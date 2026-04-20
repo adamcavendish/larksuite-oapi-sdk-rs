@@ -134,6 +134,54 @@ pub struct P2ChatUpdatedV1 {
     pub before_change: serde_json::Value,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2MessageReactionCreatedV1 {
+    #[serde(default)]
+    pub message_id: String,
+    #[serde(default)]
+    pub operator: serde_json::Value,
+    #[serde(default)]
+    pub action_time: String,
+    #[serde(default)]
+    pub reaction_type: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2MessageReactionDeletedV1 {
+    #[serde(default)]
+    pub message_id: String,
+    #[serde(default)]
+    pub operator: serde_json::Value,
+    #[serde(default)]
+    pub action_time: String,
+    #[serde(default)]
+    pub reaction_type: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ChatMemberBotAddedV1 {
+    #[serde(default)]
+    pub chat_id: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+    #[serde(default)]
+    pub external: bool,
+    #[serde(default)]
+    pub operator_tenant_key: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ChatMemberBotDeletedV1 {
+    #[serde(default)]
+    pub chat_id: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+    #[serde(default)]
+    pub external: bool,
+    #[serde(default)]
+    pub operator_tenant_key: String,
+}
+
 // ── Handler registration helpers ──
 
 fn wrap_handler<T, F, Fut>(
@@ -216,5 +264,37 @@ impl EventDispatcher {
         Fut: Future<Output = Result<()>> + Send + 'static,
     {
         self.on_event("im.chat.updated_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_im_message_reaction_created_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2MessageReactionCreatedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("im.message.reaction.created_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_im_message_reaction_deleted_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2MessageReactionDeletedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("im.message.reaction.deleted_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_im_chat_member_bot_added_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2ChatMemberBotAddedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("im.chat.member.bot.added_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_im_chat_member_bot_deleted_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2ChatMemberBotDeletedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("im.chat.member.bot.deleted_v1", wrap_handler(handler))
     }
 }
