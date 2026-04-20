@@ -136,6 +136,10 @@ impl Client {
         service::im::v1::V1::new(&self.config)
     }
 
+    pub fn sheets(&self) -> service::sheets::v3::V3<'_> {
+        service::sheets::v3::V3::new(&self.config)
+    }
+
     pub fn tenant(&self) -> service::tenant::v2::V2<'_> {
         service::tenant::v2::V2::new(&self.config)
     }
