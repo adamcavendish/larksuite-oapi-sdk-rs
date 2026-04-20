@@ -104,6 +104,10 @@ impl Client {
         service::admin::v1::V1::new(&self.config)
     }
 
+    pub fn application(&self) -> service::application::v1::V1<'_> {
+        service::application::v1::V1::new(&self.config)
+    }
+
     pub fn attendance(&self) -> service::attendance::v1::V1<'_> {
         service::attendance::v1::V1::new(&self.config)
     }
@@ -202,6 +206,18 @@ impl Client {
 
     pub fn wiki(&self) -> service::wiki::v2::V2<'_> {
         service::wiki::v2::V2::new(&self.config)
+    }
+
+    pub fn passport(&self) -> service::passport::v1::V1<'_> {
+        service::passport::v1::V1::new(&self.config)
+    }
+
+    pub fn report(&self) -> service::report::v1::V1<'_> {
+        service::report::v1::V1::new(&self.config)
+    }
+
+    pub fn workplace(&self) -> service::workplace::v1::V1<'_> {
+        service::workplace::v1::V1::new(&self.config)
     }
 
     pub async fn do_req(&self, api_req: &ApiReq, option: &RequestOption) -> Result<ApiResp> {
