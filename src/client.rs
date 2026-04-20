@@ -100,6 +100,10 @@ impl Client {
         &self.config
     }
 
+    pub fn contact(&self) -> service::contact::v3::V3<'_> {
+        service::contact::v3::V3::new(&self.config)
+    }
+
     pub fn im(&self) -> service::im::v1::V1<'_> {
         service::im::v1::V1::new(&self.config)
     }
