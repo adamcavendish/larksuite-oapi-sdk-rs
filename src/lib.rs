@@ -5,6 +5,7 @@ pub mod constants;
 pub mod crypto;
 pub mod error;
 pub mod event;
+pub mod events;
 pub mod req;
 pub mod resp;
 pub mod service;

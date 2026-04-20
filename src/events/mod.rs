@@ -1,0 +1,10 @@
+pub mod approval;
+pub mod attendance;
+pub mod calendar;
+pub mod contact;
+pub mod drive;
+pub mod helpdesk;
+pub mod hire;
+pub mod im;
+pub mod task;
+pub mod vc;
