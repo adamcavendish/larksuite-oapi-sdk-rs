@@ -140,6 +140,10 @@ impl Client {
         service::drive::v1::V1::new(&self.config)
     }
 
+    pub fn helpdesk(&self) -> service::helpdesk::v1::V1<'_> {
+        service::helpdesk::v1::V1::new(&self.config)
+    }
+
     pub fn hire(&self) -> service::hire::v1::V1<'_> {
         service::hire::v1::V1::new(&self.config)
     }

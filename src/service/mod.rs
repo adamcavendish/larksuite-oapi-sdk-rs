@@ -8,6 +8,7 @@ pub mod contact;
 pub mod corehr;
 pub mod docx;
 pub mod drive;
+pub mod helpdesk;
 pub mod hire;
 pub mod im;
 pub mod search;
