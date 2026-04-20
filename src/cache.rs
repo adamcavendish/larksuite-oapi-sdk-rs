@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::future::Future;
 use std::pin::Pin;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 pub trait Cache: Send + Sync {
@@ -24,14 +24,29 @@ struct CacheEntry {
 }
 
 pub struct LocalCache {
-    store: Mutex<HashMap<String, CacheEntry>>,
+    store: Arc<Mutex<HashMap<String, CacheEntry>>>,
 }
 
 impl LocalCache {
     pub fn new() -> Self {
         Self {
-            store: Mutex::new(HashMap::new()),
+            store: Arc::new(Mutex::new(HashMap::new())),
         }
+    }
+
+    /// Spawn a background task that purges expired entries every `interval`.
+    /// Returns a `tokio::task::JoinHandle` — drop it to stop the cleanup loop.
+    pub fn spawn_cleanup_task(&self, interval: Duration) -> tokio::task::JoinHandle<()> {
+        let store = Arc::clone(&self.store);
+        tokio::spawn(async move {
+            let mut ticker = tokio::time::interval(interval);
+            loop {
+                ticker.tick().await;
+                let now = Instant::now();
+                let mut guard = store.lock().unwrap();
+                guard.retain(|_, entry| entry.expires_at > now);
+            }
+        })
     }
 }
 
