@@ -6,6 +6,7 @@ pub mod calendar;
 pub mod contact;
 pub mod docx;
 pub mod drive;
+pub mod hire;
 pub mod im;
 pub mod search;
 pub mod sheets;
