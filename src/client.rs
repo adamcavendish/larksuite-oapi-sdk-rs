@@ -104,6 +104,14 @@ impl Client {
         service::admin::v1::V1::new(&self.config)
     }
 
+    pub fn acs(&self) -> service::acs::v1::V1<'_> {
+        service::acs::v1::V1::new(&self.config)
+    }
+
+    pub fn aily(&self) -> service::aily::v1::V1<'_> {
+        service::aily::v1::V1::new(&self.config)
+    }
+
     pub fn application(&self) -> service::application::v1::V1<'_> {
         service::application::v1::V1::new(&self.config)
     }
@@ -218,6 +226,26 @@ impl Client {
 
     pub fn workplace(&self) -> service::workplace::v1::V1<'_> {
         service::workplace::v1::V1::new(&self.config)
+    }
+
+    pub fn face_detection(&self) -> service::face_detection::v1::V1<'_> {
+        service::face_detection::v1::V1::new(&self.config)
+    }
+
+    pub fn human_authentication(&self) -> service::human_authentication::v1::V1<'_> {
+        service::human_authentication::v1::V1::new(&self.config)
+    }
+
+    pub fn optical_char_recognition(&self) -> service::optical_char_recognition::v1::V1<'_> {
+        service::optical_char_recognition::v1::V1::new(&self.config)
+    }
+
+    pub fn speech_to_text(&self) -> service::speech_to_text::v1::V1<'_> {
+        service::speech_to_text::v1::V1::new(&self.config)
+    }
+
+    pub fn verification(&self) -> service::verification::v1::V1<'_> {
+        service::verification::v1::V1::new(&self.config)
     }
 
     pub async fn do_req(&self, api_req: &ApiReq, option: &RequestOption) -> Result<ApiResp> {
