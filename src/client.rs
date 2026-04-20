@@ -248,6 +248,74 @@ impl Client {
         service::verification::v1::V1::new(&self.config)
     }
 
+    pub fn document_ai(&self) -> service::document_ai::v1::V1<'_> {
+        service::document_ai::v1::V1::new(&self.config)
+    }
+
+    pub fn mdm(&self) -> service::mdm::v1::V1<'_> {
+        service::mdm::v1::V1::new(&self.config)
+    }
+
+    pub fn personal_settings(&self) -> service::personal_settings::v1::V1<'_> {
+        service::personal_settings::v1::V1::new(&self.config)
+    }
+
+    pub fn security_and_compliance(&self) -> service::security_and_compliance::v1::V1<'_> {
+        service::security_and_compliance::v1::V1::new(&self.config)
+    }
+
+    pub fn moments(&self) -> service::moments::v1::V1<'_> {
+        service::moments::v1::V1::new(&self.config)
+    }
+
+    pub fn meeting_room(&self) -> service::meeting_room::v1::V1<'_> {
+        service::meeting_room::v1::V1::new(&self.config)
+    }
+
+    pub fn ehr(&self) -> service::ehr::v1::V1<'_> {
+        service::ehr::v1::V1::new(&self.config)
+    }
+
+    pub fn compensation(&self) -> service::compensation::v1::V1<'_> {
+        service::compensation::v1::V1::new(&self.config)
+    }
+
+    pub fn payroll(&self) -> service::payroll::v1::V1<'_> {
+        service::payroll::v1::V1::new(&self.config)
+    }
+
+    pub fn performance(&self) -> service::performance::v1::V1<'_> {
+        service::performance::v1::V1::new(&self.config)
+    }
+
+    pub fn directory(&self) -> service::directory::v1::V1<'_> {
+        service::directory::v1::V1::new(&self.config)
+    }
+
+    pub fn docs(&self) -> service::docs::v1::V1<'_> {
+        service::docs::v1::V1::new(&self.config)
+    }
+
+    pub fn apaas(&self) -> service::apaas::v1::V1<'_> {
+        service::apaas::v1::V1::new(&self.config)
+    }
+
+    pub fn block(&self) -> service::block::v1::V1<'_> {
+        service::block::v1::V1::new(&self.config)
+    }
+
+    pub fn board(&self) -> service::board::v1::V1<'_> {
+        service::board::v1::V1::new(&self.config)
+    }
+
+    pub fn cardkit(&self) -> service::cardkit::v1::V1<'_> {
+        service::cardkit::v1::V1::new(&self.config)
+    }
+
+    pub fn event(&self) -> service::event::v1::V1<'_> {
+        service::event::v1::V1::new(&self.config)
+    }
+
     pub async fn do_req(&self, api_req: &ApiReq, option: &RequestOption) -> Result<ApiResp> {
         transport::request(&self.config, api_req, option).await
     }
