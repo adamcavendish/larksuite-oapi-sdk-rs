@@ -164,6 +164,30 @@ impl Client {
         service::tenant::v2::V2::new(&self.config)
     }
 
+    pub fn baike(&self) -> service::baike::v1::V1<'_> {
+        service::baike::v1::V1::new(&self.config)
+    }
+
+    pub fn lingo(&self) -> service::lingo::v1::V1<'_> {
+        service::lingo::v1::V1::new(&self.config)
+    }
+
+    pub fn mail(&self) -> service::mail::v1::V1<'_> {
+        service::mail::v1::V1::new(&self.config)
+    }
+
+    pub fn minutes(&self) -> service::minutes::v1::V1<'_> {
+        service::minutes::v1::V1::new(&self.config)
+    }
+
+    pub fn okr(&self) -> service::okr::v1::V1<'_> {
+        service::okr::v1::V1::new(&self.config)
+    }
+
+    pub fn translation(&self) -> service::translation::v1::V1<'_> {
+        service::translation::v1::V1::new(&self.config)
+    }
+
     pub fn search(&self) -> service::search::v2::V2<'_> {
         service::search::v2::V2::new(&self.config)
     }
