@@ -148,6 +148,10 @@ impl Client {
         service::tenant::v2::V2::new(&self.config)
     }
 
+    pub fn search(&self) -> service::search::v2::V2<'_> {
+        service::search::v2::V2::new(&self.config)
+    }
+
     pub fn wiki(&self) -> service::wiki::v2::V2<'_> {
         service::wiki::v2::V2::new(&self.config)
     }
