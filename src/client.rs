@@ -140,6 +140,10 @@ impl Client {
         service::sheets::v3::V3::new(&self.config)
     }
 
+    pub fn task(&self) -> service::task::v1::V1<'_> {
+        service::task::v1::V1::new(&self.config)
+    }
+
     pub fn tenant(&self) -> service::tenant::v2::V2<'_> {
         service::tenant::v2::V2::new(&self.config)
     }
