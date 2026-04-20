@@ -124,6 +124,10 @@ impl Client {
         service::contact::v3::V3::new(&self.config)
     }
 
+    pub fn docx(&self) -> service::docx::v1::V1<'_> {
+        service::docx::v1::V1::new(&self.config)
+    }
+
     pub fn drive(&self) -> service::drive::v1::V1<'_> {
         service::drive::v1::V1::new(&self.config)
     }
