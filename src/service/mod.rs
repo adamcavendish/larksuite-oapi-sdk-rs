@@ -1,6 +1,7 @@
 pub mod approval;
 pub mod auth;
 pub mod authen;
+pub mod bitable;
 pub mod calendar;
 pub mod contact;
 pub mod drive;

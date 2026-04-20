@@ -112,6 +112,10 @@ impl Client {
         service::authen::v1::V1::new(&self.config)
     }
 
+    pub fn bitable(&self) -> service::bitable::v1::V1<'_> {
+        service::bitable::v1::V1::new(&self.config)
+    }
+
     pub fn calendar(&self) -> service::calendar::v4::V4<'_> {
         service::calendar::v4::V4::new(&self.config)
     }
