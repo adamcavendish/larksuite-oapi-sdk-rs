@@ -48,6 +48,64 @@ pub struct P2HireEhrImportTaskImportedV1 {
     pub operator: serde_json::Value,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2HireJobCreatedV1 {
+    #[serde(default)]
+    pub job_id: String,
+    #[serde(default)]
+    pub job: serde_json::Value,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2HireJobUpdatedV1 {
+    #[serde(default)]
+    pub job_id: String,
+    #[serde(default)]
+    pub job: serde_json::Value,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+    #[serde(default)]
+    pub updated_fields: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2HireCandidateCreatedV1 {
+    #[serde(default)]
+    pub candidate_id: String,
+    #[serde(default)]
+    pub candidate: serde_json::Value,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2HireInterviewCreatedV1 {
+    #[serde(default)]
+    pub interview_id: String,
+    #[serde(default)]
+    pub application_id: String,
+    #[serde(default)]
+    pub interview: serde_json::Value,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2HireInterviewUpdatedV1 {
+    #[serde(default)]
+    pub interview_id: String,
+    #[serde(default)]
+    pub application_id: String,
+    #[serde(default)]
+    pub interview: serde_json::Value,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+    #[serde(default)]
+    pub updated_fields: Vec<String>,
+}
+
 // ── Handler registration helpers ──
 
 fn wrap_handler<T, F, Fut>(
@@ -98,5 +156,45 @@ impl EventDispatcher {
         Fut: Future<Output = Result<()>> + Send + 'static,
     {
         self.on_event("hire.ehr_import_task.imported_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_hire_job_created_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2HireJobCreatedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("hire.job.created_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_hire_job_updated_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2HireJobUpdatedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("hire.job.updated_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_hire_candidate_created_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2HireCandidateCreatedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("hire.talent.created_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_hire_interview_created_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2HireInterviewCreatedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("hire.interview.created_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_hire_interview_updated_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2HireInterviewUpdatedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("hire.interview.updated_v1", wrap_handler(handler))
     }
 }
