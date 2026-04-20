@@ -12,6 +12,13 @@ pub(crate) async fn request(
     api_req: &ApiReq,
     option: &RequestOption,
 ) -> Result<ApiResp> {
+    let _span = tracing::info_span!(
+        "lark.request",
+        method = %api_req.http_method,
+        path = %api_req.api_path,
+    )
+    .entered();
+
     validate(config, api_req, option)?;
 
     let token_type = determine_token_type(config, api_req, option);
@@ -307,6 +314,7 @@ pub(crate) async fn raw_send(
     })?;
 
     let status_code = response.status().as_u16();
+    tracing::debug!(status = status_code, url = %full_url, "lark.response");
 
     if status_code == 504 {
         return Err(Error::ServerTimeout(

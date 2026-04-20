@@ -27,7 +27,7 @@ sha1 = "0.11"
 sha2 = "0.11"
 subtle = "2"
 thiserror = "2"
-tokio = { version = "1", features = ["time"] }
+tokio = { version = "1", features = ["time", "rt-multi-thread", "macros"] }
 tokio-tungstenite = { version = "0.26", features = ["rustls-tls-native-roots"] }
 tracing = "0.1"
 url = "2"
@@ -35,3 +35,6 @@ uuid = { version = "1", features = ["v4"] }
 
 [build-dependencies]
 prost-build = "0.13"
+
+[dev-dependencies]
+tracing-subscriber = "0.3"
