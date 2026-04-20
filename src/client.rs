@@ -100,6 +100,10 @@ impl Client {
         &self.config
     }
 
+    pub fn approval(&self) -> service::approval::v4::V4<'_> {
+        service::approval::v4::V4::new(&self.config)
+    }
+
     pub fn auth(&self) -> service::auth::v3::V3<'_> {
         service::auth::v3::V3::new(&self.config)
     }
