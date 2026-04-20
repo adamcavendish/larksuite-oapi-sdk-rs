@@ -100,6 +100,10 @@ impl Client {
         &self.config
     }
 
+    pub fn attendance(&self) -> service::attendance::v1::V1<'_> {
+        service::attendance::v1::V1::new(&self.config)
+    }
+
     pub fn approval(&self) -> service::approval::v4::V4<'_> {
         service::approval::v4::V4::new(&self.config)
     }

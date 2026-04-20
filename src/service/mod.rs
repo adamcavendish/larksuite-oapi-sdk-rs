@@ -1,4 +1,5 @@
 pub mod approval;
+pub mod attendance;
 pub mod auth;
 pub mod authen;
 pub mod bitable;
