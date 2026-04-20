@@ -10,3 +10,4 @@ pub mod im;
 pub mod sheets;
 pub mod task;
 pub mod tenant;
+pub mod wiki;
