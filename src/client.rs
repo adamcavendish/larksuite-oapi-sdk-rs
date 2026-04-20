@@ -124,6 +124,10 @@ impl Client {
         service::contact::v3::V3::new(&self.config)
     }
 
+    pub fn corehr(&self) -> service::corehr::v1::V1<'_> {
+        service::corehr::v1::V1::new(&self.config)
+    }
+
     pub fn docx(&self) -> service::docx::v1::V1<'_> {
         service::docx::v1::V1::new(&self.config)
     }

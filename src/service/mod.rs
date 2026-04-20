@@ -4,6 +4,7 @@ pub mod authen;
 pub mod bitable;
 pub mod calendar;
 pub mod contact;
+pub mod corehr;
 pub mod docx;
 pub mod drive;
 pub mod hire;
