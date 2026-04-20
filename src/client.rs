@@ -164,6 +164,10 @@ impl Client {
         service::search::v2::V2::new(&self.config)
     }
 
+    pub fn vc(&self) -> service::vc::v1::V1<'_> {
+        service::vc::v1::V1::new(&self.config)
+    }
+
     pub fn wiki(&self) -> service::wiki::v2::V2<'_> {
         service::wiki::v2::V2::new(&self.config)
     }
