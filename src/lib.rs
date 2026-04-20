@@ -11,6 +11,7 @@ pub mod resp;
 pub mod service;
 pub mod token;
 pub(crate) mod transport;
+pub mod ws;
 
 pub use cache::{Cache, LocalCache};
 pub use client::{Client, ClientBuilder};
