@@ -13,6 +13,9 @@ pub mod token;
 pub(crate) mod transport;
 pub mod ws;
 
+#[cfg(feature = "axum")]
+pub mod axum_handler;
+
 pub use cache::{Cache, LocalCache};
 pub use client::{Client, ClientBuilder};
 pub use config::Config;

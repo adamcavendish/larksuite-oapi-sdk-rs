@@ -115,6 +115,35 @@ impl EventDispatcher {
         self
     }
 
+    /// Register an automatic app_ticket handler for ISV (marketplace) apps.
+    /// When an `app_ticket` event arrives, the ticket is stored in the token cache
+    /// so that subsequent token requests can use it automatically.
+    pub fn with_auto_app_ticket(self) -> Self {
+        use std::time::Duration;
+
+        use crate::token::AppTicketManager;
+
+        self.on_event("app_ticket", move |val: serde_json::Value| async move {
+            let app_id = val
+                .get("app_id")
+                .and_then(|v| v.as_str())
+                .unwrap_or_default()
+                .to_string();
+            let app_ticket = val
+                .get("app_ticket")
+                .and_then(|v| v.as_str())
+                .unwrap_or_default()
+                .to_string();
+            if app_id.is_empty() || app_ticket.is_empty() {
+                return Ok(());
+            }
+            let cache = Arc::new(crate::cache::LocalCache::new());
+            let mgr = AppTicketManager::new(cache);
+            mgr.set(&app_id, &app_ticket, Duration::from_secs(3600))
+                .await
+        })
+    }
+
     pub fn on_event<F, Fut>(mut self, event_type: impl Into<String>, handler: F) -> Self
     where
         F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
