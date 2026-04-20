@@ -10,6 +10,7 @@ use crate::constants::AppType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, RawResponse};
+use crate::service;
 use crate::transport;
 
 pub struct ClientBuilder {
@@ -97,6 +98,14 @@ impl Client {
 
     pub fn config(&self) -> &Config {
         &self.config
+    }
+
+    pub fn im(&self) -> service::im::v1::V1<'_> {
+        service::im::v1::V1::new(&self.config)
+    }
+
+    pub fn tenant(&self) -> service::tenant::v2::V2<'_> {
+        service::tenant::v2::V2::new(&self.config)
     }
 
     pub async fn do_req(&self, api_req: &ApiReq, option: &RequestOption) -> Result<ApiResp> {

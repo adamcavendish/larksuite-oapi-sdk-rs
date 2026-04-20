@@ -7,6 +7,7 @@ pub mod error;
 pub mod event;
 pub mod req;
 pub mod resp;
+pub mod service;
 pub mod token;
 pub(crate) mod transport;
 
