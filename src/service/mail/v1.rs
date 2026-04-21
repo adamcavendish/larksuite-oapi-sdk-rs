@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -192,34 +192,6 @@ pub struct MailgroupPermissionMember {
 }
 
 // ── Response wrappers ──
-
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: CodeError,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.success()
-            }
-        }
-    };
-}
-
-#[derive(Debug, Clone)]
-pub struct EmptyResp {
-    pub api_resp: ApiResp,
-    pub code_error: CodeError,
-}
-
-impl EmptyResp {
-    pub fn success(&self) -> bool {
-        self.code_error.success()
-    }
-}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MailgroupData {
@@ -544,7 +516,7 @@ impl<'a> MailgroupMemberResource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(BatchCreateMailgroupMemberResp {
             api_resp,
             code_error,
@@ -827,7 +799,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(BatchCreatePublicMailboxMemberResp {
             api_resp,
             code_error,
@@ -899,36 +871,6 @@ impl<'a> PublicMailboxMemberResource<'a> {
 }
 
 // ── Helpers for newer resources (use Option<CodeError> pattern) ──
-
-fn parse_v2<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
-    move || {
-        let code_error = if raw.code_error.code != 0 {
-            Some(raw.code_error)
-        } else {
-            None
-        };
-        (api_resp, code_error, raw.data)
-    }
-}
-
-macro_rules! impl_resp_v2 {
-    ($name:ident, $data:ty) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.api_resp.status_code == 200
-                    && self.code_error.as_ref().is_none_or(|e| e.code == 0)
-            }
-        }
-    };
-}
 
 // ── Domain types for new resources ──
 
@@ -1175,7 +1117,7 @@ impl UserMailboxMessageResource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetUserMailboxMessageResp {
             api_resp,
             code_error,
@@ -1207,7 +1149,7 @@ impl UserMailboxMessageResource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetByCardUserMailboxMessageResp {
             api_resp,
             code_error,
@@ -1242,7 +1184,7 @@ impl UserMailboxMessageResource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListUserMailboxMessageResp {
             api_resp,
             code_error,
@@ -1263,7 +1205,7 @@ impl UserMailboxMessageResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(SendUserMailboxMessageResp {
             api_resp,
             code_error,
@@ -1297,7 +1239,7 @@ impl UserMailboxMessageAttachmentResource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DownloadUrlUserMailboxMessageAttachmentResp {
             api_resp,
             code_error,
@@ -1326,7 +1268,7 @@ impl UserMailboxFolderResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateUserMailboxFolderResp {
             api_resp,
             code_error,
@@ -1346,7 +1288,7 @@ impl UserMailboxFolderResource<'_> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteUserMailboxFolderResp {
             api_resp,
             code_error,
@@ -1369,7 +1311,7 @@ impl UserMailboxFolderResource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListUserMailboxFolderResp {
             api_resp,
             code_error,
@@ -1392,7 +1334,7 @@ impl UserMailboxFolderResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchUserMailboxFolderResp {
             api_resp,
             code_error,
@@ -1421,7 +1363,7 @@ impl UserMailboxMailContactResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateUserMailboxMailContactResp {
             api_resp,
             code_error,
@@ -1442,7 +1384,7 @@ impl UserMailboxMailContactResource<'_> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteUserMailboxMailContactResp {
             api_resp,
             code_error,
@@ -1469,7 +1411,7 @@ impl UserMailboxMailContactResource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListUserMailboxMailContactResp {
             api_resp,
             code_error,
@@ -1493,7 +1435,7 @@ impl UserMailboxMailContactResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchUserMailboxMailContactResp {
             api_resp,
             code_error,
@@ -1522,7 +1464,7 @@ impl UserMailboxRuleResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -1541,7 +1483,7 @@ impl UserMailboxRuleResource<'_> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -1560,7 +1502,7 @@ impl UserMailboxRuleResource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -1580,7 +1522,7 @@ impl UserMailboxRuleResource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ReorderUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -1602,7 +1544,7 @@ impl UserMailboxRuleResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UpdateUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -1631,7 +1573,7 @@ impl MailgroupAliasResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateMailgroupAliasResp {
             api_resp,
             code_error,
@@ -1668,7 +1610,7 @@ impl MailgroupAliasResource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListMailgroupAliasResp {
             api_resp,
             code_error,
@@ -1697,7 +1639,7 @@ impl MailgroupManagerResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(BatchCreateMailgroupManagerResp {
             api_resp,
             code_error,
@@ -1776,7 +1718,7 @@ impl MailgroupPermissionMemberResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateMailgroupPermissionMemberResp {
             api_resp,
             code_error,
@@ -1885,7 +1827,7 @@ impl MailgroupPermissionMemberResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(BatchCreateMailgroupPermissionMemberResp {
             api_resp,
             code_error,
@@ -1934,7 +1876,7 @@ impl PublicMailboxAliasResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreatePublicMailboxAliasResp {
             api_resp,
             code_error,
@@ -1972,7 +1914,7 @@ impl PublicMailboxAliasResource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListPublicMailboxAliasResp {
             api_resp,
             code_error,
@@ -1999,7 +1941,7 @@ impl UserResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(QueryUserResp {
             api_resp,
             code_error,
@@ -2029,7 +1971,7 @@ impl UserMailboxResource<'_> {
             api_req.query_params.set("transfer_mailbox", v);
         }
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteUserMailboxResp {
             api_resp,
             code_error,
@@ -2058,7 +2000,7 @@ impl UserMailboxAliasResource<'_> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateUserMailboxAliasResp {
             api_resp,
             code_error,
@@ -2078,7 +2020,7 @@ impl UserMailboxAliasResource<'_> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteUserMailboxAliasResp {
             api_resp,
             code_error,
@@ -2097,7 +2039,7 @@ impl UserMailboxAliasResource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListUserMailboxAliasResp {
             api_resp,
             code_error,
@@ -2124,7 +2066,7 @@ impl UserMailboxEventResource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(SubscribeUserMailboxEventResp {
             api_resp,
             code_error,
@@ -2144,7 +2086,7 @@ impl UserMailboxEventResource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(SubscriptionUserMailboxEventResp {
             api_resp,
             code_error,
@@ -2162,7 +2104,7 @@ impl UserMailboxEventResource<'_> {
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UnsubscribeUserMailboxEventResp {
             api_resp,
             code_error,

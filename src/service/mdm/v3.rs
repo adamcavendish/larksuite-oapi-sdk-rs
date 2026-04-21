@@ -23,24 +23,8 @@ pub struct CountryRegionListData {
     pub has_more: Option<bool>,
 }
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.api_resp.status_code == 200
-                    && self.code_error.as_ref().map_or(true, |e| e.code == 0)
-            }
-        }
-    };
-}
-
-impl_resp!(GetBatchCountryRegionV3Resp, BatchCountryRegionData);
-impl_resp!(ListCountryRegionV3Resp, CountryRegionListData);
+impl_resp_v2!(GetBatchCountryRegionV3Resp, BatchCountryRegionData);
+impl_resp_v2!(ListCountryRegionV3Resp, CountryRegionListData);
 
 fn parse<T: for<'de> serde::Deserialize<'de>>(
     api_resp: ApiResp,

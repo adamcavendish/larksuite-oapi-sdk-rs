@@ -4,7 +4,6 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
 use crate::transport;
 
 // ── Request body types ──
@@ -20,22 +19,6 @@ pub struct CreateIdentityReqBody {
 }
 
 // ── Response wrappers ──
-
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: CodeError,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.success()
-            }
-        }
-    };
-}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct IdentityData {

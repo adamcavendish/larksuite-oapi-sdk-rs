@@ -23,25 +23,9 @@ pub struct AppRoleListData {
     pub has_more: Option<bool>,
 }
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.api_resp.status_code == 200
-                    && self.code_error.as_ref().is_none_or(|e| e.code == 0)
-            }
-        }
-    };
-}
-
-impl_resp!(CreateAppRoleV2Resp, AppRoleData);
-impl_resp!(ListAppRoleV2Resp, AppRoleListData);
-impl_resp!(UpdateAppRoleV2Resp, AppRoleData);
+impl_resp_v2!(CreateAppRoleV2Resp, AppRoleData);
+impl_resp_v2!(ListAppRoleV2Resp, AppRoleListData);
+impl_resp_v2!(UpdateAppRoleV2Resp, AppRoleData);
 
 fn parse<T: for<'de> serde::Deserialize<'de>>(
     api_resp: ApiResp,

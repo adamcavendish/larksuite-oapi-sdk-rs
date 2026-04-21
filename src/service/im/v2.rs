@@ -29,34 +29,18 @@ pub struct TagData {
 
 // ── Response types ─────────────────────────────────────────────────────────────
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.api_resp.status_code == 200
-                    && self.code_error.as_ref().map_or(true, |e| e.code == 0)
-            }
-        }
-    };
-}
-
-impl_resp!(CreateAppFeedCardV2Resp, AppFeedCardData);
-impl_resp!(DeleteAppFeedCardBatchV2Resp, ());
-impl_resp!(UpdateAppFeedCardBatchV2Resp, ());
-impl_resp!(CreateBizEntityTagRelationV2Resp, BizEntityTagRelationData);
-impl_resp!(GetBizEntityTagRelationV2Resp, BizEntityTagRelationData);
-impl_resp!(UpdateBizEntityTagRelationV2Resp, BizEntityTagRelationData);
-impl_resp!(UpdateChatButtonV2Resp, ());
-impl_resp!(BotTimeSensitiveFeedCardV2Resp, ());
-impl_resp!(PatchFeedCardV2Resp, ());
-impl_resp!(CreateTagV2Resp, TagData);
-impl_resp!(PatchTagV2Resp, TagData);
-impl_resp!(BatchUpdateUrlPreviewV2Resp, ());
+impl_resp_v2!(CreateAppFeedCardV2Resp, AppFeedCardData);
+impl_resp_v2!(DeleteAppFeedCardBatchV2Resp, ());
+impl_resp_v2!(UpdateAppFeedCardBatchV2Resp, ());
+impl_resp_v2!(CreateBizEntityTagRelationV2Resp, BizEntityTagRelationData);
+impl_resp_v2!(GetBizEntityTagRelationV2Resp, BizEntityTagRelationData);
+impl_resp_v2!(UpdateBizEntityTagRelationV2Resp, BizEntityTagRelationData);
+impl_resp_v2!(UpdateChatButtonV2Resp, ());
+impl_resp_v2!(BotTimeSensitiveFeedCardV2Resp, ());
+impl_resp_v2!(PatchFeedCardV2Resp, ());
+impl_resp_v2!(CreateTagV2Resp, TagData);
+impl_resp_v2!(PatchTagV2Resp, TagData);
+impl_resp_v2!(BatchUpdateUrlPreviewV2Resp, ());
 
 // ── Resource helper ───────────────────────────────────────────────────────────
 

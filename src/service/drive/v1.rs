@@ -723,22 +723,6 @@ pub struct UpdatePermissionPublicPasswordRespData {
 
 // ── Response wrappers ──
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: CodeError,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.success()
-            }
-        }
-    };
-}
-
 impl_resp!(CreateExportTaskResp, CreateExportTaskRespData);
 impl_resp!(GetExportTaskResp, GetExportTaskRespData);
 impl_resp!(CopyFileResp, CopyFileRespData);

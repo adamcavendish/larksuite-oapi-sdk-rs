@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::parse_v2;
 use crate::transport;
 
 // ── Shared sub-types ──
@@ -260,22 +260,6 @@ pub struct WorkingHoursType {
 }
 
 // ── Response wrappers ──
-
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: CodeError,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.success()
-            }
-        }
-    };
-}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct EmployeeData {
@@ -593,7 +577,7 @@ impl<'a> CompanyResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateCompanyResp {
             api_resp,
             code_error,
@@ -610,7 +594,7 @@ impl<'a> CompanyResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteCompanyResp {
             api_resp,
             code_error,
@@ -630,7 +614,7 @@ impl<'a> CompanyResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchCompanyResp {
             api_resp,
             code_error,
@@ -744,36 +728,6 @@ impl<'a> WorkingHoursTypeResource<'a> {
 }
 
 // ── Helpers for newer resources (use Option<CodeError> pattern) ──
-
-fn parse_v2<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
-    move || {
-        let code_error = if raw.code_error.code != 0 {
-            Some(raw.code_error)
-        } else {
-            None
-        };
-        (api_resp, code_error, raw.data)
-    }
-}
-
-macro_rules! impl_resp_v2 {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.as_ref().is_none_or(|e| e.code == 0)
-            }
-        }
-    };
-}
 
 // ── Response types for new resources ──
 
@@ -893,7 +847,7 @@ impl<'a> AssignedUserResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(SearchAssignedUserResp {
             api_resp,
             code_error,
@@ -920,7 +874,7 @@ impl<'a> AuthorizationResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(AddRoleAssignAuthorizationResp {
             api_resp,
             code_error,
@@ -939,7 +893,7 @@ impl<'a> AuthorizationResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetByParamAuthorizationResp {
             api_resp,
             code_error,
@@ -955,7 +909,7 @@ impl<'a> AuthorizationResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(QueryAuthorizationResp {
             api_resp,
             code_error,
@@ -976,7 +930,7 @@ impl<'a> AuthorizationResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(RemoveRoleAssignAuthorizationResp {
             api_resp,
             code_error,
@@ -997,7 +951,7 @@ impl<'a> AuthorizationResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UpdateRoleAssignAuthorizationResp {
             api_resp,
             code_error,
@@ -1024,7 +978,7 @@ impl<'a> CommonDataIdResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ConvertCommonDataIdResp {
             api_resp,
             code_error,
@@ -1051,7 +1005,7 @@ impl<'a> CommonDataMetaDataResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(AddEnumOptionCommonDataMetaDataResp {
             api_resp,
             code_error,
@@ -1072,7 +1026,7 @@ impl<'a> CommonDataMetaDataResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(EditEnumOptionCommonDataMetaDataResp {
             api_resp,
             code_error,
@@ -1097,7 +1051,7 @@ impl<'a> CompensationStandardResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(MatchCompensationStandardResp {
             api_resp,
             code_error,
@@ -1121,7 +1075,7 @@ impl<'a> ContractResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateContractResp {
             api_resp,
             code_error,
@@ -1138,7 +1092,7 @@ impl<'a> ContractResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteContractResp {
             api_resp,
             code_error,
@@ -1152,7 +1106,7 @@ impl<'a> ContractResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetContractResp {
             api_resp,
             code_error,
@@ -1176,7 +1130,7 @@ impl<'a> ContractResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListContractResp {
             api_resp,
             code_error,
@@ -1196,7 +1150,7 @@ impl<'a> ContractResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchContractResp {
             api_resp,
             code_error,
@@ -1220,7 +1174,7 @@ impl<'a> CountryRegionResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetCountryRegionResp {
             api_resp,
             code_error,
@@ -1244,7 +1198,7 @@ impl<'a> CountryRegionResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListCountryRegionResp {
             api_resp,
             code_error,
@@ -1266,7 +1220,7 @@ impl<'a> CustomFieldResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetByParamCustomFieldResp {
             api_resp,
             code_error,
@@ -1285,7 +1239,7 @@ impl<'a> CustomFieldResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListObjectApiNameCustomFieldResp {
             api_resp,
             code_error,
@@ -1301,7 +1255,7 @@ impl<'a> CustomFieldResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(QueryCustomFieldResp {
             api_resp,
             code_error,
@@ -1325,7 +1279,7 @@ impl<'a> EmployeeTypeResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateEmployeeTypeResp {
             api_resp,
             code_error,
@@ -1342,7 +1296,7 @@ impl<'a> EmployeeTypeResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteEmployeeTypeResp {
             api_resp,
             code_error,
@@ -1360,7 +1314,7 @@ impl<'a> EmployeeTypeResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetEmployeeTypeResp {
             api_resp,
             code_error,
@@ -1384,7 +1338,7 @@ impl<'a> EmployeeTypeResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListEmployeeTypeResp {
             api_resp,
             code_error,
@@ -1404,7 +1358,7 @@ impl<'a> EmployeeTypeResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchEmployeeTypeResp {
             api_resp,
             code_error,
@@ -1428,7 +1382,7 @@ impl<'a> EmploymentResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateEmploymentResp {
             api_resp,
             code_error,
@@ -1445,7 +1399,7 @@ impl<'a> EmploymentResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteEmploymentResp {
             api_resp,
             code_error,
@@ -1465,7 +1419,7 @@ impl<'a> EmploymentResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchEmploymentResp {
             api_resp,
             code_error,
@@ -1485,7 +1439,7 @@ impl<'a> FileResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetFileResp {
             api_resp,
             code_error,
@@ -1509,7 +1463,7 @@ impl<'a> JobResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateJobResp {
             api_resp,
             code_error,
@@ -1522,7 +1476,7 @@ impl<'a> JobResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteJobResp {
             api_resp,
             code_error,
@@ -1536,7 +1490,7 @@ impl<'a> JobResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetJobResp {
             api_resp,
             code_error,
@@ -1560,7 +1514,7 @@ impl<'a> JobResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListJobResp {
             api_resp,
             code_error,
@@ -1580,7 +1534,7 @@ impl<'a> JobResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchJobResp {
             api_resp,
             code_error,
@@ -1604,7 +1558,7 @@ impl<'a> JobChangeResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateJobChangeResp {
             api_resp,
             code_error,
@@ -1628,7 +1582,7 @@ impl<'a> JobDataResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateJobDataResp {
             api_resp,
             code_error,
@@ -1645,7 +1599,7 @@ impl<'a> JobDataResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteJobDataResp {
             api_resp,
             code_error,
@@ -1659,7 +1613,7 @@ impl<'a> JobDataResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetJobDataResp {
             api_resp,
             code_error,
@@ -1683,7 +1637,7 @@ impl<'a> JobDataResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListJobDataResp {
             api_resp,
             code_error,
@@ -1703,7 +1657,7 @@ impl<'a> JobDataResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchJobDataResp {
             api_resp,
             code_error,
@@ -1727,7 +1681,7 @@ impl<'a> JobFamilyResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateJobFamilyResp {
             api_resp,
             code_error,
@@ -1744,7 +1698,7 @@ impl<'a> JobFamilyResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteJobFamilyResp {
             api_resp,
             code_error,
@@ -1762,7 +1716,7 @@ impl<'a> JobFamilyResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetJobFamilyResp {
             api_resp,
             code_error,
@@ -1786,7 +1740,7 @@ impl<'a> JobFamilyResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListJobFamilyResp {
             api_resp,
             code_error,
@@ -1806,7 +1760,7 @@ impl<'a> JobFamilyResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchJobFamilyResp {
             api_resp,
             code_error,
@@ -1831,7 +1785,7 @@ impl<'a> LeaveResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CalendarByScopeLeaveResp {
             api_resp,
             code_error,
@@ -1858,7 +1812,7 @@ impl<'a> LeaveResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(LeaveBalancesLeaveResp {
             api_resp,
             code_error,
@@ -1885,7 +1839,7 @@ impl<'a> LeaveResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(LeaveRequestHistoryLeaveResp {
             api_resp,
             code_error,
@@ -1909,7 +1863,7 @@ impl<'a> LeaveResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(LeaveTypesLeaveResp {
             api_resp,
             code_error,
@@ -1930,7 +1884,7 @@ impl<'a> LeaveResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(WorkCalendarLeaveResp {
             api_resp,
             code_error,
@@ -1951,7 +1905,7 @@ impl<'a> LeaveResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(WorkCalendarDateLeaveResp {
             api_resp,
             code_error,
@@ -1978,7 +1932,7 @@ impl<'a> LeaveGrantingRecordResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateLeaveGrantingRecordResp {
             api_resp,
             code_error,
@@ -1996,7 +1950,7 @@ impl<'a> LeaveGrantingRecordResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteLeaveGrantingRecordResp {
             api_resp,
             code_error,
@@ -2020,7 +1974,7 @@ impl<'a> NationalIdTypeResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateNationalIdTypeResp {
             api_resp,
             code_error,
@@ -2037,7 +1991,7 @@ impl<'a> NationalIdTypeResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteNationalIdTypeResp {
             api_resp,
             code_error,
@@ -2055,7 +2009,7 @@ impl<'a> NationalIdTypeResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetNationalIdTypeResp {
             api_resp,
             code_error,
@@ -2079,7 +2033,7 @@ impl<'a> NationalIdTypeResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListNationalIdTypeResp {
             api_resp,
             code_error,
@@ -2099,7 +2053,7 @@ impl<'a> NationalIdTypeResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchNationalIdTypeResp {
             api_resp,
             code_error,
@@ -2126,7 +2080,7 @@ impl<'a> OffboardingResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(QueryOffboardingResp {
             api_resp,
             code_error,
@@ -2147,7 +2101,7 @@ impl<'a> OffboardingResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(SearchOffboardingResp {
             api_resp,
             code_error,
@@ -2168,7 +2122,7 @@ impl<'a> OffboardingResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(SubmitOffboardingResp {
             api_resp,
             code_error,
@@ -2192,7 +2146,7 @@ impl<'a> PersonResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreatePersonResp {
             api_resp,
             code_error,
@@ -2209,7 +2163,7 @@ impl<'a> PersonResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeletePersonResp {
             api_resp,
             code_error,
@@ -2223,7 +2177,7 @@ impl<'a> PersonResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetPersonResp {
             api_resp,
             code_error,
@@ -2243,7 +2197,7 @@ impl<'a> PersonResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchPersonResp {
             api_resp,
             code_error,
@@ -2261,7 +2215,7 @@ impl<'a> PersonResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UploadPersonResp {
             api_resp,
             code_error,
@@ -2284,7 +2238,7 @@ impl<'a> PreHireResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeletePreHireResp {
             api_resp,
             code_error,
@@ -2298,7 +2252,7 @@ impl<'a> PreHireResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetPreHireResp {
             api_resp,
             code_error,
@@ -2322,7 +2276,7 @@ impl<'a> PreHireResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListPreHireResp {
             api_resp,
             code_error,
@@ -2342,7 +2296,7 @@ impl<'a> PreHireResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchPreHireResp {
             api_resp,
             code_error,
@@ -2366,7 +2320,7 @@ impl<'a> ProcessFormVariableDataResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetProcessFormVariableDataResp {
             api_resp,
             code_error,
@@ -2396,7 +2350,7 @@ impl<'a> SecurityGroupResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListSecurityGroupResp {
             api_resp,
             code_error,
@@ -2417,7 +2371,7 @@ impl<'a> SecurityGroupResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(QuerySecurityGroupResp {
             api_resp,
             code_error,
@@ -2441,7 +2395,7 @@ impl<'a> SubdivisionResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetSubdivisionResp {
             api_resp,
             code_error,
@@ -2465,7 +2419,7 @@ impl<'a> SubdivisionResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListSubdivisionResp {
             api_resp,
             code_error,
@@ -2489,7 +2443,7 @@ impl<'a> SubregionResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetSubregionResp {
             api_resp,
             code_error,
@@ -2513,7 +2467,7 @@ impl<'a> SubregionResource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListSubregionResp {
             api_resp,
             code_error,
@@ -2535,7 +2489,7 @@ impl<'a> TransferReasonResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(QueryTransferReasonResp {
             api_resp,
             code_error,
@@ -2557,7 +2511,7 @@ impl<'a> TransferTypeResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(QueryTransferTypeResp {
             api_resp,
             code_error,
@@ -2580,7 +2534,7 @@ impl<'a> JobLevelResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateJobLevelResp {
             api_resp,
             code_error,
@@ -2597,7 +2551,7 @@ impl<'a> JobLevelResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteJobLevelResp {
             api_resp,
             code_error,
@@ -2617,7 +2571,7 @@ impl<'a> JobLevelResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchJobLevelResp {
             api_resp,
             code_error,
@@ -2633,7 +2587,7 @@ impl<'a> CurrencyResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetCurrencyResp {
             api_resp,
             code_error,
@@ -2653,7 +2607,7 @@ impl<'a> LocationResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateLocationResp {
             api_resp,
             code_error,
@@ -2670,7 +2624,7 @@ impl<'a> LocationResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteLocationResp {
             api_resp,
             code_error,
@@ -2690,7 +2644,7 @@ impl<'a> DepartmentResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateDepartmentResp {
             api_resp,
             code_error,
@@ -2707,7 +2661,7 @@ impl<'a> DepartmentResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteDepartmentResp {
             api_resp,
             code_error,
@@ -2727,7 +2681,7 @@ impl<'a> DepartmentResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchDepartmentResp {
             api_resp,
             code_error,
@@ -2750,7 +2704,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateWorkingHoursTypeResp {
             api_resp,
             code_error,
@@ -2767,7 +2721,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteWorkingHoursTypeResp {
             api_resp,
             code_error,
@@ -2785,7 +2739,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetWorkingHoursTypeResp {
             api_resp,
             code_error,
@@ -2805,7 +2759,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchWorkingHoursTypeResp {
             api_resp,
             code_error,

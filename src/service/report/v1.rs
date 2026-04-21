@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::EmptyResp;
 use crate::transport;
 
 // ── Domain types ──
@@ -87,22 +87,6 @@ pub struct QueryTaskReqBody {
 
 // ── Response wrappers ──
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: CodeError,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.success()
-            }
-        }
-    };
-}
-
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RuleListData {
     #[serde(default)]
@@ -130,18 +114,6 @@ impl_resp!(QueryTaskResp, TaskListData);
 pub struct RemoveRuleViewReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_ids: Option<Vec<String>>,
-}
-
-#[derive(Debug, Clone)]
-pub struct EmptyResp {
-    pub api_resp: ApiResp,
-    pub code_error: CodeError,
-}
-
-impl EmptyResp {
-    pub fn success(&self) -> bool {
-        self.code_error.success()
-    }
 }
 
 // ── Resources ──

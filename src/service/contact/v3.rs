@@ -635,22 +635,6 @@ pub struct UnbindDepartmentUnitReqBody {
 
 // ── Response wrappers (macro) ──
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: CodeError,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.success()
-            }
-        }
-    };
-}
-
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct CreateDepartmentRespData {
     pub department: Option<Department>,

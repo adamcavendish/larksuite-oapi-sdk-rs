@@ -17,39 +17,23 @@ pub struct MetricTagListData {
     pub has_more: Option<bool>,
 }
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.api_resp.status_code == 200
-                    && self.code_error.as_ref().map_or(true, |e| e.code == 0)
-            }
-        }
-    };
-}
-
-impl_resp!(QueryActivityV2Resp, serde_json::Value);
-impl_resp!(ImportAdditionalInformationV2Resp, serde_json::Value);
-impl_resp!(QueryAdditionalInformationV2Resp, serde_json::Value);
-impl_resp!(DeleteAdditionalInformationsBatchV2Resp, ());
-impl_resp!(QueryIndicatorV2Resp, serde_json::Value);
-impl_resp!(ImportMetricDetailV2Resp, serde_json::Value);
-impl_resp!(QueryMetricDetailV2Resp, serde_json::Value);
-impl_resp!(QueryMetricFieldV2Resp, serde_json::Value);
-impl_resp!(QueryMetricLibV2Resp, serde_json::Value);
-impl_resp!(ListMetricTagV2Resp, MetricTagListData);
-impl_resp!(QueryMetricTemplateV2Resp, serde_json::Value);
-impl_resp!(QueryQuestionV2Resp, serde_json::Value);
-impl_resp!(QueryReviewDataV2Resp, serde_json::Value);
-impl_resp!(QueryReviewTemplateV2Resp, serde_json::Value);
-impl_resp!(QueryRevieweeV2Resp, serde_json::Value);
-impl_resp!(WriteUserGroupUserRelV2Resp, serde_json::Value);
-impl_resp!(QueryUserInfoV2Resp, serde_json::Value);
+impl_resp_v2!(QueryActivityV2Resp, serde_json::Value);
+impl_resp_v2!(ImportAdditionalInformationV2Resp, serde_json::Value);
+impl_resp_v2!(QueryAdditionalInformationV2Resp, serde_json::Value);
+impl_resp_v2!(DeleteAdditionalInformationsBatchV2Resp, ());
+impl_resp_v2!(QueryIndicatorV2Resp, serde_json::Value);
+impl_resp_v2!(ImportMetricDetailV2Resp, serde_json::Value);
+impl_resp_v2!(QueryMetricDetailV2Resp, serde_json::Value);
+impl_resp_v2!(QueryMetricFieldV2Resp, serde_json::Value);
+impl_resp_v2!(QueryMetricLibV2Resp, serde_json::Value);
+impl_resp_v2!(ListMetricTagV2Resp, MetricTagListData);
+impl_resp_v2!(QueryMetricTemplateV2Resp, serde_json::Value);
+impl_resp_v2!(QueryQuestionV2Resp, serde_json::Value);
+impl_resp_v2!(QueryReviewDataV2Resp, serde_json::Value);
+impl_resp_v2!(QueryReviewTemplateV2Resp, serde_json::Value);
+impl_resp_v2!(QueryRevieweeV2Resp, serde_json::Value);
+impl_resp_v2!(WriteUserGroupUserRelV2Resp, serde_json::Value);
+impl_resp_v2!(QueryUserInfoV2Resp, serde_json::Value);
 
 fn parse<T: for<'de> serde::Deserialize<'de>>(
     api_resp: ApiResp,

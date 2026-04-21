@@ -33,25 +33,9 @@ pub struct TalentV2Data {
 
 // ── Response types ────────────────────────────────────────────────────────────
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.api_resp.status_code == 200
-                    && self.code_error.as_ref().map_or(true, |e| e.code == 0)
-            }
-        }
-    };
-}
-
-impl_resp!(GetInterviewRecordV2Resp, InterviewRecordData);
-impl_resp!(ListInterviewRecordV2Resp, InterviewRecordListData);
-impl_resp!(GetTalentV2Resp, TalentV2Data);
+impl_resp_v2!(GetInterviewRecordV2Resp, InterviewRecordData);
+impl_resp_v2!(ListInterviewRecordV2Resp, InterviewRecordListData);
+impl_resp_v2!(GetTalentV2Resp, TalentV2Data);
 
 // ── Resource helper ───────────────────────────────────────────────────────────
 

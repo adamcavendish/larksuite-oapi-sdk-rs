@@ -23,29 +23,13 @@ pub struct DeviceRecordListData {
     pub has_more: Option<bool>,
 }
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.api_resp.status_code == 200
-                    && self.code_error.as_ref().map_or(true, |e| e.code == 0)
-            }
-        }
-    };
-}
-
-impl_resp!(UpdateDeviceApplyRecordV2Resp, serde_json::Value);
-impl_resp!(CreateDeviceRecordV2Resp, DeviceRecordData);
-impl_resp!(DeleteDeviceRecordV2Resp, ());
-impl_resp!(GetDeviceRecordV2Resp, DeviceRecordData);
-impl_resp!(ListDeviceRecordV2Resp, DeviceRecordListData);
-impl_resp!(MineDeviceRecordV2Resp, DeviceRecordListData);
-impl_resp!(UpdateDeviceRecordV2Resp, DeviceRecordData);
+impl_resp_v2!(UpdateDeviceApplyRecordV2Resp, serde_json::Value);
+impl_resp_v2!(CreateDeviceRecordV2Resp, DeviceRecordData);
+impl_resp_v2!(DeleteDeviceRecordV2Resp, ());
+impl_resp_v2!(GetDeviceRecordV2Resp, DeviceRecordData);
+impl_resp_v2!(ListDeviceRecordV2Resp, DeviceRecordListData);
+impl_resp_v2!(MineDeviceRecordV2Resp, DeviceRecordListData);
+impl_resp_v2!(UpdateDeviceRecordV2Resp, DeviceRecordData);
 
 fn parse<T: for<'de> serde::Deserialize<'de>>(
     api_resp: ApiResp,

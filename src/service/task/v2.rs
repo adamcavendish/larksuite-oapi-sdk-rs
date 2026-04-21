@@ -135,74 +135,58 @@ pub struct TaskListParams<'a> {
 
 // ── Response types ─────────────────────────────────────────────────────────────
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.api_resp.status_code == 200
-                    && self.code_error.as_ref().map_or(true, |e| e.code == 0)
-            }
-        }
-    };
-}
-
-impl_resp!(CreateTaskV2Resp, TaskV2Data);
-impl_resp!(GetTaskV2Resp, TaskV2Data);
-impl_resp!(PatchTaskV2Resp, TaskV2Data);
-impl_resp!(ListTaskV2Resp, TaskV2ListData);
-impl_resp!(AddMembersTaskV2Resp, TaskV2Data);
-impl_resp!(RemoveMembersTaskV2Resp, TaskV2Data);
-impl_resp!(AddRemindersTaskV2Resp, TaskV2Data);
-impl_resp!(RemoveRemindersTaskV2Resp, TaskV2Data);
-impl_resp!(AddDependenciesTaskV2Resp, TaskV2Data);
-impl_resp!(RemoveDependenciesTaskV2Resp, TaskV2Data);
-impl_resp!(AddTasklistTaskV2Resp, TaskV2Data);
-impl_resp!(RemoveTasklistTaskV2Resp, TaskV2Data);
-impl_resp!(TasklistsTaskV2Resp, TasklistListData);
-impl_resp!(CreateTaskSubtaskV2Resp, TaskV2Data);
-impl_resp!(ListTaskSubtaskV2Resp, TaskV2ListData);
-impl_resp!(DeleteTaskV2Resp, ());
-impl_resp!(GetAttachmentV2Resp, AttachmentData);
-impl_resp!(ListAttachmentV2Resp, AttachmentListData);
-impl_resp!(DeleteAttachmentV2Resp, ());
-impl_resp!(UploadAttachmentV2Resp, AttachmentData);
-impl_resp!(CreateCommentV2Resp, CommentV2Data);
-impl_resp!(GetCommentV2Resp, CommentV2Data);
-impl_resp!(PatchCommentV2Resp, CommentV2Data);
-impl_resp!(ListCommentV2Resp, CommentV2ListData);
-impl_resp!(DeleteCommentV2Resp, ());
-impl_resp!(CreateCustomFieldV2Resp, CustomFieldData);
-impl_resp!(GetCustomFieldV2Resp, CustomFieldData);
-impl_resp!(PatchCustomFieldV2Resp, CustomFieldData);
-impl_resp!(ListCustomFieldV2Resp, CustomFieldListData);
-impl_resp!(AddCustomFieldV2Resp, CustomFieldData);
-impl_resp!(RemoveCustomFieldV2Resp, ());
-impl_resp!(CreateCustomFieldOptionV2Resp, serde_json::Value);
-impl_resp!(PatchCustomFieldOptionV2Resp, serde_json::Value);
-impl_resp!(CreateSectionV2Resp, SectionData);
-impl_resp!(GetSectionV2Resp, SectionData);
-impl_resp!(PatchSectionV2Resp, SectionData);
-impl_resp!(ListSectionV2Resp, SectionListData);
-impl_resp!(DeleteSectionV2Resp, ());
-impl_resp!(TasksSectionV2Resp, TaskV2ListData);
-impl_resp!(CreateTasklistV2Resp, TasklistData);
-impl_resp!(GetTasklistV2Resp, TasklistData);
-impl_resp!(PatchTasklistV2Resp, TasklistData);
-impl_resp!(ListTasklistV2Resp, TasklistListData);
-impl_resp!(DeleteTasklistV2Resp, ());
-impl_resp!(AddMembersTasklistV2Resp, TasklistData);
-impl_resp!(RemoveMembersTasklistV2Resp, TasklistData);
-impl_resp!(TasksTasklistV2Resp, TaskV2ListData);
-impl_resp!(CreateActivitySubscriptionV2Resp, ActivitySubscriptionData);
-impl_resp!(GetActivitySubscriptionV2Resp, ActivitySubscriptionData);
-impl_resp!(PatchActivitySubscriptionV2Resp, ActivitySubscriptionData);
-impl_resp!(ListActivitySubscriptionV2Resp, ActivitySubscriptionListData);
-impl_resp!(DeleteActivitySubscriptionV2Resp, ());
+impl_resp_v2!(CreateTaskV2Resp, TaskV2Data);
+impl_resp_v2!(GetTaskV2Resp, TaskV2Data);
+impl_resp_v2!(PatchTaskV2Resp, TaskV2Data);
+impl_resp_v2!(ListTaskV2Resp, TaskV2ListData);
+impl_resp_v2!(AddMembersTaskV2Resp, TaskV2Data);
+impl_resp_v2!(RemoveMembersTaskV2Resp, TaskV2Data);
+impl_resp_v2!(AddRemindersTaskV2Resp, TaskV2Data);
+impl_resp_v2!(RemoveRemindersTaskV2Resp, TaskV2Data);
+impl_resp_v2!(AddDependenciesTaskV2Resp, TaskV2Data);
+impl_resp_v2!(RemoveDependenciesTaskV2Resp, TaskV2Data);
+impl_resp_v2!(AddTasklistTaskV2Resp, TaskV2Data);
+impl_resp_v2!(RemoveTasklistTaskV2Resp, TaskV2Data);
+impl_resp_v2!(TasklistsTaskV2Resp, TasklistListData);
+impl_resp_v2!(CreateTaskSubtaskV2Resp, TaskV2Data);
+impl_resp_v2!(ListTaskSubtaskV2Resp, TaskV2ListData);
+impl_resp_v2!(DeleteTaskV2Resp, ());
+impl_resp_v2!(GetAttachmentV2Resp, AttachmentData);
+impl_resp_v2!(ListAttachmentV2Resp, AttachmentListData);
+impl_resp_v2!(DeleteAttachmentV2Resp, ());
+impl_resp_v2!(UploadAttachmentV2Resp, AttachmentData);
+impl_resp_v2!(CreateCommentV2Resp, CommentV2Data);
+impl_resp_v2!(GetCommentV2Resp, CommentV2Data);
+impl_resp_v2!(PatchCommentV2Resp, CommentV2Data);
+impl_resp_v2!(ListCommentV2Resp, CommentV2ListData);
+impl_resp_v2!(DeleteCommentV2Resp, ());
+impl_resp_v2!(CreateCustomFieldV2Resp, CustomFieldData);
+impl_resp_v2!(GetCustomFieldV2Resp, CustomFieldData);
+impl_resp_v2!(PatchCustomFieldV2Resp, CustomFieldData);
+impl_resp_v2!(ListCustomFieldV2Resp, CustomFieldListData);
+impl_resp_v2!(AddCustomFieldV2Resp, CustomFieldData);
+impl_resp_v2!(RemoveCustomFieldV2Resp, ());
+impl_resp_v2!(CreateCustomFieldOptionV2Resp, serde_json::Value);
+impl_resp_v2!(PatchCustomFieldOptionV2Resp, serde_json::Value);
+impl_resp_v2!(CreateSectionV2Resp, SectionData);
+impl_resp_v2!(GetSectionV2Resp, SectionData);
+impl_resp_v2!(PatchSectionV2Resp, SectionData);
+impl_resp_v2!(ListSectionV2Resp, SectionListData);
+impl_resp_v2!(DeleteSectionV2Resp, ());
+impl_resp_v2!(TasksSectionV2Resp, TaskV2ListData);
+impl_resp_v2!(CreateTasklistV2Resp, TasklistData);
+impl_resp_v2!(GetTasklistV2Resp, TasklistData);
+impl_resp_v2!(PatchTasklistV2Resp, TasklistData);
+impl_resp_v2!(ListTasklistV2Resp, TasklistListData);
+impl_resp_v2!(DeleteTasklistV2Resp, ());
+impl_resp_v2!(AddMembersTasklistV2Resp, TasklistData);
+impl_resp_v2!(RemoveMembersTasklistV2Resp, TasklistData);
+impl_resp_v2!(TasksTasklistV2Resp, TaskV2ListData);
+impl_resp_v2!(CreateActivitySubscriptionV2Resp, ActivitySubscriptionData);
+impl_resp_v2!(GetActivitySubscriptionV2Resp, ActivitySubscriptionData);
+impl_resp_v2!(PatchActivitySubscriptionV2Resp, ActivitySubscriptionData);
+impl_resp_v2!(ListActivitySubscriptionV2Resp, ActivitySubscriptionListData);
+impl_resp_v2!(DeleteActivitySubscriptionV2Resp, ());
 
 // ── Resource helpers ──────────────────────────────────────────────────────────
 

@@ -5,6 +5,7 @@ use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
+use crate::service::common::EmptyResp;
 use crate::transport;
 
 // ── Domain types ──
@@ -290,34 +291,6 @@ pub struct GetApprovalInfoReqBody {
 }
 
 // ── Response wrappers ──
-
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: CodeError,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.success()
-            }
-        }
-    };
-}
-
-#[derive(Debug, Clone)]
-pub struct EmptyResp {
-    pub api_resp: ApiResp,
-    pub code_error: CodeError,
-}
-
-impl EmptyResp {
-    pub fn success(&self) -> bool {
-        self.code_error.success()
-    }
-}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GroupData {
@@ -752,21 +725,6 @@ fn parse_v2<T: for<'de> serde::Deserialize<'de>>(
     } else {
         (api_resp, None, raw.data)
     }
-}
-
-macro_rules! impl_resp_v2 {
-    ($name:ident, $data:ty) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.as_ref().is_none_or(|e| e.code == 0)
-            }
-        }
-    };
 }
 
 // ── Response types for new resources ──

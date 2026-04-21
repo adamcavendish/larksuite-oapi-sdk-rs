@@ -5,22 +5,6 @@ use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
 use crate::transport;
 
-macro_rules! impl_resp {
-    ($name:ident) => {
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<serde_json::Value>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.api_resp.status_code == 200
-                    && self.code_error.as_ref().is_none_or(|e| e.code == 0)
-            }
-        }
-    };
-}
-
 impl_resp!(AuthenAccessTokenResp);
 impl_resp!(RefreshAuthenAccessTokenResp);
 impl_resp!(AuthenUserInfoResp);

@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -222,34 +222,6 @@ pub struct SetRoomConfigReqBody {
 }
 
 // ── Response wrappers ──
-
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: CodeError,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.success()
-            }
-        }
-    };
-}
-
-#[derive(Debug, Clone)]
-pub struct EmptyResp {
-    pub api_resp: ApiResp,
-    pub code_error: CodeError,
-}
-
-impl EmptyResp {
-    pub fn success(&self) -> bool {
-        self.code_error.success()
-    }
-}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RoomData {
@@ -865,33 +837,6 @@ impl<'a> ReportResource<'a> {
 }
 
 // ── impl_resp_v2! macro ──
-
-fn parse_v2<T>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> (ApiResp, Option<CodeError>, Option<T>) {
-    if raw.code_error.code != 0 {
-        (api_resp, Some(raw.code_error), None)
-    } else {
-        (api_resp, None, raw.data)
-    }
-}
-
-macro_rules! impl_resp_v2 {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.as_ref().map_or(true, |e| e.code == 0)
-            }
-        }
-    };
-}
 
 impl_resp_v2!(MgetRoomResp, serde_json::Value);
 impl_resp_v2!(SearchRoomResp, serde_json::Value);

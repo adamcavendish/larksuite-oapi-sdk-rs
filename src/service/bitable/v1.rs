@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError, RawResponse};
+use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -520,34 +520,6 @@ pub struct WorkflowListData {
 
 // ── Response wrappers ──
 
-macro_rules! impl_resp {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: CodeError,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.success()
-            }
-        }
-    };
-}
-
-#[derive(Debug, Clone)]
-pub struct EmptyResp {
-    pub api_resp: ApiResp,
-    pub code_error: CodeError,
-}
-
-impl EmptyResp {
-    pub fn success(&self) -> bool {
-        self.code_error.success()
-    }
-}
-
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AppData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -747,30 +719,6 @@ impl_resp!(ListFormFieldResp, FormFieldListData);
 impl_resp!(PatchFormFieldResp, FormFieldPatchData);
 
 // ── v2 helpers (Option<CodeError>, used for newer endpoints) ──
-
-fn parse_v2<T>(api_resp: ApiResp, raw: RawResponse<T>) -> (ApiResp, Option<CodeError>, Option<T>) {
-    if raw.code_error.code != 0 {
-        (api_resp, Some(raw.code_error), None)
-    } else {
-        (api_resp, None, raw.data)
-    }
-}
-
-macro_rules! impl_resp_v2 {
-    ($name:ident, $data:ty) => {
-        #[derive(Debug, Clone)]
-        pub struct $name {
-            pub api_resp: ApiResp,
-            pub code_error: Option<CodeError>,
-            pub data: Option<$data>,
-        }
-        impl $name {
-            pub fn success(&self) -> bool {
-                self.code_error.as_ref().is_none_or(|e| e.code == 0)
-            }
-        }
-    };
-}
 
 // app.copy / app.create
 impl_resp_v2!(CopyAppResp, serde_json::Value);
