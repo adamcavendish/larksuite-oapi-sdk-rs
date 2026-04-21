@@ -102,36 +102,25 @@ pub struct FileLikeResource<'a> {
 }
 
 impl<'a> FileLikeResource<'a> {
-    #[allow(clippy::too_many_arguments)]
     pub async fn list(
         &self,
+        file_token: &str,
+        user_id_type: Option<&str>,
         page_size: Option<i32>,
         page_token: Option<&str>,
-        folder_token: Option<&str>,
-        order_by: Option<&str>,
-        direction: Option<&str>,
-        user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<FileLikeListResp> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/drive/v2/files");
+        let path = format!("/open-apis/drive/v2/files/{file_token}/likes");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
         if let Some(v) = page_token {
             api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = folder_token {
-            api_req.query_params.set("folder_token", v);
-        }
-        if let Some(v) = order_by {
-            api_req.query_params.set("order_by", v);
-        }
-        if let Some(v) = direction {
-            api_req.query_params.set("direction", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
         }
         let (api_resp, raw) =
             transport::request_typed::<FileLikeListData>(self.config, &api_req, option).await?;

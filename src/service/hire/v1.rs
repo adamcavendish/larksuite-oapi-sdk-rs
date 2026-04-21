@@ -1411,6 +1411,28 @@ impl<'a> ApplicationResource<'a> {
             data,
         })
     }
+
+    pub async fn offer(
+        &self,
+        application_id: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<OfferApplicationResp> {
+        let path = format!("/open-apis/hire/v1/applications/{application_id}/offer");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(OfferApplicationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct InterviewResource<'a> {
@@ -1904,6 +1926,44 @@ impl_resp_v2!(SearchTestResp, serde_json::Value);
 impl_resp_v2!(CreateByAttachmentWebsiteDeliveryResp, serde_json::Value);
 impl_resp_v2!(CreateByResumeWebsiteDeliveryResp, serde_json::Value);
 impl_resp_v2!(SearchWebsiteJobPostResp, serde_json::Value);
+
+// ── New response types (Phase 10) ──
+
+impl_resp_v2!(OfferApplicationResp, serde_json::Value);
+impl_resp_v2!(ListApplicationInterviewResp2, serde_json::Value);
+impl_resp_v2!(PatchEhrImportTaskResp, serde_json::Value);
+impl_resp_v2!(ListEvaluationTaskResp, serde_json::Value);
+impl_resp_v2!(CreateExamResp, serde_json::Value);
+impl_resp_v2!(ListExamMarkingTaskResp, serde_json::Value);
+impl_resp_v2!(CreateExternalInterviewAssessmentResp, serde_json::Value);
+impl_resp_v2!(PatchExternalInterviewAssessmentResp, serde_json::Value);
+impl_resp_v2!(CreateExternalReferralRewardResp, serde_json::Value);
+impl_resp_v2!(DeleteExternalReferralRewardResp, ());
+impl_resp_v2!(ListInterviewFeedbackFormResp, serde_json::Value);
+impl_resp_v2!(GetInterviewRecordAttachmentResp, serde_json::Value);
+impl_resp_v2!(ListInterviewRegistrationSchemaResp, serde_json::Value);
+impl_resp_v2!(ListInterviewRoundTypeResp, serde_json::Value);
+impl_resp_v2!(ListInterviewTaskResp, serde_json::Value);
+impl_resp_v2!(GetJobManagerResp, serde_json::Value);
+impl_resp_v2!(ListJobRequirementSchemaResp, serde_json::Value);
+impl_resp_v2!(ListJobSchemaResp, serde_json::Value);
+impl_resp_v2!(GetMinutesResp, serde_json::Value);
+impl_resp_v2!(GetOfferApplicationFormResp, serde_json::Value);
+impl_resp_v2!(ListOfferApplicationFormResp, serde_json::Value);
+impl_resp_v2!(ListOfferApprovalTemplateResp, serde_json::Value);
+impl_resp_v2!(UpdateOfferCustomFieldResp, serde_json::Value);
+impl_resp_v2!(ListPortalApplySchemaResp, serde_json::Value);
+impl_resp_v2!(GetReferralWebsiteJobPostResp, serde_json::Value);
+impl_resp_v2!(ListReferralWebsiteJobPostResp, serde_json::Value);
+impl_resp_v2!(CreateTalentExternalInfoResp, serde_json::Value);
+impl_resp_v2!(UpdateTalentExternalInfoResp, serde_json::Value);
+impl_resp_v2!(ListTalentTagResp, serde_json::Value);
+impl_resp_v2!(CreateWebsiteChannelResp, serde_json::Value);
+impl_resp_v2!(DeleteWebsiteChannelResp, ());
+impl_resp_v2!(ListWebsiteChannelResp, serde_json::Value);
+impl_resp_v2!(UpdateWebsiteChannelResp, serde_json::Value);
+impl_resp_v2!(GetWebsiteDeliveryTaskResp, serde_json::Value);
+impl_resp_v2!(CreateWebsiteSiteUserResp, serde_json::Value);
 
 // ── Employee resource ──
 
@@ -3217,6 +3277,29 @@ impl JobManagerResource<'_> {
             data,
         })
     }
+
+    pub async fn get(
+        &self,
+        job_id: &str,
+        manager_id: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetJobManagerResp> {
+        let path = format!("/open-apis/hire/v1/jobs/{job_id}/managers/{manager_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetJobManagerResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 // ── JobPublishRecord resource ──
@@ -3571,6 +3654,975 @@ impl WebsiteDeliveryResource<'_> {
     }
 }
 
+// ── ApplicationInterview resource ──
+
+pub struct ApplicationInterviewResource<'a> {
+    config: &'a Config,
+}
+
+impl ApplicationInterviewResource<'_> {
+    pub async fn list(
+        &self,
+        application_id: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListApplicationInterviewResp2> {
+        let path = format!("/open-apis/hire/v1/applications/{application_id}/interviews");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListApplicationInterviewResp2 {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── EhrImportTask resource ──
+
+pub struct EhrImportTaskResource<'a> {
+    config: &'a Config,
+}
+
+impl EhrImportTaskResource<'_> {
+    pub async fn patch(
+        &self,
+        ehr_import_task_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PatchEhrImportTaskResp> {
+        let path = format!("/open-apis/hire/v1/ehr_import_tasks/{ehr_import_task_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(PatchEhrImportTaskResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── EvaluationTask resource ──
+
+pub struct EvaluationTaskResource<'a> {
+    config: &'a Config,
+}
+
+impl EvaluationTaskResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListEvaluationTaskResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/evaluation_tasks");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListEvaluationTaskResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Exam resource ──
+
+pub struct ExamResource<'a> {
+    config: &'a Config,
+}
+
+impl ExamResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateExamResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/exams");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateExamResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── ExamMarkingTask resource ──
+
+pub struct ExamMarkingTaskResource<'a> {
+    config: &'a Config,
+}
+
+impl ExamMarkingTaskResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListExamMarkingTaskResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/exam_marking_tasks");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListExamMarkingTaskResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── ExternalInterviewAssessment resource ──
+
+pub struct ExternalInterviewAssessmentResource<'a> {
+    config: &'a Config,
+}
+
+impl ExternalInterviewAssessmentResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateExternalInterviewAssessmentResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/external_interview_assessments",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateExternalInterviewAssessmentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        external_interview_assessment_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PatchExternalInterviewAssessmentResp> {
+        let path = format!(
+            "/open-apis/hire/v1/external_interview_assessments/{external_interview_assessment_id}"
+        );
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(PatchExternalInterviewAssessmentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── ExternalReferralReward resource ──
+
+pub struct ExternalReferralRewardResource<'a> {
+    config: &'a Config,
+}
+
+impl ExternalReferralRewardResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateExternalReferralRewardResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/external_referral_rewards",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateExternalReferralRewardResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        external_referral_reward_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteExternalReferralRewardResp> {
+        let path =
+            format!("/open-apis/hire/v1/external_referral_rewards/{external_referral_reward_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(DeleteExternalReferralRewardResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── InterviewFeedbackForm resource ──
+
+pub struct InterviewFeedbackFormResource<'a> {
+    config: &'a Config,
+}
+
+impl InterviewFeedbackFormResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewFeedbackFormResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/interview_feedback_forms",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListInterviewFeedbackFormResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── InterviewRecordAttachment resource ──
+
+pub struct InterviewRecordAttachmentResource<'a> {
+    config: &'a Config,
+}
+
+impl InterviewRecordAttachmentResource<'_> {
+    pub async fn get(&self, option: &RequestOption) -> Result<GetInterviewRecordAttachmentResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/interview_records/attachments",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetInterviewRecordAttachmentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── InterviewRegistrationSchema resource ──
+
+pub struct InterviewRegistrationSchemaResource<'a> {
+    config: &'a Config,
+}
+
+impl InterviewRegistrationSchemaResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewRegistrationSchemaResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/interview_registration_schemas",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListInterviewRegistrationSchemaResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── InterviewRoundType resource ──
+
+pub struct InterviewRoundTypeResource<'a> {
+    config: &'a Config,
+}
+
+impl InterviewRoundTypeResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewRoundTypeResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/interview_round_types",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListInterviewRoundTypeResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── InterviewTask resource ──
+
+pub struct InterviewTaskResource<'a> {
+    config: &'a Config,
+}
+
+impl InterviewTaskResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewTaskResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/interview_tasks");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListInterviewTaskResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── JobRequirementSchema resource ──
+
+pub struct JobRequirementSchemaResource<'a> {
+    config: &'a Config,
+}
+
+impl JobRequirementSchemaResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListJobRequirementSchemaResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/job_requirement_schemas",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListJobRequirementSchemaResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── JobSchema resource ──
+
+pub struct JobSchemaResource<'a> {
+    config: &'a Config,
+}
+
+impl JobSchemaResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListJobSchemaResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/job_schemas");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListJobSchemaResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Minutes resource ──
+
+pub struct MinutesResource<'a> {
+    config: &'a Config,
+}
+
+impl MinutesResource<'_> {
+    pub async fn get(&self, option: &RequestOption) -> Result<GetMinutesResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/minutes");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetMinutesResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── OfferApplicationForm resource ──
+
+pub struct OfferApplicationFormResource<'a> {
+    config: &'a Config,
+}
+
+impl OfferApplicationFormResource<'_> {
+    pub async fn get(
+        &self,
+        offer_application_form_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetOfferApplicationFormResp> {
+        let path =
+            format!("/open-apis/hire/v1/offer_application_forms/{offer_application_form_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetOfferApplicationFormResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListOfferApplicationFormResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/offer_application_forms",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListOfferApplicationFormResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── OfferApprovalTemplate resource ──
+
+pub struct OfferApprovalTemplateResource<'a> {
+    config: &'a Config,
+}
+
+impl OfferApprovalTemplateResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListOfferApprovalTemplateResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/offer_approval_templates",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListOfferApprovalTemplateResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── OfferCustomField resource ──
+
+pub struct OfferCustomFieldResource<'a> {
+    config: &'a Config,
+}
+
+impl OfferCustomFieldResource<'_> {
+    pub async fn update(
+        &self,
+        offer_custom_field_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UpdateOfferCustomFieldResp> {
+        let path = format!("/open-apis/hire/v1/offer_custom_fields/{offer_custom_field_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UpdateOfferCustomFieldResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── PortalApplySchema resource ──
+
+pub struct PortalApplySchemaResource<'a> {
+    config: &'a Config,
+}
+
+impl PortalApplySchemaResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListPortalApplySchemaResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/portal_apply_schemas");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListPortalApplySchemaResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── ReferralWebsiteJobPost resource ──
+
+pub struct ReferralWebsiteJobPostResource<'a> {
+    config: &'a Config,
+}
+
+impl ReferralWebsiteJobPostResource<'_> {
+    pub async fn get(
+        &self,
+        job_post_id: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetReferralWebsiteJobPostResp> {
+        let path = format!("/open-apis/hire/v1/referral_websites/job_posts/{job_post_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetReferralWebsiteJobPostResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListReferralWebsiteJobPostResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/referral_websites/job_posts",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListReferralWebsiteJobPostResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── TalentExternalInfo resource ──
+
+pub struct TalentExternalInfoResource<'a> {
+    config: &'a Config,
+}
+
+impl TalentExternalInfoResource<'_> {
+    pub async fn create(
+        &self,
+        talent_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateTalentExternalInfoResp> {
+        let path = format!("/open-apis/hire/v1/talents/{talent_id}/external_info");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateTalentExternalInfoResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update(
+        &self,
+        talent_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UpdateTalentExternalInfoResp> {
+        let path = format!("/open-apis/hire/v1/talents/{talent_id}/external_info");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UpdateTalentExternalInfoResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── TalentTag resource ──
+
+pub struct TalentTagResource<'a> {
+    config: &'a Config,
+}
+
+impl TalentTagResource<'_> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListTalentTagResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/talent_tags");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListTalentTagResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── WebsiteChannel resource ──
+
+pub struct WebsiteChannelResource<'a> {
+    config: &'a Config,
+}
+
+impl WebsiteChannelResource<'_> {
+    pub async fn create(
+        &self,
+        website_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateWebsiteChannelResp> {
+        let path = format!("/open-apis/hire/v1/websites/{website_id}/channels");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateWebsiteChannelResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        website_id: &str,
+        channel_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteWebsiteChannelResp> {
+        let path = format!("/open-apis/hire/v1/websites/{website_id}/channels/{channel_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(DeleteWebsiteChannelResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        website_id: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListWebsiteChannelResp> {
+        let path = format!("/open-apis/hire/v1/websites/{website_id}/channels");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListWebsiteChannelResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update(
+        &self,
+        website_id: &str,
+        channel_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UpdateWebsiteChannelResp> {
+        let path = format!("/open-apis/hire/v1/websites/{website_id}/channels/{channel_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UpdateWebsiteChannelResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── WebsiteDeliveryTask resource ──
+
+pub struct WebsiteDeliveryTaskResource<'a> {
+    config: &'a Config,
+}
+
+impl WebsiteDeliveryTaskResource<'_> {
+    pub async fn get(
+        &self,
+        website_id: &str,
+        delivery_task_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetWebsiteDeliveryTaskResp> {
+        let path =
+            format!("/open-apis/hire/v1/websites/{website_id}/delivery_tasks/{delivery_task_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetWebsiteDeliveryTaskResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── WebsiteSiteUser resource ──
+
+pub struct WebsiteSiteUserResource<'a> {
+    config: &'a Config,
+}
+
+impl WebsiteSiteUserResource<'_> {
+    pub async fn create(
+        &self,
+        website_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateWebsiteSiteUserResp> {
+        let path = format!("/open-apis/hire/v1/websites/{website_id}/site_users");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateWebsiteSiteUserResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── EhrImportTaskForInternshipOffer resource (placeholder — no methods in Go SDK) ──
+
+pub struct EhrImportTaskForInternshipOfferResource<'a> {
+    #[allow(dead_code)]
+    config: &'a Config,
+}
+
 pub struct V1<'a> {
     pub job: JobResource<'a>,
     pub talent: TalentResource<'a>,
@@ -3625,6 +4677,32 @@ pub struct V1<'a> {
     pub talent_pool: TalentPoolResource<'a>,
     pub test: TestResource<'a>,
     pub website_delivery: WebsiteDeliveryResource<'a>,
+    pub application_interview: ApplicationInterviewResource<'a>,
+    pub ehr_import_task: EhrImportTaskResource<'a>,
+    pub ehr_import_task_for_internship_offer: EhrImportTaskForInternshipOfferResource<'a>,
+    pub evaluation_task: EvaluationTaskResource<'a>,
+    pub exam: ExamResource<'a>,
+    pub exam_marking_task: ExamMarkingTaskResource<'a>,
+    pub external_interview_assessment: ExternalInterviewAssessmentResource<'a>,
+    pub external_referral_reward: ExternalReferralRewardResource<'a>,
+    pub interview_feedback_form: InterviewFeedbackFormResource<'a>,
+    pub interview_record_attachment: InterviewRecordAttachmentResource<'a>,
+    pub interview_registration_schema: InterviewRegistrationSchemaResource<'a>,
+    pub interview_round_type: InterviewRoundTypeResource<'a>,
+    pub interview_task: InterviewTaskResource<'a>,
+    pub job_requirement_schema: JobRequirementSchemaResource<'a>,
+    pub job_schema: JobSchemaResource<'a>,
+    pub minutes: MinutesResource<'a>,
+    pub offer_application_form: OfferApplicationFormResource<'a>,
+    pub offer_approval_template: OfferApprovalTemplateResource<'a>,
+    pub offer_custom_field: OfferCustomFieldResource<'a>,
+    pub portal_apply_schema: PortalApplySchemaResource<'a>,
+    pub referral_website_job_post: ReferralWebsiteJobPostResource<'a>,
+    pub talent_external_info: TalentExternalInfoResource<'a>,
+    pub talent_tag: TalentTagResource<'a>,
+    pub website_channel: WebsiteChannelResource<'a>,
+    pub website_delivery_task: WebsiteDeliveryTaskResource<'a>,
+    pub website_site_user: WebsiteSiteUserResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -3683,6 +4761,34 @@ impl<'a> V1<'a> {
             talent_pool: TalentPoolResource { config },
             test: TestResource { config },
             website_delivery: WebsiteDeliveryResource { config },
+            application_interview: ApplicationInterviewResource { config },
+            ehr_import_task: EhrImportTaskResource { config },
+            ehr_import_task_for_internship_offer: EhrImportTaskForInternshipOfferResource {
+                config,
+            },
+            evaluation_task: EvaluationTaskResource { config },
+            exam: ExamResource { config },
+            exam_marking_task: ExamMarkingTaskResource { config },
+            external_interview_assessment: ExternalInterviewAssessmentResource { config },
+            external_referral_reward: ExternalReferralRewardResource { config },
+            interview_feedback_form: InterviewFeedbackFormResource { config },
+            interview_record_attachment: InterviewRecordAttachmentResource { config },
+            interview_registration_schema: InterviewRegistrationSchemaResource { config },
+            interview_round_type: InterviewRoundTypeResource { config },
+            interview_task: InterviewTaskResource { config },
+            job_requirement_schema: JobRequirementSchemaResource { config },
+            job_schema: JobSchemaResource { config },
+            minutes: MinutesResource { config },
+            offer_application_form: OfferApplicationFormResource { config },
+            offer_approval_template: OfferApprovalTemplateResource { config },
+            offer_custom_field: OfferCustomFieldResource { config },
+            portal_apply_schema: PortalApplySchemaResource { config },
+            referral_website_job_post: ReferralWebsiteJobPostResource { config },
+            talent_external_info: TalentExternalInfoResource { config },
+            talent_tag: TalentTagResource { config },
+            website_channel: WebsiteChannelResource { config },
+            website_delivery_task: WebsiteDeliveryTaskResource { config },
+            website_site_user: WebsiteSiteUserResource { config },
         }
     }
 }

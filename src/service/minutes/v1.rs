@@ -97,6 +97,21 @@ impl_resp!(GetMinutesResp, MinutesInfoData);
 impl_resp!(ListParticipantResp, ParticipantListData);
 impl_resp!(GetTranscriptResp, TranscriptData);
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MinuteMediaData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub media: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MinuteStatisticsData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub statistics: Option<serde_json::Value>,
+}
+
+impl_resp!(GetMinuteMediaResp, MinuteMediaData);
+impl_resp!(GetMinuteStatisticsResp, MinuteStatisticsData);
+
 // ── Resources ──
 
 pub struct MinutesResource<'a> {
@@ -188,12 +203,64 @@ impl<'a> TranscriptResource<'a> {
     }
 }
 
+pub struct MinuteMediaResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> MinuteMediaResource<'a> {
+    pub async fn get(
+        &self,
+        minutes_token: &str,
+        option: &RequestOption,
+    ) -> Result<GetMinuteMediaResp> {
+        let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/media");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<MinuteMediaData>(self.config, &api_req, option).await?;
+        Ok(GetMinuteMediaResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+pub struct MinuteStatisticsResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> MinuteStatisticsResource<'a> {
+    pub async fn get(
+        &self,
+        minutes_token: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetMinuteStatisticsResp> {
+        let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/statistics");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<MinuteStatisticsData>(self.config, &api_req, option).await?;
+        Ok(GetMinuteStatisticsResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
     pub minutes: MinutesResource<'a>,
     pub participant: ParticipantResource<'a>,
     pub transcript: TranscriptResource<'a>,
+    pub minute_media: MinuteMediaResource<'a>,
+    pub minute_statistics: MinuteStatisticsResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -202,6 +269,8 @@ impl<'a> V1<'a> {
             minutes: MinutesResource { config },
             participant: ParticipantResource { config },
             transcript: TranscriptResource { config },
+            minute_media: MinuteMediaResource { config },
+            minute_statistics: MinuteStatisticsResource { config },
         }
     }
 }

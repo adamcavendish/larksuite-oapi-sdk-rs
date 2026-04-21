@@ -940,6 +940,15 @@ impl_resp!(ListDepartmentUnitResp, ListDepartmentUnitRespData);
 impl_resp!(GetWorkCityResp, GetWorkCityRespData);
 impl_resp!(ListWorkCityResp, ListWorkCityRespData);
 
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct CustomAttrListData {
+    pub items: Option<Vec<serde_json::Value>>,
+    pub page_token: Option<String>,
+    pub has_more: Option<bool>,
+}
+
+impl_resp!(ListCustomAttrResp, CustomAttrListData);
+
 #[derive(Debug, Clone)]
 pub struct EmptyResp {
     pub api_resp: ApiResp,
@@ -2680,6 +2689,35 @@ impl<'a> WorkCityResource<'a> {
     }
 }
 
+pub struct CustomAttrResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> CustomAttrResource<'a> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListCustomAttrResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/custom_attrs");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<CustomAttrListData>(self.config, &api_req, option).await?;
+        Ok(ListCustomAttrResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V3<'a> {
@@ -2696,6 +2734,7 @@ pub struct V3<'a> {
     pub job_family: JobFamilyResource<'a>,
     pub job_title: JobTitleResource<'a>,
     pub work_city: WorkCityResource<'a>,
+    pub custom_attr: CustomAttrResource<'a>,
 }
 
 impl<'a> V3<'a> {
@@ -2714,6 +2753,7 @@ impl<'a> V3<'a> {
             job_family: JobFamilyResource { config },
             job_title: JobTitleResource { config },
             work_city: WorkCityResource { config },
+            custom_attr: CustomAttrResource { config },
         }
     }
 }

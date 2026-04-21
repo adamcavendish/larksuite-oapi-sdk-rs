@@ -245,6 +245,14 @@ pub struct MoveDocsToWikiData {
 
 impl_resp!(MoveDocsToWikiResp, MoveDocsToWikiData);
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task: Option<serde_json::Value>,
+}
+
+impl_resp!(GetTaskResp, TaskData);
+
 // ── Resources ──
 
 pub struct SpaceResource<'a> {
@@ -536,17 +544,14 @@ impl<'a> SpaceMemberResource<'a> {
     pub async fn delete(
         &self,
         space_id: &str,
-        body: &DeleteMemberReqBody,
-        user_id_type: Option<&str>,
+        member_id: &str,
+        member_type: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp> {
-        let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members/batch_delete");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members/{member_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
+        api_req.query_params.set("member_type", member_type);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
@@ -585,12 +590,63 @@ impl<'a> SpaceMemberResource<'a> {
     }
 }
 
+pub struct SpaceSettingResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> SpaceSettingResource<'a> {
+    pub async fn update(
+        &self,
+        space_id: &str,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/wiki/v2/spaces/{space_id}/setting");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+}
+
+pub struct TaskResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> TaskResource<'a> {
+    pub async fn get(
+        &self,
+        task_id: &str,
+        task_type: &str,
+        option: &RequestOption,
+    ) -> Result<GetTaskResp> {
+        let path = format!("/open-apis/wiki/v2/tasks/{task_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.query_params.set("task_type", task_type);
+        let (api_resp, raw) =
+            transport::request_typed::<TaskData>(self.config, &api_req, option).await?;
+        Ok(GetTaskResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V2<'a> {
     pub space: SpaceResource<'a>,
     pub node: NodeResource<'a>,
     pub member: SpaceMemberResource<'a>,
+    pub space_setting: SpaceSettingResource<'a>,
+    pub task: TaskResource<'a>,
 }
 
 impl<'a> V2<'a> {
@@ -599,6 +655,8 @@ impl<'a> V2<'a> {
             space: SpaceResource { config },
             node: NodeResource { config },
             member: SpaceMemberResource { config },
+            space_setting: SpaceSettingResource { config },
+            task: TaskResource { config },
         }
     }
 }

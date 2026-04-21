@@ -1758,10 +1758,7 @@ impl<'a> FreeBusyResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFreeBusyResp> {
-        let mut api_req = ApiReq::new(
-            http::Method::POST,
-            "/open-apis/calendar/v4/freebusy/batch_get",
-        );
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/freebusy/list");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);

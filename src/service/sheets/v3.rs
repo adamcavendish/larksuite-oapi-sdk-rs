@@ -355,6 +355,41 @@ impl_resp!(FindSheetResp, serde_json::Value);
 impl_resp!(MoveDimensionSheetResp, serde_json::Value);
 impl_resp!(ReplaceSheetResp, serde_json::Value);
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FloatImage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub float_image_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub float_image_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset_x: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset_y: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FloatImageData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub float_image: Option<FloatImage>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FloatImageQueryData {
+    #[serde(default)]
+    pub items: Vec<FloatImage>,
+}
+
+impl_resp!(CreateFloatImageResp, FloatImageData);
+impl_resp!(GetFloatImageResp, FloatImageData);
+impl_resp!(PatchFloatImageResp, FloatImageData);
+impl_resp!(QueryFloatImageResp, FloatImageQueryData);
+
 // ── Resources ──
 
 pub struct SpreadsheetResource<'a> {
@@ -1138,6 +1173,118 @@ impl<'a> DataValidationResource<'a> {
     }
 }
 
+pub struct SpreadsheetSheetFloatImageResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> SpreadsheetSheetFloatImageResource<'a> {
+    pub async fn create(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        body: &FloatImage,
+        option: &RequestOption,
+    ) -> Result<CreateFloatImageResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images"
+        );
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<FloatImageData>(self.config, &api_req, option).await?;
+        Ok(CreateFloatImageResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        float_image_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/{float_image_id}"
+        );
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn get(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        float_image_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetFloatImageResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/{float_image_id}"
+        );
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<FloatImageData>(self.config, &api_req, option).await?;
+        Ok(GetFloatImageResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        float_image_id: &str,
+        body: &FloatImage,
+        option: &RequestOption,
+    ) -> Result<PatchFloatImageResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/{float_image_id}"
+        );
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<FloatImageData>(self.config, &api_req, option).await?;
+        Ok(PatchFloatImageResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        option: &RequestOption,
+    ) -> Result<QueryFloatImageResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/query"
+        );
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<FloatImageQueryData>(self.config, &api_req, option).await?;
+        Ok(QueryFloatImageResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V3<'a> {
@@ -1148,6 +1295,7 @@ pub struct V3<'a> {
     pub filter_view_condition: FilterViewConditionResource<'a>,
     pub conditional_format: ConditionalFormatResource<'a>,
     pub data_validation: DataValidationResource<'a>,
+    pub float_image: SpreadsheetSheetFloatImageResource<'a>,
 }
 
 impl<'a> V3<'a> {
@@ -1160,6 +1308,7 @@ impl<'a> V3<'a> {
             filter_view_condition: FilterViewConditionResource { config },
             conditional_format: ConditionalFormatResource { config },
             data_validation: DataValidationResource { config },
+            float_image: SpreadsheetSheetFloatImageResource { config },
         }
     }
 }

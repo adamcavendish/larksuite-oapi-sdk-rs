@@ -555,11 +555,11 @@ impl<'a> AppSearchResource<'a> {
     }
 }
 
-pub struct SchemaResource<'a> {
+pub struct DataSourceSchemaResource<'a> {
     config: &'a Config,
 }
 
-impl<'a> SchemaResource<'a> {
+impl<'a> DataSourceSchemaResource<'a> {
     pub async fn create(
         &self,
         data_source_id: &str,
@@ -638,6 +638,73 @@ impl<'a> SchemaResource<'a> {
     }
 }
 
+pub struct SchemaResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> SchemaResource<'a> {
+    pub async fn create(
+        &self,
+        body: &CreateSchemaReqBody,
+        option: &RequestOption,
+    ) -> Result<CreateSchemaResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/schemas");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<SchemaData>(self.config, &api_req, option).await?;
+        Ok(CreateSchemaResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn delete(&self, schema_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+        let path = format!("/open-apis/search/v2/schemas/{schema_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn get(&self, schema_id: &str, option: &RequestOption) -> Result<GetSchemaResp> {
+        let path = format!("/open-apis/search/v2/schemas/{schema_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<SchemaData>(self.config, &api_req, option).await?;
+        Ok(GetSchemaResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        schema_id: &str,
+        body: &PatchSchemaReqBody,
+        option: &RequestOption,
+    ) -> Result<PatchSchemaResp> {
+        let path = format!("/open-apis/search/v2/schemas/{schema_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<SchemaData>(self.config, &api_req, option).await?;
+        Ok(PatchSchemaResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct DocWikiResource<'a> {
@@ -669,6 +736,7 @@ pub struct V2<'a> {
     pub message: MessageSearchResource<'a>,
     pub app: AppSearchResource<'a>,
     pub schema: SchemaResource<'a>,
+    pub data_source_schema: DataSourceSchemaResource<'a>,
     pub doc_wiki: DocWikiResource<'a>,
 }
 
@@ -680,6 +748,7 @@ impl<'a> V2<'a> {
             message: MessageSearchResource { config },
             app: AppSearchResource { config },
             schema: SchemaResource { config },
+            data_source_schema: DataSourceSchemaResource { config },
             doc_wiki: DocWikiResource { config },
         }
     }
