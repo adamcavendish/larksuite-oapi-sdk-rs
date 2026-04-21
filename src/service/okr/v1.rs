@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
-use crate::req::{ApiReq, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::transport;
 
 // ── Domain types ──
@@ -99,6 +99,42 @@ macro_rules! impl_resp {
     };
 }
 
+fn parse_v2<T>(api_resp: ApiResp, raw: RawResponse<T>) -> (ApiResp, Option<CodeError>, Option<T>) {
+    if raw.code_error.code != 0 {
+        (api_resp, Some(raw.code_error), None)
+    } else {
+        (api_resp, None, raw.data)
+    }
+}
+
+macro_rules! impl_resp_v2 {
+    ($name:ident, $data:ty) => {
+        #[derive(Debug, Clone)]
+        pub struct $name {
+            pub api_resp: ApiResp,
+            pub code_error: Option<CodeError>,
+            pub data: Option<$data>,
+        }
+        impl $name {
+            pub fn success(&self) -> bool {
+                self.code_error.as_ref().is_none_or(|e| e.code == 0)
+            }
+        }
+    };
+}
+
+#[derive(Debug, Clone)]
+pub struct EmptyResp {
+    pub api_resp: ApiResp,
+    pub code_error: Option<CodeError>,
+}
+
+impl EmptyResp {
+    pub fn success(&self) -> bool {
+        self.code_error.as_ref().is_none_or(|e| e.code == 0)
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PeriodListData {
     #[serde(default)]
@@ -117,6 +153,16 @@ pub struct OkrListData {
 
 impl_resp!(ListPeriodResp, PeriodListData);
 impl_resp!(GetUserOkrResp, OkrListData);
+
+impl_resp_v2!(UploadImageResp, serde_json::Value);
+impl_resp_v2!(BatchGetOkrResp, serde_json::Value);
+impl_resp_v2!(CreatePeriodResp, serde_json::Value);
+impl_resp_v2!(PatchPeriodResp, serde_json::Value);
+impl_resp_v2!(ListPeriodRuleResp, serde_json::Value);
+impl_resp_v2!(CreateProgressRecordResp, serde_json::Value);
+impl_resp_v2!(GetProgressRecordResp, serde_json::Value);
+impl_resp_v2!(UpdateProgressRecordResp, serde_json::Value);
+impl_resp_v2!(QueryReviewResp, serde_json::Value);
 
 // ── Resources ──
 
@@ -147,6 +193,254 @@ impl<'a> PeriodResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn create(
+        &self,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreatePeriodResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/okr/v1/periods");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreatePeriodResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        period_id: &str,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PatchPeriodResp> {
+        let path = format!("/open-apis/okr/v1/periods/{period_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(PatchPeriodResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── PeriodRule resource ──
+
+pub struct PeriodRuleResource<'a> {
+    config: &'a Config,
+}
+
+impl PeriodRuleResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListPeriodRuleResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/okr/v1/period_rules");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListPeriodRuleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Image resource ──
+
+pub struct ImageResource<'a> {
+    config: &'a Config,
+}
+
+impl ImageResource<'_> {
+    pub async fn upload(
+        &self,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UploadImageResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/okr/v1/images/upload");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UploadImageResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Okr resource ──
+
+pub struct OkrResource<'a> {
+    config: &'a Config,
+}
+
+impl OkrResource<'_> {
+    pub async fn batch_get(
+        &self,
+        okr_ids: &[&str],
+        user_id_type: Option<&str>,
+        lang: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<BatchGetOkrResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/okr/v1/okrs/batch_get");
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        for id in okr_ids {
+            api_req.query_params.add("okr_ids", *id);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = lang {
+            api_req.query_params.set("lang", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(BatchGetOkrResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── ProgressRecord resource ──
+
+pub struct ProgressRecordResource<'a> {
+    config: &'a Config,
+}
+
+impl ProgressRecordResource<'_> {
+    pub async fn create(
+        &self,
+        body: &serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateProgressRecordResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/okr/v1/progress_records");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateProgressRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn delete(&self, progress_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+        let path = format!("/open-apis/okr/v1/progress_records/{progress_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        Ok(EmptyResp {
+            api_resp,
+            code_error,
+        })
+    }
+
+    pub async fn get(
+        &self,
+        progress_id: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetProgressRecordResp> {
+        let path = format!("/open-apis/okr/v1/progress_records/{progress_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(GetProgressRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update(
+        &self,
+        progress_id: &str,
+        body: &serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<UpdateProgressRecordResp> {
+        let path = format!("/open-apis/okr/v1/progress_records/{progress_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UpdateProgressRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Review resource ──
+
+pub struct ReviewResource<'a> {
+    config: &'a Config,
+}
+
+impl ReviewResource<'_> {
+    pub async fn query(
+        &self,
+        user_ids: &[&str],
+        period_ids: Option<&[&str]>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<QueryReviewResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/okr/v1/reviews/query");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        for id in user_ids {
+            api_req.query_params.add("user_ids", *id);
+        }
+        if let Some(ids) = period_ids {
+            for id in ids {
+                api_req.query_params.add("period_ids", *id);
+            }
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryReviewResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct UserOkrResource<'a> {
@@ -154,11 +448,15 @@ pub struct UserOkrResource<'a> {
 }
 
 impl<'a> UserOkrResource<'a> {
+    #[allow(clippy::too_many_arguments)]
     pub async fn get(
         &self,
         user_id: &str,
         user_id_type: Option<&str>,
         period_ids: Option<Vec<&str>>,
+        offset: Option<&str>,
+        limit: Option<&str>,
+        lang: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetUserOkrResp> {
         let path = format!("/open-apis/okr/v1/users/{user_id}/okrs");
@@ -171,6 +469,15 @@ impl<'a> UserOkrResource<'a> {
             for id in ids {
                 api_req.query_params.add("period_ids", id);
             }
+        }
+        if let Some(v) = offset {
+            api_req.query_params.set("offset", v);
+        }
+        if let Some(v) = limit {
+            api_req.query_params.set("limit", v);
+        }
+        if let Some(v) = lang {
+            api_req.query_params.set("lang", v);
         }
         let (api_resp, raw) =
             transport::request_typed::<OkrListData>(self.config, &api_req, option).await?;
@@ -186,6 +493,11 @@ impl<'a> UserOkrResource<'a> {
 
 pub struct V1<'a> {
     pub period: PeriodResource<'a>,
+    pub period_rule: PeriodRuleResource<'a>,
+    pub image: ImageResource<'a>,
+    pub okr: OkrResource<'a>,
+    pub progress_record: ProgressRecordResource<'a>,
+    pub review: ReviewResource<'a>,
     pub user_okr: UserOkrResource<'a>,
 }
 
@@ -193,6 +505,11 @@ impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             period: PeriodResource { config },
+            period_rule: PeriodRuleResource { config },
+            image: ImageResource { config },
+            okr: OkrResource { config },
+            progress_record: ProgressRecordResource { config },
+            review: ReviewResource { config },
             user_okr: UserOkrResource { config },
         }
     }
