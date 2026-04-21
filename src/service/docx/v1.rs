@@ -348,6 +348,7 @@ impl_resp_v2!(
 impl_resp_v2!(CreateChatAnnouncementBlockChildrenResp, serde_json::Value);
 impl_resp_v2!(GetChatAnnouncementBlockChildrenResp, serde_json::Value);
 impl_resp_v2!(CreateDocumentBlockDescendantResp, serde_json::Value);
+impl_resp_v2!(ConvertDocumentResp, serde_json::Value);
 
 // ── Resources ──
 
@@ -383,6 +384,27 @@ impl<'a> DocumentResource<'a> {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
+        })
+    }
+
+    pub async fn convert(
+        &self,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ConvertDocumentResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/docx/v1/documents/blocks/convert",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ConvertDocumentResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 

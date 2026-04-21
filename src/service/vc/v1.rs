@@ -581,6 +581,49 @@ impl<'a> RoomConfigResource<'a> {
             data,
         })
     }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn query(
+        &self,
+        scope: i32,
+        country_id: Option<&str>,
+        district_id: Option<&str>,
+        building_id: Option<&str>,
+        floor_name: Option<&str>,
+        room_id: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<QueryRoomConfigResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/room_configs/query");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("scope", scope.to_string());
+        if let Some(v) = country_id {
+            api_req.query_params.set("country_id", v);
+        }
+        if let Some(v) = district_id {
+            api_req.query_params.set("district_id", v);
+        }
+        if let Some(v) = building_id {
+            api_req.query_params.set("building_id", v);
+        }
+        if let Some(v) = floor_name {
+            api_req.query_params.set("floor_name", v);
+        }
+        if let Some(v) = room_id {
+            api_req.query_params.set("room_id", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryRoomConfigResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct MeetingResource<'a> {
@@ -854,6 +897,7 @@ impl_resp_v2!(MgetRoomResp, serde_json::Value);
 impl_resp_v2!(SearchRoomResp, serde_json::Value);
 impl_resp_v2!(SetCheckboardAccessCodeRoomConfigResp, serde_json::Value);
 impl_resp_v2!(SetRoomAccessCodeRoomConfigResp, serde_json::Value);
+impl_resp_v2!(QueryRoomConfigResp, serde_json::Value);
 
 // ── Alert response types ──
 

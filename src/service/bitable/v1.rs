@@ -275,6 +275,86 @@ pub struct AppWorkflow {
     pub title: Option<String>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppTableForm {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shared: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shared_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shared_limit: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub submit_limit_once: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppTableFormField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppTableFormPatchedField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pre_field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Sort {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub desc: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Condition {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChildrenFilter {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conjunction: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditions: Option<Vec<Condition>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FilterInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conjunction: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditions: Option<Vec<Condition>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub children: Option<Vec<ChildrenFilter>>,
+}
+
 // ── Additional request body types ──
 
 /// Body for `app.copy`
@@ -333,6 +413,71 @@ pub struct CreateAppRoleMemberReqBody {
 pub struct UpdateWorkflowReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
+}
+
+/// Body for `app_dashboard.copy`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CopyAppDashboardReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+/// Body for `app_table_record.batch_get`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchGetRecordReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub record_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub with_shared_url: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub automatic_fields: Option<bool>,
+}
+
+/// Body for `app_table_record.search`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct SearchRecordReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub field_names: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sort: Option<Vec<Sort>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filter: Option<FilterInfo>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub automatic_fields: Option<bool>,
+}
+
+/// Body for `app_table_form.patch`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct PatchAppTableFormReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shared: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shared_limit: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub submit_limit_once: Option<bool>,
+}
+
+/// Body for `app_table_form_field.patch`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct PatchAppTableFormFieldReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pre_field_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
 }
 
 // ── Additional data types ──
@@ -519,6 +664,60 @@ pub struct DashboardListData {
     pub has_more: Option<bool>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CopyAppDashboardData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetRecordData {
+    #[serde(default)]
+    pub records: Vec<AppTableRecord>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub forbidden_record_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub absent_record_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchRecordData {
+    #[serde(default)]
+    pub items: Vec<AppTableRecord>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub form: Option<AppTableForm>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldListData {
+    #[serde(default)]
+    pub items: Vec<AppTableFormField>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldPatchData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field: Option<AppTableFormPatchedField>,
+}
+
 impl_resp!(GetAppResp, AppData);
 impl_resp!(UpdateAppResp, AppData);
 impl_resp!(CreateTableResp, TableData);
@@ -539,6 +738,13 @@ impl_resp!(BatchCreateRecordResp, BatchCreateRecordData);
 impl_resp!(BatchUpdateRecordResp, BatchUpdateRecordData);
 impl_resp!(BatchDeleteRecordResp, BatchDeleteRecordData);
 impl_resp!(ListDashboardResp, DashboardListData);
+impl_resp!(CopyAppDashboardResp, CopyAppDashboardData);
+impl_resp!(BatchGetRecordResp, BatchGetRecordData);
+impl_resp!(SearchRecordResp, SearchRecordData);
+impl_resp!(GetFormResp, FormData);
+impl_resp!(PatchFormResp, FormData);
+impl_resp!(ListFormFieldResp, FormFieldListData);
+impl_resp!(PatchFormFieldResp, FormFieldPatchData);
 
 // ── v2 helpers (Option<CodeError>, used for newer endpoints) ──
 
@@ -1249,6 +1455,65 @@ impl<'a> AppTableRecordResource<'a> {
             data: raw.data,
         })
     }
+
+    /// Batch-get records.
+    /// POST /open-apis/bitable/v1/apps/:app_token/tables/:table_id/records/batch_get
+    pub async fn batch_get(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        body: &BatchGetRecordReqBody,
+        option: &RequestOption,
+    ) -> Result<BatchGetRecordResp> {
+        let path =
+            format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_get");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<BatchGetRecordData>(self.config, &api_req, option).await?;
+        Ok(BatchGetRecordResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    /// Search records.
+    /// POST /open-apis/bitable/v1/apps/:app_token/tables/:table_id/records/search
+    #[allow(clippy::too_many_arguments)]
+    pub async fn search(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        body: &SearchRecordReqBody,
+        user_id_type: Option<&str>,
+        page_token: Option<&str>,
+        page_size: Option<i32>,
+        option: &RequestOption,
+    ) -> Result<SearchRecordResp> {
+        let path =
+            format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/search");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<SearchRecordData>(self.config, &api_req, option).await?;
+        Ok(SearchRecordResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
 }
 
 pub struct AppDashboardResource<'a> {
@@ -1256,6 +1521,28 @@ pub struct AppDashboardResource<'a> {
 }
 
 impl<'a> AppDashboardResource<'a> {
+    /// Copy a dashboard.
+    /// POST /open-apis/bitable/v1/apps/:app_token/dashboards/:block_id/copy
+    pub async fn copy(
+        &self,
+        app_token: &str,
+        block_id: &str,
+        body: &CopyAppDashboardReqBody,
+        option: &RequestOption,
+    ) -> Result<CopyAppDashboardResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/dashboards/{block_id}/copy");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<CopyAppDashboardData>(self.config, &api_req, option).await?;
+        Ok(CopyAppDashboardResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
     pub async fn list(
         &self,
         app_token: &str,
@@ -1577,6 +1864,125 @@ impl<'a> AppWorkflowResource<'a> {
     }
 }
 
+// ── AppTableFormResource ──
+
+pub struct AppTableFormResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AppTableFormResource<'a> {
+    /// Get form metadata.
+    /// GET /open-apis/bitable/v1/apps/:app_token/tables/:table_id/forms/:form_id
+    pub async fn get(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        form_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetFormResp> {
+        let path =
+            format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<FormData>(self.config, &api_req, option).await?;
+        Ok(GetFormResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    /// Patch form metadata.
+    /// PATCH /open-apis/bitable/v1/apps/:app_token/tables/:table_id/forms/:form_id
+    pub async fn patch(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        form_id: &str,
+        body: &PatchAppTableFormReqBody,
+        option: &RequestOption,
+    ) -> Result<PatchFormResp> {
+        let path =
+            format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<FormData>(self.config, &api_req, option).await?;
+        Ok(PatchFormResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+// ── AppTableFormFieldResource ──
+
+pub struct AppTableFormFieldResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AppTableFormFieldResource<'a> {
+    /// List form fields.
+    /// GET /open-apis/bitable/v1/apps/:app_token/tables/:table_id/forms/:form_id/fields
+    pub async fn list(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        form_id: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListFormFieldResp> {
+        let path = format!(
+            "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}/fields"
+        );
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<FormFieldListData>(self.config, &api_req, option).await?;
+        Ok(ListFormFieldResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    /// Patch a form field.
+    /// PATCH /open-apis/bitable/v1/apps/:app_token/tables/:table_id/forms/:form_id/fields/:field_id
+    pub async fn patch(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        form_id: &str,
+        field_id: &str,
+        body: &PatchAppTableFormFieldReqBody,
+        option: &RequestOption,
+    ) -> Result<PatchFormFieldResp> {
+        let path = format!(
+            "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}/fields/{field_id}"
+        );
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<FormFieldPatchData>(self.config, &api_req, option).await?;
+        Ok(PatchFormFieldResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
@@ -1589,6 +1995,8 @@ pub struct V1<'a> {
     pub role: AppRoleResource<'a>,
     pub role_member: AppRoleMemberResource<'a>,
     pub workflow: AppWorkflowResource<'a>,
+    pub form: AppTableFormResource<'a>,
+    pub form_field: AppTableFormFieldResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -1603,6 +2011,8 @@ impl<'a> V1<'a> {
             role: AppRoleResource { config },
             role_member: AppRoleMemberResource { config },
             workflow: AppWorkflowResource { config },
+            form: AppTableFormResource { config },
+            form_field: AppTableFormFieldResource { config },
         }
     }
 }

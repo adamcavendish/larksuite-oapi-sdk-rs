@@ -248,6 +248,7 @@ impl_resp_v2!(UpdateBadgeGrantResp, BadgeGrantData);
 impl_resp_v2!(ListAdminUserStatResp, serde_json::Value);
 impl_resp_v2!(ListAuditInfoResp, serde_json::Value);
 impl_resp_v2!(CreateBadgeImageResp, serde_json::Value);
+impl_resp_v2!(ListAdminDeptStatResp, serde_json::Value);
 
 // ── Resources ──
 
@@ -539,6 +540,55 @@ impl<'a> AdminDeptStatResource<'a> {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
+        })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn list(
+        &self,
+        department_id_type: &str,
+        start_date: &str,
+        end_date: &str,
+        department_id: &str,
+        contains_child_dept: bool,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        target_geo: Option<&str>,
+        with_product_version: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<ListAdminDeptStatResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/admin_dept_stats");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req
+            .query_params
+            .set("department_id_type", department_id_type);
+        api_req.query_params.set("start_date", start_date);
+        api_req.query_params.set("end_date", end_date);
+        api_req.query_params.set("department_id", department_id);
+        api_req
+            .query_params
+            .set("contains_child_dept", contains_child_dept.to_string());
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = target_geo {
+            api_req.query_params.set("target_geo", v);
+        }
+        if let Some(v) = with_product_version {
+            api_req
+                .query_params
+                .set("with_product_version", v.to_string());
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListAdminDeptStatResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 }

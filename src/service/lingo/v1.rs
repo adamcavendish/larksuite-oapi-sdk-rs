@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::transport;
 
 // ── Domain types ──
@@ -103,6 +103,37 @@ macro_rules! impl_resp {
     };
 }
 
+fn parse_v2<T>(api_resp: ApiResp, raw: RawResponse<T>) -> (ApiResp, Option<CodeError>, Option<T>) {
+    if raw.code_error.code != 0 {
+        (api_resp, Some(raw.code_error), None)
+    } else {
+        (api_resp, None, raw.data)
+    }
+}
+
+macro_rules! impl_resp_v2 {
+    ($name:ident, $data:ty) => {
+        #[derive(Debug, Clone)]
+        pub struct $name {
+            pub api_resp: ApiResp,
+            pub code_error: Option<CodeError>,
+            pub data: Option<$data>,
+        }
+        impl $name {
+            pub fn success(&self) -> bool {
+                self.code_error.as_ref().is_none_or(|e| e.code == 0)
+            }
+        }
+    };
+}
+
+#[derive(Debug, Clone)]
+pub struct DownloadResp {
+    pub api_resp: ApiResp,
+    pub file_name: Option<String>,
+    pub data: Vec<u8>,
+}
+
 #[derive(Debug, Clone)]
 pub struct EmptyResp {
     pub api_resp: ApiResp,
@@ -136,6 +167,14 @@ impl_resp!(UpdateEntityResp, EntityData);
 impl_resp!(GetEntityResp, EntityData);
 impl_resp!(ListEntityResp, EntityListData);
 impl_resp!(SearchEntityResp, EntityListData);
+
+impl_resp_v2!(HighlightEntityResp, serde_json::Value);
+impl_resp_v2!(MatchEntityResp, serde_json::Value);
+impl_resp_v2!(ListClassificationResp, serde_json::Value);
+impl_resp_v2!(CreateDraftResp, serde_json::Value);
+impl_resp_v2!(UpdateDraftResp, serde_json::Value);
+impl_resp_v2!(UploadFileResp, serde_json::Value);
+impl_resp_v2!(ListRepoResp, serde_json::Value);
 
 // ── Resources ──
 
@@ -316,18 +355,203 @@ impl<'a> EntityResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn highlight(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<HighlightEntityResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/entities/highlight");
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(HighlightEntityResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn match_(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<MatchEntityResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/entities/match");
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(MatchEntityResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct ClassificationResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> ClassificationResource<'a> {
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListClassificationResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/lingo/v1/classifications");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListClassificationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct DraftResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> DraftResource<'a> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateDraftResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/drafts");
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateDraftResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update(
+        &self,
+        draft_id: &str,
+        body: serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<UpdateDraftResp> {
+        let path = format!("/open-apis/lingo/v1/drafts/{draft_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UpdateDraftResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct FileResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> FileResource<'a> {
+    pub async fn download(&self, file_token: &str, option: &RequestOption) -> Result<DownloadResp> {
+        let path = format!("/open-apis/lingo/v1/files/{file_token}/download");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let mut opt = option.clone();
+        opt.file_download = true;
+        let api_resp = transport::request(self.config, &api_req, &opt).await?;
+        let file_name = api_resp.file_name_by_header();
+        let data = api_resp.raw_body.clone();
+        Ok(DownloadResp {
+            api_resp,
+            file_name,
+            data,
+        })
+    }
+
+    pub async fn upload(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UploadFileResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/files/upload");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UploadFileResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct RepoResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> RepoResource<'a> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListRepoResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/lingo/v1/repos");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListRepoResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 // ── Version struct ──
 
 pub struct V1<'a> {
     pub entity: EntityResource<'a>,
+    pub classification: ClassificationResource<'a>,
+    pub draft: DraftResource<'a>,
+    pub file: FileResource<'a>,
+    pub repo: RepoResource<'a>,
 }
 
 impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             entity: EntityResource { config },
+            classification: ClassificationResource { config },
+            draft: DraftResource { config },
+            file: FileResource { config },
+            repo: RepoResource { config },
         }
     }
 }

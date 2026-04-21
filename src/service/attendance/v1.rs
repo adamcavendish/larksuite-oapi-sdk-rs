@@ -778,6 +778,7 @@ impl_resp_v2!(PatchLeaveEmployExpireRecordResp, serde_json::Value);
 impl_resp_v2!(CreateUserApprovalResp, serde_json::Value);
 impl_resp_v2!(QueryUserApprovalResp, serde_json::Value);
 impl_resp_v2!(BatchCreateUserDailyShiftResp, serde_json::Value);
+impl_resp_v2!(BatchCreateTempUserDailyShiftResp, serde_json::Value);
 impl_resp_v2!(QueryUserDailyShiftResp, serde_json::Value);
 impl_resp_v2!(BatchCreateUserFlowResp, serde_json::Value);
 impl_resp_v2!(BatchDelUserFlowResp, serde_json::Value);
@@ -1358,6 +1359,29 @@ impl<'a> UserDailyShiftResource<'a> {
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(BatchCreateUserDailyShiftResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn batch_create_temp(
+        &self,
+        body: &serde_json::Value,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<BatchCreateTempUserDailyShiftResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_daily_shifts/batch_create_temp",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(BatchCreateTempUserDailyShiftResp {
             api_resp,
             code_error,
             data,
