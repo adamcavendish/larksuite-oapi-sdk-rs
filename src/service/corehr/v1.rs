@@ -1094,7 +1094,7 @@ impl<'a> CompensationStandardResource<'a> {
             http::Method::GET,
             "/open-apis/corehr/v1/compensation_standards/match",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
@@ -1828,7 +1828,7 @@ impl<'a> LeaveResource<'a> {
             http::Method::GET,
             "/open-apis/corehr/v1/leaves/calendar_by_scope",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
@@ -1947,7 +1947,7 @@ impl<'a> LeaveResource<'a> {
             http::Method::POST,
             "/open-apis/corehr/v1/leaves/work_calendar_date",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;

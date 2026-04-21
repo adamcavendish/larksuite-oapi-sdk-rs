@@ -2824,7 +2824,7 @@ pub struct TodoResource<'a> {
 impl TodoResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListTodoResp> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/todos");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
