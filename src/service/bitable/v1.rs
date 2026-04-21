@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::transport;
 
 // ── Domain types ──
@@ -193,6 +193,186 @@ pub struct BatchDeleteRecordReqBody {
     pub records: Option<Vec<String>>,
 }
 
+// ── Additional domain types ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppRoleTableRole {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table_perm: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_perm: Option<std::collections::HashMap<String, i32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allow_add_record: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allow_delete_record: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppRoleBlockRole {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_perm: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppRole {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table_roles: Option<Vec<AppRoleTableRole>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_roles: Option<Vec<AppRoleBlockRole>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppRoleMemberId {
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
+    pub type_: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppRoleMember {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_en_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppWorkflow {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub workflow_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+}
+
+// ── Additional request body types ──
+
+/// Body for `app.copy`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CopyAppReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub folder_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub without_content: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub time_zone: Option<String>,
+}
+
+/// Body for `app.create`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CreateAppReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub folder_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub time_zone: Option<String>,
+}
+
+/// Body for `app_role.create` / `app_role.update`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct AppRoleReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub role_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub table_roles: Option<Vec<AppRoleTableRole>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub block_roles: Option<Vec<AppRoleBlockRole>>,
+}
+
+/// Body for `app_role_member.batch_create` and `app_role_member.batch_delete`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchAppRoleMemberReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub member_list: Option<Vec<AppRoleMemberId>>,
+}
+
+/// Body for `app_role_member.create`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CreateAppRoleMemberReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub member_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "type")]
+    pub type_: Option<String>,
+}
+
+/// Body for `app_workflow.update`
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct UpdateWorkflowReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+
+// ── Additional data types ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppRoleData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role: Option<AppRole>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppRoleListData {
+    #[serde(default)]
+    pub items: Vec<AppRole>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppRoleMemberListData {
+    #[serde(default)]
+    pub items: Vec<AppRoleMember>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkflowListData {
+    #[serde(default)]
+    pub workflows: Vec<AppWorkflow>,
+}
+
 // ── Response wrappers ──
 
 macro_rules! impl_resp {
@@ -360,6 +540,53 @@ impl_resp!(BatchUpdateRecordResp, BatchUpdateRecordData);
 impl_resp!(BatchDeleteRecordResp, BatchDeleteRecordData);
 impl_resp!(ListDashboardResp, DashboardListData);
 
+// ── v2 helpers (Option<CodeError>, used for newer endpoints) ──
+
+fn parse_v2<T>(api_resp: ApiResp, raw: RawResponse<T>) -> (ApiResp, Option<CodeError>, Option<T>) {
+    if raw.code_error.code != 0 {
+        (api_resp, Some(raw.code_error), None)
+    } else {
+        (api_resp, None, raw.data)
+    }
+}
+
+macro_rules! impl_resp_v2 {
+    ($name:ident, $data:ty) => {
+        #[derive(Debug, Clone)]
+        pub struct $name {
+            pub api_resp: ApiResp,
+            pub code_error: Option<CodeError>,
+            pub data: Option<$data>,
+        }
+        impl $name {
+            pub fn success(&self) -> bool {
+                self.code_error.as_ref().is_none_or(|e| e.code == 0)
+            }
+        }
+    };
+}
+
+// app.copy / app.create
+impl_resp_v2!(CopyAppResp, serde_json::Value);
+impl_resp_v2!(CreateAppResp, serde_json::Value);
+
+// app_role
+impl_resp_v2!(CreateAppRoleResp, AppRoleData);
+impl_resp_v2!(DeleteAppRoleResp, ());
+impl_resp_v2!(ListAppRoleResp, AppRoleListData);
+impl_resp_v2!(UpdateAppRoleResp, AppRoleData);
+
+// app_role_member
+impl_resp_v2!(BatchCreateAppRoleMemberResp, ());
+impl_resp_v2!(BatchDeleteAppRoleMemberResp, ());
+impl_resp_v2!(CreateAppRoleMemberResp, ());
+impl_resp_v2!(DeleteAppRoleMemberResp, ());
+impl_resp_v2!(ListAppRoleMemberResp, AppRoleMemberListData);
+
+// app_workflow
+impl_resp_v2!(ListAppWorkflowResp, WorkflowListData);
+impl_resp_v2!(UpdateAppWorkflowResp, ());
+
 // ── Resources ──
 
 pub struct AppResource<'a> {
@@ -367,6 +594,48 @@ pub struct AppResource<'a> {
 }
 
 impl<'a> AppResource<'a> {
+    /// Copy a bitable app.
+    /// POST /open-apis/bitable/v1/apps/:app_token/copy
+    pub async fn copy(
+        &self,
+        app_token: &str,
+        body: &CopyAppReqBody,
+        option: &RequestOption,
+    ) -> Result<CopyAppResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/copy");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CopyAppResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// Create a new bitable app.
+    /// POST /open-apis/bitable/v1/apps
+    pub async fn create(
+        &self,
+        body: &CreateAppReqBody,
+        option: &RequestOption,
+    ) -> Result<CreateAppResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/bitable/v1/apps");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateAppResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     pub async fn get(&self, app_token: &str, option: &RequestOption) -> Result<GetAppResp> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1013,6 +1282,301 @@ impl<'a> AppDashboardResource<'a> {
     }
 }
 
+// ── AppRoleResource ──
+
+pub struct AppRoleResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AppRoleResource<'a> {
+    /// Create a custom role.
+    /// POST /open-apis/bitable/v1/apps/:app_token/roles
+    pub async fn create(
+        &self,
+        app_token: &str,
+        body: &AppRoleReqBody,
+        option: &RequestOption,
+    ) -> Result<CreateAppRoleResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<AppRoleData>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateAppRoleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// Delete a custom role.
+    /// DELETE /open-apis/bitable/v1/apps/:app_token/roles/:role_id
+    pub async fn delete(
+        &self,
+        app_token: &str,
+        role_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteAppRoleResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(DeleteAppRoleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// List custom roles.
+    /// GET /open-apis/bitable/v1/apps/:app_token/roles
+    pub async fn list(
+        &self,
+        app_token: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListAppRoleResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<AppRoleListData>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListAppRoleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// Update a custom role (full replacement).
+    /// PUT /open-apis/bitable/v1/apps/:app_token/roles/:role_id
+    pub async fn update(
+        &self,
+        app_token: &str,
+        role_id: &str,
+        body: &AppRoleReqBody,
+        option: &RequestOption,
+    ) -> Result<UpdateAppRoleResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<AppRoleData>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UpdateAppRoleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── AppRoleMemberResource ──
+
+pub struct AppRoleMemberResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AppRoleMemberResource<'a> {
+    /// Batch-create members for a custom role.
+    /// POST /open-apis/bitable/v1/apps/:app_token/roles/:role_id/members/batch_create
+    pub async fn batch_create(
+        &self,
+        app_token: &str,
+        role_id: &str,
+        body: &BatchAppRoleMemberReqBody,
+        option: &RequestOption,
+    ) -> Result<BatchCreateAppRoleMemberResp> {
+        let path =
+            format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/batch_create");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(BatchCreateAppRoleMemberResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// Batch-delete members from a custom role.
+    /// POST /open-apis/bitable/v1/apps/:app_token/roles/:role_id/members/batch_delete
+    pub async fn batch_delete(
+        &self,
+        app_token: &str,
+        role_id: &str,
+        body: &BatchAppRoleMemberReqBody,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteAppRoleMemberResp> {
+        let path =
+            format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/batch_delete");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(BatchDeleteAppRoleMemberResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// Add a single member to a custom role.
+    /// POST /open-apis/bitable/v1/apps/:app_token/roles/:role_id/members
+    pub async fn create(
+        &self,
+        app_token: &str,
+        role_id: &str,
+        body: &CreateAppRoleMemberReqBody,
+        member_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateAppRoleMemberResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = member_id_type {
+            api_req.query_params.set("member_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateAppRoleMemberResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// Remove a single member from a custom role.
+    /// DELETE /open-apis/bitable/v1/apps/:app_token/roles/:role_id/members/:member_id
+    pub async fn delete(
+        &self,
+        app_token: &str,
+        role_id: &str,
+        member_id: &str,
+        member_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<DeleteAppRoleMemberResp> {
+        let path =
+            format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/{member_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = member_id_type {
+            api_req.query_params.set("member_id_type", v);
+        }
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(DeleteAppRoleMemberResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// List members of a custom role.
+    /// GET /open-apis/bitable/v1/apps/:app_token/roles/:role_id/members
+    pub async fn list(
+        &self,
+        app_token: &str,
+        role_id: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListAppRoleMemberResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<AppRoleMemberListData>(self.config, &api_req, option)
+                .await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListAppRoleMemberResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── AppWorkflowResource ──
+
+pub struct AppWorkflowResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AppWorkflowResource<'a> {
+    /// List automation workflows for a bitable app.
+    /// GET /open-apis/bitable/v1/apps/:app_token/workflows
+    pub async fn list(
+        &self,
+        app_token: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListAppWorkflowResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/workflows");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<WorkflowListData>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListAppWorkflowResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// Update the enabled/disabled status of an automation workflow.
+    /// PUT /open-apis/bitable/v1/apps/:app_token/workflows/:workflow_id
+    pub async fn update(
+        &self,
+        app_token: &str,
+        workflow_id: &str,
+        body: &UpdateWorkflowReqBody,
+        option: &RequestOption,
+    ) -> Result<UpdateAppWorkflowResp> {
+        let path = format!("/open-apis/bitable/v1/apps/{app_token}/workflows/{workflow_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UpdateAppWorkflowResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
@@ -1022,6 +1586,9 @@ pub struct V1<'a> {
     pub field: AppTableFieldResource<'a>,
     pub record: AppTableRecordResource<'a>,
     pub dashboard: AppDashboardResource<'a>,
+    pub role: AppRoleResource<'a>,
+    pub role_member: AppRoleMemberResource<'a>,
+    pub workflow: AppWorkflowResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -1033,6 +1600,9 @@ impl<'a> V1<'a> {
             field: AppTableFieldResource { config },
             record: AppTableRecordResource { config },
             dashboard: AppDashboardResource { config },
+            role: AppRoleResource { config },
+            role_member: AppRoleMemberResource { config },
+            workflow: AppWorkflowResource { config },
         }
     }
 }

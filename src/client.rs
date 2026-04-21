@@ -121,6 +121,10 @@ impl Client {
         service::application::v1::V1::new(&self.config)
     }
 
+    pub fn application_v6(&self) -> service::application::v6::V6<'_> {
+        service::application::v6::V6::new(&self.config)
+    }
+
     pub fn attendance(&self) -> service::attendance::v1::V1<'_> {
         service::attendance::v1::V1::new(&self.config)
     }

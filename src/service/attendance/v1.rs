@@ -655,6 +655,865 @@ impl<'a> LeaveAccrualResource<'a> {
     }
 }
 
+// ── Helpers for v2 pattern (Option<CodeError>) ──
+
+fn parse_v2<T: for<'de> serde::Deserialize<'de>>(
+    api_resp: ApiResp,
+    raw: crate::resp::RawResponse<T>,
+) -> (ApiResp, Option<CodeError>, Option<T>) {
+    if raw.code_error.code != 0 {
+        (api_resp, Some(raw.code_error), None)
+    } else {
+        (api_resp, None, raw.data)
+    }
+}
+
+macro_rules! impl_resp_v2 {
+    ($name:ident, $data:ty) => {
+        pub struct $name {
+            pub api_resp: ApiResp,
+            pub code_error: Option<CodeError>,
+            pub data: Option<$data>,
+        }
+        impl $name {
+            pub fn success(&self) -> bool {
+                self.code_error.as_ref().is_none_or(|e| e.code == 0)
+            }
+        }
+    };
+}
+
+// ── Response types for new resources ──
+
+impl_resp_v2!(UploadReportArchiveRuleResp, serde_json::Value);
+impl_resp_v2!(UserStatsFieldsQueryArchiveRuleResp, serde_json::Value);
+impl_resp_v2!(PatchLeaveAccrualRecordResp, serde_json::Value);
+impl_resp_v2!(PatchLeaveEmployExpireRecordResp, serde_json::Value);
+impl_resp_v2!(CreateUserApprovalResp, serde_json::Value);
+impl_resp_v2!(QueryUserApprovalResp, serde_json::Value);
+impl_resp_v2!(BatchCreateUserDailyShiftResp, serde_json::Value);
+impl_resp_v2!(QueryUserDailyShiftResp, serde_json::Value);
+impl_resp_v2!(BatchCreateUserFlowResp, serde_json::Value);
+impl_resp_v2!(BatchDelUserFlowResp, serde_json::Value);
+impl_resp_v2!(GetUserFlowResp, serde_json::Value);
+impl_resp_v2!(QueryUserFlowResp, serde_json::Value);
+impl_resp_v2!(ModifyUserSettingResp, serde_json::Value);
+impl_resp_v2!(QueryUserSettingResp, serde_json::Value);
+impl_resp_v2!(QueryUserStatsDataResp, serde_json::Value);
+impl_resp_v2!(QueryUserStatsFieldResp, serde_json::Value);
+impl_resp_v2!(QueryUserStatsViewResp, serde_json::Value);
+impl_resp_v2!(UpdateUserStatsViewResp, serde_json::Value);
+impl_resp_v2!(QueryUserTaskResp, serde_json::Value);
+impl_resp_v2!(CreateUserTaskRemedyResp, serde_json::Value);
+impl_resp_v2!(QueryUserTaskRemedyResp, serde_json::Value);
+impl_resp_v2!(QueryUserAllowedRemedysUserTaskRemedyResp, serde_json::Value);
+
+// ── Request body types for new resources ──
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct UploadReportArchiveRuleReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub month: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub operator_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub archive_report_datas: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub archive_rule_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct UserStatsFieldsQueryArchiveRuleReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub month: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub archive_rule_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub operator_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct PatchLeaveAccrualRecordReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub leave_granting_record_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reason: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub time_offset: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expiration_date: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub section_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct PatchLeaveEmployExpireRecordReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_expiration_date: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_expiration_date: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub time_offset: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CreateUserApprovalReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_approval: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserApprovalReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_date_from: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_date_to: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_date_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_time_from: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_time_to: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchCreateUserDailyShiftReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_daily_shifts: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub operator_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserDailyShiftReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_date_from: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_date_to: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchCreateUserFlowReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flow_records: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchDelUserFlowReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub record_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserFlowReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_time_from: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_time_to: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct ModifyUserSettingReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_setting: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserSettingReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserStatsDataReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stats_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_date: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_date: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub need_history: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub current_group_only: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserStatsFieldReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stats_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_date: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_date: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserStatsViewReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stats_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct UpdateUserStatsViewReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserTaskReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_date_from: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_date_to: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub need_overtime_result: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CreateUserTaskRemedyReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub remedy_date: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub punch_no: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub work_type: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub remedy_time: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserTaskRemedyReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_time_from: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_time_to: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub check_date_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserAllowedRemedysReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub remedy_date: Option<i32>,
+}
+
+// ── New resource structs ──
+
+pub struct ArchiveRuleResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> ArchiveRuleResource<'a> {
+    pub async fn upload_report(
+        &self,
+        body: &UploadReportArchiveRuleReqBody,
+        option: &RequestOption,
+    ) -> Result<UploadReportArchiveRuleResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/archive_rule/upload_report",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UploadReportArchiveRuleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn user_stats_fields_query(
+        &self,
+        body: &UserStatsFieldsQueryArchiveRuleReqBody,
+        option: &RequestOption,
+    ) -> Result<UserStatsFieldsQueryArchiveRuleResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/archive_rule/user_stats_fields_query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UserStatsFieldsQueryArchiveRuleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct LeaveAccrualRecordResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> LeaveAccrualRecordResource<'a> {
+    pub async fn patch(
+        &self,
+        leave_id: &str,
+        body: &PatchLeaveAccrualRecordReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<PatchLeaveAccrualRecordResp> {
+        let path = format!("/open-apis/attendance/v1/leave_accrual_record/{leave_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(PatchLeaveAccrualRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct LeaveEmployExpireRecordResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> LeaveEmployExpireRecordResource<'a> {
+    pub async fn patch(
+        &self,
+        leave_id: &str,
+        body: &PatchLeaveEmployExpireRecordReqBody,
+        option: &RequestOption,
+    ) -> Result<PatchLeaveEmployExpireRecordResp> {
+        let path = format!("/open-apis/attendance/v1/leave_employ_expire_records/{leave_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(PatchLeaveEmployExpireRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct UserApprovalResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserApprovalResource<'a> {
+    pub async fn create(
+        &self,
+        body: &CreateUserApprovalReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<CreateUserApprovalResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_approvals",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateUserApprovalResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        body: &QueryUserApprovalReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserApprovalResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_approvals/query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserApprovalResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct UserDailyShiftResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserDailyShiftResource<'a> {
+    pub async fn batch_create(
+        &self,
+        body: &BatchCreateUserDailyShiftReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<BatchCreateUserDailyShiftResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_daily_shifts/batch_create",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(BatchCreateUserDailyShiftResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        body: &QueryUserDailyShiftReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserDailyShiftResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_daily_shifts/query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserDailyShiftResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct UserFlowResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserFlowResource<'a> {
+    pub async fn batch_create(
+        &self,
+        body: &BatchCreateUserFlowReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<BatchCreateUserFlowResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_flows/batch_create",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(BatchCreateUserFlowResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn batch_del(
+        &self,
+        body: &BatchDelUserFlowReqBody,
+        option: &RequestOption,
+    ) -> Result<BatchDelUserFlowResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_flows/batch_del",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(BatchDelUserFlowResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get(
+        &self,
+        user_flow_id: &str,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<GetUserFlowResp> {
+        let path = format!("/open-apis/attendance/v1/user_flows/{user_flow_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(GetUserFlowResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        body: &QueryUserFlowReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserFlowResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_flows/query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserFlowResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct UserSettingResource2<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserSettingResource2<'a> {
+    pub async fn modify(
+        &self,
+        body: &ModifyUserSettingReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<ModifyUserSettingResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_settings/modify",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ModifyUserSettingResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        body: &QueryUserSettingReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserSettingResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/attendance/v1/user_settings/query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserSettingResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct UserStatsDataResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserStatsDataResource<'a> {
+    pub async fn query(
+        &self,
+        body: &QueryUserStatsDataReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserStatsDataResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_stats_datas/query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserStatsDataResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct UserStatsFieldResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserStatsFieldResource<'a> {
+    pub async fn query(
+        &self,
+        body: &QueryUserStatsFieldReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserStatsFieldResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_stats_fields/query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserStatsFieldResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct UserStatsViewResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserStatsViewResource<'a> {
+    pub async fn query(
+        &self,
+        body: &QueryUserStatsViewReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserStatsViewResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_stats_views/query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserStatsViewResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update(
+        &self,
+        user_stats_view_id: &str,
+        body: &UpdateUserStatsViewReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<UpdateUserStatsViewResp> {
+        let path = format!("/open-apis/attendance/v1/user_stats_views/{user_stats_view_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UpdateUserStatsViewResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct UserTaskResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserTaskResource<'a> {
+    pub async fn query(
+        &self,
+        body: &QueryUserTaskReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserTaskResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_tasks/query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserTaskResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct UserTaskRemedyResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserTaskRemedyResource<'a> {
+    pub async fn create(
+        &self,
+        body: &CreateUserTaskRemedyReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<CreateUserTaskRemedyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_task_remedys",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateUserTaskRemedyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        body: &QueryUserTaskRemedyReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserTaskRemedyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_task_remedys/query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserTaskRemedyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query_user_allowed_remedys(
+        &self,
+        body: &QueryUserAllowedRemedysReqBody,
+        employee_type: &str,
+        option: &RequestOption,
+    ) -> Result<QueryUserAllowedRemedysUserTaskRemedyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/user_task_remedys/query_user_allowed_remedys",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("employee_type", employee_type);
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryUserAllowedRemedysUserTaskRemedyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
@@ -664,6 +1523,18 @@ pub struct V1<'a> {
     pub record: RecordResource<'a>,
     pub approval_info: ApprovalInfoResource<'a>,
     pub leave_accrual: LeaveAccrualResource<'a>,
+    pub archive_rule: ArchiveRuleResource<'a>,
+    pub leave_accrual_record: LeaveAccrualRecordResource<'a>,
+    pub leave_employ_expire_record: LeaveEmployExpireRecordResource<'a>,
+    pub user_approval: UserApprovalResource<'a>,
+    pub user_daily_shift: UserDailyShiftResource<'a>,
+    pub user_flow: UserFlowResource<'a>,
+    pub user_setting2: UserSettingResource2<'a>,
+    pub user_stats_data: UserStatsDataResource<'a>,
+    pub user_stats_field: UserStatsFieldResource<'a>,
+    pub user_stats_view: UserStatsViewResource<'a>,
+    pub user_task: UserTaskResource<'a>,
+    pub user_task_remedy: UserTaskRemedyResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -675,6 +1546,18 @@ impl<'a> V1<'a> {
             record: RecordResource { config },
             approval_info: ApprovalInfoResource { config },
             leave_accrual: LeaveAccrualResource { config },
+            archive_rule: ArchiveRuleResource { config },
+            leave_accrual_record: LeaveAccrualRecordResource { config },
+            leave_employ_expire_record: LeaveEmployExpireRecordResource { config },
+            user_approval: UserApprovalResource { config },
+            user_daily_shift: UserDailyShiftResource { config },
+            user_flow: UserFlowResource { config },
+            user_setting2: UserSettingResource2 { config },
+            user_stats_data: UserStatsDataResource { config },
+            user_stats_field: UserStatsFieldResource { config },
+            user_stats_view: UserStatsViewResource { config },
+            user_task: UserTaskResource { config },
+            user_task_remedy: UserTaskRemedyResource { config },
         }
     }
 }

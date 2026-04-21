@@ -291,6 +291,154 @@ pub struct CreateNotificationReqBody {
     pub notification: Option<Notification>,
 }
 
+// ── Additional domain types ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgentSkillRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub selected_operator: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_options: Option<Vec<i32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operand: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub category: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgentSkill {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub helpdesk_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rules: Option<Vec<AgentSkillRule>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_default: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_skill_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TicketCustomizedField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ticket_customized_field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub helpdesk_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub editable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_by: Option<TicketUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_by: Option<TicketUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dropdown_allow_multiple: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BotMessage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub msg_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub receiver_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub receive_type: Option<String>,
+}
+
+// ── Additional request body types ──
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CreateAgentSkillReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rules: Option<Vec<AgentSkillRule>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct PatchAgentSkillReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_skill: Option<AgentSkill>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct SubscribeEventReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub events: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct UnsubscribeEventReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub events: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CancelSendNotificationReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_recall: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct ExecuteSendNotificationReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub send_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct SubmitApproveNotificationReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct StartServiceTicketReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub human_service: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub appointed_agents: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub customized_info: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct ListTicketCustomizedFieldReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
+}
+
 // ── Response wrappers ──
 
 macro_rules! impl_resp {
@@ -395,6 +543,123 @@ pub struct GetNotificationData {
     pub approval_settings: Option<serde_json::Value>,
 }
 
+// ── Additional response data types ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateAgentSkillRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_skill_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetAgentSkillRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_skill: Option<AgentSkill>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListAgentSkillRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_skills: Option<Vec<AgentSkill>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListAgentSkillRuleRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rules: Option<Vec<AgentSkillRule>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateBotMessageRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchFaqRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub items: Option<Vec<Faq>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubmitApproveNotificationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_access: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct StartServiceTicketRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ticket_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CustomizedFieldsTicketRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_customized_fields: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ticket_customized_fields: Option<Vec<TicketCustomizedField>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetTicketCustomizedFieldRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ticket_customized_field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub helpdesk_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub editable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_by: Option<TicketUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_by: Option<TicketUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dropdown_allow_multiple: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListTicketCustomizedFieldRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub next_page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub items: Option<Vec<TicketCustomizedField>>,
+}
+
+// ── Download response ──
+
+#[derive(Debug, Clone)]
+pub struct DownloadResp {
+    pub api_resp: ApiResp,
+    pub file_name: Option<String>,
+    pub data: Vec<u8>,
+}
+
 impl_resp!(GetTicketResp, TicketData);
 impl_resp!(ListTicketResp, TicketListData);
 impl_resp!(ListTicketMessageResp, TicketMessageListData);
@@ -407,6 +672,26 @@ impl_resp!(GetFaqResp, FaqData);
 impl_resp!(ListFaqResp, FaqListData);
 impl_resp!(CreateNotificationResp, NotificationData);
 impl_resp!(GetNotificationResp, GetNotificationData);
+impl_resp!(CreateAgentSkillResp, CreateAgentSkillRespData);
+impl_resp!(GetAgentSkillResp, GetAgentSkillRespData);
+impl_resp!(ListAgentSkillResp, ListAgentSkillRespData);
+impl_resp!(ListAgentSkillRuleResp, ListAgentSkillRuleRespData);
+impl_resp!(CreateBotMessageResp, CreateBotMessageRespData);
+impl_resp!(SearchFaqResp, SearchFaqRespData);
+impl_resp!(
+    SubmitApproveNotificationResp,
+    SubmitApproveNotificationRespData
+);
+impl_resp!(StartServiceTicketResp, StartServiceTicketRespData);
+impl_resp!(CustomizedFieldsTicketResp, CustomizedFieldsTicketRespData);
+impl_resp!(
+    GetTicketCustomizedFieldResp,
+    GetTicketCustomizedFieldRespData
+);
+impl_resp!(
+    ListTicketCustomizedFieldResp,
+    ListTicketCustomizedFieldRespData
+);
 
 // ── Resources ──
 
@@ -519,6 +804,76 @@ impl<'a> TicketResource<'a> {
             code_error: raw.code_error,
         })
     }
+
+    pub async fn start_service(
+        &self,
+        body: &StartServiceTicketReqBody,
+        option: &RequestOption,
+    ) -> Result<StartServiceTicketResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/start_service");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<StartServiceTicketRespData>(self.config, &api_req, option)
+                .await?;
+        Ok(StartServiceTicketResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn customized_fields(
+        &self,
+        visible_only: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<CustomizedFieldsTicketResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/customized_fields",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = visible_only {
+            api_req.query_params.set("visible_only", v.to_string());
+        }
+        let (api_resp, raw) = transport::request_typed::<CustomizedFieldsTicketRespData>(
+            self.config,
+            &api_req,
+            option,
+        )
+        .await?;
+        Ok(CustomizedFieldsTicketResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn ticket_image(
+        &self,
+        ticket_id: &str,
+        msg_id: &str,
+        index: Option<i32>,
+        option: &RequestOption,
+    ) -> Result<DownloadResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/ticket_images");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("ticket_id", ticket_id);
+        api_req.query_params.set("msg_id", msg_id);
+        if let Some(v) = index {
+            api_req.query_params.set("index", v.to_string());
+        }
+        let mut opt = option.clone();
+        opt.file_download = true;
+        let api_resp = transport::request(self.config, &api_req, &opt).await?;
+        let file_name = api_resp.file_name_by_header();
+        let data = api_resp.raw_body.clone();
+        Ok(DownloadResp {
+            api_resp,
+            file_name,
+            data,
+        })
+    }
 }
 
 pub struct TicketMessageResource<'a> {
@@ -575,6 +930,32 @@ impl<'a> TicketMessageResource<'a> {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
+        })
+    }
+
+    pub async fn image(
+        &self,
+        ticket_id: &str,
+        msg_id: &str,
+        index: Option<i32>,
+        option: &RequestOption,
+    ) -> Result<DownloadResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/ticket_images");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.query_params.set("ticket_id", ticket_id);
+        api_req.query_params.set("msg_id", msg_id);
+        if let Some(v) = index {
+            api_req.query_params.set("index", v.to_string());
+        }
+        let mut opt = option.clone();
+        opt.file_download = true;
+        let api_resp = transport::request(self.config, &api_req, &opt).await?;
+        let file_name = api_resp.file_name_by_header();
+        let data = api_resp.raw_body.clone();
+        Ok(DownloadResp {
+            api_resp,
+            file_name,
+            data,
         })
     }
 }
@@ -780,6 +1161,58 @@ impl<'a> FaqResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn image(
+        &self,
+        id: &str,
+        image_key: &str,
+        option: &RequestOption,
+    ) -> Result<DownloadResp> {
+        let path = format!("/open-apis/helpdesk/v1/faqs/{id}/image/{image_key}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let mut opt = option.clone();
+        opt.file_download = true;
+        let api_resp = transport::request(self.config, &api_req, &opt).await?;
+        let file_name = api_resp.file_name_by_header();
+        let data = api_resp.raw_body.clone();
+        Ok(DownloadResp {
+            api_resp,
+            file_name,
+            data,
+        })
+    }
+
+    pub async fn search(
+        &self,
+        query: Option<&str>,
+        base64: Option<&str>,
+        page_token: Option<&str>,
+        page_size: Option<i32>,
+        option: &RequestOption,
+    ) -> Result<SearchFaqResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/faqs/search");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = query {
+            api_req.query_params.set("query", v);
+        }
+        if let Some(v) = base64 {
+            api_req.query_params.set("base64", v);
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<SearchFaqRespData>(self.config, &api_req, option).await?;
+        Ok(SearchFaqResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
 }
 
 pub struct NotificationResource<'a> {
@@ -876,6 +1309,425 @@ impl<'a> NotificationResource<'a> {
             code_error: raw.code_error,
         })
     }
+
+    pub async fn cancel_approve(
+        &self,
+        notification_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel_approve");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn cancel_send(
+        &self,
+        notification_id: &str,
+        body: &CancelSendNotificationReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel_send");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn execute_send(
+        &self,
+        notification_id: &str,
+        body: &ExecuteSendNotificationReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/execute_send");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn preview(
+        &self,
+        notification_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/preview");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        notification_id: &str,
+        body: &CreateNotificationReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn submit_approve_v2(
+        &self,
+        notification_id: &str,
+        body: &SubmitApproveNotificationReqBody,
+        option: &RequestOption,
+    ) -> Result<SubmitApproveNotificationResp> {
+        let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/submit_approve");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) = transport::request_typed::<SubmitApproveNotificationRespData>(
+            self.config,
+            &api_req,
+            option,
+        )
+        .await?;
+        Ok(SubmitApproveNotificationResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+// ── AgentSkill resource ──
+
+pub struct AgentSkillResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AgentSkillResource<'a> {
+    pub async fn create(
+        &self,
+        body: &CreateAgentSkillReqBody,
+        option: &RequestOption,
+    ) -> Result<CreateAgentSkillResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/agent_skills");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<CreateAgentSkillRespData>(self.config, &api_req, option)
+                .await?;
+        Ok(CreateAgentSkillResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn delete(&self, agent_skill_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+        let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn get(
+        &self,
+        agent_skill_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetAgentSkillResp> {
+        let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<GetAgentSkillRespData>(self.config, &api_req, option)
+                .await?;
+        Ok(GetAgentSkillResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn list(&self, option: &RequestOption) -> Result<ListAgentSkillResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/agent_skills");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<ListAgentSkillRespData>(self.config, &api_req, option)
+                .await?;
+        Ok(ListAgentSkillResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        agent_skill_id: &str,
+        body: &PatchAgentSkillReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+}
+
+// ── AgentSkillRule resource ──
+
+pub struct AgentSkillRuleResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AgentSkillRuleResource<'a> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListAgentSkillRuleResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/agent_skill_rules",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<ListAgentSkillRuleRespData>(self.config, &api_req, option)
+                .await?;
+        Ok(ListAgentSkillRuleResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+// ── BotMessage resource ──
+
+pub struct BotMessageResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> BotMessageResource<'a> {
+    pub async fn create(
+        &self,
+        body: &BotMessage,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateBotMessageResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/message");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<CreateBotMessageRespData>(self.config, &api_req, option)
+                .await?;
+        Ok(CreateBotMessageResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+// ── Event resource ──
+
+pub struct EventResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> EventResource<'a> {
+    pub async fn subscribe(
+        &self,
+        body: &SubscribeEventReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/events/subscribe",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn unsubscribe(
+        &self,
+        body: &UnsubscribeEventReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/events/unsubscribe",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+}
+
+// ── TicketCustomizedField resource ──
+
+pub struct TicketCustomizedFieldResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> TicketCustomizedFieldResource<'a> {
+    pub async fn create(
+        &self,
+        body: &TicketCustomizedField,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/ticket_customized_fields",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        ticket_customized_field_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path =
+            format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn get(
+        &self,
+        ticket_customized_field_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetTicketCustomizedFieldResp> {
+        let path =
+            format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) = transport::request_typed::<GetTicketCustomizedFieldRespData>(
+            self.config,
+            &api_req,
+            option,
+        )
+        .await?;
+        Ok(GetTicketCustomizedFieldResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        page_token: Option<&str>,
+        page_size: Option<i32>,
+        body: Option<&ListTicketCustomizedFieldReqBody>,
+        option: &RequestOption,
+    ) -> Result<ListTicketCustomizedFieldResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/ticket_customized_fields",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(b) = body {
+            api_req.body = Some(ReqBody::json(b)?);
+        }
+        let (api_resp, raw) = transport::request_typed::<ListTicketCustomizedFieldRespData>(
+            self.config,
+            &api_req,
+            option,
+        )
+        .await?;
+        Ok(ListTicketCustomizedFieldResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        ticket_customized_field_id: &str,
+        body: &TicketCustomizedField,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path =
+            format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
 }
 
 // ── Version struct ──
@@ -884,9 +1736,14 @@ pub struct V1<'a> {
     pub ticket: TicketResource<'a>,
     pub ticket_message: TicketMessageResource<'a>,
     pub agent: AgentResource<'a>,
+    pub agent_skill: AgentSkillResource<'a>,
+    pub agent_skill_rule: AgentSkillRuleResource<'a>,
+    pub bot_message: BotMessageResource<'a>,
     pub category: CategoryResource<'a>,
+    pub event: EventResource<'a>,
     pub faq: FaqResource<'a>,
     pub notification: NotificationResource<'a>,
+    pub ticket_customized_field: TicketCustomizedFieldResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -895,9 +1752,14 @@ impl<'a> V1<'a> {
             ticket: TicketResource { config },
             ticket_message: TicketMessageResource { config },
             agent: AgentResource { config },
+            agent_skill: AgentSkillResource { config },
+            agent_skill_rule: AgentSkillRuleResource { config },
+            bot_message: BotMessageResource { config },
             category: CategoryResource { config },
+            event: EventResource { config },
             faq: FaqResource { config },
             notification: NotificationResource { config },
+            ticket_customized_field: TicketCustomizedFieldResource { config },
         }
     }
 }
