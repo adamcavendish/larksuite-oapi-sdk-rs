@@ -332,6 +332,10 @@ impl Client {
         service::apaas::v1::V1::new(&self.config)
     }
 
+    pub fn base_v2(&self) -> service::base::v2::V2<'_> {
+        service::base::v2::V2::new(&self.config)
+    }
+
     pub fn block(&self) -> service::block::v1::V1<'_> {
         service::block::v1::V1::new(&self.config)
     }
@@ -346,6 +350,10 @@ impl Client {
 
     pub fn event(&self) -> service::event::v1::V1<'_> {
         service::event::v1::V1::new(&self.config)
+    }
+
+    pub fn ext(&self) -> service::ext::ExtService<'_> {
+        service::ext::ExtService::new(&self.config)
     }
 
     pub async fn do_req(&self, api_req: &ApiReq, option: &RequestOption) -> Result<ApiResp> {
