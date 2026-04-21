@@ -11,7 +11,10 @@ async fn transport_rejects_empty_app_id() {
     let config = Config::new("", "secret");
     let client = Client::builder("", "secret").build();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
-    let err = client.do_req(&api_req, &default_option()).await.unwrap_err();
+    let err = client
+        .do_req(&api_req, &default_option())
+        .await
+        .unwrap_err();
     matches!(err, Error::IllegalParam(_));
     drop(config);
 }
@@ -20,7 +23,10 @@ async fn transport_rejects_empty_app_id() {
 async fn transport_rejects_empty_app_secret() {
     let client = Client::builder("app_id", "").build();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
-    let err = client.do_req(&api_req, &default_option()).await.unwrap_err();
+    let err = client
+        .do_req(&api_req, &default_option())
+        .await
+        .unwrap_err();
     assert!(matches!(err, Error::IllegalParam(_)));
 }
 
@@ -28,13 +34,14 @@ async fn transport_rejects_empty_app_secret() {
 async fn transport_rejects_marketplace_missing_tenant_key() {
     use larksuite_oapi_sdk_rs::constants::AccessTokenType;
 
-    let client = Client::builder("app_id", "secret")
-        .marketplace()
-        .build();
+    let client = Client::builder("app_id", "secret").marketplace().build();
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
 
-    let err = client.do_req(&api_req, &default_option()).await.unwrap_err();
+    let err = client
+        .do_req(&api_req, &default_option())
+        .await
+        .unwrap_err();
     assert!(matches!(err, Error::IllegalParam(_)));
 }
 

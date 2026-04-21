@@ -1,4 +1,6 @@
-use larksuite_oapi_sdk_rs::crypto::{event_decrypt, verify_signature_sha1, verify_signature_sha256};
+use larksuite_oapi_sdk_rs::crypto::{
+    event_decrypt, verify_signature_sha1, verify_signature_sha256,
+};
 
 #[test]
 fn verify_signature_sha256_correct() {
@@ -18,7 +20,9 @@ fn verify_signature_sha256_correct() {
     hasher.update(content.as_bytes());
     let expected = hex::encode(hasher.finalize());
 
-    assert!(verify_signature_sha256(timestamp, nonce, key, body, &expected));
+    assert!(verify_signature_sha256(
+        timestamp, nonce, key, body, &expected
+    ));
 }
 
 #[test]
@@ -65,7 +69,9 @@ fn verify_signature_sha1_correct() {
     hasher.update(content.as_bytes());
     let expected = hex::encode(hasher.finalize());
 
-    assert!(verify_signature_sha1(timestamp, nonce, key, body, &expected));
+    assert!(verify_signature_sha1(
+        timestamp, nonce, key, body, &expected
+    ));
 }
 
 #[test]
