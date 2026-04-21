@@ -444,7 +444,7 @@ impl<'a> TaskResource<'a> {
         option: &RequestOption,
     ) -> Result<ListTaskResp> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v1/tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }

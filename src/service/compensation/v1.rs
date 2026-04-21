@@ -141,7 +141,7 @@ impl ArchiveResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateArchiveResp> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/compensation/v1/archives");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -162,7 +162,7 @@ impl ArchiveResource<'_> {
             http::Method::POST,
             "/open-apis/compensation/v1/archives/query",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;

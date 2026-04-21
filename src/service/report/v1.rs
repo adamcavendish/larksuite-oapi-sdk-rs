@@ -191,7 +191,7 @@ impl<'a> TaskResource<'a> {
         option: &RequestOption,
     ) -> Result<QueryTaskResp> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/report/v1/tasks/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }

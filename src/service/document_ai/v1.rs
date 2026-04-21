@@ -524,7 +524,7 @@ impl<'a> HealthCertificateResource<'a> {
             http::Method::POST,
             "/open-apis/document_ai/v1/health_certificate/recognize",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<HealthCertificateData>(self.config, &api_req, option)
@@ -608,7 +608,7 @@ impl<'a> VehicleInvoiceResource<'a> {
             http::Method::POST,
             "/open-apis/document_ai/v1/vehicle_invoice/recognize",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<VehicleInvoiceData>(self.config, &api_req, option).await?;

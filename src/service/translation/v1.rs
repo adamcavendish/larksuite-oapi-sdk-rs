@@ -86,7 +86,7 @@ impl<'a> TextResource<'a> {
             http::Method::POST,
             "/open-apis/translation/v1/text/translate",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TranslateData>(self.config, &api_req, option).await?;
