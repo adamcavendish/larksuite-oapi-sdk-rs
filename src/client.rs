@@ -176,6 +176,10 @@ impl Client {
         service::task::v1::V1::new(&self.config)
     }
 
+    pub fn task_v2(&self) -> service::task::v2::V2<'_> {
+        service::task::v2::V2::new(&self.config)
+    }
+
     pub fn tenant(&self) -> service::tenant::v2::V2<'_> {
         service::tenant::v2::V2::new(&self.config)
     }
