@@ -289,9 +289,13 @@ pub struct V2<'a> {
     pub probation_assessment: ProbationAssessmentV2Resource<'a>,
     pub process: ProcessV2Resource<'a>,
     pub process_approver: ProcessApproverV2Resource<'a>,
+    pub process_cc: ProcessCcV2Resource<'a>,
     pub process_extra: ProcessExtraV2Resource<'a>,
     pub process_form_variable_data: ProcessFormVariableDataV2Resource<'a>,
+    pub process_node: ProcessNodeV2Resource<'a>,
+    pub process_status: ProcessStatusV2Resource<'a>,
     pub process_transfer: ProcessTransferV2Resource<'a>,
+    pub process_comment_info: ProcessCommentInfoV2Resource<'a>,
     pub process_revoke: ProcessRevokeV2Resource<'a>,
     pub process_withdraw: ProcessWithdrawV2Resource<'a>,
     pub report_detail_row: ReportDetailRowV2Resource<'a>,
@@ -342,9 +346,13 @@ impl<'a> V2<'a> {
             probation_assessment: ProbationAssessmentV2Resource { config },
             process: ProcessV2Resource { config },
             process_approver: ProcessApproverV2Resource { config },
+            process_cc: ProcessCcV2Resource { config },
             process_extra: ProcessExtraV2Resource { config },
             process_form_variable_data: ProcessFormVariableDataV2Resource { config },
+            process_node: ProcessNodeV2Resource { config },
+            process_status: ProcessStatusV2Resource { config },
             process_transfer: ProcessTransferV2Resource { config },
+            process_comment_info: ProcessCommentInfoV2Resource { config },
             process_revoke: ProcessRevokeV2Resource { config },
             process_withdraw: ProcessWithdrawV2Resource { config },
             report_detail_row: ReportDetailRowV2Resource { config },
@@ -2137,6 +2145,42 @@ impl ProcessTransferV2Resource<'_> {
         })
     }
 }
+
+// ── ProcessCc resource (placeholder — no methods in Go SDK) ───────────────────
+
+pub struct ProcessCcV2Resource<'a> {
+    #[allow(dead_code)]
+    config: &'a Config,
+}
+
+impl ProcessCcV2Resource<'_> {}
+
+// ── ProcessNode resource (placeholder — no methods in Go SDK) ─────────────────
+
+pub struct ProcessNodeV2Resource<'a> {
+    #[allow(dead_code)]
+    config: &'a Config,
+}
+
+impl ProcessNodeV2Resource<'_> {}
+
+// ── ProcessStatus resource (placeholder — no methods in Go SDK) ───────────────
+
+pub struct ProcessStatusV2Resource<'a> {
+    #[allow(dead_code)]
+    config: &'a Config,
+}
+
+impl ProcessStatusV2Resource<'_> {}
+
+// ── ProcessCommentInfo resource (placeholder — no methods in Go SDK) ──────────
+
+pub struct ProcessCommentInfoV2Resource<'a> {
+    #[allow(dead_code)]
+    config: &'a Config,
+}
+
+impl ProcessCommentInfoV2Resource<'_> {}
 
 // ── ProcessRevoke resource ────────────────────────────────────────────────────
 
