@@ -1897,6 +1897,7 @@ macro_rules! impl_resp_v2 {
 }
 
 impl_resp_v2!(GetEmployeeResp, serde_json::Value);
+impl_resp_v2!(GetByApplicationEmployeeResp, serde_json::Value);
 impl_resp_v2!(PatchEmployeeResp, serde_json::Value);
 impl_resp_v2!(ListEvaluationResp, serde_json::Value);
 impl_resp_v2!(ListNoteResp, serde_json::Value);
@@ -1913,6 +1914,7 @@ impl_resp_v2!(ListJobTypeResp, serde_json::Value);
 impl_resp_v2!(ListJobProcessResp, serde_json::Value);
 impl_resp_v2!(ListLocationResp, serde_json::Value);
 impl_resp_v2!(ListRoleResp, serde_json::Value);
+impl_resp_v2!(GetRoleResp, serde_json::Value);
 impl_resp_v2!(ListSubjectResp, serde_json::Value);
 impl_resp_v2!(ListTalentFolderResp, serde_json::Value);
 impl_resp_v2!(ListTerminationReasonResp, serde_json::Value);
@@ -1923,9 +1925,11 @@ impl_resp_v2!(GetWebsiteJobPostResp, serde_json::Value);
 impl_resp_v2!(ListInterviewRecordResp, serde_json::Value);
 impl_resp_v2!(GetInterviewRecordResp, serde_json::Value);
 impl_resp_v2!(ListInterviewerResp, serde_json::Value);
+impl_resp_v2!(PatchInterviewerResp, serde_json::Value);
 impl_resp_v2!(CreateExternalApplicationResp, serde_json::Value);
 impl_resp_v2!(UpdateExternalApplicationResp, serde_json::Value);
 impl_resp_v2!(DeleteExternalApplicationResp, ());
+impl_resp_v2!(ListExternalApplicationResp, serde_json::Value);
 impl_resp_v2!(CreateExternalOfferResp, serde_json::Value);
 impl_resp_v2!(UpdateExternalOfferResp, serde_json::Value);
 impl_resp_v2!(DeleteExternalOfferResp, ());
@@ -1955,6 +1959,7 @@ impl_resp_v2!(GetDetailApplicationResp, serde_json::Value);
 impl_resp_v2!(RecoverApplicationResp, serde_json::Value);
 impl_resp_v2!(TransferOnboardApplicationResp, serde_json::Value);
 impl_resp_v2!(BatchQueryBackgroundCheckOrderResp, serde_json::Value);
+impl_resp_v2!(ListBackgroundCheckOrderResp, serde_json::Value);
 impl_resp_v2!(SearchDiversityInclusionResp, serde_json::Value);
 impl_resp_v2!(BatchDeleteEcoAccountCustomFieldResp, serde_json::Value);
 impl_resp_v2!(BatchUpdateEcoAccountCustomFieldResp, serde_json::Value);
@@ -2102,6 +2107,25 @@ impl EmployeeResource<'_> {
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
         Ok(PatchEmployeeResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get_by_application(
+        &self,
+        option: &RequestOption,
+    ) -> Result<GetByApplicationEmployeeResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/employees/get_by_application",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetByApplicationEmployeeResp {
             api_resp,
             code_error,
             data,
@@ -2395,7 +2419,38 @@ impl LocationResource<'_> {
         })
     }
 }
-simple_list_resource!(RoleResource, ListRoleResp, "/open-apis/hire/v1/roles");
+pub struct RoleResource<'a> {
+    config: &'a Config,
+}
+
+impl RoleResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListRoleResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/roles");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListRoleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get(&self, role_id: &str, option: &RequestOption) -> Result<GetRoleResp> {
+        let path = format!("/open-apis/hire/v1/roles/{role_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetRoleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
 simple_list_resource!(
     SubjectResource,
     ListSubjectResp,
@@ -2545,6 +2600,26 @@ impl InterviewerResource<'_> {
             data,
         })
     }
+
+    pub async fn patch(
+        &self,
+        interviewer_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PatchInterviewerResp> {
+        let path = format!("/open-apis/hire/v1/interviewers/{interviewer_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(PatchInterviewerResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 // ── External resources (CRUD) ──
@@ -2625,6 +2700,24 @@ external_crud_resource!(
     DeleteExternalApplicationResp,
     external_application_id
 );
+
+impl ExternalApplicationResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListExternalApplicationResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/external_applications",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListExternalApplicationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
 
 external_crud_resource!(
     ExternalOfferResource,
@@ -3020,6 +3113,22 @@ impl BackgroundCheckOrderResource<'_> {
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
         Ok(BatchQueryBackgroundCheckOrderResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(&self, option: &RequestOption) -> Result<ListBackgroundCheckOrderResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/background_check_orders",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListBackgroundCheckOrderResp {
             api_resp,
             code_error,
             data,

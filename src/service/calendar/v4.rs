@@ -1640,7 +1640,7 @@ impl<'a> ExchangeBindingResource<'a> {
             http::Method::POST,
             "/open-apis/calendar/v4/exchange_bindings",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
@@ -1662,7 +1662,7 @@ impl<'a> ExchangeBindingResource<'a> {
     ) -> Result<GetExchangeBindingResp> {
         let path = format!("/open-apis/calendar/v4/exchange_bindings/{exchange_binding_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
@@ -1682,7 +1682,7 @@ impl<'a> ExchangeBindingResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/calendar/v4/exchange_bindings/{exchange_binding_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
