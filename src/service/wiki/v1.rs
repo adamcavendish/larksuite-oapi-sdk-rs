@@ -66,7 +66,7 @@ impl NodeV1Resource<'_> {
         option: &RequestOption,
     ) -> Result<SearchNodeV1Resp> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/wiki/v1/nodes/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<NodeV1ListData>(self.config, &api_req, option).await?;

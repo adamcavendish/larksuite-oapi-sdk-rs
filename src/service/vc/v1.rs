@@ -661,7 +661,7 @@ impl<'a> MeetingResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/invite");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
@@ -683,7 +683,7 @@ impl<'a> MeetingResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/kickout");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
@@ -721,7 +721,7 @@ impl<'a> MeetingResource<'a> {
     pub async fn end(&self, meeting_id: &str, option: &RequestOption) -> Result<EmptyResp> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/end");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {

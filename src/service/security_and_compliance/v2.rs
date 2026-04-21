@@ -198,7 +198,7 @@ impl DeviceRecordV2Resource<'_> {
             http::Method::GET,
             "/open-apis/security_and_compliance/v2/device_records/mine",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<DeviceRecordListData>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse(api_resp, raw)();

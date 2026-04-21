@@ -174,7 +174,7 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<ListAppResp> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/apaas/v1/apps");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
@@ -209,7 +209,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
     ) -> Result<AuditLogListResp> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/audit_log/audit_log_list");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(b) = body {
             api_req.body = Some(ReqBody::json(b)?);
         }
@@ -235,7 +235,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
             "/open-apis/apaas/v1/applications/{namespace}/audit_log/data_change_log_detail"
         );
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(b) = body {
             api_req.body = Some(ReqBody::json(b)?);
         }
@@ -260,7 +260,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
         let path =
             format!("/open-apis/apaas/v1/applications/{namespace}/audit_log/data_change_logs_list");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(b) = body {
             api_req.body = Some(ReqBody::json(b)?);
         }
@@ -284,7 +284,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
     ) -> Result<GetAuditLogResp> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/audit_log");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(b) = body {
             api_req.body = Some(ReqBody::json(b)?);
         }
@@ -947,7 +947,7 @@ impl<'a> SeatActivityResource<'a> {
         option: &RequestOption,
     ) -> Result<ListSeatActivityResp> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/apaas/v1/seat_activities");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
@@ -980,7 +980,7 @@ impl<'a> SeatAssignmentResource<'a> {
         option: &RequestOption,
     ) -> Result<ListSeatAssignmentResp> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/apaas/v1/seat_assignments");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
@@ -1148,7 +1148,7 @@ impl<'a> WorkspaceResource<'a> {
     ) -> Result<SqlCommandsWorkspaceResp> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/sql_commands");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1178,7 +1178,7 @@ impl<'a> WorkspaceEnumResource<'a> {
     ) -> Result<EnumGetWorkspaceEnumResp> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/enums/{enum_name}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw);
@@ -1200,7 +1200,7 @@ impl<'a> WorkspaceEnumResource<'a> {
     ) -> Result<ListWorkspaceEnumResp> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/enums");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
@@ -1236,7 +1236,7 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<ListWorkspaceTableResp> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
@@ -1266,7 +1266,7 @@ impl<'a> WorkspaceTableResource<'a> {
             "/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records_batch_update"
         );
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1290,7 +1290,7 @@ impl<'a> WorkspaceTableResource<'a> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw);
@@ -1314,7 +1314,7 @@ impl<'a> WorkspaceTableResource<'a> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
@@ -1343,7 +1343,7 @@ impl<'a> WorkspaceTableResource<'a> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1367,7 +1367,7 @@ impl<'a> WorkspaceTableResource<'a> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1389,7 +1389,7 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<TableGetWorkspaceTableResp> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw);
@@ -1420,7 +1420,7 @@ impl<'a> WorkspaceViewResource<'a> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/views/{view_name}/records");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
