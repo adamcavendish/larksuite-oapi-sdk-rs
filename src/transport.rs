@@ -1,4 +1,5 @@
 use http::header::{CONTENT_TYPE, HeaderValue, USER_AGENT as UA_HEADER};
+use tracing::Instrument;
 
 use crate::config::Config;
 use crate::constants::*;
@@ -12,18 +13,20 @@ pub(crate) async fn request(
     api_req: &ApiReq,
     option: &RequestOption,
 ) -> Result<ApiResp> {
-    let _span = tracing::info_span!(
+    let span = tracing::info_span!(
         "lark.request",
         method = %api_req.http_method,
         path = %api_req.api_path,
-    )
-    .entered();
+    );
 
-    validate(config, api_req, option)?;
+    let token_type = span.in_scope(|| {
+        validate(config, api_req, option)?;
+        Ok::<_, Error>(determine_token_type(config, api_req, option))
+    })?;
 
-    let token_type = determine_token_type(config, api_req, option);
-
-    do_request(config, api_req, option, token_type).await
+    do_request(config, api_req, option, token_type)
+        .instrument(span)
+        .await
 }
 
 pub(crate) async fn request_typed<T: for<'de> serde::Deserialize<'de>>(

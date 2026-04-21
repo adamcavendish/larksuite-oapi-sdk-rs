@@ -1324,6 +1324,705 @@ impl<'a> OfferSchemaResource<'a> {
     }
 }
 
+// ── Helpers for newer resources (use Option<CodeError> pattern) ──
+
+fn parse_v2<T: for<'de> serde::Deserialize<'de>>(
+    api_resp: ApiResp,
+    raw: crate::resp::RawResponse<T>,
+) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
+    move || {
+        let code_error = if raw.code_error.code != 0 {
+            Some(raw.code_error)
+        } else {
+            None
+        };
+        (api_resp, code_error, raw.data)
+    }
+}
+
+macro_rules! impl_resp_v2 {
+    ($name:ident, $data:ty) => {
+        pub struct $name {
+            pub api_resp: ApiResp,
+            pub code_error: Option<CodeError>,
+            pub data: Option<$data>,
+        }
+        impl $name {
+            pub fn success(&self) -> bool {
+                self.api_resp.status_code == 200
+                    && self.code_error.as_ref().is_none_or(|e| e.code == 0)
+            }
+        }
+    };
+}
+
+impl_resp_v2!(GetEmployeeResp, serde_json::Value);
+impl_resp_v2!(PatchEmployeeResp, serde_json::Value);
+impl_resp_v2!(ListEvaluationResp, serde_json::Value);
+impl_resp_v2!(ListNoteResp, serde_json::Value);
+impl_resp_v2!(CreateNoteResp, serde_json::Value);
+impl_resp_v2!(GetNoteResp, serde_json::Value);
+impl_resp_v2!(PatchNoteResp, serde_json::Value);
+impl_resp_v2!(DeleteNoteResp, ());
+impl_resp_v2!(ListQuestionnaireResp, serde_json::Value);
+impl_resp_v2!(GetReferralResp, serde_json::Value);
+impl_resp_v2!(ListRegistrationSchemaResp, serde_json::Value);
+impl_resp_v2!(ListResumeSourceResp, serde_json::Value);
+impl_resp_v2!(ListJobFunctionResp, serde_json::Value);
+impl_resp_v2!(ListJobTypeResp, serde_json::Value);
+impl_resp_v2!(ListJobProcessResp, serde_json::Value);
+impl_resp_v2!(ListLocationResp, serde_json::Value);
+impl_resp_v2!(ListRoleResp, serde_json::Value);
+impl_resp_v2!(ListSubjectResp, serde_json::Value);
+impl_resp_v2!(ListTalentFolderResp, serde_json::Value);
+impl_resp_v2!(ListTerminationReasonResp, serde_json::Value);
+impl_resp_v2!(ListUserRoleResp, serde_json::Value);
+impl_resp_v2!(ListWebsiteResp, serde_json::Value);
+impl_resp_v2!(ListWebsiteJobPostResp, serde_json::Value);
+impl_resp_v2!(GetWebsiteJobPostResp, serde_json::Value);
+impl_resp_v2!(ListInterviewRecordResp, serde_json::Value);
+impl_resp_v2!(GetInterviewRecordResp, serde_json::Value);
+impl_resp_v2!(ListInterviewerResp, serde_json::Value);
+impl_resp_v2!(CreateExternalApplicationResp, serde_json::Value);
+impl_resp_v2!(UpdateExternalApplicationResp, serde_json::Value);
+impl_resp_v2!(DeleteExternalApplicationResp, ());
+impl_resp_v2!(CreateExternalOfferResp, serde_json::Value);
+impl_resp_v2!(UpdateExternalOfferResp, serde_json::Value);
+impl_resp_v2!(DeleteExternalOfferResp, ());
+impl_resp_v2!(CreateExternalInterviewResp, serde_json::Value);
+impl_resp_v2!(UpdateExternalInterviewResp, serde_json::Value);
+impl_resp_v2!(DeleteExternalInterviewResp, ());
+impl_resp_v2!(CreateExternalBackgroundCheckResp, serde_json::Value);
+impl_resp_v2!(UpdateExternalBackgroundCheckResp, serde_json::Value);
+impl_resp_v2!(DeleteExternalBackgroundCheckResp, ());
+impl_resp_v2!(ListTodoResp, serde_json::Value);
+impl_resp_v2!(CreateTripartiteAgreementResp, serde_json::Value);
+impl_resp_v2!(UpdateTripartiteAgreementResp, serde_json::Value);
+impl_resp_v2!(DeleteTripartiteAgreementResp, ());
+impl_resp_v2!(ListTripartiteAgreementResp, serde_json::Value);
+
+// ── Employee resource ──
+
+pub struct EmployeeResource<'a> {
+    config: &'a Config,
+}
+
+impl EmployeeResource<'_> {
+    pub async fn get(&self, employee_id: &str, option: &RequestOption) -> Result<GetEmployeeResp> {
+        let path = format!("/open-apis/hire/v1/employees/{employee_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetEmployeeResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        employee_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PatchEmployeeResp> {
+        let path = format!("/open-apis/hire/v1/employees/{employee_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(PatchEmployeeResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Evaluation resource ──
+
+pub struct EvaluationResource<'a> {
+    config: &'a Config,
+}
+
+impl EvaluationResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListEvaluationResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/evaluations");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListEvaluationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Note resource ──
+
+pub struct NoteResource<'a> {
+    config: &'a Config,
+}
+
+impl NoteResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateNoteResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/notes");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateNoteResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn delete(&self, note_id: &str, option: &RequestOption) -> Result<DeleteNoteResp> {
+        let path = format!("/open-apis/hire/v1/notes/{note_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(DeleteNoteResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get(&self, note_id: &str, option: &RequestOption) -> Result<GetNoteResp> {
+        let path = format!("/open-apis/hire/v1/notes/{note_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetNoteResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(&self, option: &RequestOption) -> Result<ListNoteResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/notes");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListNoteResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        note_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PatchNoteResp> {
+        let path = format!("/open-apis/hire/v1/notes/{note_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(PatchNoteResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Questionnaire resource ──
+
+pub struct QuestionnaireResource<'a> {
+    config: &'a Config,
+}
+
+impl QuestionnaireResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListQuestionnaireResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/questionnaires");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListQuestionnaireResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Referral resource ──
+
+pub struct ReferralResource<'a> {
+    config: &'a Config,
+}
+
+impl ReferralResource<'_> {
+    pub async fn get_by_application(&self, option: &RequestOption) -> Result<GetReferralResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/referrals/get_by_application",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetReferralResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── RegistrationSchema resource ──
+
+pub struct RegistrationSchemaResource<'a> {
+    config: &'a Config,
+}
+
+impl RegistrationSchemaResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListRegistrationSchemaResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/registration_schemas");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListRegistrationSchemaResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── ResumeSource resource ──
+
+pub struct ResumeSourceResource<'a> {
+    config: &'a Config,
+}
+
+impl ResumeSourceResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListResumeSourceResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/resume_sources");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListResumeSourceResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Simple list-only resources ──
+
+macro_rules! simple_list_resource {
+    ($struct_name:ident, $resp:ident, $path:literal) => {
+        pub struct $struct_name<'a> {
+            config: &'a Config,
+        }
+        impl $struct_name<'_> {
+            pub async fn list(&self, option: &RequestOption) -> Result<$resp> {
+                let mut api_req = ApiReq::new(http::Method::GET, $path);
+                api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+                let (api_resp, raw) =
+                    transport::request_typed::<serde_json::Value>(self.config, &api_req, option)
+                        .await?;
+                let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+                Ok($resp {
+                    api_resp,
+                    code_error,
+                    data,
+                })
+            }
+        }
+    };
+}
+
+simple_list_resource!(
+    JobFunctionResource,
+    ListJobFunctionResp,
+    "/open-apis/hire/v1/job_functions"
+);
+simple_list_resource!(
+    JobTypeResource,
+    ListJobTypeResp,
+    "/open-apis/hire/v1/job_types"
+);
+simple_list_resource!(
+    JobProcessResource,
+    ListJobProcessResp,
+    "/open-apis/hire/v1/job_processes"
+);
+simple_list_resource!(
+    LocationResource,
+    ListLocationResp,
+    "/open-apis/hire/v1/locations"
+);
+simple_list_resource!(RoleResource, ListRoleResp, "/open-apis/hire/v1/roles");
+simple_list_resource!(
+    SubjectResource,
+    ListSubjectResp,
+    "/open-apis/hire/v1/subjects"
+);
+simple_list_resource!(
+    TalentFolderResource,
+    ListTalentFolderResp,
+    "/open-apis/hire/v1/talent_folders"
+);
+simple_list_resource!(
+    TerminationReasonResource,
+    ListTerminationReasonResp,
+    "/open-apis/hire/v1/termination_reasons"
+);
+simple_list_resource!(
+    UserRoleResource,
+    ListUserRoleResp,
+    "/open-apis/hire/v1/user_roles"
+);
+simple_list_resource!(
+    WebsiteResource,
+    ListWebsiteResp,
+    "/open-apis/hire/v1/websites"
+);
+
+// ── WebsiteJobPost resource ──
+
+pub struct WebsiteJobPostResource<'a> {
+    config: &'a Config,
+}
+
+impl WebsiteJobPostResource<'_> {
+    pub async fn get(
+        &self,
+        website_id: &str,
+        job_post_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetWebsiteJobPostResp> {
+        let path = format!("/open-apis/hire/v1/websites/{website_id}/job_posts/{job_post_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetWebsiteJobPostResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        website_id: &str,
+        option: &RequestOption,
+    ) -> Result<ListWebsiteJobPostResp> {
+        let path = format!("/open-apis/hire/v1/websites/{website_id}/job_posts");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListWebsiteJobPostResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── InterviewRecord resource ──
+
+pub struct InterviewRecordResource<'a> {
+    config: &'a Config,
+}
+
+impl InterviewRecordResource<'_> {
+    pub async fn get(
+        &self,
+        interview_record_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetInterviewRecordResp> {
+        let path = format!("/open-apis/hire/v1/interview_records/{interview_record_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetInterviewRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(&self, option: &RequestOption) -> Result<ListInterviewRecordResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/interview_records");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListInterviewRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Interviewer resource ──
+
+pub struct InterviewerResource<'a> {
+    config: &'a Config,
+}
+
+impl InterviewerResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListInterviewerResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/interviewers");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListInterviewerResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── External resources (CRUD) ──
+
+macro_rules! external_crud_resource {
+    ($struct_name:ident, $base_path:literal,
+     $create_resp:ident, $update_resp:ident, $delete_resp:ident, $id_param:ident) => {
+        pub struct $struct_name<'a> {
+            config: &'a Config,
+        }
+        impl $struct_name<'_> {
+            pub async fn create(
+                &self,
+                body: serde_json::Value,
+                option: &RequestOption,
+            ) -> Result<$create_resp> {
+                let mut api_req = ApiReq::new(http::Method::POST, $base_path);
+                api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+                api_req.body = Some(ReqBody::json(&body)?);
+                let (api_resp, raw) =
+                    transport::request_typed::<serde_json::Value>(self.config, &api_req, option)
+                        .await?;
+                let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+                Ok($create_resp {
+                    api_resp,
+                    code_error,
+                    data,
+                })
+            }
+
+            pub async fn update(
+                &self,
+                $id_param: &str,
+                body: serde_json::Value,
+                option: &RequestOption,
+            ) -> Result<$update_resp> {
+                let path = format!("{}/{}", $base_path, $id_param);
+                let mut api_req = ApiReq::new(http::Method::PUT, &path);
+                api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+                api_req.body = Some(ReqBody::json(&body)?);
+                let (api_resp, raw) =
+                    transport::request_typed::<serde_json::Value>(self.config, &api_req, option)
+                        .await?;
+                let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+                Ok($update_resp {
+                    api_resp,
+                    code_error,
+                    data,
+                })
+            }
+
+            pub async fn delete(
+                &self,
+                $id_param: &str,
+                option: &RequestOption,
+            ) -> Result<$delete_resp> {
+                let path = format!("{}/{}", $base_path, $id_param);
+                let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+                api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+                let (api_resp, raw) =
+                    transport::request_typed::<()>(self.config, &api_req, option).await?;
+                let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+                Ok($delete_resp {
+                    api_resp,
+                    code_error,
+                    data,
+                })
+            }
+        }
+    };
+}
+
+external_crud_resource!(
+    ExternalApplicationResource,
+    "/open-apis/hire/v1/external_applications",
+    CreateExternalApplicationResp,
+    UpdateExternalApplicationResp,
+    DeleteExternalApplicationResp,
+    external_application_id
+);
+
+external_crud_resource!(
+    ExternalOfferResource,
+    "/open-apis/hire/v1/external_offers",
+    CreateExternalOfferResp,
+    UpdateExternalOfferResp,
+    DeleteExternalOfferResp,
+    external_offer_id
+);
+
+external_crud_resource!(
+    ExternalInterviewResource,
+    "/open-apis/hire/v1/external_interviews",
+    CreateExternalInterviewResp,
+    UpdateExternalInterviewResp,
+    DeleteExternalInterviewResp,
+    external_interview_id
+);
+
+external_crud_resource!(
+    ExternalBackgroundCheckResource,
+    "/open-apis/hire/v1/external_background_checks",
+    CreateExternalBackgroundCheckResp,
+    UpdateExternalBackgroundCheckResp,
+    DeleteExternalBackgroundCheckResp,
+    external_background_check_id
+);
+
+// ── Todo resource ──
+
+pub struct TodoResource<'a> {
+    config: &'a Config,
+}
+
+impl TodoResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListTodoResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/todos");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListTodoResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── TripartiteAgreement resource ──
+
+pub struct TripartiteAgreementResource<'a> {
+    config: &'a Config,
+}
+
+impl TripartiteAgreementResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateTripartiteAgreementResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/tripartite_agreements",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateTripartiteAgreementResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        tripartite_agreement_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteTripartiteAgreementResp> {
+        let path = format!("/open-apis/hire/v1/tripartite_agreements/{tripartite_agreement_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(DeleteTripartiteAgreementResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(&self, option: &RequestOption) -> Result<ListTripartiteAgreementResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/tripartite_agreements",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListTripartiteAgreementResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update(
+        &self,
+        tripartite_agreement_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UpdateTripartiteAgreementResp> {
+        let path = format!("/open-apis/hire/v1/tripartite_agreements/{tripartite_agreement_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UpdateTripartiteAgreementResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
@@ -1335,6 +2034,32 @@ pub struct V1<'a> {
     pub job_requirement: JobRequirementResource<'a>,
     pub attachment: AttachmentResource<'a>,
     pub offer_schema: OfferSchemaResource<'a>,
+    pub employee: EmployeeResource<'a>,
+    pub evaluation: EvaluationResource<'a>,
+    pub note: NoteResource<'a>,
+    pub questionnaire: QuestionnaireResource<'a>,
+    pub referral: ReferralResource<'a>,
+    pub registration_schema: RegistrationSchemaResource<'a>,
+    pub resume_source: ResumeSourceResource<'a>,
+    pub job_function: JobFunctionResource<'a>,
+    pub job_type: JobTypeResource<'a>,
+    pub job_process: JobProcessResource<'a>,
+    pub location: LocationResource<'a>,
+    pub role: RoleResource<'a>,
+    pub subject: SubjectResource<'a>,
+    pub talent_folder: TalentFolderResource<'a>,
+    pub termination_reason: TerminationReasonResource<'a>,
+    pub user_role: UserRoleResource<'a>,
+    pub website: WebsiteResource<'a>,
+    pub website_job_post: WebsiteJobPostResource<'a>,
+    pub interview_record: InterviewRecordResource<'a>,
+    pub interviewer: InterviewerResource<'a>,
+    pub external_application: ExternalApplicationResource<'a>,
+    pub external_offer: ExternalOfferResource<'a>,
+    pub external_interview: ExternalInterviewResource<'a>,
+    pub external_background_check: ExternalBackgroundCheckResource<'a>,
+    pub todo: TodoResource<'a>,
+    pub tripartite_agreement: TripartiteAgreementResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -1348,6 +2073,32 @@ impl<'a> V1<'a> {
             job_requirement: JobRequirementResource { config },
             attachment: AttachmentResource { config },
             offer_schema: OfferSchemaResource { config },
+            employee: EmployeeResource { config },
+            evaluation: EvaluationResource { config },
+            note: NoteResource { config },
+            questionnaire: QuestionnaireResource { config },
+            referral: ReferralResource { config },
+            registration_schema: RegistrationSchemaResource { config },
+            resume_source: ResumeSourceResource { config },
+            job_function: JobFunctionResource { config },
+            job_type: JobTypeResource { config },
+            job_process: JobProcessResource { config },
+            location: LocationResource { config },
+            role: RoleResource { config },
+            subject: SubjectResource { config },
+            talent_folder: TalentFolderResource { config },
+            termination_reason: TerminationReasonResource { config },
+            user_role: UserRoleResource { config },
+            website: WebsiteResource { config },
+            website_job_post: WebsiteJobPostResource { config },
+            interview_record: InterviewRecordResource { config },
+            interviewer: InterviewerResource { config },
+            external_application: ExternalApplicationResource { config },
+            external_offer: ExternalOfferResource { config },
+            external_interview: ExternalInterviewResource { config },
+            external_background_check: ExternalBackgroundCheckResource { config },
+            todo: TodoResource { config },
+            tripartite_agreement: TripartiteAgreementResource { config },
         }
     }
 }
