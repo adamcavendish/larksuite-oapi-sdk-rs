@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::transport;
 
 // ── Domain types ──
@@ -347,6 +347,130 @@ pub struct ExternalInstanceTask {
     pub node_description: Option<String>,
 }
 
+// ── Additional domain types ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstanceSearch {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_external_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_external_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_start_time_from: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_start_time_to: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub with_revoked_instance: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CcSearch {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_external_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_external_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cc_title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub read_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cc_create_time_from: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cc_create_time_to: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub with_revoked_instance: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SpecifiedRollback {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub task_def_key_list: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CommentRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub at_info_list: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_comment_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub comment_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub disable_bot: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskResubmit {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub form: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskSearch {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_external_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_external_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub task_title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub task_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub task_start_time_from: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub task_start_time_to: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+}
+
 // ── Request body types ──
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -541,6 +665,88 @@ pub struct CreateExternalApprovalReqBody {
     pub i18n_resources: Option<Vec<serde_json::Value>>,
 }
 
+// ── Additional request body types ──
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct AddSignInstanceReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub add_sign_user_ids: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub add_sign_type: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_method: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CcInstanceReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cc_user_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cc_open_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct PreviewInstanceReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub form: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct ListExternalTaskReqBody {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub approval_codes: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub instance_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub user_ids: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CancelInstanceReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instance_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+}
+
 // ── Response wrappers ──
 
 macro_rules! impl_resp {
@@ -610,6 +816,49 @@ impl_resp!(CreateExternalApprovalResp, ExternalApproval);
 impl_resp!(GetExternalApprovalResp, ExternalApproval);
 impl_resp!(CreateExternalInstanceResp, ExternalInstance);
 impl_resp!(CheckExternalInstanceResp, CheckExternalInstanceData);
+
+// ── v2 response helpers ──
+
+fn parse_v2<T>(api_resp: ApiResp, raw: RawResponse<T>) -> (ApiResp, Option<CodeError>, Option<T>) {
+    if raw.code_error.code != 0 {
+        (api_resp, Some(raw.code_error), None)
+    } else {
+        (api_resp, None, raw.data)
+    }
+}
+
+macro_rules! impl_resp_v2 {
+    ($name:ident, $data:ty) => {
+        #[derive(Debug, Clone)]
+        pub struct $name {
+            pub api_resp: ApiResp,
+            pub code_error: Option<CodeError>,
+            pub data: Option<$data>,
+        }
+        impl $name {
+            pub fn success(&self) -> bool {
+                self.code_error.as_ref().is_none_or(|e| e.code == 0)
+            }
+        }
+    };
+}
+
+// ── v2 response types for new methods ──
+
+impl_resp_v2!(AddSignInstanceResp, serde_json::Value);
+impl_resp_v2!(CcInstanceResp, serde_json::Value);
+impl_resp_v2!(PreviewInstanceResp, serde_json::Value);
+impl_resp_v2!(QueryInstanceResp, serde_json::Value);
+impl_resp_v2!(SearchCcInstanceResp, serde_json::Value);
+impl_resp_v2!(SpecifiedRollbackInstanceResp, serde_json::Value);
+impl_resp_v2!(CreateInstanceCommentResp, serde_json::Value);
+impl_resp_v2!(DeleteInstanceCommentResp, serde_json::Value);
+impl_resp_v2!(ListInstanceCommentResp, serde_json::Value);
+impl_resp_v2!(RemoveInstanceCommentResp, serde_json::Value);
+impl_resp_v2!(QueryTaskResp, serde_json::Value);
+impl_resp_v2!(ResubmitTaskResp, serde_json::Value);
+impl_resp_v2!(SearchTaskResp, serde_json::Value);
+impl_resp_v2!(ListExternalTaskResp, serde_json::Value);
 
 // ── Resources ──
 
@@ -776,6 +1025,166 @@ impl<'a> ApprovalInstanceResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn add_sign(
+        &self,
+        body: &AddSignInstanceReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<AddSignInstanceResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/approval/v4/instances/add_sign",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(AddSignInstanceResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn cc(
+        &self,
+        body: &CcInstanceReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CcInstanceResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/instances/cc");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CcInstanceResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn preview(
+        &self,
+        body: &PreviewInstanceReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<PreviewInstanceResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/approval/v4/instances/preview",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(PreviewInstanceResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        body: &InstanceSearch,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<QueryInstanceResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/instances/query");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryInstanceResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn search_cc(
+        &self,
+        body: &CcSearch,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<SearchCcInstanceResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/approval/v4/instances/search_cc",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(SearchCcInstanceResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn specified_rollback(
+        &self,
+        body: &SpecifiedRollback,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<SpecifiedRollbackInstanceResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/approval/v4/instances/specified_rollback",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(SpecifiedRollbackInstanceResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct ApprovalTaskResource<'a> {
@@ -840,6 +1249,94 @@ impl<'a> ApprovalTaskResource<'a> {
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        user_id: Option<&str>,
+        topic: Option<&str>,
+        user_id_type: Option<&str>,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<QueryTaskResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/approval/v4/tasks/query");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id {
+            api_req.query_params.set("user_id", v);
+        }
+        if let Some(v) = topic {
+            api_req.query_params.set("topic", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryTaskResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn resubmit(
+        &self,
+        body: &TaskResubmit,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ResubmitTaskResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/resubmit");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ResubmitTaskResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn search(
+        &self,
+        body: &TaskSearch,
+        user_id_type: Option<&str>,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<SearchTaskResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/search");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(SearchTaskResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 }
@@ -984,15 +1481,174 @@ impl<'a> ExternalInstanceResource<'a> {
     }
 }
 
+// ── InstanceComment resource ──
+
+pub struct InstanceCommentResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> InstanceCommentResource<'a> {
+    pub async fn create(
+        &self,
+        instance_id: &str,
+        body: &CommentRequest,
+        user_id: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateInstanceCommentResp> {
+        let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id {
+            api_req.query_params.set("user_id", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateInstanceCommentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        instance_id: &str,
+        comment_id: &str,
+        user_id: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<DeleteInstanceCommentResp> {
+        let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments/{comment_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id {
+            api_req.query_params.set("user_id", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(DeleteInstanceCommentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        instance_id: &str,
+        user_id: Option<&str>,
+        user_id_type: Option<&str>,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListInstanceCommentResp> {
+        let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id {
+            api_req.query_params.set("user_id", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListInstanceCommentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn remove(
+        &self,
+        instance_id: &str,
+        user_id: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<RemoveInstanceCommentResp> {
+        let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments/remove");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id {
+            api_req.query_params.set("user_id", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(RemoveInstanceCommentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── ExternalTask resource ──
+
+pub struct ExternalTaskResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> ExternalTaskResource<'a> {
+    pub async fn list(
+        &self,
+        body: &ListExternalTaskReqBody,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListExternalTaskResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/approval/v4/external_tasks");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListExternalTaskResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V4<'a> {
     pub approval: ApprovalDefinitionResource<'a>,
     pub instance: ApprovalInstanceResource<'a>,
+    pub instance_comment: InstanceCommentResource<'a>,
     pub task: ApprovalTaskResource<'a>,
     pub subscribe: ApprovalSubscribeResource<'a>,
     pub external_approval: ExternalApprovalResource<'a>,
     pub external_instance: ExternalInstanceResource<'a>,
+    pub external_task: ExternalTaskResource<'a>,
 }
 
 impl<'a> V4<'a> {
@@ -1000,10 +1656,12 @@ impl<'a> V4<'a> {
         Self {
             approval: ApprovalDefinitionResource { config },
             instance: ApprovalInstanceResource { config },
+            instance_comment: InstanceCommentResource { config },
             task: ApprovalTaskResource { config },
             subscribe: ApprovalSubscribeResource { config },
             external_approval: ExternalApprovalResource { config },
             external_instance: ExternalInstanceResource { config },
+            external_task: ExternalTaskResource { config },
         }
     }
 }
