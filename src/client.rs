@@ -164,6 +164,10 @@ impl Client {
         service::hire::v1::V1::new(&self.config)
     }
 
+    pub fn hire_v2(&self) -> service::hire::v2::V2<'_> {
+        service::hire::v2::V2::new(&self.config)
+    }
+
     pub fn im(&self) -> service::im::v1::V1<'_> {
         service::im::v1::V1::new(&self.config)
     }
