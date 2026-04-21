@@ -218,7 +218,10 @@ impl EventDispatcher {
             .header
             .as_ref()
             .map(|h| h.event_type.as_str())
-            .unwrap_or_default();
+            .unwrap_or_else(|| {
+                // P1 protocol: event type is in event.type
+                parsed.event["type"].as_str().unwrap_or_default()
+            });
 
         if let Some(handler) = self.callback_handlers.get(event_type) {
             let event_data = parsed.event.clone();

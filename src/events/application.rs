@@ -50,6 +50,66 @@ pub struct P2ApplicationBotDeletedV1 {
     pub operator: serde_json::Value,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ApplicationAppVersionAuditV6 {
+    #[serde(default)]
+    pub app_id: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+    #[serde(default)]
+    pub version: serde_json::Value,
+    #[serde(default)]
+    pub audit_node: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ApplicationAppVersionPublishApplyV6 {
+    #[serde(default)]
+    pub app_id: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+    #[serde(default)]
+    pub version: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ApplicationAppVersionPublishRevokeV6 {
+    #[serde(default)]
+    pub app_id: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+    #[serde(default)]
+    pub version: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ApplicationFeedbackCreatedV6 {
+    #[serde(default)]
+    pub app_id: String,
+    #[serde(default)]
+    pub feedback_id: String,
+    #[serde(default)]
+    pub feedback: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ApplicationFeedbackUpdatedV6 {
+    #[serde(default)]
+    pub app_id: String,
+    #[serde(default)]
+    pub feedback_id: String,
+    #[serde(default)]
+    pub feedback: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ApplicationVisibilityAddedV6 {
+    #[serde(default)]
+    pub app_id: String,
+    #[serde(default)]
+    pub added_members: Vec<serde_json::Value>,
+}
+
 // ── Handler registration helpers ──
 
 fn wrap_handler<T, F, Fut>(
@@ -120,6 +180,72 @@ impl EventDispatcher {
     {
         self.on_event(
             "application.application.visibility_changed_v6",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_application_app_version_audit_v6<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2ApplicationAppVersionAuditV6) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "application.application.app_version.audit_v6",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_application_app_version_publish_apply_v6<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2ApplicationAppVersionPublishApplyV6) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "application.application.app_version.publish_apply_v6",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_application_app_version_publish_revoke_v6<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2ApplicationAppVersionPublishRevokeV6) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "application.application.app_version.publish_revoke_v6",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_application_feedback_created_v6<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2ApplicationFeedbackCreatedV6) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "application.application.feedback.created_v6",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_application_feedback_updated_v6<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2ApplicationFeedbackUpdatedV6) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "application.application.feedback.updated_v6",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_application_visibility_added_v6<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2ApplicationVisibilityAddedV6) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "application.application.visibility.added_v6",
             wrap_handler(handler),
         )
     }
