@@ -153,16 +153,22 @@ pub struct RuleResource<'a> {
 impl<'a> RuleResource<'a> {
     pub async fn query(
         &self,
-        body: &QueryRuleReqBody,
+        rule_name: Option<&str>,
+        include_deleted: Option<i32>,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<QueryRuleResp> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/report/v1/rules/query");
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/report/v1/rules/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = rule_name {
+            api_req.query_params.set("rule_name", v);
+        }
+        if let Some(v) = include_deleted {
+            api_req.query_params.set("include_deleted", v.to_string());
+        }
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
-        api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<RuleListData>(self.config, &api_req, option).await?;
         Ok(QueryRuleResp {

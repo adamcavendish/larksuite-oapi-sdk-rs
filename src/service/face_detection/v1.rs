@@ -48,14 +48,14 @@ pub struct ImageResource<'a> {
 }
 
 impl<'a> ImageResource<'a> {
-    pub async fn detect_face_info(
+    pub async fn detect_face_attributes(
         &self,
         body: &RecognizeReqBody,
         option: &RequestOption,
     ) -> Result<DetectFaceResp> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
-            "/open-apis/face_detection/v1/image/detect_face_info",
+            "/open-apis/face_detection/v1/image/detect_face_attributes",
         );
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);

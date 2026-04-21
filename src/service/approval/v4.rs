@@ -979,16 +979,19 @@ impl<'a> ApprovalInstanceResource<'a> {
 
     pub async fn cancel(
         &self,
-        instance_id: &str,
+        body: &CancelInstanceReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp> {
-        let path = format!("/open-apis/approval/v4/instances/{instance_id}/cancel");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/approval/v4/instances/cancel",
+        );
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
+        api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
@@ -1348,10 +1351,12 @@ pub struct ApprovalSubscribeResource<'a> {
 impl<'a> ApprovalSubscribeResource<'a> {
     pub async fn subscribe(
         &self,
+        approval_code: &str,
         body: &SubscribeApprovalReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/subscribes");
+        let path = format!("/open-apis/approval/v4/approvals/{approval_code}/subscribe");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
@@ -1364,10 +1369,12 @@ impl<'a> ApprovalSubscribeResource<'a> {
 
     pub async fn unsubscribe(
         &self,
+        approval_code: &str,
         body: &UnsubscribeApprovalReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp> {
-        let mut api_req = ApiReq::new(http::Method::DELETE, "/open-apis/approval/v4/subscribes");
+        let path = format!("/open-apis/approval/v4/approvals/{approval_code}/unsubscribe");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =

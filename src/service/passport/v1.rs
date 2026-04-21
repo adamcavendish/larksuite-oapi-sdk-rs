@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
-use crate::req::{ApiReq, RequestOption};
+use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
 use crate::transport;
 
@@ -21,6 +21,30 @@ pub struct SessionInfo {
     pub terminal_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub os: Option<String>,
+}
+
+// ── Request body types ──
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QuerySessionReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct LogoutSessionReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub idp_credential_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub logout_type: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub terminal_type: Option<Vec<i32>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub logout_reason: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sid: Option<String>,
 }
 
 // ── Response wrappers ──
@@ -74,16 +98,16 @@ pub struct SessionResource<'a> {
 impl<'a> SessionResource<'a> {
     pub async fn query(
         &self,
-        user_id: &str,
+        body: &QuerySessionReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<QuerySessionResp> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/passport/v1/sessions/query");
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/passport/v1/sessions/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("user_id", user_id);
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
+        api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<SessionListData>(self.config, &api_req, option).await?;
         Ok(QuerySessionResp {
@@ -95,14 +119,16 @@ impl<'a> SessionResource<'a> {
 
     pub async fn logout(
         &self,
-        idp_credential_id: &str,
+        body: &LogoutSessionReqBody,
+        user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp> {
-        let mut api_req = ApiReq::new(http::Method::DELETE, "/open-apis/passport/v1/sessions");
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/passport/v1/sessions/logout");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("idp_credential_id", idp_credential_id);
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
