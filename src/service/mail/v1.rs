@@ -96,9 +96,99 @@ pub struct CreatePublicMailboxReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchDeleteMailgroupMemberReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub member_id_list: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct BatchCreatePublicMailboxMemberReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub items: Option<Vec<PublicMailboxMember>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchDeletePublicMailboxMemberReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub member_id_list: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CreateMailgroupAliasReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email_alias: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchCreateMailgroupManagerReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mailgroup_manager_list: Option<Vec<MailgroupManager>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchDeleteMailgroupManagerReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mailgroup_manager_list: Option<Vec<MailgroupManager>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchCreateMailgroupPermissionMemberReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub items: Option<Vec<MailgroupPermissionMember>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchDeleteMailgroupPermissionMemberReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub permission_member_id_list: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CreatePublicMailboxAliasReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email_alias: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct QueryUserReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email_list: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CreateUserMailboxAliasReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email_alias: Option<String>,
+}
+
+// ── Domain types for alias / manager / permission_member resources ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EmailAlias {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub primary_email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_alias: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MailgroupManager {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MailgroupPermissionMember {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission_member_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<String>,
 }
 
 // ── Response wrappers ──
@@ -180,9 +270,41 @@ pub struct PublicMailboxListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PublicMailboxMemberData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member: Option<PublicMailboxMember>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PublicMailboxMemberListData {
     #[serde(default)]
     pub items: Vec<PublicMailboxMember>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MailgroupPermissionMemberData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission_member: Option<MailgroupPermissionMember>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MailgroupPermissionMemberListData {
+    #[serde(default)]
+    pub items: Vec<MailgroupPermissionMember>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MailgroupManagerListData {
+    #[serde(default)]
+    pub items: Vec<MailgroupManager>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -198,6 +320,16 @@ impl_resp!(CreatePublicMailboxResp, PublicMailboxData);
 impl_resp!(GetPublicMailboxResp, PublicMailboxData);
 impl_resp!(ListPublicMailboxResp, PublicMailboxListData);
 impl_resp!(ListPublicMailboxMemberResp, PublicMailboxMemberListData);
+impl_resp!(GetPublicMailboxMemberResp, PublicMailboxMemberData);
+impl_resp!(
+    GetMailgroupPermissionMemberResp,
+    MailgroupPermissionMemberData
+);
+impl_resp!(
+    ListMailgroupPermissionMemberResp,
+    MailgroupPermissionMemberListData
+);
+impl_resp!(ListMailgroupManagerResp, MailgroupManagerListData);
 
 // ── Resources ──
 
@@ -278,6 +410,46 @@ impl<'a> MailgroupResource<'a> {
             data: raw.data,
         })
     }
+
+    /// PATCH /open-apis/mail/v1/mailgroups/:mailgroup_id
+    pub async fn patch(
+        &self,
+        mailgroup_id: &str,
+        body: &CreateMailgroupReqBody,
+        option: &RequestOption,
+    ) -> Result<GetMailgroupResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<MailgroupData>(self.config, &api_req, option).await?;
+        Ok(GetMailgroupResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    /// PUT /open-apis/mail/v1/mailgroups/:mailgroup_id
+    pub async fn update(
+        &self,
+        mailgroup_id: &str,
+        body: &CreateMailgroupReqBody,
+        option: &RequestOption,
+    ) -> Result<GetMailgroupResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<MailgroupData>(self.config, &api_req, option).await?;
+        Ok(GetMailgroupResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
 }
 
 pub struct MailgroupMemberResource<'a> {
@@ -349,6 +521,73 @@ impl<'a> MailgroupMemberResource<'a> {
             transport::request_typed::<MailgroupMemberListData>(self.config, &api_req, option)
                 .await?;
         Ok(ListMailgroupMemberResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    /// POST /open-apis/mail/v1/mailgroups/:mailgroup_id/members/batch_create
+    pub async fn batch_create(
+        &self,
+        mailgroup_id: &str,
+        body: &BatchCreateMailgroupMemberReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<BatchCreateMailgroupMemberResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members/batch_create");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchCreateMailgroupMemberResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// DELETE /open-apis/mail/v1/mailgroups/:mailgroup_id/members/batch_delete
+    pub async fn batch_delete(
+        &self,
+        mailgroup_id: &str,
+        body: &BatchDeleteMailgroupMemberReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members/batch_delete");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/members/:member_id
+    pub async fn get(
+        &self,
+        mailgroup_id: &str,
+        member_id: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetMailgroupMemberResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members/{member_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<MailgroupMemberData>(self.config, &api_req, option).await?;
+        Ok(GetMailgroupMemberResp {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
@@ -434,6 +673,65 @@ impl<'a> PublicMailboxResource<'a> {
             data: raw.data,
         })
     }
+
+    /// PATCH /open-apis/mail/v1/public_mailboxes/:public_mailbox_id
+    pub async fn patch(
+        &self,
+        public_mailbox_id: &str,
+        body: &CreatePublicMailboxReqBody,
+        option: &RequestOption,
+    ) -> Result<GetPublicMailboxResp> {
+        let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<PublicMailboxData>(self.config, &api_req, option).await?;
+        Ok(GetPublicMailboxResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    /// DELETE /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/remove_to_recycle_bin
+    pub async fn remove_to_recycle_bin(
+        &self,
+        public_mailbox_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!(
+            "/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/remove_to_recycle_bin"
+        );
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    /// PUT /open-apis/mail/v1/public_mailboxes/:public_mailbox_id
+    pub async fn update(
+        &self,
+        public_mailbox_id: &str,
+        body: &CreatePublicMailboxReqBody,
+        option: &RequestOption,
+    ) -> Result<GetPublicMailboxResp> {
+        let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<PublicMailboxData>(self.config, &api_req, option).await?;
+        Ok(GetPublicMailboxResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
 }
 
 pub struct PublicMailboxMemberResource<'a> {
@@ -505,6 +803,94 @@ impl<'a> PublicMailboxMemberResource<'a> {
             transport::request_typed::<PublicMailboxMemberListData>(self.config, &api_req, option)
                 .await?;
         Ok(ListPublicMailboxMemberResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    /// POST /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/members/batch_create
+    pub async fn batch_create(
+        &self,
+        public_mailbox_id: &str,
+        body: &BatchCreatePublicMailboxMemberReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<BatchCreatePublicMailboxMemberResp> {
+        let path =
+            format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/batch_create");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchCreatePublicMailboxMemberResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// DELETE /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/members/batch_delete
+    pub async fn batch_delete(
+        &self,
+        public_mailbox_id: &str,
+        body: &BatchDeletePublicMailboxMemberReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path =
+            format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/batch_delete");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    /// POST /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/members/clear
+    pub async fn clear(
+        &self,
+        public_mailbox_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/clear");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    /// GET /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/members/:member_id
+    pub async fn get(
+        &self,
+        public_mailbox_id: &str,
+        member_id: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetPublicMailboxMemberResp> {
+        let path =
+            format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/{member_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<PublicMailboxMemberData>(self.config, &api_req, option)
+                .await?;
+        Ok(GetPublicMailboxMemberResp {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
@@ -751,6 +1137,23 @@ impl_resp_v2!(DeleteUserMailboxRuleResp, ());
 impl_resp_v2!(ListUserMailboxRuleResp, serde_json::Value);
 impl_resp_v2!(ReorderUserMailboxRuleResp, ());
 impl_resp_v2!(UpdateUserMailboxRuleResp, serde_json::Value);
+impl_resp_v2!(BatchCreateMailgroupMemberResp, serde_json::Value);
+impl_resp_v2!(BatchCreatePublicMailboxMemberResp, serde_json::Value);
+impl_resp_v2!(CreateMailgroupAliasResp, serde_json::Value);
+impl_resp_v2!(ListMailgroupAliasResp, serde_json::Value);
+impl_resp_v2!(BatchCreateMailgroupManagerResp, serde_json::Value);
+impl_resp_v2!(CreateMailgroupPermissionMemberResp, serde_json::Value);
+impl_resp_v2!(BatchCreateMailgroupPermissionMemberResp, serde_json::Value);
+impl_resp_v2!(CreatePublicMailboxAliasResp, serde_json::Value);
+impl_resp_v2!(ListPublicMailboxAliasResp, serde_json::Value);
+impl_resp_v2!(QueryUserResp, serde_json::Value);
+impl_resp_v2!(DeleteUserMailboxResp, ());
+impl_resp_v2!(CreateUserMailboxAliasResp, serde_json::Value);
+impl_resp_v2!(ListUserMailboxAliasResp, serde_json::Value);
+impl_resp_v2!(DeleteUserMailboxAliasResp, ());
+impl_resp_v2!(SubscribeUserMailboxEventResp, serde_json::Value);
+impl_resp_v2!(SubscriptionUserMailboxEventResp, serde_json::Value);
+impl_resp_v2!(UnsubscribeUserMailboxEventResp, ());
 
 // ── UserMailboxMessage resource ──
 
@@ -1208,13 +1611,581 @@ impl UserMailboxRuleResource<'_> {
     }
 }
 
+// ── MailgroupAlias resource ──
+
+pub struct MailgroupAliasResource<'a> {
+    config: &'a Config,
+}
+
+impl MailgroupAliasResource<'_> {
+    /// POST /open-apis/mail/v1/mailgroups/:mailgroup_id/aliases
+    pub async fn create(
+        &self,
+        mailgroup_id: &str,
+        body: &CreateMailgroupAliasReqBody,
+        option: &RequestOption,
+    ) -> Result<CreateMailgroupAliasResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateMailgroupAliasResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// DELETE /open-apis/mail/v1/mailgroups/:mailgroup_id/aliases/:alias_id
+    pub async fn delete(
+        &self,
+        mailgroup_id: &str,
+        alias_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases/{alias_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/aliases
+    pub async fn list(
+        &self,
+        mailgroup_id: &str,
+        option: &RequestOption,
+    ) -> Result<ListMailgroupAliasResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListMailgroupAliasResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── MailgroupManager resource ──
+
+pub struct MailgroupManagerResource<'a> {
+    config: &'a Config,
+}
+
+impl MailgroupManagerResource<'_> {
+    /// POST /open-apis/mail/v1/mailgroups/:mailgroup_id/managers/batch_create
+    pub async fn batch_create(
+        &self,
+        mailgroup_id: &str,
+        body: &BatchCreateMailgroupManagerReqBody,
+        option: &RequestOption,
+    ) -> Result<BatchCreateMailgroupManagerResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers/batch_create");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchCreateMailgroupManagerResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// POST /open-apis/mail/v1/mailgroups/:mailgroup_id/managers/batch_delete
+    pub async fn batch_delete(
+        &self,
+        mailgroup_id: &str,
+        body: &BatchDeleteMailgroupManagerReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers/batch_delete");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/managers
+    pub async fn list(
+        &self,
+        mailgroup_id: &str,
+        page_token: Option<&str>,
+        page_size: Option<i32>,
+        option: &RequestOption,
+    ) -> Result<ListMailgroupManagerResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<MailgroupManagerListData>(self.config, &api_req, option)
+                .await?;
+        Ok(ListMailgroupManagerResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+// ── MailgroupPermissionMember resource ──
+
+pub struct MailgroupPermissionMemberResource<'a> {
+    config: &'a Config,
+}
+
+impl MailgroupPermissionMemberResource<'_> {
+    /// POST /open-apis/mail/v1/mailgroups/:mailgroup_id/permission_members
+    pub async fn create(
+        &self,
+        mailgroup_id: &str,
+        body: &MailgroupPermissionMember,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateMailgroupPermissionMemberResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateMailgroupPermissionMemberResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// DELETE /open-apis/mail/v1/mailgroups/:mailgroup_id/permission_members/:permission_member_id
+    pub async fn delete(
+        &self,
+        mailgroup_id: &str,
+        permission_member_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!(
+            "/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/{permission_member_id}"
+        );
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/permission_members/:permission_member_id
+    pub async fn get(
+        &self,
+        mailgroup_id: &str,
+        permission_member_id: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetMailgroupPermissionMemberResp> {
+        let path = format!(
+            "/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/{permission_member_id}"
+        );
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) = transport::request_typed::<MailgroupPermissionMemberData>(
+            self.config,
+            &api_req,
+            option,
+        )
+        .await?;
+        Ok(GetMailgroupPermissionMemberResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/permission_members
+    pub async fn list(
+        &self,
+        mailgroup_id: &str,
+        user_id_type: Option<&str>,
+        page_token: Option<&str>,
+        page_size: Option<i32>,
+        option: &RequestOption,
+    ) -> Result<ListMailgroupPermissionMemberResp> {
+        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        let (api_resp, raw) = transport::request_typed::<MailgroupPermissionMemberListData>(
+            self.config,
+            &api_req,
+            option,
+        )
+        .await?;
+        Ok(ListMailgroupPermissionMemberResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    /// POST /open-apis/mail/v1/mailgroups/:mailgroup_id/permission_members/batch_create
+    pub async fn batch_create(
+        &self,
+        mailgroup_id: &str,
+        body: &BatchCreateMailgroupPermissionMemberReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<BatchCreateMailgroupPermissionMemberResp> {
+        let path =
+            format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/batch_create");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchCreateMailgroupPermissionMemberResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// DELETE /open-apis/mail/v1/mailgroups/:mailgroup_id/permission_members/batch_delete
+    pub async fn batch_delete(
+        &self,
+        mailgroup_id: &str,
+        body: &BatchDeleteMailgroupPermissionMemberReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path =
+            format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/batch_delete");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+}
+
+// ── PublicMailboxAlias resource ──
+
+pub struct PublicMailboxAliasResource<'a> {
+    config: &'a Config,
+}
+
+impl PublicMailboxAliasResource<'_> {
+    /// POST /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/aliases
+    pub async fn create(
+        &self,
+        public_mailbox_id: &str,
+        body: &CreatePublicMailboxAliasReqBody,
+        option: &RequestOption,
+    ) -> Result<CreatePublicMailboxAliasResp> {
+        let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreatePublicMailboxAliasResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// DELETE /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/aliases/:alias_id
+    pub async fn delete(
+        &self,
+        public_mailbox_id: &str,
+        alias_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path =
+            format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases/{alias_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    /// GET /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/aliases
+    pub async fn list(
+        &self,
+        public_mailbox_id: &str,
+        option: &RequestOption,
+    ) -> Result<ListPublicMailboxAliasResp> {
+        let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListPublicMailboxAliasResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── User resource ──
+
+pub struct UserResource<'a> {
+    config: &'a Config,
+}
+
+impl UserResource<'_> {
+    /// POST /open-apis/mail/v1/users/query
+    pub async fn query(
+        &self,
+        body: &QueryUserReqBody,
+        option: &RequestOption,
+    ) -> Result<QueryUserResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/mail/v1/users/query");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(QueryUserResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── UserMailbox resource ──
+
+pub struct UserMailboxResource<'a> {
+    config: &'a Config,
+}
+
+impl UserMailboxResource<'_> {
+    /// DELETE /open-apis/mail/v1/user_mailboxes/:user_mailbox_id
+    pub async fn delete(
+        &self,
+        user_mailbox_id: &str,
+        transfer_mailbox: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<DeleteUserMailboxResp> {
+        let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = transfer_mailbox {
+            api_req.query_params.set("transfer_mailbox", v);
+        }
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(DeleteUserMailboxResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── UserMailboxAlias resource ──
+
+pub struct UserMailboxAliasResource<'a> {
+    config: &'a Config,
+}
+
+impl UserMailboxAliasResource<'_> {
+    /// POST /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/aliases
+    pub async fn create(
+        &self,
+        user_mailbox_id: &str,
+        body: &CreateUserMailboxAliasReqBody,
+        option: &RequestOption,
+    ) -> Result<CreateUserMailboxAliasResp> {
+        let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/aliases");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateUserMailboxAliasResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// DELETE /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/aliases/:alias_id
+    pub async fn delete(
+        &self,
+        user_mailbox_id: &str,
+        alias_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteUserMailboxAliasResp> {
+        let path =
+            format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/aliases/{alias_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(DeleteUserMailboxAliasResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// GET /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/aliases
+    pub async fn list(
+        &self,
+        user_mailbox_id: &str,
+        option: &RequestOption,
+    ) -> Result<ListUserMailboxAliasResp> {
+        let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/aliases");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListUserMailboxAliasResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── UserMailboxEvent resource ──
+
+pub struct UserMailboxEventResource<'a> {
+    config: &'a Config,
+}
+
+impl UserMailboxEventResource<'_> {
+    /// POST /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/event/subscribe
+    pub async fn subscribe(
+        &self,
+        user_mailbox_id: &str,
+        option: &RequestOption,
+    ) -> Result<SubscribeUserMailboxEventResp> {
+        let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/event/subscribe");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(SubscribeUserMailboxEventResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// GET /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/event/subscription
+    pub async fn subscription(
+        &self,
+        user_mailbox_id: &str,
+        option: &RequestOption,
+    ) -> Result<SubscriptionUserMailboxEventResp> {
+        let path =
+            format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/event/subscription");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(SubscriptionUserMailboxEventResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    /// POST /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/event/unsubscribe
+    pub async fn unsubscribe(
+        &self,
+        user_mailbox_id: &str,
+        option: &RequestOption,
+    ) -> Result<UnsubscribeUserMailboxEventResp> {
+        let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/event/unsubscribe");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UnsubscribeUserMailboxEventResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
     pub mailgroup: MailgroupResource<'a>,
+    pub mailgroup_alias: MailgroupAliasResource<'a>,
+    pub mailgroup_manager: MailgroupManagerResource<'a>,
     pub mailgroup_member: MailgroupMemberResource<'a>,
+    pub mailgroup_permission_member: MailgroupPermissionMemberResource<'a>,
     pub public_mailbox: PublicMailboxResource<'a>,
+    pub public_mailbox_alias: PublicMailboxAliasResource<'a>,
     pub public_mailbox_member: PublicMailboxMemberResource<'a>,
+    pub user: UserResource<'a>,
+    pub user_mailbox: UserMailboxResource<'a>,
+    pub user_mailbox_alias: UserMailboxAliasResource<'a>,
+    pub user_mailbox_event: UserMailboxEventResource<'a>,
     pub user_mailbox_message: UserMailboxMessageResource<'a>,
     pub user_mailbox_message_attachment: UserMailboxMessageAttachmentResource<'a>,
     pub user_mailbox_folder: UserMailboxFolderResource<'a>,
@@ -1226,9 +2197,17 @@ impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             mailgroup: MailgroupResource { config },
+            mailgroup_alias: MailgroupAliasResource { config },
+            mailgroup_manager: MailgroupManagerResource { config },
             mailgroup_member: MailgroupMemberResource { config },
+            mailgroup_permission_member: MailgroupPermissionMemberResource { config },
             public_mailbox: PublicMailboxResource { config },
+            public_mailbox_alias: PublicMailboxAliasResource { config },
             public_mailbox_member: PublicMailboxMemberResource { config },
+            user: UserResource { config },
+            user_mailbox: UserMailboxResource { config },
+            user_mailbox_alias: UserMailboxAliasResource { config },
+            user_mailbox_event: UserMailboxEventResource { config },
             user_mailbox_message: UserMailboxMessageResource { config },
             user_mailbox_message_attachment: UserMailboxMessageAttachmentResource { config },
             user_mailbox_folder: UserMailboxFolderResource { config },

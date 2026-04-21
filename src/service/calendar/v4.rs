@@ -291,6 +291,104 @@ pub struct FreeBusyEvent {
     pub end_time: Option<String>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimeoffEvent {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timeoff_event_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timezone: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Instance {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<TimeInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<TimeInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_exception: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub organizer_calendar_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vchat: Option<Vchat>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visibility: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attendee_ability: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub free_busy_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<EventLocation>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurring_event_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_organizer: Option<EventOrganizer>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attendees: Option<Vec<EventAttendee>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserCalendar {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calendar: Option<Calendar>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Freebusy {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rsvp_status: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserFreebusy {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub freebusy_items: Option<Vec<Freebusy>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EventSearchFilter {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<TimeInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<TimeInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_ids: Option<Vec<String>>,
+}
+
 // ── Request body types ──
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -453,6 +551,76 @@ pub struct ListFreeBusyReqBody {
     pub room_id_list: Option<Vec<String>>,
 }
 
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct MgetCalendarReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub calendar_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct SearchCalendarReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub query: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct PrimarysCalendarReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct ReplyEventReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rsvp_status: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct SearchEventReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub query: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filter: Option<EventSearchFilter>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchFreeBusyReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub time_min: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub time_max: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub include_external_calendar: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub only_busy: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub need_rsvp_status: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct GenerateCaldavConfReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub device_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct CreateTimeoffEventReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timezone: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
 // ── Response wrappers ──
 
 macro_rules! impl_resp {
@@ -549,6 +717,116 @@ pub struct FreeBusyData {
     pub free_busy: std::collections::HashMap<String, Vec<FreeBusyEvent>>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MgetCalendarData {
+    #[serde(default)]
+    pub calendars: Vec<Calendar>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchCalendarData {
+    #[serde(default)]
+    pub items: Vec<Calendar>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubscribeCalendarData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calendar: Option<Calendar>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PrimarysCalendarData {
+    #[serde(default)]
+    pub calendars: Vec<UserCalendar>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstanceViewData {
+    #[serde(default)]
+    pub items: Vec<Instance>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstancesData {
+    #[serde(default)]
+    pub items: Vec<Instance>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchEventData {
+    #[serde(default)]
+    pub items: Vec<CalendarEvent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChatMemberListData {
+    #[serde(default)]
+    pub items: Vec<AttendeeChatMember>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MeetingChatData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_chat_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub applink: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MeetingMinuteData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub doc_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchFreeBusyData {
+    #[serde(default)]
+    pub freebusy_lists: Vec<UserFreebusy>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CaldavConfData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub server_address: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimeoffEventData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timeoff_event_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timezone: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
 impl_resp!(CreateCalendarResp, Calendar);
 impl_resp!(GetCalendarResp, Calendar);
 impl_resp!(PatchCalendarResp, Calendar);
@@ -567,6 +845,20 @@ impl_resp!(GetExchangeBindingResp, ExchangeBinding);
 impl_resp!(GetCalendarSettingResp, CalendarSetting);
 impl_resp!(PatchCalendarSettingResp, CalendarSetting);
 impl_resp!(ListFreeBusyResp, FreeBusyData);
+impl_resp!(MgetCalendarResp, MgetCalendarData);
+impl_resp!(SearchCalendarResp, SearchCalendarData);
+impl_resp!(SubscribeCalendarResp, SubscribeCalendarData);
+impl_resp!(PrimarysCalendarResp, PrimarysCalendarData);
+impl_resp!(InstanceViewResp, InstanceViewData);
+impl_resp!(InstancesResp, InstancesData);
+impl_resp!(ReplyEventResp, serde_json::Value);
+impl_resp!(SearchEventResp, SearchEventData);
+impl_resp!(ListChatMemberResp, ChatMemberListData);
+impl_resp!(CreateMeetingChatResp, MeetingChatData);
+impl_resp!(CreateMeetingMinuteResp, MeetingMinuteData);
+impl_resp!(BatchFreeBusyResp, BatchFreeBusyData);
+impl_resp!(GenerateCaldavConfResp, CaldavConfData);
+impl_resp!(CreateTimeoffEventResp, TimeoffEventData);
 
 // ── Resources ──
 
@@ -682,6 +974,137 @@ impl<'a> CalendarResource<'a> {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
+        })
+    }
+
+    pub async fn mget(
+        &self,
+        body: &MgetCalendarReqBody,
+        option: &RequestOption,
+    ) -> Result<MgetCalendarResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/calendars/mget");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<MgetCalendarData>(self.config, &api_req, option).await?;
+        Ok(MgetCalendarResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn primarys(
+        &self,
+        body: &PrimarysCalendarReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<PrimarysCalendarResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/calendar/v4/calendars/primarys",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<PrimarysCalendarData>(self.config, &api_req, option).await?;
+        Ok(PrimarysCalendarResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn search(
+        &self,
+        body: &SearchCalendarReqBody,
+        page_token: Option<&str>,
+        page_size: Option<i32>,
+        option: &RequestOption,
+    ) -> Result<SearchCalendarResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/calendar/v4/calendars/search",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<SearchCalendarData>(self.config, &api_req, option).await?;
+        Ok(SearchCalendarResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn subscribe(
+        &self,
+        calendar_id: &str,
+        option: &RequestOption,
+    ) -> Result<SubscribeCalendarResp> {
+        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/subscribe");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<SubscribeCalendarData>(self.config, &api_req, option)
+                .await?;
+        Ok(SubscribeCalendarResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn subscription(&self, option: &RequestOption) -> Result<EmptyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/calendar/v4/calendars/subscription",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn unsubscribe(
+        &self,
+        calendar_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/unsubscribe");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn unsubscription(&self, option: &RequestOption) -> Result<EmptyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/calendar/v4/calendars/unsubscription",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
         })
     }
 }
@@ -825,6 +1248,156 @@ impl<'a> CalendarEventResource<'a> {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
+        })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn instance_view(
+        &self,
+        calendar_id: &str,
+        start_time: Option<&str>,
+        end_time: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<InstanceViewResp> {
+        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/instance_view");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = start_time {
+            api_req.query_params.set("start_time", v);
+        }
+        if let Some(v) = end_time {
+            api_req.query_params.set("end_time", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<InstanceViewData>(self.config, &api_req, option).await?;
+        Ok(InstanceViewResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn instances(
+        &self,
+        calendar_id: &str,
+        event_id: &str,
+        start_time: Option<&str>,
+        end_time: Option<&str>,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<InstancesResp> {
+        let path =
+            format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/instances");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = start_time {
+            api_req.query_params.set("start_time", v);
+        }
+        if let Some(v) = end_time {
+            api_req.query_params.set("end_time", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<InstancesData>(self.config, &api_req, option).await?;
+        Ok(InstancesResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn reply(
+        &self,
+        calendar_id: &str,
+        event_id: &str,
+        body: &ReplyEventReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path =
+            format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/reply");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn search(
+        &self,
+        calendar_id: &str,
+        body: &SearchEventReqBody,
+        user_id_type: Option<&str>,
+        page_token: Option<&str>,
+        page_size: Option<i32>,
+        option: &RequestOption,
+    ) -> Result<SearchEventResp> {
+        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/search");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<SearchEventData>(self.config, &api_req, option).await?;
+        Ok(SearchEventResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn subscription(
+        &self,
+        calendar_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/subscription");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn unsubscription(
+        &self,
+        calendar_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/unsubscription");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
         })
     }
 }
@@ -989,6 +1562,38 @@ impl<'a> CalendarAclResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn subscription(
+        &self,
+        calendar_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls/subscription");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn unsubscription(
+        &self,
+        calendar_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls/unsubscription");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
 }
 
 pub struct TimeZoneResource<'a> {
@@ -1120,6 +1725,26 @@ impl<'a> CalendarSettingResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn generate_caldav_conf(
+        &self,
+        body: &GenerateCaldavConfReqBody,
+        option: &RequestOption,
+    ) -> Result<GenerateCaldavConfResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/calendar/v4/settings/generate_caldav_conf",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<CaldavConfData>(self.config, &api_req, option).await?;
+        Ok(GenerateCaldavConfResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
 }
 
 pub struct FreeBusyResource<'a> {
@@ -1150,6 +1775,185 @@ impl<'a> FreeBusyResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn batch(
+        &self,
+        body: &BatchFreeBusyReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<BatchFreeBusyResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/freebusy/batch");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<BatchFreeBusyData>(self.config, &api_req, option).await?;
+        Ok(BatchFreeBusyResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+pub struct CalendarEventAttendeeChatMemberResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> CalendarEventAttendeeChatMemberResource<'a> {
+    #[allow(clippy::too_many_arguments)]
+    pub async fn list(
+        &self,
+        calendar_id: &str,
+        event_id: &str,
+        attendee_id: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListChatMemberResp> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees/{attendee_id}/chat_members"
+        );
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<ChatMemberListData>(self.config, &api_req, option).await?;
+        Ok(ListChatMemberResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+pub struct CalendarEventMeetingChatResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> CalendarEventMeetingChatResource<'a> {
+    pub async fn create(
+        &self,
+        calendar_id: &str,
+        event_id: &str,
+        option: &RequestOption,
+    ) -> Result<CreateMeetingChatResp> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_chat"
+        );
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<MeetingChatData>(self.config, &api_req, option).await?;
+        Ok(CreateMeetingChatResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        calendar_id: &str,
+        event_id: &str,
+        meeting_chat_id: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_chat"
+        );
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = meeting_chat_id {
+            api_req.query_params.set("meeting_chat_id", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+}
+
+pub struct CalendarEventMeetingMinuteResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> CalendarEventMeetingMinuteResource<'a> {
+    pub async fn create(
+        &self,
+        calendar_id: &str,
+        event_id: &str,
+        option: &RequestOption,
+    ) -> Result<CreateMeetingMinuteResp> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_minute"
+        );
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<MeetingMinuteData>(self.config, &api_req, option).await?;
+        Ok(CreateMeetingMinuteResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+pub struct TimeoffEventResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> TimeoffEventResource<'a> {
+    pub async fn create(
+        &self,
+        body: &CreateTimeoffEventReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateTimeoffEventResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/timeoff_events");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<TimeoffEventData>(self.config, &api_req, option).await?;
+        Ok(CreateTimeoffEventResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        timeoff_event_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/calendar/v4/timeoff_events/{timeoff_event_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
 }
 
 // ── Version struct ──
@@ -1163,6 +1967,10 @@ pub struct V4<'a> {
     pub exchange_binding: ExchangeBindingResource<'a>,
     pub setting: CalendarSettingResource<'a>,
     pub freebusy: FreeBusyResource<'a>,
+    pub attendee_chat_member: CalendarEventAttendeeChatMemberResource<'a>,
+    pub meeting_chat: CalendarEventMeetingChatResource<'a>,
+    pub meeting_minute: CalendarEventMeetingMinuteResource<'a>,
+    pub timeoff_event: TimeoffEventResource<'a>,
 }
 
 impl<'a> V4<'a> {
@@ -1176,6 +1984,10 @@ impl<'a> V4<'a> {
             exchange_binding: ExchangeBindingResource { config },
             setting: CalendarSettingResource { config },
             freebusy: FreeBusyResource { config },
+            attendee_chat_member: CalendarEventAttendeeChatMemberResource { config },
+            meeting_chat: CalendarEventMeetingChatResource { config },
+            meeting_minute: CalendarEventMeetingMinuteResource { config },
+            timeoff_event: TimeoffEventResource { config },
         }
     }
 }
