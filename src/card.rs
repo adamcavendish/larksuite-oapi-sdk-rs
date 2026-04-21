@@ -1,3 +1,21 @@
+//! Lark interactive card builder.
+//!
+//! Build message cards using a fluent API, then serialize to JSON for
+//! the Lark messaging API.
+//!
+//! # Example
+//!
+//! ```rust
+//! use larksuite_oapi_sdk_rs::card::{Card, CardConfig, CardHeader};
+//!
+//! let card = Card::new()
+//!     .config(CardConfig::new().wide_screen_mode(true))
+//!     .header(CardHeader::new("Hello").template("blue"))
+//!     .element(larksuite_oapi_sdk_rs::card::md("**world**"));
+//!
+//! let json = card.to_json();
+//! ```
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 

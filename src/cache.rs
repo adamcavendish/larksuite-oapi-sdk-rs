@@ -1,3 +1,9 @@
+//! In-memory token cache with TTL expiry.
+//!
+//! [`LocalCache`] is a thread-safe HashMap-backed cache used by [`crate::token::TokenManager`]
+//! to avoid redundant token fetches. Call [`LocalCache::spawn_cleanup_task`] to periodically
+//! evict expired entries.
+
 use std::collections::HashMap;
 use std::future::Future;
 use std::pin::Pin;

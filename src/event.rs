@@ -1,3 +1,18 @@
+//! Lark event dispatch framework.
+//!
+//! [`EventDispatcher`] receives raw HTTP webhook requests, verifies signatures,
+//! routes events by type, and calls registered async handlers.
+//!
+//! [`CardActionHandler`] does the same for interactive card callbacks.
+//!
+//! # Example
+//!
+//! ```rust,no_run
+//! use larksuite_oapi_sdk_rs::EventDispatcher;
+//!
+//! let dispatcher = EventDispatcher::new("VERIFICATION_TOKEN", "ENCRYPT_KEY");
+//! ```
+
 use std::collections::HashMap;
 use std::future::Future;
 use std::pin::Pin;
