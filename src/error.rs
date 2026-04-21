@@ -24,6 +24,9 @@ pub enum Error {
     #[error("token error: {0}")]
     Token(String),
 
+    #[error("max retries exceeded")]
+    MaxRetries,
+
     #[error("event error: {0}")]
     Event(String),
 

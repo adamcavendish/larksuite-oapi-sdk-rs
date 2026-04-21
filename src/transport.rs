@@ -186,7 +186,7 @@ async fn do_request(
         }
     }
 
-    Err(last_err.unwrap_or_else(|| Error::Token("max retries exceeded".to_string())))
+    Err(last_err.unwrap_or(Error::MaxRetries))
 }
 
 async fn resolve_bearer_token(
