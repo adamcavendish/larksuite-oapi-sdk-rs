@@ -840,6 +840,157 @@ impl<'a> JobResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn close(
+        &self,
+        job_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CloseJobResp> {
+        let path = format!("/open-apis/hire/v1/jobs/{job_id}/close");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CloseJobResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn combined_create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CombinedCreateJobResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/jobs/combined_create",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CombinedCreateJobResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn combined_update(
+        &self,
+        job_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CombinedUpdateJobResp> {
+        let path = format!("/open-apis/hire/v1/jobs/{job_id}/combined_update");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CombinedUpdateJobResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn config(&self, job_id: &str, option: &RequestOption) -> Result<ConfigJobResp> {
+        let path = format!("/open-apis/hire/v1/jobs/{job_id}/config");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ConfigJobResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get_detail(
+        &self,
+        job_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetDetailJobResp> {
+        let path = format!("/open-apis/hire/v1/jobs/{job_id}/get_detail");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetDetailJobResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn open(
+        &self,
+        job_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<OpenJobResp> {
+        let path = format!("/open-apis/hire/v1/jobs/{job_id}/open");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(OpenJobResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn recruiter(
+        &self,
+        job_id: &str,
+        option: &RequestOption,
+    ) -> Result<RecruiterJobResp> {
+        let path = format!("/open-apis/hire/v1/jobs/{job_id}/recruiter");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(RecruiterJobResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update_config(
+        &self,
+        job_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UpdateConfigJobResp> {
+        let path = format!("/open-apis/hire/v1/jobs/{job_id}/update_config");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UpdateConfigJobResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct TalentResource<'a> {
@@ -913,6 +1064,151 @@ impl<'a> TalentResource<'a> {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
+        })
+    }
+
+    pub async fn add_to_folder(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<AddToFolderTalentResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/talents/add_to_folder",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(AddToFolderTalentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn batch_get_id(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchGetIdTalentResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/talents/batch_get_id",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchGetIdTalentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn combined_create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CombinedCreateTalentResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/talents/combined_create",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CombinedCreateTalentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn combined_update(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CombinedUpdateTalentResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/talents/combined_update",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CombinedUpdateTalentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn onboard_status(
+        &self,
+        talent_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<OnboardStatusTalentResp> {
+        let path = format!("/open-apis/hire/v1/talents/{talent_id}/onboard_status");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(OnboardStatusTalentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn remove_to_folder(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<RemoveToFolderTalentResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/talents/remove_to_folder",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(RemoveToFolderTalentResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn tag(
+        &self,
+        talent_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<TagTalentResp> {
+        let path = format!("/open-apis/hire/v1/talents/{talent_id}/tag");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(TagTalentResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 }
@@ -1039,6 +1335,82 @@ impl<'a> ApplicationResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn cancel_onboard(
+        &self,
+        application_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CancelOnboardApplicationResp> {
+        let path = format!("/open-apis/hire/v1/applications/{application_id}/cancel_onboard");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CancelOnboardApplicationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get_detail(
+        &self,
+        application_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetDetailApplicationResp> {
+        let path = format!("/open-apis/hire/v1/applications/{application_id}/get_detail");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetDetailApplicationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn recover(
+        &self,
+        application_id: &str,
+        option: &RequestOption,
+    ) -> Result<RecoverApplicationResp> {
+        let path = format!("/open-apis/hire/v1/applications/{application_id}/recover");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(RecoverApplicationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn transfer_onboard(
+        &self,
+        application_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<TransferOnboardApplicationResp> {
+        let path = format!("/open-apis/hire/v1/applications/{application_id}/transfer_onboard");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(TransferOnboardApplicationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct InterviewResource<'a> {
@@ -1087,6 +1459,22 @@ impl<'a> InterviewResource<'a> {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
+        })
+    }
+
+    pub async fn get_by_talent(&self, option: &RequestOption) -> Result<GetByTalentInterviewResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/interviews/get_by_talent",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetByTalentInterviewResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 }
@@ -1209,6 +1597,26 @@ impl<'a> OfferResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn intern_offer_status(
+        &self,
+        offer_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<InternOfferStatusResp> {
+        let path = format!("/open-apis/hire/v1/offers/{offer_id}/intern_offer_status");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(InternOfferStatusResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct JobRequirementResource<'a> {
@@ -1262,6 +1670,27 @@ impl<'a> JobRequirementResource<'a> {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
+        })
+    }
+
+    pub async fn list_by_id(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ListByIdJobRequirementResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/job_requirements/search",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListByIdJobRequirementResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 }
@@ -1400,6 +1829,81 @@ impl_resp_v2!(CreateTripartiteAgreementResp, serde_json::Value);
 impl_resp_v2!(UpdateTripartiteAgreementResp, serde_json::Value);
 impl_resp_v2!(DeleteTripartiteAgreementResp, ());
 impl_resp_v2!(ListTripartiteAgreementResp, serde_json::Value);
+
+// ── New response types for missing methods ──
+
+impl_resp_v2!(PublishAdvertisementResp, serde_json::Value);
+impl_resp_v2!(BatchQueryAgencyResp, serde_json::Value);
+impl_resp_v2!(GetAgencyAccountResp, serde_json::Value);
+impl_resp_v2!(OperateAgencyAccountResp, serde_json::Value);
+impl_resp_v2!(ProtectAgencyResp, serde_json::Value);
+impl_resp_v2!(ProtectSearchAgencyResp, serde_json::Value);
+impl_resp_v2!(QueryAgencyResp, serde_json::Value);
+impl_resp_v2!(CancelOnboardApplicationResp, serde_json::Value);
+impl_resp_v2!(GetDetailApplicationResp, serde_json::Value);
+impl_resp_v2!(RecoverApplicationResp, serde_json::Value);
+impl_resp_v2!(TransferOnboardApplicationResp, serde_json::Value);
+impl_resp_v2!(BatchQueryBackgroundCheckOrderResp, serde_json::Value);
+impl_resp_v2!(SearchDiversityInclusionResp, serde_json::Value);
+impl_resp_v2!(BatchDeleteEcoAccountCustomFieldResp, serde_json::Value);
+impl_resp_v2!(BatchUpdateEcoAccountCustomFieldResp, serde_json::Value);
+impl_resp_v2!(CancelEcoBackgroundCheckResp, serde_json::Value);
+impl_resp_v2!(UpdateProgressEcoBackgroundCheckResp, serde_json::Value);
+impl_resp_v2!(UpdateResultEcoBackgroundCheckResp, serde_json::Value);
+impl_resp_v2!(
+    BatchDeleteEcoBackgroundCheckCustomFieldResp,
+    serde_json::Value
+);
+impl_resp_v2!(
+    BatchUpdateEcoBackgroundCheckCustomFieldResp,
+    serde_json::Value
+);
+impl_resp_v2!(BatchDeleteEcoBackgroundCheckPackageResp, serde_json::Value);
+impl_resp_v2!(BatchUpdateEcoBackgroundCheckPackageResp, serde_json::Value);
+impl_resp_v2!(LoginInfoEcoExamResp, serde_json::Value);
+impl_resp_v2!(UpdateResultEcoExamResp, serde_json::Value);
+impl_resp_v2!(BatchDeleteEcoExamPaperResp, serde_json::Value);
+impl_resp_v2!(BatchUpdateEcoExamPaperResp, serde_json::Value);
+impl_resp_v2!(BatchQueryExternalBackgroundCheckResp, serde_json::Value);
+impl_resp_v2!(BatchQueryExternalInterviewResp, serde_json::Value);
+impl_resp_v2!(BatchQueryExternalOfferResp, serde_json::Value);
+impl_resp_v2!(GetByTalentInterviewResp, serde_json::Value);
+impl_resp_v2!(CloseJobResp, serde_json::Value);
+impl_resp_v2!(CombinedCreateJobResp, serde_json::Value);
+impl_resp_v2!(CombinedUpdateJobResp, serde_json::Value);
+impl_resp_v2!(ConfigJobResp, serde_json::Value);
+impl_resp_v2!(GetDetailJobResp, serde_json::Value);
+impl_resp_v2!(OpenJobResp, serde_json::Value);
+impl_resp_v2!(RecruiterJobResp, serde_json::Value);
+impl_resp_v2!(UpdateConfigJobResp, serde_json::Value);
+impl_resp_v2!(BatchUpdateJobManagerResp, serde_json::Value);
+impl_resp_v2!(SearchJobPublishRecordResp, serde_json::Value);
+impl_resp_v2!(ListByIdJobRequirementResp, serde_json::Value);
+impl_resp_v2!(QueryLocationResp, serde_json::Value);
+impl_resp_v2!(InternOfferStatusResp, serde_json::Value);
+impl_resp_v2!(SearchReferralResp, serde_json::Value);
+impl_resp_v2!(DeactivateReferralAccountResp, serde_json::Value);
+impl_resp_v2!(EnableReferralAccountResp, serde_json::Value);
+impl_resp_v2!(GetAccountAssetsReferralAccountResp, serde_json::Value);
+impl_resp_v2!(ReconciliationReferralAccountResp, serde_json::Value);
+impl_resp_v2!(WithdrawReferralAccountResp, serde_json::Value);
+impl_resp_v2!(AddToFolderTalentResp, serde_json::Value);
+impl_resp_v2!(BatchGetIdTalentResp, serde_json::Value);
+impl_resp_v2!(CombinedCreateTalentResp, serde_json::Value);
+impl_resp_v2!(CombinedUpdateTalentResp, serde_json::Value);
+impl_resp_v2!(OnboardStatusTalentResp, serde_json::Value);
+impl_resp_v2!(RemoveToFolderTalentResp, serde_json::Value);
+impl_resp_v2!(TagTalentResp, serde_json::Value);
+impl_resp_v2!(ChangeTalentBlockResp, serde_json::Value);
+impl_resp_v2!(QueryTalentObjectResp, serde_json::Value);
+impl_resp_v2!(SearchTalentOperationLogResp, serde_json::Value);
+impl_resp_v2!(BatchChangeTalentPoolResp, serde_json::Value);
+impl_resp_v2!(MoveTalentTalentPoolResp, serde_json::Value);
+impl_resp_v2!(SearchTalentPoolResp, serde_json::Value);
+impl_resp_v2!(SearchTestResp, serde_json::Value);
+impl_resp_v2!(CreateByAttachmentWebsiteDeliveryResp, serde_json::Value);
+impl_resp_v2!(CreateByResumeWebsiteDeliveryResp, serde_json::Value);
+impl_resp_v2!(SearchWebsiteJobPostResp, serde_json::Value);
 
 // ── Employee resource ──
 
@@ -1593,9 +2097,25 @@ impl ReferralResource<'_> {
             data,
         })
     }
-}
 
-// ── RegistrationSchema resource ──
+    pub async fn search(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchReferralResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/referrals/search");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(SearchReferralResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
 
 pub struct RegistrationSchemaResource<'a> {
     config: &'a Config,
@@ -1677,11 +2197,42 @@ simple_list_resource!(
     ListJobProcessResp,
     "/open-apis/hire/v1/job_processes"
 );
-simple_list_resource!(
-    LocationResource,
-    ListLocationResp,
-    "/open-apis/hire/v1/locations"
-);
+pub struct LocationResource<'a> {
+    config: &'a Config,
+}
+
+impl LocationResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListLocationResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/locations");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ListLocationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<QueryLocationResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/locations/query");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(QueryLocationResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
 simple_list_resource!(RoleResource, ListRoleResp, "/open-apis/hire/v1/roles");
 simple_list_resource!(
     SubjectResource,
@@ -1747,6 +2298,26 @@ impl WebsiteJobPostResource<'_> {
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
         Ok(ListWebsiteJobPostResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn search(
+        &self,
+        website_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchWebsiteJobPostResp> {
+        let path = format!("/open-apis/hire/v1/websites/{website_id}/job_posts/search");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(SearchWebsiteJobPostResp {
             api_resp,
             code_error,
             data,
@@ -1902,6 +2473,29 @@ external_crud_resource!(
     external_offer_id
 );
 
+impl ExternalOfferResource<'_> {
+    pub async fn batch_query(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchQueryExternalOfferResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/external_offers/batch_query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchQueryExternalOfferResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 external_crud_resource!(
     ExternalInterviewResource,
     "/open-apis/hire/v1/external_interviews",
@@ -1911,6 +2505,29 @@ external_crud_resource!(
     external_interview_id
 );
 
+impl ExternalInterviewResource<'_> {
+    pub async fn batch_query(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchQueryExternalInterviewResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/external_interviews/batch_query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchQueryExternalInterviewResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 external_crud_resource!(
     ExternalBackgroundCheckResource,
     "/open-apis/hire/v1/external_background_checks",
@@ -1919,6 +2536,29 @@ external_crud_resource!(
     DeleteExternalBackgroundCheckResp,
     external_background_check_id
 );
+
+impl ExternalBackgroundCheckResource<'_> {
+    pub async fn batch_query(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchQueryExternalBackgroundCheckResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/external_background_checks/batch_query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchQueryExternalBackgroundCheckResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
 
 // ── Todo resource ──
 
@@ -2023,7 +2663,913 @@ impl TripartiteAgreementResource<'_> {
     }
 }
 
-// ── Version struct ──
+// ── Advertisement resource ──
+
+pub struct AdvertisementResource<'a> {
+    config: &'a Config,
+}
+
+impl AdvertisementResource<'_> {
+    pub async fn publish(
+        &self,
+        advertisement_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PublishAdvertisementResp> {
+        let path = format!("/open-apis/hire/v1/advertisements/{advertisement_id}/publish");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(PublishAdvertisementResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Agency resource ──
+
+pub struct AgencyResource<'a> {
+    config: &'a Config,
+}
+
+impl AgencyResource<'_> {
+    pub async fn batch_query(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchQueryAgencyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/agencies/batch_query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchQueryAgencyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get_agency_account(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<GetAgencyAccountResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/agencies/get_agency_account",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetAgencyAccountResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn operate_agency_account(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<OperateAgencyAccountResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/agencies/operate_agency_account",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(OperateAgencyAccountResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn protect(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ProtectAgencyResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/agencies/protect");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ProtectAgencyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn protect_search(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ProtectSearchAgencyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/agencies/protection_period/search",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ProtectSearchAgencyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query(&self, option: &RequestOption) -> Result<QueryAgencyResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/agencies/query");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(QueryAgencyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── BackgroundCheckOrder resource ──
+
+pub struct BackgroundCheckOrderResource<'a> {
+    config: &'a Config,
+}
+
+impl BackgroundCheckOrderResource<'_> {
+    pub async fn batch_query(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchQueryBackgroundCheckOrderResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/background_check_orders/batch_query",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchQueryBackgroundCheckOrderResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── DiversityInclusion resource ──
+
+pub struct DiversityInclusionResource<'a> {
+    config: &'a Config,
+}
+
+impl DiversityInclusionResource<'_> {
+    pub async fn search(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchDiversityInclusionResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/applications/diversity_inclusions/search",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(SearchDiversityInclusionResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── EcoAccountCustomField resource ──
+
+pub struct EcoAccountCustomFieldResource<'a> {
+    config: &'a Config,
+}
+
+impl EcoAccountCustomFieldResource<'_> {
+    pub async fn batch_delete(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteEcoAccountCustomFieldResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_account_custom_fields/batch_delete",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchDeleteEcoAccountCustomFieldResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn batch_update(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateEcoAccountCustomFieldResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::PATCH,
+            "/open-apis/hire/v1/eco_account_custom_fields/batch_update",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchUpdateEcoAccountCustomFieldResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── EcoBackgroundCheck resource ──
+
+pub struct EcoBackgroundCheckResource<'a> {
+    config: &'a Config,
+}
+
+impl EcoBackgroundCheckResource<'_> {
+    pub async fn cancel(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CancelEcoBackgroundCheckResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_background_checks/cancel",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CancelEcoBackgroundCheckResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update_progress(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UpdateProgressEcoBackgroundCheckResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_background_checks/update_progress",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UpdateProgressEcoBackgroundCheckResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update_result(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UpdateResultEcoBackgroundCheckResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_background_checks/update_result",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UpdateResultEcoBackgroundCheckResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── EcoBackgroundCheckCustomField resource ──
+
+pub struct EcoBackgroundCheckCustomFieldResource<'a> {
+    config: &'a Config,
+}
+
+impl EcoBackgroundCheckCustomFieldResource<'_> {
+    pub async fn batch_delete(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteEcoBackgroundCheckCustomFieldResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_background_check_custom_fields/batch_delete",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchDeleteEcoBackgroundCheckCustomFieldResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn batch_update(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateEcoBackgroundCheckCustomFieldResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::PATCH,
+            "/open-apis/hire/v1/eco_background_check_custom_fields/batch_update",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchUpdateEcoBackgroundCheckCustomFieldResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── EcoBackgroundCheckPackage resource ──
+
+pub struct EcoBackgroundCheckPackageResource<'a> {
+    config: &'a Config,
+}
+
+impl EcoBackgroundCheckPackageResource<'_> {
+    pub async fn batch_delete(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteEcoBackgroundCheckPackageResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_background_check_packages/batch_delete",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchDeleteEcoBackgroundCheckPackageResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn batch_update(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateEcoBackgroundCheckPackageResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::PATCH,
+            "/open-apis/hire/v1/eco_background_check_packages/batch_update",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchUpdateEcoBackgroundCheckPackageResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── EcoExam resource ──
+
+pub struct EcoExamResource<'a> {
+    config: &'a Config,
+}
+
+impl EcoExamResource<'_> {
+    pub async fn login_info(
+        &self,
+        exam_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<LoginInfoEcoExamResp> {
+        let path = format!("/open-apis/hire/v1/eco_exams/{exam_id}/login_info");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(LoginInfoEcoExamResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update_result(
+        &self,
+        exam_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UpdateResultEcoExamResp> {
+        let path = format!("/open-apis/hire/v1/eco_exams/{exam_id}/update_result");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UpdateResultEcoExamResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── EcoExamPaper resource ──
+
+pub struct EcoExamPaperResource<'a> {
+    config: &'a Config,
+}
+
+impl EcoExamPaperResource<'_> {
+    pub async fn batch_delete(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteEcoExamPaperResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_exam_papers/batch_delete",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchDeleteEcoExamPaperResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn batch_update(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateEcoExamPaperResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::PATCH,
+            "/open-apis/hire/v1/eco_exam_papers/batch_update",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchUpdateEcoExamPaperResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── JobManager resource ──
+
+pub struct JobManagerResource<'a> {
+    config: &'a Config,
+}
+
+impl JobManagerResource<'_> {
+    pub async fn batch_update(
+        &self,
+        job_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateJobManagerResp> {
+        let path = format!("/open-apis/hire/v1/jobs/{job_id}/managers/batch_update");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchUpdateJobManagerResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── JobPublishRecord resource ──
+
+pub struct JobPublishRecordResource<'a> {
+    config: &'a Config,
+}
+
+impl JobPublishRecordResource<'_> {
+    pub async fn search(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchJobPublishRecordResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/job_publish_records/search",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(SearchJobPublishRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── ReferralAccount resource ──
+
+pub struct ReferralAccountResource<'a> {
+    config: &'a Config,
+}
+
+impl ReferralAccountResource<'_> {
+    pub async fn deactivate(
+        &self,
+        referral_account_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeactivateReferralAccountResp> {
+        let path = format!("/open-apis/hire/v1/referral_account/{referral_account_id}/deactivate");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(DeactivateReferralAccountResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn enable(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<EnableReferralAccountResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/referral_account/enable",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(EnableReferralAccountResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get_account_assets(
+        &self,
+        option: &RequestOption,
+    ) -> Result<GetAccountAssetsReferralAccountResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::GET,
+            "/open-apis/hire/v1/referral_account/get_account_assets",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetAccountAssetsReferralAccountResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn reconciliation(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ReconciliationReferralAccountResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/referral_account/reconciliation",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ReconciliationReferralAccountResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn withdraw(
+        &self,
+        referral_account_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<WithdrawReferralAccountResp> {
+        let path = format!("/open-apis/hire/v1/referral_account/{referral_account_id}/withdraw");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(WithdrawReferralAccountResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── TalentBlocklist resource ──
+
+pub struct TalentBlocklistResource<'a> {
+    config: &'a Config,
+}
+
+impl TalentBlocklistResource<'_> {
+    pub async fn change_talent_block(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ChangeTalentBlockResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/talent_blocklist/change_talent_block",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(ChangeTalentBlockResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── TalentObject resource ──
+
+pub struct TalentObjectResource<'a> {
+    config: &'a Config,
+}
+
+impl TalentObjectResource<'_> {
+    pub async fn query(&self, option: &RequestOption) -> Result<QueryTalentObjectResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/talent_objects/query");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(QueryTalentObjectResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── TalentOperationLog resource ──
+
+pub struct TalentOperationLogResource<'a> {
+    config: &'a Config,
+}
+
+impl TalentOperationLogResource<'_> {
+    pub async fn search(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchTalentOperationLogResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/talent_operation_logs/search",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(SearchTalentOperationLogResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── TalentPool resource ──
+
+pub struct TalentPoolResource<'a> {
+    config: &'a Config,
+}
+
+impl TalentPoolResource<'_> {
+    pub async fn batch_change_talent_pool(
+        &self,
+        talent_pool_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchChangeTalentPoolResp> {
+        let path =
+            format!("/open-apis/hire/v1/talent_pools/{talent_pool_id}/batch_change_talent_pool");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(BatchChangeTalentPoolResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn move_talent(
+        &self,
+        talent_pool_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<MoveTalentTalentPoolResp> {
+        let path = format!("/open-apis/hire/v1/talent_pools/{talent_pool_id}/talent_relationship");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(MoveTalentTalentPoolResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn search(&self, option: &RequestOption) -> Result<SearchTalentPoolResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/talent_pools");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(SearchTalentPoolResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── Test resource ──
+
+pub struct TestResource<'a> {
+    config: &'a Config,
+}
+
+impl TestResource<'_> {
+    pub async fn search(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchTestResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/tests/search");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(SearchTestResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+// ── WebsiteDelivery resource ──
+
+pub struct WebsiteDeliveryResource<'a> {
+    config: &'a Config,
+}
+
+impl WebsiteDeliveryResource<'_> {
+    pub async fn create_by_attachment(
+        &self,
+        website_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateByAttachmentWebsiteDeliveryResp> {
+        let path =
+            format!("/open-apis/hire/v1/websites/{website_id}/deliveries/create_by_attachment");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateByAttachmentWebsiteDeliveryResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn create_by_resume(
+        &self,
+        website_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateByResumeWebsiteDeliveryResp> {
+        let path = format!("/open-apis/hire/v1/websites/{website_id}/deliveries/create_by_resume");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateByResumeWebsiteDeliveryResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
 
 pub struct V1<'a> {
     pub job: JobResource<'a>,
@@ -2060,6 +3606,25 @@ pub struct V1<'a> {
     pub external_background_check: ExternalBackgroundCheckResource<'a>,
     pub todo: TodoResource<'a>,
     pub tripartite_agreement: TripartiteAgreementResource<'a>,
+    pub advertisement: AdvertisementResource<'a>,
+    pub agency: AgencyResource<'a>,
+    pub background_check_order: BackgroundCheckOrderResource<'a>,
+    pub diversity_inclusion: DiversityInclusionResource<'a>,
+    pub eco_account_custom_field: EcoAccountCustomFieldResource<'a>,
+    pub eco_background_check: EcoBackgroundCheckResource<'a>,
+    pub eco_background_check_custom_field: EcoBackgroundCheckCustomFieldResource<'a>,
+    pub eco_background_check_package: EcoBackgroundCheckPackageResource<'a>,
+    pub eco_exam: EcoExamResource<'a>,
+    pub eco_exam_paper: EcoExamPaperResource<'a>,
+    pub job_manager: JobManagerResource<'a>,
+    pub job_publish_record: JobPublishRecordResource<'a>,
+    pub referral_account: ReferralAccountResource<'a>,
+    pub talent_blocklist: TalentBlocklistResource<'a>,
+    pub talent_object: TalentObjectResource<'a>,
+    pub talent_operation_log: TalentOperationLogResource<'a>,
+    pub talent_pool: TalentPoolResource<'a>,
+    pub test: TestResource<'a>,
+    pub website_delivery: WebsiteDeliveryResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -2099,6 +3664,25 @@ impl<'a> V1<'a> {
             external_background_check: ExternalBackgroundCheckResource { config },
             todo: TodoResource { config },
             tripartite_agreement: TripartiteAgreementResource { config },
+            advertisement: AdvertisementResource { config },
+            agency: AgencyResource { config },
+            background_check_order: BackgroundCheckOrderResource { config },
+            diversity_inclusion: DiversityInclusionResource { config },
+            eco_account_custom_field: EcoAccountCustomFieldResource { config },
+            eco_background_check: EcoBackgroundCheckResource { config },
+            eco_background_check_custom_field: EcoBackgroundCheckCustomFieldResource { config },
+            eco_background_check_package: EcoBackgroundCheckPackageResource { config },
+            eco_exam: EcoExamResource { config },
+            eco_exam_paper: EcoExamPaperResource { config },
+            job_manager: JobManagerResource { config },
+            job_publish_record: JobPublishRecordResource { config },
+            referral_account: ReferralAccountResource { config },
+            talent_blocklist: TalentBlocklistResource { config },
+            talent_object: TalentObjectResource { config },
+            talent_operation_log: TalentOperationLogResource { config },
+            talent_pool: TalentPoolResource { config },
+            test: TestResource { config },
+            website_delivery: WebsiteDeliveryResource { config },
         }
     }
 }
