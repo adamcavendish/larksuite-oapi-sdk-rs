@@ -657,7 +657,7 @@ impl<'a> PublicMailboxResource<'a> {
         option: &RequestOption,
     ) -> Result<ListPublicMailboxResp> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/mail/v1/public_mailboxes");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_token {
             api_req.query_params.set("page_token", v);
         }
@@ -1172,7 +1172,7 @@ impl UserMailboxMessageResource<'_> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/{message_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
@@ -1195,7 +1195,7 @@ impl UserMailboxMessageResource<'_> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/get_by_card");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = card_id {
             api_req.query_params.set("card_id", v);
         }
@@ -1227,7 +1227,7 @@ impl UserMailboxMessageResource<'_> {
     ) -> Result<ListUserMailboxMessageResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
@@ -1259,7 +1259,7 @@ impl UserMailboxMessageResource<'_> {
     ) -> Result<SendUserMailboxMessageResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/send");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1291,7 +1291,7 @@ impl UserMailboxMessageAttachmentResource<'_> {
             "/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/{message_id}/attachments/download_url"
         );
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         for id in attachment_ids {
             api_req.query_params.add("attachment_ids", id.to_string());
         }
@@ -1322,7 +1322,7 @@ impl UserMailboxFolderResource<'_> {
     ) -> Result<CreateUserMailboxFolderResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1344,7 +1344,7 @@ impl UserMailboxFolderResource<'_> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders/{folder_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
         Ok(DeleteUserMailboxFolderResp {
@@ -1363,7 +1363,7 @@ impl UserMailboxFolderResource<'_> {
     ) -> Result<ListUserMailboxFolderResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = folder_type {
             api_req.query_params.set("folder_type", v.to_string());
         }
@@ -1388,7 +1388,7 @@ impl UserMailboxFolderResource<'_> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders/{folder_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1417,7 +1417,7 @@ impl UserMailboxMailContactResource<'_> {
     ) -> Result<CreateUserMailboxMailContactResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1440,7 +1440,7 @@ impl UserMailboxMailContactResource<'_> {
             "/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts/{mail_contact_id}"
         );
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
         Ok(DeleteUserMailboxMailContactResp {
@@ -1460,7 +1460,7 @@ impl UserMailboxMailContactResource<'_> {
     ) -> Result<ListUserMailboxMailContactResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
             api_req.query_params.set("page_size", v.to_string());
         }
@@ -1489,7 +1489,7 @@ impl UserMailboxMailContactResource<'_> {
             "/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts/{mail_contact_id}"
         );
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1518,7 +1518,7 @@ impl UserMailboxRuleResource<'_> {
     ) -> Result<CreateUserMailboxRuleResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1539,7 +1539,7 @@ impl UserMailboxRuleResource<'_> {
     ) -> Result<DeleteUserMailboxRuleResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules/{rule_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
         Ok(DeleteUserMailboxRuleResp {
@@ -1557,7 +1557,7 @@ impl UserMailboxRuleResource<'_> {
     ) -> Result<ListUserMailboxRuleResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
@@ -1577,7 +1577,7 @@ impl UserMailboxRuleResource<'_> {
     ) -> Result<ReorderUserMailboxRuleResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules/reorder");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
@@ -1598,7 +1598,7 @@ impl UserMailboxRuleResource<'_> {
     ) -> Result<UpdateUserMailboxRuleResp> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules/{rule_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;

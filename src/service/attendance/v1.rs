@@ -1086,7 +1086,7 @@ impl<'a> ArchiveRuleResource<'a> {
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/user_stats_fields_query",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
