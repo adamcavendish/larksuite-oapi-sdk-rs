@@ -96,6 +96,7 @@ pub struct BatchOpenData {
 impl_resp!(CreateSystemStatusResp, SystemStatusData);
 impl_resp!(ListSystemStatusResp, SystemStatusListData);
 impl_resp!(BatchOpenSystemStatusResp, BatchOpenData);
+impl_resp!(PatchSystemStatusResp, SystemStatusData);
 
 // ── Resources ──
 
@@ -210,6 +211,25 @@ impl<'a> SystemStatusResource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<BatchOpenData>(self.config, &api_req, option).await?;
         Ok(BatchOpenSystemStatusResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        system_status_id: &str,
+        body: &CreateSystemStatusReqBody,
+        option: &RequestOption,
+    ) -> Result<PatchSystemStatusResp> {
+        let path = format!("/open-apis/personal_settings/v1/system_statuses/{system_status_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<SystemStatusData>(self.config, &api_req, option).await?;
+        Ok(PatchSystemStatusResp {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,

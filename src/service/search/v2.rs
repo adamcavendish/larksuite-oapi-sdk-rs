@@ -223,6 +223,20 @@ pub struct PatchSchemaReqBody {
     pub properties: Option<Vec<SchemaProperty>>,
 }
 
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct SearchDocWikiReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub query: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub doc_filter: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub wiki_filter: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_size: Option<i32>,
+}
+
 // ── Response wrappers ──
 
 macro_rules! impl_resp {
@@ -312,6 +326,20 @@ impl_resp!(SearchAppResp, SearchAppData);
 impl_resp!(CreateSchemaResp, SchemaData);
 impl_resp!(GetSchemaResp, SchemaData);
 impl_resp!(PatchSchemaResp, SchemaData);
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchDocWikiData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default)]
+    pub res_units: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+impl_resp!(SearchDocWikiResp, SearchDocWikiData);
 
 // ── Resources ──
 
@@ -612,12 +640,36 @@ impl<'a> SchemaResource<'a> {
 
 // ── Version struct ──
 
+pub struct DocWikiResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> DocWikiResource<'a> {
+    pub async fn search(
+        &self,
+        body: &SearchDocWikiReqBody,
+        option: &RequestOption,
+    ) -> Result<SearchDocWikiResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/doc_wiki/search");
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<SearchDocWikiData>(self.config, &api_req, option).await?;
+        Ok(SearchDocWikiResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
 pub struct V2<'a> {
     pub data_source: DataSourceResource<'a>,
     pub data_record: DataRecordResource<'a>,
     pub message: MessageSearchResource<'a>,
     pub app: AppSearchResource<'a>,
     pub schema: SchemaResource<'a>,
+    pub doc_wiki: DocWikiResource<'a>,
 }
 
 impl<'a> V2<'a> {
@@ -628,6 +680,7 @@ impl<'a> V2<'a> {
             message: MessageSearchResource { config },
             app: AppSearchResource { config },
             schema: SchemaResource { config },
+            doc_wiki: DocWikiResource { config },
         }
     }
 }

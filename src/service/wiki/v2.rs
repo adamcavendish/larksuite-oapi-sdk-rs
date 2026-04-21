@@ -139,6 +139,18 @@ pub struct DeleteMemberReqBody {
     pub members: Option<Vec<SpaceMember>>,
 }
 
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct MoveDocsToWikiReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_wiki_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub obj_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub obj_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply: Option<bool>,
+}
+
 // ── Response wrappers ──
 
 macro_rules! impl_resp {
@@ -221,6 +233,18 @@ impl_resp!(CopyNodeResp, NodeData);
 impl_resp!(ListNodeResp, NodeListData);
 impl_resp!(ListMemberResp, MemberListData);
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MoveDocsToWikiData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wiki_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub applied: Option<bool>,
+}
+
+impl_resp!(MoveDocsToWikiResp, MoveDocsToWikiData);
+
 // ── Resources ──
 
 pub struct SpaceResource<'a> {
@@ -283,6 +307,27 @@ impl<'a> SpaceResource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<SpaceListData>(self.config, &api_req, option).await?;
         Ok(ListSpaceResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn get_node(
+        &self,
+        token: &str,
+        obj_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetNodeResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/wiki/v2/spaces/get_node");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.query_params.set("token", token);
+        if let Some(v) = obj_type {
+            api_req.query_params.set("obj_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<NodeData>(self.config, &api_req, option).await?;
+        Ok(GetNodeResp {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
@@ -435,6 +480,25 @@ impl<'a> NodeResource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<NodeListData>(self.config, &api_req, option).await?;
         Ok(ListNodeResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn move_docs_to_wiki(
+        &self,
+        space_id: &str,
+        body: &MoveDocsToWikiReqBody,
+        option: &RequestOption,
+    ) -> Result<MoveDocsToWikiResp> {
+        let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/move_docs_to_wiki");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<MoveDocsToWikiData>(self.config, &api_req, option).await?;
+        Ok(MoveDocsToWikiResp {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,

@@ -126,6 +126,24 @@ pub struct TaskListData {
 impl_resp!(QueryRuleResp, RuleListData);
 impl_resp!(QueryTaskResp, TaskListData);
 
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct RemoveRuleViewReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EmptyResp {
+    pub api_resp: ApiResp,
+    pub code_error: CodeError,
+}
+
+impl EmptyResp {
+    pub fn success(&self) -> bool {
+        self.code_error.success()
+    }
+}
+
 // ── Resources ──
 
 pub struct RuleResource<'a> {
@@ -184,8 +202,37 @@ impl<'a> TaskResource<'a> {
 
 // ── Version struct ──
 
+pub struct RuleViewResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> RuleViewResource<'a> {
+    pub async fn remove(
+        &self,
+        rule_id: &str,
+        body: &RemoveRuleViewReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!("/open-apis/report/v1/rules/{rule_id}/views/remove");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+}
+
 pub struct V1<'a> {
     pub rule: RuleResource<'a>,
+    pub rule_view: RuleViewResource<'a>,
     pub task: TaskResource<'a>,
 }
 
@@ -193,6 +240,7 @@ impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             rule: RuleResource { config },
+            rule_view: RuleViewResource { config },
             task: TaskResource { config },
         }
     }

@@ -49,7 +49,36 @@ pub struct EmployeeListData {
 
 impl_resp!(ListEhrEmployeeResp, EmployeeListData);
 
+#[derive(Debug, Clone)]
+pub struct GetAttachmentResp {
+    pub api_resp: ApiResp,
+    pub file_name: Option<String>,
+    pub data: Vec<u8>,
+}
+
 // ── Resources ──
+
+pub struct AttachmentResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AttachmentResource<'a> {
+    pub async fn get(&self, token: &str, option: &RequestOption) -> Result<GetAttachmentResp> {
+        let path = format!("/open-apis/ehr/v1/attachments/{token}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let mut opt = option.clone();
+        opt.file_download = true;
+        let api_resp = transport::request(self.config, &api_req, &opt).await?;
+        let file_name = api_resp.file_name_by_header();
+        let data = api_resp.raw_body.clone();
+        Ok(GetAttachmentResp {
+            api_resp,
+            file_name,
+            data,
+        })
+    }
+}
 
 pub struct EmployeeResource<'a> {
     config: &'a Config,
@@ -97,12 +126,14 @@ impl<'a> EmployeeResource<'a> {
 // ── Version struct ──
 
 pub struct V1<'a> {
+    pub attachment: AttachmentResource<'a>,
     pub employee: EmployeeResource<'a>,
 }
 
 impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
+            attachment: AttachmentResource { config },
             employee: EmployeeResource { config },
         }
     }
