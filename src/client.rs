@@ -169,6 +169,10 @@ impl Client {
         service::drive::v1::V1::new(&self.config)
     }
 
+    pub fn drive_v2(&self) -> service::drive::v2::V2<'_> {
+        service::drive::v2::V2::new(&self.config)
+    }
+
     pub fn helpdesk(&self) -> service::helpdesk::v1::V1<'_> {
         service::helpdesk::v1::V1::new(&self.config)
     }
@@ -347,6 +351,10 @@ impl Client {
 
     pub fn block(&self) -> service::block::v1::V1<'_> {
         service::block::v1::V1::new(&self.config)
+    }
+
+    pub fn block_v2(&self) -> service::block::v2::V2<'_> {
+        service::block::v2::V2::new(&self.config)
     }
 
     pub fn board(&self) -> service::board::v1::V1<'_> {

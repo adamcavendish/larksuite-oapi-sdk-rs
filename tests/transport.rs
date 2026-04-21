@@ -15,7 +15,7 @@ async fn transport_rejects_empty_app_id() {
         .do_req(&api_req, &default_option())
         .await
         .unwrap_err();
-    matches!(err, Error::IllegalParam(_));
+    assert!(matches!(err, Error::IllegalParam(_)));
     drop(config);
 }
 

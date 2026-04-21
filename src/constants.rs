@@ -2,7 +2,7 @@ pub const FEISHU_BASE_URL: &str = "https://open.feishu.cn";
 pub const LARK_BASE_URL: &str = "https://open.larksuite.com";
 
 pub const DEFAULT_CONTENT_TYPE: &str = "application/json; charset=utf-8";
-pub const USER_AGENT: &str = "oapi-sdk-rust/v0.1.0";
+pub const USER_AGENT: &str = concat!("oapi-sdk-rust/v", env!("CARGO_PKG_VERSION"));
 
 pub const HTTP_HEADER_KEY_REQUEST_ID: &str = "X-Request-Id";
 pub const HTTP_HEADER_REQUEST_ID: &str = "Request-Id";
