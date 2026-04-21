@@ -232,6 +232,10 @@ impl Client {
         service::wiki::v2::V2::new(&self.config)
     }
 
+    pub fn wiki_v1(&self) -> service::wiki::v1::V1<'_> {
+        service::wiki::v1::V1::new(&self.config)
+    }
+
     pub fn passport(&self) -> service::passport::v1::V1<'_> {
         service::passport::v1::V1::new(&self.config)
     }
@@ -272,12 +276,20 @@ impl Client {
         service::mdm::v1::V1::new(&self.config)
     }
 
+    pub fn mdm_v3(&self) -> service::mdm::v3::V3<'_> {
+        service::mdm::v3::V3::new(&self.config)
+    }
+
     pub fn personal_settings(&self) -> service::personal_settings::v1::V1<'_> {
         service::personal_settings::v1::V1::new(&self.config)
     }
 
     pub fn security_and_compliance(&self) -> service::security_and_compliance::v1::V1<'_> {
         service::security_and_compliance::v1::V1::new(&self.config)
+    }
+
+    pub fn security_and_compliance_v2(&self) -> service::security_and_compliance::v2::V2<'_> {
+        service::security_and_compliance::v2::V2::new(&self.config)
     }
 
     pub fn moments(&self) -> service::moments::v1::V1<'_> {
@@ -302,6 +314,10 @@ impl Client {
 
     pub fn performance(&self) -> service::performance::v1::V1<'_> {
         service::performance::v1::V1::new(&self.config)
+    }
+
+    pub fn performance_v2(&self) -> service::performance::v2::V2<'_> {
+        service::performance::v2::V2::new(&self.config)
     }
 
     pub fn directory(&self) -> service::directory::v1::V1<'_> {
