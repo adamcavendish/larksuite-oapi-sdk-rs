@@ -365,6 +365,11 @@ impl Client {
         service::ext::ExtService::new(&self.config)
     }
 
+    /// Create a [`WsClient`](crate::ws::WsClient) that shares this client's token cache.
+    pub fn ws_client(&self, dispatcher: crate::event::EventDispatcher) -> crate::ws::WsClient {
+        crate::ws::WsClient::new(self.config.clone(), dispatcher)
+    }
+
     pub async fn do_req(&self, api_req: &ApiReq, option: &RequestOption) -> Result<ApiResp> {
         transport::request(&self.config, api_req, option).await
     }

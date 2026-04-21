@@ -27,7 +27,6 @@ use tokio::time::sleep;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
-use crate::cache::LocalCache;
 use crate::config::Config;
 use crate::error::{Error, Result};
 use crate::event::EventDispatcher;
@@ -242,8 +241,7 @@ impl WsClient {
     }
 
     async fn get_ws_url(&self) -> Result<String> {
-        let cache = Arc::new(LocalCache::new());
-        let token_mgr = TokenManager::new(cache);
+        let token_mgr = TokenManager::new(self.config.token_cache.clone());
         let token = token_mgr
             .get_tenant_access_token(&self.config, None, None)
             .await?;
