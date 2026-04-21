@@ -622,7 +622,7 @@ impl<'a> UserSettingResource<'a> {
         option: &RequestOption,
     ) -> Result<BatchGetUserSettingResp> {
         let mut api_req = ApiReq::new(
-            http::Method::POST,
+            http::Method::GET,
             "/open-apis/attendance/v1/user_settings/query",
         );
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
