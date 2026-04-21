@@ -73,6 +73,11 @@ impl ClientBuilder {
         self
     }
 
+    pub fn log_level(mut self, level: tracing::Level) -> Self {
+        self.config.log_level = Some(level);
+        self
+    }
+
     pub fn build(self) -> Client {
         let mut config = self.config;
         if !self.explicit_http_client {

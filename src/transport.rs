@@ -175,6 +175,10 @@ async fn do_request(
                 last_err = Some(Error::DialFailed(msg));
                 continue;
             }
+            Err(Error::ServerTimeout(msg)) => {
+                last_err = Some(Error::ServerTimeout(msg));
+                continue;
+            }
             Err(e) => return Err(e),
         }
     }
@@ -314,7 +318,13 @@ pub(crate) async fn raw_send(
     })?;
 
     let status_code = response.status().as_u16();
-    tracing::debug!(status = status_code, url = %full_url, "lark.response");
+
+    let enabled = config
+        .log_level
+        .is_none_or(|lvl| lvl <= tracing::Level::DEBUG);
+    if enabled {
+        tracing::debug!(status = status_code, url = %full_url, "lark.response");
+    }
 
     if status_code == 504 {
         return Err(Error::ServerTimeout(

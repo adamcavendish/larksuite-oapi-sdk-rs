@@ -135,15 +135,19 @@ impl WsClient {
 
         let mut pending_frags: HashMap<u64, FragBuffer> = HashMap::new();
 
-        use futures_util::StreamExt as _;
-        let (_, mut read) = ws_stream.split();
+        use futures_util::{SinkExt as _, StreamExt as _};
+        let (mut write, mut read) = ws_stream.split();
 
         while let Some(msg) = read.next().await {
             let msg = msg.map_err(|e| Error::Event(format!("ws recv error: {e}")))?;
             match msg {
                 Message::Binary(data) => {
-                    self.handle_binary_message(&data, &mut pending_frags)
-                        .await?;
+                    if let Some(pong) = self
+                        .handle_binary_message(&data, &mut pending_frags)
+                        .await?
+                    {
+                        let _ = write.send(pong).await;
+                    }
                 }
                 Message::Close(_) => {
                     tracing::info!("ws server closed connection");
@@ -160,7 +164,7 @@ impl WsClient {
         &self,
         data: &[u8],
         pending_frags: &mut HashMap<u64, FragBuffer>,
-    ) -> Result<()> {
+    ) -> Result<Option<Message>> {
         let frame = proto::Frame::decode(data)
             .map_err(|e| Error::Event(format!("proto frame decode error: {e}")))?;
 
@@ -174,6 +178,13 @@ impl WsClient {
                 match ctrl_type {
                     CTRL_TYPE_PING => {
                         tracing::debug!("ws ping received, seq={}", frame.seq_id);
+                        let pong = proto::Frame {
+                            frame_type: FRAME_TYPE_PONG,
+                            seq_id: frame.seq_id,
+                            ..Default::default()
+                        };
+                        let encoded = pong.encode_to_vec();
+                        return Ok(Some(Message::Binary(encoded.into())));
                     }
                     CTRL_TYPE_CLOSE => {
                         tracing::info!("ws close control received");
@@ -194,7 +205,7 @@ impl WsClient {
                     if buf.complete() {
                         pending_frags.remove(&frame.seq_id).unwrap().assemble()
                     } else {
-                        return Ok(());
+                        return Ok(None);
                     }
                 };
 
@@ -206,7 +217,7 @@ impl WsClient {
             }
         }
 
-        Ok(())
+        Ok(None)
     }
 
     async fn dispatch_event(&self, payload: Vec<u8>) -> Result<()> {
@@ -237,8 +248,9 @@ impl WsClient {
             .get_tenant_access_token(&self.config, None, None)
             .await?;
 
+        let device_id = uuid::Uuid::new_v4().to_string();
         let base = self.config.base_url.trim_end_matches('/');
-        let url = format!("{base}/callback/ws/endpoint");
+        let url = format!("{base}/callback/ws/endpoint?DeviceID={device_id}");
 
         let resp = self
             .config
@@ -250,6 +262,8 @@ impl WsClient {
                     .parse::<http::HeaderValue>()
                     .unwrap(),
             )
+            .header_str("DeviceID", &device_id)
+            .map_err(|e| Error::Event(format!("invalid device id header: {e}")))?
             .send()
             .await?;
 

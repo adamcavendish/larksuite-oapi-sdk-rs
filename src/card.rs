@@ -150,6 +150,9 @@ pub enum Element {
     Action(ActionElement),
     Note(NoteElement),
     Markdown(MarkdownElement),
+    ColumnSet(ColumnSetElement),
+    Form(FormElement),
+    ChartMd(ChartMdElement),
 }
 
 // ── Div (content block) ──
@@ -257,7 +260,9 @@ impl ActionElement {
 pub enum ActionComponent {
     Button(ButtonComponent),
     SelectStatic(SelectStaticComponent),
+    MultiSelectStatic(MultiSelectStaticComponent),
     DatePicker(DatePickerComponent),
+    TimePicker(TimePickerComponent),
     Overflow(OverflowComponent),
 }
 
@@ -376,6 +381,173 @@ impl MarkdownElement {
 
     pub fn text_align(mut self, align: impl Into<String>) -> Self {
         self.text_align = Some(align.into());
+        self
+    }
+}
+
+// ── ColumnSet / Column ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ColumnSetElement {
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub columns: Vec<ColumnElement>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flex_mode: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub background_style: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub horizontal_spacing: Option<String>,
+}
+
+impl ColumnSetElement {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn column(mut self, col: ColumnElement) -> Self {
+        self.columns.push(col);
+        self
+    }
+
+    pub fn flex_mode(mut self, mode: impl Into<String>) -> Self {
+        self.flex_mode = Some(mode.into());
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ColumnElement {
+    pub tag: String,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub elements: Vec<Element>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub width: Option<String>,
+}
+
+impl ColumnElement {
+    pub fn new() -> Self {
+        Self {
+            tag: "column".to_string(),
+            ..Default::default()
+        }
+    }
+
+    pub fn element(mut self, element: Element) -> Self {
+        self.elements.push(element);
+        self
+    }
+
+    pub fn width(mut self, width: impl Into<String>) -> Self {
+        self.width = Some(width.into());
+        self
+    }
+}
+
+// ── Form / InputForm ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormElement {
+    pub name: String,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub elements: Vec<Element>,
+}
+
+impl FormElement {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            elements: Vec::new(),
+        }
+    }
+
+    pub fn element(mut self, element: Element) -> Self {
+        self.elements.push(element);
+        self
+    }
+}
+
+// ── ChartMd ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChartMdElement {
+    pub chart_spec: Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color_theme: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preview: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub height: Option<String>,
+}
+
+impl ChartMdElement {
+    pub fn new(chart_spec: Value) -> Self {
+        Self {
+            chart_spec,
+            ..Default::default()
+        }
+    }
+
+    pub fn color_theme(mut self, theme: impl Into<String>) -> Self {
+        self.color_theme = Some(theme.into());
+        self
+    }
+
+    pub fn height(mut self, height: impl Into<String>) -> Self {
+        self.height = Some(height.into());
+        self
+    }
+}
+
+// ── MultiSelectStatic ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MultiSelectStaticComponent {
+    pub placeholder: TextObject,
+    pub options: Vec<SelectOption>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_values: Option<Vec<String>>,
+}
+
+impl MultiSelectStaticComponent {
+    pub fn new(placeholder: TextObject) -> Self {
+        Self {
+            placeholder,
+            ..Default::default()
+        }
+    }
+
+    pub fn option(mut self, opt: SelectOption) -> Self {
+        self.options.push(opt);
+        self
+    }
+}
+
+// ── TimePicker ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimePickerComponent {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub placeholder: Option<TextObject>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub initial_time: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<Value>,
+}
+
+impl TimePickerComponent {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn placeholder(mut self, text: TextObject) -> Self {
+        self.placeholder = Some(text);
+        self
+    }
+
+    pub fn initial_time(mut self, time: impl Into<String>) -> Self {
+        self.initial_time = Some(time.into());
         self
     }
 }

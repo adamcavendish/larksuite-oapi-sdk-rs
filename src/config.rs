@@ -22,6 +22,7 @@ pub struct Config {
     pub token_cache: Arc<dyn Cache>,
     pub default_headers: HeaderMap,
     pub skip_sign_verify: bool,
+    pub log_level: Option<tracing::Level>,
 }
 
 impl Config {
@@ -42,6 +43,7 @@ impl Config {
             token_cache: Arc::new(LocalCache::new()),
             default_headers: HeaderMap::new(),
             skip_sign_verify: false,
+            log_level: None,
         }
     }
 }
