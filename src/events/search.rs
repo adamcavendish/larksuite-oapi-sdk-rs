@@ -9,41 +9,25 @@ use crate::event::EventDispatcher;
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2TaskCreatedV1 {
+pub struct P2SearchDataSourceCreatedV1 {
     #[serde(default)]
-    pub task: serde_json::Value,
+    pub data_source_id: String,
     #[serde(default)]
-    pub created_by: serde_json::Value,
+    pub name: String,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2TaskDeletedV1 {
+pub struct P2SearchDataSourceDeletedV1 {
     #[serde(default)]
-    pub task: serde_json::Value,
-    #[serde(default)]
-    pub deleted_by: serde_json::Value,
+    pub data_source_id: String,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2TaskUpdatedV1 {
+pub struct P2SearchDataSourceUpdatedV1 {
     #[serde(default)]
-    pub task: serde_json::Value,
+    pub data_source_id: String,
     #[serde(default)]
-    pub update_fields: Vec<String>,
-    #[serde(default)]
-    pub updated_by: serde_json::Value,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2TaskCommentUpdatedV1 {
-    #[serde(default)]
-    pub task: serde_json::Value,
-    #[serde(default)]
-    pub comment: serde_json::Value,
-    #[serde(default)]
-    pub update_fields: Vec<String>,
-    #[serde(default)]
-    pub updated_by: serde_json::Value,
+    pub name: String,
 }
 
 // ── Handler registration helpers ──
@@ -74,35 +58,27 @@ where
 // ── EventDispatcher extension methods ──
 
 impl EventDispatcher {
-    pub fn on_p2_task_created_v1<F, Fut>(self, handler: F) -> Self
+    pub fn on_p2_search_data_source_created_v1<F, Fut>(self, handler: F) -> Self
     where
-        F: Fn(P2TaskCreatedV1) -> Fut + Send + Sync + 'static,
+        F: Fn(P2SearchDataSourceCreatedV1) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<()>> + Send + 'static,
     {
-        self.on_event("task.task.created_v1", wrap_handler(handler))
+        self.on_event("search.data_source.created_v1", wrap_handler(handler))
     }
 
-    pub fn on_p2_task_deleted_v1<F, Fut>(self, handler: F) -> Self
+    pub fn on_p2_search_data_source_deleted_v1<F, Fut>(self, handler: F) -> Self
     where
-        F: Fn(P2TaskDeletedV1) -> Fut + Send + Sync + 'static,
+        F: Fn(P2SearchDataSourceDeletedV1) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<()>> + Send + 'static,
     {
-        self.on_event("task.task.deleted_v1", wrap_handler(handler))
+        self.on_event("search.data_source.deleted_v1", wrap_handler(handler))
     }
 
-    pub fn on_p2_task_updated_v1<F, Fut>(self, handler: F) -> Self
+    pub fn on_p2_search_data_source_updated_v1<F, Fut>(self, handler: F) -> Self
     where
-        F: Fn(P2TaskUpdatedV1) -> Fut + Send + Sync + 'static,
+        F: Fn(P2SearchDataSourceUpdatedV1) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<()>> + Send + 'static,
     {
-        self.on_event("task.task.updated_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_task_comment_updated_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2TaskCommentUpdatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("task.task.comment.updated_v1", wrap_handler(handler))
+        self.on_event("search.data_source.updated_v1", wrap_handler(handler))
     }
 }
