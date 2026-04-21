@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
-use crate::req::{ApiReq, RequestOption};
+use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
 use crate::transport;
 
@@ -60,6 +60,7 @@ pub struct OpenapiLogListData {
 }
 
 impl_resp!(ListOpenapiLogResp, OpenapiLogListData);
+impl_resp!(ListDataOpenapiLogResp, OpenapiLogListData);
 
 // ── Resources ──
 
@@ -109,6 +110,26 @@ impl<'a> OpenapiLogResource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<OpenapiLogListData>(self.config, &api_req, option).await?;
         Ok(ListOpenapiLogResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn list_data(
+        &self,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ListDataOpenapiLogResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/security_and_compliance/v1/openapi_logs/list_data",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<OpenapiLogListData>(self.config, &api_req, option).await?;
+        Ok(ListDataOpenapiLogResp {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,

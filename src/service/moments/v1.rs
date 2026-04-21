@@ -55,6 +55,14 @@ pub struct PostListData {
 
 impl_resp!(ListPostResp, PostListData);
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PostGetData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub post: Option<Post>,
+}
+
+impl_resp!(GetPostResp, PostGetData);
+
 // ── Resources ──
 
 pub struct PostResource<'a> {
@@ -62,6 +70,27 @@ pub struct PostResource<'a> {
 }
 
 impl<'a> PostResource<'a> {
+    pub async fn get(
+        &self,
+        post_id: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetPostResp> {
+        let path = format!("/open-apis/moments/v1/posts/{post_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<PostGetData>(self.config, &api_req, option).await?;
+        Ok(GetPostResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
     pub async fn list(
         &self,
         category_id: Option<&str>,

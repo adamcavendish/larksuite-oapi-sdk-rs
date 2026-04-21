@@ -321,6 +321,8 @@ impl_resp!(CreateReminderResp, ReminderData);
 impl_resp!(GetReminderResp, ReminderData);
 impl_resp!(UpdateReminderResp, ReminderData);
 impl_resp!(ListReminderResp, ReminderListData);
+impl_resp!(BatchDeleteCollaboratorResp, serde_json::Value);
+impl_resp!(BatchDeleteFollowerResp, serde_json::Value);
 
 // ── Resources ──
 
@@ -464,6 +466,52 @@ impl<'a> TaskResource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<TaskListData>(self.config, &api_req, option).await?;
         Ok(ListTaskResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn batch_delete_collaborator(
+        &self,
+        task_id: &str,
+        body: &serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteCollaboratorResp> {
+        let path = format!("/open-apis/task/v1/tasks/{task_id}/batch_delete_collaborator");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(BatchDeleteCollaboratorResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn batch_delete_follower(
+        &self,
+        task_id: &str,
+        body: &serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteFollowerResp> {
+        let path = format!("/open-apis/task/v1/tasks/{task_id}/batch_delete_follower");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(BatchDeleteFollowerResp {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,

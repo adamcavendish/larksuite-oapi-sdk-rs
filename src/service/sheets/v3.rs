@@ -351,6 +351,9 @@ impl_resp!(UpdateFilterViewConditionResp, FilterViewConditionData);
 impl_resp!(QueryFilterViewConditionResp, FilterViewConditionListData);
 impl_resp!(QueryConditionalFormatResp, ConditionalFormatListData);
 impl_resp!(QueryDataValidationResp, DataValidationListData);
+impl_resp!(FindSheetResp, serde_json::Value);
+impl_resp!(MoveDimensionSheetResp, serde_json::Value);
+impl_resp!(ReplaceSheetResp, serde_json::Value);
 
 // ── Resources ──
 
@@ -492,6 +495,71 @@ impl<'a> SheetResource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<OperateSheetsData>(self.config, &api_req, option).await?;
         Ok(OperateSheetsResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn find(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<FindSheetResp> {
+        let path =
+            format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/find");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(FindSheetResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn move_dimension(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<MoveDimensionSheetResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/move_dimension"
+        );
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(MoveDimensionSheetResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn replace(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ReplaceSheetResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/replace"
+        );
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(ReplaceSheetResp {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,

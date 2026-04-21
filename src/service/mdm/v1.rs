@@ -132,16 +132,70 @@ impl<'a> UserDeviceResource<'a> {
     }
 }
 
+pub struct UserAuthDataRelationResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> UserAuthDataRelationResource<'a> {
+    pub async fn bind(
+        &self,
+        body: &serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/mdm/v1/user_auth_data_relations/bind",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn unbind(
+        &self,
+        body: &serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/mdm/v1/user_auth_data_relations/unbind",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
     pub user_device: UserDeviceResource<'a>,
+    pub user_auth_data_relation: UserAuthDataRelationResource<'a>,
 }
 
 impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             user_device: UserDeviceResource { config },
+            user_auth_data_relation: UserAuthDataRelationResource { config },
         }
     }
 }

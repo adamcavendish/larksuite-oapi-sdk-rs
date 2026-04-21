@@ -208,6 +208,28 @@ impl_resp_v2!(RecognizeVehicleInvoiceResp, VehicleInvoiceData);
 impl_resp_v2!(ParseResumeResp, ResumeData);
 impl_resp_v2!(RecognizeVatInvoiceRespV2, VatInvoiceData);
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FieldExtractionContractData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub copy: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub header: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub body_info: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank_info: Option<Vec<serde_json::Value>>,
+}
+
+impl_resp!(FieldExtractionContractResp, FieldExtractionContractData);
+
 // ── Resources ──
 
 pub struct AiResource<'a> {
@@ -650,10 +672,38 @@ impl<'a> VatInvoiceResource<'a> {
     }
 }
 
+pub struct ContractResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> ContractResource<'a> {
+    pub async fn field_extraction(
+        &self,
+        body: &RecognizeFileReqBody,
+        option: &RequestOption,
+    ) -> Result<FieldExtractionContractResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/document_ai/v1/contract/field_extraction",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<FieldExtractionContractData>(self.config, &api_req, option)
+                .await?;
+        Ok(FieldExtractionContractResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
     pub ai: AiResource<'a>,
+    pub contract: ContractResource<'a>,
     pub chinese_passport: ChinesePassportResource<'a>,
     pub driving_license: DrivingLicenseResource<'a>,
     pub food_manage_license: FoodManageLicenseResource<'a>,
@@ -670,6 +720,7 @@ impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             ai: AiResource { config },
+            contract: ContractResource { config },
             chinese_passport: ChinesePassportResource { config },
             driving_license: DrivingLicenseResource { config },
             food_manage_license: FoodManageLicenseResource { config },
