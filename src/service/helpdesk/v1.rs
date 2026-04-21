@@ -692,6 +692,13 @@ impl_resp!(
     ListTicketCustomizedFieldResp,
     ListTicketCustomizedFieldRespData
 );
+impl_resp!(AgentEmailResp, serde_json::Value);
+impl_resp!(PatchAgentResp, serde_json::Value);
+impl_resp!(DeleteAgentSchedulesResp, serde_json::Value);
+impl_resp!(GetAgentSchedulesResp, serde_json::Value);
+impl_resp!(PatchAgentSchedulesResp, serde_json::Value);
+impl_resp!(CreateAgentScheduleResp, serde_json::Value);
+impl_resp!(ListAgentScheduleResp, serde_json::Value);
 
 // ── Resources ──
 
@@ -974,6 +981,140 @@ impl<'a> AgentResource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<AgentListData>(self.config, &api_req, option).await?;
         Ok(ListAgentResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn agent_email(&self, option: &RequestOption) -> Result<AgentEmailResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/agent_emails");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(AgentEmailResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        agent_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PatchAgentResp> {
+        let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(PatchAgentResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+pub struct AgentSchedulesResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AgentSchedulesResource<'a> {
+    pub async fn delete(
+        &self,
+        agent_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteAgentSchedulesResp> {
+        let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}/schedules");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(DeleteAgentSchedulesResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn get(
+        &self,
+        agent_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetAgentSchedulesResp> {
+        let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}/schedules");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(GetAgentSchedulesResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        agent_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PatchAgentSchedulesResp> {
+        let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}/schedules");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(PatchAgentSchedulesResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
+pub struct AgentScheduleResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AgentScheduleResource<'a> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateAgentScheduleResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/agent_schedules");
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(CreateAgentScheduleResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        status: Option<&[i32]>,
+        option: &RequestOption,
+    ) -> Result<ListAgentScheduleResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/agent_schedules");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(vals) = status {
+            for v in vals {
+                api_req.query_params.add("status", v.to_string());
+            }
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(ListAgentScheduleResp {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
@@ -1736,6 +1877,8 @@ pub struct V1<'a> {
     pub ticket: TicketResource<'a>,
     pub ticket_message: TicketMessageResource<'a>,
     pub agent: AgentResource<'a>,
+    pub agent_schedules: AgentSchedulesResource<'a>,
+    pub agent_schedule: AgentScheduleResource<'a>,
     pub agent_skill: AgentSkillResource<'a>,
     pub agent_skill_rule: AgentSkillRuleResource<'a>,
     pub bot_message: BotMessageResource<'a>,
@@ -1752,6 +1895,8 @@ impl<'a> V1<'a> {
             ticket: TicketResource { config },
             ticket_message: TicketMessageResource { config },
             agent: AgentResource { config },
+            agent_schedules: AgentSchedulesResource { config },
+            agent_schedule: AgentScheduleResource { config },
             agent_skill: AgentSkillResource { config },
             agent_skill_rule: AgentSkillRuleResource { config },
             bot_message: BotMessageResource { config },

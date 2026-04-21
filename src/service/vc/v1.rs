@@ -427,6 +427,50 @@ impl<'a> RoomResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn mget(
+        &self,
+        body: serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<MgetRoomResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/rooms/mget");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(MgetRoomResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn search(
+        &self,
+        body: serde_json::Value,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<SearchRoomResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/rooms/search");
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(SearchRoomResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct RoomConfigResource<'a> {
@@ -493,6 +537,48 @@ impl<'a> RoomConfigResource<'a> {
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
+        })
+    }
+
+    pub async fn set_checkboard_access_code(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SetCheckboardAccessCodeRoomConfigResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/vc/v1/room_configs/set_checkboard_access_code",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(SetCheckboardAccessCodeRoomConfigResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn set_room_access_code(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SetRoomAccessCodeRoomConfigResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/vc/v1/room_configs/set_room_access_code",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(SetRoomAccessCodeRoomConfigResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 }
@@ -763,6 +849,11 @@ macro_rules! impl_resp_v2 {
         }
     };
 }
+
+impl_resp_v2!(MgetRoomResp, serde_json::Value);
+impl_resp_v2!(SearchRoomResp, serde_json::Value);
+impl_resp_v2!(SetCheckboardAccessCodeRoomConfigResp, serde_json::Value);
+impl_resp_v2!(SetRoomAccessCodeRoomConfigResp, serde_json::Value);
 
 // ── Alert response types ──
 

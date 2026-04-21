@@ -474,6 +474,50 @@ impl<'a> GroupResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn list_user(
+        &self,
+        group_id: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListUserGroupResp> {
+        let path = format!("/open-apis/attendance/v1/groups/{group_id}/list_user");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListUserGroupResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn search(
+        &self,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchGroupResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/groups/search");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(SearchGroupResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct ShiftResource<'a> {
@@ -520,6 +564,48 @@ impl<'a> ShiftResource<'a> {
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListShiftResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/attendance/v1/shifts");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListShiftResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn query(
+        &self,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<QueryShiftResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/shifts/query");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(QueryShiftResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 }
@@ -707,6 +793,22 @@ impl_resp_v2!(QueryUserTaskResp, serde_json::Value);
 impl_resp_v2!(CreateUserTaskRemedyResp, serde_json::Value);
 impl_resp_v2!(QueryUserTaskRemedyResp, serde_json::Value);
 impl_resp_v2!(QueryUserAllowedRemedysUserTaskRemedyResp, serde_json::Value);
+impl_resp_v2!(ProcessApprovalInfoResp, serde_json::Value);
+impl_resp_v2!(DelReportArchiveRuleResp, serde_json::Value);
+impl_resp_v2!(ListArchiveRuleResp, serde_json::Value);
+impl_resp_v2!(UploadFileResp, serde_json::Value);
+impl_resp_v2!(ListUserGroupResp, serde_json::Value);
+impl_resp_v2!(SearchGroupResp, serde_json::Value);
+impl_resp_v2!(GetLeaveEmployExpireRecordResp, serde_json::Value);
+impl_resp_v2!(ListShiftResp, serde_json::Value);
+impl_resp_v2!(QueryShiftResp, serde_json::Value);
+
+#[derive(Debug, Clone)]
+pub struct DownloadResp {
+    pub api_resp: ApiResp,
+    pub file_name: Option<String>,
+    pub data: Vec<u8>,
+}
 
 // ── Request body types for new resources ──
 
@@ -994,6 +1096,51 @@ impl<'a> ArchiveRuleResource<'a> {
             data,
         })
     }
+
+    pub async fn del_report(
+        &self,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<DelReportArchiveRuleResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/archive_rule/del_report",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(DelReportArchiveRuleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListArchiveRuleResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/attendance/v1/archive_rule");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListArchiveRuleResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct LeaveAccrualRecordResource<'a> {
@@ -1045,6 +1192,91 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchLeaveEmployExpireRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get(
+        &self,
+        leave_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetLeaveEmployExpireRecordResp> {
+        let path = format!("/open-apis/attendance/v1/leave_employ_expire_records/{leave_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(GetLeaveEmployExpireRecordResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct ApprovalInfoProcessResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> ApprovalInfoProcessResource<'a> {
+    pub async fn process(
+        &self,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ProcessApprovalInfoResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/attendance/v1/approval_infos/process",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ProcessApprovalInfoResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct FileResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> FileResource<'a> {
+    pub async fn download(&self, file_id: &str, option: &RequestOption) -> Result<DownloadResp> {
+        let path = format!("/open-apis/attendance/v1/files/{file_id}/download");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let mut opt = option.clone();
+        opt.file_download = true;
+        let api_resp = transport::request(self.config, &api_req, &opt).await?;
+        let file_name = api_resp.file_name_by_header();
+        let data = api_resp.raw_body.clone();
+        Ok(DownloadResp {
+            api_resp,
+            file_name,
+            data,
+        })
+    }
+
+    pub async fn upload(
+        &self,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<UploadFileResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/files/upload");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UploadFileResp {
             api_resp,
             code_error,
             data,
@@ -1522,8 +1754,10 @@ pub struct V1<'a> {
     pub user_setting: UserSettingResource<'a>,
     pub record: RecordResource<'a>,
     pub approval_info: ApprovalInfoResource<'a>,
+    pub approval_info_process: ApprovalInfoProcessResource<'a>,
     pub leave_accrual: LeaveAccrualResource<'a>,
     pub archive_rule: ArchiveRuleResource<'a>,
+    pub file: FileResource<'a>,
     pub leave_accrual_record: LeaveAccrualRecordResource<'a>,
     pub leave_employ_expire_record: LeaveEmployExpireRecordResource<'a>,
     pub user_approval: UserApprovalResource<'a>,
@@ -1545,8 +1779,10 @@ impl<'a> V1<'a> {
             user_setting: UserSettingResource { config },
             record: RecordResource { config },
             approval_info: ApprovalInfoResource { config },
+            approval_info_process: ApprovalInfoProcessResource { config },
             leave_accrual: LeaveAccrualResource { config },
             archive_rule: ArchiveRuleResource { config },
+            file: FileResource { config },
             leave_accrual_record: LeaveAccrualRecordResource { config },
             leave_employ_expire_record: LeaveEmployExpireRecordResource { config },
             user_approval: UserApprovalResource { config },

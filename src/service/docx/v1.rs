@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::transport;
 
 // ── Domain types ──
@@ -239,6 +239,30 @@ macro_rules! impl_resp {
     };
 }
 
+fn parse_v2<T>(api_resp: ApiResp, raw: RawResponse<T>) -> (ApiResp, Option<CodeError>, Option<T>) {
+    if raw.code_error.code != 0 {
+        (api_resp, Some(raw.code_error), None)
+    } else {
+        (api_resp, None, raw.data)
+    }
+}
+
+macro_rules! impl_resp_v2 {
+    ($name:ident, $data:ty) => {
+        #[derive(Debug, Clone)]
+        pub struct $name {
+            pub api_resp: ApiResp,
+            pub code_error: Option<CodeError>,
+            pub data: Option<$data>,
+        }
+        impl $name {
+            pub fn success(&self) -> bool {
+                self.code_error.as_ref().is_none_or(|e| e.code == 0)
+            }
+        }
+    };
+}
+
 #[derive(Debug, Clone)]
 pub struct EmptyResp {
     pub api_resp: ApiResp,
@@ -312,6 +336,18 @@ impl_resp!(UpdateBlockResp, UpdateBlockData);
 impl_resp!(BatchUpdateBlockResp, BatchUpdateBlockData);
 impl_resp!(ListBlockResp, BlockListData);
 impl_resp!(GetBuildingBlockResp, BuildingBlockData);
+
+impl_resp_v2!(GetChatAnnouncementResp, serde_json::Value);
+impl_resp_v2!(BatchUpdateChatAnnouncementBlockResp, serde_json::Value);
+impl_resp_v2!(GetChatAnnouncementBlockResp, serde_json::Value);
+impl_resp_v2!(ListChatAnnouncementBlockResp, serde_json::Value);
+impl_resp_v2!(
+    BatchDeleteChatAnnouncementBlockChildrenResp,
+    serde_json::Value
+);
+impl_resp_v2!(CreateChatAnnouncementBlockChildrenResp, serde_json::Value);
+impl_resp_v2!(GetChatAnnouncementBlockChildrenResp, serde_json::Value);
+impl_resp_v2!(CreateDocumentBlockDescendantResp, serde_json::Value);
 
 // ── Resources ──
 
@@ -618,12 +654,285 @@ impl<'a> BuildingBlockResource<'a> {
     }
 }
 
+pub struct ChatAnnouncementResource<'a> {
+    config: &'a Config,
+}
+
+impl ChatAnnouncementResource<'_> {
+    pub async fn get(
+        &self,
+        chat_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetChatAnnouncementResp> {
+        let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(GetChatAnnouncementResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct ChatAnnouncementBlockResource<'a> {
+    config: &'a Config,
+}
+
+impl ChatAnnouncementBlockResource<'_> {
+    pub async fn batch_update(
+        &self,
+        chat_id: &str,
+        body: &serde_json::Value,
+        document_revision_id: Option<i64>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateChatAnnouncementBlockResp> {
+        let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/batch_update");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = document_revision_id {
+            api_req
+                .query_params
+                .set("document_revision_id", v.to_string());
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(BatchUpdateChatAnnouncementBlockResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn get(
+        &self,
+        chat_id: &str,
+        block_id: &str,
+        document_revision_id: Option<i64>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetChatAnnouncementBlockResp> {
+        let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = document_revision_id {
+            api_req
+                .query_params
+                .set("document_revision_id", v.to_string());
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(GetChatAnnouncementBlockResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn list(
+        &self,
+        chat_id: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        document_revision_id: Option<i64>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListChatAnnouncementBlockResp> {
+        let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = document_revision_id {
+            api_req
+                .query_params
+                .set("document_revision_id", v.to_string());
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListChatAnnouncementBlockResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct ChatAnnouncementBlockChildrenResource<'a> {
+    config: &'a Config,
+}
+
+impl ChatAnnouncementBlockChildrenResource<'_> {
+    pub async fn batch_delete(
+        &self,
+        chat_id: &str,
+        block_id: &str,
+        body: &serde_json::Value,
+        document_revision_id: Option<i64>,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteChatAnnouncementBlockChildrenResp> {
+        let path = format!(
+            "/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}/children/batch_delete"
+        );
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = document_revision_id {
+            api_req
+                .query_params
+                .set("document_revision_id", v.to_string());
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(BatchDeleteChatAnnouncementBlockChildrenResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn create(
+        &self,
+        chat_id: &str,
+        block_id: &str,
+        body: &serde_json::Value,
+        document_revision_id: Option<i64>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateChatAnnouncementBlockChildrenResp> {
+        let path =
+            format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}/children");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = document_revision_id {
+            api_req
+                .query_params
+                .set("document_revision_id", v.to_string());
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateChatAnnouncementBlockChildrenResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn get(
+        &self,
+        chat_id: &str,
+        block_id: &str,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        document_revision_id: Option<i64>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetChatAnnouncementBlockChildrenResp> {
+        let path =
+            format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}/children");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = document_revision_id {
+            api_req
+                .query_params
+                .set("document_revision_id", v.to_string());
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(GetChatAnnouncementBlockChildrenResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct DocumentBlockDescendantResource<'a> {
+    config: &'a Config,
+}
+
+impl DocumentBlockDescendantResource<'_> {
+    pub async fn create(
+        &self,
+        document_id: &str,
+        block_id: &str,
+        body: &serde_json::Value,
+        document_revision_id: Option<i64>,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateDocumentBlockDescendantResp> {
+        let path =
+            format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}/descendant");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        if let Some(v) = document_revision_id {
+            api_req
+                .query_params
+                .set("document_revision_id", v.to_string());
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateDocumentBlockDescendantResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
     pub document: DocumentResource<'a>,
     pub block: DocumentBlockResource<'a>,
     pub building_block: BuildingBlockResource<'a>,
+    pub chat_announcement: ChatAnnouncementResource<'a>,
+    pub chat_announcement_block: ChatAnnouncementBlockResource<'a>,
+    pub chat_announcement_block_children: ChatAnnouncementBlockChildrenResource<'a>,
+    pub document_block_descendant: DocumentBlockDescendantResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -632,6 +941,10 @@ impl<'a> V1<'a> {
             document: DocumentResource { config },
             block: DocumentBlockResource { config },
             building_block: BuildingBlockResource { config },
+            chat_announcement: ChatAnnouncementResource { config },
+            chat_announcement_block: ChatAnnouncementBlockResource { config },
+            chat_announcement_block_children: ChatAnnouncementBlockChildrenResource { config },
+            document_block_descendant: DocumentBlockDescendantResource { config },
         }
     }
 }

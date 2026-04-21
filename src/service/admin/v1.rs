@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::transport;
 
 // ── Domain types ──
@@ -217,6 +217,38 @@ impl_resp!(GetBadgeGrantResp, BadgeGrantData);
 impl_resp!(ListBadgeGrantResp, BadgeGrantListData);
 impl_resp!(GetDeptStatResp, DeptStatListData);
 
+// ── impl_resp_v2! macro ──
+
+fn parse_v2<T>(api_resp: ApiResp, raw: RawResponse<T>) -> (ApiResp, Option<CodeError>, Option<T>) {
+    if raw.code_error.code != 0 {
+        (api_resp, Some(raw.code_error), None)
+    } else {
+        (api_resp, None, raw.data)
+    }
+}
+
+macro_rules! impl_resp_v2 {
+    ($name:ident, $data:ty) => {
+        #[derive(Debug, Clone)]
+        pub struct $name {
+            pub api_resp: ApiResp,
+            pub code_error: Option<CodeError>,
+            pub data: Option<$data>,
+        }
+        impl $name {
+            pub fn success(&self) -> bool {
+                self.code_error.as_ref().map_or(true, |e| e.code == 0)
+            }
+        }
+    };
+}
+
+impl_resp_v2!(UpdateBadgeResp, BadgeData);
+impl_resp_v2!(UpdateBadgeGrantResp, BadgeGrantData);
+impl_resp_v2!(ListAdminUserStatResp, serde_json::Value);
+impl_resp_v2!(ListAuditInfoResp, serde_json::Value);
+impl_resp_v2!(CreateBadgeImageResp, serde_json::Value);
+
 // ── Resources ──
 
 pub struct PasswordResource<'a> {
@@ -300,6 +332,26 @@ impl<'a> BadgeResource<'a> {
             api_resp,
             code_error: raw.code_error,
             data: raw.data,
+        })
+    }
+
+    pub async fn update(
+        &self,
+        badge_id: &str,
+        body: &CreateBadgeReqBody,
+        option: &RequestOption,
+    ) -> Result<UpdateBadgeResp> {
+        let path = format!("/open-apis/admin/v1/badges/{badge_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<BadgeData>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UpdateBadgeResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 }
@@ -416,6 +468,35 @@ impl<'a> BadgeGrantResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn update(
+        &self,
+        badge_id: &str,
+        grant_id: &str,
+        body: &CreateBadgeGrantReqBody,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<UpdateBadgeGrantResp> {
+        let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants/{grant_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = department_id_type {
+            api_req.query_params.set("department_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<BadgeGrantData>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(UpdateBadgeGrantResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct AdminDeptStatResource<'a> {
@@ -462,6 +543,140 @@ impl<'a> AdminDeptStatResource<'a> {
     }
 }
 
+pub struct AdminUserStatResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AdminUserStatResource<'a> {
+    #[allow(clippy::too_many_arguments)]
+    pub async fn list(
+        &self,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        start_date: &str,
+        end_date: &str,
+        department_id: Option<&str>,
+        user_id: Option<&str>,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListAdminUserStatResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/admin_user_stats");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = department_id_type {
+            api_req.query_params.set("department_id_type", v);
+        }
+        api_req.query_params.set("start_date", start_date);
+        api_req.query_params.set("end_date", end_date);
+        if let Some(v) = department_id {
+            api_req.query_params.set("department_id", v);
+        }
+        if let Some(v) = user_id {
+            api_req.query_params.set("user_id", v);
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListAdminUserStatResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct AuditInfoResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AuditInfoResource<'a> {
+    #[allow(clippy::too_many_arguments)]
+    pub async fn list(
+        &self,
+        user_id_type: Option<&str>,
+        latest: Option<&str>,
+        oldest: Option<&str>,
+        event_name: Option<&str>,
+        operator_type: Option<&str>,
+        operator_value: Option<&str>,
+        event_module: Option<i32>,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListAuditInfoResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/audit_infos");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = latest {
+            api_req.query_params.set("latest", v);
+        }
+        if let Some(v) = oldest {
+            api_req.query_params.set("oldest", v);
+        }
+        if let Some(v) = event_name {
+            api_req.query_params.set("event_name", v);
+        }
+        if let Some(v) = operator_type {
+            api_req.query_params.set("operator_type", v);
+        }
+        if let Some(v) = operator_value {
+            api_req.query_params.set("operator_value", v);
+        }
+        if let Some(v) = event_module {
+            api_req.query_params.set("event_module", v.to_string());
+        }
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(ListAuditInfoResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
+pub struct BadgeImageResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> BadgeImageResource<'a> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateBadgeImageResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/admin/v1/badge_images");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateBadgeImageResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
@@ -469,6 +684,9 @@ pub struct V1<'a> {
     pub badge: BadgeResource<'a>,
     pub badge_grant: BadgeGrantResource<'a>,
     pub dept_stat: AdminDeptStatResource<'a>,
+    pub user_stat: AdminUserStatResource<'a>,
+    pub audit_info: AuditInfoResource<'a>,
+    pub badge_image: BadgeImageResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -478,6 +696,9 @@ impl<'a> V1<'a> {
             badge: BadgeResource { config },
             badge_grant: BadgeGrantResource { config },
             dept_stat: AdminDeptStatResource { config },
+            user_stat: AdminUserStatResource { config },
+            audit_info: AuditInfoResource { config },
+            badge_image: BadgeImageResource { config },
         }
     }
 }
