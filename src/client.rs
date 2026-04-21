@@ -148,6 +148,10 @@ impl Client {
         service::corehr::v1::V1::new(&self.config)
     }
 
+    pub fn corehr_v2(&self) -> service::corehr::v2::V2<'_> {
+        service::corehr::v2::V2::new(&self.config)
+    }
+
     pub fn docx(&self) -> service::docx::v1::V1<'_> {
         service::docx::v1::V1::new(&self.config)
     }
