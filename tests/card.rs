@@ -1,6 +1,5 @@
 use larksuite_oapi_sdk_rs::card::{
-    ActionElement, ButtonComponent, Card, CardConfig, CardHeader, DivElement, DivField, HrElement,
-    MarkdownElement, TextObject,
+    ActionElement, Card, CardConfig, CardHeader, DivElement, DivField, TextObject,
 };
 
 #[test]

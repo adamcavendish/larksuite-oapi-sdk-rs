@@ -34,6 +34,44 @@ pub struct P2AttendanceUserApprovalCreatedV1 {
     pub time_off_approvals: Vec<serde_json::Value>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2AttendanceUserFlowCreatedV1 {
+    #[serde(default)]
+    pub user_id: String,
+    #[serde(default)]
+    pub creator_id: String,
+    #[serde(default)]
+    pub location_name: String,
+    #[serde(default)]
+    pub check_time: String,
+    #[serde(default)]
+    pub comment: String,
+    #[serde(default)]
+    pub record_id: String,
+    #[serde(default)]
+    pub longitude: f64,
+    #[serde(default)]
+    pub latitude: f64,
+    #[serde(default)]
+    pub ssid: String,
+    #[serde(default)]
+    pub bssid: String,
+    #[serde(default)]
+    pub check_result: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2AttendanceRemedyApplyUpdatedV1 {
+    #[serde(default)]
+    pub remedy_id: String,
+    #[serde(default)]
+    pub user_id: String,
+    #[serde(default)]
+    pub apply_time: String,
+    #[serde(default)]
+    pub status: i32,
+}
+
 // ── Handler registration helpers ──
 
 fn wrap_handler<T, F, Fut>(
@@ -76,5 +114,21 @@ impl EventDispatcher {
         Fut: Future<Output = Result<()>> + Send + 'static,
     {
         self.on_event("attendance.user_approval.created_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_attendance_user_flow_created_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2AttendanceUserFlowCreatedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("attendance.user_flow.created_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_attendance_remedy_apply_updated_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2AttendanceRemedyApplyUpdatedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("attendance.remedy_apply.updated_v1", wrap_handler(handler))
     }
 }

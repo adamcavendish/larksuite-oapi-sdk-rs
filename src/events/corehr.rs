@@ -185,4 +185,42 @@ impl EventDispatcher {
     {
         self.on_event("corehr.job_change.updated_v1", wrap_handler(handler))
     }
+
+    pub fn on_p2_corehr_pre_hire_updated_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("corehr.pre_hire.updated_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_corehr_probation_updated_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "corehr.probation_management.updated_v1",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_corehr_org_role_authorization_updated_v2<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "corehr.org_role_authorization.updated_v2",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_corehr_contract_created_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("corehr.contract.created_v1", wrap_handler(handler))
+    }
 }

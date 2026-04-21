@@ -161,4 +161,85 @@ impl EventDispatcher {
     {
         self.on_event("contact.scope.updated_v3", wrap_handler(handler))
     }
+
+    pub fn on_p2_contact_employee_type_enum_created_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "contact.employee_type_enum.created_v3",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_contact_employee_type_enum_updated_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "contact.employee_type_enum.updated_v3",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_contact_employee_type_enum_deleted_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "contact.employee_type_enum.deleted_v3",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_contact_job_family_created_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("contact.job_family.created_v3", wrap_handler(handler))
+    }
+
+    pub fn on_p2_contact_job_family_updated_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("contact.job_family.updated_v3", wrap_handler(handler))
+    }
+
+    pub fn on_p2_contact_job_family_deleted_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("contact.job_family.deleted_v3", wrap_handler(handler))
+    }
+
+    pub fn on_p2_contact_job_level_created_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("contact.job_level.created_v3", wrap_handler(handler))
+    }
+
+    pub fn on_p2_contact_job_level_updated_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("contact.job_level.updated_v3", wrap_handler(handler))
+    }
+
+    pub fn on_p2_contact_job_level_deleted_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("contact.job_level.deleted_v3", wrap_handler(handler))
+    }
 }
