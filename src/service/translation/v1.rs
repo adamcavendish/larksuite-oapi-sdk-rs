@@ -102,11 +102,8 @@ impl<'a> TextResource<'a> {
         body: &DetectLanguageReqBody,
         option: &RequestOption,
     ) -> Result<DetectLanguageResp> {
-        let mut api_req = ApiReq::new(
-            http::Method::POST,
-            "/open-apis/translation/v1/text/detect_language",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/translation/v1/text/detect");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<DetectData>(self.config, &api_req, option).await?;

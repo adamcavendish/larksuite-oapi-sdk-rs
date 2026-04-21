@@ -108,10 +108,26 @@ pub struct ContentResource<'a> {
 }
 
 impl<'a> ContentResource<'a> {
-    pub async fn get(&self, document_id: &str, option: &RequestOption) -> Result<GetContentResp> {
-        let path = format!("/open-apis/docs/v1/{document_id}/content");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+    pub async fn get(
+        &self,
+        doc_token: &str,
+        doc_type: Option<&str>,
+        content_type: Option<&str>,
+        lang: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetContentResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/docs/v1/content");
+        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
+        api_req.query_params.set("doc_token", doc_token);
+        if let Some(v) = doc_type {
+            api_req.query_params.set("doc_type", v);
+        }
+        if let Some(v) = content_type {
+            api_req.query_params.set("content_type", v);
+        }
+        if let Some(v) = lang {
+            api_req.query_params.set("lang", v);
+        }
         let (api_resp, raw) =
             transport::request_typed::<ContentData>(self.config, &api_req, option).await?;
         Ok(GetContentResp {

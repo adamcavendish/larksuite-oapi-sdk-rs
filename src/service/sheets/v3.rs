@@ -354,6 +354,13 @@ impl_resp!(QueryDataValidationResp, DataValidationListData);
 impl_resp!(FindSheetResp, serde_json::Value);
 impl_resp!(MoveDimensionSheetResp, serde_json::Value);
 impl_resp!(ReplaceSheetResp, serde_json::Value);
+impl_resp!(GetSheetFilterResp, SheetFilterData);
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetFilterData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sheet_filter_info: Option<serde_json::Value>,
+}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FloatImage {
@@ -1285,6 +1292,93 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
     }
 }
 
+pub struct SheetFilterResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> SheetFilterResource<'a> {
+    pub async fn create(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter"
+        );
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter"
+        );
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+
+    pub async fn get(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetSheetFilterResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter"
+        );
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        let (api_resp, raw) =
+            transport::request_typed::<SheetFilterData>(self.config, &api_req, option).await?;
+        Ok(GetSheetFilterResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn update(
+        &self,
+        spreadsheet_token: &str,
+        sheet_id: &str,
+        body: &serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<EmptyResp> {
+        let path = format!(
+            "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter"
+        );
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        Ok(EmptyResp {
+            api_resp,
+            code_error: raw.code_error,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V3<'a> {
@@ -1296,6 +1390,7 @@ pub struct V3<'a> {
     pub conditional_format: ConditionalFormatResource<'a>,
     pub data_validation: DataValidationResource<'a>,
     pub float_image: SpreadsheetSheetFloatImageResource<'a>,
+    pub sheet_filter: SheetFilterResource<'a>,
 }
 
 impl<'a> V3<'a> {
@@ -1309,6 +1404,7 @@ impl<'a> V3<'a> {
             conditional_format: ConditionalFormatResource { config },
             data_validation: DataValidationResource { config },
             float_image: SpreadsheetSheetFloatImageResource { config },
+            sheet_filter: SheetFilterResource { config },
         }
     }
 }

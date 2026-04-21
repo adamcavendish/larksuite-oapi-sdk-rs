@@ -1646,6 +1646,77 @@ pub struct JobRequirementResource<'a> {
 }
 
 impl<'a> JobRequirementResource<'a> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateJobRequirementResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/job_requirements");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = department_id_type {
+            api_req.query_params.set("department_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateJobRequirementResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        job_requirement_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteJobRequirementResp> {
+        let path = format!("/open-apis/hire/v1/job_requirements/{job_requirement_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(DeleteJobRequirementResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn update(
+        &self,
+        job_requirement_id: &str,
+        body: serde_json::Value,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<UpdateJobRequirementResp> {
+        let path = format!("/open-apis/hire/v1/job_requirements/{job_requirement_id}");
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        if let Some(v) = department_id_type {
+            api_req.query_params.set("department_id_type", v);
+        }
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(UpdateJobRequirementResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub async fn list(
         &self,
@@ -1748,6 +1819,24 @@ impl<'a> AttachmentResource<'a> {
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
+        })
+    }
+
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateAttachmentResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/attachments");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateAttachmentResp {
+            api_resp,
+            code_error,
+            data,
         })
     }
 }
@@ -1964,6 +2053,19 @@ impl_resp_v2!(ListWebsiteChannelResp, serde_json::Value);
 impl_resp_v2!(UpdateWebsiteChannelResp, serde_json::Value);
 impl_resp_v2!(GetWebsiteDeliveryTaskResp, serde_json::Value);
 impl_resp_v2!(CreateWebsiteSiteUserResp, serde_json::Value);
+
+// ── New response types (Phase 11 — missing methods) ──
+
+impl_resp_v2!(GetAgencyResp, serde_json::Value);
+impl_resp_v2!(CreateAttachmentResp, serde_json::Value);
+impl_resp_v2!(CreateEcoAccountCustomFieldResp, serde_json::Value);
+impl_resp_v2!(CreateEcoBackgroundCheckCustomFieldResp, serde_json::Value);
+impl_resp_v2!(CreateEcoBackgroundCheckPackageResp, serde_json::Value);
+impl_resp_v2!(CreateEcoExamPaperResp, serde_json::Value);
+impl_resp_v2!(CreateJobRequirementResp, serde_json::Value);
+impl_resp_v2!(DeleteJobRequirementResp, ());
+impl_resp_v2!(UpdateJobRequirementResp, serde_json::Value);
+impl_resp_v2!(CreateReferralAccountResp, serde_json::Value);
 
 // ── Employee resource ──
 
@@ -2872,6 +2974,28 @@ impl AgencyResource<'_> {
             data,
         })
     }
+
+    pub async fn get(
+        &self,
+        agency_id: &str,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetAgencyResp> {
+        let path = format!("/open-apis/hire/v1/agencies/{agency_id}");
+        let mut api_req = ApiReq::new(http::Method::GET, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(GetAgencyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 // ── BackgroundCheckOrder resource ──
@@ -2939,6 +3063,27 @@ pub struct EcoAccountCustomFieldResource<'a> {
 }
 
 impl EcoAccountCustomFieldResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateEcoAccountCustomFieldResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_account_custom_fields",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateEcoAccountCustomFieldResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     pub async fn batch_delete(
         &self,
         body: serde_json::Value,
@@ -3060,6 +3205,27 @@ pub struct EcoBackgroundCheckCustomFieldResource<'a> {
 }
 
 impl EcoBackgroundCheckCustomFieldResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateEcoBackgroundCheckCustomFieldResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_background_check_custom_fields",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateEcoBackgroundCheckCustomFieldResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     pub async fn batch_delete(
         &self,
         body: serde_json::Value,
@@ -3110,6 +3276,27 @@ pub struct EcoBackgroundCheckPackageResource<'a> {
 }
 
 impl EcoBackgroundCheckPackageResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateEcoBackgroundCheckPackageResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/hire/v1/eco_background_check_packages",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateEcoBackgroundCheckPackageResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     pub async fn batch_delete(
         &self,
         body: serde_json::Value,
@@ -3208,6 +3395,24 @@ pub struct EcoExamPaperResource<'a> {
 }
 
 impl EcoExamPaperResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateEcoExamPaperResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/eco_exam_papers");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateEcoExamPaperResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     pub async fn batch_delete(
         &self,
         body: serde_json::Value,
@@ -3338,6 +3543,24 @@ pub struct ReferralAccountResource<'a> {
 }
 
 impl ReferralAccountResource<'_> {
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateReferralAccountResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/hire/v1/referral_account");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateReferralAccountResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     pub async fn deactivate(
         &self,
         referral_account_id: &str,

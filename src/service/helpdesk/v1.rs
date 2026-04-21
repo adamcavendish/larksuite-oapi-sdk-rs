@@ -727,8 +727,8 @@ impl<'a> TicketResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/tickets/{ticket_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let mut api_req = ApiReq::new(http::Method::PUT, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;

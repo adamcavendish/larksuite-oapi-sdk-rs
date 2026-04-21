@@ -699,10 +699,48 @@ impl<'a> ContractResource<'a> {
     }
 }
 
+// ── BusinessLicense resource ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BusinessLicenseData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub business_license: Option<serde_json::Value>,
+}
+
+impl_resp_v2!(RecognizeBusinessLicenseResp, BusinessLicenseData);
+
+pub struct BusinessLicenseResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> BusinessLicenseResource<'a> {
+    pub async fn recognize(
+        &self,
+        body: &RecognizeFileReqBody,
+        option: &RequestOption,
+    ) -> Result<RecognizeBusinessLicenseResp> {
+        let mut api_req = ApiReq::new(
+            http::Method::POST,
+            "/open-apis/document_ai/v1/business_license/recognize",
+        );
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<BusinessLicenseData>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(RecognizeBusinessLicenseResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+}
+
 // ── Version struct ──
 
 pub struct V1<'a> {
     pub ai: AiResource<'a>,
+    pub business_license: BusinessLicenseResource<'a>,
     pub contract: ContractResource<'a>,
     pub chinese_passport: ChinesePassportResource<'a>,
     pub driving_license: DrivingLicenseResource<'a>,
@@ -720,6 +758,7 @@ impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             ai: AiResource { config },
+            business_license: BusinessLicenseResource { config },
             contract: ContractResource { config },
             chinese_passport: ChinesePassportResource { config },
             driving_license: DrivingLicenseResource { config },

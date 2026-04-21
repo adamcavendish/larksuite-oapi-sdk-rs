@@ -582,6 +582,61 @@ impl<'a> CompanyResource<'a> {
             data: raw.data,
         })
     }
+
+    pub async fn create(
+        &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateCompanyResp> {
+        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/companies");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(CreateCompanyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn delete(
+        &self,
+        company_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteCompanyResp> {
+        let path = format!("/open-apis/corehr/v1/companies/{company_id}");
+        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(DeleteCompanyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
+    pub async fn patch(
+        &self,
+        company_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<PatchCompanyResp> {
+        let path = format!("/open-apis/corehr/v1/companies/{company_id}");
+        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::json(&body)?);
+        let (api_resp, raw) =
+            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw)();
+        Ok(PatchCompanyResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
 }
 
 pub struct LocationResource<'a> {
@@ -814,6 +869,9 @@ impl_resp_v2!(CreateWorkingHoursTypeResp, serde_json::Value);
 impl_resp_v2!(DeleteWorkingHoursTypeResp, ());
 impl_resp_v2!(GetWorkingHoursTypeResp, serde_json::Value);
 impl_resp_v2!(PatchWorkingHoursTypeResp, serde_json::Value);
+impl_resp_v2!(CreateCompanyResp, serde_json::Value);
+impl_resp_v2!(DeleteCompanyResp, ());
+impl_resp_v2!(PatchCompanyResp, serde_json::Value);
 
 // ── New Resource Structs ──
 

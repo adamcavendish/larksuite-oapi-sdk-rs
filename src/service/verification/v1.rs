@@ -58,6 +58,14 @@ pub struct VerificationTaskData {
 impl_resp!(CreateVerificationTaskResp, VerificationTaskData);
 impl_resp!(GetVerificationTaskResp, VerificationTaskData);
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct VerificationData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verification: Option<serde_json::Value>,
+}
+
+impl_resp!(GetVerificationResp, VerificationData);
+
 // ── Resources ──
 
 pub struct VerificationTaskResource<'a> {
@@ -111,13 +119,33 @@ impl<'a> VerificationTaskResource<'a> {
 
 // ── Version struct ──
 
+pub struct VerificationResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> VerificationResource<'a> {
+    pub async fn get(&self, option: &RequestOption) -> Result<GetVerificationResp> {
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/verification/v1/verification");
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        let (api_resp, raw) =
+            transport::request_typed::<VerificationData>(self.config, &api_req, option).await?;
+        Ok(GetVerificationResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+}
+
 pub struct V1<'a> {
+    pub verification: VerificationResource<'a>,
     pub verification_task: VerificationTaskResource<'a>,
 }
 
 impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
+            verification: VerificationResource { config },
             verification_task: VerificationTaskResource { config },
         }
     }

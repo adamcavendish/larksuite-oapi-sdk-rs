@@ -214,6 +214,25 @@ pub struct WhiteboardNodeResource<'a> {
 }
 
 impl<'a> WhiteboardNodeResource<'a> {
+    pub async fn create(
+        &self,
+        whiteboard_id: &str,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<CreateWhiteboardNodeResp> {
+        let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/nodes");
+        let mut api_req = ApiReq::new(http::Method::POST, &path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.body = Some(ReqBody::Json(body));
+        let (api_resp, raw) =
+            transport::request_typed::<WhiteboardNodeData>(self.config, &api_req, option).await?;
+        Ok(CreateWhiteboardNodeResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
     pub async fn create_plantuml(
         &self,
         whiteboard_id: &str,
