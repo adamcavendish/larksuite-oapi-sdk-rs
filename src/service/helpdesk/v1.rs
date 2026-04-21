@@ -1133,7 +1133,7 @@ impl<'a> CategoryResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateCategoryResp> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/categories");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<CategoryData>(self.config, &api_req, option).await?;
@@ -1165,7 +1165,7 @@ impl<'a> CategoryResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/categories/{id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1178,7 +1178,7 @@ impl<'a> CategoryResource<'a> {
     pub async fn delete(&self, id: &str, option: &RequestOption) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/categories/{id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
@@ -1218,7 +1218,7 @@ impl<'a> FaqResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFaqResp> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/faqs");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<FaqData>(self.config, &api_req, option).await?;
@@ -1250,7 +1250,7 @@ impl<'a> FaqResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/faqs/{id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1263,7 +1263,7 @@ impl<'a> FaqResource<'a> {
     pub async fn delete(&self, id: &str, option: &RequestOption) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/faqs/{id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
@@ -1368,7 +1368,7 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateNotificationResp> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/notifications");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
@@ -1390,7 +1390,7 @@ impl<'a> NotificationResource<'a> {
     ) -> Result<GetNotificationResp> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
@@ -1411,7 +1411,7 @@ impl<'a> NotificationResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/submit_approve");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::Json(body));
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1458,7 +1458,7 @@ impl<'a> NotificationResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel_approve");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
@@ -1475,7 +1475,7 @@ impl<'a> NotificationResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel_send");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1493,7 +1493,7 @@ impl<'a> NotificationResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/execute_send");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1510,7 +1510,7 @@ impl<'a> NotificationResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/preview");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
@@ -1528,7 +1528,7 @@ impl<'a> NotificationResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = user_id_type {
             api_req.query_params.set("user_id_type", v);
         }
@@ -1549,7 +1549,7 @@ impl<'a> NotificationResource<'a> {
     ) -> Result<SubmitApproveNotificationResp> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/submit_approve");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) = transport::request_typed::<SubmitApproveNotificationRespData>(
             self.config,
@@ -1578,7 +1578,7 @@ impl<'a> AgentSkillResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateAgentSkillResp> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/agent_skills");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<CreateAgentSkillRespData>(self.config, &api_req, option)
@@ -1593,7 +1593,7 @@ impl<'a> AgentSkillResource<'a> {
     pub async fn delete(&self, agent_skill_id: &str, option: &RequestOption) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
@@ -1641,7 +1641,7 @@ impl<'a> AgentSkillResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1768,7 +1768,7 @@ impl<'a> TicketCustomizedFieldResource<'a> {
             http::Method::POST,
             "/open-apis/helpdesk/v1/ticket_customized_fields",
         );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -1786,7 +1786,7 @@ impl<'a> TicketCustomizedFieldResource<'a> {
         let path =
             format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
         Ok(EmptyResp {
@@ -1860,7 +1860,7 @@ impl<'a> TicketCustomizedFieldResource<'a> {
         let path =
             format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;

@@ -191,7 +191,7 @@ impl<'a> EntityResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateEntityResp> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/entities");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = repo_id {
             api_req.query_params.set("repo_id", v);
         }
@@ -218,7 +218,7 @@ impl<'a> EntityResource<'a> {
     ) -> Result<UpdateEntityResp> {
         let path = format!("/open-apis/lingo/v1/entities/{entity_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = repo_id {
             api_req.query_params.set("repo_id", v);
         }
@@ -244,7 +244,7 @@ impl<'a> EntityResource<'a> {
     ) -> Result<EmptyResp> {
         let path = format!("/open-apis/lingo/v1/entities/{entity_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = provider {
             api_req.query_params.set("provider", v);
         }

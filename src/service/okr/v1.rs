@@ -178,7 +178,7 @@ impl<'a> PeriodResource<'a> {
         option: &RequestOption,
     ) -> Result<ListPeriodResp> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/okr/v1/periods");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_token {
             api_req.query_params.set("page_token", v);
         }

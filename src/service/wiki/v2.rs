@@ -266,7 +266,7 @@ impl<'a> SpaceResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateSpaceResp> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/wiki/v2/spaces");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+        api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<SpaceData>(self.config, &api_req, option).await?;
