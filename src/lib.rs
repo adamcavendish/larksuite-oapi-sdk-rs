@@ -14,8 +14,8 @@
 //! - **Event dispatch** — webhook and WebSocket event routing via [`EventDispatcher`].
 //! - **Typed events** — 200+ typed event structs under [`events`].
 //! - **Card builder** — interactive Lark card construction via [`card`].
-//! - **WebSocket client** — persistent long-connection event stream via [`ws::WsClient`].
-//! - **Axum adapter** — feature-gated `axum` integration for HTTP servers.
+//! - **WebSocket client** — feature-gated (`ws`) persistent long-connection event stream via [`ws::WsClient`].
+//! - **Axum adapter** — feature-gated (`axum`) integration for HTTP servers.
 
 pub mod cache;
 pub mod card;
@@ -33,6 +33,7 @@ pub mod resp;
 pub mod service;
 pub mod token;
 pub(crate) mod transport;
+#[cfg(feature = "ws")]
 pub mod ws;
 
 #[cfg(feature = "axum")]

@@ -391,6 +391,7 @@ impl Client {
     }
 
     /// Create a [`WsClient`](crate::ws::WsClient) that shares this client's token cache.
+    #[cfg(feature = "ws")]
     pub fn ws_client(&self, dispatcher: crate::event::EventDispatcher) -> crate::ws::WsClient {
         crate::ws::WsClient::new(self.config.clone(), dispatcher)
     }

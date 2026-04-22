@@ -77,6 +77,7 @@ async fn all_service_accessors() {
     let _ = client.ext();
 }
 
+#[cfg(feature = "ws")]
 #[tokio::test]
 async fn ws_client_accessor() {
     let client = Client::builder("app", "secret").build();
