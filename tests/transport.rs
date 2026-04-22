@@ -1,6 +1,6 @@
 use larksuite_oapi_sdk_rs::error::Error;
 use larksuite_oapi_sdk_rs::req::{ApiReq, RequestOption};
-use larksuite_oapi_sdk_rs::{Client, Config};
+use larksuite_oapi_sdk_rs::Client;
 
 fn default_option() -> RequestOption {
     RequestOption::default()
@@ -8,7 +8,6 @@ fn default_option() -> RequestOption {
 
 #[tokio::test]
 async fn transport_rejects_empty_app_id() {
-    let config = Config::new("", "secret");
     let client = Client::builder("", "secret").build();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     let err = client
@@ -16,7 +15,6 @@ async fn transport_rejects_empty_app_id() {
         .await
         .unwrap_err();
     assert!(matches!(err, Error::IllegalParam(_)));
-    drop(config);
 }
 
 #[tokio::test]

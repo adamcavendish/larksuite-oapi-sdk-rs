@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use aioduct::runtime::TokioRuntime;
 use http::HeaderMap;
 
 use crate::cache::Cache;
@@ -18,7 +17,6 @@ use crate::transport;
 #[derive(Debug)]
 pub struct ClientBuilder {
     config: Config,
-    explicit_http_client: bool,
 }
 
 impl ClientBuilder {
@@ -39,12 +37,6 @@ impl ClientBuilder {
 
     pub fn token_cache(mut self, cache: Arc<dyn Cache>) -> Self {
         self.config.token_cache = cache;
-        self
-    }
-
-    pub fn http_client(mut self, client: aioduct::Client<TokioRuntime>) -> Self {
-        self.config.http_client = client;
-        self.explicit_http_client = true;
         self
     }
 
@@ -88,11 +80,9 @@ impl ClientBuilder {
 
     pub fn build(self) -> Client {
         let mut config = self.config;
-        if !self.explicit_http_client {
-            config.http_client = aioduct::Client::builder()
-                .timeout(config.req_timeout)
-                .build();
-        }
+        config.http_client = aioduct::Client::builder()
+            .timeout(config.req_timeout)
+            .build();
         Client { config }
     }
 }
@@ -107,7 +97,6 @@ impl Client {
     pub fn builder(app_id: impl Into<String>, app_secret: impl Into<String>) -> ClientBuilder {
         ClientBuilder {
             config: Config::new(app_id, app_secret),
-            explicit_http_client: false,
         }
     }
 

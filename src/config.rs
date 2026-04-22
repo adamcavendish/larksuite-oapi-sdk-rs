@@ -7,43 +7,28 @@ use http::HeaderMap;
 use crate::cache::{Cache, LocalCache};
 use crate::constants::{AppType, FEISHU_BASE_URL};
 
-/// SDK configuration. Prefer constructing via [`ClientBuilder`](crate::ClientBuilder).
+/// SDK configuration. Construct via [`ClientBuilder`](crate::ClientBuilder).
 #[derive(Clone)]
 pub struct Config {
-    /// Base URL for API requests (default: Feishu `https://open.feishu.cn`).
-    pub base_url: String,
-    /// Lark/Feishu application ID.
-    pub app_id: String,
-    /// Lark/Feishu application secret (hidden from `Debug` output).
-    pub app_secret: String,
-    /// Helpdesk ID for helpdesk-authenticated endpoints.
-    pub helpdesk_id: Option<String>,
-    /// Helpdesk token for helpdesk-authenticated endpoints.
-    pub helpdesk_token: Option<String>,
-    /// Base64-encoded `{id}:{token}`, set automatically by [`ClientBuilder::helpdesk_credential`](crate::ClientBuilder::helpdesk_credential).
-    pub helpdesk_auth_token: Option<String>,
-    /// HTTP request timeout (default: 30s).
-    pub req_timeout: Duration,
-    /// Underlying HTTP client. Rebuilt automatically when [`ClientBuilder::timeout`](crate::ClientBuilder::timeout) is set without an explicit client.
-    pub http_client: aioduct::Client<TokioRuntime>,
-    /// Self-built (default) or marketplace app.
-    pub app_type: AppType,
-    /// Whether to cache access tokens (default: true).
-    pub enable_token_cache: bool,
-    /// Shared token cache. Cloning `Config` shares the same cache via `Arc`.
-    pub token_cache: Arc<dyn Cache>,
-    /// Headers sent with every request.
-    pub default_headers: HeaderMap,
-    /// Skip event callback signature verification (for testing only).
-    pub skip_sign_verify: bool,
-    /// Maximum number of retries on transient errors (default: 2).
-    pub max_retries: u32,
-    /// Minimum tracing level for SDK log output.
-    pub log_level: Option<tracing::Level>,
+    pub(crate) base_url: String,
+    pub(crate) app_id: String,
+    pub(crate) app_secret: String,
+    pub(crate) helpdesk_id: Option<String>,
+    pub(crate) helpdesk_token: Option<String>,
+    pub(crate) helpdesk_auth_token: Option<String>,
+    pub(crate) req_timeout: Duration,
+    pub(crate) http_client: aioduct::Client<TokioRuntime>,
+    pub(crate) app_type: AppType,
+    pub(crate) enable_token_cache: bool,
+    pub(crate) token_cache: Arc<dyn Cache>,
+    pub(crate) default_headers: HeaderMap,
+    pub(crate) skip_sign_verify: bool,
+    pub(crate) max_retries: u32,
+    pub(crate) log_level: Option<tracing::Level>,
 }
 
 impl Config {
-    pub fn new(app_id: impl Into<String>, app_secret: impl Into<String>) -> Self {
+    pub(crate) fn new(app_id: impl Into<String>, app_secret: impl Into<String>) -> Self {
         let timeout = Duration::from_secs(30);
         let http_client = aioduct::Client::builder().timeout(timeout).build();
         Self {
@@ -63,6 +48,62 @@ impl Config {
             max_retries: 2,
             log_level: None,
         }
+    }
+
+    pub fn base_url(&self) -> &str {
+        &self.base_url
+    }
+
+    pub fn app_id(&self) -> &str {
+        &self.app_id
+    }
+
+    pub fn app_secret(&self) -> &str {
+        &self.app_secret
+    }
+
+    pub fn helpdesk_id(&self) -> Option<&str> {
+        self.helpdesk_id.as_deref()
+    }
+
+    pub fn helpdesk_token(&self) -> Option<&str> {
+        self.helpdesk_token.as_deref()
+    }
+
+    pub fn helpdesk_auth_token(&self) -> Option<&str> {
+        self.helpdesk_auth_token.as_deref()
+    }
+
+    pub fn req_timeout(&self) -> Duration {
+        self.req_timeout
+    }
+
+    pub fn app_type(&self) -> AppType {
+        self.app_type
+    }
+
+    pub fn enable_token_cache(&self) -> bool {
+        self.enable_token_cache
+    }
+
+    pub fn token_cache(&self) -> &Arc<dyn Cache> {
+        &self.token_cache
+    }
+
+    pub fn default_headers(&self) -> &HeaderMap {
+        &self.default_headers
+    }
+
+    pub fn skip_sign_verify(&self) -> bool {
+        self.skip_sign_verify
+    }
+
+    pub fn max_retries(&self) -> u32 {
+        self.max_retries
+    }
+
+    pub fn log_level(&self) -> Option<tracing::Level> {
+        self.log_level
     }
 }
 

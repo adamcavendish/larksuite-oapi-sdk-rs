@@ -207,20 +207,15 @@ async fn invalid_json_body_returns_500() {
     assert_eq!(resp.status_code, 500);
 }
 
-// ── EventDispatcher: with_config skip_sign_verify ──
+// ── EventDispatcher: skip_sign_verify ──
 
 #[tokio::test]
 async fn skip_sign_verify_bypasses_signature_check() {
-    use larksuite_oapi_sdk_rs::Config;
-
-    let mut config = Config::new("app", "secret");
-    config.skip_sign_verify = true;
-
     let received = Arc::new(Mutex::new(false));
     let received_clone = Arc::clone(&received);
 
     let dispatcher = EventDispatcher::new("", "some_encrypt_key")
-        .with_config(config)
+        .skip_sign_verify()
         .on_event("test.event_v1", move |_val| {
             let r = Arc::clone(&received_clone);
             async move {
@@ -298,11 +293,6 @@ async fn card_handler_wrong_verification_token() {
 
 #[tokio::test]
 async fn card_handler_dispatches_action() {
-    use larksuite_oapi_sdk_rs::Config;
-
-    let mut config = Config::new("app", "secret");
-    config.skip_sign_verify = true;
-
     let received_action = Arc::new(Mutex::new(None::<serde_json::Value>));
     let received_clone = Arc::clone(&received_action);
 
@@ -313,7 +303,7 @@ async fn card_handler_dispatches_action() {
             Ok(serde_json::json!({"status": "handled"}))
         }
     })
-    .with_config(config);
+    .skip_sign_verify();
 
     let body = serde_json::json!({
         "open_id": "ou_123",
@@ -661,13 +651,8 @@ fn event_req_serde_roundtrip() {
 
 #[tokio::test]
 async fn auto_app_ticket_stores_ticket() {
-    use larksuite_oapi_sdk_rs::Config;
-
-    let mut config = Config::new("app", "secret");
-    config.skip_sign_verify = true;
-
     let dispatcher = EventDispatcher::new("", "")
-        .with_config(config)
+        .skip_sign_verify()
         .with_auto_app_ticket();
 
     let body = serde_json::json!({
@@ -696,13 +681,8 @@ async fn auto_app_ticket_stores_ticket() {
 
 #[tokio::test]
 async fn auto_app_ticket_empty_fields_noop() {
-    use larksuite_oapi_sdk_rs::Config;
-
-    let mut config = Config::new("app", "secret");
-    config.skip_sign_verify = true;
-
     let dispatcher = EventDispatcher::new("", "")
-        .with_config(config)
+        .skip_sign_verify()
         .with_auto_app_ticket();
 
     let body = serde_json::json!({
@@ -733,12 +713,7 @@ async fn auto_app_ticket_empty_fields_noop() {
 
 #[tokio::test]
 async fn event_no_handler_returns_200() {
-    use larksuite_oapi_sdk_rs::Config;
-
-    let mut config = Config::new("app", "secret");
-    config.skip_sign_verify = true;
-
-    let dispatcher = EventDispatcher::new("", "").with_config(config);
+    let dispatcher = EventDispatcher::new("", "").skip_sign_verify();
 
     let body = serde_json::json!({
         "schema": "2.0",
@@ -798,17 +773,12 @@ async fn card_handler_invalid_json_returns_500() {
 
 #[tokio::test]
 async fn card_handler_error_returns_500() {
-    use larksuite_oapi_sdk_rs::Config;
-
-    let mut config = Config::new("app", "secret");
-    config.skip_sign_verify = true;
-
     let handler = CardActionHandler::new("", "", |_action: CardAction| async {
         Err(larksuite_oapi_sdk_rs::error::Error::Event(
             "handler failed".to_string(),
         ))
     })
-    .with_config(config);
+    .skip_sign_verify();
 
     let body = serde_json::json!({
         "open_id": "ou_1",

@@ -7,14 +7,13 @@
 //! # Example
 //!
 //! ```rust,no_run
-//! use larksuite_oapi_sdk_rs::{Config, EventDispatcher};
-//! use larksuite_oapi_sdk_rs::ws::WsClient;
+//! use larksuite_oapi_sdk_rs::{Client, EventDispatcher};
 //!
 //! # #[tokio::main]
 //! # async fn main() {
-//! let config = Config::new("APP_ID", "APP_SECRET");
+//! let client = Client::builder("APP_ID", "APP_SECRET").build();
 //! let dispatcher = EventDispatcher::new("VERIFICATION_TOKEN", "ENCRYPT_KEY");
-//! WsClient::new(config, dispatcher).start().await.unwrap();
+//! client.ws_client(dispatcher).start().await.unwrap();
 //! # }
 //! ```
 

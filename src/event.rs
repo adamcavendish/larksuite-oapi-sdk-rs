@@ -20,7 +20,7 @@ use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
 
-use crate::config::Config;
+use crate::cache::Cache;
 use crate::crypto;
 use crate::error::{Error, Result};
 
@@ -109,7 +109,8 @@ pub struct EventDispatcher {
     callback_handlers: HashMap<String, CallbackHandlerFn>,
     verification_token: String,
     event_encrypt_key: String,
-    config: Option<Config>,
+    skip_sign_verify: bool,
+    token_cache: Option<Arc<dyn Cache>>,
 }
 
 impl EventDispatcher {
@@ -122,12 +123,18 @@ impl EventDispatcher {
             callback_handlers: HashMap::new(),
             verification_token: verification_token.into(),
             event_encrypt_key: event_encrypt_key.into(),
-            config: None,
+            skip_sign_verify: false,
+            token_cache: None,
         }
     }
 
-    pub fn with_config(mut self, config: Config) -> Self {
-        self.config = Some(config);
+    pub fn skip_sign_verify(mut self) -> Self {
+        self.skip_sign_verify = true;
+        self
+    }
+
+    pub fn token_cache(mut self, cache: Arc<dyn Cache>) -> Self {
+        self.token_cache = Some(cache);
         self
     }
 
@@ -139,10 +146,9 @@ impl EventDispatcher {
 
         use crate::token::AppTicketManager;
 
-        let cache: Arc<dyn crate::cache::Cache> = self
-            .config
-            .as_ref()
-            .map(|c| c.token_cache.clone())
+        let cache: Arc<dyn Cache> = self
+            .token_cache
+            .clone()
             .unwrap_or_else(|| Arc::new(crate::cache::LocalCache::new()));
 
         self.on_event("app_ticket", move |val: serde_json::Value| {
@@ -219,7 +225,7 @@ impl EventDispatcher {
             return self.handle_url_verification(&parsed);
         }
 
-        if !self.skip_sign_verify() {
+        if !self.skip_sign_verify {
             self.verify_signature(&req)?;
         }
 
@@ -283,10 +289,6 @@ impl EventDispatcher {
 
         Ok(())
     }
-
-    fn skip_sign_verify(&self) -> bool {
-        skip_sign_verify(self.config.as_ref())
-    }
 }
 
 pub type CardHandlerFn = Arc<
@@ -300,7 +302,7 @@ pub struct CardActionHandler {
     verification_token: String,
     event_encrypt_key: String,
     handler: CardHandlerFn,
-    config: Option<Config>,
+    skip_sign_verify: bool,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -341,12 +343,12 @@ impl CardActionHandler {
             handler: Arc::new(move |action: CardAction| -> Pin<Box<dyn Future<Output = Result<serde_json::Value>> + Send>> {
                 Box::pin(handler(action))
             }),
-            config: None,
+            skip_sign_verify: false,
         }
     }
 
-    pub fn with_config(mut self, config: Config) -> Self {
-        self.config = Some(config);
+    pub fn skip_sign_verify(mut self) -> Self {
+        self.skip_sign_verify = true;
         self
     }
 
@@ -373,7 +375,7 @@ impl CardActionHandler {
             return self.handle_challenge(&parsed);
         }
 
-        if !self.skip_sign_verify() {
+        if !self.skip_sign_verify {
             self.verify_signature_sha1(&req.headers, &body_str)?;
         }
 
@@ -420,10 +422,6 @@ impl CardActionHandler {
 
         Ok(())
     }
-
-    fn skip_sign_verify(&self) -> bool {
-        skip_sign_verify(self.config.as_ref())
-    }
 }
 
 fn get_header(headers: &HashMap<String, Vec<String>>, key: &str) -> String {
@@ -446,10 +444,6 @@ fn extract_signature_headers(
     }
 
     Ok((timestamp, nonce, sig))
-}
-
-fn skip_sign_verify(config: Option<&Config>) -> bool {
-    config.is_some_and(|c| c.skip_sign_verify)
 }
 
 fn decrypt_if_needed(encrypt_key: &str, body: &str) -> Result<String> {
