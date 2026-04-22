@@ -681,6 +681,32 @@ pub struct I18nElements {
     pub en_us: Option<Vec<Element>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ja_jp: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_hk: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_tw: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id_id: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vi_vn: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub th_th: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pt_br: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub es_es: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ko_kr: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub de_de: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fr_fr: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub it_it: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ru_ru: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ms_my: Option<Vec<Element>>,
 }
 
 impl I18nElements {
@@ -700,6 +726,71 @@ impl I18nElements {
 
     pub fn ja_jp(mut self, elements: Vec<Element>) -> Self {
         self.ja_jp = Some(elements);
+        self
+    }
+
+    pub fn zh_hk(mut self, elements: Vec<Element>) -> Self {
+        self.zh_hk = Some(elements);
+        self
+    }
+
+    pub fn zh_tw(mut self, elements: Vec<Element>) -> Self {
+        self.zh_tw = Some(elements);
+        self
+    }
+
+    pub fn id_id(mut self, elements: Vec<Element>) -> Self {
+        self.id_id = Some(elements);
+        self
+    }
+
+    pub fn vi_vn(mut self, elements: Vec<Element>) -> Self {
+        self.vi_vn = Some(elements);
+        self
+    }
+
+    pub fn th_th(mut self, elements: Vec<Element>) -> Self {
+        self.th_th = Some(elements);
+        self
+    }
+
+    pub fn pt_br(mut self, elements: Vec<Element>) -> Self {
+        self.pt_br = Some(elements);
+        self
+    }
+
+    pub fn es_es(mut self, elements: Vec<Element>) -> Self {
+        self.es_es = Some(elements);
+        self
+    }
+
+    pub fn ko_kr(mut self, elements: Vec<Element>) -> Self {
+        self.ko_kr = Some(elements);
+        self
+    }
+
+    pub fn de_de(mut self, elements: Vec<Element>) -> Self {
+        self.de_de = Some(elements);
+        self
+    }
+
+    pub fn fr_fr(mut self, elements: Vec<Element>) -> Self {
+        self.fr_fr = Some(elements);
+        self
+    }
+
+    pub fn it_it(mut self, elements: Vec<Element>) -> Self {
+        self.it_it = Some(elements);
+        self
+    }
+
+    pub fn ru_ru(mut self, elements: Vec<Element>) -> Self {
+        self.ru_ru = Some(elements);
+        self
+    }
+
+    pub fn ms_my(mut self, elements: Vec<Element>) -> Self {
+        self.ms_my = Some(elements);
         self
     }
 }

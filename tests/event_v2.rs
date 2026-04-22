@@ -512,14 +512,14 @@ async fn event_p1_protocol_dispatches_by_event_type() {
 
 #[tokio::test]
 async fn card_sha1_signature_valid() {
-    let encrypt_key = "card_sign_key";
+    let verification_token = "card_sign_key";
     let timestamp = "1620000000";
     let nonce = "xyz789";
 
     let received = Arc::new(Mutex::new(false));
     let received_clone = Arc::clone(&received);
 
-    let handler = CardActionHandler::new("", encrypt_key, move |_action: CardAction| {
+    let handler = CardActionHandler::new(verification_token, "", move |_action: CardAction| {
         let r = Arc::clone(&received_clone);
         async move {
             *r.lock().unwrap() = true;
@@ -539,7 +539,7 @@ async fn card_sha1_signature_valid() {
         "delivery_type": ""
     });
     let body_str = serde_json::to_string(&body).unwrap();
-    let sig = compute_sha1_sig(timestamp, nonce, encrypt_key, &body_str);
+    let sig = compute_sha1_sig(timestamp, nonce, verification_token, &body_str);
 
     let headers = HashMap::from([
         (
@@ -562,9 +562,9 @@ async fn card_sha1_signature_valid() {
 
 #[tokio::test]
 async fn card_sha1_signature_invalid_returns_500() {
-    let encrypt_key = "card_sign_key";
+    let verification_token = "card_sign_key";
 
-    let handler = CardActionHandler::new("", encrypt_key, |_action: CardAction| async {
+    let handler = CardActionHandler::new(verification_token, "", |_action: CardAction| async {
         Ok(serde_json::json!({}))
     });
 
@@ -607,9 +607,9 @@ async fn card_sha1_signature_invalid_returns_500() {
 
 #[tokio::test]
 async fn card_missing_signature_header_returns_500() {
-    let encrypt_key = "card_sign_key";
+    let verification_token = "card_sign_key";
 
-    let handler = CardActionHandler::new("", encrypt_key, |_action: CardAction| async {
+    let handler = CardActionHandler::new(verification_token, "", |_action: CardAction| async {
         Ok(serde_json::json!({}))
     });
 
@@ -1107,4 +1107,180 @@ fn parse_req_then_decrypt_event_roundtrip() {
     let cipher = dispatcher.parse_req(&req).unwrap();
     let decrypted = dispatcher.decrypt_event(&cipher).unwrap();
     assert_eq!(decrypted, inner);
+}
+
+// ── CardActionHandler: signature uses verification_token not encrypt_key ──
+
+#[tokio::test]
+async fn card_signature_uses_verification_token() {
+    let verification_token = "my_verify_token";
+    let timestamp = "1620000000";
+    let nonce = "test_nonce";
+
+    let received = Arc::new(Mutex::new(false));
+    let received_clone = Arc::clone(&received);
+
+    let handler = CardActionHandler::new(
+        verification_token,
+        "some_encrypt_key",
+        move |_action: CardAction| {
+            let r = Arc::clone(&received_clone);
+            async move {
+                *r.lock().unwrap() = true;
+                Ok(serde_json::json!({}))
+            }
+        },
+    );
+
+    let body = serde_json::json!({
+        "open_id": "ou_1",
+        "action": {}
+    });
+    let body_str = serde_json::to_string(&body).unwrap();
+    let sig = compute_sha1_sig(timestamp, nonce, verification_token, &body_str);
+
+    let headers = HashMap::from([
+        (
+            "X-Lark-Request-Timestamp".to_string(),
+            vec![timestamp.to_string()],
+        ),
+        ("X-Lark-Request-Nonce".to_string(), vec![nonce.to_string()]),
+        ("X-Lark-Signature".to_string(), vec![sig]),
+    ]);
+
+    let req = EventReq {
+        headers,
+        body: body_str.into_bytes(),
+        request_uri: "/card".to_string(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    assert!(*received.lock().unwrap());
+}
+
+#[tokio::test]
+async fn card_empty_verification_token_skips_signature() {
+    let received = Arc::new(Mutex::new(false));
+    let received_clone = Arc::clone(&received);
+
+    let handler = CardActionHandler::new("", "some_encrypt_key", move |_action: CardAction| {
+        let r = Arc::clone(&received_clone);
+        async move {
+            *r.lock().unwrap() = true;
+            Ok(serde_json::json!({}))
+        }
+    });
+
+    let body = serde_json::json!({
+        "open_id": "ou_1",
+        "action": {}
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/card".to_string(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    assert!(*received.lock().unwrap());
+}
+
+// ── EventDispatcher: on_card_action_trigger ──
+
+#[tokio::test]
+async fn on_card_action_trigger_dispatches_typed() {
+    use larksuite_oapi_sdk_rs::event::{CardActionTriggerResponse, Toast};
+
+    let dispatcher = EventDispatcher::new("", "")
+        .skip_sign_verify()
+        .on_card_action_trigger(|req| async move {
+            assert_eq!(req.action.as_ref().unwrap().tag, "button");
+            Ok(CardActionTriggerResponse {
+                toast: Some(Toast {
+                    toast_type: Some("success".to_string()),
+                    content: Some("Done!".to_string()),
+                    i18n: None,
+                }),
+                card: None,
+            })
+        });
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_trigger",
+            "event_type": "card.action.trigger",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {
+            "action": { "tag": "button", "value": {} },
+            "token": "tok",
+            "host": "lark",
+            "delivery_type": "push"
+        }
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: String::new(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
+    assert_eq!(parsed["toast"]["type"], "success");
+    assert_eq!(parsed["toast"]["content"], "Done!");
+}
+
+// ── EventDispatcher: on_url_preview_get ──
+
+#[tokio::test]
+async fn on_url_preview_get_dispatches_typed() {
+    use larksuite_oapi_sdk_rs::event::{InlinePreview, URLPreviewGetResponse};
+
+    let dispatcher = EventDispatcher::new("", "")
+        .skip_sign_verify()
+        .on_url_preview_get(|req| async move {
+            assert_eq!(req.context.as_ref().unwrap().url, "https://example.com");
+            Ok(URLPreviewGetResponse {
+                inline: Some(InlinePreview {
+                    title: Some("Example".to_string()),
+                    i18n_title: None,
+                    image_key: Some("img_key".to_string()),
+                    url: None,
+                }),
+                card: None,
+            })
+        });
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_preview",
+            "event_type": "url.preview.get",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {
+            "host": "lark",
+            "context": {
+                "url": "https://example.com",
+                "preview_token": "ptok",
+                "open_message_id": "om_1",
+                "open_chat_id": "oc_1"
+            }
+        }
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: String::new(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
+    assert_eq!(parsed["inline"]["title"], "Example");
+    assert_eq!(parsed["inline"]["image_key"], "img_key");
 }

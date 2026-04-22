@@ -237,6 +237,40 @@ impl EventDispatcher {
         self
     }
 
+    /// Register a typed handler for `card.action.trigger` callbacks.
+    pub fn on_card_action_trigger<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(CardActionTriggerRequest) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<CardActionTriggerResponse>> + Send + 'static,
+    {
+        self.on_callback("card.action.trigger", move |val: serde_json::Value| {
+            let req: CardActionTriggerRequest = serde_json::from_value(val).unwrap_or_default();
+            let fut = handler(req);
+            async move {
+                let resp = fut.await?;
+                serde_json::to_value(resp)
+                    .map_err(|e| Error::Event(format!("serialize trigger response: {e}")))
+            }
+        })
+    }
+
+    /// Register a typed handler for `url.preview.get` callbacks.
+    pub fn on_url_preview_get<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(URLPreviewGetRequest) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<URLPreviewGetResponse>> + Send + 'static,
+    {
+        self.on_callback("url.preview.get", move |val: serde_json::Value| {
+            let req: URLPreviewGetRequest = serde_json::from_value(val).unwrap_or_default();
+            let fut = handler(req);
+            async move {
+                let resp = fut.await?;
+                serde_json::to_value(resp)
+                    .map_err(|e| Error::Event(format!("serialize preview response: {e}")))
+            }
+        })
+    }
+
     /// Extract the raw event payload from an [`EventReq`].
     ///
     /// If an encrypt key is configured and the body contains an `"encrypt"` field,
@@ -555,13 +589,14 @@ impl CardActionHandler {
         headers: &HashMap<String, Vec<String>>,
         body: &str,
     ) -> Result<()> {
-        if self.event_encrypt_key.is_empty() {
+        if self.verification_token.is_empty() {
             return Ok(());
         }
 
         let (timestamp, nonce, sig) = extract_signature_headers(headers)?;
 
-        if !crypto::verify_signature_sha1(&timestamp, &nonce, &self.event_encrypt_key, body, &sig) {
+        if !crypto::verify_signature_sha1(&timestamp, &nonce, &self.verification_token, body, &sig)
+        {
             return Err(Error::Event(
                 "card signature verification failed".to_string(),
             ));
@@ -609,4 +644,147 @@ fn decrypt_if_needed(encrypt_key: &str, body: &str) -> Result<String> {
         }
         _ => Ok(body.to_string()),
     }
+}
+
+// ── Typed callback types ──
+
+/// Operator info for card action trigger and URL preview callbacks.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CallbackOperator {
+    #[serde(default)]
+    pub tenant_key: Option<String>,
+    #[serde(default)]
+    pub user_id: Option<String>,
+    #[serde(default)]
+    pub open_id: String,
+}
+
+/// Context for card action trigger and URL preview callbacks.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CallbackContext {
+    #[serde(default)]
+    pub url: String,
+    #[serde(default)]
+    pub preview_token: String,
+    #[serde(default)]
+    pub open_message_id: String,
+    #[serde(default)]
+    pub open_chat_id: String,
+}
+
+/// Action detail for card action trigger callbacks.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CallbackAction {
+    #[serde(default)]
+    pub value: serde_json::Map<String, serde_json::Value>,
+    #[serde(default)]
+    pub tag: String,
+    #[serde(default)]
+    pub option: String,
+    #[serde(default)]
+    pub timezone: String,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub form_value: serde_json::Map<String, serde_json::Value>,
+    #[serde(default)]
+    pub input_value: String,
+    #[serde(default)]
+    pub options: Vec<String>,
+    #[serde(default)]
+    pub checked: bool,
+}
+
+/// Request payload for `card.action.trigger` callbacks.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CardActionTriggerRequest {
+    #[serde(default)]
+    pub operator: Option<CallbackOperator>,
+    #[serde(default)]
+    pub token: String,
+    #[serde(default)]
+    pub action: Option<CallbackAction>,
+    #[serde(default)]
+    pub host: String,
+    #[serde(default)]
+    pub delivery_type: String,
+    #[serde(default)]
+    pub context: Option<CallbackContext>,
+}
+
+/// Toast notification in a card action trigger response.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Toast {
+    #[serde(skip_serializing_if = "Option::is_none", rename = "type")]
+    pub toast_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub i18n: Option<HashMap<String, String>>,
+}
+
+/// Card reference in callback responses (template or raw card JSON).
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CallbackCard {
+    #[serde(skip_serializing_if = "Option::is_none", rename = "type")]
+    pub card_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<serde_json::Value>,
+}
+
+/// Response for `card.action.trigger` callbacks.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CardActionTriggerResponse {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub toast: Option<Toast>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub card: Option<CallbackCard>,
+}
+
+/// Request payload for `url.preview.get` callbacks.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct URLPreviewGetRequest {
+    #[serde(default)]
+    pub operator: Option<CallbackOperator>,
+    #[serde(default)]
+    pub host: String,
+    #[serde(default)]
+    pub context: Option<CallbackContext>,
+}
+
+/// Inline preview in a URL preview response.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InlinePreview {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub i18n_title: Option<HashMap<String, String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub image_key: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<PreviewUrl>,
+}
+
+/// Multi-platform URL for inline previews.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PreviewUrl {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub copy_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ios: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub android: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pc: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub web: Option<String>,
+}
+
+/// Response for `url.preview.get` callbacks.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct URLPreviewGetResponse {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline: Option<InlinePreview>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub card: Option<CallbackCard>,
 }
