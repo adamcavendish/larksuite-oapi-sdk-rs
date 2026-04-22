@@ -70,6 +70,58 @@ pub struct P2DriveFilePermissionMemberAddedV1 {
     pub members: Vec<serde_json::Value>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2DriveFileCreatedInFolderV1 {
+    #[serde(default)]
+    pub file_token: String,
+    #[serde(default)]
+    pub file_type: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2DriveFilePermissionMemberAppliedV1 {
+    #[serde(default)]
+    pub file_token: String,
+    #[serde(default)]
+    pub file_type: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2DriveFilePermissionMemberRemovedV1 {
+    #[serde(default)]
+    pub file_token: String,
+    #[serde(default)]
+    pub file_type: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+    #[serde(default)]
+    pub members: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2DriveFileBitableFieldChangedV1 {
+    #[serde(default)]
+    pub file_token: String,
+    #[serde(default)]
+    pub file_type: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2DriveFileBitableRecordChangedV1 {
+    #[serde(default)]
+    pub file_token: String,
+    #[serde(default)]
+    pub file_type: String,
+    #[serde(default)]
+    pub operator_id: serde_json::Value,
+}
+
 // ── Handler registration helpers ──
 
 fn wrap_handler<T, F, Fut>(
@@ -95,57 +147,74 @@ where
     }
 }
 
-// ── EventDispatcher extension methods ──
+// ── EventDispatcher extension methods (all 11 drive/v1 handlers) ──
+
+macro_rules! drive_v1_handler {
+    ($method:ident, $event_key:literal, $payload_type:ty) => {
+        pub fn $method<F, Fut>(self, handler: F) -> Self
+        where
+            F: Fn($payload_type) -> Fut + Send + Sync + 'static,
+            Fut: Future<Output = Result<()>> + Send + 'static,
+        {
+            self.on_event($event_key, wrap_handler(handler))
+        }
+    };
+}
 
 impl EventDispatcher {
-    pub fn on_p2_drive_file_read_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2DriveFileReadV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("drive.file.read_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_drive_file_edited_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2DriveFileEditedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("drive.file.edit_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_drive_file_trashed_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2DriveFileTrashedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("drive.file.trashed_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_drive_file_deleted_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2DriveFileDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("drive.file.deleted_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_drive_file_title_updated_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2DriveFileTitleUpdatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("drive.file.title_updated_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_drive_file_permission_member_added_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2DriveFilePermissionMemberAddedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event(
-            "drive.file.permission_member_added_v1",
-            wrap_handler(handler),
-        )
-    }
+    drive_v1_handler!(
+        on_p2_drive_file_read_v1,
+        "drive.file.read_v1",
+        P2DriveFileReadV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_edited_v1,
+        "drive.file.edit_v1",
+        P2DriveFileEditedV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_trashed_v1,
+        "drive.file.trashed_v1",
+        P2DriveFileTrashedV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_deleted_v1,
+        "drive.file.deleted_v1",
+        P2DriveFileDeletedV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_title_updated_v1,
+        "drive.file.title_updated_v1",
+        P2DriveFileTitleUpdatedV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_permission_member_added_v1,
+        "drive.file.permission_member_added_v1",
+        P2DriveFilePermissionMemberAddedV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_created_in_folder_v1,
+        "drive.file.created_in_folder_v1",
+        P2DriveFileCreatedInFolderV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_permission_member_applied_v1,
+        "drive.file.permission_member_applied_v1",
+        P2DriveFilePermissionMemberAppliedV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_permission_member_removed_v1,
+        "drive.file.permission_member_removed_v1",
+        P2DriveFilePermissionMemberRemovedV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_bitable_field_changed_v1,
+        "drive.file.bitable_field_changed_v1",
+        P2DriveFileBitableFieldChangedV1
+    );
+    drive_v1_handler!(
+        on_p2_drive_file_bitable_record_changed_v1,
+        "drive.file.bitable_record_changed_v1",
+        P2DriveFileBitableRecordChangedV1
+    );
 }

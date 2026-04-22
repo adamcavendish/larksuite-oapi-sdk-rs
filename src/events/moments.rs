@@ -41,6 +41,16 @@ pub struct P2MomentsReactionCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2MomentsReactionDeletedV1 {
+    #[serde(default)]
+    pub entity_id: String,
+    #[serde(default)]
+    pub user_id: serde_json::Value,
+    #[serde(default)]
+    pub reaction_type: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2MomentsCommentCreatedV1 {
     #[serde(default)]
     pub entity_id: String,
@@ -48,6 +58,24 @@ pub struct P2MomentsCommentCreatedV1 {
     pub user_id: serde_json::Value,
     #[serde(default)]
     pub comment: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2MomentsCommentDeletedV1 {
+    #[serde(default)]
+    pub entity_id: String,
+    #[serde(default)]
+    pub user_id: serde_json::Value,
+    #[serde(default)]
+    pub comment_id: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2MomentsPostStatisticsUpdatedV1 {
+    #[serde(default)]
+    pub entity_id: String,
+    #[serde(default)]
+    pub statistics: serde_json::Value,
 }
 
 // ── Handler registration helpers ──
@@ -75,38 +103,54 @@ where
     }
 }
 
-// ── EventDispatcher extension methods ──
+// ── EventDispatcher extension methods (all 7 moments/v1 handlers) ──
+
+macro_rules! moments_v1_handler {
+    ($method:ident, $event_key:literal, $payload_type:ty) => {
+        pub fn $method<F, Fut>(self, handler: F) -> Self
+        where
+            F: Fn($payload_type) -> Fut + Send + Sync + 'static,
+            Fut: Future<Output = Result<()>> + Send + 'static,
+        {
+            self.on_event($event_key, wrap_handler(handler))
+        }
+    };
+}
 
 impl EventDispatcher {
-    pub fn on_p2_moments_post_created_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MomentsPostCreatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("moments.post.published_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_moments_post_deleted_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MomentsPostDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("moments.post.deleted_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_moments_reaction_created_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MomentsReactionCreatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("moments.post.reacted_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_moments_comment_created_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MomentsCommentCreatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("moments.post.comment_replied_v1", wrap_handler(handler))
-    }
+    moments_v1_handler!(
+        on_p2_moments_post_created_v1,
+        "moments.post.created_v1",
+        P2MomentsPostCreatedV1
+    );
+    moments_v1_handler!(
+        on_p2_moments_post_deleted_v1,
+        "moments.post.deleted_v1",
+        P2MomentsPostDeletedV1
+    );
+    moments_v1_handler!(
+        on_p2_moments_reaction_created_v1,
+        "moments.reaction.created_v1",
+        P2MomentsReactionCreatedV1
+    );
+    moments_v1_handler!(
+        on_p2_moments_reaction_deleted_v1,
+        "moments.reaction.deleted_v1",
+        P2MomentsReactionDeletedV1
+    );
+    moments_v1_handler!(
+        on_p2_moments_comment_created_v1,
+        "moments.comment.created_v1",
+        P2MomentsCommentCreatedV1
+    );
+    moments_v1_handler!(
+        on_p2_moments_comment_deleted_v1,
+        "moments.comment.deleted_v1",
+        P2MomentsCommentDeletedV1
+    );
+    moments_v1_handler!(
+        on_p2_moments_post_statistics_updated_v1,
+        "moments.post_statistics.updated_v1",
+        P2MomentsPostStatisticsUpdatedV1
+    );
 }

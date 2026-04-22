@@ -297,4 +297,23 @@ impl EventDispatcher {
     {
         self.on_event("im.chat.member.bot.deleted_v1", wrap_handler(handler))
     }
+
+    pub fn on_p2_im_chat_access_event_bot_p2p_chat_entered_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event(
+            "im.chat.access_event.bot_p2p_chat_entered_v1",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_im_chat_member_user_withdrawn_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("im.chat.member.user.withdrawn_v1", wrap_handler(handler))
+    }
 }

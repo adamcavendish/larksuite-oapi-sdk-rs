@@ -41,6 +41,64 @@ pub struct P2VcMeetingLeftV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcMeetingAllMeetingStartedV1 {
+    #[serde(default)]
+    pub meeting: serde_json::Value,
+    #[serde(default)]
+    pub operator: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcMeetingAllMeetingEndedV1 {
+    #[serde(default)]
+    pub meeting: serde_json::Value,
+    #[serde(default)]
+    pub operator: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcMeetingRecordingStartedV1 {
+    #[serde(default)]
+    pub meeting: serde_json::Value,
+    #[serde(default)]
+    pub operator: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcMeetingRecordingEndedV1 {
+    #[serde(default)]
+    pub meeting: serde_json::Value,
+    #[serde(default)]
+    pub operator: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcMeetingRecordingReadyV1 {
+    #[serde(default)]
+    pub meeting: serde_json::Value,
+    #[serde(default)]
+    pub url: String,
+    #[serde(default)]
+    pub duration: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcMeetingShareStartedV1 {
+    #[serde(default)]
+    pub meeting: serde_json::Value,
+    #[serde(default)]
+    pub operator: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcMeetingShareEndedV1 {
+    #[serde(default)]
+    pub meeting: serde_json::Value,
+    #[serde(default)]
+    pub operator: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2VcRoomCreatedV1 {
     #[serde(default)]
     pub room: serde_json::Value,
@@ -58,6 +116,32 @@ pub struct P2VcRoomUpdatedV1 {
     pub room: serde_json::Value,
     #[serde(default)]
     pub old_room: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcRoomLevelCreatedV1 {
+    #[serde(default)]
+    pub room_level: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcRoomLevelDeletedV1 {
+    #[serde(default)]
+    pub room_level: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcRoomLevelUpdatedV1 {
+    #[serde(default)]
+    pub room_level: serde_json::Value,
+    #[serde(default)]
+    pub old_room_level: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2VcReserveConfigUpdatedV1 {
+    #[serde(default)]
+    pub reserve_config: serde_json::Value,
 }
 
 // ── Handler registration helpers ──
@@ -85,62 +169,109 @@ where
     }
 }
 
-// ── EventDispatcher extension methods ──
+// ── EventDispatcher extension methods (all 18 vc/v1 handlers) ──
+
+macro_rules! vc_v1_handler {
+    ($method:ident, $event_key:literal, $payload_type:ty) => {
+        pub fn $method<F, Fut>(self, handler: F) -> Self
+        where
+            F: Fn($payload_type) -> Fut + Send + Sync + 'static,
+            Fut: Future<Output = Result<()>> + Send + 'static,
+        {
+            self.on_event($event_key, wrap_handler(handler))
+        }
+    };
+}
 
 impl EventDispatcher {
-    pub fn on_p2_vc_meeting_started_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2VcMeetingStartedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("vc.meeting.meeting_started_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_vc_meeting_ended_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2VcMeetingEndedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("vc.meeting.meeting_ended_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_vc_meeting_joined_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2VcMeetingJoinedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("vc.meeting.participant_joined_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_vc_meeting_left_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2VcMeetingLeftV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("vc.meeting.participant_left_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_vc_room_created_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2VcRoomCreatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("vc.room.created_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_vc_room_deleted_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2VcRoomDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("vc.room.deleted_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_vc_room_updated_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2VcRoomUpdatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
-    {
-        self.on_event("vc.room.updated_v1", wrap_handler(handler))
-    }
+    vc_v1_handler!(
+        on_p2_vc_meeting_started_v1,
+        "vc.meeting.meeting_started_v1",
+        P2VcMeetingStartedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_ended_v1,
+        "vc.meeting.meeting_ended_v1",
+        P2VcMeetingEndedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_joined_v1,
+        "vc.meeting.join_meeting_v1",
+        P2VcMeetingJoinedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_left_v1,
+        "vc.meeting.leave_meeting_v1",
+        P2VcMeetingLeftV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_all_meeting_started_v1,
+        "vc.meeting.all_meeting_started_v1",
+        P2VcMeetingAllMeetingStartedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_all_meeting_ended_v1,
+        "vc.meeting.all_meeting_ended_v1",
+        P2VcMeetingAllMeetingEndedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_recording_started_v1,
+        "vc.meeting.recording_started_v1",
+        P2VcMeetingRecordingStartedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_recording_ended_v1,
+        "vc.meeting.recording_ended_v1",
+        P2VcMeetingRecordingEndedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_recording_ready_v1,
+        "vc.meeting.recording_ready_v1",
+        P2VcMeetingRecordingReadyV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_share_started_v1,
+        "vc.meeting.share_started_v1",
+        P2VcMeetingShareStartedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_meeting_share_ended_v1,
+        "vc.meeting.share_ended_v1",
+        P2VcMeetingShareEndedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_room_created_v1,
+        "vc.room.created_v1",
+        P2VcRoomCreatedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_room_deleted_v1,
+        "vc.room.deleted_v1",
+        P2VcRoomDeletedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_room_updated_v1,
+        "vc.room.updated_v1",
+        P2VcRoomUpdatedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_room_level_created_v1,
+        "vc.room_level.created_v1",
+        P2VcRoomLevelCreatedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_room_level_deleted_v1,
+        "vc.room_level.deleted_v1",
+        P2VcRoomLevelDeletedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_room_level_updated_v1,
+        "vc.room_level.updated_v1",
+        P2VcRoomLevelUpdatedV1
+    );
+    vc_v1_handler!(
+        on_p2_vc_reserve_config_updated_v1,
+        "vc.reserve_config.updated_v1",
+        P2VcReserveConfigUpdatedV1
+    );
 }
