@@ -338,6 +338,310 @@ async fn card_handler_dispatches_action() {
     assert_eq!(action_val["tag"], "button");
 }
 
+// ── EventDispatcher: SHA-256 signature verification ──
+
+fn compute_sha256_sig(timestamp: &str, nonce: &str, key: &str, body: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+    let mut content = String::new();
+    content.push_str(timestamp);
+    content.push_str(nonce);
+    content.push_str(key);
+    content.push_str(&String::from_utf8_lossy(body));
+    let mut hasher = Sha256::new();
+    hasher.update(content.as_bytes());
+    hex::encode(hasher.finalize())
+}
+
+fn compute_sha1_sig(timestamp: &str, nonce: &str, key: &str, body: &str) -> String {
+    use sha1::{Digest, Sha1};
+    let mut content = String::new();
+    content.push_str(timestamp);
+    content.push_str(nonce);
+    content.push_str(key);
+    content.push_str(body);
+    let mut hasher = Sha1::new();
+    hasher.update(content.as_bytes());
+    hex::encode(hasher.finalize())
+}
+
+#[tokio::test]
+async fn event_sha256_signature_valid() {
+    let encrypt_key = "test_sign_key";
+    let timestamp = "1620000000";
+    let nonce = "abc123";
+
+    let received = Arc::new(Mutex::new(false));
+    let received_clone = Arc::clone(&received);
+
+    let dispatcher =
+        EventDispatcher::new("", encrypt_key).on_event("im.message.receive_v1", move |_val| {
+            let r = Arc::clone(&received_clone);
+            async move {
+                *r.lock().unwrap() = true;
+                Ok(())
+            }
+        });
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_sig",
+            "event_type": "im.message.receive_v1",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {}
+    });
+    let body_bytes = serde_json::to_vec(&body).unwrap();
+    let sig = compute_sha256_sig(timestamp, nonce, encrypt_key, &body_bytes);
+
+    let headers = HashMap::from([
+        (
+            "X-Lark-Request-Timestamp".to_string(),
+            vec![timestamp.to_string()],
+        ),
+        ("X-Lark-Request-Nonce".to_string(), vec![nonce.to_string()]),
+        ("X-Lark-Signature".to_string(), vec![sig]),
+    ]);
+
+    let req = EventReq {
+        headers,
+        body: body_bytes,
+        request_uri: "/webhook".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    assert!(*received.lock().unwrap());
+}
+
+#[tokio::test]
+async fn event_sha256_signature_invalid_returns_500() {
+    let encrypt_key = "test_sign_key";
+
+    let dispatcher =
+        EventDispatcher::new("", encrypt_key).on_event("test.event_v1", |_val| async { Ok(()) });
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_bad_sig",
+            "event_type": "test.event_v1",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {}
+    });
+    let body_bytes = serde_json::to_vec(&body).unwrap();
+
+    let headers = HashMap::from([
+        (
+            "X-Lark-Request-Timestamp".to_string(),
+            vec!["1620000000".to_string()],
+        ),
+        (
+            "X-Lark-Request-Nonce".to_string(),
+            vec!["nonce".to_string()],
+        ),
+        (
+            "X-Lark-Signature".to_string(),
+            vec!["0000000000000000000000000000000000000000000000000000000000000000".to_string()],
+        ),
+    ]);
+
+    let req = EventReq {
+        headers,
+        body: body_bytes,
+        request_uri: "/webhook".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 500);
+}
+
+#[tokio::test]
+async fn event_missing_signature_header_returns_500() {
+    let encrypt_key = "test_sign_key";
+
+    let dispatcher =
+        EventDispatcher::new("", encrypt_key).on_event("test.event_v1", |_val| async { Ok(()) });
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_no_sig",
+            "event_type": "test.event_v1",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {}
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/webhook".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 500);
+}
+
+// ── EventDispatcher: P1 protocol (no header, event type from event.type) ──
+
+#[tokio::test]
+async fn event_p1_protocol_dispatches_by_event_type() {
+    let received = Arc::new(Mutex::new(false));
+    let received_clone = Arc::clone(&received);
+
+    let dispatcher = EventDispatcher::new("", "").on_event("app_open", move |_val| {
+        let r = Arc::clone(&received_clone);
+        async move {
+            *r.lock().unwrap() = true;
+            Ok(())
+        }
+    });
+
+    let body = serde_json::json!({
+        "event": {
+            "type": "app_open",
+            "app_id": "cli_test"
+        }
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/webhook".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    assert!(*received.lock().unwrap());
+}
+
+// ── CardActionHandler: SHA-1 signature verification ──
+
+#[tokio::test]
+async fn card_sha1_signature_valid() {
+    let encrypt_key = "card_sign_key";
+    let timestamp = "1620000000";
+    let nonce = "xyz789";
+
+    let received = Arc::new(Mutex::new(false));
+    let received_clone = Arc::clone(&received);
+
+    let handler = CardActionHandler::new("", encrypt_key, move |_action: CardAction| {
+        let r = Arc::clone(&received_clone);
+        async move {
+            *r.lock().unwrap() = true;
+            Ok(serde_json::json!({}))
+        }
+    });
+
+    let body = serde_json::json!({
+        "open_id": "ou_1",
+        "user_id": "u_1",
+        "open_message_id": "om_1",
+        "open_chat_id": "oc_1",
+        "tenant_key": "tk",
+        "token": "",
+        "action": {},
+        "host": "",
+        "delivery_type": ""
+    });
+    let body_str = serde_json::to_string(&body).unwrap();
+    let sig = compute_sha1_sig(timestamp, nonce, encrypt_key, &body_str);
+
+    let headers = HashMap::from([
+        (
+            "X-Lark-Request-Timestamp".to_string(),
+            vec![timestamp.to_string()],
+        ),
+        ("X-Lark-Request-Nonce".to_string(), vec![nonce.to_string()]),
+        ("X-Lark-Signature".to_string(), vec![sig]),
+    ]);
+
+    let req = EventReq {
+        headers,
+        body: body_str.into_bytes(),
+        request_uri: "/card".to_string(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    assert!(*received.lock().unwrap());
+}
+
+#[tokio::test]
+async fn card_sha1_signature_invalid_returns_500() {
+    let encrypt_key = "card_sign_key";
+
+    let handler = CardActionHandler::new("", encrypt_key, |_action: CardAction| async {
+        Ok(serde_json::json!({}))
+    });
+
+    let body = serde_json::json!({
+        "open_id": "ou_1",
+        "user_id": "u_1",
+        "open_message_id": "om_1",
+        "open_chat_id": "oc_1",
+        "tenant_key": "tk",
+        "token": "",
+        "action": {},
+        "host": "",
+        "delivery_type": ""
+    });
+    let body_bytes = serde_json::to_vec(&body).unwrap();
+
+    let headers = HashMap::from([
+        (
+            "X-Lark-Request-Timestamp".to_string(),
+            vec!["1620000000".to_string()],
+        ),
+        (
+            "X-Lark-Request-Nonce".to_string(),
+            vec!["nonce".to_string()],
+        ),
+        (
+            "X-Lark-Signature".to_string(),
+            vec!["0000000000000000000000000000000000000000".to_string()],
+        ),
+    ]);
+
+    let req = EventReq {
+        headers,
+        body: body_bytes,
+        request_uri: "/card".to_string(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 500);
+}
+
+#[tokio::test]
+async fn card_missing_signature_header_returns_500() {
+    let encrypt_key = "card_sign_key";
+
+    let handler = CardActionHandler::new("", encrypt_key, |_action: CardAction| async {
+        Ok(serde_json::json!({}))
+    });
+
+    let body = serde_json::json!({
+        "open_id": "ou_1",
+        "user_id": "u_1",
+        "open_message_id": "om_1",
+        "open_chat_id": "oc_1",
+        "tenant_key": "tk",
+        "token": "",
+        "action": {},
+        "host": "",
+        "delivery_type": ""
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/card".to_string(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 500);
+}
+
 // ── EventReq: serde ──
 
 #[test]
