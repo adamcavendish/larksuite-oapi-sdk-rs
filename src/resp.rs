@@ -5,6 +5,7 @@ use crate::constants::{
     HTTP_HEADER_KEY_LOG_ID, HTTP_HEADER_KEY_REQUEST_ID, HTTP_HEADER_REQUEST_ID,
 };
 
+/// Raw HTTP response from the Lark API.
 #[derive(Debug, Clone)]
 pub struct ApiResp {
     pub status_code: u16,
@@ -40,6 +41,7 @@ impl ApiResp {
     }
 }
 
+/// Lark API business-level error returned in the JSON response body.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CodeError {
     pub code: i64,

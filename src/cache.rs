@@ -10,6 +10,8 @@ use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+/// Token cache interface. Implement this trait to use a custom cache backend
+/// (e.g. Redis). The default [`LocalCache`] is an in-memory HashMap with TTL.
 pub trait Cache: Send + Sync {
     fn set(
         &self,
