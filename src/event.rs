@@ -237,6 +237,36 @@ impl EventDispatcher {
         self
     }
 
+    /// Extract the raw event payload from an [`EventReq`].
+    ///
+    /// If an encrypt key is configured and the body contains an `"encrypt"` field,
+    /// returns the encrypted ciphertext string. Otherwise returns the raw body as-is.
+    pub fn parse_req(&self, req: &EventReq) -> Result<String> {
+        let body_str = String::from_utf8(req.body.clone())
+            .map_err(|e| Error::Event(format!("invalid utf8 body: {e}")))?;
+
+        if self.event_encrypt_key.is_empty() {
+            return Ok(body_str);
+        }
+
+        let parsed: std::result::Result<EncryptedBody, _> = serde_json::from_str(&body_str);
+        match parsed {
+            Ok(encrypted) if !encrypted.encrypt.is_empty() => Ok(encrypted.encrypt),
+            _ => Ok(body_str),
+        }
+    }
+
+    /// Decrypt an event payload string.
+    ///
+    /// If an encrypt key is configured, decrypts the ciphertext. Otherwise
+    /// returns the input unchanged. This is the second step after [`parse_req`].
+    pub fn decrypt_event(&self, cipher_event_json: &str) -> Result<String> {
+        if self.event_encrypt_key.is_empty() {
+            return Ok(cipher_event_json.to_string());
+        }
+        crypto::event_decrypt(&self.event_encrypt_key, cipher_event_json)
+    }
+
     pub async fn handle(&self, req: EventReq) -> EventResp {
         match self.do_handle(req).await {
             Ok(resp) => resp,

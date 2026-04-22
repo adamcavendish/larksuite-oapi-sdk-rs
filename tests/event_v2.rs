@@ -1039,3 +1039,72 @@ async fn card_handler_custom_json_variant() {
     let resp_body: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
     assert_eq!(resp_body["card"], "data");
 }
+
+// ── EventDispatcher: parse_req and decrypt_event ──
+
+#[test]
+fn parse_req_returns_raw_body_when_no_encrypt_key() {
+    let dispatcher = EventDispatcher::new("", "");
+    let body = r#"{"schema":"2.0","event":{}}"#;
+    let req = EventReq {
+        headers: Default::default(),
+        body: body.as_bytes().to_vec(),
+        request_uri: String::new(),
+    };
+    let result = dispatcher.parse_req(&req).unwrap();
+    assert_eq!(result, body);
+}
+
+#[test]
+fn parse_req_extracts_encrypt_field_when_present() {
+    let dispatcher = EventDispatcher::new("", "some_key");
+    let body = serde_json::json!({ "encrypt": "cipher_text_here" });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: String::new(),
+    };
+    let result = dispatcher.parse_req(&req).unwrap();
+    assert_eq!(result, "cipher_text_here");
+}
+
+#[test]
+fn parse_req_returns_raw_when_no_encrypt_field() {
+    let dispatcher = EventDispatcher::new("", "some_key");
+    let body = r#"{"schema":"2.0","event":{}}"#;
+    let req = EventReq {
+        headers: Default::default(),
+        body: body.as_bytes().to_vec(),
+        request_uri: String::new(),
+    };
+    let result = dispatcher.parse_req(&req).unwrap();
+    assert_eq!(result, body);
+}
+
+#[test]
+fn decrypt_event_passthrough_when_no_encrypt_key() {
+    let dispatcher = EventDispatcher::new("", "");
+    let result = dispatcher.decrypt_event("plaintext_data").unwrap();
+    assert_eq!(result, "plaintext_data");
+}
+
+#[test]
+fn parse_req_then_decrypt_event_roundtrip() {
+    use larksuite_oapi_sdk_rs::crypto::event_encrypt;
+
+    let encrypt_key = "roundtrip_test_key";
+    let inner = r#"{"schema":"2.0","header":{"event_type":"test"},"event":{}}"#;
+    let encrypted = event_encrypt(encrypt_key, inner).unwrap();
+    let outer = serde_json::json!({ "encrypt": encrypted });
+
+    let dispatcher = EventDispatcher::new("", encrypt_key);
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&outer).unwrap(),
+        request_uri: String::new(),
+    };
+
+    let cipher = dispatcher.parse_req(&req).unwrap();
+    let decrypted = dispatcher.decrypt_event(&cipher).unwrap();
+    assert_eq!(decrypted, inner);
+}

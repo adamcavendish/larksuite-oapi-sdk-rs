@@ -19,7 +19,7 @@
 
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
 use futures_util::{SinkExt as _, StreamExt as _};
@@ -160,6 +160,7 @@ pub struct WsClient {
     ping_interval: Arc<AtomicU64>,
     reconnect_interval: Arc<AtomicU64>,
     reconnect_nonce: Arc<AtomicU64>,
+    auto_reconnect: Arc<AtomicBool>,
 }
 
 impl WsClient {
@@ -170,7 +171,15 @@ impl WsClient {
             ping_interval: Arc::new(AtomicU64::new(120)),
             reconnect_interval: Arc::new(AtomicU64::new(120)),
             reconnect_nonce: Arc::new(AtomicU64::new(30)),
+            auto_reconnect: Arc::new(AtomicBool::new(true)),
         }
+    }
+
+    /// Disable automatic reconnection. When set to `false`, `start()` will
+    /// return after the first connection closes instead of reconnecting.
+    pub fn auto_reconnect(self, enable: bool) -> Self {
+        self.auto_reconnect.store(enable, Ordering::Relaxed);
+        self
     }
 
     fn apply_config(&self, conf: &ClientConfig) {
@@ -188,16 +197,20 @@ impl WsClient {
         }
     }
 
-    /// Run forever, reconnecting on errors.
+    /// Run the WebSocket connection. If auto-reconnect is enabled (default),
+    /// reconnects indefinitely on errors. Otherwise returns after one session.
     pub async fn start(self) -> Result<()> {
         loop {
             match self.run_once().await {
                 Ok(()) => {
-                    tracing::info!("ws connection closed, reconnecting");
+                    tracing::info!("ws connection closed");
                 }
                 Err(e) => {
                     tracing::warn!("ws connection error: {e}");
                 }
+            }
+            if !self.auto_reconnect.load(Ordering::Relaxed) {
+                return Ok(());
             }
             let interval = self.reconnect_interval.load(Ordering::Relaxed);
             let nonce = self.reconnect_nonce.load(Ordering::Relaxed);
@@ -248,11 +261,7 @@ impl WsClient {
                 };
                 let encoded = frame.encode_to_vec();
                 let mut w = ping_write.lock().await;
-                if (*w)
-                    .send(Message::Binary(encoded.into()))
-                    .await
-                    .is_err()
-                {
+                if (*w).send(Message::Binary(encoded.into())).await.is_err() {
                     break;
                 }
                 tracing::debug!("ws ping sent");
