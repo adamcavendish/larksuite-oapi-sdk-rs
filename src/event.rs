@@ -139,24 +139,32 @@ impl EventDispatcher {
 
         use crate::token::AppTicketManager;
 
-        self.on_event("app_ticket", move |val: serde_json::Value| async move {
-            let app_id = val
-                .get("app_id")
-                .and_then(|v| v.as_str())
-                .unwrap_or_default()
-                .to_string();
-            let app_ticket = val
-                .get("app_ticket")
-                .and_then(|v| v.as_str())
-                .unwrap_or_default()
-                .to_string();
-            if app_id.is_empty() || app_ticket.is_empty() {
-                return Ok(());
+        let cache: Arc<dyn crate::cache::Cache> = self
+            .config
+            .as_ref()
+            .map(|c| c.token_cache.clone())
+            .unwrap_or_else(|| Arc::new(crate::cache::LocalCache::new()));
+
+        self.on_event("app_ticket", move |val: serde_json::Value| {
+            let cache = cache.clone();
+            async move {
+                let app_id = val
+                    .get("app_id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or_default()
+                    .to_string();
+                let app_ticket = val
+                    .get("app_ticket")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or_default()
+                    .to_string();
+                if app_id.is_empty() || app_ticket.is_empty() {
+                    return Ok(());
+                }
+                let mgr = AppTicketManager::new(cache);
+                mgr.set(&app_id, &app_ticket, Duration::from_secs(3600))
+                    .await
             }
-            let cache = Arc::new(crate::cache::LocalCache::new());
-            let mgr = AppTicketManager::new(cache);
-            mgr.set(&app_id, &app_ticket, Duration::from_secs(3600))
-                .await
         })
     }
 
@@ -277,7 +285,7 @@ impl EventDispatcher {
     }
 
     fn skip_sign_verify(&self) -> bool {
-        self.config.as_ref().is_some_and(|c| c.skip_sign_verify)
+        skip_sign_verify(self.config.as_ref())
     }
 }
 
@@ -414,7 +422,7 @@ impl CardActionHandler {
     }
 
     fn skip_sign_verify(&self) -> bool {
-        self.config.as_ref().is_some_and(|c| c.skip_sign_verify)
+        skip_sign_verify(self.config.as_ref())
     }
 }
 
@@ -438,6 +446,10 @@ fn extract_signature_headers(
     }
 
     Ok((timestamp, nonce, sig))
+}
+
+fn skip_sign_verify(config: Option<&Config>) -> bool {
+    config.is_some_and(|c| c.skip_sign_verify)
 }
 
 fn decrypt_if_needed(encrypt_key: &str, body: &str) -> Result<String> {

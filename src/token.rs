@@ -5,13 +5,24 @@ use serde::{Deserialize, Serialize};
 
 use crate::cache::Cache;
 use crate::config::Config;
-use crate::constants::*;
+use crate::constants::{
+    APP_ACCESS_TOKEN_INTERNAL_URL_PATH, APP_ACCESS_TOKEN_KEY_PREFIX, APP_ACCESS_TOKEN_URL_PATH,
+    APP_TICKET_KEY_PREFIX, APPLY_APP_TICKET_PATH, AccessTokenType, AppType, EXPIRY_DELTA_SECONDS,
+    TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH, TENANT_ACCESS_TOKEN_KEY_PREFIX,
+    TENANT_ACCESS_TOKEN_URL_PATH,
+};
 use crate::error::{Error, Result};
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
 pub struct TokenManager {
     cache: Arc<dyn Cache>,
+}
+
+impl std::fmt::Debug for TokenManager {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TokenManager").finish_non_exhaustive()
+    }
 }
 
 impl TokenManager {
@@ -65,7 +76,7 @@ impl TokenManager {
     }
 
     async fn fetch_self_built_app_token(&self, config: &Config) -> Result<String> {
-        let body = SelfBuiltAppAccessTokenReq {
+        let body = SelfBuiltTokenReq {
             app_id: &config.app_id,
             app_secret: &config.app_secret,
         };
@@ -84,7 +95,7 @@ impl TokenManager {
     }
 
     async fn fetch_self_built_tenant_token(&self, config: &Config) -> Result<String> {
-        let body = SelfBuiltTenantAccessTokenReq {
+        let body = SelfBuiltTokenReq {
             app_id: &config.app_id,
             app_secret: &config.app_secret,
         };
@@ -187,6 +198,12 @@ pub struct AppTicketManager {
     cache: Arc<dyn Cache>,
 }
 
+impl std::fmt::Debug for AppTicketManager {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AppTicketManager").finish_non_exhaustive()
+    }
+}
+
 impl AppTicketManager {
     pub fn new(cache: Arc<dyn Cache>) -> Self {
         Self { cache }
@@ -226,13 +243,7 @@ impl AppTicketManager {
 }
 
 #[derive(Serialize)]
-struct SelfBuiltAppAccessTokenReq<'a> {
-    app_id: &'a str,
-    app_secret: &'a str,
-}
-
-#[derive(Serialize)]
-struct SelfBuiltTenantAccessTokenReq<'a> {
+struct SelfBuiltTokenReq<'a> {
     app_id: &'a str,
     app_secret: &'a str,
 }

@@ -51,7 +51,7 @@ impl LocalCache {
             loop {
                 ticker.tick().await;
                 let now = Instant::now();
-                let mut guard = store.lock().unwrap();
+                let mut guard = store.lock().unwrap_or_else(|p| p.into_inner());
                 guard.retain(|_, entry| entry.expires_at > now);
             }
         })
@@ -74,7 +74,7 @@ impl Cache for LocalCache {
         let key = key.to_string();
         let value = value.to_string();
         Box::pin(async move {
-            let mut store = self.store.lock().unwrap();
+            let mut store = self.store.lock().unwrap_or_else(|p| p.into_inner());
             store.insert(
                 key,
                 CacheEntry {
@@ -92,7 +92,7 @@ impl Cache for LocalCache {
     ) -> Pin<Box<dyn Future<Output = crate::Result<Option<String>>> + Send + '_>> {
         let key = key.to_string();
         Box::pin(async move {
-            let mut store = self.store.lock().unwrap();
+            let mut store = self.store.lock().unwrap_or_else(|p| p.into_inner());
             match store.get(&key) {
                 Some(entry) if entry.expires_at > Instant::now() => Ok(Some(entry.value.clone())),
                 Some(_) => {

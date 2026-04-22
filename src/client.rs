@@ -15,6 +15,7 @@ use crate::transport;
 
 /// Builder for [`Client`]. Construct via [`Client::builder`].
 #[must_use]
+#[derive(Debug)]
 pub struct ClientBuilder {
     config: Config,
     explicit_http_client: bool,
@@ -97,6 +98,7 @@ impl ClientBuilder {
 }
 
 /// Lark/Feishu API client. All service accessors borrow `&self` and are zero-cost wrappers.
+#[derive(Debug)]
 pub struct Client {
     config: Config,
 }

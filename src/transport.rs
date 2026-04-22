@@ -2,7 +2,11 @@ use http::header::{CONTENT_TYPE, HeaderValue, USER_AGENT as UA_HEADER};
 use tracing::Instrument;
 
 use crate::config::Config;
-use crate::constants::*;
+use crate::constants::{
+    AccessTokenType, AppType, CUSTOM_REQUEST_ID, ERR_CODE_ACCESS_TOKEN_INVALID,
+    ERR_CODE_APP_ACCESS_TOKEN_INVALID, ERR_CODE_APP_TICKET_INVALID,
+    ERR_CODE_TENANT_ACCESS_TOKEN_INVALID, USER_AGENT,
+};
 use crate::error::{Error, Result};
 use crate::req::{ApiReq, FormDataValue, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError, RawResponse};
@@ -372,7 +376,7 @@ fn build_url(config: &Config, api_req: &ApiReq) -> String {
 
 fn is_json_content_type(resp: &ApiResp) -> bool {
     resp.header
-        .get(CONTENT_TYPE.as_str())
+        .get(CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .is_some_and(|v| v.contains("application/json"))
 }
