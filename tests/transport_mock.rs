@@ -857,3 +857,26 @@ async fn transport_empty_supported_tokens_treated_as_none() {
         .unwrap();
     assert_eq!(resp.status_code, 200);
 }
+
+// ── log_level filtering disables debug logging ──
+
+#[tokio::test]
+async fn transport_log_level_filters_debug() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+
+    let client = Client::builder("app_id", "secret")
+        .base_url(format!("http://{addr}"))
+        .disable_token_cache()
+        .log_level(tracing::Level::ERROR)
+        .build();
+
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::None];
+
+    let resp = client
+        .do_req(&api_req, &RequestOption::default())
+        .await
+        .unwrap();
+    assert_eq!(resp.status_code, 200);
+}

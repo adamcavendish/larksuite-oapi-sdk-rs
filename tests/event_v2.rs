@@ -761,3 +761,86 @@ async fn event_no_handler_returns_200() {
     let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
     assert!(parsed["msg"].as_str().unwrap().contains("no handler"));
 }
+
+// ── CardActionHandler: invalid utf8 body returns 500 ──
+
+#[tokio::test]
+async fn card_handler_invalid_utf8_returns_500() {
+    let handler = CardActionHandler::new("", "", |_action: CardAction| async {
+        Ok(serde_json::json!({}))
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: vec![0xFF, 0xFE],
+        request_uri: "/card".to_string(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 500);
+}
+
+// ── CardActionHandler: invalid json body returns 500 ──
+
+#[tokio::test]
+async fn card_handler_invalid_json_returns_500() {
+    let handler = CardActionHandler::new("", "", |_action: CardAction| async {
+        Ok(serde_json::json!({}))
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: b"not json".to_vec(),
+        request_uri: "/card".to_string(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 500);
+}
+
+// ── CardActionHandler: handler error returns 500 ──
+
+#[tokio::test]
+async fn card_handler_error_returns_500() {
+    use larksuite_oapi_sdk_rs::Config;
+
+    let mut config = Config::new("app", "secret");
+    config.skip_sign_verify = true;
+
+    let handler = CardActionHandler::new("", "", |_action: CardAction| async {
+        Err(larksuite_oapi_sdk_rs::error::Error::Event(
+            "handler failed".to_string(),
+        ))
+    })
+    .with_config(config);
+
+    let body = serde_json::json!({
+        "open_id": "ou_1",
+        "user_id": "u_1",
+        "open_message_id": "om_1",
+        "open_chat_id": "oc_1",
+        "tenant_key": "tk",
+        "token": "",
+        "action": {},
+        "host": "",
+        "delivery_type": ""
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/card".to_string(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 500);
+}
+
+// ── EventDispatcher: encrypted body with decrypt error ──
+
+#[tokio::test]
+async fn event_encrypted_body_decrypt_error_returns_500() {
+    let dispatcher = EventDispatcher::new("", "some_key");
+    let body = serde_json::json!({ "encrypt": "!!!invalid-base64!!!" });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/webhook".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 500);
+}
