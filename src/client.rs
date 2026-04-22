@@ -78,6 +78,11 @@ impl ClientBuilder {
         self
     }
 
+    pub fn log_req_at_debug(mut self) -> Self {
+        self.config.log_req_at_debug = true;
+        self
+    }
+
     pub fn build(self) -> Client {
         let mut config = self.config;
         config.http_client = aioduct::Client::builder()

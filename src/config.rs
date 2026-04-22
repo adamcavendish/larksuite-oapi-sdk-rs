@@ -25,6 +25,7 @@ pub struct Config {
     pub(crate) skip_sign_verify: bool,
     pub(crate) max_retries: u32,
     pub(crate) log_level: Option<tracing::Level>,
+    pub(crate) log_req_at_debug: bool,
 }
 
 impl Config {
@@ -47,6 +48,7 @@ impl Config {
             skip_sign_verify: false,
             max_retries: 2,
             log_level: None,
+            log_req_at_debug: false,
         }
     }
 
@@ -104,6 +106,10 @@ impl Config {
 
     pub fn log_level(&self) -> Option<tracing::Level> {
         self.log_level
+    }
+
+    pub fn log_req_at_debug(&self) -> bool {
+        self.log_req_at_debug
     }
 }
 

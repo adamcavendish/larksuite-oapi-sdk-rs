@@ -313,6 +313,34 @@ pub(crate) async fn raw_send(
         None => {}
     }
 
+    if config.log_req_at_debug {
+        match &api_req.body {
+            Some(ReqBody::Json(v)) => {
+                tracing::debug!(
+                    method = %api_req.http_method,
+                    url = %full_url,
+                    body = %v,
+                    "lark.request"
+                );
+            }
+            Some(ReqBody::FormData(_)) => {
+                tracing::debug!(
+                    method = %api_req.http_method,
+                    url = %full_url,
+                    body = "<multipart>",
+                    "lark.request"
+                );
+            }
+            None => {
+                tracing::debug!(
+                    method = %api_req.http_method,
+                    url = %full_url,
+                    "lark.request"
+                );
+            }
+        }
+    }
+
     let response = builder.send().await.map_err(|e| match e {
         aioduct::Error::Timeout => Error::ClientTimeout("request timed out".to_string()),
         aioduct::Error::Io(ref io_err)
@@ -330,13 +358,6 @@ pub(crate) async fn raw_send(
 
     let status_code = response.status().as_u16();
 
-    let enabled = config
-        .log_level
-        .is_none_or(|lvl| lvl <= tracing::Level::DEBUG);
-    if enabled {
-        tracing::debug!(status = status_code, url = %full_url, "lark.response");
-    }
-
     if status_code == 504 {
         return Err(Error::ServerTimeout(
             "server returned 504 Gateway Timeout".to_string(),
@@ -351,6 +372,31 @@ pub(crate) async fn raw_send(
 
     let header = response.headers().clone();
     let raw_body = response.bytes().await.map_err(Error::Http)?.to_vec();
+
+    let enabled = config
+        .log_level
+        .is_none_or(|lvl| lvl <= tracing::Level::DEBUG);
+    if enabled {
+        if config.log_req_at_debug {
+            let content_type = header
+                .get(CONTENT_TYPE)
+                .and_then(|v| v.to_str().ok())
+                .unwrap_or("");
+            let body_str = if content_type.contains("json") || content_type.contains("text") {
+                String::from_utf8_lossy(&raw_body)
+            } else {
+                format!("<binary> len {}", raw_body.len()).into()
+            };
+            tracing::debug!(
+                status = status_code,
+                url = %full_url,
+                body = %body_str,
+                "lark.response"
+            );
+        } else {
+            tracing::debug!(status = status_code, url = %full_url, "lark.response");
+        }
+    }
 
     Ok(ApiResp {
         status_code,

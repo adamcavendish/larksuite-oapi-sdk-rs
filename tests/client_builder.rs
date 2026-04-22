@@ -213,3 +213,15 @@ async fn client_and_builder_debug() {
     assert!(debug.contains("Client"));
     assert!(debug.contains("app_id"));
 }
+
+#[tokio::test]
+async fn builder_log_req_at_debug() {
+    let client = Client::builder("app", "secret").log_req_at_debug().build();
+    assert!(client.config().log_req_at_debug());
+}
+
+#[tokio::test]
+async fn builder_log_req_at_debug_default_false() {
+    let client = Client::builder("app", "secret").build();
+    assert!(!client.config().log_req_at_debug());
+}
