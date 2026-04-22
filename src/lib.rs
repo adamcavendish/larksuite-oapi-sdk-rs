@@ -52,4 +52,8 @@ pub use req::{
     ApiReq, FormDataField, FormDataValue, PathParams, QueryParams, ReqBody, RequestOption,
 };
 pub use resp::{ApiResp, CodeError, CodeErrorInfo, RawResponse};
-pub use token::{AppTicketManager, TokenManager};
+pub use token::{
+    AppTicketManager, AppTokenResponse, MarketplaceAppTokenReq, MarketplaceTenantTokenReq,
+    ResendAppTicketRequest, ResendAppTicketResponse, SelfBuiltAppTokenReq, SelfBuiltTenantTokenReq,
+    TenantTokenResponse, TokenManager,
+};

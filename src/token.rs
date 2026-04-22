@@ -298,3 +298,103 @@ struct ResendAppTicketReq<'a> {
     app_id: &'a str,
     app_secret: &'a str,
 }
+
+// ── Public token endpoint types (matching Go SDK) ──
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SelfBuiltAppTokenReq {
+    pub app_id: String,
+    pub app_secret: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MarketplaceAppTokenReq {
+    pub app_id: String,
+    pub app_secret: String,
+    pub app_ticket: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SelfBuiltTenantTokenReq {
+    pub app_id: String,
+    pub app_secret: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MarketplaceTenantTokenReq {
+    pub app_access_token: String,
+    pub tenant_key: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResendAppTicketRequest {
+    pub app_id: String,
+    pub app_secret: String,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct AppTokenResponse {
+    #[serde(default)]
+    pub code: i64,
+    #[serde(default)]
+    pub msg: String,
+    #[serde(default)]
+    pub expire: u64,
+    #[serde(default)]
+    pub app_access_token: String,
+}
+
+impl AppTokenResponse {
+    pub fn success(&self) -> bool {
+        self.code == 0
+    }
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct TenantTokenResponse {
+    #[serde(default)]
+    pub code: i64,
+    #[serde(default)]
+    pub msg: String,
+    #[serde(default)]
+    pub expire: u64,
+    #[serde(default)]
+    pub tenant_access_token: String,
+}
+
+impl TenantTokenResponse {
+    pub fn success(&self) -> bool {
+        self.code == 0
+    }
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct ResendAppTicketResponse {
+    #[serde(default)]
+    pub code: i64,
+    #[serde(default)]
+    pub msg: String,
+}
+
+impl ResendAppTicketResponse {
+    pub fn success(&self) -> bool {
+        self.code == 0
+    }
+}
+
+pub(crate) async fn token_endpoint<Req: Serialize, Resp: for<'de> Deserialize<'de>>(
+    config: &Config,
+    path: &str,
+    body: &Req,
+) -> Result<(crate::resp::ApiResp, Resp)> {
+    let mut api_req = ApiReq::new(http::Method::POST, path);
+    api_req.body = Some(ReqBody::Json(serde_json::to_value(body)?));
+    api_req.supported_access_token_types = vec![AccessTokenType::None];
+
+    let option = RequestOption::default();
+    let api_resp =
+        transport::raw_send(config, &api_req, &option, AccessTokenType::None, None).await?;
+
+    let resp: Resp = serde_json::from_slice(&api_resp.raw_body)?;
+    Ok((api_resp, resp))
+}

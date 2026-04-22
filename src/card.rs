@@ -29,6 +29,10 @@ pub struct Card {
     pub header: Option<CardHeader>,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub elements: Vec<Element>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub i18n_elements: Option<I18nElements>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub card_link: Option<CardUrl>,
 }
 
 impl Card {
@@ -51,6 +55,16 @@ impl Card {
         self
     }
 
+    pub fn i18n_elements(mut self, i18n: I18nElements) -> Self {
+        self.i18n_elements = Some(i18n);
+        self
+    }
+
+    pub fn card_link(mut self, link: CardUrl) -> Self {
+        self.card_link = Some(link);
+        self
+    }
+
     pub fn to_json(&self) -> Value {
         serde_json::to_value(self).unwrap_or_default()
     }
@@ -64,6 +78,8 @@ pub struct CardConfig {
     pub wide_screen_mode: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enable_forward: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub update_multi: Option<bool>,
 }
 
 impl CardConfig {
@@ -78,6 +94,11 @@ impl CardConfig {
 
     pub fn enable_forward(mut self, v: bool) -> Self {
         self.enable_forward = Some(v);
+        self
+    }
+
+    pub fn update_multi(mut self, v: bool) -> Self {
+        self.update_multi = Some(v);
         self
     }
 }
@@ -261,8 +282,10 @@ pub enum ActionComponent {
     Button(ButtonComponent),
     SelectStatic(SelectStaticComponent),
     MultiSelectStatic(MultiSelectStaticComponent),
+    SelectPerson(SelectPersonComponent),
     DatePicker(DatePickerComponent),
     TimePicker(TimePickerComponent),
+    PickerDatetime(DatetimePickerComponent),
     Overflow(OverflowComponent),
 }
 
@@ -275,6 +298,8 @@ pub struct ButtonComponent {
     pub value: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub multi_url: Option<CardUrl>,
 }
 
 impl ButtonComponent {
@@ -297,6 +322,11 @@ impl ButtonComponent {
 
     pub fn url(mut self, url: impl Into<String>) -> Self {
         self.url = Some(url.into());
+        self
+    }
+
+    pub fn multi_url(mut self, multi_url: CardUrl) -> Self {
+        self.multi_url = Some(multi_url);
         self
     }
 }
@@ -548,6 +578,128 @@ impl TimePickerComponent {
 
     pub fn initial_time(mut self, time: impl Into<String>) -> Self {
         self.initial_time = Some(time.into());
+        self
+    }
+}
+
+// ── DatetimePicker ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DatetimePickerComponent {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub placeholder: Option<TextObject>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub initial_datetime: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<Value>,
+}
+
+impl DatetimePickerComponent {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn placeholder(mut self, text: TextObject) -> Self {
+        self.placeholder = Some(text);
+        self
+    }
+
+    pub fn initial_datetime(mut self, dt: impl Into<String>) -> Self {
+        self.initial_datetime = Some(dt.into());
+        self
+    }
+}
+
+// ── SelectPerson ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SelectPersonComponent {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub placeholder: Option<TextObject>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<Value>,
+}
+
+impl SelectPersonComponent {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn placeholder(mut self, text: TextObject) -> Self {
+        self.placeholder = Some(text);
+        self
+    }
+}
+
+// ── CardUrl (multi-platform URL) ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CardUrl {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub android_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ios_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pc_url: Option<String>,
+}
+
+impl CardUrl {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn url(mut self, url: impl Into<String>) -> Self {
+        self.url = Some(url.into());
+        self
+    }
+
+    pub fn android_url(mut self, url: impl Into<String>) -> Self {
+        self.android_url = Some(url.into());
+        self
+    }
+
+    pub fn ios_url(mut self, url: impl Into<String>) -> Self {
+        self.ios_url = Some(url.into());
+        self
+    }
+
+    pub fn pc_url(mut self, url: impl Into<String>) -> Self {
+        self.pc_url = Some(url.into());
+        self
+    }
+}
+
+// ── I18nElements (per-locale element arrays) ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18nElements {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<Vec<Element>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<Vec<Element>>,
+}
+
+impl I18nElements {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn zh_cn(mut self, elements: Vec<Element>) -> Self {
+        self.zh_cn = Some(elements);
+        self
+    }
+
+    pub fn en_us(mut self, elements: Vec<Element>) -> Self {
+        self.en_us = Some(elements);
+        self
+    }
+
+    pub fn ja_jp(mut self, elements: Vec<Element>) -> Self {
+        self.ja_jp = Some(elements);
         self
     }
 }
