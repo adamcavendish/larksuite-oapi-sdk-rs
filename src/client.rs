@@ -83,7 +83,9 @@ impl ClientBuilder {
         config.http_client = aioduct::Client::builder()
             .timeout(config.req_timeout)
             .build();
-        Client { config }
+        let client = Client { config };
+        client.resend_app_ticket_if_marketplace();
+        client
     }
 }
 
@@ -98,6 +100,23 @@ impl Client {
         ClientBuilder {
             config: Config::new(app_id, app_secret),
         }
+    }
+
+    fn resend_app_ticket_if_marketplace(&self) {
+        use crate::constants::AppType;
+        use crate::token::AppTicketManager;
+
+        if self.config.app_type != AppType::Marketplace {
+            return;
+        }
+
+        let config = self.config.clone();
+        tokio::spawn(async move {
+            let atm = AppTicketManager::new(config.token_cache.clone());
+            if let Err(e) = atm.apply_app_ticket(&config).await {
+                tracing::info!("resend app_ticket on startup: {e}");
+            }
+        });
     }
 
     pub fn config(&self) -> &Config {

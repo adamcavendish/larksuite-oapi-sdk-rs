@@ -1,6 +1,6 @@
+use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::error::Error;
 use larksuite_oapi_sdk_rs::req::{ApiReq, RequestOption};
-use larksuite_oapi_sdk_rs::Client;
 
 fn default_option() -> RequestOption {
     RequestOption::default()

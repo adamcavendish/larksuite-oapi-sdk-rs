@@ -12,7 +12,7 @@ categories = ["api-bindings", "web-programming::http-client"]
 
 [features]
 axum = ["dep:axum"]
-ws = ["dep:tokio-tungstenite", "dep:prost", "dep:futures-util"]
+ws = ["dep:tokio-tungstenite", "dep:prost", "dep:futures-util", "dep:prost-build"]
 
 [dependencies]
 aes = "0.9"
@@ -37,7 +37,7 @@ url = "2"
 uuid = { version = "1", features = ["v4"] }
 
 [build-dependencies]
-prost-build = "0.13"
+prost-build = { version = "0.13", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
