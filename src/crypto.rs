@@ -44,14 +44,11 @@ pub fn verify_signature_sha256(
     body: &[u8],
     expected_sig: &str,
 ) -> bool {
-    let mut content = String::new();
-    content.push_str(timestamp);
-    content.push_str(nonce);
-    content.push_str(encrypt_key);
-    content.push_str(&String::from_utf8_lossy(body));
-
     let mut hasher = Sha256::new();
-    hasher.update(content.as_bytes());
+    hasher.update(timestamp.as_bytes());
+    hasher.update(nonce.as_bytes());
+    hasher.update(encrypt_key.as_bytes());
+    hasher.update(body);
     let result = hex::encode(hasher.finalize());
 
     constant_time_eq(result.as_bytes(), expected_sig.as_bytes())

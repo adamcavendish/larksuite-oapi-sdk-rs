@@ -13,6 +13,7 @@ macro_rules! impl_resp {
         }
     };
     ($name:ident) => {
+        #[derive(Debug, Clone)]
         pub struct $name {
             pub api_resp: $crate::resp::ApiResp,
             pub code_error: Option<$crate::resp::CodeError>,

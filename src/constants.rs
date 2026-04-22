@@ -3,7 +3,6 @@ pub const FEISHU_BASE_URL: &str = "https://open.feishu.cn";
 /// Base URL for Lark (international) API endpoints.
 pub const LARK_BASE_URL: &str = "https://open.larksuite.com";
 
-pub const DEFAULT_CONTENT_TYPE: &str = "application/json; charset=utf-8";
 pub const USER_AGENT: &str = concat!("oapi-sdk-rust/v", env!("CARGO_PKG_VERSION"));
 
 pub const HTTP_HEADER_KEY_REQUEST_ID: &str = "X-Request-Id";
@@ -35,9 +34,7 @@ pub const EXPIRY_DELTA_SECONDS: u64 = 180;
 )]
 pub enum AppType {
     #[default]
-    #[serde(rename = "SelfBuilt")]
     SelfBuilt,
-    #[serde(rename = "Marketplace")]
     Marketplace,
 }
 
