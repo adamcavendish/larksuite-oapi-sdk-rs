@@ -43,6 +43,7 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
   doc:
     name: Documentation
@@ -54,7 +55,7 @@ jobs:
       - run: sudo apt-get install -y protobuf-compiler
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo doc --workspace --no-deps
+      - run: cargo doc --workspace --no-deps --all-features
 
   basics:
     name: Basics
@@ -74,6 +75,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@nextest
       - run: cargo nextest run --workspace
+      - run: cargo nextest run --workspace --all-features
       - run: cargo test --doc --workspace
 
   coverage:
@@ -91,7 +93,7 @@ jobs:
           prefix-key: coverage
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - run: cargo llvm-cov nextest --workspace --lcov --output-path lcov.info
+      - run: cargo llvm-cov nextest --workspace --all-features --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v6
         with:
           files: lcov.info
@@ -110,4 +112,4 @@ jobs:
         with:
           toolchain: ${{ env.rust_min }}
       - uses: Swatinem/rust-cache@v2
-      - run: cargo check --workspace
+      - run: cargo check --workspace --all-features
