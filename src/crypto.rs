@@ -1,8 +1,9 @@
-use aes::cipher::{BlockModeDecrypt, KeyIvInit};
+use aes::cipher::{BlockModeDecrypt, BlockModeEncrypt, KeyIvInit};
 use sha2::{Digest, Sha256};
 use subtle::ConstantTimeEq;
 
 type Aes256CbcDec = cbc::Decryptor<aes::Aes256>;
+type Aes256CbcEnc = cbc::Encryptor<aes::Aes256>;
 
 pub fn event_decrypt(encrypt_key: &str, encrypted: &str) -> crate::Result<String> {
     let key = {
@@ -31,6 +32,35 @@ pub fn event_decrypt(encrypt_key: &str, encrypted: &str) -> crate::Result<String
 
     String::from_utf8(decrypted.to_vec())
         .map_err(|e| crate::Error::Crypto(format!("utf8 decode failed: {e}")))
+}
+
+/// Encrypt a plaintext string using the same AES-256-CBC scheme Lark uses for
+/// encrypted event callbacks. Useful for constructing mock event payloads in
+/// tests. The inverse of [`event_decrypt`].
+pub fn event_encrypt(encrypt_key: &str, plaintext: &str) -> crate::Result<String> {
+    let key = {
+        let mut hasher = Sha256::new();
+        hasher.update(encrypt_key.as_bytes());
+        hasher.finalize()
+    };
+
+    let iv = uuid::Uuid::new_v4();
+    let iv = &iv.as_bytes()[..16];
+
+    let encryptor = Aes256CbcEnc::new_from_slices(&key, iv)
+        .map_err(|e| crate::Error::Crypto(format!("cipher init failed: {e}")))?;
+
+    let encrypted =
+        encryptor.encrypt_padded_vec::<aes::cipher::block_padding::Pkcs7>(plaintext.as_bytes());
+
+    let mut result = Vec::with_capacity(16 + encrypted.len());
+    result.extend_from_slice(iv);
+    result.extend_from_slice(&encrypted);
+
+    Ok(base64::Engine::encode(
+        &base64::engine::general_purpose::STANDARD,
+        &result,
+    ))
 }
 
 fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {

@@ -1,5 +1,5 @@
 use larksuite_oapi_sdk_rs::crypto::{
-    event_decrypt, verify_signature_sha1, verify_signature_sha256,
+    event_decrypt, event_encrypt, verify_signature_sha1, verify_signature_sha256,
 };
 
 #[test]
@@ -171,4 +171,55 @@ fn event_decrypt_invalid_base64() {
 fn event_decrypt_empty_input() {
     let result = event_decrypt("key", "");
     assert!(result.is_err());
+}
+
+// ── event_encrypt ──
+
+#[test]
+fn event_encrypt_roundtrip() {
+    let key = "my_secret_encrypt_key";
+    let plaintext = r#"{"challenge":"hello_world","type":"url_verification"}"#;
+
+    let encrypted = event_encrypt(key, plaintext).unwrap();
+    let decrypted = event_decrypt(key, &encrypted).unwrap();
+    assert_eq!(decrypted, plaintext);
+}
+
+#[test]
+fn event_encrypt_produces_different_ciphertext_each_call() {
+    let key = "test_key";
+    let plaintext = "same input";
+    let a = event_encrypt(key, plaintext).unwrap();
+    let b = event_encrypt(key, plaintext).unwrap();
+    assert_ne!(a, b);
+    assert_eq!(event_decrypt(key, &a).unwrap(), plaintext);
+    assert_eq!(event_decrypt(key, &b).unwrap(), plaintext);
+}
+
+#[test]
+fn event_encrypt_with_event_dispatcher() {
+    use larksuite_oapi_sdk_rs::event::{EventDispatcher, EventReq};
+
+    let encrypt_key = "dispatcher_test_key";
+    let inner_body = serde_json::json!({
+        "type": "url_verification",
+        "token": "",
+        "challenge": "from_encrypt"
+    });
+    let encrypted =
+        event_encrypt(encrypt_key, &serde_json::to_string(&inner_body).unwrap()).unwrap();
+    let outer_body = serde_json::json!({ "encrypt": encrypted });
+
+    let dispatcher = EventDispatcher::new("", encrypt_key);
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&outer_body).unwrap(),
+        request_uri: String::new(),
+    };
+
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let resp = rt.block_on(dispatcher.handle(req));
+    assert_eq!(resp.status_code, 200);
+    let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
+    assert_eq!(parsed["challenge"], "from_encrypt");
 }

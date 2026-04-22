@@ -874,10 +874,7 @@ async fn customized_event_handler_receives_full_req() {
 #[test]
 fn event_req_request_id_from_logid() {
     let req = EventReq {
-        headers: HashMap::from([(
-            "X-Tt-Logid".to_string(),
-            vec!["log-abc-123".to_string()],
-        )]),
+        headers: HashMap::from([("X-Tt-Logid".to_string(), vec!["log-abc-123".to_string()])]),
         body: vec![],
         request_uri: String::new(),
     };
@@ -887,10 +884,7 @@ fn event_req_request_id_from_logid() {
 #[test]
 fn event_req_request_id_falls_back_to_request_id() {
     let req = EventReq {
-        headers: HashMap::from([(
-            "X-Request-Id".to_string(),
-            vec!["req-456".to_string()],
-        )]),
+        headers: HashMap::from([("X-Request-Id".to_string(), vec!["req-456".to_string()])]),
         body: vec![],
         request_uri: String::new(),
     };
@@ -916,29 +910,25 @@ async fn card_action_receives_event_req() {
     let uri_clone = captured_uri.clone();
     let id_clone = captured_id.clone();
 
-    let handler =
-        CardActionHandler::new("", "", move |action: CardAction| {
-            let uri = uri_clone.clone();
-            let id = id_clone.clone();
-            async move {
-                if let Some(ref req) = action.req {
-                    *uri.lock().unwrap() = req.request_uri.clone();
-                    *id.lock().unwrap() = req.request_id().to_string();
-                }
-                Ok(serde_json::json!({ "ok": true }))
+    let handler = CardActionHandler::new("", "", move |action: CardAction| {
+        let uri = uri_clone.clone();
+        let id = id_clone.clone();
+        async move {
+            if let Some(ref req) = action.req {
+                *uri.lock().unwrap() = req.request_uri.clone();
+                *id.lock().unwrap() = req.request_id().to_string();
             }
-        })
-        .skip_sign_verify();
+            Ok(serde_json::json!({ "ok": true }))
+        }
+    })
+    .skip_sign_verify();
 
     let body = serde_json::json!({
         "open_id": "ou_1",
         "action": { "tag": "button" }
     });
     let req = EventReq {
-        headers: HashMap::from([(
-            "X-Tt-Logid".to_string(),
-            vec!["log-xyz".to_string()],
-        )]),
+        headers: HashMap::from([("X-Tt-Logid".to_string(), vec!["log-xyz".to_string()])]),
         body: serde_json::to_vec(&body).unwrap(),
         request_uri: "/card/action".to_string(),
     };
@@ -955,15 +945,14 @@ async fn card_action_timezone_field() {
     let captured_tz = Arc::new(Mutex::new(String::new()));
     let tz_clone = captured_tz.clone();
 
-    let handler =
-        CardActionHandler::new("", "", move |action: CardAction| {
-            let tz = tz_clone.clone();
-            async move {
-                *tz.lock().unwrap() = action.timezone.clone();
-                Ok(serde_json::json!({}))
-            }
-        })
-        .skip_sign_verify();
+    let handler = CardActionHandler::new("", "", move |action: CardAction| {
+        let tz = tz_clone.clone();
+        async move {
+            *tz.lock().unwrap() = action.timezone.clone();
+            Ok(serde_json::json!({}))
+        }
+    })
+    .skip_sign_verify();
 
     let body = serde_json::json!({
         "open_id": "ou_1",
@@ -1033,7 +1022,9 @@ async fn card_handler_custom_resp_zero_status_defaults_to_200() {
 #[tokio::test]
 async fn card_handler_custom_json_variant() {
     let handler = CardActionHandler::new_custom("", "", |_action: CardAction| async {
-        Ok(CardHandlerResult::Json(serde_json::json!({ "card": "data" })))
+        Ok(CardHandlerResult::Json(
+            serde_json::json!({ "card": "data" }),
+        ))
     })
     .skip_sign_verify();
 
