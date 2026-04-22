@@ -33,6 +33,16 @@ pub struct EventReq {
     pub request_uri: String,
 }
 
+impl EventReq {
+    /// Extract the Lark request ID from the HTTP headers.
+    /// Checks `X-Tt-Logid` first, then falls back to `X-Request-Id`.
+    pub fn request_id(&self) -> &str {
+        get_header_ref(&self.headers, "X-Tt-Logid")
+            .or_else(|| get_header_ref(&self.headers, "X-Request-Id"))
+            .unwrap_or_default()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct EventResp {
     pub status_code: u16,
@@ -321,8 +331,37 @@ impl EventDispatcher {
     }
 }
 
+/// Return type for card action handlers.
+///
+/// Handlers can return either a JSON value (served as HTTP 200) or a
+/// [`CustomResp`] with a custom HTTP status code and body.
+#[derive(Debug, Clone)]
+pub enum CardHandlerResult {
+    Json(serde_json::Value),
+    Custom(CustomResp),
+}
+
+impl From<serde_json::Value> for CardHandlerResult {
+    fn from(val: serde_json::Value) -> Self {
+        Self::Json(val)
+    }
+}
+
+impl From<CustomResp> for CardHandlerResult {
+    fn from(resp: CustomResp) -> Self {
+        Self::Custom(resp)
+    }
+}
+
+/// Custom card response with an explicit HTTP status code.
+#[derive(Debug, Clone)]
+pub struct CustomResp {
+    pub status_code: u16,
+    pub body: serde_json::Map<String, serde_json::Value>,
+}
+
 pub type CardHandlerFn = Arc<
-    dyn Fn(CardAction) -> Pin<Box<dyn Future<Output = Result<serde_json::Value>> + Send>>
+    dyn Fn(CardAction) -> Pin<Box<dyn Future<Output = Result<CardHandlerResult>> + Send>>
         + Send
         + Sync,
 >;
@@ -350,14 +389,21 @@ pub struct CardAction {
     #[serde(default)]
     pub token: String,
     #[serde(default)]
+    pub timezone: String,
+    #[serde(default)]
     pub action: serde_json::Value,
     #[serde(default)]
     pub host: String,
     #[serde(default)]
     pub delivery_type: String,
+    /// The raw HTTP request that delivered this card action.
+    /// Populated by [`CardActionHandler`] before calling the handler.
+    #[serde(skip)]
+    pub req: Option<EventReq>,
 }
 
 impl CardActionHandler {
+    /// Create a card action handler that returns a JSON response with HTTP 200.
     pub fn new<F, Fut>(
         verification_token: impl Into<String>,
         event_encrypt_key: impl Into<String>,
@@ -370,7 +416,29 @@ impl CardActionHandler {
         Self {
             verification_token: verification_token.into(),
             event_encrypt_key: event_encrypt_key.into(),
-            handler: Arc::new(move |action: CardAction| -> Pin<Box<dyn Future<Output = Result<serde_json::Value>> + Send>> {
+            handler: Arc::new(move |action: CardAction| -> Pin<Box<dyn Future<Output = Result<CardHandlerResult>> + Send>> {
+                let fut = handler(action);
+                Box::pin(async move { fut.await.map(CardHandlerResult::Json) })
+            }),
+            skip_sign_verify: false,
+        }
+    }
+
+    /// Create a card action handler that can return a [`CustomResp`] with a
+    /// custom HTTP status code and body.
+    pub fn new_custom<F, Fut>(
+        verification_token: impl Into<String>,
+        event_encrypt_key: impl Into<String>,
+        handler: F,
+    ) -> Self
+    where
+        F: Fn(CardAction) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<CardHandlerResult>> + Send + 'static,
+    {
+        Self {
+            verification_token: verification_token.into(),
+            event_encrypt_key: event_encrypt_key.into(),
+            handler: Arc::new(move |action: CardAction| -> Pin<Box<dyn Future<Output = Result<CardHandlerResult>> + Send>> {
                 Box::pin(handler(action))
             }),
             skip_sign_verify: false,
@@ -393,7 +461,7 @@ impl CardActionHandler {
     }
 
     async fn do_handle(&self, req: EventReq) -> Result<EventResp> {
-        let body_str = String::from_utf8(req.body)
+        let body_str = String::from_utf8(req.body.clone())
             .map_err(|e| Error::Event(format!("invalid utf8 body: {e}")))?;
 
         let body_str = decrypt_if_needed(&self.event_encrypt_key, &body_str)?;
@@ -409,11 +477,30 @@ impl CardActionHandler {
             self.verify_signature_sha1(&req.headers, &body_str)?;
         }
 
-        let action: CardAction = serde_json::from_value(parsed)
+        let mut action: CardAction = serde_json::from_value(parsed)
             .map_err(|e| Error::Event(format!("failed to parse card action: {e}")))?;
+        action.req = Some(req);
 
-        let resp = (self.handler)(action).await?;
-        Ok(EventResp::success(resp))
+        let result = (self.handler)(action).await?;
+        match result {
+            CardHandlerResult::Json(val) => Ok(EventResp::success(val)),
+            CardHandlerResult::Custom(custom) => {
+                let status = if custom.status_code == 0 {
+                    200
+                } else {
+                    custom.status_code
+                };
+                let body_bytes = serde_json::to_vec(&custom.body).unwrap_or_default();
+                Ok(EventResp {
+                    status_code: status,
+                    headers: HashMap::from([(
+                        "Content-Type".to_string(),
+                        "application/json".to_string(),
+                    )]),
+                    body: body_bytes,
+                })
+            }
+        }
     }
 
     fn handle_challenge(&self, parsed: &serde_json::Value) -> Result<EventResp> {
@@ -452,6 +539,10 @@ impl CardActionHandler {
 
         Ok(())
     }
+}
+
+fn get_header_ref<'a>(headers: &'a HashMap<String, Vec<String>>, key: &str) -> Option<&'a str> {
+    headers.get(key).and_then(|v| v.first()).map(|s| s.as_str())
 }
 
 fn get_header(headers: &HashMap<String, Vec<String>>, key: &str) -> String {

@@ -45,8 +45,9 @@ pub use config::Config;
 pub use constants::{AccessTokenType, AppType, FEISHU_BASE_URL, LARK_BASE_URL};
 pub use error::{Error, Result};
 pub use event::{
-    CallbackHandlerFn, CardAction, CardActionHandler, CardHandlerFn, CustomizedEventHandlerFn,
-    EventDispatcher, EventHandlerFn, EventHeader, EventReq, EventResp, EventV2Body,
+    CallbackHandlerFn, CardAction, CardActionHandler, CardHandlerFn, CardHandlerResult, CustomResp,
+    CustomizedEventHandlerFn, EventDispatcher, EventHandlerFn, EventHeader, EventReq, EventResp,
+    EventV2Body,
 };
 pub use req::{
     ApiReq, FormDataField, FormDataValue, PathParams, QueryParams, ReqBody, RequestOption,

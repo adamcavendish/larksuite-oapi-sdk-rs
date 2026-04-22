@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use larksuite_oapi_sdk_rs::event::{
-    CardAction, CardActionHandler, EventDispatcher, EventReq, EventResp,
+    CardAction, CardActionHandler, CardHandlerResult, CustomResp, EventDispatcher, EventReq,
+    EventResp,
 };
 
 // ── EventResp ──
@@ -866,4 +867,184 @@ async fn customized_event_handler_receives_full_req() {
     let hdr = captured_header.lock().unwrap();
     assert_eq!(hdr.as_ref().unwrap().event_id, "ev_123");
     assert_eq!(hdr.as_ref().unwrap().app_id, "cli_test");
+}
+
+// ── EventReq::request_id ──
+
+#[test]
+fn event_req_request_id_from_logid() {
+    let req = EventReq {
+        headers: HashMap::from([(
+            "X-Tt-Logid".to_string(),
+            vec!["log-abc-123".to_string()],
+        )]),
+        body: vec![],
+        request_uri: String::new(),
+    };
+    assert_eq!(req.request_id(), "log-abc-123");
+}
+
+#[test]
+fn event_req_request_id_falls_back_to_request_id() {
+    let req = EventReq {
+        headers: HashMap::from([(
+            "X-Request-Id".to_string(),
+            vec!["req-456".to_string()],
+        )]),
+        body: vec![],
+        request_uri: String::new(),
+    };
+    assert_eq!(req.request_id(), "req-456");
+}
+
+#[test]
+fn event_req_request_id_empty_when_no_headers() {
+    let req = EventReq {
+        headers: HashMap::new(),
+        body: vec![],
+        request_uri: String::new(),
+    };
+    assert_eq!(req.request_id(), "");
+}
+
+// ── CardAction.req populated by handler ──
+
+#[tokio::test]
+async fn card_action_receives_event_req() {
+    let captured_uri = Arc::new(Mutex::new(String::new()));
+    let captured_id = Arc::new(Mutex::new(String::new()));
+    let uri_clone = captured_uri.clone();
+    let id_clone = captured_id.clone();
+
+    let handler =
+        CardActionHandler::new("", "", move |action: CardAction| {
+            let uri = uri_clone.clone();
+            let id = id_clone.clone();
+            async move {
+                if let Some(ref req) = action.req {
+                    *uri.lock().unwrap() = req.request_uri.clone();
+                    *id.lock().unwrap() = req.request_id().to_string();
+                }
+                Ok(serde_json::json!({ "ok": true }))
+            }
+        })
+        .skip_sign_verify();
+
+    let body = serde_json::json!({
+        "open_id": "ou_1",
+        "action": { "tag": "button" }
+    });
+    let req = EventReq {
+        headers: HashMap::from([(
+            "X-Tt-Logid".to_string(),
+            vec!["log-xyz".to_string()],
+        )]),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/card/action".to_string(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    assert_eq!(&*captured_uri.lock().unwrap(), "/card/action");
+    assert_eq!(&*captured_id.lock().unwrap(), "log-xyz");
+}
+
+// ── CardAction.timezone field ──
+
+#[tokio::test]
+async fn card_action_timezone_field() {
+    let captured_tz = Arc::new(Mutex::new(String::new()));
+    let tz_clone = captured_tz.clone();
+
+    let handler =
+        CardActionHandler::new("", "", move |action: CardAction| {
+            let tz = tz_clone.clone();
+            async move {
+                *tz.lock().unwrap() = action.timezone.clone();
+                Ok(serde_json::json!({}))
+            }
+        })
+        .skip_sign_verify();
+
+    let body = serde_json::json!({
+        "open_id": "ou_1",
+        "timezone": "Asia/Shanghai",
+        "action": {}
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: String::new(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    assert_eq!(&*captured_tz.lock().unwrap(), "Asia/Shanghai");
+}
+
+// ── CardActionHandler::new_custom with CustomResp ──
+
+#[tokio::test]
+async fn card_handler_custom_resp_status_and_body() {
+    let handler = CardActionHandler::new_custom("", "", |_action: CardAction| async {
+        Ok(CardHandlerResult::Custom(CustomResp {
+            status_code: 202,
+            body: serde_json::Map::from_iter([(
+                "toast".to_string(),
+                serde_json::json!({ "content": "Updated!" }),
+            )]),
+        }))
+    })
+    .skip_sign_verify();
+
+    let body = serde_json::json!({
+        "open_id": "ou_1",
+        "action": { "tag": "button" }
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: String::new(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 202);
+    let resp_body: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
+    assert_eq!(resp_body["toast"]["content"], "Updated!");
+}
+
+#[tokio::test]
+async fn card_handler_custom_resp_zero_status_defaults_to_200() {
+    let handler = CardActionHandler::new_custom("", "", |_action: CardAction| async {
+        Ok(CardHandlerResult::Custom(CustomResp {
+            status_code: 0,
+            body: serde_json::Map::from_iter([("msg".to_string(), serde_json::json!("ok"))]),
+        }))
+    })
+    .skip_sign_verify();
+
+    let body = serde_json::json!({ "open_id": "ou_1", "action": {} });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: String::new(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+}
+
+#[tokio::test]
+async fn card_handler_custom_json_variant() {
+    let handler = CardActionHandler::new_custom("", "", |_action: CardAction| async {
+        Ok(CardHandlerResult::Json(serde_json::json!({ "card": "data" })))
+    })
+    .skip_sign_verify();
+
+    let body = serde_json::json!({ "open_id": "ou_1", "action": {} });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: String::new(),
+    };
+    let resp = handler.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    let resp_body: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
+    assert_eq!(resp_body["card"], "data");
 }
