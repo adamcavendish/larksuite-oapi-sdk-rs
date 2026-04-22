@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::parse_v2;
 use crate::transport;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -30,20 +30,6 @@ impl_resp_v2!(GetDeviceRecordV2Resp, DeviceRecordData);
 impl_resp_v2!(ListDeviceRecordV2Resp, DeviceRecordListData);
 impl_resp_v2!(MineDeviceRecordV2Resp, DeviceRecordListData);
 impl_resp_v2!(UpdateDeviceRecordV2Resp, DeviceRecordData);
-
-fn parse<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
-    move || {
-        let code_error = if raw.code_error.code != 0 {
-            Some(raw.code_error)
-        } else {
-            None
-        };
-        (api_resp, code_error, raw.data)
-    }
-}
 
 pub struct V2<'a> {
     pub device_apply_record: DeviceApplyRecordV2Resource<'a>,
@@ -78,7 +64,7 @@ impl DeviceApplyRecordV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UpdateDeviceApplyRecordV2Resp {
             api_resp,
             code_error,
@@ -105,7 +91,7 @@ impl DeviceRecordV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<DeviceRecordData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateDeviceRecordV2Resp {
             api_resp,
             code_error,
@@ -123,7 +109,7 @@ impl DeviceRecordV2Resource<'_> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteDeviceRecordV2Resp {
             api_resp,
             code_error,
@@ -142,7 +128,7 @@ impl DeviceRecordV2Resource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
             transport::request_typed::<DeviceRecordData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetDeviceRecordV2Resp {
             api_resp,
             code_error,
@@ -169,7 +155,7 @@ impl DeviceRecordV2Resource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<DeviceRecordListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListDeviceRecordV2Resp {
             api_resp,
             code_error,
@@ -185,7 +171,7 @@ impl DeviceRecordV2Resource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
             transport::request_typed::<DeviceRecordListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(MineDeviceRecordV2Resp {
             api_resp,
             code_error,
@@ -206,7 +192,7 @@ impl DeviceRecordV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<DeviceRecordData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UpdateDeviceRecordV2Resp {
             api_resp,
             code_error,

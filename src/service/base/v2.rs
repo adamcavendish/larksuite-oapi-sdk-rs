@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::parse_v2;
 use crate::transport;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -26,20 +26,6 @@ pub struct AppRoleListData {
 impl_resp_v2!(CreateAppRoleV2Resp, AppRoleData);
 impl_resp_v2!(ListAppRoleV2Resp, AppRoleListData);
 impl_resp_v2!(UpdateAppRoleV2Resp, AppRoleData);
-
-fn parse<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
-    move || {
-        let code_error = if raw.code_error.code != 0 {
-            Some(raw.code_error)
-        } else {
-            None
-        };
-        (api_resp, code_error, raw.data)
-    }
-}
 
 pub struct V2<'a> {
     pub app_role: AppRoleV2Resource<'a>,
@@ -70,7 +56,7 @@ impl AppRoleV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<AppRoleData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateAppRoleV2Resp {
             api_resp,
             code_error,
@@ -96,7 +82,7 @@ impl AppRoleV2Resource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<AppRoleListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListAppRoleV2Resp {
             api_resp,
             code_error,
@@ -117,7 +103,7 @@ impl AppRoleV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<AppRoleData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UpdateAppRoleV2Resp {
             api_resp,
             code_error,

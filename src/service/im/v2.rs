@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::parse_v2;
 use crate::transport;
 
 // ── Response data types ───────────────────────────────────────────────────────
@@ -41,22 +41,6 @@ impl_resp_v2!(PatchFeedCardV2Resp, ());
 impl_resp_v2!(CreateTagV2Resp, TagData);
 impl_resp_v2!(PatchTagV2Resp, TagData);
 impl_resp_v2!(BatchUpdateUrlPreviewV2Resp, ());
-
-// ── Resource helper ───────────────────────────────────────────────────────────
-
-fn parse<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
-    move || {
-        let code_error = if raw.code_error.code != 0 {
-            Some(raw.code_error)
-        } else {
-            None
-        };
-        (api_resp, code_error, raw.data)
-    }
-}
 
 // ── V2 service entry ──────────────────────────────────────────────────────────
 
@@ -101,7 +85,7 @@ impl AppFeedCardV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<AppFeedCardData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateAppFeedCardV2Resp {
             api_resp,
             code_error,
@@ -126,7 +110,7 @@ impl AppFeedCardBatchV2Resource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteAppFeedCardBatchV2Resp {
             api_resp,
             code_error,
@@ -143,7 +127,7 @@ impl AppFeedCardBatchV2Resource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UpdateAppFeedCardBatchV2Resp {
             api_resp,
             code_error,
@@ -173,7 +157,7 @@ impl BizEntityTagRelationV2Resource<'_> {
         let (api_resp, raw) =
             transport::request_typed::<BizEntityTagRelationData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateBizEntityTagRelationV2Resp {
             api_resp,
             code_error,
@@ -190,7 +174,7 @@ impl BizEntityTagRelationV2Resource<'_> {
         let (api_resp, raw) =
             transport::request_typed::<BizEntityTagRelationData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetBizEntityTagRelationV2Resp {
             api_resp,
             code_error,
@@ -212,7 +196,7 @@ impl BizEntityTagRelationV2Resource<'_> {
         let (api_resp, raw) =
             transport::request_typed::<BizEntityTagRelationData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UpdateBizEntityTagRelationV2Resp {
             api_resp,
             code_error,
@@ -237,7 +221,7 @@ impl ChatButtonV2Resource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UpdateChatButtonV2Resp {
             api_resp,
             code_error,
@@ -265,7 +249,7 @@ impl FeedCardV2Resource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(BotTimeSensitiveFeedCardV2Resp {
             api_resp,
             code_error,
@@ -284,7 +268,7 @@ impl FeedCardV2Resource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchFeedCardV2Resp {
             api_resp,
             code_error,
@@ -310,7 +294,7 @@ impl TagV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<TagData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateTagV2Resp {
             api_resp,
             code_error,
@@ -330,7 +314,7 @@ impl TagV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<TagData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchTagV2Resp {
             api_resp,
             code_error,
@@ -358,7 +342,7 @@ impl UrlPreviewV2Resource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(BatchUpdateUrlPreviewV2Resp {
             api_resp,
             code_error,

@@ -33,3 +33,15 @@ pub struct DownloadResp {
     pub file_name: Option<String>,
     pub data: Vec<u8>,
 }
+
+#[derive(Debug, Clone)]
+pub struct EmptyRespV2 {
+    pub api_resp: ApiResp,
+    pub code_error: Option<CodeError>,
+}
+
+impl EmptyRespV2 {
+    pub fn success(&self) -> bool {
+        self.code_error.as_ref().is_none_or(|e| e.code == 0)
+    }
+}

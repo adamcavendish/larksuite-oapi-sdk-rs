@@ -1,45 +1,11 @@
+mod common;
+use common::{http_response, mock_server};
+
 use larksuite_oapi_sdk_rs::Config;
 use larksuite_oapi_sdk_rs::cache::LocalCache;
 use larksuite_oapi_sdk_rs::error::Error;
 use larksuite_oapi_sdk_rs::token::{AppTicketManager, TokenManager};
 use std::sync::Arc;
-
-async fn mock_server(
-    responses: Vec<String>,
-) -> (std::net::SocketAddr, tokio::task::JoinHandle<()>) {
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
-    let addr = listener.local_addr().unwrap();
-    let responses = Arc::new(responses);
-    let counter = Arc::new(std::sync::atomic::AtomicUsize::new(0));
-
-    let handle = tokio::spawn(async move {
-        loop {
-            let Ok((mut stream, _)) = listener.accept().await else {
-                break;
-            };
-            let responses = Arc::clone(&responses);
-            let counter = Arc::clone(&counter);
-            tokio::spawn(async move {
-                use tokio::io::{AsyncReadExt, AsyncWriteExt};
-                let mut buf = vec![0u8; 8192];
-                let _ = stream.read(&mut buf).await;
-                let idx = counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                let resp_idx = idx.min(responses.len() - 1);
-                let _ = stream.write_all(responses[resp_idx].as_bytes()).await;
-                let _ = stream.shutdown().await;
-            });
-        }
-    });
-
-    (addr, handle)
-}
-
-fn http_response(status: u16, body: &str) -> String {
-    format!(
-        "HTTP/1.1 {status} OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
-        body.len()
-    )
-}
 
 fn marketplace_config(addr: std::net::SocketAddr) -> Config {
     let mut c = Config::new("app_id", "secret");

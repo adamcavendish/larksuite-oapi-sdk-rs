@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::parse_v2;
 use crate::transport;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -34,20 +34,6 @@ impl_resp_v2!(QueryReviewTemplateV2Resp, serde_json::Value);
 impl_resp_v2!(QueryRevieweeV2Resp, serde_json::Value);
 impl_resp_v2!(WriteUserGroupUserRelV2Resp, serde_json::Value);
 impl_resp_v2!(QueryUserInfoV2Resp, serde_json::Value);
-
-fn parse<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
-    move || {
-        let code_error = if raw.code_error.code != 0 {
-            Some(raw.code_error)
-        } else {
-            None
-        };
-        (api_resp, code_error, raw.data)
-    }
-}
 
 pub struct V2<'a> {
     pub activity: ActivityV2Resource<'a>,
@@ -106,7 +92,7 @@ macro_rules! post_query {
                 let (api_resp, raw) =
                     transport::request_typed::<serde_json::Value>(self.config, &api_req, option)
                         .await?;
-                let (api_resp, code_error, data) = parse(api_resp, raw)();
+                let (api_resp, code_error, data) = parse_v2(api_resp, raw);
                 Ok($resp {
                     api_resp,
                     code_error,
@@ -142,7 +128,7 @@ impl AdditionalInformationV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ImportAdditionalInformationV2Resp {
             api_resp,
             code_error,
@@ -163,7 +149,7 @@ impl AdditionalInformationV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(QueryAdditionalInformationV2Resp {
             api_resp,
             code_error,
@@ -189,7 +175,7 @@ impl AdditionalInformationsBatchV2Resource<'_> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteAdditionalInformationsBatchV2Resp {
             api_resp,
             code_error,
@@ -223,7 +209,7 @@ impl MetricDetailV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ImportMetricDetailV2Resp {
             api_resp,
             code_error,
@@ -244,7 +230,7 @@ impl MetricDetailV2Resource<'_> {
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(QueryMetricDetailV2Resp {
             api_resp,
             code_error,
@@ -287,7 +273,7 @@ impl MetricTagV2Resource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<MetricTagListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListMetricTagV2Resp {
             api_resp,
             code_error,

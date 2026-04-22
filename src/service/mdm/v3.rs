@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::parse_v2;
 use crate::transport;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -25,20 +25,6 @@ pub struct CountryRegionListData {
 
 impl_resp_v2!(GetBatchCountryRegionV3Resp, BatchCountryRegionData);
 impl_resp_v2!(ListCountryRegionV3Resp, CountryRegionListData);
-
-fn parse<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
-    move || {
-        let code_error = if raw.code_error.code != 0 {
-            Some(raw.code_error)
-        } else {
-            None
-        };
-        (api_resp, code_error, raw.data)
-    }
-}
 
 pub struct V3<'a> {
     pub batch_country_region: BatchCountryRegionV3Resource<'a>,
@@ -65,7 +51,7 @@ impl BatchCountryRegionV3Resource<'_> {
         let (api_resp, raw) =
             transport::request_typed::<BatchCountryRegionData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetBatchCountryRegionV3Resp {
             api_resp,
             code_error,
@@ -96,7 +82,7 @@ impl CountryRegionV3Resource<'_> {
         let (api_resp, raw) =
             transport::request_typed::<CountryRegionListData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListCountryRegionV3Resp {
             api_resp,
             code_error,

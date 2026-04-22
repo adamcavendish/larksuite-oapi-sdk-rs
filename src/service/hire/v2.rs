@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::parse_v2;
 use crate::transport;
 
 // ── Response data types ───────────────────────────────────────────────────────
@@ -36,22 +36,6 @@ pub struct TalentV2Data {
 impl_resp_v2!(GetInterviewRecordV2Resp, InterviewRecordData);
 impl_resp_v2!(ListInterviewRecordV2Resp, InterviewRecordListData);
 impl_resp_v2!(GetTalentV2Resp, TalentV2Data);
-
-// ── Resource helper ───────────────────────────────────────────────────────────
-
-fn parse<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
-    move || {
-        let code_error = if raw.code_error.code != 0 {
-            Some(raw.code_error)
-        } else {
-            None
-        };
-        (api_resp, code_error, raw.data)
-    }
-}
 
 // ── V2 service entry ──────────────────────────────────────────────────────────
 
@@ -90,7 +74,7 @@ impl InterviewRecordV2Resource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<InterviewRecordData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetInterviewRecordV2Resp {
             api_resp,
             code_error,
@@ -123,7 +107,7 @@ impl InterviewRecordV2Resource<'_> {
         let (api_resp, raw) =
             transport::request_typed::<InterviewRecordListData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListInterviewRecordV2Resp {
             api_resp,
             code_error,
@@ -153,7 +137,7 @@ impl TalentV2Resource<'_> {
         }
         let (api_resp, raw) =
             transport::request_typed::<TalentV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetTalentV2Resp {
             api_resp,
             code_error,

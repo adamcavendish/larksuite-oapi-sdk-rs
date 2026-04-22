@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::EmptyResp;
 use crate::transport;
 
 // ── Domain types ──
@@ -932,17 +932,6 @@ pub struct CustomAttrListData {
 }
 
 impl_resp!(ListCustomAttrResp, CustomAttrListData);
-
-#[derive(Debug, Clone)]
-pub struct EmptyResp {
-    pub api_resp: ApiResp,
-    pub code_error: CodeError,
-}
-impl EmptyResp {
-    pub fn success(&self) -> bool {
-        self.code_error.success()
-    }
-}
 
 // ── Resources ──
 

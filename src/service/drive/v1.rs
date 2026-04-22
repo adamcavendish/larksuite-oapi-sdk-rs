@@ -4,8 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
-use crate::service::common::DownloadResp;
+use crate::service::common::{DownloadResp, EmptyResp};
 use crate::transport;
 
 // ── Domain types ──
@@ -778,17 +777,6 @@ impl_resp!(
     UpdatePermissionPublicPasswordResp,
     UpdatePermissionPublicPasswordRespData
 );
-
-#[derive(Debug, Clone)]
-pub struct EmptyResp {
-    pub api_resp: ApiResp,
-    pub code_error: CodeError,
-}
-impl EmptyResp {
-    pub fn success(&self) -> bool {
-        self.code_error.success()
-    }
-}
 
 // ── Resources ──
 

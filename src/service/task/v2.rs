@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::service::common::parse_v2;
 use crate::transport;
 
 // ── Generic response data types ───────────────────────────────────────────────
@@ -188,22 +188,6 @@ impl_resp_v2!(PatchActivitySubscriptionV2Resp, ActivitySubscriptionData);
 impl_resp_v2!(ListActivitySubscriptionV2Resp, ActivitySubscriptionListData);
 impl_resp_v2!(DeleteActivitySubscriptionV2Resp, ());
 
-// ── Resource helpers ──────────────────────────────────────────────────────────
-
-fn parse<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> impl FnOnce() -> (ApiResp, Option<CodeError>, Option<T>) {
-    move || {
-        let code_error = if raw.code_error.code != 0 {
-            Some(raw.code_error)
-        } else {
-            None
-        };
-        (api_resp, code_error, raw.data)
-    }
-}
-
 // ── V2 service entry ──────────────────────────────────────────────────────────
 
 pub struct V2<'a> {
@@ -249,7 +233,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateTaskV2Resp {
             api_resp,
             code_error,
@@ -271,7 +255,7 @@ impl<'a> TaskV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetTaskV2Resp {
             api_resp,
             code_error,
@@ -295,7 +279,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchTaskV2Resp {
             api_resp,
             code_error,
@@ -312,7 +296,7 @@ impl<'a> TaskV2Resource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteTaskV2Resp {
             api_resp,
             code_error,
@@ -340,7 +324,7 @@ impl<'a> TaskV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<TaskV2ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListTaskV2Resp {
             api_resp,
             code_error,
@@ -360,7 +344,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(AddMembersTaskV2Resp {
             api_resp,
             code_error,
@@ -380,7 +364,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(RemoveMembersTaskV2Resp {
             api_resp,
             code_error,
@@ -400,7 +384,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(AddRemindersTaskV2Resp {
             api_resp,
             code_error,
@@ -420,7 +404,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(RemoveRemindersTaskV2Resp {
             api_resp,
             code_error,
@@ -440,7 +424,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(AddDependenciesTaskV2Resp {
             api_resp,
             code_error,
@@ -460,7 +444,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(RemoveDependenciesTaskV2Resp {
             api_resp,
             code_error,
@@ -480,7 +464,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(AddTasklistTaskV2Resp {
             api_resp,
             code_error,
@@ -500,7 +484,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(RemoveTasklistTaskV2Resp {
             api_resp,
             code_error,
@@ -522,7 +506,7 @@ impl<'a> TaskV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<TasklistListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(TasklistsTaskV2Resp {
             api_resp,
             code_error,
@@ -546,7 +530,7 @@ impl<'a> TaskV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateTaskSubtaskV2Resp {
             api_resp,
             code_error,
@@ -576,7 +560,7 @@ impl<'a> TaskV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<TaskV2ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListTaskSubtaskV2Resp {
             api_resp,
             code_error,
@@ -606,7 +590,7 @@ impl<'a> AttachmentV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<AttachmentData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetAttachmentV2Resp {
             api_resp,
             code_error,
@@ -623,7 +607,7 @@ impl<'a> AttachmentV2Resource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteAttachmentV2Resp {
             api_resp,
             code_error,
@@ -655,7 +639,7 @@ impl<'a> AttachmentV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<AttachmentListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListAttachmentV2Resp {
             api_resp,
             code_error,
@@ -673,7 +657,7 @@ impl<'a> AttachmentV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<AttachmentData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(UploadAttachmentV2Resp {
             api_resp,
             code_error,
@@ -703,7 +687,7 @@ impl<'a> CommentV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<CommentV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateCommentV2Resp {
             api_resp,
             code_error,
@@ -725,7 +709,7 @@ impl<'a> CommentV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<CommentV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetCommentV2Resp {
             api_resp,
             code_error,
@@ -749,7 +733,7 @@ impl<'a> CommentV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<CommentV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchCommentV2Resp {
             api_resp,
             code_error,
@@ -766,7 +750,7 @@ impl<'a> CommentV2Resource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteCommentV2Resp {
             api_resp,
             code_error,
@@ -802,7 +786,7 @@ impl<'a> CommentV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<CommentV2ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListCommentV2Resp {
             api_resp,
             code_error,
@@ -832,7 +816,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<CustomFieldData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateCustomFieldV2Resp {
             api_resp,
             code_error,
@@ -854,7 +838,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<CustomFieldData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetCustomFieldV2Resp {
             api_resp,
             code_error,
@@ -878,7 +862,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<CustomFieldData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchCustomFieldV2Resp {
             api_resp,
             code_error,
@@ -914,7 +898,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<CustomFieldListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListCustomFieldV2Resp {
             api_resp,
             code_error,
@@ -934,7 +918,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<CustomFieldData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(AddCustomFieldV2Resp {
             api_resp,
             code_error,
@@ -953,7 +937,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(RemoveCustomFieldV2Resp {
             api_resp,
             code_error,
@@ -973,7 +957,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateCustomFieldOptionV2Resp {
             api_resp,
             code_error,
@@ -996,7 +980,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, req_option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchCustomFieldOptionV2Resp {
             api_resp,
             code_error,
@@ -1026,7 +1010,7 @@ impl<'a> SectionV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<SectionData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateSectionV2Resp {
             api_resp,
             code_error,
@@ -1048,7 +1032,7 @@ impl<'a> SectionV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<SectionData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetSectionV2Resp {
             api_resp,
             code_error,
@@ -1072,7 +1056,7 @@ impl<'a> SectionV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<SectionData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchSectionV2Resp {
             api_resp,
             code_error,
@@ -1089,7 +1073,7 @@ impl<'a> SectionV2Resource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteSectionV2Resp {
             api_resp,
             code_error,
@@ -1125,7 +1109,7 @@ impl<'a> SectionV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<SectionListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListSectionV2Resp {
             api_resp,
             code_error,
@@ -1164,7 +1148,7 @@ impl<'a> SectionV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<TaskV2ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(TasksSectionV2Resp {
             api_resp,
             code_error,
@@ -1194,7 +1178,7 @@ impl<'a> TasklistV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TasklistData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateTasklistV2Resp {
             api_resp,
             code_error,
@@ -1216,7 +1200,7 @@ impl<'a> TasklistV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<TasklistData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetTasklistV2Resp {
             api_resp,
             code_error,
@@ -1240,7 +1224,7 @@ impl<'a> TasklistV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TasklistData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchTasklistV2Resp {
             api_resp,
             code_error,
@@ -1257,7 +1241,7 @@ impl<'a> TasklistV2Resource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteTasklistV2Resp {
             api_resp,
             code_error,
@@ -1285,7 +1269,7 @@ impl<'a> TasklistV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<TasklistListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListTasklistV2Resp {
             api_resp,
             code_error,
@@ -1309,7 +1293,7 @@ impl<'a> TasklistV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TasklistData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(AddMembersTasklistV2Resp {
             api_resp,
             code_error,
@@ -1333,7 +1317,7 @@ impl<'a> TasklistV2Resource<'a> {
         api_req.body = Some(ReqBody::json(body)?);
         let (api_resp, raw) =
             transport::request_typed::<TasklistData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(RemoveMembersTasklistV2Resp {
             api_resp,
             code_error,
@@ -1372,7 +1356,7 @@ impl<'a> TasklistV2Resource<'a> {
         }
         let (api_resp, raw) =
             transport::request_typed::<TaskV2ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(TasksTasklistV2Resp {
             api_resp,
             code_error,
@@ -1397,7 +1381,7 @@ impl<'a> TasklistV2Resource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<ActivitySubscriptionData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(CreateActivitySubscriptionV2Resp {
             api_resp,
             code_error,
@@ -1423,7 +1407,7 @@ impl<'a> TasklistV2Resource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<ActivitySubscriptionData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(GetActivitySubscriptionV2Resp {
             api_resp,
             code_error,
@@ -1451,7 +1435,7 @@ impl<'a> TasklistV2Resource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<ActivitySubscriptionData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(PatchActivitySubscriptionV2Resp {
             api_resp,
             code_error,
@@ -1478,7 +1462,7 @@ impl<'a> TasklistV2Resource<'a> {
         let (api_resp, raw) =
             transport::request_typed::<ActivitySubscriptionListData>(self.config, &api_req, option)
                 .await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(ListActivitySubscriptionV2Resp {
             api_resp,
             code_error,
@@ -1498,7 +1482,7 @@ impl<'a> TasklistV2Resource<'a> {
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse(api_resp, raw)();
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(DeleteActivitySubscriptionV2Resp {
             api_resp,
             code_error,

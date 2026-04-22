@@ -4,8 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
-use crate::service::common::parse_v2;
+use crate::service::common::{EmptyRespV2 as EmptyResp, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -27,18 +26,6 @@ pub struct DirectoryUser {
 }
 
 // ── Response wrappers ──
-
-#[derive(Debug, Clone)]
-pub struct EmptyResp {
-    pub api_resp: ApiResp,
-    pub code_error: Option<CodeError>,
-}
-
-impl EmptyResp {
-    pub fn success(&self) -> bool {
-        self.code_error.as_ref().is_none_or(|e| e.code == 0)
-    }
-}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UserListData {
