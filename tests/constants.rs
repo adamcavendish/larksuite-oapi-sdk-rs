@@ -50,3 +50,9 @@ fn app_type_debug() {
     let debug = format!("{:?}", AppType::Marketplace);
     assert_eq!(debug, "Marketplace");
 }
+
+#[test]
+fn app_type_display() {
+    assert_eq!(format!("{}", AppType::SelfBuilt), "SelfBuilt");
+    assert_eq!(format!("{}", AppType::Marketplace), "Marketplace");
+}

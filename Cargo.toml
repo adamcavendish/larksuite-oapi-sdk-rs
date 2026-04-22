@@ -6,6 +6,8 @@ edition = "2024"
 rust-version = "1.94.0"
 license = "MIT"
 repository = "https://github.com/adamcavendish/larksuite-oapi-sdk-rs"
+keywords = ["lark", "feishu", "larksuite", "openapi", "sdk"]
+categories = ["api-bindings", "web-programming::http-client"]
 
 [features]
 axum = ["dep:axum"]

@@ -1,4 +1,6 @@
+/// Base URL for Feishu (China) API endpoints.
 pub const FEISHU_BASE_URL: &str = "https://open.feishu.cn";
+/// Base URL for Lark (international) API endpoints.
 pub const LARK_BASE_URL: &str = "https://open.larksuite.com";
 
 pub const DEFAULT_CONTENT_TYPE: &str = "application/json; charset=utf-8";
@@ -27,6 +29,7 @@ pub const TENANT_ACCESS_TOKEN_KEY_PREFIX: &str = "tenant_access_token";
 
 pub const EXPIRY_DELTA_SECONDS: u64 = 180;
 
+/// Self-built (internal) or marketplace (ISV) application type.
 #[derive(
     Debug, Clone, Copy, Default, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize,
 )]
@@ -38,6 +41,16 @@ pub enum AppType {
     Marketplace,
 }
 
+impl std::fmt::Display for AppType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SelfBuilt => write!(f, "SelfBuilt"),
+            Self::Marketplace => write!(f, "Marketplace"),
+        }
+    }
+}
+
+/// Access token type used for API authorization.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum AccessTokenType {
     None,
