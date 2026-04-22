@@ -26,3 +26,10 @@ impl EmptyResp {
         self.code_error.success()
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct DownloadResp {
+    pub api_resp: ApiResp,
+    pub file_name: Option<String>,
+    pub data: Vec<u8>,
+}

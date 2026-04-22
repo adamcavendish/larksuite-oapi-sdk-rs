@@ -4,8 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::ApiResp;
-use crate::service::common::EmptyResp;
+use crate::service::common::{DownloadResp, EmptyResp};
 use crate::transport;
 
 // ── Domain types ──
@@ -625,13 +624,6 @@ pub struct ListTicketCustomizedFieldRespData {
 }
 
 // ── Download response ──
-
-#[derive(Debug, Clone)]
-pub struct DownloadResp {
-    pub api_resp: ApiResp,
-    pub file_name: Option<String>,
-    pub data: Vec<u8>,
-}
 
 impl_resp!(GetTicketResp, TicketData);
 impl_resp!(ListTicketResp, TicketListData);

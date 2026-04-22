@@ -4,8 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::ApiResp;
-use crate::service::common::{EmptyResp, parse_v2};
+use crate::service::common::{DownloadResp, EmptyResp, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -87,13 +86,6 @@ pub struct SearchLingoEntityReqBody {
 }
 
 // ── Response wrappers ──
-
-#[derive(Debug, Clone)]
-pub struct DownloadResp {
-    pub api_resp: ApiResp,
-    pub file_name: Option<String>,
-    pub data: Vec<u8>,
-}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct EntityData {

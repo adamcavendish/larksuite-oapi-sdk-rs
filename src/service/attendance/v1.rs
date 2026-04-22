@@ -5,7 +5,7 @@ use crate::constants::AccessTokenType;
 use crate::error::Result;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
-use crate::service::common::EmptyResp;
+use crate::service::common::{DownloadResp, EmptyResp};
 use crate::transport;
 
 // ── Domain types ──
@@ -761,13 +761,6 @@ impl_resp_v2!(SearchGroupResp, serde_json::Value);
 impl_resp_v2!(GetLeaveEmployExpireRecordResp, serde_json::Value);
 impl_resp_v2!(ListShiftResp, serde_json::Value);
 impl_resp_v2!(QueryShiftResp, serde_json::Value);
-
-#[derive(Debug, Clone)]
-pub struct DownloadResp {
-    pub api_resp: ApiResp,
-    pub file_name: Option<String>,
-    pub data: Vec<u8>,
-}
 
 // ── Request body types for new resources ──
 
