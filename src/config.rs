@@ -12,7 +12,9 @@ use crate::constants::{AppType, FEISHU_BASE_URL};
 pub struct Config {
     /// Base URL for API requests (default: Feishu `https://open.feishu.cn`).
     pub base_url: String,
+    /// Lark/Feishu application ID.
     pub app_id: String,
+    /// Lark/Feishu application secret (hidden from `Debug` output).
     pub app_secret: String,
     /// Helpdesk ID for helpdesk-authenticated endpoints.
     pub helpdesk_id: Option<String>,
@@ -22,6 +24,7 @@ pub struct Config {
     pub helpdesk_auth_token: Option<String>,
     /// HTTP request timeout (default: 30s).
     pub req_timeout: Duration,
+    /// Underlying HTTP client. Rebuilt automatically when [`ClientBuilder::timeout`](crate::ClientBuilder::timeout) is set without an explicit client.
     pub http_client: aioduct::Client<TokioRuntime>,
     /// Self-built (default) or marketplace app.
     pub app_type: AppType,
@@ -35,6 +38,7 @@ pub struct Config {
     pub skip_sign_verify: bool,
     /// Maximum number of retries on transient errors (default: 2).
     pub max_retries: u32,
+    /// Minimum tracing level for SDK log output.
     pub log_level: Option<tracing::Level>,
 }
 

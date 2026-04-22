@@ -13,6 +13,7 @@ use crate::resp::{ApiResp, RawResponse};
 use crate::service;
 use crate::transport;
 
+/// Builder for [`Client`]. Construct via [`Client::builder`].
 pub struct ClientBuilder {
     config: Config,
     explicit_http_client: bool,
@@ -94,6 +95,7 @@ impl ClientBuilder {
     }
 }
 
+/// Lark/Feishu API client. All service accessors borrow `&self` and are zero-cost wrappers.
 pub struct Client {
     config: Config,
 }

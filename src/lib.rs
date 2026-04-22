@@ -10,7 +10,7 @@
 //!
 //! # Features
 //!
-//! - **REST services** — 53 service modules under [`service`] covering IM, Calendar, Drive, etc.
+//! - **REST services** — 56+ service modules under [`service`] covering IM, Calendar, Drive, etc.
 //! - **Event dispatch** — webhook and WebSocket event routing via [`EventDispatcher`].
 //! - **Typed events** — 200+ typed event structs under [`events`].
 //! - **Card builder** — interactive Lark card construction via [`card`].
