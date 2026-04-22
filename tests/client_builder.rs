@@ -3,6 +3,98 @@ use larksuite_oapi_sdk_rs::constants::AppType;
 use std::time::Duration;
 
 #[tokio::test]
+async fn all_service_accessors() {
+    let client = Client::builder("app", "secret").build();
+    let _ = client.config();
+    let _ = client.admin();
+    let _ = client.acs();
+    let _ = client.aily();
+    let _ = client.application();
+    let _ = client.application_v6();
+    let _ = client.attendance();
+    let _ = client.approval();
+    let _ = client.auth();
+    let _ = client.authen();
+    let _ = client.bitable();
+    let _ = client.calendar();
+    let _ = client.contact();
+    let _ = client.corehr();
+    let _ = client.corehr_v2();
+    let _ = client.docx();
+    let _ = client.drive();
+    let _ = client.drive_v2();
+    let _ = client.helpdesk();
+    let _ = client.hire();
+    let _ = client.hire_v2();
+    let _ = client.im();
+    let _ = client.sheets();
+    let _ = client.task();
+    let _ = client.im_v2();
+    let _ = client.task_v2();
+    let _ = client.tenant();
+    let _ = client.baike();
+    let _ = client.lingo();
+    let _ = client.mail();
+    let _ = client.minutes();
+    let _ = client.okr();
+    let _ = client.translation();
+    let _ = client.search();
+    let _ = client.vc();
+    let _ = client.wiki();
+    let _ = client.wiki_v1();
+    let _ = client.passport();
+    let _ = client.report();
+    let _ = client.workplace();
+    let _ = client.face_detection();
+    let _ = client.human_authentication();
+    let _ = client.optical_char_recognition();
+    let _ = client.speech_to_text();
+    let _ = client.verification();
+    let _ = client.document_ai();
+    let _ = client.mdm();
+    let _ = client.mdm_v3();
+    let _ = client.personal_settings();
+    let _ = client.security_and_compliance();
+    let _ = client.security_and_compliance_v2();
+    let _ = client.moments();
+    let _ = client.meeting_room();
+    let _ = client.ehr();
+    let _ = client.compensation();
+    let _ = client.payroll();
+    let _ = client.performance();
+    let _ = client.performance_v2();
+    let _ = client.directory();
+    let _ = client.docs();
+    let _ = client.apaas();
+    let _ = client.base_v2();
+    let _ = client.block();
+    let _ = client.block_v2();
+    let _ = client.board();
+    let _ = client.cardkit();
+    let _ = client.event();
+    let _ = client.ext();
+}
+
+#[tokio::test]
+async fn ws_client_accessor() {
+    let client = Client::builder("app", "secret").build();
+    let dispatcher = larksuite_oapi_sdk_rs::EventDispatcher::new("", "");
+    let _ = client.ws_client(dispatcher);
+}
+
+#[tokio::test]
+async fn builder_explicit_http_client_preserves_it() {
+    let custom_client = aioduct::Client::builder()
+        .timeout(Duration::from_secs(99))
+        .build();
+    let client = Client::builder("app", "secret")
+        .timeout(Duration::from_secs(5))
+        .http_client(custom_client)
+        .build();
+    assert_eq!(client.config().req_timeout, Duration::from_secs(5));
+}
+
+#[tokio::test]
 async fn builder_defaults() {
     let client = Client::builder("app_id", "app_secret").build();
     let config = client.config();
