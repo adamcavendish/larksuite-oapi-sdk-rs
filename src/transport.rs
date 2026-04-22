@@ -153,7 +153,7 @@ async fn do_request(
     option: &RequestOption,
     token_type: AccessTokenType,
 ) -> Result<ApiResp> {
-    let max_retries = 2;
+    let max_retries = config.max_retries;
     let mut last_err = None;
 
     for _ in 0..max_retries {
@@ -335,6 +335,12 @@ pub(crate) async fn raw_send(
         ));
     }
 
+    if status_code == 429 {
+        return Err(Error::ServerTimeout(
+            "server returned 429 Too Many Requests".to_string(),
+        ));
+    }
+
     let header = response.headers().clone();
     let raw_body = response.bytes().await.map_err(Error::Http)?.to_vec();
 
@@ -378,4 +384,58 @@ fn is_token_invalid_error(code: i64) -> bool {
             | ERR_CODE_APP_ACCESS_TOKEN_INVALID
             | ERR_CODE_TENANT_ACCESS_TOKEN_INVALID
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::req::ApiReq;
+
+    fn test_config() -> Config {
+        Config::new("test_id", "test_secret")
+    }
+
+    #[tokio::test]
+    async fn build_url_simple() {
+        let config = test_config();
+        let api_req = ApiReq::new(http::Method::GET, "/open-apis/im/v1/messages");
+        assert_eq!(
+            build_url(&config, &api_req),
+            "https://open.feishu.cn/open-apis/im/v1/messages"
+        );
+    }
+
+    #[tokio::test]
+    async fn build_url_with_query_params() {
+        let config = test_config();
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/im/v1/messages");
+        api_req.query_params.set("page_size", "20");
+        api_req.query_params.set("page_token", "abc");
+        let url = build_url(&config, &api_req);
+        assert!(url.starts_with("https://open.feishu.cn/open-apis/im/v1/messages?"));
+        assert!(url.contains("page_size=20"));
+        assert!(url.contains("page_token=abc"));
+    }
+
+    #[tokio::test]
+    async fn build_url_with_path_params() {
+        let config = test_config();
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/im/v1/messages/:message_id");
+        api_req.path_params.set("message_id", "om_123");
+        assert_eq!(
+            build_url(&config, &api_req),
+            "https://open.feishu.cn/open-apis/im/v1/messages/om_123"
+        );
+    }
+
+    #[tokio::test]
+    async fn build_url_custom_base() {
+        let mut config = test_config();
+        config.base_url = "https://open.larksuite.com".to_string();
+        let api_req = ApiReq::new(http::Method::GET, "/open-apis/auth/v3/app_access_token");
+        assert_eq!(
+            build_url(&config, &api_req),
+            "https://open.larksuite.com/open-apis/auth/v3/app_access_token"
+        );
+    }
 }

@@ -78,6 +78,11 @@ impl ClientBuilder {
         self
     }
 
+    pub fn max_retries(mut self, n: u32) -> Self {
+        self.config.max_retries = n;
+        self
+    }
+
     pub fn build(self) -> Client {
         let mut config = self.config;
         if !self.explicit_http_client {

@@ -33,6 +33,8 @@ pub struct Config {
     pub default_headers: HeaderMap,
     /// Skip event callback signature verification (for testing only).
     pub skip_sign_verify: bool,
+    /// Maximum number of retries on transient errors (default: 2).
+    pub max_retries: u32,
     pub log_level: Option<tracing::Level>,
 }
 
@@ -54,6 +56,7 @@ impl Config {
             token_cache: Arc::new(LocalCache::new()),
             default_headers: HeaderMap::new(),
             skip_sign_verify: false,
+            max_retries: 2,
             log_level: None,
         }
     }
