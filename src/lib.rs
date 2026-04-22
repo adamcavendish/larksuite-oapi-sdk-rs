@@ -48,7 +48,7 @@ pub use event::{
     CallbackAction, CallbackCard, CallbackContext, CallbackHandlerFn, CallbackOperator, CardAction,
     CardActionHandler, CardActionTriggerRequest, CardActionTriggerResponse, CardHandlerFn,
     CardHandlerResult, CustomResp, CustomizedEventHandlerFn, EventDispatcher, EventHandlerFn,
-    EventHeader, EventReq, EventResp, EventV2Body, InlinePreview, PreviewUrl, Toast,
+    EventHeader, EventReq, EventResp, EventV2Body, InlinePreview, PreviewUrl, TemplateCard, Toast,
     URLPreviewGetRequest, URLPreviewGetResponse,
 };
 pub use req::{

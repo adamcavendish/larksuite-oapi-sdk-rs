@@ -286,3 +286,43 @@ fn card_serde_roundtrip() {
     assert_eq!(deserialized.elements.len(), 3);
     assert!(deserialized.config.unwrap().wide_screen_mode.unwrap());
 }
+
+#[test]
+fn test_text_object_i18n() {
+    use larksuite_oapi_sdk_rs::card::TextI18n;
+
+    let text = TextObject::plain("Hello").i18n(TextI18n {
+        zh_cn: Some("你好".to_string()),
+        en_us: Some("Hello".to_string()),
+        ko_kr: Some("안녕하세요".to_string()),
+        ..Default::default()
+    });
+
+    let json = serde_json::to_value(&text).unwrap();
+    assert_eq!(json["content"], "Hello");
+    assert_eq!(json["i18n"]["zh_cn"], "你好");
+    assert_eq!(json["i18n"]["en_us"], "Hello");
+    assert_eq!(json["i18n"]["ko_kr"], "안녕하세요");
+    assert!(json["i18n"].get("ja_jp").is_none());
+}
+
+#[test]
+fn test_template_card_in_callback_card() {
+    use larksuite_oapi_sdk_rs::event::{CallbackCard, TemplateCard};
+
+    let card = CallbackCard::template(TemplateCard {
+        template_id: Some("tpl_abc123".to_string()),
+        template_variable: Some(
+            [("name".to_string(), serde_json::json!("Alice"))]
+                .into_iter()
+                .collect(),
+        ),
+        template_version_name: Some("1.0.0".to_string()),
+    });
+
+    let json = serde_json::to_value(&card).unwrap();
+    assert_eq!(json["type"], "template");
+    assert_eq!(json["data"]["template_id"], "tpl_abc123");
+    assert_eq!(json["data"]["template_variable"]["name"], "Alice");
+    assert_eq!(json["data"]["template_version_name"], "1.0.0");
+}

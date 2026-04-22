@@ -732,6 +732,27 @@ pub struct CallbackCard {
     pub data: Option<serde_json::Value>,
 }
 
+impl CallbackCard {
+    /// Create a template-based card response.
+    pub fn template(card: TemplateCard) -> Self {
+        Self {
+            card_type: Some("template".to_string()),
+            data: serde_json::to_value(card).ok(),
+        }
+    }
+}
+
+/// Template card with ID, version, and variable bindings.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TemplateCard {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub template_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub template_variable: Option<HashMap<String, serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub template_version_name: Option<String>,
+}
+
 /// Response for `card.action.trigger` callbacks.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CardActionTriggerResponse {

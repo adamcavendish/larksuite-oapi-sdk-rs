@@ -135,6 +135,45 @@ pub struct TextObject {
     pub content: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lines: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub i18n: Option<Box<TextI18n>>,
+}
+
+/// Per-locale plain text content for [`TextObject`].
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TextI18n {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_hk: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_tw: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vi_vn: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub th_th: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pt_br: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub es_es: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ko_kr: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub de_de: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fr_fr: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub it_it: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ru_ru: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ms_my: Option<String>,
 }
 
 impl TextObject {
@@ -143,6 +182,7 @@ impl TextObject {
             tag: "plain_text".to_string(),
             content: content.into(),
             lines: None,
+            i18n: None,
         }
     }
 
@@ -151,11 +191,17 @@ impl TextObject {
             tag: "lark_md".to_string(),
             content: content.into(),
             lines: None,
+            i18n: None,
         }
     }
 
     pub fn lines(mut self, n: i32) -> Self {
         self.lines = Some(n);
+        self
+    }
+
+    pub fn i18n(mut self, i18n: TextI18n) -> Self {
+        self.i18n = Some(Box::new(i18n));
         self
     }
 }
