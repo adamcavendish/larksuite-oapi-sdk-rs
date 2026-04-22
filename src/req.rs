@@ -108,6 +108,63 @@ impl PathParams {
     }
 }
 
+/// Builder for constructing multipart form-data request bodies.
+///
+/// Matches the Go SDK's `larkcore.NewFormdata()` fluent API.
+///
+/// ```rust
+/// use larksuite_oapi_sdk_rs::FormDataBuilder;
+///
+/// let body = FormDataBuilder::new()
+///     .field("name", "document.pdf")
+///     .file("file", "doc.pdf", b"contents".to_vec(), Some("application/pdf"))
+///     .build();
+/// ```
+#[derive(Debug, Clone, Default)]
+pub struct FormDataBuilder {
+    fields: Vec<FormDataField>,
+}
+
+impl FormDataBuilder {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn field(mut self, name: impl Into<String>, value: impl Into<String>) -> Self {
+        self.fields.push(FormDataField {
+            name: name.into(),
+            value: FormDataValue::Text(value.into()),
+        });
+        self
+    }
+
+    pub fn file(
+        mut self,
+        name: impl Into<String>,
+        filename: impl Into<String>,
+        data: Vec<u8>,
+        content_type: Option<impl Into<String>>,
+    ) -> Self {
+        self.fields.push(FormDataField {
+            name: name.into(),
+            value: FormDataValue::File {
+                filename: filename.into(),
+                data,
+                content_type: content_type.map(|s| s.into()),
+            },
+        });
+        self
+    }
+
+    pub fn build(self) -> Vec<FormDataField> {
+        self.fields
+    }
+
+    pub fn into_body(self) -> ReqBody {
+        ReqBody::FormData(self.fields)
+    }
+}
+
 /// Per-request options that override client-level defaults.
 #[derive(Debug, Clone, Default)]
 pub struct RequestOption {

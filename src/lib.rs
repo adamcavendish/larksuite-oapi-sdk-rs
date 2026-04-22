@@ -43,6 +43,7 @@ pub use cache::{Cache, LocalCache};
 pub use client::{Client, ClientBuilder};
 pub use config::Config;
 pub use constants::{AccessTokenType, AppType, FEISHU_BASE_URL, LARK_BASE_URL};
+pub use crypto::{event_decrypt, event_encrypt, verify_signature_sha1, verify_signature_sha256};
 pub use error::{Error, Result};
 pub use event::{
     CallbackAction, CallbackCard, CallbackContext, CallbackHandlerFn, CallbackOperator, CardAction,
@@ -52,7 +53,8 @@ pub use event::{
     URLPreviewGetRequest, URLPreviewGetResponse,
 };
 pub use req::{
-    ApiReq, FormDataField, FormDataValue, PathParams, QueryParams, ReqBody, RequestOption,
+    ApiReq, FormDataBuilder, FormDataField, FormDataValue, PathParams, QueryParams, ReqBody,
+    RequestOption,
 };
 pub use resp::{ApiResp, CodeError, CodeErrorInfo, RawResponse};
 pub use token::{

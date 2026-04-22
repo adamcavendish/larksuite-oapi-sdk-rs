@@ -1,3 +1,4 @@
+use larksuite_oapi_sdk_rs::FormDataBuilder;
 use larksuite_oapi_sdk_rs::req::{PathParams, QueryParams, ReqBody};
 
 #[test]
@@ -94,5 +95,55 @@ fn req_body_json_from_struct() {
             assert_eq!(v["count"], 42);
         }
         _ => panic!("expected Json variant"),
+    }
+}
+
+#[test]
+fn form_data_builder_empty() {
+    let fields = FormDataBuilder::new().build();
+    assert!(fields.is_empty());
+}
+
+#[test]
+fn form_data_builder_fields_and_file() {
+    let fields = FormDataBuilder::new()
+        .field("name", "document.pdf")
+        .file(
+            "file",
+            "doc.pdf",
+            b"file content".to_vec(),
+            Some("application/pdf"),
+        )
+        .build();
+    assert_eq!(fields.len(), 2);
+    assert_eq!(fields[0].name, "name");
+    assert_eq!(fields[1].name, "file");
+}
+
+#[test]
+fn form_data_builder_into_body() {
+    let body = FormDataBuilder::new().field("key", "val").into_body();
+    match body {
+        ReqBody::FormData(fields) => assert_eq!(fields.len(), 1),
+        _ => panic!("expected FormData variant"),
+    }
+}
+
+#[test]
+fn form_data_builder_file_without_content_type() {
+    let fields = FormDataBuilder::new()
+        .file("img", "photo.jpg", vec![0xFF, 0xD8], None::<String>)
+        .build();
+    assert_eq!(fields.len(), 1);
+    match &fields[0].value {
+        larksuite_oapi_sdk_rs::FormDataValue::File {
+            content_type,
+            filename,
+            ..
+        } => {
+            assert!(content_type.is_none());
+            assert_eq!(filename, "photo.jpg");
+        }
+        _ => panic!("expected File variant"),
     }
 }

@@ -2,6 +2,8 @@ use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::constants::AppType;
 use std::time::Duration;
 
+mod common;
+
 #[tokio::test]
 async fn all_service_accessors() {
     let client = Client::builder("app", "secret").build();
@@ -244,4 +246,39 @@ async fn app_ticket_manager_shares_cache() {
         .await
         .unwrap();
     assert_eq!(val.as_deref(), Some("ticket_value"));
+}
+
+#[tokio::test]
+async fn download_file_success() {
+    let body = "file bytes here";
+    let (addr, _handle) = common::mock_server(vec![common::http_response_with_headers(
+        200,
+        "Content-Type: application/octet-stream\r\n",
+        body,
+    )])
+    .await;
+
+    let client = Client::builder("app", "secret")
+        .base_url(format!("http://{addr}"))
+        .build();
+
+    let bytes = client
+        .download_file(&format!("http://{addr}/some/file"))
+        .await
+        .unwrap();
+    assert_eq!(bytes, body.as_bytes());
+}
+
+#[tokio::test]
+async fn download_file_404_returns_error() {
+    let (addr, _handle) = common::mock_server(vec![common::http_response(404, "not found")]).await;
+
+    let client = Client::builder("app", "secret")
+        .base_url(format!("http://{addr}"))
+        .build();
+
+    let result = client
+        .download_file(&format!("http://{addr}/missing"))
+        .await;
+    assert!(result.is_err());
 }

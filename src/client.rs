@@ -468,6 +468,24 @@ impl Client {
         self.do_req(&api_req, option).await
     }
 
+    pub async fn download_file(&self, url: &str) -> Result<Vec<u8>> {
+        let resp = self
+            .config
+            .http_client
+            .request(http::Method::GET, url)?
+            .send()
+            .await?;
+
+        let status = resp.status();
+        let bytes = resp.bytes().await?;
+
+        if !status.is_success() {
+            return Err(crate::Error::Http(aioduct::Error::Status(status)));
+        }
+
+        Ok(bytes.to_vec())
+    }
+
     pub async fn get_app_access_token_by_self_built_app(
         &self,
         req: &crate::token::SelfBuiltAppTokenReq,
