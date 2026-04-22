@@ -1,3 +1,5 @@
+//! CoreHR v2 event handlers.
+
 use std::future::Future;
 use std::pin::Pin;
 

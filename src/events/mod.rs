@@ -1,3 +1,5 @@
+//! Typed P2 (v2.0 protocol) event payload structs and handler registration methods.
+
 pub mod acs;
 pub mod apaas;
 pub mod application;
