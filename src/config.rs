@@ -52,62 +52,92 @@ impl Config {
         }
     }
 
+    #[must_use]
+    #[inline]
     pub fn base_url(&self) -> &str {
         &self.base_url
     }
 
+    #[must_use]
+    #[inline]
     pub fn app_id(&self) -> &str {
         &self.app_id
     }
 
+    #[must_use]
+    #[inline]
     pub fn app_secret(&self) -> &str {
         &self.app_secret
     }
 
+    #[must_use]
+    #[inline]
     pub fn helpdesk_id(&self) -> Option<&str> {
         self.helpdesk_id.as_deref()
     }
 
+    #[must_use]
+    #[inline]
     pub fn helpdesk_token(&self) -> Option<&str> {
         self.helpdesk_token.as_deref()
     }
 
+    #[must_use]
+    #[inline]
     pub fn helpdesk_auth_token(&self) -> Option<&str> {
         self.helpdesk_auth_token.as_deref()
     }
 
+    #[must_use]
+    #[inline]
     pub fn req_timeout(&self) -> Duration {
         self.req_timeout
     }
 
+    #[must_use]
+    #[inline]
     pub fn app_type(&self) -> AppType {
         self.app_type
     }
 
+    #[must_use]
+    #[inline]
     pub fn enable_token_cache(&self) -> bool {
         self.enable_token_cache
     }
 
+    #[must_use]
+    #[inline]
     pub fn token_cache(&self) -> &Arc<dyn Cache> {
         &self.token_cache
     }
 
+    #[must_use]
+    #[inline]
     pub fn default_headers(&self) -> &HeaderMap {
         &self.default_headers
     }
 
+    #[must_use]
+    #[inline]
     pub fn skip_sign_verify(&self) -> bool {
         self.skip_sign_verify
     }
 
+    #[must_use]
+    #[inline]
     pub fn max_retries(&self) -> u32 {
         self.max_retries
     }
 
+    #[must_use]
+    #[inline]
     pub fn log_level(&self) -> Option<tracing::Level> {
         self.log_level
     }
 
+    #[must_use]
+    #[inline]
     pub fn log_req_at_debug(&self) -> bool {
         self.log_req_at_debug
     }

@@ -276,17 +276,17 @@ impl EventDispatcher {
     /// If an encrypt key is configured and the body contains an `"encrypt"` field,
     /// returns the encrypted ciphertext string. Otherwise returns the raw body as-is.
     pub fn parse_req(&self, req: &EventReq) -> Result<String> {
-        let body_str = String::from_utf8(req.body.clone())
+        let body_str = std::str::from_utf8(&req.body)
             .map_err(|e| Error::Event(format!("invalid utf8 body: {e}")))?;
 
         if self.event_encrypt_key.is_empty() {
-            return Ok(body_str);
+            return Ok(body_str.to_string());
         }
 
-        let parsed: std::result::Result<EncryptedBody, _> = serde_json::from_str(&body_str);
+        let parsed: std::result::Result<EncryptedBody, _> = serde_json::from_str(body_str);
         match parsed {
             Ok(encrypted) if !encrypted.encrypt.is_empty() => Ok(encrypted.encrypt),
-            _ => Ok(body_str),
+            _ => Ok(body_str.to_string()),
         }
     }
 
@@ -312,10 +312,10 @@ impl EventDispatcher {
     }
 
     async fn do_handle(&self, req: EventReq) -> Result<EventResp> {
-        let body_str = String::from_utf8(req.body.clone())
+        let body_str = std::str::from_utf8(&req.body)
             .map_err(|e| Error::Event(format!("invalid utf8 body: {e}")))?;
 
-        let body_str = decrypt_if_needed(&self.event_encrypt_key, &body_str)?;
+        let body_str = decrypt_if_needed(&self.event_encrypt_key, body_str)?;
 
         let parsed: EventV2Body = serde_json::from_str(&body_str)
             .map_err(|e| Error::Event(format!("failed to parse event body: {e}")))?;
@@ -525,10 +525,10 @@ impl CardActionHandler {
     }
 
     async fn do_handle(&self, req: EventReq) -> Result<EventResp> {
-        let body_str = String::from_utf8(req.body.clone())
+        let body_str = std::str::from_utf8(&req.body)
             .map_err(|e| Error::Event(format!("invalid utf8 body: {e}")))?;
 
-        let body_str = decrypt_if_needed(&self.event_encrypt_key, &body_str)?;
+        let body_str = decrypt_if_needed(&self.event_encrypt_key, body_str)?;
 
         let parsed: serde_json::Value = serde_json::from_str(&body_str)
             .map_err(|e| Error::Event(format!("failed to parse card body: {e}")))?;
