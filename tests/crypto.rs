@@ -158,3 +158,17 @@ fn event_decrypt_wrong_key() {
     // Decryption with wrong key either errors or produces different bytes
     assert!(result.is_err() || result.unwrap() != plaintext);
 }
+
+#[test]
+fn event_decrypt_invalid_base64() {
+    let result = event_decrypt("key", "!!!not-base64!!!");
+    assert!(result.is_err());
+    let err = result.unwrap_err().to_string();
+    assert!(err.contains("base64"));
+}
+
+#[test]
+fn event_decrypt_empty_input() {
+    let result = event_decrypt("key", "");
+    assert!(result.is_err());
+}

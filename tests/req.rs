@@ -1,4 +1,4 @@
-use larksuite_oapi_sdk_rs::req::{PathParams, QueryParams};
+use larksuite_oapi_sdk_rs::req::{PathParams, QueryParams, ReqBody};
 
 #[test]
 fn query_params_encode_empty() {
@@ -61,4 +61,38 @@ fn path_params_overwrite() {
     pp.set("id", "old");
     pp.set("id", "new");
     assert_eq!(pp.get("id"), Some("new"));
+}
+
+#[test]
+fn query_params_get_existing_key() {
+    let mut qp = QueryParams::new();
+    qp.set("page_size", "20");
+    assert_eq!(qp.get("page_size"), Some("20"));
+}
+
+#[test]
+fn query_params_get_missing_key() {
+    let qp = QueryParams::new();
+    assert_eq!(qp.get("nonexistent"), None);
+}
+
+#[test]
+fn req_body_json_from_struct() {
+    #[derive(serde::Serialize)]
+    struct Payload {
+        name: String,
+        count: u32,
+    }
+    let body = ReqBody::json(&Payload {
+        name: "test".to_string(),
+        count: 42,
+    })
+    .unwrap();
+    match body {
+        ReqBody::Json(v) => {
+            assert_eq!(v["name"], "test");
+            assert_eq!(v["count"], 42);
+        }
+        _ => panic!("expected Json variant"),
+    }
 }

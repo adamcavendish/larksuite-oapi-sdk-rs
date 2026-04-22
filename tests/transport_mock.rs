@@ -789,3 +789,71 @@ async fn transport_app_ticket_invalid_triggers_retry() {
         .unwrap();
     assert_eq!(resp.status_code, 200);
 }
+
+// ── determine_token_type with token cache enabled and app token supported ──
+
+#[tokio::test]
+async fn transport_cache_enabled_app_token_type() {
+    let token_resp = r#"{"code":0,"msg":"ok","app_access_token":"auto_app_tok","expire":7200}"#;
+    let api_resp = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _h) = mock_server(vec![
+        http_response(200, token_resp),
+        http_response(200, api_resp),
+    ])
+    .await;
+
+    let client = Client::builder("app_id", "secret")
+        .base_url(format!("http://{addr}"))
+        .build();
+
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::App];
+
+    let resp = client
+        .do_req(&api_req, &RequestOption::default())
+        .await
+        .unwrap();
+    assert_eq!(resp.status_code, 200);
+}
+
+// ── determine_token_type with user token takes priority over tenant ──
+
+#[tokio::test]
+async fn transport_user_token_priority_over_tenant() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+
+    let client = Client::builder("app_id", "secret")
+        .base_url(format!("http://{addr}"))
+        .build();
+
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
+
+    let option = RequestOption {
+        user_access_token: Some("user_tok".to_string()),
+        ..Default::default()
+    };
+    let resp = client.do_req(&api_req, &option).await.unwrap();
+    assert_eq!(resp.status_code, 200);
+}
+
+// ── empty supported_access_token_types treated as None ──
+
+#[tokio::test]
+async fn transport_empty_supported_tokens_treated_as_none() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+
+    let client = Client::builder("app_id", "secret")
+        .base_url(format!("http://{addr}"))
+        .build();
+
+    let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
+
+    let resp = client
+        .do_req(&api_req, &RequestOption::default())
+        .await
+        .unwrap();
+    assert_eq!(resp.status_code, 200);
+}

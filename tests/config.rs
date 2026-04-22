@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use larksuite_oapi_sdk_rs::Config;
+use larksuite_oapi_sdk_rs::cache::{Cache, LocalCache};
 use larksuite_oapi_sdk_rs::constants::{AppType, FEISHU_BASE_URL};
 
 #[tokio::test]
@@ -42,4 +43,12 @@ async fn config_clone_shares_cache() {
 
     let val = config2.token_cache.get("test_key").await.unwrap();
     assert_eq!(val.as_deref(), Some("test_val"));
+}
+
+#[tokio::test]
+async fn local_cache_default_works() {
+    let cache = LocalCache::default();
+    cache.set("k", "v", Duration::from_secs(60)).await.unwrap();
+    let val = cache.get("k").await.unwrap();
+    assert_eq!(val.as_deref(), Some("v"));
 }
