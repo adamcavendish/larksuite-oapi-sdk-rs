@@ -656,3 +656,108 @@ fn event_req_serde_roundtrip() {
     assert_eq!(deserialized.request_uri, "/test");
     assert_eq!(deserialized.headers.get("X-Test").unwrap(), &vec!["val"]);
 }
+
+// ── EventDispatcher: with_auto_app_ticket ──
+
+#[tokio::test]
+async fn auto_app_ticket_stores_ticket() {
+    use larksuite_oapi_sdk_rs::Config;
+
+    let mut config = Config::new("app", "secret");
+    config.skip_sign_verify = true;
+
+    let dispatcher = EventDispatcher::new("", "")
+        .with_config(config)
+        .with_auto_app_ticket();
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_ticket",
+            "event_type": "app_ticket",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {
+            "type": "app_ticket",
+            "app_id": "test_app_123",
+            "app_ticket": "ticket_value_abc"
+        }
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/webhook".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+}
+
+#[tokio::test]
+async fn auto_app_ticket_empty_fields_noop() {
+    use larksuite_oapi_sdk_rs::Config;
+
+    let mut config = Config::new("app", "secret");
+    config.skip_sign_verify = true;
+
+    let dispatcher = EventDispatcher::new("", "")
+        .with_config(config)
+        .with_auto_app_ticket();
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_ticket2",
+            "event_type": "app_ticket",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {
+            "type": "app_ticket",
+            "app_id": "",
+            "app_ticket": ""
+        }
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/webhook".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+}
+
+// ── EventDispatcher: no handler returns 200 with message ──
+
+#[tokio::test]
+async fn event_no_handler_returns_200() {
+    use larksuite_oapi_sdk_rs::Config;
+
+    let mut config = Config::new("app", "secret");
+    config.skip_sign_verify = true;
+
+    let dispatcher = EventDispatcher::new("", "").with_config(config);
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_noop",
+            "event_type": "unknown.event_v1",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {}
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/webhook".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
+    assert!(parsed["msg"].as_str().unwrap().contains("no handler"));
+}

@@ -4,7 +4,7 @@ use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::cache::{Cache, LocalCache};
 use larksuite_oapi_sdk_rs::constants::AccessTokenType;
 use larksuite_oapi_sdk_rs::error::Error;
-use larksuite_oapi_sdk_rs::req::{ApiReq, RequestOption};
+use larksuite_oapi_sdk_rs::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
 
 /// Spawn a TCP listener that returns canned HTTP responses.
 /// Returns (addr, join_handle). Each accepted connection reads one request then writes
@@ -688,5 +688,104 @@ async fn transport_none_token_type_skips_validation() {
         ..Default::default()
     };
     let resp = client.do_req(&api_req, &option).await.unwrap();
+    assert_eq!(resp.status_code, 200);
+}
+
+// ── FormData multipart upload ──
+
+#[tokio::test]
+async fn transport_formdata_text_field() {
+    let body = r#"{"code":0,"msg":"ok","data":{"file_key":"fk_123"}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/files/upload_all");
+    api_req.supported_access_token_types = vec![AccessTokenType::None];
+    api_req.body = Some(ReqBody::FormData(vec![FormDataField {
+        name: "file_name".to_string(),
+        value: FormDataValue::Text("test.txt".to_string()),
+    }]));
+
+    let resp = client
+        .do_req(&api_req, &RequestOption::default())
+        .await
+        .unwrap();
+    assert_eq!(resp.status_code, 200);
+}
+
+#[tokio::test]
+async fn transport_formdata_file_upload() {
+    let body = r#"{"code":0,"msg":"ok","data":{"file_key":"fk_456"}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/files/upload_all");
+    api_req.supported_access_token_types = vec![AccessTokenType::None];
+    api_req.body = Some(ReqBody::FormData(vec![
+        FormDataField {
+            name: "file_name".to_string(),
+            value: FormDataValue::Text("report.pdf".to_string()),
+        },
+        FormDataField {
+            name: "file".to_string(),
+            value: FormDataValue::File {
+                filename: "report.pdf".to_string(),
+                data: b"PDF_CONTENT".to_vec(),
+                content_type: Some("application/pdf".to_string()),
+            },
+        },
+    ]));
+
+    let resp = client
+        .do_req(&api_req, &RequestOption::default())
+        .await
+        .unwrap();
+    assert_eq!(resp.status_code, 200);
+}
+
+#[tokio::test]
+async fn transport_formdata_file_no_content_type() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v1/images");
+    api_req.supported_access_token_types = vec![AccessTokenType::None];
+    api_req.body = Some(ReqBody::FormData(vec![FormDataField {
+        name: "image".to_string(),
+        value: FormDataValue::File {
+            filename: "photo.png".to_string(),
+            data: vec![0x89, 0x50, 0x4E, 0x47],
+            content_type: None,
+        },
+    }]));
+
+    let resp = client
+        .do_req(&api_req, &RequestOption::default())
+        .await
+        .unwrap();
+    assert_eq!(resp.status_code, 200);
+}
+
+// ── App ticket invalid triggers apply_app_ticket ──
+
+#[tokio::test]
+async fn transport_app_ticket_invalid_triggers_retry() {
+    let ticket_invalid_resp = r#"{"code":10012,"msg":"app ticket invalid"}"#;
+    let success_resp = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _h) = mock_server(vec![
+        http_response(200, ticket_invalid_resp),
+        http_response(200, success_resp),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::None];
+
+    let resp = client
+        .do_req(&api_req, &RequestOption::default())
+        .await
+        .unwrap();
     assert_eq!(resp.status_code, 200);
 }
