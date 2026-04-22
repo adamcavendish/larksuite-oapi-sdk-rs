@@ -20,6 +20,12 @@ fn error_display_server_timeout() {
 }
 
 #[test]
+fn error_display_rate_limited() {
+    let e = Error::RateLimited("429".to_string());
+    assert_eq!(format!("{e}"), "rate limited: 429");
+}
+
+#[test]
 fn error_display_dial_failed() {
     let e = Error::DialFailed("connection refused".to_string());
     assert_eq!(format!("{e}"), "dial failed: connection refused");

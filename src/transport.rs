@@ -186,6 +186,10 @@ async fn do_request(
                 last_err = Some(Error::ServerTimeout(msg));
                 continue;
             }
+            Err(Error::RateLimited(msg)) => {
+                last_err = Some(Error::RateLimited(msg));
+                continue;
+            }
             Err(e) => return Err(e),
         }
     }
@@ -340,7 +344,7 @@ pub(crate) async fn raw_send(
     }
 
     if status_code == 429 {
-        return Err(Error::ServerTimeout(
+        return Err(Error::RateLimited(
             "server returned 429 Too Many Requests".to_string(),
         ));
     }

@@ -212,3 +212,15 @@ async fn builder_custom_token_cache() {
     let val = client.config().token_cache.get("pre").await.unwrap();
     assert_eq!(val.as_deref(), Some("val"));
 }
+
+#[tokio::test]
+async fn client_and_builder_debug() {
+    let builder = Client::builder("app", "secret");
+    let debug = format!("{builder:?}");
+    assert!(debug.contains("ClientBuilder"));
+
+    let client = builder.build();
+    let debug = format!("{client:?}");
+    assert!(debug.contains("Client"));
+    assert!(debug.contains("app_id"));
+}

@@ -203,12 +203,10 @@ async fn transport_429_retries_then_fails() {
         .await
         .unwrap_err();
     assert!(
-        matches!(err, Error::ServerTimeout(_) | Error::MaxRetries),
-        "expected ServerTimeout or MaxRetries, got {err:?}"
+        matches!(err, Error::RateLimited(_) | Error::MaxRetries),
+        "expected RateLimited or MaxRetries, got {err:?}"
     );
 }
-
-// ── 504 then success: retry succeeds ──
 
 #[tokio::test]
 async fn transport_retry_succeeds_after_504() {

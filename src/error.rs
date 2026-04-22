@@ -13,6 +13,10 @@ pub enum Error {
     #[error("server timeout: {0}")]
     ServerTimeout(String),
 
+    /// The server returned HTTP 429 Too Many Requests.
+    #[error("rate limited: {0}")]
+    RateLimited(String),
+
     /// TCP connection to the server failed.
     #[error("dial failed: {0}")]
     DialFailed(String),

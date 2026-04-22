@@ -202,7 +202,10 @@ impl WsClient {
                         .or_insert_with(|| FragBuffer::new(sum));
                     buf.insert(index, frame.message.to_vec());
                     if buf.complete() {
-                        pending_frags.remove(&frame.seq_id).unwrap().assemble()
+                        match pending_frags.remove(&frame.seq_id) {
+                            Some(buf) => buf.assemble(),
+                            None => return Ok(None),
+                        }
                     } else {
                         return Ok(None);
                     }
