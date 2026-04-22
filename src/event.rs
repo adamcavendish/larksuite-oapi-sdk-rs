@@ -103,6 +103,7 @@ pub type CallbackHandlerFn = Arc<
         + Sync,
 >;
 
+#[must_use]
 pub struct EventDispatcher {
     event_handlers: HashMap<String, EventHandlerFn>,
     callback_handlers: HashMap<String, CallbackHandlerFn>,
@@ -286,6 +287,7 @@ pub type CardHandlerFn = Arc<
         + Sync,
 >;
 
+#[must_use]
 pub struct CardActionHandler {
     verification_token: String,
     event_encrypt_key: String,

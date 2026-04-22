@@ -14,6 +14,7 @@ use crate::service;
 use crate::transport;
 
 /// Builder for [`Client`]. Construct via [`Client::builder`].
+#[must_use]
 pub struct ClientBuilder {
     config: Config,
     explicit_http_client: bool,
