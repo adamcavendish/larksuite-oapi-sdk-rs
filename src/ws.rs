@@ -258,7 +258,7 @@ impl WsClient {
                 http::header::AUTHORIZATION,
                 format!("Bearer {token}")
                     .parse::<http::HeaderValue>()
-                    .unwrap(),
+                    .map_err(|e| Error::Event(format!("invalid bearer token header: {e}")))?,
             )
             .header_str("DeviceID", &device_id)
             .map_err(|e| Error::Event(format!("invalid device id header: {e}")))?
