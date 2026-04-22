@@ -40,7 +40,9 @@ async fn all_service_accessors() {
     let _ = client.translation();
     let _ = client.search();
     let _ = client.vc();
+    #[allow(deprecated)]
     let _ = client.wiki();
+    let _ = client.wiki_v2();
     let _ = client.wiki_v1();
     let _ = client.passport();
     let _ = client.report();

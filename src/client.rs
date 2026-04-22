@@ -248,7 +248,14 @@ impl Client {
         service::vc::v1::V1::new(&self.config)
     }
 
+    #[deprecated(
+        note = "use wiki_v2() for consistency — un-suffixed accessors return v1 elsewhere"
+    )]
     pub fn wiki(&self) -> service::wiki::v2::V2<'_> {
+        service::wiki::v2::V2::new(&self.config)
+    }
+
+    pub fn wiki_v2(&self) -> service::wiki::v2::V2<'_> {
         service::wiki::v2::V2::new(&self.config)
     }
 
