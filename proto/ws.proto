@@ -1,37 +1,22 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package larksuite.ws;
 
+message Header {
+  required string key = 1;
+  required string value = 2;
+}
+
 // Frame is the binary framing unit exchanged over the WebSocket connection.
-// The Lark WebSocket gateway uses length-prefixed protobuf frames.
+// The Lark WebSocket gateway uses protobuf-encoded binary WebSocket messages.
 message Frame {
-  // Unique frame sequence number (monotonically increasing per connection).
-  uint64 seq_id = 1;
-  // Sum of total frames in a fragmented message (0 = unfragmented).
-  uint32 sum = 2;
-  // 0-based index of this frame within its fragment set.
-  uint32 index = 3;
-  // Frame type — see FrameType enum.
-  uint32 frame_type = 4;
-  // Opaque payload; interpretation depends on frame_type.
-  bytes message = 5;
-  // Headers (key → value), used for service_id, trace_id, etc.
-  map<string, string> headers = 6;
-}
-
-// HandshakeRequest is sent by the client immediately after connection to
-// identify the app and negotiate capabilities.
-message HandshakeRequest {
-  string app_id = 1;
-  string access_token = 2;
-}
-
-// HandshakeResponse is sent by the server in reply to HandshakeRequest.
-message HandshakeResponse {
-  int32 code = 1;
-  string msg = 2;
-  // conn_id is the server-assigned connection identifier.
-  string conn_id = 3;
-  // device_id identifies this device / SDK instance.
-  string device_id = 4;
+  required uint64 SeqID = 1;
+  required uint64 LogID = 2;
+  required int32 service = 3;
+  required int32 method = 4;
+  repeated Header headers = 5;
+  optional string payload_encoding = 6;
+  optional string payload_type = 7;
+  optional bytes payload = 8;
+  optional string LogIDNew = 9;
 }
