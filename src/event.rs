@@ -723,6 +723,112 @@ pub struct Toast {
     pub i18n: Option<HashMap<String, String>>,
 }
 
+impl Toast {
+    pub fn new(content: impl Into<String>) -> Self {
+        Self {
+            toast_type: Some("info".to_string()),
+            content: Some(content.into()),
+            i18n: None,
+        }
+    }
+
+    pub fn toast_type(mut self, t: impl Into<String>) -> Self {
+        self.toast_type = Some(t.into());
+        self
+    }
+
+    pub fn i18n(mut self, i18n: ToastI18n) -> Self {
+        let mut map = HashMap::new();
+        if let Some(v) = i18n.zh_cn {
+            map.insert("zh_cn".to_string(), v);
+        }
+        if let Some(v) = i18n.en_us {
+            map.insert("en_us".to_string(), v);
+        }
+        if let Some(v) = i18n.ja_jp {
+            map.insert("ja_jp".to_string(), v);
+        }
+        if let Some(v) = i18n.zh_hk {
+            map.insert("zh_hk".to_string(), v);
+        }
+        if let Some(v) = i18n.zh_tw {
+            map.insert("zh_tw".to_string(), v);
+        }
+        if let Some(v) = i18n.id_id {
+            map.insert("id_id".to_string(), v);
+        }
+        if let Some(v) = i18n.vi_vn {
+            map.insert("vi_vn".to_string(), v);
+        }
+        if let Some(v) = i18n.th_th {
+            map.insert("th_th".to_string(), v);
+        }
+        if let Some(v) = i18n.pt_br {
+            map.insert("pt_br".to_string(), v);
+        }
+        if let Some(v) = i18n.es_es {
+            map.insert("es_es".to_string(), v);
+        }
+        if let Some(v) = i18n.ko_kr {
+            map.insert("ko_kr".to_string(), v);
+        }
+        if let Some(v) = i18n.de_de {
+            map.insert("de_de".to_string(), v);
+        }
+        if let Some(v) = i18n.fr_fr {
+            map.insert("fr_fr".to_string(), v);
+        }
+        if let Some(v) = i18n.it_it {
+            map.insert("it_it".to_string(), v);
+        }
+        if let Some(v) = i18n.ru_ru {
+            map.insert("ru_ru".to_string(), v);
+        }
+        if let Some(v) = i18n.ms_my {
+            map.insert("ms_my".to_string(), v);
+        }
+        self.i18n = Some(map);
+        self
+    }
+}
+
+/// Typed locale fields for toast I18n, matching Go SDK's `I18n` struct.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ToastI18n {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_hk: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_tw: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vi_vn: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub th_th: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pt_br: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub es_es: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ko_kr: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub de_de: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fr_fr: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub it_it: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ru_ru: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ms_my: Option<String>,
+}
+
 /// Card reference in callback responses (template or raw card JSON).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CallbackCard {

@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use larksuite_oapi_sdk_rs::event::{
     CardAction, CardActionHandler, CardHandlerResult, CustomResp, EventDispatcher, EventReq,
-    EventResp,
+    EventResp, ToastI18n,
 };
 
 // ── EventResp ──
@@ -1283,4 +1283,91 @@ async fn on_url_preview_get_dispatches_typed() {
     let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
     assert_eq!(parsed["inline"]["title"], "Example");
     assert_eq!(parsed["inline"]["image_key"], "img_key");
+}
+
+// ── Toast builder with ToastI18n ──
+
+#[test]
+fn toast_new_and_i18n() {
+    use larksuite_oapi_sdk_rs::event::Toast;
+
+    let toast = Toast::new("Operation complete")
+        .toast_type("success")
+        .i18n(ToastI18n {
+            zh_cn: Some("操作完成".to_string()),
+            en_us: Some("Operation complete".to_string()),
+            ja_jp: Some("操作完了".to_string()),
+            ..Default::default()
+        });
+
+    let json = serde_json::to_value(&toast).unwrap();
+    assert_eq!(json["type"], "success");
+    assert_eq!(json["content"], "Operation complete");
+    assert_eq!(json["i18n"]["zh_cn"], "操作完成");
+    assert_eq!(json["i18n"]["en_us"], "Operation complete");
+    assert_eq!(json["i18n"]["ja_jp"], "操作完了");
+    assert!(json["i18n"].get("ko_kr").is_none());
+}
+
+#[test]
+fn toast_i18n_serde_roundtrip() {
+    let i18n = ToastI18n {
+        zh_cn: Some("你好".to_string()),
+        en_us: Some("Hello".to_string()),
+        ..Default::default()
+    };
+    let json = serde_json::to_string(&i18n).unwrap();
+    let parsed: ToastI18n = serde_json::from_str(&json).unwrap();
+    assert_eq!(parsed.zh_cn.as_deref(), Some("你好"));
+    assert_eq!(parsed.en_us.as_deref(), Some("Hello"));
+    assert!(parsed.ko_kr.is_none());
+}
+
+// ── AppTicketEvent typed handler ──
+
+#[tokio::test]
+async fn on_app_ticket_event_dispatches_typed() {
+    use larksuite_oapi_sdk_rs::events::p1::AppTicketEvent;
+
+    let captured_ticket = Arc::new(Mutex::new(String::new()));
+    let captured_app_id = Arc::new(Mutex::new(String::new()));
+    let ticket_clone = captured_ticket.clone();
+    let app_clone = captured_app_id.clone();
+
+    let dispatcher = EventDispatcher::new("", "")
+        .skip_sign_verify()
+        .on_app_ticket_event(move |evt: AppTicketEvent| {
+            let t = ticket_clone.clone();
+            let a = app_clone.clone();
+            async move {
+                *t.lock().unwrap() = evt.app_ticket.clone();
+                *a.lock().unwrap() = evt.app_id.clone();
+                Ok(())
+            }
+        });
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_ticket_typed",
+            "event_type": "app_ticket",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {
+            "type": "app_ticket",
+            "app_id": "my_app_id",
+            "app_ticket": "ticket_xyz_123"
+        }
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/webhook".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    assert_eq!(&*captured_ticket.lock().unwrap(), "ticket_xyz_123");
+    assert_eq!(&*captured_app_id.lock().unwrap(), "my_app_id");
 }

@@ -14,6 +14,16 @@ use crate::event::EventDispatcher;
 // ── P1 payload types ──────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppTicketEvent {
+    #[serde(rename = "type", default)]
+    pub event_type: String,
+    #[serde(default)]
+    pub app_id: String,
+    #[serde(default)]
+    pub app_ticket: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P1OrderPaidV6 {
     #[serde(default)]
     pub app_id: String,
@@ -649,5 +659,13 @@ impl EventDispatcher {
         Fut: Future<Output = Result<()>> + Send + 'static,
     {
         self.on_event("out_approval", wrap_handler(handler))
+    }
+
+    pub fn on_app_ticket_event<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(AppTicketEvent) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        self.on_event("app_ticket", wrap_handler(handler))
     }
 }

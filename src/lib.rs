@@ -50,7 +50,7 @@ pub use event::{
     CardActionHandler, CardActionTriggerRequest, CardActionTriggerResponse, CardHandlerFn,
     CardHandlerResult, CustomResp, CustomizedEventHandlerFn, EventDispatcher, EventHandlerFn,
     EventHeader, EventReq, EventResp, EventV2Body, InlinePreview, PreviewUrl, TemplateCard, Toast,
-    URLPreviewGetRequest, URLPreviewGetResponse,
+    ToastI18n, URLPreviewGetRequest, URLPreviewGetResponse,
 };
 pub use req::{
     ApiReq, FormDataBuilder, FormDataField, FormDataValue, PathParams, QueryParams, ReqBody,
