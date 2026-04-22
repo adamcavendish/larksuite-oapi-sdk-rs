@@ -814,3 +814,56 @@ async fn event_encrypted_body_decrypt_error_returns_500() {
     let resp = dispatcher.handle(req).await;
     assert_eq!(resp.status_code, 500);
 }
+
+// ── EventDispatcher: on_customized_event ──
+
+#[tokio::test]
+async fn customized_event_handler_receives_full_req() {
+    let captured_uri = Arc::new(Mutex::new(String::new()));
+    let captured_header = Arc::new(Mutex::new(None));
+
+    let uri_clone = captured_uri.clone();
+    let header_clone = captured_header.clone();
+
+    let dispatcher = EventDispatcher::new("", "")
+        .skip_sign_verify()
+        .on_customized_event(
+            "im.message.receive_v1",
+            move |req: EventReq, body: larksuite_oapi_sdk_rs::event::EventV2Body| {
+                let uri = uri_clone.clone();
+                let hdr = header_clone.clone();
+                async move {
+                    *uri.lock().unwrap() = req.request_uri.clone();
+                    *hdr.lock().unwrap() = body.header;
+                    Ok(())
+                }
+            },
+        );
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_123",
+            "event_type": "im.message.receive_v1",
+            "app_id": "cli_test",
+            "tenant_key": "tk",
+            "create_time": "1234567890",
+            "token": ""
+        },
+        "event": {
+            "message": { "message_id": "om_abc" }
+        }
+    });
+
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: "/webhook/event".to_string(),
+    };
+    let resp = dispatcher.handle(req).await;
+    assert_eq!(resp.status_code, 200);
+    assert_eq!(&*captured_uri.lock().unwrap(), "/webhook/event");
+    let hdr = captured_header.lock().unwrap();
+    assert_eq!(hdr.as_ref().unwrap().event_id, "ev_123");
+    assert_eq!(hdr.as_ref().unwrap().app_id, "cli_test");
+}

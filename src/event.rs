@@ -97,6 +97,10 @@ pub type EventHandlerFn = Arc<
     dyn Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync,
 >;
 
+pub type CustomizedEventHandlerFn = Arc<
+    dyn Fn(EventReq, EventV2Body) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync,
+>;
+
 pub type CallbackHandlerFn = Arc<
     dyn Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<serde_json::Value>> + Send>>
         + Send
@@ -106,6 +110,7 @@ pub type CallbackHandlerFn = Arc<
 #[must_use]
 pub struct EventDispatcher {
     event_handlers: HashMap<String, EventHandlerFn>,
+    customized_event_handlers: HashMap<String, CustomizedEventHandlerFn>,
     callback_handlers: HashMap<String, CallbackHandlerFn>,
     verification_token: String,
     event_encrypt_key: String,
@@ -120,6 +125,7 @@ impl EventDispatcher {
     ) -> Self {
         Self {
             event_handlers: HashMap::new(),
+            customized_event_handlers: HashMap::new(),
             callback_handlers: HashMap::new(),
             verification_token: verification_token.into(),
             event_encrypt_key: event_encrypt_key.into(),
@@ -202,6 +208,25 @@ impl EventDispatcher {
         self
     }
 
+    /// Register a raw event handler that receives the full [`EventReq`] and
+    /// parsed [`EventV2Body`], including headers, raw body, and request URI.
+    pub fn on_customized_event<F, Fut>(mut self, event_type: impl Into<String>, handler: F) -> Self
+    where
+        F: Fn(EventReq, EventV2Body) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<()>> + Send + 'static,
+    {
+        let event_type = event_type.into();
+        let handler = Arc::new(
+            move |req: EventReq,
+                  body: EventV2Body|
+                  -> Pin<Box<dyn Future<Output = Result<()>> + Send>> {
+                Box::pin(handler(req, body))
+            },
+        );
+        self.customized_event_handlers.insert(event_type, handler);
+        self
+    }
+
     pub async fn handle(&self, req: EventReq) -> EventResp {
         match self.do_handle(req).await {
             Ok(resp) => resp,
@@ -242,6 +267,11 @@ impl EventDispatcher {
             let event_data = parsed.event.clone();
             let resp_data = handler(event_data).await?;
             return Ok(EventResp::success(resp_data));
+        }
+
+        if let Some(handler) = self.customized_event_handlers.get(event_type) {
+            handler(req, parsed).await?;
+            return Ok(EventResp::success(serde_json::json!({ "msg": "success" })));
         }
 
         if let Some(handler) = self.event_handlers.get(event_type) {
