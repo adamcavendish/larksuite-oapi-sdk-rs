@@ -7,20 +7,31 @@ use http::HeaderMap;
 use crate::cache::{Cache, LocalCache};
 use crate::constants::{AppType, FEISHU_BASE_URL};
 
+/// SDK configuration. Prefer constructing via [`ClientBuilder`](crate::ClientBuilder).
 #[derive(Clone)]
 pub struct Config {
+    /// Base URL for API requests (default: Feishu `https://open.feishu.cn`).
     pub base_url: String,
     pub app_id: String,
     pub app_secret: String,
+    /// Helpdesk ID for helpdesk-authenticated endpoints.
     pub helpdesk_id: Option<String>,
+    /// Helpdesk token for helpdesk-authenticated endpoints.
     pub helpdesk_token: Option<String>,
+    /// Base64-encoded `{id}:{token}`, set automatically by [`ClientBuilder::helpdesk_credential`](crate::ClientBuilder::helpdesk_credential).
     pub helpdesk_auth_token: Option<String>,
+    /// HTTP request timeout (default: 30s).
     pub req_timeout: Duration,
     pub http_client: aioduct::Client<TokioRuntime>,
+    /// Self-built (default) or marketplace app.
     pub app_type: AppType,
+    /// Whether to cache access tokens (default: true).
     pub enable_token_cache: bool,
+    /// Shared token cache. Cloning `Config` shares the same cache via `Arc`.
     pub token_cache: Arc<dyn Cache>,
+    /// Headers sent with every request.
     pub default_headers: HeaderMap,
+    /// Skip event callback signature verification (for testing only).
     pub skip_sign_verify: bool,
     pub log_level: Option<tracing::Level>,
 }

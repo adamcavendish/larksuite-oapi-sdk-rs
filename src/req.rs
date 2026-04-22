@@ -108,16 +108,27 @@ impl PathParams {
     }
 }
 
+/// Per-request options that override client-level defaults.
 #[derive(Debug, Clone, Default)]
 pub struct RequestOption {
+    /// Tenant key for marketplace multi-tenant requests.
     pub tenant_key: Option<String>,
+    /// Explicit user access token (skips automatic token resolution).
     pub user_access_token: Option<String>,
+    /// Explicit app access token (skips automatic token resolution).
     pub app_access_token: Option<String>,
+    /// Explicit tenant access token (skips automatic token resolution).
     pub tenant_access_token: Option<String>,
+    /// Attach helpdesk authorization header.
     pub need_helpdesk_auth: bool,
+    /// Custom request ID for tracing.
     pub request_id: Option<String>,
+    /// App ticket for marketplace app token exchange.
     pub app_ticket: Option<String>,
+    /// Send body as multipart/form-data.
     pub file_upload: bool,
+    /// Expect a binary file response instead of JSON.
     pub file_download: bool,
+    /// Extra headers merged into this request.
     pub headers: Option<HeaderMap>,
 }
