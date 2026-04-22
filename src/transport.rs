@@ -76,6 +76,19 @@ fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result
         }
     }
 
+    if let Some(ref headers) = option.headers {
+        if headers.contains_key("X-Request-Id") {
+            return Err(Error::IllegalParam(
+                "use X-Request-Id as header key is not allowed".to_string(),
+            ));
+        }
+        if headers.contains_key("Request-Id") {
+            return Err(Error::IllegalParam(
+                "use Request-Id as header key is not allowed".to_string(),
+            ));
+        }
+    }
+
     validate_token_type(&api_req.supported_access_token_types, option)?;
 
     Ok(())
@@ -359,12 +372,34 @@ pub(crate) async fn raw_send(
     let status_code = response.status().as_u16();
 
     if status_code == 504 {
+        let log_id = response
+            .headers()
+            .get("X-Tt-Logid")
+            .or_else(|| response.headers().get("X-Request-Id"))
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("");
+        tracing::info!(
+            path = %api_req.api_path,
+            log_id = %log_id,
+            "server timeout (504)"
+        );
         return Err(Error::ServerTimeout(
             "server returned 504 Gateway Timeout".to_string(),
         ));
     }
 
     if status_code == 429 {
+        let log_id = response
+            .headers()
+            .get("X-Tt-Logid")
+            .or_else(|| response.headers().get("X-Request-Id"))
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("");
+        tracing::info!(
+            path = %api_req.api_path,
+            log_id = %log_id,
+            "rate limited (429)"
+        );
         return Err(Error::RateLimited(
             "server returned 429 Too Many Requests".to_string(),
         ));

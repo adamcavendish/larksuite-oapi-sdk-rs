@@ -68,3 +68,35 @@ async fn transport_user_access_token_option_sets_header() {
         "unexpected error: {err:?}"
     );
 }
+
+#[tokio::test]
+async fn transport_rejects_reserved_x_request_id_header() {
+    let client = Client::builder("app_id", "secret").build();
+    let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
+
+    let mut headers = http::HeaderMap::new();
+    headers.insert("X-Request-Id", "custom".parse().unwrap());
+    let option = RequestOption {
+        headers: Some(headers),
+        ..Default::default()
+    };
+
+    let err = client.do_req(&api_req, &option).await.unwrap_err();
+    assert!(matches!(err, Error::IllegalParam(_)));
+}
+
+#[tokio::test]
+async fn transport_rejects_reserved_request_id_header() {
+    let client = Client::builder("app_id", "secret").build();
+    let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
+
+    let mut headers = http::HeaderMap::new();
+    headers.insert("Request-Id", "custom".parse().unwrap());
+    let option = RequestOption {
+        headers: Some(headers),
+        ..Default::default()
+    };
+
+    let err = client.do_req(&api_req, &option).await.unwrap_err();
+    assert!(matches!(err, Error::IllegalParam(_)));
+}
