@@ -128,6 +128,10 @@ impl Client {
         &self.config
     }
 
+    pub fn app_ticket_manager(&self) -> crate::token::AppTicketManager {
+        crate::token::AppTicketManager::new(self.config.token_cache.clone())
+    }
+
     pub fn admin(&self) -> service::admin::v1::V1<'_> {
         service::admin::v1::V1::new(&self.config)
     }

@@ -22,6 +22,7 @@ cbc = "0.2"
 futures-util = { version = "0.3", optional = true }
 hex = "0.4"
 http = "1"
+percent-encoding = "2"
 aioduct = { version = "0.1.2", features = ["json", "tokio", "rustls"] }
 prost = { version = "0.13", optional = true }
 serde = { version = "1", features = ["derive"] }

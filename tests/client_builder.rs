@@ -225,3 +225,23 @@ async fn builder_log_req_at_debug_default_false() {
     let client = Client::builder("app", "secret").build();
     assert!(!client.config().log_req_at_debug());
 }
+
+#[tokio::test]
+async fn app_ticket_manager_shares_cache() {
+    use std::time::Duration;
+
+    let client = Client::builder("app", "secret").build();
+    let atm = client.app_ticket_manager();
+
+    atm.set("app", "ticket_value", Duration::from_secs(60))
+        .await
+        .unwrap();
+
+    let val = client
+        .config()
+        .token_cache()
+        .get("app_ticket-app")
+        .await
+        .unwrap();
+    assert_eq!(val.as_deref(), Some("ticket_value"));
+}

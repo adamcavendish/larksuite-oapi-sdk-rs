@@ -87,9 +87,13 @@ impl TokenManager {
 
         let cache_key = format!("{APP_ACCESS_TOKEN_KEY_PREFIX}-{}", config.app_id);
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
-        self.cache
+        if let Err(e) = self
+            .cache
             .set(&cache_key, &resp.app_access_token, ttl)
-            .await?;
+            .await
+        {
+            tracing::warn!("app access token save cache: {e}");
+        }
 
         Ok(resp.app_access_token)
     }
@@ -110,9 +114,13 @@ impl TokenManager {
 
         let cache_key = format!("{TENANT_ACCESS_TOKEN_KEY_PREFIX}-{}-", config.app_id);
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
-        self.cache
+        if let Err(e) = self
+            .cache
             .set(&cache_key, &resp.tenant_access_token, ttl)
-            .await?;
+            .await
+        {
+            tracing::warn!("tenant access token save cache: {e}");
+        }
 
         Ok(resp.tenant_access_token)
     }
@@ -134,9 +142,13 @@ impl TokenManager {
 
         let cache_key = format!("{APP_ACCESS_TOKEN_KEY_PREFIX}-{}", config.app_id);
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
-        self.cache
+        if let Err(e) = self
+            .cache
             .set(&cache_key, &resp.app_access_token, ttl)
-            .await?;
+            .await
+        {
+            tracing::warn!("marketplace app access token save cache: {e}");
+        }
 
         Ok(resp.app_access_token)
     }
@@ -161,9 +173,13 @@ impl TokenManager {
         let tk = tenant_key.unwrap_or_default();
         let cache_key = format!("{TENANT_ACCESS_TOKEN_KEY_PREFIX}-{}-{tk}", config.app_id);
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
-        self.cache
+        if let Err(e) = self
+            .cache
             .set(&cache_key, &resp.tenant_access_token, ttl)
-            .await?;
+            .await
+        {
+            tracing::warn!("marketplace tenant access token save cache: {e}");
+        }
 
         Ok(resp.tenant_access_token)
     }

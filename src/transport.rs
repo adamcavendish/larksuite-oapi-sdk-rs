@@ -406,11 +406,31 @@ pub(crate) async fn raw_send(
 }
 
 fn build_url(config: &Config, api_req: &ApiReq) -> String {
+    const PATH_SEGMENT_ENCODE_SET: &percent_encoding::AsciiSet = &percent_encoding::CONTROLS
+        .add(b' ')
+        .add(b'"')
+        .add(b'#')
+        .add(b'%')
+        .add(b'/')
+        .add(b'<')
+        .add(b'>')
+        .add(b'?')
+        .add(b'[')
+        .add(b'\\')
+        .add(b']')
+        .add(b'^')
+        .add(b'`')
+        .add(b'{')
+        .add(b'|')
+        .add(b'}');
+
     let mut path = api_req.api_path.clone();
 
     for (key, value) in &api_req.path_params.0 {
         let placeholder = format!(":{key}");
-        path = path.replace(&placeholder, value);
+        let encoded =
+            percent_encoding::utf8_percent_encode(value, PATH_SEGMENT_ENCODE_SET).to_string();
+        path = path.replace(&placeholder, &encoded);
     }
 
     let query = api_req.query_params.encode();
@@ -491,5 +511,15 @@ mod tests {
             build_url(&config, &api_req),
             "https://open.larksuite.com/open-apis/auth/v3/app_access_token"
         );
+    }
+
+    #[tokio::test]
+    async fn build_url_path_params_percent_encoded() {
+        let config = test_config();
+        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/drive/v1/files/:file_token");
+        api_req.path_params.set("file_token", "a/b?c#d e");
+        let url = build_url(&config, &api_req);
+        assert!(!url.contains("a/b?c#d e"));
+        assert!(url.contains("a%2Fb%3Fc%23d%20e"));
     }
 }
