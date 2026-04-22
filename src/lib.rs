@@ -3,7 +3,7 @@
 //! # Quick start
 //!
 //! ```rust,no_run
-//! use larksuite_oapi_sdk_rs::{Client, Config};
+//! use larksuite_oapi_sdk_rs::Client;
 //!
 //! let client = Client::builder("APP_ID", "APP_SECRET").build();
 //! ```
