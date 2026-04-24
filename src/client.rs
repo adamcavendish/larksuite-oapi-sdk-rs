@@ -86,6 +86,7 @@ impl ClientBuilder {
     pub fn build(self) -> Client {
         let mut config = self.config;
         config.http_client = aioduct::Client::builder()
+            .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
             .timeout(config.req_timeout)
             .build();
         let client = Client { config };

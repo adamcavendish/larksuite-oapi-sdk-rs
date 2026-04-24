@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::sync::Once;
 use std::time::Duration;
 
 use aioduct::runtime::TokioRuntime;
@@ -6,6 +7,19 @@ use http::HeaderMap;
 
 use crate::cache::{Cache, LocalCache};
 use crate::constants::{AppType, FEISHU_BASE_URL};
+
+static CRYPTO_PROVIDER_INIT: Once = Once::new();
+
+/// Install the rustls ring crypto provider as process-wide default. Safe to
+/// call multiple times; only the first call wins. Required because
+/// `rustls::ClientConfig::builder_with_protocol_versions` (used by
+/// `aioduct::tls::RustlsConnector::with_webpki_roots`) needs a crypto
+/// provider installed, and aioduct does not install one on the library path.
+fn install_default_crypto_provider() {
+    CRYPTO_PROVIDER_INIT.call_once(|| {
+        let _ = rustls::crypto::ring::default_provider().install_default();
+    });
+}
 
 /// SDK configuration. Construct via [`ClientBuilder`](crate::ClientBuilder).
 #[derive(Clone)]
@@ -31,7 +45,11 @@ pub struct Config {
 impl Config {
     pub(crate) fn new(app_id: impl Into<String>, app_secret: impl Into<String>) -> Self {
         let timeout = Duration::from_secs(30);
-        let http_client = aioduct::Client::builder().timeout(timeout).build();
+        install_default_crypto_provider();
+        let http_client = aioduct::Client::builder()
+            .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
+            .timeout(timeout)
+            .build();
         Self {
             base_url: FEISHU_BASE_URL.to_string(),
             app_id: app_id.into(),
