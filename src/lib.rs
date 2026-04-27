@@ -28,6 +28,7 @@ pub mod event;
 pub mod events;
 #[macro_use]
 mod macros;
+pub mod registration;
 pub mod req;
 pub mod resp;
 pub mod service;

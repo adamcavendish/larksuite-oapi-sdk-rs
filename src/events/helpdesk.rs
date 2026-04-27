@@ -32,6 +32,12 @@ pub struct P2HelpdeskTicketMessageCreatedV1 {
     pub message: serde_json::Value,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2HelpdeskNotificationApproveV1 {
+    #[serde(default)]
+    pub object: serde_json::Value,
+}
+
 // ── Handler registration helpers ──
 
 fn wrap_handler<T, F, Fut>(
@@ -87,5 +93,13 @@ impl EventDispatcher {
             "helpdesk.ticket.ticket_message.created_v1",
             wrap_handler(handler),
         )
+    }
+
+    pub fn on_p2_helpdesk_notification_approve_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2HelpdeskNotificationApproveV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
+    {
+        self.on_event("helpdesk.notification.approve_v1", wrap_handler(handler))
     }
 }

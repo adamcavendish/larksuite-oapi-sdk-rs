@@ -15,7 +15,7 @@ static CRYPTO_PROVIDER_INIT: Once = Once::new();
 /// `rustls::ClientConfig::builder_with_protocol_versions` (used by
 /// `aioduct::tls::RustlsConnector::with_webpki_roots`) needs a crypto
 /// provider installed, and aioduct does not install one on the library path.
-fn install_default_crypto_provider() {
+pub(crate) fn install_default_crypto_provider() {
     CRYPTO_PROVIDER_INIT.call_once(|| {
         let _ = rustls::crypto::ring::default_provider().install_default();
     });

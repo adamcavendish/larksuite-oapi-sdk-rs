@@ -36,6 +36,14 @@ pub struct P2MeetingRoomDeletedV1 {
     pub room: serde_json::Value,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2MeetingRoomStatusChangedV1 {
+    #[serde(default)]
+    pub room_id: String,
+    #[serde(default)]
+    pub room: serde_json::Value,
+}
+
 // ── Handler registration helpers ──
 
 fn wrap_handler<T, F, Fut>(
@@ -88,5 +96,13 @@ impl EventDispatcher {
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("meeting_room.room.deleted_v1", wrap_handler(handler))
+    }
+
+    pub fn on_p2_meeting_room_status_changed_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2MeetingRoomStatusChangedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
+    {
+        self.on_event("meeting_room.room.status_changed_v1", wrap_handler(handler))
     }
 }

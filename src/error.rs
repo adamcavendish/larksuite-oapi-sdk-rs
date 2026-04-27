@@ -48,6 +48,10 @@ pub enum LarkError {
     /// AES decryption or signature verification failed.
     #[error("crypto error: {0}")]
     Crypto(String),
+
+    /// App registration flow error.
+    #[error("registration error: {0}")]
+    Registration(String),
 }
 
 impl From<crate::resp::CodeError> for LarkError {

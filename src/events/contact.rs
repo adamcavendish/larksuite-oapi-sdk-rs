@@ -80,6 +80,30 @@ pub struct P2ContactScopeUpdatedV3 {
     pub added_open_group_ids: Vec<String>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ContactCustomAttrEventUpdatedV3 {
+    #[serde(default)]
+    pub object: serde_json::Value,
+    #[serde(default)]
+    pub old_object: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ContactEmployeeTypeEnumActivedV3 {
+    #[serde(default)]
+    pub object: serde_json::Value,
+    #[serde(default)]
+    pub old_object: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ContactEmployeeTypeEnumDeactivatedV3 {
+    #[serde(default)]
+    pub object: serde_json::Value,
+    #[serde(default)]
+    pub old_object: serde_json::Value,
+}
+
 // ── Handler registration helpers ──
 
 fn wrap_handler<T, F, Fut>(
@@ -245,5 +269,38 @@ impl EventDispatcher {
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("contact.job_level.deleted_v3", wrap_handler(handler))
+    }
+
+    pub fn on_p2_contact_custom_attr_event_updated_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
+    {
+        self.on_event(
+            "contact.custom_attr_event.updated_v3",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_contact_employee_type_enum_actived_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
+    {
+        self.on_event(
+            "contact.employee_type_enum.actived_v3",
+            wrap_handler(handler),
+        )
+    }
+
+    pub fn on_p2_contact_employee_type_enum_deactivated_v3<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
+    {
+        self.on_event(
+            "contact.employee_type_enum.deactivated_v3",
+            wrap_handler(handler),
+        )
     }
 }
