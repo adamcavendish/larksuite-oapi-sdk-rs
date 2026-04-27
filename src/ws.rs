@@ -200,26 +200,36 @@ impl WsClient {
     /// Run the WebSocket connection. If auto-reconnect is enabled (default),
     /// reconnects indefinitely on errors. Otherwise returns after one session.
     pub async fn start(self) -> Result<()> {
+        let mut consecutive_failures: u32 = 0;
         loop {
             match self.run_once().await {
                 Ok(()) => {
                     tracing::info!("ws connection closed");
+                    consecutive_failures = 0;
                 }
                 Err(e) => {
                     tracing::warn!("ws connection error: {e}");
+                    consecutive_failures += 1;
                 }
             }
             if !self.auto_reconnect.load(Ordering::Relaxed) {
                 return Ok(());
             }
-            let interval = self.reconnect_interval.load(Ordering::Relaxed);
-            let nonce = self.reconnect_nonce.load(Ordering::Relaxed);
-            let jitter = if nonce > 0 {
-                uuid::Uuid::new_v4().as_u64_pair().0 % nonce
+            // Fast reconnect (5s) on first failure after a working connection.
+            // Use server-configured interval on repeated failures to avoid
+            // hammering the endpoint.
+            let wait = if consecutive_failures <= 1 {
+                Duration::from_secs(5)
             } else {
-                0
+                let interval = self.reconnect_interval.load(Ordering::Relaxed);
+                let nonce = self.reconnect_nonce.load(Ordering::Relaxed);
+                let jitter = if nonce > 0 {
+                    uuid::Uuid::new_v4().as_u64_pair().0 % nonce
+                } else {
+                    0
+                };
+                Duration::from_secs(interval + jitter)
             };
-            let wait = Duration::from_secs(interval + jitter);
             tracing::info!("reconnecting in {wait:?}");
             sleep(wait).await;
         }
