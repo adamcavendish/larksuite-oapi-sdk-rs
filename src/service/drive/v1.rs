@@ -783,6 +783,7 @@ impl_resp!(
 #[derive(Debug, Clone)]
 struct PageIteratorState<T> {
     next_page_token: Option<String>,
+    request_page_token: Option<String>,
     items: VecDeque<T>,
     started: bool,
     exhausted: bool,
@@ -794,6 +795,7 @@ impl<T> Default for PageIteratorState<T> {
     fn default() -> Self {
         Self {
             next_page_token: None,
+            request_page_token: None,
             items: VecDeque::new(),
             started: false,
             exhausted: false,
@@ -809,13 +811,22 @@ impl<T> PageIteratorState<T> {
         self
     }
 
+    fn with_page_token(mut self, page_token: Option<String>) -> Self {
+        self.request_page_token = page_token;
+        self.started = self.request_page_token.is_some();
+        self.exhausted = false;
+        self
+    }
+
     fn next_page_token(&self) -> Option<&str> {
         self.next_page_token.as_deref()
     }
 
     fn page_token_for_request(&self) -> Option<&str> {
         if self.started {
-            self.next_page_token.as_deref()
+            self.request_page_token
+                .as_deref()
+                .or(self.next_page_token.as_deref())
         } else {
             None
         }
@@ -834,7 +845,9 @@ impl<T> PageIteratorState<T> {
         self.limit.is_none_or(|limit| self.emitted < limit)
             && self.items.is_empty()
             && !self.exhausted
-            && (!self.started || self.next_page_token.is_some())
+            && (!self.started
+                || self.request_page_token.is_some()
+                || self.next_page_token.is_some())
     }
 
     fn accept_page(
@@ -843,9 +856,15 @@ impl<T> PageIteratorState<T> {
         page_token: Option<String>,
         has_more: Option<bool>,
     ) {
+        let prev_page_token = self.next_page_token.clone();
         self.started = true;
+        self.request_page_token = None;
         self.items = items.unwrap_or_default().into();
-        self.next_page_token = page_token;
+        self.next_page_token = if self.items.is_empty() {
+            prev_page_token
+        } else {
+            page_token
+        };
         self.exhausted =
             self.items.is_empty() || !has_more.unwrap_or(false) || self.next_page_token.is_none();
     }
@@ -868,6 +887,11 @@ pub struct FileCommentIterator<'a> {
 impl<'a> FileCommentIterator<'a> {
     pub fn limit(mut self, limit: usize) -> Self {
         self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
+        self.state = self.state.with_page_token(Some(page_token.into()));
         self
     }
 
@@ -919,6 +943,11 @@ pub struct FileCommentReplyIterator<'a> {
 impl<'a> FileCommentReplyIterator<'a> {
     pub fn limit(mut self, limit: usize) -> Self {
         self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
+        self.state = self.state.with_page_token(Some(page_token.into()));
         self
     }
 
@@ -974,6 +1003,11 @@ impl<'a> FileVersionIterator<'a> {
         self
     }
 
+    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
+        self.state = self.state.with_page_token(Some(page_token.into()));
+        self
+    }
+
     pub fn next_page_token(&self) -> Option<&str> {
         self.state.next_page_token()
     }
@@ -1019,6 +1053,11 @@ pub struct FileViewRecordIterator<'a> {
 impl<'a> FileViewRecordIterator<'a> {
     pub fn limit(mut self, limit: usize) -> Self {
         self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
+        self.state = self.state.with_page_token(Some(page_token.into()));
         self
     }
 

@@ -1,6 +1,6 @@
 mod common;
 
-use common::{http_response, mock_server};
+use common::{http_response, mock_server, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::req::RequestOption;
@@ -40,6 +40,53 @@ async fn drive_file_version_iterator_pages_and_limits() {
 }
 
 #[tokio::test]
+async fn drive_file_version_iterator_sends_page_token_on_resume() {
+    let page1 = r#"{"code":0,"msg":"ok","data":{"items":[{"name":"v1"}],"page_token":"next-1","has_more":true}}"#;
+    let page2 = r#"{"code":0,"msg":"ok","data":{"items":[{"name":"v2"}],"page_token":"next-2","has_more":false}}"#;
+    let (addr, _h, requests) =
+        mock_server_with_requests(vec![http_response(200, page1), http_response(200, page2)]).await;
+
+    let client = client_for(addr);
+    let mut iter = client
+        .drive()
+        .file_version
+        .list_by_iterator("file-token", "doc", None, Some(1))
+        .page_token("seed-token");
+    let option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..Default::default()
+    };
+
+    let _ = iter.next(&option).await.unwrap();
+    let _ = iter.next(&option).await.unwrap();
+
+    let reqs = requests.lock().unwrap();
+    assert!(reqs[0].contains("GET /open-apis/drive/v1/files/file-token/versions?"));
+    assert!(reqs[0].contains("page_token=seed-token"));
+    assert!(reqs[1].contains("page_token=next-1"));
+}
+
+#[tokio::test]
+async fn drive_file_version_iterator_next_page_token_uses_server_cursor_after_resume() {
+    let page1 = r#"{"code":0,"msg":"ok","data":{"items":[{"name":"v1"}],"page_token":"next-1","has_more":true}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, page1)]).await;
+
+    let client = client_for(addr);
+    let mut iter = client
+        .drive()
+        .file_version
+        .list_by_iterator("file-token", "doc", None, Some(1))
+        .page_token("seed-token");
+    let option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..Default::default()
+    };
+
+    let _ = iter.next(&option).await.unwrap();
+    assert_eq!(iter.next_page_token(), Some("next-1"));
+}
+
+#[tokio::test]
 async fn drive_file_view_record_iterator_limit_zero_is_unlimited() {
     let page1 = r#"{"code":0,"msg":"ok","data":{"items":[{"viewer_id":"u1"}],"page_token":"token-1","has_more":true}}"#;
     let page2 = r#"{"code":0,"msg":"ok","data":{"items":[{"viewer_id":"u2"}],"page_token":"token-2","has_more":false}}"#;
@@ -64,4 +111,30 @@ async fn drive_file_view_record_iterator_limit_zero_is_unlimited() {
     assert_eq!(second.viewer_id.as_deref(), Some("u2"));
     assert!(third.is_none());
     assert_eq!(iter.next_page_token(), Some("token-2"));
+}
+
+#[tokio::test]
+async fn drive_file_view_record_iterator_preserves_token_on_empty_page() {
+    let page1 = r#"{"code":0,"msg":"ok","data":{"items":[{"viewer_id":"u1"}],"page_token":"token-1","has_more":true}}"#;
+    let page2 =
+        r#"{"code":0,"msg":"ok","data":{"items":[],"page_token":"token-2","has_more":true}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, page1), http_response(200, page2)]).await;
+
+    let client = client_for(addr);
+    let mut iter =
+        client
+            .drive()
+            .file_view_record
+            .list_by_iterator("file-token", "doc", None, Some(1));
+    let option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..Default::default()
+    };
+
+    let first = iter.next(&option).await.unwrap().unwrap();
+    let second = iter.next(&option).await.unwrap();
+
+    assert_eq!(first.viewer_id.as_deref(), Some("u1"));
+    assert!(second.is_none());
+    assert_eq!(iter.next_page_token(), Some("token-1"));
 }

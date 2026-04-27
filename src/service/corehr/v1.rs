@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
@@ -31,6 +33,134 @@ pub struct ObjectFieldData {
     pub field_name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub apply_initiator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub apply_initiating_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub apply_finish_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Enum {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display: Option<Vec<I18nText>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CustomFieldData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OffboardingChecklist {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub checklist_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub checklist_start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub checklist_finish_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub checklist_process_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OffboardingData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_reason_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_reason_explanation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OffboardingInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hrbp_id: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_offboarding_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<Enum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason_explanation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_reason: Option<Enum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_reason_explanation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_block_list: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_reason: Option<Enum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_reason_explanation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_fields: Option<Vec<CustomFieldData>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub retain_account: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub social_insurance_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provident_fund_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enforce_noncompete_agreement: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub noncompete_agreement_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub noncompete_agreement_company: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub noncompete_agreement_start_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub noncompete_agreement_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sign_type: Option<Enum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub signature_file: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_attendance_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_transfer_with_workforce: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Offboarding {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initiating_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_info: Option<ApplicationInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_info: Option<OffboardingInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_checklist: Option<OffboardingChecklist>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_id: Option<String>,
 }
 
 // ── Domain types ──
@@ -811,7 +941,7 @@ impl_resp_v2!(GetNationalIdTypeResp, serde_json::Value);
 impl_resp_v2!(ListNationalIdTypeResp, serde_json::Value);
 impl_resp_v2!(PatchNationalIdTypeResp, serde_json::Value);
 impl_resp_v2!(QueryOffboardingResp, serde_json::Value);
-impl_resp_v2!(SearchOffboardingResp, serde_json::Value);
+impl_resp_v2!(SearchOffboardingResp, SearchOffboardingRespData);
 impl_resp_v2!(SubmitOffboardingResp, serde_json::Value);
 impl_resp_v2!(CreatePersonResp, serde_json::Value);
 impl_resp_v2!(DeletePersonResp, ());
@@ -838,6 +968,106 @@ impl_resp_v2!(PatchWorkingHoursTypeResp, serde_json::Value);
 impl_resp_v2!(CreateCompanyResp, serde_json::Value);
 impl_resp_v2!(DeleteCompanyResp, ());
 impl_resp_v2!(PatchCompanyResp, serde_json::Value);
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchOffboardingRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub items: Option<Vec<Offboarding>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone)]
+struct PageIteratorState<T> {
+    next_page_token: Option<String>,
+    request_page_token: Option<String>,
+    items: VecDeque<T>,
+    started: bool,
+    exhausted: bool,
+    limit: Option<usize>,
+    emitted: usize,
+}
+
+impl<T> Default for PageIteratorState<T> {
+    fn default() -> Self {
+        Self {
+            next_page_token: None,
+            request_page_token: None,
+            items: VecDeque::new(),
+            started: false,
+            exhausted: false,
+            limit: None,
+            emitted: 0,
+        }
+    }
+}
+
+impl<T> PageIteratorState<T> {
+    fn limit(mut self, limit: usize) -> Self {
+        self.limit = (limit > 0).then_some(limit);
+        self
+    }
+
+    fn with_page_token(mut self, page_token: Option<String>) -> Self {
+        self.request_page_token = page_token;
+        self.started = self.request_page_token.is_some();
+        self.exhausted = false;
+        self
+    }
+
+    fn next_page_token(&self) -> Option<&str> {
+        self.next_page_token.as_deref()
+    }
+
+    fn page_token_for_request(&self) -> Option<&str> {
+        if self.started {
+            self.request_page_token
+                .as_deref()
+                .or(self.next_page_token.as_deref())
+        } else {
+            None
+        }
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        if self.limit.is_some_and(|limit| self.emitted >= limit) {
+            return None;
+        }
+        let item = self.items.pop_front()?;
+        self.emitted += 1;
+        Some(item)
+    }
+
+    fn should_fetch(&self) -> bool {
+        self.limit.is_none_or(|limit| self.emitted < limit)
+            && self.items.is_empty()
+            && !self.exhausted
+            && (!self.started
+                || self.request_page_token.is_some()
+                || self.next_page_token.is_some())
+    }
+
+    fn accept_page(
+        &mut self,
+        items: Option<Vec<T>>,
+        page_token: Option<String>,
+        has_more: Option<bool>,
+    ) {
+        let prev_page_token = self.next_page_token.clone();
+        self.started = true;
+        self.request_page_token = None;
+        self.items = items.unwrap_or_default().into();
+        self.next_page_token = if self.items.is_empty() {
+            prev_page_token
+        } else {
+            page_token
+        };
+        self.exhausted =
+            self.items.is_empty() || !has_more.unwrap_or(false) || self.next_page_token.is_none();
+    }
+}
 
 // ── New Resource Structs ──
 
@@ -2093,6 +2323,57 @@ pub struct OffboardingResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+pub struct SearchOffboardingIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Offboarding>,
+    body: serde_json::Value,
+    page_size: Option<i32>,
+    user_id_type: Option<String>,
+}
+
+impl<'a> SearchOffboardingIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
+        self.state = self.state.with_page_token(Some(page_token.into()));
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Offboarding>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = OffboardingResource {
+            config: self.config,
+        };
+        let resp = resource
+            .search_page(
+                self.page_size,
+                self.state.page_token_for_request(),
+                self.user_id_type.as_deref(),
+                self.body.clone(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
 impl<'a> OffboardingResource<'a> {
     pub async fn query(
         &self,
@@ -2120,20 +2401,56 @@ impl<'a> OffboardingResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchOffboardingResp, LarkError> {
+        self.search_page(None, None, None, body, option).await
+    }
+
+    pub async fn search_page(
+        &self,
+        page_size: Option<i32>,
+        page_token: Option<&str>,
+        user_id_type: Option<&str>,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchOffboardingResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/offboardings/search",
         );
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        if let Some(v) = page_size {
+            api_req.query_params.set("page_size", v.to_string());
+        }
+        if let Some(v) = page_token {
+            api_req.query_params.set("page_token", v);
+        }
+        if let Some(v) = user_id_type {
+            api_req.query_params.set("user_id_type", v);
+        }
         api_req.body = Some(ReqBody::json(&body)?);
         let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            transport::request_typed::<SearchOffboardingRespData>(self.config, &api_req, option)
+                .await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(SearchOffboardingResp {
             api_resp,
             code_error,
             data,
         })
+    }
+
+    pub fn search_by_iterator(
+        &self,
+        body: serde_json::Value,
+        page_size: Option<i32>,
+        user_id_type: Option<&str>,
+    ) -> SearchOffboardingIterator<'a> {
+        SearchOffboardingIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            body,
+            page_size,
+            user_id_type: user_id_type.map(|v| v.to_owned()),
+        }
     }
 
     pub async fn submit(

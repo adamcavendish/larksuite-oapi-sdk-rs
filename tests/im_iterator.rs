@@ -1,6 +1,6 @@
 mod common;
 
-use common::{http_response, mock_server};
+use common::{http_response, mock_server, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::error::LarkError;
@@ -41,6 +41,55 @@ async fn im_message_list_by_iterator_pages_and_limits() {
 }
 
 #[tokio::test]
+async fn im_message_iterator_sends_page_token_on_resume() {
+    let page1 = r#"{"code":0,"msg":"ok","data":{"items":[{"message_id":"m1"}],"page_token":"next-1","has_more":true}}"#;
+    let page2 = r#"{"code":0,"msg":"ok","data":{"items":[{"message_id":"m2"}],"page_token":"next-2","has_more":false}}"#;
+    let (addr, _h, requests) =
+        mock_server_with_requests(vec![http_response(200, page1), http_response(200, page2)]).await;
+
+    let client = client_for(addr);
+    let mut iter = client
+        .im()
+        .message
+        .list_by_iterator("chat", "chat", None, None, None, Some(1))
+        .page_token("seed-token");
+    let option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..Default::default()
+    };
+
+    let _ = iter.next(&option).await.unwrap();
+    let _ = iter.next(&option).await.unwrap();
+
+    let reqs = requests.lock().unwrap();
+    assert!(reqs[0].contains("GET /open-apis/im/v1/messages?"));
+    assert!(reqs[0].contains("container_id=chat"));
+    assert!(reqs[0].contains("container_id_type=chat"));
+    assert!(reqs[0].contains("page_token=seed-token"));
+    assert!(reqs[1].contains("page_token=next-1"));
+}
+
+#[tokio::test]
+async fn im_message_iterator_next_page_token_uses_server_cursor_after_resume() {
+    let page1 = r#"{"code":0,"msg":"ok","data":{"items":[{"message_id":"m1"}],"page_token":"next-1","has_more":true}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, page1)]).await;
+
+    let client = client_for(addr);
+    let mut iter = client
+        .im()
+        .message
+        .list_by_iterator("chat", "chat", None, None, None, Some(1))
+        .page_token("seed-token");
+    let option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..Default::default()
+    };
+
+    let _ = iter.next(&option).await.unwrap();
+    assert_eq!(iter.next_page_token(), Some("next-1"));
+}
+
+#[tokio::test]
 async fn im_chat_members_iterator_requests_follow_up_page() {
     let page1 = r#"{"code":0,"msg":"ok","data":{"items":[{"member_id":"u1"}],"page_token":"token-1","has_more":true,"member_total":3}}"#;
     let page2 = r#"{"code":0,"msg":"ok","data":{"items":[{"member_id":"u2"}],"page_token":"token-2","has_more":false,"member_total":3}}"#;
@@ -64,6 +113,31 @@ async fn im_chat_members_iterator_requests_follow_up_page() {
     assert_eq!(second.member_id.as_deref(), Some("u2"));
     assert!(third.is_none());
     assert_eq!(iter.next_page_token(), Some("token-2"));
+}
+
+#[tokio::test]
+async fn im_message_iterator_preserves_token_on_empty_page() {
+    let page1 = r#"{"code":0,"msg":"ok","data":{"items":[{"message_id":"m1"}],"page_token":"next-1","has_more":true}}"#;
+    let page2 =
+        r#"{"code":0,"msg":"ok","data":{"items":[],"page_token":"next-2","has_more":true}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, page1), http_response(200, page2)]).await;
+
+    let client = client_for(addr);
+    let mut iter = client
+        .im()
+        .message
+        .list_by_iterator("chat", "chat", None, None, None, Some(1));
+    let option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..Default::default()
+    };
+
+    let first = iter.next(&option).await.unwrap().unwrap();
+    let second = iter.next(&option).await.unwrap();
+
+    assert_eq!(first.message_id.as_deref(), Some("m1"));
+    assert!(second.is_none());
+    assert_eq!(iter.next_page_token(), Some("next-1"));
 }
 
 #[tokio::test]
