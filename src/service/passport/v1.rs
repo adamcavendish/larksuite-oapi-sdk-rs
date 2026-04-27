@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -73,7 +73,7 @@ impl<'a> SessionResource<'a> {
         body: &QuerySessionReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<QuerySessionResp> {
+    ) -> Result<QuerySessionResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/passport/v1/sessions/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -94,7 +94,7 @@ impl<'a> SessionResource<'a> {
         body: &LogoutSessionReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/passport/v1/sessions/logout");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {

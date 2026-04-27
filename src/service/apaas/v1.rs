@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -111,7 +111,7 @@ impl<'a> AppResource<'a> {
         namespace: &str,
         body: &InvokeOpenApiReqBody,
         option: &RequestOption,
-    ) -> Result<InvokeOpenApiResp> {
+    ) -> Result<InvokeOpenApiResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/apps/{namespace}/open_api/invoke");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -132,7 +132,7 @@ impl<'a> AppResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAppResp> {
+    ) -> Result<ListAppResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/apaas/v1/apps");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
@@ -166,7 +166,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
         namespace: &str,
         body: Option<&serde_json::Value>,
         option: &RequestOption,
-    ) -> Result<AuditLogListResp> {
+    ) -> Result<AuditLogListResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/audit_log/audit_log_list");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -190,7 +190,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
         namespace: &str,
         body: Option<&serde_json::Value>,
         option: &RequestOption,
-    ) -> Result<DataChangeLogDetailResp> {
+    ) -> Result<DataChangeLogDetailResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/audit_log/data_change_log_detail"
         );
@@ -216,7 +216,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
         namespace: &str,
         body: Option<&serde_json::Value>,
         option: &RequestOption,
-    ) -> Result<DataChangeLogsListResp> {
+    ) -> Result<DataChangeLogsListResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/applications/{namespace}/audit_log/data_change_logs_list");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -241,7 +241,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
         namespace: &str,
         body: Option<&serde_json::Value>,
         option: &RequestOption,
-    ) -> Result<GetAuditLogResp> {
+    ) -> Result<GetAuditLogResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/audit_log");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -273,7 +273,7 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
         namespace: &str,
         environment_variable_api_name: &str,
         option: &RequestOption,
-    ) -> Result<GetEnvironmentVariableResp> {
+    ) -> Result<GetEnvironmentVariableResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/environment_variables/{environment_variable_api_name}"
         );
@@ -296,7 +296,7 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
         namespace: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryEnvironmentVariableResp> {
+    ) -> Result<QueryEnvironmentVariableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/applications/{namespace}/environment_variables/query");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -328,7 +328,7 @@ impl<'a> ApplicationFlowResource<'a> {
         flow_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ExecuteFlowResp> {
+    ) -> Result<ExecuteFlowResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/flows/{flow_id}/execute");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -359,7 +359,7 @@ impl<'a> ApplicationFunctionResource<'a> {
         function_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<InvokeFunctionResp> {
+    ) -> Result<InvokeFunctionResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/functions/{function_api_name}/invoke"
         );
@@ -391,7 +391,7 @@ impl<'a> ApplicationObjectResource<'a> {
         namespace: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<OqlQueryObjectResp> {
+    ) -> Result<OqlQueryObjectResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/objects/oql_query");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -413,7 +413,7 @@ impl<'a> ApplicationObjectResource<'a> {
         namespace: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<SearchObjectResp> {
+    ) -> Result<SearchObjectResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/objects/search");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -444,7 +444,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         object_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchCreateRecordResp> {
+    ) -> Result<BatchCreateRecordResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_create"
         );
@@ -469,7 +469,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         object_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchDeleteRecordResp> {
+    ) -> Result<BatchDeleteRecordResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_delete"
         );
@@ -493,7 +493,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         object_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchQueryRecordResp> {
+    ) -> Result<BatchQueryRecordResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_query"
         );
@@ -518,7 +518,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         object_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchUpdateRecordResp> {
+    ) -> Result<BatchUpdateRecordResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_update"
         );
@@ -543,7 +543,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         object_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateRecordResp> {
+    ) -> Result<CreateRecordResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records"
         );
@@ -568,7 +568,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         object_api_name: &str,
         id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteRecordResp> {
+    ) -> Result<DeleteRecordResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/{id}"
         );
@@ -592,7 +592,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchRecordResp> {
+    ) -> Result<PatchRecordResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/{id}"
         );
@@ -618,7 +618,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryRecordResp> {
+    ) -> Result<QueryRecordResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/{id}/query"
         );
@@ -650,7 +650,7 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
         record_permission_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchCreateAuthorizationRecordPermissionResp> {
+    ) -> Result<BatchCreateAuthorizationRecordPermissionResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/record_permissions/{record_permission_api_name}/member/batch_create_authorization"
         );
@@ -674,7 +674,7 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
         record_permission_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchRemoveAuthorizationRecordPermissionResp> {
+    ) -> Result<BatchRemoveAuthorizationRecordPermissionResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/record_permissions/{record_permission_api_name}/member/batch_remove_authorization"
         );
@@ -707,7 +707,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
         role_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchCreateAuthorizationRoleMemberResp> {
+    ) -> Result<BatchCreateAuthorizationRoleMemberResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/roles/{role_api_name}/member/batch_create_authorization"
         );
@@ -732,7 +732,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
         role_api_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchRemoveAuthorizationRoleMemberResp> {
+    ) -> Result<BatchRemoveAuthorizationRoleMemberResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/roles/{role_api_name}/member/batch_remove_authorization"
         );
@@ -755,7 +755,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
         namespace: &str,
         role_api_name: &str,
         option: &RequestOption,
-    ) -> Result<GetRoleMemberResp> {
+    ) -> Result<GetRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/applications/{namespace}/roles/{role_api_name}/member");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -784,7 +784,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         approval_instance_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CancelApprovalInstanceResp> {
+    ) -> Result<CancelApprovalInstanceResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_instances/{approval_instance_id}/cancel");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -813,7 +813,7 @@ impl<'a> ApprovalTaskResource<'a> {
         approval_task_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AddAssigneeApprovalTaskResp> {
+    ) -> Result<AddAssigneeApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/add_assignee");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -834,7 +834,7 @@ impl<'a> ApprovalTaskResource<'a> {
         approval_task_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AgreeApprovalTaskResp> {
+    ) -> Result<AgreeApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/agree");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -855,7 +855,7 @@ impl<'a> ApprovalTaskResource<'a> {
         approval_task_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RejectApprovalTaskResp> {
+    ) -> Result<RejectApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/reject");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -876,7 +876,7 @@ impl<'a> ApprovalTaskResource<'a> {
         approval_task_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<TransferApprovalTaskResp> {
+    ) -> Result<TransferApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/transfer");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -905,7 +905,7 @@ impl<'a> SeatActivityResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSeatActivityResp> {
+    ) -> Result<ListSeatActivityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/apaas/v1/seat_activities");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
@@ -938,7 +938,7 @@ impl<'a> SeatAssignmentResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSeatAssignmentResp> {
+    ) -> Result<ListSeatAssignmentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/apaas/v1/seat_assignments");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
@@ -971,7 +971,7 @@ impl<'a> UserTaskResource<'a> {
         task_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CcUserTaskResp> {
+    ) -> Result<CcUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/cc");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -992,7 +992,7 @@ impl<'a> UserTaskResource<'a> {
         task_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ChatGroupUserTaskResp> {
+    ) -> Result<ChatGroupUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/chat_group");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1013,7 +1013,7 @@ impl<'a> UserTaskResource<'a> {
         task_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ExpeditingUserTaskResp> {
+    ) -> Result<ExpeditingUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/expediting");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1034,7 +1034,7 @@ impl<'a> UserTaskResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryUserTaskResp> {
+    ) -> Result<QueryUserTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/apaas/v1/user_task/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -1054,7 +1054,7 @@ impl<'a> UserTaskResource<'a> {
         task_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RollbackUserTaskResp> {
+    ) -> Result<RollbackUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/rollback");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1075,7 +1075,7 @@ impl<'a> UserTaskResource<'a> {
         task_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RollbackPointsUserTaskResp> {
+    ) -> Result<RollbackPointsUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/rollback_points");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1105,7 +1105,7 @@ impl<'a> WorkspaceResource<'a> {
         workspace_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<SqlCommandsWorkspaceResp> {
+    ) -> Result<SqlCommandsWorkspaceResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/sql_commands");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1135,7 +1135,7 @@ impl<'a> WorkspaceEnumResource<'a> {
         workspace_id: &str,
         enum_name: &str,
         option: &RequestOption,
-    ) -> Result<EnumGetWorkspaceEnumResp> {
+    ) -> Result<EnumGetWorkspaceEnumResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/enums/{enum_name}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1157,7 +1157,7 @@ impl<'a> WorkspaceEnumResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListWorkspaceEnumResp> {
+    ) -> Result<ListWorkspaceEnumResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/enums");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1193,7 +1193,7 @@ impl<'a> WorkspaceTableResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListWorkspaceTableResp> {
+    ) -> Result<ListWorkspaceTableResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1221,7 +1221,7 @@ impl<'a> WorkspaceTableResource<'a> {
         table_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RecordsBatchUpdateWorkspaceTableResp> {
+    ) -> Result<RecordsBatchUpdateWorkspaceTableResp, LarkError> {
         let path = format!(
             "/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records_batch_update"
         );
@@ -1246,7 +1246,7 @@ impl<'a> WorkspaceTableResource<'a> {
         table_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RecordsDeleteWorkspaceTableResp> {
+    ) -> Result<RecordsDeleteWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -1270,7 +1270,7 @@ impl<'a> WorkspaceTableResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<RecordsGetWorkspaceTableResp> {
+    ) -> Result<RecordsGetWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1299,7 +1299,7 @@ impl<'a> WorkspaceTableResource<'a> {
         table_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RecordsPatchWorkspaceTableResp> {
+    ) -> Result<RecordsPatchWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -1323,7 +1323,7 @@ impl<'a> WorkspaceTableResource<'a> {
         table_name: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RecordsPostWorkspaceTableResp> {
+    ) -> Result<RecordsPostWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -1346,7 +1346,7 @@ impl<'a> WorkspaceTableResource<'a> {
         workspace_id: &str,
         table_name: &str,
         option: &RequestOption,
-    ) -> Result<TableGetWorkspaceTableResp> {
+    ) -> Result<TableGetWorkspaceTableResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1376,7 +1376,7 @@ impl<'a> WorkspaceViewResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ViewsGetWorkspaceViewResp> {
+    ) -> Result<ViewsGetWorkspaceViewResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/views/{view_name}/records");
         let mut api_req = ApiReq::new(http::Method::GET, &path);

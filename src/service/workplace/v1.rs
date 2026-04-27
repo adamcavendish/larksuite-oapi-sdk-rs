@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::transport;
 
@@ -83,7 +83,7 @@ impl<'a> WorkplaceAccessDataResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetWorkplaceAccessResp> {
+    ) -> Result<GetWorkplaceAccessResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/workplace/v1/workplace_access_data/search",
@@ -114,7 +114,7 @@ impl<'a> WorkplaceAccessDataResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetWorkplaceAccessResp> {
+    ) -> Result<GetWorkplaceAccessResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/workplace/v1/workplace_access_data/search",
@@ -152,7 +152,7 @@ impl<'a> CustomWorkplaceAccessDataResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetBlockAccessResp> {
+    ) -> Result<GetBlockAccessResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/workplace/v1/custom_workplace_access_data/search",
@@ -186,7 +186,7 @@ impl<'a> CustomWorkplaceAccessDataResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetBlockAccessResp> {
+    ) -> Result<GetBlockAccessResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/workplace/v1/custom_workplace_access_data/search",
@@ -228,7 +228,7 @@ impl<'a> WorkplaceBlockAccessDataResource<'a> {
         page_token: Option<&str>,
         block_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetBlockAccessResp> {
+    ) -> Result<GetBlockAccessResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/workplace/v1/workplace_block_access_data/search",

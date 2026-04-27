@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::transport;
 
@@ -58,7 +58,7 @@ impl<'a> PostResource<'a> {
         post_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetPostResp> {
+    ) -> Result<GetPostResp, LarkError> {
         let path = format!("/open-apis/moments/v1/posts/{post_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -81,7 +81,7 @@ impl<'a> PostResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListPostResp> {
+    ) -> Result<ListPostResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/moments/v1/posts");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = category_id {

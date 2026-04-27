@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -947,7 +947,7 @@ impl<'a> DepartmentResource<'a> {
         client_token: Option<&str>,
         body: &Department,
         option: &RequestOption,
-    ) -> Result<CreateDepartmentResp> {
+    ) -> Result<CreateDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/contact/v3/departments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -975,7 +975,7 @@ impl<'a> DepartmentResource<'a> {
         department_id: &str,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -996,7 +996,7 @@ impl<'a> DepartmentResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetDepartmentResp> {
+    ) -> Result<GetDepartmentResp, LarkError> {
         let path = format!("/open-apis/contact/v3/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1023,7 +1023,7 @@ impl<'a> DepartmentResource<'a> {
         department_id_type: Option<&str>,
         body: &Department,
         option: &RequestOption,
-    ) -> Result<PatchDepartmentResp> {
+    ) -> Result<PatchDepartmentResp, LarkError> {
         let path = format!("/open-apis/contact/v3/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1051,7 +1051,7 @@ impl<'a> DepartmentResource<'a> {
         department_id_type: Option<&str>,
         body: &Department,
         option: &RequestOption,
-    ) -> Result<UpdateDepartmentResp> {
+    ) -> Result<UpdateDepartmentResp, LarkError> {
         let path = format!("/open-apis/contact/v3/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1078,7 +1078,7 @@ impl<'a> DepartmentResource<'a> {
         department_id_type: Option<&str>,
         body: &UpdateDepartmentIdReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/contact/v3/departments/{department_id}/update_department_id");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
@@ -1105,7 +1105,7 @@ impl<'a> DepartmentResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListDepartmentResp> {
+    ) -> Result<ListDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/departments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -1142,7 +1142,7 @@ impl<'a> DepartmentResource<'a> {
         department_id_type: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchDepartmentResp> {
+    ) -> Result<BatchDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/departments/batch");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         for id in department_ids {
@@ -1174,7 +1174,7 @@ impl<'a> DepartmentResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ChildrenDepartmentResp> {
+    ) -> Result<ChildrenDepartmentResp, LarkError> {
         let path = format!("/open-apis/contact/v3/departments/{department_id}/children");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1211,7 +1211,7 @@ impl<'a> DepartmentResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ParentDepartmentResp> {
+    ) -> Result<ParentDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/contact/v3/departments/parent",
@@ -1248,7 +1248,7 @@ impl<'a> DepartmentResource<'a> {
         page_size: Option<i32>,
         body: &SearchDepartmentReqBody,
         option: &RequestOption,
-    ) -> Result<SearchDepartmentResp> {
+    ) -> Result<SearchDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/contact/v3/departments/search",
@@ -1282,7 +1282,7 @@ impl<'a> DepartmentResource<'a> {
         department_id_type: Option<&str>,
         body: &UnbindDepartmentChatReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/contact/v3/departments/unbind_department_chat",
@@ -1313,7 +1313,7 @@ impl<'a> UserResource<'a> {
         client_token: Option<&str>,
         body: &User,
         option: &RequestOption,
-    ) -> Result<CreateUserResp> {
+    ) -> Result<CreateUserResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/contact/v3/users");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1341,7 +1341,7 @@ impl<'a> UserResource<'a> {
         user_id_type: Option<&str>,
         body: &DeleteUserReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/users/{user_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1363,7 +1363,7 @@ impl<'a> UserResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetUserResp> {
+    ) -> Result<GetUserResp, LarkError> {
         let path = format!("/open-apis/contact/v3/users/{user_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1389,7 +1389,7 @@ impl<'a> UserResource<'a> {
         department_id_type: Option<&str>,
         body: &User,
         option: &RequestOption,
-    ) -> Result<PatchUserResp> {
+    ) -> Result<PatchUserResp, LarkError> {
         let path = format!("/open-apis/contact/v3/users/{user_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1416,7 +1416,7 @@ impl<'a> UserResource<'a> {
         department_id_type: Option<&str>,
         body: &User,
         option: &RequestOption,
-    ) -> Result<UpdateUserResp> {
+    ) -> Result<UpdateUserResp, LarkError> {
         let path = format!("/open-apis/contact/v3/users/{user_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1444,7 +1444,7 @@ impl<'a> UserResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListUserResp> {
+    ) -> Result<ListUserResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/users");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -1477,7 +1477,7 @@ impl<'a> UserResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchUserResp> {
+    ) -> Result<BatchUserResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/users/batch");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         for id in user_ids {
@@ -1503,7 +1503,7 @@ impl<'a> UserResource<'a> {
         user_id_type: Option<&str>,
         body: &BatchGetIdUserReqBody,
         option: &RequestOption,
-    ) -> Result<BatchGetIdUserResp> {
+    ) -> Result<BatchGetIdUserResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/contact/v3/users/batch_get_id",
@@ -1531,7 +1531,7 @@ impl<'a> UserResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<FindByDepartmentUserResp> {
+    ) -> Result<FindByDepartmentUserResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/contact/v3/users/find_by_department",
@@ -1566,7 +1566,7 @@ impl<'a> UserResource<'a> {
         department_id_type: Option<&str>,
         body: &ResurrectUserReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/users/{user_id}/resurrect");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1590,7 +1590,7 @@ impl<'a> UserResource<'a> {
         user_id: &str,
         body: &UpdateUserIdReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/users/{user_id}/update_user_id");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1616,7 +1616,7 @@ impl<'a> ScopeResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListScopeResp> {
+    ) -> Result<ListScopeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/scopes");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1650,7 +1650,7 @@ impl<'a> EmployeeTypeEnumResource<'a> {
         &self,
         body: &EmployeeTypeEnum,
         option: &RequestOption,
-    ) -> Result<CreateEmployeeTypeEnumResp> {
+    ) -> Result<CreateEmployeeTypeEnumResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/contact/v3/employee_type_enums",
@@ -1670,7 +1670,11 @@ impl<'a> EmployeeTypeEnumResource<'a> {
         })
     }
 
-    pub async fn delete(&self, enum_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        enum_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/employee_type_enums/{enum_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1687,7 +1691,7 @@ impl<'a> EmployeeTypeEnumResource<'a> {
         enum_id: &str,
         body: &EmployeeTypeEnum,
         option: &RequestOption,
-    ) -> Result<UpdateEmployeeTypeEnumResp> {
+    ) -> Result<UpdateEmployeeTypeEnumResp, LarkError> {
         let path = format!("/open-apis/contact/v3/employee_type_enums/{enum_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1710,7 +1714,7 @@ impl<'a> EmployeeTypeEnumResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListEmployeeTypeEnumResp> {
+    ) -> Result<ListEmployeeTypeEnumResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/contact/v3/employee_type_enums",
@@ -1742,7 +1746,7 @@ impl<'a> UnitResource<'a> {
         &self,
         body: &CreateUnitReqBody,
         option: &RequestOption,
-    ) -> Result<CreateUnitResp> {
+    ) -> Result<CreateUnitResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/contact/v3/unit");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -1755,7 +1759,11 @@ impl<'a> UnitResource<'a> {
         })
     }
 
-    pub async fn delete(&self, unit_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        unit_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/unit/{unit_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1767,7 +1775,11 @@ impl<'a> UnitResource<'a> {
         })
     }
 
-    pub async fn get(&self, unit_id: &str, option: &RequestOption) -> Result<GetUnitResp> {
+    pub async fn get(
+        &self,
+        unit_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetUnitResp, LarkError> {
         let path = format!("/open-apis/contact/v3/unit/{unit_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1785,7 +1797,7 @@ impl<'a> UnitResource<'a> {
         unit_id: &str,
         body: &PatchUnitReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/unit/{unit_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1803,7 +1815,7 @@ impl<'a> UnitResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListUnitResp> {
+    ) -> Result<ListUnitResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/unit");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1825,7 +1837,7 @@ impl<'a> UnitResource<'a> {
         &self,
         body: &BindDepartmentUnitReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/contact/v3/unit/bind_department",
@@ -1844,7 +1856,7 @@ impl<'a> UnitResource<'a> {
         &self,
         body: &UnbindDepartmentUnitReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/contact/v3/unit/unbind_department",
@@ -1866,7 +1878,7 @@ impl<'a> UnitResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListDepartmentUnitResp> {
+    ) -> Result<ListDepartmentUnitResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/contact/v3/unit/list_department",
@@ -1904,7 +1916,7 @@ impl<'a> GroupResource<'a> {
         department_id_type: Option<&str>,
         body: &Group,
         option: &RequestOption,
-    ) -> Result<CreateGroupResp> {
+    ) -> Result<CreateGroupResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/contact/v3/group");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1923,7 +1935,11 @@ impl<'a> GroupResource<'a> {
         })
     }
 
-    pub async fn delete(&self, group_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        group_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{group_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1941,7 +1957,7 @@ impl<'a> GroupResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetGroupResp> {
+    ) -> Result<GetGroupResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{group_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1967,7 +1983,7 @@ impl<'a> GroupResource<'a> {
         department_id_type: Option<&str>,
         body: &Group,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{group_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1992,7 +2008,7 @@ impl<'a> GroupResource<'a> {
         page_token: Option<&str>,
         group_type: Option<i32>,
         option: &RequestOption,
-    ) -> Result<SimplelistGroupResp> {
+    ) -> Result<SimplelistGroupResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/group/simplelist");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2022,7 +2038,7 @@ impl<'a> GroupResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<MemberBelongGroupResp> {
+    ) -> Result<MemberBelongGroupResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/contact/v3/group/member_belong",
@@ -2062,7 +2078,7 @@ impl<'a> GroupMemberResource<'a> {
         group_id: &str,
         body: &AddGroupMemberReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{group_id}/member/add");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2080,7 +2096,7 @@ impl<'a> GroupMemberResource<'a> {
         group_id: &str,
         body: &BatchAddGroupMemberReqBody,
         option: &RequestOption,
-    ) -> Result<BatchAddGroupMemberResp> {
+    ) -> Result<BatchAddGroupMemberResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{group_id}/member/batch_add");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2100,7 +2116,7 @@ impl<'a> GroupMemberResource<'a> {
         group_id: &str,
         body: &BatchRemoveGroupMemberReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{group_id}/member/batch_remove");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2118,7 +2134,7 @@ impl<'a> GroupMemberResource<'a> {
         group_id: &str,
         body: &RemoveGroupMemberReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{group_id}/member/remove");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2139,7 +2155,7 @@ impl<'a> GroupMemberResource<'a> {
         member_id_type: Option<&str>,
         member_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SimplelistGroupMemberResp> {
+    ) -> Result<SimplelistGroupMemberResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{group_id}/member/simplelist");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2178,7 +2194,7 @@ impl<'a> FunctionalRoleResource<'a> {
         &self,
         body: &CreateFunctionalRoleReqBody,
         option: &RequestOption,
-    ) -> Result<CreateFunctionalRoleResp> {
+    ) -> Result<CreateFunctionalRoleResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/contact/v3/functional_roles");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -2192,7 +2208,11 @@ impl<'a> FunctionalRoleResource<'a> {
         })
     }
 
-    pub async fn delete(&self, role_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        role_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/functional_roles/{role_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2209,7 +2229,7 @@ impl<'a> FunctionalRoleResource<'a> {
         role_id: &str,
         body: &UpdateFunctionalRoleReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/functional_roles/{role_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2234,7 +2254,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         user_id_type: Option<&str>,
         body: &BatchCreateFunctionalRoleMemberReqBody,
         option: &RequestOption,
-    ) -> Result<BatchCreateFunctionalRoleMemberResp> {
+    ) -> Result<BatchCreateFunctionalRoleMemberResp, LarkError> {
         let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members/batch_create");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2261,7 +2281,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         user_id_type: Option<&str>,
         body: &BatchDeleteFunctionalRoleMemberReqBody,
         option: &RequestOption,
-    ) -> Result<BatchDeleteFunctionalRoleMemberResp> {
+    ) -> Result<BatchDeleteFunctionalRoleMemberResp, LarkError> {
         let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members/batch_delete");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2289,7 +2309,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetFunctionalRoleMemberResp> {
+    ) -> Result<GetFunctionalRoleMemberResp, LarkError> {
         let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members/{member_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2320,7 +2340,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListFunctionalRoleMemberResp> {
+    ) -> Result<ListFunctionalRoleMemberResp, LarkError> {
         let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2356,7 +2376,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         department_id_type: Option<&str>,
         body: &ScopesFunctionalRoleMemberReqBody,
         option: &RequestOption,
-    ) -> Result<ScopesFunctionalRoleMemberResp> {
+    ) -> Result<ScopesFunctionalRoleMemberResp, LarkError> {
         let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members/scopes");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2390,7 +2410,7 @@ impl<'a> JobLevelResource<'a> {
         &self,
         body: &JobLevel,
         option: &RequestOption,
-    ) -> Result<CreateJobLevelResp> {
+    ) -> Result<CreateJobLevelResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/contact/v3/job_levels");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -2404,7 +2424,11 @@ impl<'a> JobLevelResource<'a> {
         })
     }
 
-    pub async fn delete(&self, job_level_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        job_level_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_levels/{job_level_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2416,7 +2440,11 @@ impl<'a> JobLevelResource<'a> {
         })
     }
 
-    pub async fn get(&self, job_level_id: &str, option: &RequestOption) -> Result<GetJobLevelResp> {
+    pub async fn get(
+        &self,
+        job_level_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetJobLevelResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_levels/{job_level_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2434,7 +2462,7 @@ impl<'a> JobLevelResource<'a> {
         job_level_id: &str,
         body: &JobLevel,
         option: &RequestOption,
-    ) -> Result<UpdateJobLevelResp> {
+    ) -> Result<UpdateJobLevelResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_levels/{job_level_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2455,7 +2483,7 @@ impl<'a> JobLevelResource<'a> {
         page_token: Option<&str>,
         name: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListJobLevelResp> {
+    ) -> Result<ListJobLevelResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/job_levels");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2486,7 +2514,7 @@ impl<'a> JobFamilyResource<'a> {
         &self,
         body: &JobFamily,
         option: &RequestOption,
-    ) -> Result<CreateJobFamilyResp> {
+    ) -> Result<CreateJobFamilyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/contact/v3/job_families");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -2500,7 +2528,11 @@ impl<'a> JobFamilyResource<'a> {
         })
     }
 
-    pub async fn delete(&self, job_family_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        job_family_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_families/{job_family_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2516,7 +2548,7 @@ impl<'a> JobFamilyResource<'a> {
         &self,
         job_family_id: &str,
         option: &RequestOption,
-    ) -> Result<GetJobFamilyResp> {
+    ) -> Result<GetJobFamilyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_families/{job_family_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2534,7 +2566,7 @@ impl<'a> JobFamilyResource<'a> {
         job_family_id: &str,
         body: &JobFamily,
         option: &RequestOption,
-    ) -> Result<UpdateJobFamilyResp> {
+    ) -> Result<UpdateJobFamilyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_families/{job_family_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2555,7 +2587,7 @@ impl<'a> JobFamilyResource<'a> {
         page_token: Option<&str>,
         name: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListJobFamilyResp> {
+    ) -> Result<ListJobFamilyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/job_families");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2583,7 +2615,11 @@ pub struct JobTitleResource<'a> {
 }
 
 impl<'a> JobTitleResource<'a> {
-    pub async fn get(&self, job_title_id: &str, option: &RequestOption) -> Result<GetJobTitleResp> {
+    pub async fn get(
+        &self,
+        job_title_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetJobTitleResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_titles/{job_title_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2601,7 +2637,7 @@ impl<'a> JobTitleResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListJobTitleResp> {
+    ) -> Result<ListJobTitleResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/job_titles");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -2625,7 +2661,11 @@ pub struct WorkCityResource<'a> {
 }
 
 impl<'a> WorkCityResource<'a> {
-    pub async fn get(&self, work_city_id: &str, option: &RequestOption) -> Result<GetWorkCityResp> {
+    pub async fn get(
+        &self,
+        work_city_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetWorkCityResp, LarkError> {
         let path = format!("/open-apis/contact/v3/work_cities/{work_city_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2643,7 +2683,7 @@ impl<'a> WorkCityResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListWorkCityResp> {
+    ) -> Result<ListWorkCityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/work_cities");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -2672,7 +2712,7 @@ impl<'a> CustomAttrResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCustomAttrResp> {
+    ) -> Result<ListCustomAttrResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/custom_attrs");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {

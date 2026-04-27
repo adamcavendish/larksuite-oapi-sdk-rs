@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{EmptyRespV2 as EmptyResp, parse_v2};
 use crate::transport;
@@ -124,7 +124,7 @@ impl<'a> PeriodResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListPeriodResp> {
+    ) -> Result<ListPeriodResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/okr/v1/periods");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_token {
@@ -146,7 +146,7 @@ impl<'a> PeriodResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreatePeriodResp> {
+    ) -> Result<CreatePeriodResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/okr/v1/periods");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -165,7 +165,7 @@ impl<'a> PeriodResource<'a> {
         period_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchPeriodResp> {
+    ) -> Result<PatchPeriodResp, LarkError> {
         let path = format!("/open-apis/okr/v1/periods/{period_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -188,7 +188,7 @@ pub struct PeriodRuleResource<'a> {
 }
 
 impl PeriodRuleResource<'_> {
-    pub async fn list(&self, option: &RequestOption) -> Result<ListPeriodRuleResp> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListPeriodRuleResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/okr/v1/period_rules");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
@@ -213,7 +213,7 @@ impl ImageResource<'_> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UploadImageResp> {
+    ) -> Result<UploadImageResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/okr/v1/images/upload");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -241,7 +241,7 @@ impl OkrResource<'_> {
         user_id_type: Option<&str>,
         lang: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchGetOkrResp> {
+    ) -> Result<BatchGetOkrResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/okr/v1/okrs/batch_get");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         for id in okr_ids {
@@ -276,7 +276,7 @@ impl ProgressRecordResource<'_> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateProgressRecordResp> {
+    ) -> Result<CreateProgressRecordResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/okr/v1/progress_records");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -293,7 +293,11 @@ impl ProgressRecordResource<'_> {
         })
     }
 
-    pub async fn delete(&self, progress_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        progress_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/okr/v1/progress_records/{progress_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -311,7 +315,7 @@ impl ProgressRecordResource<'_> {
         progress_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetProgressRecordResp> {
+    ) -> Result<GetProgressRecordResp, LarkError> {
         let path = format!("/open-apis/okr/v1/progress_records/{progress_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -334,7 +338,7 @@ impl ProgressRecordResource<'_> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<UpdateProgressRecordResp> {
+    ) -> Result<UpdateProgressRecordResp, LarkError> {
         let path = format!("/open-apis/okr/v1/progress_records/{progress_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -366,7 +370,7 @@ impl ReviewResource<'_> {
         period_ids: Option<&[&str]>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<QueryReviewResp> {
+    ) -> Result<QueryReviewResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/okr/v1/reviews/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         for id in user_ids {
@@ -406,7 +410,7 @@ impl<'a> UserOkrResource<'a> {
         limit: Option<&str>,
         lang: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetUserOkrResp> {
+    ) -> Result<GetUserOkrResp, LarkError> {
         let path = format!("/open-apis/okr/v1/users/{user_id}/okrs");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];

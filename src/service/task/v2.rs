@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -224,7 +224,7 @@ impl<'a> TaskV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateTaskV2Resp> {
+    ) -> Result<CreateTaskV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/task/v2/tasks");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -246,7 +246,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetTaskV2Resp> {
+    ) -> Result<GetTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -269,7 +269,7 @@ impl<'a> TaskV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchTaskV2Resp> {
+    ) -> Result<PatchTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -291,7 +291,7 @@ impl<'a> TaskV2Resource<'a> {
         &self,
         task_guid: &str,
         option: &RequestOption,
-    ) -> Result<DeleteTaskV2Resp> {
+    ) -> Result<DeleteTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -310,7 +310,7 @@ impl<'a> TaskV2Resource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListTaskV2Resp> {
+    ) -> Result<ListTaskV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/tasks");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = page_size {
@@ -337,7 +337,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AddMembersTaskV2Resp> {
+    ) -> Result<AddMembersTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/add_members");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -357,7 +357,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RemoveMembersTaskV2Resp> {
+    ) -> Result<RemoveMembersTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/remove_members");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -377,7 +377,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AddRemindersTaskV2Resp> {
+    ) -> Result<AddRemindersTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/add_reminders");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -397,7 +397,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RemoveRemindersTaskV2Resp> {
+    ) -> Result<RemoveRemindersTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/remove_reminders");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -417,7 +417,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AddDependenciesTaskV2Resp> {
+    ) -> Result<AddDependenciesTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/add_dependencies");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -437,7 +437,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RemoveDependenciesTaskV2Resp> {
+    ) -> Result<RemoveDependenciesTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/remove_dependencies");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -457,7 +457,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AddTasklistTaskV2Resp> {
+    ) -> Result<AddTasklistTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/add_tasklist");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -477,7 +477,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RemoveTasklistTaskV2Resp> {
+    ) -> Result<RemoveTasklistTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/remove_tasklist");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -497,7 +497,7 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<TasklistsTaskV2Resp> {
+    ) -> Result<TasklistsTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/tasklists");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -520,7 +520,7 @@ impl<'a> TaskV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateTaskSubtaskV2Resp> {
+    ) -> Result<CreateTaskSubtaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/subtasks");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -545,7 +545,7 @@ impl<'a> TaskV2Resource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListTaskSubtaskV2Resp> {
+    ) -> Result<ListTaskSubtaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{task_guid}/subtasks");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -581,7 +581,7 @@ impl<'a> AttachmentV2Resource<'a> {
         attachment_guid: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetAttachmentV2Resp> {
+    ) -> Result<GetAttachmentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/attachments/{attachment_guid}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -602,7 +602,7 @@ impl<'a> AttachmentV2Resource<'a> {
         &self,
         attachment_guid: &str,
         option: &RequestOption,
-    ) -> Result<DeleteAttachmentV2Resp> {
+    ) -> Result<DeleteAttachmentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/attachments/{attachment_guid}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -622,7 +622,7 @@ impl<'a> AttachmentV2Resource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAttachmentV2Resp> {
+    ) -> Result<ListAttachmentV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/attachments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = resource_type {
@@ -651,7 +651,7 @@ impl<'a> AttachmentV2Resource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UploadAttachmentV2Resp> {
+    ) -> Result<UploadAttachmentV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/task/v2/attachments/upload");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -678,7 +678,7 @@ impl<'a> CommentV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateCommentV2Resp> {
+    ) -> Result<CreateCommentV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/task/v2/comments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -700,7 +700,7 @@ impl<'a> CommentV2Resource<'a> {
         comment_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetCommentV2Resp> {
+    ) -> Result<GetCommentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/comments/{comment_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -723,7 +723,7 @@ impl<'a> CommentV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchCommentV2Resp> {
+    ) -> Result<PatchCommentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/comments/{comment_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -745,7 +745,7 @@ impl<'a> CommentV2Resource<'a> {
         &self,
         comment_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteCommentV2Resp> {
+    ) -> Result<DeleteCommentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/comments/{comment_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -766,7 +766,7 @@ impl<'a> CommentV2Resource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCommentV2Resp> {
+    ) -> Result<ListCommentV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/comments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = resource_type {
@@ -807,7 +807,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateCustomFieldV2Resp> {
+    ) -> Result<CreateCustomFieldV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/task/v2/custom_fields");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -829,7 +829,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         custom_field_guid: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetCustomFieldV2Resp> {
+    ) -> Result<GetCustomFieldV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/custom_fields/{custom_field_guid}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -852,7 +852,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchCustomFieldV2Resp> {
+    ) -> Result<PatchCustomFieldV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/custom_fields/{custom_field_guid}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -878,7 +878,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCustomFieldV2Resp> {
+    ) -> Result<ListCustomFieldV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/custom_fields");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = resource_type {
@@ -911,7 +911,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         custom_field_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AddCustomFieldV2Resp> {
+    ) -> Result<AddCustomFieldV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/custom_fields/{custom_field_guid}/add");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -931,7 +931,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         custom_field_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RemoveCustomFieldV2Resp> {
+    ) -> Result<RemoveCustomFieldV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/custom_fields/{custom_field_guid}/remove");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -950,7 +950,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         custom_field_guid: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateCustomFieldOptionV2Resp> {
+    ) -> Result<CreateCustomFieldOptionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/custom_fields/{custom_field_guid}/options");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -971,7 +971,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         option_guid: &str,
         body: &serde_json::Value,
         req_option: &RequestOption,
-    ) -> Result<PatchCustomFieldOptionV2Resp> {
+    ) -> Result<PatchCustomFieldOptionV2Resp, LarkError> {
         let path =
             format!("/open-apis/task/v2/custom_fields/{custom_field_guid}/options/{option_guid}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -1001,7 +1001,7 @@ impl<'a> SectionV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateSectionV2Resp> {
+    ) -> Result<CreateSectionV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/task/v2/sections");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -1023,7 +1023,7 @@ impl<'a> SectionV2Resource<'a> {
         section_guid: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetSectionV2Resp> {
+    ) -> Result<GetSectionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/sections/{section_guid}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1046,7 +1046,7 @@ impl<'a> SectionV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchSectionV2Resp> {
+    ) -> Result<PatchSectionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/sections/{section_guid}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1068,7 +1068,7 @@ impl<'a> SectionV2Resource<'a> {
         &self,
         section_guid: &str,
         option: &RequestOption,
-    ) -> Result<DeleteSectionV2Resp> {
+    ) -> Result<DeleteSectionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/sections/{section_guid}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1089,7 +1089,7 @@ impl<'a> SectionV2Resource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSectionV2Resp> {
+    ) -> Result<ListSectionV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/sections");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = resource_type {
@@ -1122,7 +1122,7 @@ impl<'a> SectionV2Resource<'a> {
         section_guid: &str,
         params: TaskListParams<'_>,
         option: &RequestOption,
-    ) -> Result<TasksSectionV2Resp> {
+    ) -> Result<TasksSectionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/sections/{section_guid}/tasks");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1169,7 +1169,7 @@ impl<'a> TasklistV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateTasklistV2Resp> {
+    ) -> Result<CreateTasklistV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/task/v2/tasklists");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -1191,7 +1191,7 @@ impl<'a> TasklistV2Resource<'a> {
         tasklist_guid: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetTasklistV2Resp> {
+    ) -> Result<GetTasklistV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{tasklist_guid}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1214,7 +1214,7 @@ impl<'a> TasklistV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchTasklistV2Resp> {
+    ) -> Result<PatchTasklistV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{tasklist_guid}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1236,7 +1236,7 @@ impl<'a> TasklistV2Resource<'a> {
         &self,
         tasklist_guid: &str,
         option: &RequestOption,
-    ) -> Result<DeleteTasklistV2Resp> {
+    ) -> Result<DeleteTasklistV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{tasklist_guid}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1255,7 +1255,7 @@ impl<'a> TasklistV2Resource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListTasklistV2Resp> {
+    ) -> Result<ListTasklistV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/tasklists");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -1283,7 +1283,7 @@ impl<'a> TasklistV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<AddMembersTasklistV2Resp> {
+    ) -> Result<AddMembersTasklistV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{tasklist_guid}/add_members");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1307,7 +1307,7 @@ impl<'a> TasklistV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<RemoveMembersTasklistV2Resp> {
+    ) -> Result<RemoveMembersTasklistV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{tasklist_guid}/remove_members");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1330,7 +1330,7 @@ impl<'a> TasklistV2Resource<'a> {
         tasklist_guid: &str,
         params: TaskListParams<'_>,
         option: &RequestOption,
-    ) -> Result<TasksTasklistV2Resp> {
+    ) -> Result<TasksTasklistV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{tasklist_guid}/tasks");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1370,7 +1370,7 @@ impl<'a> TasklistV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateActivitySubscriptionV2Resp> {
+    ) -> Result<CreateActivitySubscriptionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{tasklist_guid}/activity_subscriptions");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1395,7 +1395,7 @@ impl<'a> TasklistV2Resource<'a> {
         activity_subscription_guid: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetActivitySubscriptionV2Resp> {
+    ) -> Result<GetActivitySubscriptionV2Resp, LarkError> {
         let path = format!(
             "/open-apis/task/v2/tasklists/{tasklist_guid}/activity_subscriptions/{activity_subscription_guid}"
         );
@@ -1422,7 +1422,7 @@ impl<'a> TasklistV2Resource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchActivitySubscriptionV2Resp> {
+    ) -> Result<PatchActivitySubscriptionV2Resp, LarkError> {
         let path = format!(
             "/open-apis/task/v2/tasklists/{tasklist_guid}/activity_subscriptions/{activity_subscription_guid}"
         );
@@ -1449,7 +1449,7 @@ impl<'a> TasklistV2Resource<'a> {
         limit: Option<i32>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListActivitySubscriptionV2Resp> {
+    ) -> Result<ListActivitySubscriptionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{tasklist_guid}/activity_subscriptions");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1475,7 +1475,7 @@ impl<'a> TasklistV2Resource<'a> {
         tasklist_guid: &str,
         activity_subscription_guid: &str,
         option: &RequestOption,
-    ) -> Result<DeleteActivitySubscriptionV2Resp> {
+    ) -> Result<DeleteActivitySubscriptionV2Resp, LarkError> {
         let path = format!(
             "/open-apis/task/v2/tasklists/{tasklist_guid}/activity_subscriptions/{activity_subscription_guid}"
         );

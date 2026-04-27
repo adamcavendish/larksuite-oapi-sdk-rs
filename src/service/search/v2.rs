@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -324,7 +324,7 @@ impl<'a> DataSourceResource<'a> {
         &self,
         body: &CreateDataSourceReqBody,
         option: &RequestOption,
-    ) -> Result<CreateDataSourceResp> {
+    ) -> Result<CreateDataSourceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/data_sources");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -341,7 +341,7 @@ impl<'a> DataSourceResource<'a> {
         &self,
         data_source_id: &str,
         option: &RequestOption,
-    ) -> Result<GetDataSourceResp> {
+    ) -> Result<GetDataSourceResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{data_source_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -359,7 +359,7 @@ impl<'a> DataSourceResource<'a> {
         data_source_id: &str,
         body: &PatchDataSourceReqBody,
         option: &RequestOption,
-    ) -> Result<PatchDataSourceResp> {
+    ) -> Result<PatchDataSourceResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{data_source_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -373,7 +373,11 @@ impl<'a> DataSourceResource<'a> {
         })
     }
 
-    pub async fn delete(&self, data_source_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        data_source_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{data_source_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -391,7 +395,7 @@ impl<'a> DataSourceResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListDataSourceResp> {
+    ) -> Result<ListDataSourceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/search/v2/data_sources");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = view {
@@ -423,7 +427,7 @@ impl<'a> DataRecordResource<'a> {
         data_source_id: &str,
         body: &CreateDataRecordReqBody,
         option: &RequestOption,
-    ) -> Result<CreateDataRecordResp> {
+    ) -> Result<CreateDataRecordResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{data_source_id}/items");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -442,7 +446,7 @@ impl<'a> DataRecordResource<'a> {
         data_source_id: &str,
         item_id: &str,
         option: &RequestOption,
-    ) -> Result<GetDataRecordResp> {
+    ) -> Result<GetDataRecordResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{data_source_id}/items/{item_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -460,7 +464,7 @@ impl<'a> DataRecordResource<'a> {
         data_source_id: &str,
         item_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{data_source_id}/items/{item_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -483,7 +487,7 @@ impl<'a> MessageSearchResource<'a> {
         body: &SearchMessageReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SearchMessageResp> {
+    ) -> Result<SearchMessageResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/message");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -510,7 +514,7 @@ impl<'a> AppSearchResource<'a> {
         body: &SearchAppReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SearchAppResp> {
+    ) -> Result<SearchAppResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/app");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -537,7 +541,7 @@ impl<'a> DataSourceSchemaResource<'a> {
         data_source_id: &str,
         body: &CreateSchemaReqBody,
         option: &RequestOption,
-    ) -> Result<CreateSchemaResp> {
+    ) -> Result<CreateSchemaResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{data_source_id}/schemas");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -556,7 +560,7 @@ impl<'a> DataSourceSchemaResource<'a> {
         data_source_id: &str,
         schema_id: &str,
         option: &RequestOption,
-    ) -> Result<GetSchemaResp> {
+    ) -> Result<GetSchemaResp, LarkError> {
         let path =
             format!("/open-apis/search/v2/data_sources/{data_source_id}/schemas/{schema_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -576,7 +580,7 @@ impl<'a> DataSourceSchemaResource<'a> {
         schema_id: &str,
         body: &PatchSchemaReqBody,
         option: &RequestOption,
-    ) -> Result<PatchSchemaResp> {
+    ) -> Result<PatchSchemaResp, LarkError> {
         let path =
             format!("/open-apis/search/v2/data_sources/{data_source_id}/schemas/{schema_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -596,7 +600,7 @@ impl<'a> DataSourceSchemaResource<'a> {
         data_source_id: &str,
         schema_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/search/v2/data_sources/{data_source_id}/schemas/{schema_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -619,7 +623,7 @@ impl<'a> SchemaResource<'a> {
         &self,
         body: &CreateSchemaReqBody,
         option: &RequestOption,
-    ) -> Result<CreateSchemaResp> {
+    ) -> Result<CreateSchemaResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/schemas");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -632,7 +636,11 @@ impl<'a> SchemaResource<'a> {
         })
     }
 
-    pub async fn delete(&self, schema_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        schema_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/search/v2/schemas/{schema_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -644,7 +652,11 @@ impl<'a> SchemaResource<'a> {
         })
     }
 
-    pub async fn get(&self, schema_id: &str, option: &RequestOption) -> Result<GetSchemaResp> {
+    pub async fn get(
+        &self,
+        schema_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetSchemaResp, LarkError> {
         let path = format!("/open-apis/search/v2/schemas/{schema_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -662,7 +674,7 @@ impl<'a> SchemaResource<'a> {
         schema_id: &str,
         body: &PatchSchemaReqBody,
         option: &RequestOption,
-    ) -> Result<PatchSchemaResp> {
+    ) -> Result<PatchSchemaResp, LarkError> {
         let path = format!("/open-apis/search/v2/schemas/{schema_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -688,7 +700,7 @@ impl<'a> DocWikiResource<'a> {
         &self,
         body: &SearchDocWikiReqBody,
         option: &RequestOption,
-    ) -> Result<SearchDocWikiResp> {
+    ) -> Result<SearchDocWikiResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/doc_wiki/search");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);

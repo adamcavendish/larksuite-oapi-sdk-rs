@@ -1,6 +1,5 @@
 pub use crate::config::Config;
 pub use crate::constants::AccessTokenType;
-pub use crate::error::Result;
 pub use crate::req::{ApiReq, ReqBody, RequestOption};
 pub use crate::resp::{ApiResp, CodeError, RawResponse};
 

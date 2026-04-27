@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -68,7 +68,7 @@ impl<'a> BlockResource<'a> {
         &self,
         body: &CreateBlockReqBody,
         option: &RequestOption,
-    ) -> Result<CreateBlockResp> {
+    ) -> Result<CreateBlockResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/block/v2/blocks");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -81,7 +81,11 @@ impl<'a> BlockResource<'a> {
         })
     }
 
-    pub async fn get(&self, block_id: &str, option: &RequestOption) -> Result<GetBlockResp> {
+    pub async fn get(
+        &self,
+        block_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetBlockResp, LarkError> {
         let path = format!("/open-apis/block/v2/blocks/{block_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];

@@ -6,7 +6,7 @@ use std::sync::Arc;
 use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::cache::{Cache, LocalCache};
 use larksuite_oapi_sdk_rs::constants::AccessTokenType;
-use larksuite_oapi_sdk_rs::error::Error;
+use larksuite_oapi_sdk_rs::error::LarkError;
 use larksuite_oapi_sdk_rs::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
 
 fn client_for(addr: std::net::SocketAddr) -> Client {
@@ -74,7 +74,7 @@ async fn transport_typed_request_api_error() {
         .do_req_typed::<serde_json::Value>(&api_req, &RequestOption::default())
         .await
         .unwrap_err();
-    assert!(matches!(err, Error::Api(_)));
+    assert!(matches!(err, LarkError::Api(_)));
 }
 
 // ── File download: skips JSON parsing ──
@@ -129,7 +129,7 @@ async fn transport_504_retries_then_fails() {
         .await
         .unwrap_err();
     assert!(
-        matches!(err, Error::ServerTimeout(_) | Error::MaxRetries),
+        matches!(err, LarkError::ServerTimeout(_) | LarkError::MaxRetries),
         "expected ServerTimeout or MaxRetries, got {err:?}"
     );
 }
@@ -157,7 +157,7 @@ async fn transport_429_retries_then_fails() {
         .await
         .unwrap_err();
     assert!(
-        matches!(err, Error::RateLimited(_) | Error::MaxRetries),
+        matches!(err, LarkError::RateLimited(_) | LarkError::MaxRetries),
         "expected RateLimited or MaxRetries, got {err:?}"
     );
 }
@@ -208,7 +208,7 @@ async fn transport_token_invalid_retries() {
         .await
         .unwrap_err();
     assert!(
-        matches!(err, Error::Api(_)),
+        matches!(err, LarkError::Api(_)),
         "expected Api error, got {err:?}"
     );
 }
@@ -582,7 +582,7 @@ async fn transport_rejects_user_token_on_tenant_only_api() {
         ..Default::default()
     };
     let err = client.do_req(&api_req, &option).await.unwrap_err();
-    assert!(matches!(err, Error::IllegalParam(_)));
+    assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
 // ── validate_token_type: app token on user-only API ──
@@ -601,7 +601,7 @@ async fn transport_rejects_app_token_on_user_only_api() {
         ..Default::default()
     };
     let err = client.do_req(&api_req, &option).await.unwrap_err();
-    assert!(matches!(err, Error::IllegalParam(_)));
+    assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
 // ── validate_token_type: tenant token on app-only API ──
@@ -620,7 +620,7 @@ async fn transport_rejects_tenant_token_on_app_only_api() {
         ..Default::default()
     };
     let err = client.do_req(&api_req, &option).await.unwrap_err();
-    assert!(matches!(err, Error::IllegalParam(_)));
+    assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
 // ── AccessTokenType::None skips validation ──

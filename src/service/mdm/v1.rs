@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -63,7 +63,7 @@ impl<'a> UserDeviceResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListDeviceResp> {
+    ) -> Result<ListDeviceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/mdm/v1/user_devices");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.query_params.set("user_id", user_id);
@@ -90,7 +90,7 @@ impl<'a> UserDeviceResource<'a> {
         device_id: &str,
         body: &UpdateDeviceReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mdm/v1/user_devices/{device_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -114,7 +114,7 @@ impl<'a> UserAuthDataRelationResource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/mdm/v1/user_auth_data_relations/bind",
@@ -137,7 +137,7 @@ impl<'a> UserAuthDataRelationResource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/mdm/v1/user_auth_data_relations/unbind",

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -35,7 +35,7 @@ impl<'a> ImageResource<'a> {
         &self,
         body: &RecognizeBasicImageReqBody,
         option: &RequestOption,
-    ) -> Result<BasicRecognizeResp> {
+    ) -> Result<BasicRecognizeResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/optical_char_recognition/v1/image/basic_recognize",

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -45,7 +45,10 @@ pub struct BatchCountryRegionV3Resource<'a> {
 }
 
 impl BatchCountryRegionV3Resource<'_> {
-    pub async fn get(&self, option: &RequestOption) -> Result<GetBatchCountryRegionV3Resp> {
+    pub async fn get(
+        &self,
+        option: &RequestOption,
+    ) -> Result<GetBatchCountryRegionV3Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/mdm/v3/batch_country_region");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
@@ -70,7 +73,7 @@ impl CountryRegionV3Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCountryRegionV3Resp> {
+    ) -> Result<ListCountryRegionV3Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/mdm/v3/country_regions");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {

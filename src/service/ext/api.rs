@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
 use crate::transport;
@@ -165,7 +165,7 @@ impl AuthenExtResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AuthenAccessTokenResp> {
+    ) -> Result<AuthenAccessTokenResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/authen/v1/access_token");
         api_req.supported_access_token_types = vec![AccessTokenType::App];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -184,7 +184,7 @@ impl AuthenExtResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RefreshAuthenAccessTokenResp> {
+    ) -> Result<RefreshAuthenAccessTokenResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/authen/v1/refresh_access_token",
@@ -205,7 +205,7 @@ impl AuthenExtResource<'_> {
         })
     }
 
-    pub async fn user_info(&self, option: &RequestOption) -> Result<AuthenUserInfoResp> {
+    pub async fn user_info(&self, option: &RequestOption) -> Result<AuthenUserInfoResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/authen/v1/user_info");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
@@ -230,7 +230,7 @@ impl DriveExplorerExtResource<'_> {
         folder_token: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateFileResp> {
+    ) -> Result<CreateFileResp, LarkError> {
         let path = format!("/open-apis/drive/explorer/v2/file/{folder_token}");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];

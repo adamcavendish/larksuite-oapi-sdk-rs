@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -56,7 +56,7 @@ impl<'a> SpeechResource<'a> {
         &self,
         body: &RecognizeBasicSpeechReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeBasicSpeechResp> {
+    ) -> Result<RecognizeBasicSpeechResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/speech_to_text/v1/speech/file_recognize",
@@ -76,7 +76,7 @@ impl<'a> SpeechResource<'a> {
         &self,
         body: &RecognizeSpeechStreamReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeSpeechStreamResp> {
+    ) -> Result<RecognizeSpeechStreamResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/speech_to_text/v1/speech/stream_recognize",

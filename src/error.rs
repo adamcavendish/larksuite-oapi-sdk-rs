@@ -1,6 +1,6 @@
 /// Errors returned by SDK operations.
 #[derive(Debug, thiserror::Error)]
-pub enum Error {
+pub enum LarkError {
     /// A required parameter is missing or invalid (caught before sending the request).
     #[error("illegal parameter: {0}")]
     IllegalParam(String),
@@ -50,10 +50,8 @@ pub enum Error {
     Crypto(String),
 }
 
-impl From<crate::resp::CodeError> for Error {
+impl From<crate::resp::CodeError> for LarkError {
     fn from(e: crate::resp::CodeError) -> Self {
         Self::Api(Box::new(e))
     }
 }
-
-pub type Result<T> = std::result::Result<T, Error>;

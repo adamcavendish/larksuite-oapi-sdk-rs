@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -380,7 +380,7 @@ impl<'a> SpreadsheetResource<'a> {
         &self,
         body: &CreateSpreadsheetReqBody,
         option: &RequestOption,
-    ) -> Result<CreateSpreadsheetResp> {
+    ) -> Result<CreateSpreadsheetResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/sheets/v3/spreadsheets");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -398,7 +398,7 @@ impl<'a> SpreadsheetResource<'a> {
         spreadsheet_token: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetSpreadsheetResp> {
+    ) -> Result<GetSpreadsheetResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -419,7 +419,7 @@ impl<'a> SpreadsheetResource<'a> {
         spreadsheet_token: &str,
         body: &PatchSpreadsheetReqBody,
         option: &RequestOption,
-    ) -> Result<PatchSpreadsheetResp> {
+    ) -> Result<PatchSpreadsheetResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -444,7 +444,7 @@ impl<'a> SheetResource<'a> {
         spreadsheet_token: &str,
         sheet_id: &str,
         option: &RequestOption,
-    ) -> Result<GetSheetResp> {
+    ) -> Result<GetSheetResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -462,7 +462,7 @@ impl<'a> SheetResource<'a> {
         &self,
         spreadsheet_token: &str,
         option: &RequestOption,
-    ) -> Result<QuerySheetResp> {
+    ) -> Result<QuerySheetResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/query");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -481,7 +481,7 @@ impl<'a> SheetResource<'a> {
         sheet_id: &str,
         body: &PatchSheetReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -500,7 +500,7 @@ impl<'a> SheetResource<'a> {
         spreadsheet_token: &str,
         body: &OperateSheetsReqBody,
         option: &RequestOption,
-    ) -> Result<OperateSheetsResp> {
+    ) -> Result<OperateSheetsResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets_batch_update");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -521,7 +521,7 @@ impl<'a> SheetResource<'a> {
         sheet_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<FindSheetResp> {
+    ) -> Result<FindSheetResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/find");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -542,7 +542,7 @@ impl<'a> SheetResource<'a> {
         sheet_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<MoveDimensionSheetResp> {
+    ) -> Result<MoveDimensionSheetResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/move_dimension"
         );
@@ -564,7 +564,7 @@ impl<'a> SheetResource<'a> {
         sheet_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ReplaceSheetResp> {
+    ) -> Result<ReplaceSheetResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/replace"
         );
@@ -594,7 +594,7 @@ impl<'a> RangeResource<'a> {
         date_time_render_option: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetRangeValueResp> {
+    ) -> Result<GetRangeValueResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values/{range}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -622,7 +622,7 @@ impl<'a> RangeResource<'a> {
         range: &str,
         body: &SetRangeValueReqBody,
         option: &RequestOption,
-    ) -> Result<SetRangeValueResp> {
+    ) -> Result<SetRangeValueResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values/{range}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -644,7 +644,7 @@ impl<'a> RangeResource<'a> {
         date_time_render_option: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchGetRangeValueResp> {
+    ) -> Result<BatchGetRangeValueResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values_batch_get");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -675,7 +675,7 @@ impl<'a> RangeResource<'a> {
         spreadsheet_token: &str,
         body: &BatchSetRangeValueReqBody,
         option: &RequestOption,
-    ) -> Result<BatchSetRangeValueResp> {
+    ) -> Result<BatchSetRangeValueResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values_batch_update");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -697,7 +697,7 @@ impl<'a> RangeResource<'a> {
         body: &AppendValueReqBody,
         insert_data_option: Option<&str>,
         option: &RequestOption,
-    ) -> Result<AppendValueResp> {
+    ) -> Result<AppendValueResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values_append");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -721,7 +721,7 @@ impl<'a> RangeResource<'a> {
         range: &str,
         body: &PrependValueReqBody,
         option: &RequestOption,
-    ) -> Result<PrependValueResp> {
+    ) -> Result<PrependValueResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values_prepend");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -741,7 +741,7 @@ impl<'a> RangeResource<'a> {
         spreadsheet_token: &str,
         range: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values/{range}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -765,7 +765,7 @@ impl<'a> FilterViewResource<'a> {
         sheet_id: &str,
         body: &CreateFilterViewReqBody,
         option: &RequestOption,
-    ) -> Result<CreateFilterViewResp> {
+    ) -> Result<CreateFilterViewResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views"
         );
@@ -787,7 +787,7 @@ impl<'a> FilterViewResource<'a> {
         sheet_id: &str,
         filter_view_id: &str,
         option: &RequestOption,
-    ) -> Result<GetFilterViewResp> {
+    ) -> Result<GetFilterViewResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}"
         );
@@ -809,7 +809,7 @@ impl<'a> FilterViewResource<'a> {
         filter_view_id: &str,
         body: &PatchFilterViewReqBody,
         option: &RequestOption,
-    ) -> Result<PatchFilterViewResp> {
+    ) -> Result<PatchFilterViewResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}"
         );
@@ -831,7 +831,7 @@ impl<'a> FilterViewResource<'a> {
         sheet_id: &str,
         filter_view_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}"
         );
@@ -850,7 +850,7 @@ impl<'a> FilterViewResource<'a> {
         spreadsheet_token: &str,
         sheet_id: &str,
         option: &RequestOption,
-    ) -> Result<QueryFilterViewResp> {
+    ) -> Result<QueryFilterViewResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/query"
         );
@@ -878,7 +878,7 @@ impl<'a> FilterViewConditionResource<'a> {
         filter_view_id: &str,
         body: &CreateFilterViewConditionReqBody,
         option: &RequestOption,
-    ) -> Result<CreateFilterViewConditionResp> {
+    ) -> Result<CreateFilterViewConditionResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}/conditions"
         );
@@ -902,7 +902,7 @@ impl<'a> FilterViewConditionResource<'a> {
         filter_view_id: &str,
         condition_id: &str,
         option: &RequestOption,
-    ) -> Result<GetFilterViewConditionResp> {
+    ) -> Result<GetFilterViewConditionResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}/conditions/{condition_id}"
         );
@@ -926,7 +926,7 @@ impl<'a> FilterViewConditionResource<'a> {
         condition_id: &str,
         body: &UpdateFilterViewConditionReqBody,
         option: &RequestOption,
-    ) -> Result<UpdateFilterViewConditionResp> {
+    ) -> Result<UpdateFilterViewConditionResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}/conditions/{condition_id}"
         );
@@ -950,7 +950,7 @@ impl<'a> FilterViewConditionResource<'a> {
         filter_view_id: &str,
         condition_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}/conditions/{condition_id}"
         );
@@ -970,7 +970,7 @@ impl<'a> FilterViewConditionResource<'a> {
         sheet_id: &str,
         filter_view_id: &str,
         option: &RequestOption,
-    ) -> Result<QueryFilterViewConditionResp> {
+    ) -> Result<QueryFilterViewConditionResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}/conditions/query"
         );
@@ -998,7 +998,7 @@ impl<'a> ConditionalFormatResource<'a> {
         sheet_id: &str,
         body: &CreateConditionalFormatReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/conditional_formats"
         );
@@ -1019,7 +1019,7 @@ impl<'a> ConditionalFormatResource<'a> {
         sheet_id: &str,
         body: &UpdateConditionalFormatReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/conditional_formats/batch_update"
         );
@@ -1040,7 +1040,7 @@ impl<'a> ConditionalFormatResource<'a> {
         sheet_id: &str,
         body: &DeleteConditionalFormatReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/conditional_formats/batch_delete"
         );
@@ -1062,7 +1062,7 @@ impl<'a> ConditionalFormatResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<QueryConditionalFormatResp> {
+    ) -> Result<QueryConditionalFormatResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/conditional_formats/query"
         );
@@ -1095,7 +1095,7 @@ impl<'a> DataValidationResource<'a> {
         spreadsheet_token: &str,
         body: &SetDataValidationDropdownReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/data_validations/dropdown"
         );
@@ -1115,7 +1115,7 @@ impl<'a> DataValidationResource<'a> {
         spreadsheet_token: &str,
         range: &str,
         option: &RequestOption,
-    ) -> Result<QueryDataValidationResp> {
+    ) -> Result<QueryDataValidationResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/data_validations");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1137,7 +1137,7 @@ impl<'a> DataValidationResource<'a> {
         sheet_id: &str,
         dv_id: i32,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/data_validations/{sheet_id}/{dv_id}"
         );
@@ -1163,7 +1163,7 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
         sheet_id: &str,
         body: &FloatImage,
         option: &RequestOption,
-    ) -> Result<CreateFloatImageResp> {
+    ) -> Result<CreateFloatImageResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images"
         );
@@ -1185,7 +1185,7 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
         sheet_id: &str,
         float_image_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/{float_image_id}"
         );
@@ -1205,7 +1205,7 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
         sheet_id: &str,
         float_image_id: &str,
         option: &RequestOption,
-    ) -> Result<GetFloatImageResp> {
+    ) -> Result<GetFloatImageResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/{float_image_id}"
         );
@@ -1227,7 +1227,7 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
         float_image_id: &str,
         body: &FloatImage,
         option: &RequestOption,
-    ) -> Result<PatchFloatImageResp> {
+    ) -> Result<PatchFloatImageResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/{float_image_id}"
         );
@@ -1248,7 +1248,7 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
         spreadsheet_token: &str,
         sheet_id: &str,
         option: &RequestOption,
-    ) -> Result<QueryFloatImageResp> {
+    ) -> Result<QueryFloatImageResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/query"
         );
@@ -1275,7 +1275,7 @@ impl<'a> SheetFilterResource<'a> {
         sheet_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter"
         );
@@ -1295,7 +1295,7 @@ impl<'a> SheetFilterResource<'a> {
         spreadsheet_token: &str,
         sheet_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter"
         );
@@ -1314,7 +1314,7 @@ impl<'a> SheetFilterResource<'a> {
         spreadsheet_token: &str,
         sheet_id: &str,
         option: &RequestOption,
-    ) -> Result<GetSheetFilterResp> {
+    ) -> Result<GetSheetFilterResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter"
         );
@@ -1335,7 +1335,7 @@ impl<'a> SheetFilterResource<'a> {
         sheet_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter"
         );

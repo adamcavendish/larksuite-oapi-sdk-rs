@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::transport;
 
@@ -72,7 +72,11 @@ pub struct DocumentResource<'a> {
 }
 
 impl<'a> DocumentResource<'a> {
-    pub async fn get(&self, document_id: &str, option: &RequestOption) -> Result<GetDocumentResp> {
+    pub async fn get(
+        &self,
+        document_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetDocumentResp, LarkError> {
         let path = format!("/open-apis/docs/v1/documents/{document_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -98,7 +102,7 @@ impl<'a> ContentResource<'a> {
         content_type: Option<&str>,
         lang: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetContentResp> {
+    ) -> Result<GetContentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/docs/v1/content");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         api_req.query_params.set("doc_token", doc_token);

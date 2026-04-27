@@ -30,7 +30,7 @@ use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
 use crate::config::Config;
-use crate::error::{Error, Result};
+use crate::error::LarkError;
 use crate::event::EventDispatcher;
 
 // ── Generated protobuf types ──
@@ -199,7 +199,7 @@ impl WsClient {
 
     /// Run the WebSocket connection. If auto-reconnect is enabled (default),
     /// reconnects indefinitely on errors. Otherwise returns after one session.
-    pub async fn start(self) -> Result<()> {
+    pub async fn start(self) -> Result<(), LarkError> {
         let mut consecutive_failures: u32 = 0;
         loop {
             match self.run_once().await {
@@ -235,13 +235,13 @@ impl WsClient {
         }
     }
 
-    async fn run_once(&self) -> Result<()> {
+    async fn run_once(&self) -> Result<(), LarkError> {
         let (url, service_id) = self.get_ws_url().await?;
         tracing::info!("connecting to ws endpoint: {url}");
 
         let (ws_stream, _) = connect_async(&url)
             .await
-            .map_err(|e| Error::Event(format!("ws connect failed: {e}")))?;
+            .map_err(|e| LarkError::Event(format!("ws connect failed: {e}")))?;
 
         tracing::info!("ws connected");
 
@@ -312,12 +312,12 @@ impl WsClient {
         data: &[u8],
         pending_frags: &mut HashMap<String, FragEntry>,
         write: &Arc<Mutex<S>>,
-    ) -> Result<()>
+    ) -> Result<(), LarkError>
     where
         S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error> + Unpin,
     {
         let frame = proto::Frame::decode(data)
-            .map_err(|e| Error::Event(format!("proto frame decode error: {e}")))?;
+            .map_err(|e| LarkError::Event(format!("proto frame decode error: {e}")))?;
 
         match frame.method {
             METHOD_CONTROL => {
@@ -448,7 +448,7 @@ impl WsClient {
         true
     }
 
-    async fn get_ws_url(&self) -> Result<(String, i32)> {
+    async fn get_ws_url(&self) -> Result<(String, i32), LarkError> {
         let base = self.config.base_url.trim_end_matches('/');
         let url = format!("{base}/callback/ws/endpoint");
 
@@ -462,16 +462,16 @@ impl WsClient {
             .http_client
             .post(&url)?
             .header_str("locale", "zh")
-            .map_err(|e| Error::Event(format!("invalid locale header: {e}")))?
+            .map_err(|e| LarkError::Event(format!("invalid locale header: {e}")))?
             .json(&body)
-            .map_err(|e| Error::Event(format!("failed to serialize endpoint body: {e}")))?
+            .map_err(|e| LarkError::Event(format!("failed to serialize endpoint body: {e}")))?
             .send()
             .await?;
 
         let body: WsEndpointResp = resp.json().await?;
 
         if body.code != 0 {
-            return Err(Error::Event(format!(
+            return Err(LarkError::Event(format!(
                 "ws endpoint returned code {}: {}",
                 body.code,
                 body.msg.unwrap_or_default()
@@ -480,7 +480,7 @@ impl WsClient {
 
         let data = body
             .data
-            .ok_or_else(|| Error::Event("ws endpoint returned no data".to_string()))?;
+            .ok_or_else(|| LarkError::Event("ws endpoint returned no data".to_string()))?;
 
         if let Some(ref conf) = data.client_config {
             self.apply_config(conf);

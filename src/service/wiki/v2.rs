@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -236,7 +236,7 @@ impl<'a> SpaceResource<'a> {
         &self,
         body: &CreateSpaceReqBody,
         option: &RequestOption,
-    ) -> Result<CreateSpaceResp> {
+    ) -> Result<CreateSpaceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/wiki/v2/spaces");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -254,7 +254,7 @@ impl<'a> SpaceResource<'a> {
         space_id: &str,
         lang: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetSpaceResp> {
+    ) -> Result<GetSpaceResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -275,7 +275,7 @@ impl<'a> SpaceResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSpaceResp> {
+    ) -> Result<ListSpaceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/wiki/v2/spaces");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -298,7 +298,7 @@ impl<'a> SpaceResource<'a> {
         token: &str,
         obj_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetNodeResp> {
+    ) -> Result<GetNodeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/wiki/v2/spaces/get_node");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.query_params.set("token", token);
@@ -325,7 +325,7 @@ impl<'a> NodeResource<'a> {
         space_id: &str,
         body: &CreateNodeReqBody,
         option: &RequestOption,
-    ) -> Result<CreateNodeResp> {
+    ) -> Result<CreateNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -345,7 +345,7 @@ impl<'a> NodeResource<'a> {
         node_token: &str,
         obj_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetNodeResp> {
+    ) -> Result<GetNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -366,7 +366,7 @@ impl<'a> NodeResource<'a> {
         space_id: &str,
         node_token: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -384,7 +384,7 @@ impl<'a> NodeResource<'a> {
         node_token: &str,
         body: &MoveNodeReqBody,
         option: &RequestOption,
-    ) -> Result<MoveNodeResp> {
+    ) -> Result<MoveNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}/move");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -404,7 +404,7 @@ impl<'a> NodeResource<'a> {
         node_token: &str,
         body: &UpdateNodeTitleReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}/update_title");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -423,7 +423,7 @@ impl<'a> NodeResource<'a> {
         node_token: &str,
         body: &CopyNodeReqBody,
         option: &RequestOption,
-    ) -> Result<CopyNodeResp> {
+    ) -> Result<CopyNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}/copy");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -444,7 +444,7 @@ impl<'a> NodeResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListNodeResp> {
+    ) -> Result<ListNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -471,7 +471,7 @@ impl<'a> NodeResource<'a> {
         space_id: &str,
         body: &MoveDocsToWikiReqBody,
         option: &RequestOption,
-    ) -> Result<MoveDocsToWikiResp> {
+    ) -> Result<MoveDocsToWikiResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/move_docs_to_wiki");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -497,7 +497,7 @@ impl<'a> SpaceMemberResource<'a> {
         body: &AddMemberReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -519,7 +519,7 @@ impl<'a> SpaceMemberResource<'a> {
         member_id: &str,
         member_type: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members/{member_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -539,7 +539,7 @@ impl<'a> SpaceMemberResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListMemberResp> {
+    ) -> Result<ListMemberResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -572,7 +572,7 @@ impl<'a> SpaceSettingResource<'a> {
         space_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/setting");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -596,7 +596,7 @@ impl<'a> TaskResource<'a> {
         task_id: &str,
         task_type: &str,
         option: &RequestOption,
-    ) -> Result<GetTaskResp> {
+    ) -> Result<GetTaskResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/tasks/{task_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::transport;
 
@@ -85,7 +85,11 @@ pub struct RoomResource<'a> {
 }
 
 impl<'a> RoomResource<'a> {
-    pub async fn get(&self, room_id: &str, option: &RequestOption) -> Result<GetRoomResp> {
+    pub async fn get(
+        &self,
+        room_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetRoomResp, LarkError> {
         let path = format!("/open-apis/meeting_room/v1/rooms/{room_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -104,7 +108,7 @@ impl<'a> RoomResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListRoomResp> {
+    ) -> Result<ListRoomResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/meeting_room/v1/rooms");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = building_id {
@@ -136,7 +140,7 @@ impl<'a> BuildingResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListBuildingResp> {
+    ) -> Result<ListBuildingResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/meeting_room/v1/buildings");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {

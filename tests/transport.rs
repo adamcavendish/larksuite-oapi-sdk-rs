@@ -1,5 +1,5 @@
 use larksuite_oapi_sdk_rs::Client;
-use larksuite_oapi_sdk_rs::error::Error;
+use larksuite_oapi_sdk_rs::error::LarkError;
 use larksuite_oapi_sdk_rs::req::{ApiReq, RequestOption};
 
 fn default_option() -> RequestOption {
@@ -14,7 +14,7 @@ async fn transport_rejects_empty_app_id() {
         .do_req(&api_req, &default_option())
         .await
         .unwrap_err();
-    assert!(matches!(err, Error::IllegalParam(_)));
+    assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
 #[tokio::test]
@@ -25,7 +25,7 @@ async fn transport_rejects_empty_app_secret() {
         .do_req(&api_req, &default_option())
         .await
         .unwrap_err();
-    assert!(matches!(err, Error::IllegalParam(_)));
+    assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
 #[tokio::test]
@@ -40,7 +40,7 @@ async fn transport_rejects_marketplace_missing_tenant_key() {
         .do_req(&api_req, &default_option())
         .await
         .unwrap_err();
-    assert!(matches!(err, Error::IllegalParam(_)));
+    assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
 #[tokio::test]
@@ -64,7 +64,7 @@ async fn transport_user_access_token_option_sets_header() {
     let err = client.do_req(&api_req, &option).await.unwrap_err();
     // Should fail at network level (DialFailed), not at IllegalParam
     assert!(
-        matches!(err, Error::DialFailed(_)) || matches!(err, Error::Http(_)),
+        matches!(err, LarkError::DialFailed(_)) || matches!(err, LarkError::Http(_)),
         "unexpected error: {err:?}"
     );
 }
@@ -82,7 +82,7 @@ async fn transport_rejects_reserved_x_request_id_header() {
     };
 
     let err = client.do_req(&api_req, &option).await.unwrap_err();
-    assert!(matches!(err, Error::IllegalParam(_)));
+    assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
 #[tokio::test]
@@ -98,5 +98,5 @@ async fn transport_rejects_reserved_request_id_header() {
     };
 
     let err = client.do_req(&api_req, &option).await.unwrap_err();
-    assert!(matches!(err, Error::IllegalParam(_)));
+    assert!(matches!(err, LarkError::IllegalParam(_)));
 }

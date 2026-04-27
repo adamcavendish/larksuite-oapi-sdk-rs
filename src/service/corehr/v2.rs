@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -345,7 +345,7 @@ macro_rules! post_method {
             &self,
             body: serde_json::Value,
             option: &RequestOption,
-        ) -> Result<$resp> {
+        ) -> Result<$resp, LarkError> {
             let mut api_req = ApiReq::new(http::Method::POST, $path);
             api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
             api_req.body = Some(ReqBody::json(&body)?);
@@ -363,7 +363,7 @@ macro_rules! post_method {
 
 macro_rules! get_method {
     ($fn_name:ident, $resp:ident, $data:ty, $path:expr) => {
-        pub async fn $fn_name(&self, option: &RequestOption) -> Result<$resp> {
+        pub async fn $fn_name(&self, option: &RequestOption) -> Result<$resp, LarkError> {
             let mut api_req = ApiReq::new(http::Method::GET, $path);
             api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
             let (api_resp, raw) =
@@ -389,7 +389,7 @@ impl ApprovalGroupsV2Resource<'_> {
         &self,
         process_id: &str,
         option: &RequestOption,
-    ) -> Result<GetApprovalGroupsV2Resp> {
+    ) -> Result<GetApprovalGroupsV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/approval_groups/{process_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -435,7 +435,7 @@ impl ApproverV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListApproverV2Resp> {
+    ) -> Result<ListApproverV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/approvers");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -543,7 +543,7 @@ impl BpV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListBpV2Resp> {
+    ) -> Result<ListBpV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/bps");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -656,7 +656,7 @@ impl CostCenterV2Resource<'_> {
         &self,
         cost_center_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteCostCenterV2Resp> {
+    ) -> Result<DeleteCostCenterV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -674,7 +674,7 @@ impl CostCenterV2Resource<'_> {
         cost_center_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchCostCenterV2Resp> {
+    ) -> Result<PatchCostCenterV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -715,7 +715,7 @@ impl CostCenterVersionV2Resource<'_> {
         cost_center_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateCostCenterVersionV2Resp> {
+    ) -> Result<CreateCostCenterVersionV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}/versions");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -735,7 +735,7 @@ impl CostCenterVersionV2Resource<'_> {
         cost_center_id: &str,
         version_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteCostCenterVersionV2Resp> {
+    ) -> Result<DeleteCostCenterVersionV2Resp, LarkError> {
         let path =
             format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}/versions/{version_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -755,7 +755,7 @@ impl CostCenterVersionV2Resource<'_> {
         version_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchCostCenterVersionV2Resp> {
+    ) -> Result<PatchCostCenterVersionV2Resp, LarkError> {
         let path =
             format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}/versions/{version_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -803,7 +803,7 @@ impl CustomOrgV2Resource<'_> {
         org_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchCustomOrgV2Resp> {
+    ) -> Result<PatchCustomOrgV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/custom_orgs/{org_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -889,7 +889,7 @@ impl DepartmentV2Resource<'_> {
         &self,
         department_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteDepartmentV2Resp> {
+    ) -> Result<DeleteDepartmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -914,7 +914,7 @@ impl DepartmentV2Resource<'_> {
         department_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchDepartmentV2Resp> {
+    ) -> Result<PatchDepartmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -974,7 +974,11 @@ pub struct DraftV2Resource<'a> {
 }
 
 impl DraftV2Resource<'_> {
-    pub async fn get(&self, draft_id: &str, option: &RequestOption) -> Result<GetDraftV2Resp> {
+    pub async fn get(
+        &self,
+        draft_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetDraftV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/drafts/{draft_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1040,7 +1044,7 @@ impl EmployeesAdditionalJobV2Resource<'_> {
         &self,
         additional_job_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteEmployeesAdditionalJobV2Resp> {
+    ) -> Result<DeleteEmployeesAdditionalJobV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/employees/additional_jobs/{additional_job_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1058,7 +1062,7 @@ impl EmployeesAdditionalJobV2Resource<'_> {
         additional_job_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchEmployeesAdditionalJobV2Resp> {
+    ) -> Result<PatchEmployeesAdditionalJobV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/employees/additional_jobs/{additional_job_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1107,7 +1111,7 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
         &self,
         international_assignment_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteEmployeesIntlAssignmentV2Resp> {
+    ) -> Result<DeleteEmployeesIntlAssignmentV2Resp, LarkError> {
         let path = format!(
             "/open-apis/corehr/v2/employees/international_assignments/{international_assignment_id}"
         );
@@ -1127,7 +1131,7 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListEmployeesIntlAssignmentV2Resp> {
+    ) -> Result<ListEmployeesIntlAssignmentV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v2/employees/international_assignments",
@@ -1154,7 +1158,7 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
         international_assignment_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchEmployeesIntlAssignmentV2Resp> {
+    ) -> Result<PatchEmployeesIntlAssignmentV2Resp, LarkError> {
         let path = format!(
             "/open-apis/corehr/v2/employees/international_assignments/{international_assignment_id}"
         );
@@ -1222,7 +1226,11 @@ impl JobV2Resource<'_> {
         "/open-apis/corehr/v2/jobs/batch_get"
     );
 
-    pub async fn get(&self, job_id: &str, option: &RequestOption) -> Result<GetJobV2Resp> {
+    pub async fn get(
+        &self,
+        job_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetJobV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/jobs/{job_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1241,7 +1249,7 @@ impl JobV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListJobV2Resp> {
+    ) -> Result<ListJobV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/jobs");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1293,7 +1301,7 @@ impl JobChangeV2Resource<'_> {
         job_change_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RevokeJobChangeV2Resp> {
+    ) -> Result<RevokeJobChangeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/job_changes/{job_change_id}/revoke");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1361,7 +1369,7 @@ impl JobGradeV2Resource<'_> {
         &self,
         job_grade_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteJobGradeV2Resp> {
+    ) -> Result<DeleteJobGradeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/job_grades/{job_grade_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1379,7 +1387,7 @@ impl JobGradeV2Resource<'_> {
         job_grade_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchJobGradeV2Resp> {
+    ) -> Result<PatchJobGradeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/job_grades/{job_grade_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1454,7 +1462,7 @@ impl LocationV2Resource<'_> {
         location_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchLocationV2Resp> {
+    ) -> Result<PatchLocationV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1489,7 +1497,7 @@ impl LocationAddressV2Resource<'_> {
         location_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateLocationAddressV2Resp> {
+    ) -> Result<CreateLocationAddressV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}/addresses");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1509,7 +1517,7 @@ impl LocationAddressV2Resource<'_> {
         location_id: &str,
         address_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteLocationAddressV2Resp> {
+    ) -> Result<DeleteLocationAddressV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}/addresses/{address_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1528,7 +1536,7 @@ impl LocationAddressV2Resource<'_> {
         address_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchLocationAddressV2Resp> {
+    ) -> Result<PatchLocationAddressV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}/addresses/{address_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1601,7 +1609,7 @@ impl PathwayV2Resource<'_> {
         &self,
         pathway_id: &str,
         option: &RequestOption,
-    ) -> Result<DeletePathwayV2Resp> {
+    ) -> Result<DeletePathwayV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pathways/{pathway_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1619,7 +1627,7 @@ impl PathwayV2Resource<'_> {
         pathway_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchPathwayV2Resp> {
+    ) -> Result<PatchPathwayV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pathways/{pathway_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1654,7 +1662,7 @@ impl PersonV2Resource<'_> {
         person_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchPersonV2Resp> {
+    ) -> Result<PatchPersonV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/persons/{person_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1701,7 +1709,7 @@ impl PositionV2Resource<'_> {
         position_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchPositionV2Resp> {
+    ) -> Result<PatchPositionV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/positions/{position_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1742,7 +1750,7 @@ impl PreHireV2Resource<'_> {
         pre_hire_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CompletePreHireV2Resp> {
+    ) -> Result<CompletePreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}/complete");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1768,7 +1776,7 @@ impl PreHireV2Resource<'_> {
         &self,
         pre_hire_id: &str,
         option: &RequestOption,
-    ) -> Result<DeletePreHireV2Resp> {
+    ) -> Result<DeletePreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1786,7 +1794,7 @@ impl PreHireV2Resource<'_> {
         pre_hire_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchPreHireV2Resp> {
+    ) -> Result<PatchPreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1831,7 +1839,7 @@ impl PreHireV2Resource<'_> {
         pre_hire_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<TransitTaskPreHireV2Resp> {
+    ) -> Result<TransitTaskPreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}/transit_task");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1905,7 +1913,7 @@ impl ProbationAssessmentV2Resource<'_> {
         &self,
         assessment_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteProbationAssessmentV2Resp> {
+    ) -> Result<DeleteProbationAssessmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/probation/assessments/{assessment_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1923,7 +1931,7 @@ impl ProbationAssessmentV2Resource<'_> {
         assessment_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchProbationAssessmentV2Resp> {
+    ) -> Result<PatchProbationAssessmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/probation/assessments/{assessment_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1950,7 +1958,7 @@ impl ProcessV2Resource<'_> {
         &self,
         process_id: &str,
         option: &RequestOption,
-    ) -> Result<FlowVariableDataProcessV2Resp> {
+    ) -> Result<FlowVariableDataProcessV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/flow_variable_data");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1964,7 +1972,11 @@ impl ProcessV2Resource<'_> {
         })
     }
 
-    pub async fn get(&self, process_id: &str, option: &RequestOption) -> Result<GetProcessV2Resp> {
+    pub async fn get(
+        &self,
+        process_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetProcessV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1983,7 +1995,7 @@ impl ProcessV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListProcessV2Resp> {
+    ) -> Result<ListProcessV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/processes");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2016,7 +2028,7 @@ impl ProcessApproverV2Resource<'_> {
         approver_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateProcessApproverV2Resp> {
+    ) -> Result<UpdateProcessApproverV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/approvers/{approver_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2044,7 +2056,7 @@ impl ProcessExtraV2Resource<'_> {
         process_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateProcessExtraV2Resp> {
+    ) -> Result<UpdateProcessExtraV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/extra");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2071,7 +2083,7 @@ impl ProcessFormVariableDataV2Resource<'_> {
         &self,
         process_id: &str,
         option: &RequestOption,
-    ) -> Result<GetProcessFormVariableDataV2Resp> {
+    ) -> Result<GetProcessFormVariableDataV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/form_variable_data");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2098,7 +2110,7 @@ impl ProcessTransferV2Resource<'_> {
         process_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateProcessTransferV2Resp> {
+    ) -> Result<UpdateProcessTransferV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/transfer");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2162,7 +2174,7 @@ impl ProcessRevokeV2Resource<'_> {
         process_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateProcessRevokeV2Resp> {
+    ) -> Result<UpdateProcessRevokeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/process_revoke/{process_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2190,7 +2202,7 @@ impl ProcessWithdrawV2Resource<'_> {
         process_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateProcessWithdrawV2Resp> {
+    ) -> Result<UpdateProcessWithdrawV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/process_withdraw/{process_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2239,7 +2251,7 @@ impl SignatureFileV2Resource<'_> {
         signature_file_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<DownloadSignatureFileV2Resp> {
+    ) -> Result<DownloadSignatureFileV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/signature_files/{signature_file_id}/download");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2259,7 +2271,7 @@ impl SignatureFileV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSignatureFileV2Resp> {
+    ) -> Result<ListSignatureFileV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/signature_files");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2283,7 +2295,7 @@ impl SignatureFileV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListByBizIdSignatureFileV2Resp> {
+    ) -> Result<ListByBizIdSignatureFileV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v2/signature_files/list_by_biz_id",
@@ -2331,7 +2343,7 @@ impl SignatureNodeV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListByFileIdSignatureNodeV2Resp> {
+    ) -> Result<ListByFileIdSignatureNodeV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v2/signature_nodes/list_by_file_id",
@@ -2366,7 +2378,7 @@ impl SignatureTemplateV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SearchSignatureTemplateV2Resp> {
+    ) -> Result<SearchSignatureTemplateV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v2/signature_templates/search",
@@ -2401,7 +2413,7 @@ impl SignatureTemplateInfoWithThumbnailV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSignatureTemplateInfoWithThumbnailV2Resp> {
+    ) -> Result<ListSignatureTemplateInfoWithThumbnailV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v2/signature_template_info_with_thumbnails",
@@ -2436,7 +2448,7 @@ impl WorkforcePlanV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListWorkforcePlanV2Resp> {
+    ) -> Result<ListWorkforcePlanV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/workforce_plans");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {

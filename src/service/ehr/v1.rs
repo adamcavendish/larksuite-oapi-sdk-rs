@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::resp::ApiResp;
 use crate::transport;
@@ -47,7 +47,11 @@ pub struct AttachmentResource<'a> {
 }
 
 impl<'a> AttachmentResource<'a> {
-    pub async fn get(&self, token: &str, option: &RequestOption) -> Result<GetAttachmentResp> {
+    pub async fn get(
+        &self,
+        token: &str,
+        option: &RequestOption,
+    ) -> Result<GetAttachmentResp, LarkError> {
         let path = format!("/open-apis/ehr/v1/attachments/{token}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -77,7 +81,7 @@ impl<'a> EmployeeResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListEhrEmployeeResp> {
+    ) -> Result<ListEhrEmployeeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/ehr/v1/employees");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {

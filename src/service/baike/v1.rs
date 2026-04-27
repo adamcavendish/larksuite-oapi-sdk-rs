@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{DownloadResp, EmptyResp, parse_v2};
 use crate::transport;
@@ -170,7 +170,7 @@ impl<'a> EntityResource<'a> {
         body: &CreateEntityReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateEntityResp> {
+    ) -> Result<CreateEntityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/baike/v1/entities");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -192,7 +192,7 @@ impl<'a> EntityResource<'a> {
         body: &CreateEntityReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<UpdateEntityResp> {
+    ) -> Result<UpdateEntityResp, LarkError> {
         let path = format!("/open-apis/baike/v1/entities/{entity_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -216,7 +216,7 @@ impl<'a> EntityResource<'a> {
         outer_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetEntityResp> {
+    ) -> Result<GetEntityResp, LarkError> {
         let path = format!("/open-apis/baike/v1/entities/{entity_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -245,7 +245,7 @@ impl<'a> EntityResource<'a> {
         provider: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListEntityResp> {
+    ) -> Result<ListEntityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/baike/v1/entities");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -276,7 +276,7 @@ impl<'a> EntityResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SearchEntityResp> {
+    ) -> Result<SearchEntityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/baike/v1/entities/search");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -302,7 +302,7 @@ impl<'a> EntityResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/baike/v1/entities/highlight");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::Json(body));
@@ -318,7 +318,7 @@ impl<'a> EntityResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ExtractEntityResp> {
+    ) -> Result<ExtractEntityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/baike/v1/entities/extract");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::Json(body));
@@ -336,7 +336,7 @@ impl<'a> EntityResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<MatchEntityResp> {
+    ) -> Result<MatchEntityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/baike/v1/entities/match");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::Json(body));
@@ -361,7 +361,7 @@ impl<'a> ClassificationResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListClassificationResp> {
+    ) -> Result<ListClassificationResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/baike/v1/classifications");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -391,7 +391,7 @@ impl<'a> DraftResource<'a> {
         body: serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateDraftResp> {
+    ) -> Result<CreateDraftResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/baike/v1/drafts");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -414,7 +414,7 @@ impl<'a> DraftResource<'a> {
         body: serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<UpdateDraftResp> {
+    ) -> Result<UpdateDraftResp, LarkError> {
         let path = format!("/open-apis/baike/v1/drafts/{draft_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -438,7 +438,11 @@ pub struct FileResource<'a> {
 }
 
 impl<'a> FileResource<'a> {
-    pub async fn download(&self, file_token: &str, option: &RequestOption) -> Result<DownloadResp> {
+    pub async fn download(
+        &self,
+        file_token: &str,
+        option: &RequestOption,
+    ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/baike/v1/files/{file_token}/download");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -458,7 +462,7 @@ impl<'a> FileResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UploadFileResp> {
+    ) -> Result<UploadFileResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/baike/v1/files/upload");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::Json(body));

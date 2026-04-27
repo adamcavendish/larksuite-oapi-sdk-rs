@@ -5,7 +5,7 @@ use std::pin::Pin;
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::{Error, Result};
+use crate::error::LarkError;
 use crate::event::EventDispatcher;
 
 // ── Event payload types ──
@@ -116,20 +116,22 @@ pub struct P2ApplicationVisibilityAddedV6 {
 
 fn wrap_handler<T, F, Fut>(
     handler: F,
-) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync + 'static
+) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
++ Send
++ Sync
++ 'static
 where
     T: for<'de> serde::Deserialize<'de> + Send + 'static,
     F: Fn(T) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<()>> + Send + 'static,
+    Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
 {
     move |val: serde_json::Value| {
         let result: std::result::Result<T, _> = serde_json::from_value(val);
         match result {
-            Ok(typed) => {
-                Box::pin(handler(typed)) as Pin<Box<dyn Future<Output = Result<()>> + Send>>
-            }
+            Ok(typed) => Box::pin(handler(typed))
+                as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>,
             Err(e) => Box::pin(async move {
-                Err(Error::Event(format!(
+                Err(LarkError::Event(format!(
                     "failed to deserialize event payload: {e}"
                 )))
             }),
@@ -143,7 +145,7 @@ impl EventDispatcher {
     pub fn on_p2_application_bot_menu_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationBotMenuV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("application.bot.menu_v6", wrap_handler(handler))
     }
@@ -151,7 +153,7 @@ impl EventDispatcher {
     pub fn on_p2_application_bot_added_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationBotAddedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("im.chat.bot.disbanded_v1", wrap_handler(handler))
     }
@@ -159,7 +161,7 @@ impl EventDispatcher {
     pub fn on_p2_application_bot_deleted_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationBotDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event(
             "im.chat.access_event.bot_p2p_chat_entered_v1",
@@ -170,7 +172,7 @@ impl EventDispatcher {
     pub fn on_p2_application_created_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationCreatedV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("application.application.created_v6", wrap_handler(handler))
     }
@@ -178,7 +180,7 @@ impl EventDispatcher {
     pub fn on_p2_application_visibility_changed_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationVisibilityChangedV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event(
             "application.application.visibility_changed_v6",
@@ -189,7 +191,7 @@ impl EventDispatcher {
     pub fn on_p2_application_app_version_audit_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationAppVersionAuditV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event(
             "application.application.app_version.audit_v6",
@@ -200,7 +202,7 @@ impl EventDispatcher {
     pub fn on_p2_application_app_version_publish_apply_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationAppVersionPublishApplyV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event(
             "application.application.app_version.publish_apply_v6",
@@ -211,7 +213,7 @@ impl EventDispatcher {
     pub fn on_p2_application_app_version_publish_revoke_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationAppVersionPublishRevokeV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event(
             "application.application.app_version.publish_revoke_v6",
@@ -222,7 +224,7 @@ impl EventDispatcher {
     pub fn on_p2_application_feedback_created_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationFeedbackCreatedV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event(
             "application.application.feedback.created_v6",
@@ -233,7 +235,7 @@ impl EventDispatcher {
     pub fn on_p2_application_feedback_updated_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationFeedbackUpdatedV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event(
             "application.application.feedback.updated_v6",
@@ -244,7 +246,7 @@ impl EventDispatcher {
     pub fn on_p2_application_visibility_added_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2ApplicationVisibilityAddedV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event(
             "application.application.visibility.added_v6",

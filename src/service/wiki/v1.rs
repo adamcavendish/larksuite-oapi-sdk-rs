@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
 use crate::service::common::parse_v2;
@@ -51,7 +51,7 @@ impl NodeV1Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<SearchNodeV1Resp> {
+    ) -> Result<SearchNodeV1Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/wiki/v1/nodes/search");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(&body)?);

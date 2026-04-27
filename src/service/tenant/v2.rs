@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::resp::{ApiResp, CodeError};
 use crate::transport;
@@ -115,7 +115,7 @@ pub struct TenantResource<'a> {
 }
 
 impl<'a> TenantResource<'a> {
-    pub async fn query(&self, option: &RequestOption) -> Result<QueryTenantResp> {
+    pub async fn query(&self, option: &RequestOption) -> Result<QueryTenantResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/tenant/v2/tenant/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
 
@@ -135,7 +135,10 @@ pub struct TenantProductAssignInfoResource<'a> {
 }
 
 impl<'a> TenantProductAssignInfoResource<'a> {
-    pub async fn query(&self, option: &RequestOption) -> Result<QueryTenantProductAssignInfoResp> {
+    pub async fn query(
+        &self,
+        option: &RequestOption,
+    ) -> Result<QueryTenantProductAssignInfoResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/tenant/v2/tenant/assign_info_list/query",

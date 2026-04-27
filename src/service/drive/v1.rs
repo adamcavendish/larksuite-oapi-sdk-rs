@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
 use crate::service::common::{DownloadResp, EmptyResp};
 use crate::transport;
@@ -789,7 +789,7 @@ impl<'a> ExportTaskResource<'a> {
         &self,
         body: &ExportTask,
         option: &RequestOption,
-    ) -> Result<CreateExportTaskResp> {
+    ) -> Result<CreateExportTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/export_tasks");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -808,7 +808,7 @@ impl<'a> ExportTaskResource<'a> {
         ticket: &str,
         token: &str,
         option: &RequestOption,
-    ) -> Result<GetExportTaskResp> {
+    ) -> Result<GetExportTaskResp, LarkError> {
         let path = format!("/open-apis/drive/v1/export_tasks/{ticket}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -823,7 +823,11 @@ impl<'a> ExportTaskResource<'a> {
         })
     }
 
-    pub async fn download(&self, file_token: &str, option: &RequestOption) -> Result<DownloadResp> {
+    pub async fn download(
+        &self,
+        file_token: &str,
+        option: &RequestOption,
+    ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/drive/v1/export_tasks/file/{file_token}/download");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -851,7 +855,7 @@ impl<'a> FileResource<'a> {
         user_id_type: Option<&str>,
         body: &CopyFileReqBody,
         option: &RequestOption,
-    ) -> Result<CopyFileResp> {
+    ) -> Result<CopyFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/copy");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -872,7 +876,7 @@ impl<'a> FileResource<'a> {
         &self,
         body: &CreateFolderFileReqBody,
         option: &RequestOption,
-    ) -> Result<CreateFolderFileResp> {
+    ) -> Result<CreateFolderFileResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/drive/v1/files/create_folder",
@@ -894,7 +898,7 @@ impl<'a> FileResource<'a> {
         user_id_type: Option<&str>,
         body: &CreateShortcutFileReqBody,
         option: &RequestOption,
-    ) -> Result<CreateShortcutFileResp> {
+    ) -> Result<CreateShortcutFileResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/drive/v1/files/create_shortcut",
@@ -919,7 +923,7 @@ impl<'a> FileResource<'a> {
         file_token: &str,
         file_type: &str,
         option: &RequestOption,
-    ) -> Result<DeleteFileResp> {
+    ) -> Result<DeleteFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -933,7 +937,11 @@ impl<'a> FileResource<'a> {
         })
     }
 
-    pub async fn download(&self, file_token: &str, option: &RequestOption) -> Result<DownloadResp> {
+    pub async fn download(
+        &self,
+        file_token: &str,
+        option: &RequestOption,
+    ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/download");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -955,7 +963,7 @@ impl<'a> FileResource<'a> {
         file_type: &str,
         event_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/subscribe");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -977,7 +985,7 @@ impl<'a> FileResource<'a> {
         file_type: &str,
         event_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/delete_subscribe");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -999,7 +1007,7 @@ impl<'a> FileResource<'a> {
         file_type: &str,
         event_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetSubscribeFileResp> {
+    ) -> Result<GetSubscribeFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/get_subscribe");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -1027,7 +1035,7 @@ impl<'a> FileResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListFileResp> {
+    ) -> Result<ListFileResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/drive/v1/files");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = folder_token {
@@ -1062,7 +1070,7 @@ impl<'a> FileResource<'a> {
         file_token: &str,
         body: &MoveFileReqBody,
         option: &RequestOption,
-    ) -> Result<MoveFileResp> {
+    ) -> Result<MoveFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/move");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1080,7 +1088,7 @@ impl<'a> FileResource<'a> {
         &self,
         task_id: &str,
         option: &RequestOption,
-    ) -> Result<TaskCheckFileResp> {
+    ) -> Result<TaskCheckFileResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/drive/v1/files/task_check");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.query_params.set("task_id", task_id);
@@ -1098,7 +1106,7 @@ impl<'a> FileResource<'a> {
         &self,
         body: &FileUploadInfo,
         option: &RequestOption,
-    ) -> Result<UploadPrepareFileResp> {
+    ) -> Result<UploadPrepareFileResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/drive/v1/files/upload_prepare",
@@ -1119,7 +1127,7 @@ impl<'a> FileResource<'a> {
         &self,
         body: &UploadFinishFileReqBody,
         option: &RequestOption,
-    ) -> Result<UploadFinishFileResp> {
+    ) -> Result<UploadFinishFileResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/drive/v1/files/upload_finish",
@@ -1146,7 +1154,7 @@ impl<'a> FileResource<'a> {
         checksum: Option<&str>,
         data: Vec<u8>,
         option: &RequestOption,
-    ) -> Result<UploadAllFileResp> {
+    ) -> Result<UploadAllFileResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/files/upload_all");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let mut fields = vec![
@@ -1200,7 +1208,7 @@ impl<'a> FileResource<'a> {
         checksum: Option<&str>,
         data: Vec<u8>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/files/upload_part");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let mut fields = vec![
@@ -1253,7 +1261,7 @@ impl<'a> FileCommentResource<'a> {
         user_id_type: Option<&str>,
         body: &BatchQueryFileCommentReqBody,
         option: &RequestOption,
-    ) -> Result<BatchQueryFileCommentResp> {
+    ) -> Result<BatchQueryFileCommentResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments/batch_query");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1282,7 +1290,7 @@ impl<'a> FileCommentResource<'a> {
         user_id_type: Option<&str>,
         body: &FileComment,
         option: &RequestOption,
-    ) -> Result<CreateFileCommentResp> {
+    ) -> Result<CreateFileCommentResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -1307,7 +1315,7 @@ impl<'a> FileCommentResource<'a> {
         file_type: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetFileCommentResp> {
+    ) -> Result<GetFileCommentResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments/{comment_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -1335,7 +1343,7 @@ impl<'a> FileCommentResource<'a> {
         page_size: Option<i32>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListFileCommentResp> {
+    ) -> Result<ListFileCommentResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -1372,7 +1380,7 @@ impl<'a> FileCommentResource<'a> {
         file_type: &str,
         body: &PatchFileCommentReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments/{comment_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -1399,7 +1407,7 @@ impl<'a> FileCommentReplyResource<'a> {
         reply_id: &str,
         file_type: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/drive/v1/files/{file_token}/comments/{comment_id}/replies/{reply_id}"
         );
@@ -1424,7 +1432,7 @@ impl<'a> FileCommentReplyResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListFileCommentReplyResp> {
+    ) -> Result<ListFileCommentReplyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments/{comment_id}/replies");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1458,7 +1466,7 @@ impl<'a> FileCommentReplyResource<'a> {
         user_id_type: Option<&str>,
         body: &UpdateFileCommentReplyReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/drive/v1/files/{file_token}/comments/{comment_id}/replies/{reply_id}"
         );
@@ -1488,7 +1496,7 @@ impl<'a> FileStatisticsResource<'a> {
         file_token: &str,
         file_type: &str,
         option: &RequestOption,
-    ) -> Result<GetFileStatisticsResp> {
+    ) -> Result<GetFileStatisticsResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/statistics");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1514,7 +1522,7 @@ impl<'a> FileSubscriptionResource<'a> {
         file_token: &str,
         body: &FileSubscription,
         option: &RequestOption,
-    ) -> Result<CreateFileSubscriptionResp> {
+    ) -> Result<CreateFileSubscriptionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/subscriptions");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1535,7 +1543,7 @@ impl<'a> FileSubscriptionResource<'a> {
         subscription_id: &str,
         body: &GetFileSubscriptionReqBody,
         option: &RequestOption,
-    ) -> Result<GetFileSubscriptionResp> {
+    ) -> Result<GetFileSubscriptionResp, LarkError> {
         let path =
             format!("/open-apis/drive/v1/files/{file_token}/subscriptions/{subscription_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
@@ -1557,7 +1565,7 @@ impl<'a> FileSubscriptionResource<'a> {
         subscription_id: &str,
         body: &PatchFileSubscriptionReqBody,
         option: &RequestOption,
-    ) -> Result<PatchFileSubscriptionResp> {
+    ) -> Result<PatchFileSubscriptionResp, LarkError> {
         let path =
             format!("/open-apis/drive/v1/files/{file_token}/subscriptions/{subscription_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
@@ -1585,7 +1593,7 @@ impl<'a> FileVersionResource<'a> {
         user_id_type: Option<&str>,
         body: &Version,
         option: &RequestOption,
-    ) -> Result<CreateFileVersionResp> {
+    ) -> Result<CreateFileVersionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1610,7 +1618,7 @@ impl<'a> FileVersionResource<'a> {
         obj_type: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions/{version_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1633,7 +1641,7 @@ impl<'a> FileVersionResource<'a> {
         obj_type: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetFileVersionResp> {
+    ) -> Result<GetFileVersionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions/{version_id}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1658,7 +1666,7 @@ impl<'a> FileVersionResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListFileVersionResp> {
+    ) -> Result<ListFileVersionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1696,7 +1704,7 @@ impl<'a> FileViewRecordResource<'a> {
         page_token: Option<&str>,
         viewer_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListFileViewRecordResp> {
+    ) -> Result<ListFileViewRecordResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/view_records");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1730,7 +1738,7 @@ impl<'a> ImportTaskResource<'a> {
         &self,
         body: &ImportTask,
         option: &RequestOption,
-    ) -> Result<CreateImportTaskResp> {
+    ) -> Result<CreateImportTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/import_tasks");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -1744,7 +1752,11 @@ impl<'a> ImportTaskResource<'a> {
         })
     }
 
-    pub async fn get(&self, ticket: &str, option: &RequestOption) -> Result<GetImportTaskResp> {
+    pub async fn get(
+        &self,
+        ticket: &str,
+        option: &RequestOption,
+    ) -> Result<GetImportTaskResp, LarkError> {
         let path = format!("/open-apis/drive/v1/import_tasks/{ticket}");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -1769,7 +1781,7 @@ impl<'a> MediaResource<'a> {
         file_tokens: &[&str],
         extra: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchGetTmpDownloadUrlMediaResp> {
+    ) -> Result<BatchGetTmpDownloadUrlMediaResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/drive/v1/medias/batch_get_tmp_download_url",
@@ -1799,7 +1811,7 @@ impl<'a> MediaResource<'a> {
         file_token: &str,
         extra: Option<&str>,
         option: &RequestOption,
-    ) -> Result<DownloadResp> {
+    ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/drive/v1/medias/{file_token}/download");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -1822,7 +1834,7 @@ impl<'a> MediaResource<'a> {
         &self,
         body: &MediaUploadInfo,
         option: &RequestOption,
-    ) -> Result<UploadPrepareMediaResp> {
+    ) -> Result<UploadPrepareMediaResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/drive/v1/medias/upload_prepare",
@@ -1843,7 +1855,7 @@ impl<'a> MediaResource<'a> {
         &self,
         body: &UploadFinishMediaReqBody,
         option: &RequestOption,
-    ) -> Result<UploadFinishMediaResp> {
+    ) -> Result<UploadFinishMediaResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/drive/v1/medias/upload_finish",
@@ -1871,7 +1883,7 @@ impl<'a> MediaResource<'a> {
         extra: Option<&str>,
         data: Vec<u8>,
         option: &RequestOption,
-    ) -> Result<UploadAllMediaResp> {
+    ) -> Result<UploadAllMediaResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/medias/upload_all");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let mut fields = vec![
@@ -1931,7 +1943,7 @@ impl<'a> MediaResource<'a> {
         checksum: Option<&str>,
         data: Vec<u8>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/medias/upload_part");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let mut fields = vec![
@@ -1982,7 +1994,7 @@ impl<'a> MetaResource<'a> {
         user_id_type: Option<&str>,
         body: &MetaRequest,
         option: &RequestOption,
-    ) -> Result<BatchQueryMetaResp> {
+    ) -> Result<BatchQueryMetaResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/metas/batch_query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -2011,7 +2023,7 @@ impl<'a> PermissionMemberResource<'a> {
         token_type: &str,
         action: &str,
         option: &RequestOption,
-    ) -> Result<AuthPermissionMemberResp> {
+    ) -> Result<AuthPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/auth");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2034,7 +2046,7 @@ impl<'a> PermissionMemberResource<'a> {
         need_notification: Option<bool>,
         body: &BatchCreatePermissionMemberReqBody,
         option: &RequestOption,
-    ) -> Result<BatchCreatePermissionMemberResp> {
+    ) -> Result<BatchCreatePermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/batch_create");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2063,7 +2075,7 @@ impl<'a> PermissionMemberResource<'a> {
         need_notification: Option<bool>,
         body: &BaseMember,
         option: &RequestOption,
-    ) -> Result<CreatePermissionMemberResp> {
+    ) -> Result<CreatePermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2093,7 +2105,7 @@ impl<'a> PermissionMemberResource<'a> {
         member_type: &str,
         body: &DeletePermissionMemberReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/{member_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2115,7 +2127,7 @@ impl<'a> PermissionMemberResource<'a> {
         fields: Option<&str>,
         perm_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListPermissionMemberResp> {
+    ) -> Result<ListPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2147,7 +2159,7 @@ impl<'a> PermissionMemberResource<'a> {
         old_owner_perm: Option<&str>,
         body: &Owner,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/transfer_owner");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2181,7 +2193,7 @@ impl<'a> PermissionMemberResource<'a> {
         need_notification: Option<bool>,
         body: &BaseMember,
         option: &RequestOption,
-    ) -> Result<UpdatePermissionMemberResp> {
+    ) -> Result<UpdatePermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/{member_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2214,7 +2226,7 @@ impl<'a> PermissionPublicResource<'a> {
         token: &str,
         token_type: &str,
         option: &RequestOption,
-    ) -> Result<GetPermissionPublicV1Resp> {
+    ) -> Result<GetPermissionPublicV1Resp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public");
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2238,7 +2250,7 @@ impl<'a> PermissionPublicResource<'a> {
         token_type: &str,
         body: &PermissionPublicV1,
         option: &RequestOption,
-    ) -> Result<PatchPermissionPublicV1Resp> {
+    ) -> Result<PatchPermissionPublicV1Resp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public");
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2268,7 +2280,7 @@ impl<'a> PermissionPublicPasswordResource<'a> {
         token: &str,
         token_type: &str,
         option: &RequestOption,
-    ) -> Result<CreatePermissionPublicPasswordResp> {
+    ) -> Result<CreatePermissionPublicPasswordResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public/password");
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2291,7 +2303,7 @@ impl<'a> PermissionPublicPasswordResource<'a> {
         token: &str,
         token_type: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public/password");
         let mut api_req = ApiReq::new(http::Method::DELETE, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -2309,7 +2321,7 @@ impl<'a> PermissionPublicPasswordResource<'a> {
         token: &str,
         token_type: &str,
         option: &RequestOption,
-    ) -> Result<UpdatePermissionPublicPasswordResp> {
+    ) -> Result<UpdatePermissionPublicPasswordResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public/password");
         let mut api_req = ApiReq::new(http::Method::PUT, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];

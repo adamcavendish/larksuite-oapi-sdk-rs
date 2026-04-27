@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -152,7 +152,7 @@ impl<'a> AccessTokenResource<'a> {
         &self,
         body: &CreateAccessTokenReqBody,
         option: &RequestOption,
-    ) -> Result<CreateAccessTokenResp> {
+    ) -> Result<CreateAccessTokenResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/authen/v1/access_token");
         api_req.supported_access_token_types = vec![AccessTokenType::App];
         api_req.body = Some(ReqBody::json(body)?);
@@ -176,7 +176,7 @@ impl<'a> OidcAccessTokenResource<'a> {
         &self,
         body: &CreateOidcAccessTokenReqBody,
         option: &RequestOption,
-    ) -> Result<CreateOidcAccessTokenResp> {
+    ) -> Result<CreateOidcAccessTokenResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/authen/v1/oidc/access_token");
         api_req.supported_access_token_types = vec![AccessTokenType::App];
         api_req.body = Some(ReqBody::json(body)?);
@@ -200,7 +200,7 @@ impl<'a> OidcRefreshAccessTokenResource<'a> {
         &self,
         body: &CreateOidcRefreshAccessTokenReqBody,
         option: &RequestOption,
-    ) -> Result<CreateOidcRefreshAccessTokenResp> {
+    ) -> Result<CreateOidcRefreshAccessTokenResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/authen/v1/oidc/refresh_access_token",
@@ -227,7 +227,7 @@ impl<'a> RefreshAccessTokenResource<'a> {
         &self,
         body: &CreateRefreshAccessTokenReqBody,
         option: &RequestOption,
-    ) -> Result<CreateRefreshAccessTokenResp> {
+    ) -> Result<CreateRefreshAccessTokenResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/authen/v1/refresh_access_token",
@@ -250,7 +250,7 @@ pub struct UserInfoResource<'a> {
 
 impl<'a> UserInfoResource<'a> {
     /// Get current user info (requires user_access_token).
-    pub async fn get(&self, option: &RequestOption) -> Result<GetUserInfoResp> {
+    pub async fn get(&self, option: &RequestOption) -> Result<GetUserInfoResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/authen/v1/user_info");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{EmptyRespV2 as EmptyResp, parse_v2};
 use crate::transport;
@@ -65,7 +65,7 @@ impl<'a> UserResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListUserResp> {
+    ) -> Result<ListUserResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/directory/v1/users");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -100,7 +100,7 @@ impl CollaborationRuleResource<'_> {
         target_tenant_key: Option<&str>,
         tenant_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateCollaborationRuleResp> {
+    ) -> Result<CreateCollaborationRuleResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/directory/v1/collaboration_rules",
@@ -129,7 +129,7 @@ impl CollaborationRuleResource<'_> {
         target_tenant_key: Option<&str>,
         tenant_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/collaboration_rules/{collaboration_rule_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -155,7 +155,7 @@ impl CollaborationRuleResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCollaborationRuleResp> {
+    ) -> Result<ListCollaborationRuleResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/directory/v1/collaboration_rules",
@@ -190,7 +190,7 @@ impl CollaborationRuleResource<'_> {
         target_tenant_key: Option<&str>,
         tenant_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/collaboration_rules/{collaboration_rule_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -224,7 +224,7 @@ impl CollaborationTenantResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCollaborationTenantResp> {
+    ) -> Result<ListCollaborationTenantResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/directory/v1/collaboration_tenants",
@@ -268,7 +268,7 @@ impl ShareEntityResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListShareEntityResp> {
+    ) -> Result<ListShareEntityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/directory/v1/share_entities");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = target_tenant_key {
@@ -318,7 +318,7 @@ impl DepartmentResource<'_> {
         is_admin_role: Option<bool>,
         tenant_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateDepartmentResp> {
+    ) -> Result<CreateDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/directory/v1/departments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = employee_id_type {
@@ -350,7 +350,7 @@ impl DepartmentResource<'_> {
         is_admin_role: Option<bool>,
         employee_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -377,7 +377,7 @@ impl DepartmentResource<'_> {
         is_admin_role: Option<bool>,
         tenant_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<FilterDepartmentResp> {
+    ) -> Result<FilterDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/directory/v1/departments/filter",
@@ -413,7 +413,7 @@ impl DepartmentResource<'_> {
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
         option: &RequestOption,
-    ) -> Result<MgetDepartmentResp> {
+    ) -> Result<MgetDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/directory/v1/departments/mget",
@@ -447,7 +447,7 @@ impl DepartmentResource<'_> {
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -478,7 +478,7 @@ impl DepartmentResource<'_> {
         is_admin_role: Option<bool>,
         tenant_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SearchDepartmentResp> {
+    ) -> Result<SearchDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/directory/v1/departments/search",
@@ -523,7 +523,7 @@ impl EmployeeResource<'_> {
         is_admin_role: Option<bool>,
         tenant_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateEmployeeResp> {
+    ) -> Result<CreateEmployeeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/directory/v1/employees");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = employee_id_type {
@@ -557,7 +557,7 @@ impl EmployeeResource<'_> {
         is_admin_role: Option<bool>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/employees/{employee_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -590,7 +590,7 @@ impl EmployeeResource<'_> {
         is_admin_role: Option<bool>,
         tenant_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<FilterEmployeeResp> {
+    ) -> Result<FilterEmployeeResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/directory/v1/employees/filter",
@@ -626,7 +626,7 @@ impl EmployeeResource<'_> {
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<MgetEmployeeResp> {
+    ) -> Result<MgetEmployeeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/directory/v1/employees/mget");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = is_admin_role {
@@ -657,7 +657,7 @@ impl EmployeeResource<'_> {
         is_admin_role: Option<bool>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/employees/{employee_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -688,7 +688,7 @@ impl EmployeeResource<'_> {
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/employees/{employee_id}/regular");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -721,7 +721,7 @@ impl EmployeeResource<'_> {
         is_admin_role: Option<bool>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/employees/{employee_id}/resurrect");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -754,7 +754,7 @@ impl EmployeeResource<'_> {
         is_admin_role: Option<bool>,
         tenant_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SearchEmployeeResp> {
+    ) -> Result<SearchEmployeeResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/directory/v1/employees/search",
@@ -791,7 +791,7 @@ impl EmployeeResource<'_> {
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/employees/{employee_id}/to_be_resigned");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];

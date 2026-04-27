@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
@@ -65,7 +65,7 @@ impl<'a> CardInstanceResource<'a> {
         &self,
         body: &CreateCardInstanceReqBody,
         option: &RequestOption,
-    ) -> Result<CreateCardInstanceResp> {
+    ) -> Result<CreateCardInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/cardkit/v1/card_instances");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -83,7 +83,7 @@ impl<'a> CardInstanceResource<'a> {
         instance_id: &str,
         body: &UpdateCardInstanceReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/card_instances/{instance_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -106,7 +106,7 @@ impl CardResource<'_> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateCardResp> {
+    ) -> Result<CreateCardResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/cardkit/v1/cards");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -125,7 +125,7 @@ impl CardResource<'_> {
         card_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateCardResp> {
+    ) -> Result<UpdateCardResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{card_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -145,7 +145,7 @@ impl CardResource<'_> {
         card_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchUpdateCardResp> {
+    ) -> Result<BatchUpdateCardResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{card_id}/batch_update");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -164,7 +164,7 @@ impl CardResource<'_> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<IdConvertCardResp> {
+    ) -> Result<IdConvertCardResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/cardkit/v1/cards/id_convert");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -183,7 +183,7 @@ impl CardResource<'_> {
         card_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<SettingsCardResp> {
+    ) -> Result<SettingsCardResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{card_id}/settings");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -209,7 +209,7 @@ impl CardElementResource<'_> {
         card_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateCardElementResp> {
+    ) -> Result<CreateCardElementResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -230,7 +230,7 @@ impl CardElementResource<'_> {
         element_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateCardElementResp> {
+    ) -> Result<UpdateCardElementResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements/{element_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -250,7 +250,7 @@ impl CardElementResource<'_> {
         card_id: &str,
         element_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteCardElementResp> {
+    ) -> Result<DeleteCardElementResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements/{element_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -269,7 +269,7 @@ impl CardElementResource<'_> {
         element_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchCardElementResp> {
+    ) -> Result<PatchCardElementResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements/{element_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -290,7 +290,7 @@ impl CardElementResource<'_> {
         element_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ContentCardElementResp> {
+    ) -> Result<ContentCardElementResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements/{element_id}/content");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];

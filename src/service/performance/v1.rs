@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::transport;
 
@@ -60,7 +60,7 @@ impl<'a> ActivityResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListActivityResp> {
+    ) -> Result<ListActivityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/performance/v1/activities");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {

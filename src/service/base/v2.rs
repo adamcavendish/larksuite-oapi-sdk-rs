@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -49,7 +49,7 @@ impl AppRoleV2Resource<'_> {
         app_token: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateAppRoleV2Resp> {
+    ) -> Result<CreateAppRoleV2Resp, LarkError> {
         let path = format!("/open-apis/base/v2/apps/{app_token}/roles");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -70,7 +70,7 @@ impl AppRoleV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAppRoleV2Resp> {
+    ) -> Result<ListAppRoleV2Resp, LarkError> {
         let path = format!("/open-apis/base/v2/apps/{app_token}/roles");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -96,7 +96,7 @@ impl AppRoleV2Resource<'_> {
         role_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateAppRoleV2Resp> {
+    ) -> Result<UpdateAppRoleV2Resp, LarkError> {
         let path = format!("/open-apis/base/v2/apps/{app_token}/roles/{role_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -65,7 +65,7 @@ impl InterviewRecordV2Resource<'_> {
         interview_record_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetInterviewRecordV2Resp> {
+    ) -> Result<GetInterviewRecordV2Resp, LarkError> {
         let path = format!("/open-apis/hire/v2/interview_records/{interview_record_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -89,7 +89,7 @@ impl InterviewRecordV2Resource<'_> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListInterviewRecordV2Resp> {
+    ) -> Result<ListInterviewRecordV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v2/interview_records");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = interview_id {
@@ -128,7 +128,7 @@ impl TalentV2Resource<'_> {
         talent_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetTalentV2Resp> {
+    ) -> Result<GetTalentV2Resp, LarkError> {
         let path = format!("/open-apis/hire/v2/talents/{talent_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];

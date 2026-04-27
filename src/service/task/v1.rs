@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -308,7 +308,7 @@ impl<'a> TaskResource<'a> {
         body: &CreateTaskReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateTaskResp> {
+    ) -> Result<CreateTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/task/v1/tasks");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -329,7 +329,7 @@ impl<'a> TaskResource<'a> {
         task_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetTaskResp> {
+    ) -> Result<GetTaskResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -351,7 +351,7 @@ impl<'a> TaskResource<'a> {
         body: &PatchTaskReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchTaskResp> {
+    ) -> Result<PatchTaskResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -368,7 +368,11 @@ impl<'a> TaskResource<'a> {
         })
     }
 
-    pub async fn delete(&self, task_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        task_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -380,7 +384,11 @@ impl<'a> TaskResource<'a> {
         })
     }
 
-    pub async fn complete(&self, task_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn complete(
+        &self,
+        task_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/complete");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -392,7 +400,11 @@ impl<'a> TaskResource<'a> {
         })
     }
 
-    pub async fn uncomplete(&self, task_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn uncomplete(
+        &self,
+        task_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/uncomplete");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -414,7 +426,7 @@ impl<'a> TaskResource<'a> {
         task_completed: Option<bool>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListTaskResp> {
+    ) -> Result<ListTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v1/tasks");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -450,7 +462,7 @@ impl<'a> TaskResource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchDeleteCollaboratorResp> {
+    ) -> Result<BatchDeleteCollaboratorResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/batch_delete_collaborator");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -473,7 +485,7 @@ impl<'a> TaskResource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchDeleteFollowerResp> {
+    ) -> Result<BatchDeleteFollowerResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/batch_delete_follower");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -502,7 +514,7 @@ impl<'a> TaskCommentResource<'a> {
         body: &CreateCommentReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateCommentResp> {
+    ) -> Result<CreateCommentResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/comments");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -525,7 +537,7 @@ impl<'a> TaskCommentResource<'a> {
         comment_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetCommentResp> {
+    ) -> Result<GetCommentResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/comments/{comment_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -548,7 +560,7 @@ impl<'a> TaskCommentResource<'a> {
         body: &UpdateCommentReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<UpdateCommentResp> {
+    ) -> Result<UpdateCommentResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/comments/{comment_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -570,7 +582,7 @@ impl<'a> TaskCommentResource<'a> {
         task_id: &str,
         comment_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/comments/{comment_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -589,7 +601,7 @@ impl<'a> TaskCommentResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCommentResp> {
+    ) -> Result<ListCommentResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/comments");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -623,7 +635,7 @@ impl<'a> TaskFollowerResource<'a> {
         body: &CreateFollowerReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateFollowerResp> {
+    ) -> Result<CreateFollowerResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/followers");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -646,7 +658,7 @@ impl<'a> TaskFollowerResource<'a> {
         follower_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/followers/{follower_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -668,7 +680,7 @@ impl<'a> TaskFollowerResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListFollowerResp> {
+    ) -> Result<ListFollowerResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/followers");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -702,7 +714,7 @@ impl<'a> TaskCollaboratorResource<'a> {
         body: &CreateCollaboratorReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateCollaboratorResp> {
+    ) -> Result<CreateCollaboratorResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/collaborators");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -725,7 +737,7 @@ impl<'a> TaskCollaboratorResource<'a> {
         collaborator_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/collaborators/{collaborator_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -747,7 +759,7 @@ impl<'a> TaskCollaboratorResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCollaboratorResp> {
+    ) -> Result<ListCollaboratorResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/collaborators");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -780,7 +792,7 @@ impl<'a> TaskReminderResource<'a> {
         task_id: &str,
         body: &CreateReminderReqBody,
         option: &RequestOption,
-    ) -> Result<CreateReminderResp> {
+    ) -> Result<CreateReminderResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -799,7 +811,7 @@ impl<'a> TaskReminderResource<'a> {
         task_id: &str,
         reminder_id: &str,
         option: &RequestOption,
-    ) -> Result<GetReminderResp> {
+    ) -> Result<GetReminderResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders/{reminder_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -818,7 +830,7 @@ impl<'a> TaskReminderResource<'a> {
         reminder_id: &str,
         body: &UpdateReminderReqBody,
         option: &RequestOption,
-    ) -> Result<UpdateReminderResp> {
+    ) -> Result<UpdateReminderResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders/{reminder_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -837,7 +849,7 @@ impl<'a> TaskReminderResource<'a> {
         task_id: &str,
         reminder_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders/{reminder_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -855,7 +867,7 @@ impl<'a> TaskReminderResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListReminderResp> {
+    ) -> Result<ListReminderResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];

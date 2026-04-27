@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
@@ -163,7 +163,7 @@ impl<'a> AcsUserResource<'a> {
         user_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetAcsUserResp> {
+    ) -> Result<GetAcsUserResp, LarkError> {
         let path = format!("/open-apis/acs/v1/users/{user_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -185,7 +185,7 @@ impl<'a> AcsUserResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAcsUserResp> {
+    ) -> Result<ListAcsUserResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/acs/v1/users");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -212,7 +212,7 @@ impl<'a> AcsUserResource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/acs/v1/users/{user_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -244,7 +244,7 @@ impl<'a> AccessRecordResource<'a> {
         device_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAccessRecordResp> {
+    ) -> Result<ListAccessRecordResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/acs/v1/access_records");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -280,7 +280,7 @@ pub struct DeviceResource<'a> {
 }
 
 impl<'a> DeviceResource<'a> {
-    pub async fn list(&self, option: &RequestOption) -> Result<ListDeviceResp> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListDeviceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/acs/v1/devices");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =
@@ -306,7 +306,7 @@ impl RuleExternalResource<'_> {
         rule_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateRuleExternalResp> {
+    ) -> Result<CreateRuleExternalResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/acs/v1/rule_external");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = rule_id {
@@ -330,7 +330,7 @@ impl RuleExternalResource<'_> {
         &self,
         rule_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteRuleExternalResp> {
+    ) -> Result<DeleteRuleExternalResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::DELETE, "/open-apis/acs/v1/rule_external");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.query_params.set("rule_id", rule_id);
@@ -347,7 +347,7 @@ impl RuleExternalResource<'_> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<DeviceBindRuleExternalResp> {
+    ) -> Result<DeviceBindRuleExternalResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/acs/v1/rule_external/device_bind",
@@ -369,7 +369,7 @@ impl RuleExternalResource<'_> {
         device_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetRuleExternalResp> {
+    ) -> Result<GetRuleExternalResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/acs/v1/rule_external");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = device_id {
@@ -400,7 +400,7 @@ impl AccessRecordAccessPhotoResource<'_> {
         &self,
         access_record_id: &str,
         option: &RequestOption,
-    ) -> Result<GetAccessRecordAccessPhotoResp> {
+    ) -> Result<GetAccessRecordAccessPhotoResp, LarkError> {
         let path = format!("/open-apis/acs/v1/access_records/{access_record_id}/access_photo");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -429,7 +429,7 @@ impl UserFaceResource<'_> {
         is_cropped: Option<bool>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetUserFaceResp> {
+    ) -> Result<GetUserFaceResp, LarkError> {
         let path = format!("/open-apis/acs/v1/users/{user_id}/face");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -455,7 +455,7 @@ impl UserFaceResource<'_> {
         body: &UpdateUserFaceReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<UpdateUserFaceResp> {
+    ) -> Result<UpdateUserFaceResp, LarkError> {
         let path = format!("/open-apis/acs/v1/users/{user_id}/face");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -486,7 +486,7 @@ impl VisitorResource<'_> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateVisitorResp> {
+    ) -> Result<CreateVisitorResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/acs/v1/visitors");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -508,7 +508,7 @@ impl VisitorResource<'_> {
         visitor_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<DeleteVisitorResp> {
+    ) -> Result<DeleteVisitorResp, LarkError> {
         let path = format!("/open-apis/acs/v1/visitors/{visitor_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::transport;
 
@@ -92,7 +92,7 @@ impl<'a> FileLikeResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<FileLikeListResp> {
+    ) -> Result<FileLikeListResp, LarkError> {
         let path = format!("/open-apis/drive/v2/files/{file_token}/likes");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -125,7 +125,7 @@ impl<'a> PermissionPublicV2Resource<'a> {
         token: &str,
         r#type: &str,
         option: &RequestOption,
-    ) -> Result<GetPermissionPublicV2Resp> {
+    ) -> Result<GetPermissionPublicV2Resp, LarkError> {
         let path = format!("/open-apis/drive/v2/permissions/{token}/public");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -145,7 +145,7 @@ impl<'a> PermissionPublicV2Resource<'a> {
         r#type: &str,
         body: &PatchPermissionPublicV2ReqBody,
         option: &RequestOption,
-    ) -> Result<PatchPermissionPublicV2Resp> {
+    ) -> Result<PatchPermissionPublicV2Resp, LarkError> {
         use crate::req::ReqBody;
         let path = format!("/open-apis/drive/v2/permissions/{token}/public");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);

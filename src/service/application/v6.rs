@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -81,7 +81,7 @@ impl<'a> AppBadgeResource<'a> {
         body: &serde_json::Value,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SetAppBadgeResp> {
+    ) -> Result<SetAppBadgeResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/application/v6/app_badge/set",
@@ -114,7 +114,7 @@ impl<'a> AppRecommendRuleResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAppRecommendRuleResp> {
+    ) -> Result<ListAppRecommendRuleResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/application/v6/app_recommend_rules",
@@ -155,7 +155,7 @@ impl<'a> ApplicationResource<'a> {
         department_id_type: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ContactsRangeConfigurationApplicationResp> {
+    ) -> Result<ContactsRangeConfigurationApplicationResp, LarkError> {
         let path =
             format!("/open-apis/application/v6/applications/{app_id}/contacts_range_configuration");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -189,7 +189,7 @@ impl<'a> ApplicationResource<'a> {
         lang: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetApplicationResp> {
+    ) -> Result<GetApplicationResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -221,7 +221,7 @@ impl<'a> ApplicationResource<'a> {
         payment_type: Option<i32>,
         owner_type: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListApplicationResp> {
+    ) -> Result<ListApplicationResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/application/v6/applications");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -262,7 +262,7 @@ impl<'a> ApplicationResource<'a> {
         lang: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchApplicationResp> {
+    ) -> Result<PatchApplicationResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -289,7 +289,7 @@ impl<'a> ApplicationResource<'a> {
         page_size: Option<i32>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<UnderauditlistApplicationResp> {
+    ) -> Result<UnderauditlistApplicationResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/application/v6/applications/underauditlist",
@@ -331,7 +331,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
         department_id_type: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<DepartmentOverviewApplicationAppUsageResp> {
+    ) -> Result<DepartmentOverviewApplicationAppUsageResp, LarkError> {
         let path = format!(
             "/open-apis/application/v6/applications/{app_id}/app_usage/department_overview"
         );
@@ -358,7 +358,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
         department_id_type: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<MessagePushOverviewApplicationAppUsageResp> {
+    ) -> Result<MessagePushOverviewApplicationAppUsageResp, LarkError> {
         let path = format!(
             "/open-apis/application/v6/applications/{app_id}/app_usage/message_push_overview"
         );
@@ -385,7 +385,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
         department_id_type: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<OverviewApplicationAppUsageResp> {
+    ) -> Result<OverviewApplicationAppUsageResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/app_usage/overview");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -417,7 +417,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
         department_id_type: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ContactsRangeSuggestApplicationAppVersionResp> {
+    ) -> Result<ContactsRangeSuggestApplicationAppVersionResp, LarkError> {
         let path = format!(
             "/open-apis/application/v6/applications/{app_id}/app_versions/{version_id}/contacts_range_suggest"
         );
@@ -447,7 +447,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
         lang: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetApplicationAppVersionResp> {
+    ) -> Result<GetApplicationAppVersionResp, LarkError> {
         let path =
             format!("/open-apis/application/v6/applications/{app_id}/app_versions/{version_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -479,7 +479,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
         order: Option<i32>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListApplicationAppVersionResp> {
+    ) -> Result<ListApplicationAppVersionResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/app_versions");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -519,7 +519,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
         reject_reason: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchApplicationAppVersionResp> {
+    ) -> Result<PatchApplicationAppVersionResp, LarkError> {
         let path =
             format!("/open-apis/application/v6/applications/{app_id}/app_versions/{version_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -556,7 +556,7 @@ impl<'a> ApplicationCollaboratorsResource<'a> {
         app_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetApplicationCollaboratorsResp> {
+    ) -> Result<GetApplicationCollaboratorsResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/collaborators");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -580,7 +580,7 @@ impl<'a> ApplicationCollaboratorsResource<'a> {
         user_id_type: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateApplicationCollaboratorsResp> {
+    ) -> Result<UpdateApplicationCollaboratorsResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/collaborators");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -612,7 +612,7 @@ impl<'a> ApplicationContactsRangeResource<'a> {
         department_id_type: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchApplicationContactsRangeResp> {
+    ) -> Result<PatchApplicationContactsRangeResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/contacts_range");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -652,7 +652,7 @@ impl<'a> ApplicationFeedbackResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListApplicationFeedbackResp> {
+    ) -> Result<ListApplicationFeedbackResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/feedbacks");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -697,7 +697,7 @@ impl<'a> ApplicationFeedbackResource<'a> {
         status: Option<i32>,
         operator_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchApplicationFeedbackResp> {
+    ) -> Result<PatchApplicationFeedbackResp, LarkError> {
         let path =
             format!("/open-apis/application/v6/applications/{app_id}/feedbacks/{feedback_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -733,7 +733,7 @@ impl<'a> ApplicationManagementResource<'a> {
         app_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateApplicationManagementResp> {
+    ) -> Result<UpdateApplicationManagementResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/management");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -761,7 +761,7 @@ impl<'a> ApplicationOwnerResource<'a> {
         user_id_type: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateApplicationOwnerResp> {
+    ) -> Result<UpdateApplicationOwnerResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/owner");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -793,7 +793,7 @@ impl<'a> ApplicationVisibilityResource<'a> {
         department_id_type: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CheckWhiteBlackListApplicationVisibilityResp> {
+    ) -> Result<CheckWhiteBlackListApplicationVisibilityResp, LarkError> {
         let path = format!(
             "/open-apis/application/v6/applications/{app_id}/visibility/check_white_black_list"
         );
@@ -824,7 +824,7 @@ impl<'a> ApplicationVisibilityResource<'a> {
         user_id_type: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchApplicationVisibilityResp> {
+    ) -> Result<PatchApplicationVisibilityResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/visibility");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -852,7 +852,7 @@ pub struct ScopeResource<'a> {
 
 impl<'a> ScopeResource<'a> {
     /// Apply scope — POST /open-apis/application/v6/scopes/apply
-    pub async fn apply(&self, option: &RequestOption) -> Result<ApplyScopeResp> {
+    pub async fn apply(&self, option: &RequestOption) -> Result<ApplyScopeResp, LarkError> {
         let api_req = ApiReq::new(http::Method::POST, "/open-apis/application/v6/scopes/apply");
         let mut api_req = api_req;
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -867,7 +867,7 @@ impl<'a> ScopeResource<'a> {
     }
 
     /// List scopes — GET /open-apis/application/v6/scopes
-    pub async fn list(&self, option: &RequestOption) -> Result<ListScopeResp> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListScopeResp, LarkError> {
         let api_req = ApiReq::new(http::Method::GET, "/open-apis/application/v6/scopes");
         let mut api_req = api_req;
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];

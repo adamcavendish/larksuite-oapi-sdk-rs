@@ -18,12 +18,12 @@ pub trait Cache: Send + Sync {
         key: &str,
         value: &str,
         ttl: Duration,
-    ) -> Pin<Box<dyn Future<Output = crate::Result<()>> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = Result<(), crate::LarkError>> + Send + '_>>;
 
     fn get(
         &self,
         key: &str,
-    ) -> Pin<Box<dyn Future<Output = crate::Result<Option<String>>> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = Result<Option<String>, crate::LarkError>> + Send + '_>>;
 }
 
 struct CacheEntry {
@@ -70,7 +70,7 @@ impl Cache for LocalCache {
         key: &str,
         value: &str,
         ttl: Duration,
-    ) -> Pin<Box<dyn Future<Output = crate::Result<()>> + Send + '_>> {
+    ) -> Pin<Box<dyn Future<Output = Result<(), crate::LarkError>> + Send + '_>> {
         let key = key.to_string();
         let value = value.to_string();
         Box::pin(async move {
@@ -89,7 +89,7 @@ impl Cache for LocalCache {
     fn get(
         &self,
         key: &str,
-    ) -> Pin<Box<dyn Future<Output = crate::Result<Option<String>>> + Send + '_>> {
+    ) -> Pin<Box<dyn Future<Output = Result<Option<String>, crate::LarkError>> + Send + '_>> {
         let key = key.to_string();
         Box::pin(async move {
             let mut store = self.store.lock().unwrap_or_else(|p| p.into_inner());

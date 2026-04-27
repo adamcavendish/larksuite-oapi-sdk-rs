@@ -3,7 +3,7 @@ use common::{http_response, mock_server};
 
 use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::cache::LocalCache;
-use larksuite_oapi_sdk_rs::error::Error;
+use larksuite_oapi_sdk_rs::error::LarkError;
 use larksuite_oapi_sdk_rs::token::{AppTicketManager, TokenManager};
 use std::sync::Arc;
 
@@ -37,7 +37,7 @@ async fn token_marketplace_requires_app_ticket() {
         .await
         .unwrap_err();
     assert!(
-        matches!(err, Error::Token(_)),
+        matches!(err, LarkError::Token(_)),
         "expected Token error, got {err:?}"
     );
 }
@@ -57,7 +57,7 @@ async fn token_marketplace_tenant_requires_app_ticket() {
         .await
         .unwrap_err();
     assert!(
-        matches!(err, Error::Token(_)),
+        matches!(err, LarkError::Token(_)),
         "expected Token error, got {err:?}"
     );
 }
@@ -162,7 +162,7 @@ async fn token_request_non_200_returns_error() {
         .await
         .unwrap_err();
     assert!(
-        matches!(err, Error::Token(_)),
+        matches!(err, LarkError::Token(_)),
         "expected Token error, got {err:?}"
     );
 }

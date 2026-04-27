@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -62,7 +62,7 @@ impl<'a> VerificationTaskResource<'a> {
         user_id_type: Option<&str>,
         body: &CreateVerificationTaskReqBody,
         option: &RequestOption,
-    ) -> Result<CreateVerificationTaskResp> {
+    ) -> Result<CreateVerificationTaskResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/verification/v1/verification_tasks",
@@ -86,7 +86,7 @@ impl<'a> VerificationTaskResource<'a> {
         &self,
         task_id: &str,
         option: &RequestOption,
-    ) -> Result<GetVerificationTaskResp> {
+    ) -> Result<GetVerificationTaskResp, LarkError> {
         let path = format!("/open-apis/verification/v1/verification_tasks/{task_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -107,7 +107,7 @@ pub struct VerificationResource<'a> {
 }
 
 impl<'a> VerificationResource<'a> {
-    pub async fn get(&self, option: &RequestOption) -> Result<GetVerificationResp> {
+    pub async fn get(&self, option: &RequestOption) -> Result<GetVerificationResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/verification/v1/verification");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =

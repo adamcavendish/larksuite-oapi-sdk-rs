@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -81,7 +81,7 @@ impl<'a> SystemStatusResource<'a> {
         &self,
         body: &CreateSystemStatusReqBody,
         option: &RequestOption,
-    ) -> Result<CreateSystemStatusResp> {
+    ) -> Result<CreateSystemStatusResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/personal_settings/v1/system_statuses",
@@ -101,7 +101,7 @@ impl<'a> SystemStatusResource<'a> {
         &self,
         system_status_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/personal_settings/v1/system_statuses/{system_status_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -118,7 +118,7 @@ impl<'a> SystemStatusResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSystemStatusResp> {
+    ) -> Result<ListSystemStatusResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/personal_settings/v1/system_statuses",
@@ -145,7 +145,7 @@ impl<'a> SystemStatusResource<'a> {
         body: &BatchOpenSystemStatusReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchOpenSystemStatusResp> {
+    ) -> Result<BatchOpenSystemStatusResp, LarkError> {
         let path = format!(
             "/open-apis/personal_settings/v1/system_statuses/{system_status_id}/batch_open"
         );
@@ -170,7 +170,7 @@ impl<'a> SystemStatusResource<'a> {
         body: &BatchOpenSystemStatusReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchOpenSystemStatusResp> {
+    ) -> Result<BatchOpenSystemStatusResp, LarkError> {
         let path = format!(
             "/open-apis/personal_settings/v1/system_statuses/{system_status_id}/batch_close"
         );
@@ -194,7 +194,7 @@ impl<'a> SystemStatusResource<'a> {
         system_status_id: &str,
         body: &CreateSystemStatusReqBody,
         option: &RequestOption,
-    ) -> Result<PatchSystemStatusResp> {
+    ) -> Result<PatchSystemStatusResp, LarkError> {
         let path = format!("/open-apis/personal_settings/v1/system_statuses/{system_status_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];

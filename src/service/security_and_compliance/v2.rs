@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -55,7 +55,7 @@ impl DeviceApplyRecordV2Resource<'_> {
         device_apply_record_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateDeviceApplyRecordV2Resp> {
+    ) -> Result<UpdateDeviceApplyRecordV2Resp, LarkError> {
         let path = format!(
             "/open-apis/security_and_compliance/v2/device_apply_records/{device_apply_record_id}"
         );
@@ -82,7 +82,7 @@ impl DeviceRecordV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateDeviceRecordV2Resp> {
+    ) -> Result<CreateDeviceRecordV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/security_and_compliance/v2/device_records",
@@ -103,7 +103,7 @@ impl DeviceRecordV2Resource<'_> {
         &self,
         device_record_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteDeviceRecordV2Resp> {
+    ) -> Result<DeleteDeviceRecordV2Resp, LarkError> {
         let path =
             format!("/open-apis/security_and_compliance/v2/device_records/{device_record_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -121,7 +121,7 @@ impl DeviceRecordV2Resource<'_> {
         &self,
         device_record_id: &str,
         option: &RequestOption,
-    ) -> Result<GetDeviceRecordV2Resp> {
+    ) -> Result<GetDeviceRecordV2Resp, LarkError> {
         let path =
             format!("/open-apis/security_and_compliance/v2/device_records/{device_record_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -141,7 +141,7 @@ impl DeviceRecordV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListDeviceRecordV2Resp> {
+    ) -> Result<ListDeviceRecordV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/security_and_compliance/v2/device_records",
@@ -163,7 +163,7 @@ impl DeviceRecordV2Resource<'_> {
         })
     }
 
-    pub async fn mine(&self, option: &RequestOption) -> Result<MineDeviceRecordV2Resp> {
+    pub async fn mine(&self, option: &RequestOption) -> Result<MineDeviceRecordV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/security_and_compliance/v2/device_records/mine",
@@ -184,7 +184,7 @@ impl DeviceRecordV2Resource<'_> {
         device_record_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateDeviceRecordV2Resp> {
+    ) -> Result<UpdateDeviceRecordV2Resp, LarkError> {
         let path =
             format!("/open-apis/security_and_compliance/v2/device_records/{device_record_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);

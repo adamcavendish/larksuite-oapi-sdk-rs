@@ -155,7 +155,7 @@ async fn callback_handler_returns_custom_response() {
 #[tokio::test]
 async fn event_handler_error_returns_500() {
     let dispatcher = EventDispatcher::new("", "").on_event("test.event_v1", |_val| async {
-        Err(larksuite_oapi_sdk_rs::error::Error::Event(
+        Err(larksuite_oapi_sdk_rs::error::LarkError::Event(
             "handler failed".to_string(),
         ))
     });
@@ -775,7 +775,7 @@ async fn card_handler_invalid_json_returns_500() {
 #[tokio::test]
 async fn card_handler_error_returns_500() {
     let handler = CardActionHandler::new("", "", |_action: CardAction| async {
-        Err(larksuite_oapi_sdk_rs::error::Error::Event(
+        Err(larksuite_oapi_sdk_rs::error::LarkError::Event(
             "handler failed".to_string(),
         ))
     })

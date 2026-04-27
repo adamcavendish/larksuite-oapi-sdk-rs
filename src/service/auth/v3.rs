@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::config::Config;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
 use crate::transport;
@@ -76,7 +76,7 @@ impl<'a> AppAccessTokenResource<'a> {
         &self,
         body: &CreateAppAccessTokenReqBody,
         option: &RequestOption,
-    ) -> Result<RawTokenResp> {
+    ) -> Result<RawTokenResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/auth/v3/app_access_token");
         api_req.supported_access_token_types = vec![];
         api_req.body = Some(ReqBody::json(body)?);
@@ -93,7 +93,7 @@ impl<'a> AppAccessTokenResource<'a> {
         &self,
         body: &InternalAppAccessTokenReqBody,
         option: &RequestOption,
-    ) -> Result<RawTokenResp> {
+    ) -> Result<RawTokenResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/auth/v3/app_access_token/internal",
@@ -119,7 +119,7 @@ impl<'a> AppTicketResource<'a> {
         &self,
         body: &ResendAppTicketReqBody,
         option: &RequestOption,
-    ) -> Result<RawTokenResp> {
+    ) -> Result<RawTokenResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/auth/v3/app_ticket/resend");
         api_req.supported_access_token_types = vec![];
         api_req.body = Some(ReqBody::json(body)?);
@@ -142,7 +142,7 @@ impl<'a> TenantAccessTokenResource<'a> {
         &self,
         body: &CreateTenantAccessTokenReqBody,
         option: &RequestOption,
-    ) -> Result<RawTokenResp> {
+    ) -> Result<RawTokenResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/auth/v3/tenant_access_token");
         api_req.supported_access_token_types = vec![];
         api_req.body = Some(ReqBody::json(body)?);
@@ -159,7 +159,7 @@ impl<'a> TenantAccessTokenResource<'a> {
         &self,
         body: &InternalTenantAccessTokenReqBody,
         option: &RequestOption,
-    ) -> Result<RawTokenResp> {
+    ) -> Result<RawTokenResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/auth/v3/tenant_access_token/internal",

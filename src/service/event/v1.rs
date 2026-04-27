@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::transport;
 
@@ -25,7 +25,7 @@ pub struct OutboundIpResource<'a> {
 }
 
 impl<'a> OutboundIpResource<'a> {
-    pub async fn list(&self, option: &RequestOption) -> Result<GetOutboundIpResp> {
+    pub async fn list(&self, option: &RequestOption) -> Result<GetOutboundIpResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/event/v1/outbound_ip");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let (api_resp, raw) =

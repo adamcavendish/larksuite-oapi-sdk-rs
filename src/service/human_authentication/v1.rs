@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -41,7 +41,7 @@ impl<'a> IdentityResource<'a> {
         user_id_type: Option<&str>,
         body: &CreateIdentityReqBody,
         option: &RequestOption,
-    ) -> Result<CreateIdentityResp> {
+    ) -> Result<CreateIdentityResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/human_authentication/v1/identities",

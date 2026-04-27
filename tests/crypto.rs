@@ -5,9 +5,9 @@ use larksuite_oapi_sdk_rs::crypto::{
 #[test]
 fn crate_root_crypto_reexports() {
     let _ = larksuite_oapi_sdk_rs::event_encrypt
-        as fn(&str, &str) -> larksuite_oapi_sdk_rs::Result<String>;
+        as fn(&str, &str) -> Result<String, larksuite_oapi_sdk_rs::LarkError>;
     let _ = larksuite_oapi_sdk_rs::event_decrypt
-        as fn(&str, &str) -> larksuite_oapi_sdk_rs::Result<String>;
+        as fn(&str, &str) -> Result<String, larksuite_oapi_sdk_rs::LarkError>;
     let _ =
         larksuite_oapi_sdk_rs::verify_signature_sha256 as fn(&str, &str, &str, &[u8], &str) -> bool;
     let _ =

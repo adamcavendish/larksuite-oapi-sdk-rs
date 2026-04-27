@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -386,7 +386,7 @@ impl<'a> EmployeeResource<'a> {
         employment_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetEmployeeResp> {
+    ) -> Result<GetEmployeeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employments/{employment_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -408,7 +408,7 @@ impl<'a> EmployeeResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListEmployeeResp> {
+    ) -> Result<ListEmployeeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/employments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -440,7 +440,7 @@ impl<'a> DepartmentResource<'a> {
         department_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetDepartmentResp> {
+    ) -> Result<GetDepartmentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -462,7 +462,7 @@ impl<'a> DepartmentResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListDepartmentResp> {
+    ) -> Result<ListDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/departments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -489,7 +489,11 @@ pub struct JobLevelResource<'a> {
 }
 
 impl<'a> JobLevelResource<'a> {
-    pub async fn get(&self, job_level_id: &str, option: &RequestOption) -> Result<GetJobLevelResp> {
+    pub async fn get(
+        &self,
+        job_level_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetJobLevelResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_levels/{job_level_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -507,7 +511,7 @@ impl<'a> JobLevelResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListJobLevelResp> {
+    ) -> Result<ListJobLevelResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/job_levels");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -531,7 +535,11 @@ pub struct CompanyResource<'a> {
 }
 
 impl<'a> CompanyResource<'a> {
-    pub async fn get(&self, company_id: &str, option: &RequestOption) -> Result<GetCompanyResp> {
+    pub async fn get(
+        &self,
+        company_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetCompanyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/companies/{company_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -549,7 +557,7 @@ impl<'a> CompanyResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCompanyResp> {
+    ) -> Result<ListCompanyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/companies");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -571,7 +579,7 @@ impl<'a> CompanyResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateCompanyResp> {
+    ) -> Result<CreateCompanyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/companies");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -589,7 +597,7 @@ impl<'a> CompanyResource<'a> {
         &self,
         company_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteCompanyResp> {
+    ) -> Result<DeleteCompanyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/companies/{company_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -607,7 +615,7 @@ impl<'a> CompanyResource<'a> {
         company_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchCompanyResp> {
+    ) -> Result<PatchCompanyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/companies/{company_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -628,7 +636,11 @@ pub struct LocationResource<'a> {
 }
 
 impl<'a> LocationResource<'a> {
-    pub async fn get(&self, location_id: &str, option: &RequestOption) -> Result<GetLocationResp> {
+    pub async fn get(
+        &self,
+        location_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetLocationResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/locations/{location_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -646,7 +658,7 @@ impl<'a> LocationResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListLocationResp> {
+    ) -> Result<ListLocationResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/locations");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -675,7 +687,7 @@ impl<'a> CurrencyResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCurrencyResp> {
+    ) -> Result<ListCurrencyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/currencies");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -704,7 +716,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListWorkingHoursTypeResp> {
+    ) -> Result<ListWorkingHoursTypeResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/working_hours_types",
@@ -838,7 +850,7 @@ impl<'a> AssignedUserResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<SearchAssignedUserResp> {
+    ) -> Result<SearchAssignedUserResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/assigned_users/search",
@@ -865,7 +877,7 @@ impl<'a> AuthorizationResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AddRoleAssignAuthorizationResp> {
+    ) -> Result<AddRoleAssignAuthorizationResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/authorizations/add_role_assign",
@@ -885,7 +897,7 @@ impl<'a> AuthorizationResource<'a> {
     pub async fn get_by_param(
         &self,
         option: &RequestOption,
-    ) -> Result<GetByParamAuthorizationResp> {
+    ) -> Result<GetByParamAuthorizationResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/authorizations/get_by_param",
@@ -901,7 +913,7 @@ impl<'a> AuthorizationResource<'a> {
         })
     }
 
-    pub async fn query(&self, option: &RequestOption) -> Result<QueryAuthorizationResp> {
+    pub async fn query(&self, option: &RequestOption) -> Result<QueryAuthorizationResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/authorizations/query",
@@ -921,7 +933,7 @@ impl<'a> AuthorizationResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<RemoveRoleAssignAuthorizationResp> {
+    ) -> Result<RemoveRoleAssignAuthorizationResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/authorizations/remove_role_assign",
@@ -942,7 +954,7 @@ impl<'a> AuthorizationResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateRoleAssignAuthorizationResp> {
+    ) -> Result<UpdateRoleAssignAuthorizationResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/authorizations/update_role_assign",
@@ -969,7 +981,7 @@ impl<'a> CommonDataIdResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ConvertCommonDataIdResp> {
+    ) -> Result<ConvertCommonDataIdResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/common_data/id/convert",
@@ -996,7 +1008,7 @@ impl<'a> CommonDataMetaDataResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<AddEnumOptionCommonDataMetaDataResp> {
+    ) -> Result<AddEnumOptionCommonDataMetaDataResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/common_data/meta_data/add_enum_option",
@@ -1017,7 +1029,7 @@ impl<'a> CommonDataMetaDataResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<EditEnumOptionCommonDataMetaDataResp> {
+    ) -> Result<EditEnumOptionCommonDataMetaDataResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/common_data/meta_data/edit_enum_option",
@@ -1043,7 +1055,7 @@ impl<'a> CompensationStandardResource<'a> {
     pub async fn match_standard(
         &self,
         option: &RequestOption,
-    ) -> Result<MatchCompensationStandardResp> {
+    ) -> Result<MatchCompensationStandardResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/compensation_standards/match",
@@ -1069,7 +1081,7 @@ impl<'a> ContractResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateContractResp> {
+    ) -> Result<CreateContractResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/contracts");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -1087,7 +1099,7 @@ impl<'a> ContractResource<'a> {
         &self,
         contract_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteContractResp> {
+    ) -> Result<DeleteContractResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/contracts/{contract_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1100,7 +1112,11 @@ impl<'a> ContractResource<'a> {
         })
     }
 
-    pub async fn get(&self, contract_id: &str, option: &RequestOption) -> Result<GetContractResp> {
+    pub async fn get(
+        &self,
+        contract_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetContractResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/contracts/{contract_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1119,7 +1135,7 @@ impl<'a> ContractResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListContractResp> {
+    ) -> Result<ListContractResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/contracts");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1143,7 +1159,7 @@ impl<'a> ContractResource<'a> {
         contract_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchContractResp> {
+    ) -> Result<PatchContractResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/contracts/{contract_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1168,7 +1184,7 @@ impl<'a> CountryRegionResource<'a> {
         &self,
         country_region_id: &str,
         option: &RequestOption,
-    ) -> Result<GetCountryRegionResp> {
+    ) -> Result<GetCountryRegionResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/country_regions/{country_region_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1187,7 +1203,7 @@ impl<'a> CountryRegionResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCountryRegionResp> {
+    ) -> Result<ListCountryRegionResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/country_regions");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1212,7 +1228,10 @@ pub struct CustomFieldResource<'a> {
 }
 
 impl<'a> CustomFieldResource<'a> {
-    pub async fn get_by_param(&self, option: &RequestOption) -> Result<GetByParamCustomFieldResp> {
+    pub async fn get_by_param(
+        &self,
+        option: &RequestOption,
+    ) -> Result<GetByParamCustomFieldResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/custom_fields/get_by_param",
@@ -1231,7 +1250,7 @@ impl<'a> CustomFieldResource<'a> {
     pub async fn list_object_api_name(
         &self,
         option: &RequestOption,
-    ) -> Result<ListObjectApiNameCustomFieldResp> {
+    ) -> Result<ListObjectApiNameCustomFieldResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/custom_fields/list_object_api_name",
@@ -1247,7 +1266,7 @@ impl<'a> CustomFieldResource<'a> {
         })
     }
 
-    pub async fn query(&self, option: &RequestOption) -> Result<QueryCustomFieldResp> {
+    pub async fn query(&self, option: &RequestOption) -> Result<QueryCustomFieldResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/custom_fields/query",
@@ -1273,7 +1292,7 @@ impl<'a> EmployeeTypeResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateEmployeeTypeResp> {
+    ) -> Result<CreateEmployeeTypeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/employee_types");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -1291,7 +1310,7 @@ impl<'a> EmployeeTypeResource<'a> {
         &self,
         employee_type_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteEmployeeTypeResp> {
+    ) -> Result<DeleteEmployeeTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employee_types/{employee_type_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1308,7 +1327,7 @@ impl<'a> EmployeeTypeResource<'a> {
         &self,
         employee_type_id: &str,
         option: &RequestOption,
-    ) -> Result<GetEmployeeTypeResp> {
+    ) -> Result<GetEmployeeTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employee_types/{employee_type_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1327,7 +1346,7 @@ impl<'a> EmployeeTypeResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListEmployeeTypeResp> {
+    ) -> Result<ListEmployeeTypeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/employee_types");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1351,7 +1370,7 @@ impl<'a> EmployeeTypeResource<'a> {
         employee_type_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchEmployeeTypeResp> {
+    ) -> Result<PatchEmployeeTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employee_types/{employee_type_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1376,7 +1395,7 @@ impl<'a> EmploymentResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateEmploymentResp> {
+    ) -> Result<CreateEmploymentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/employments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -1394,7 +1413,7 @@ impl<'a> EmploymentResource<'a> {
         &self,
         employment_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteEmploymentResp> {
+    ) -> Result<DeleteEmploymentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employments/{employment_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1412,7 +1431,7 @@ impl<'a> EmploymentResource<'a> {
         employment_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchEmploymentResp> {
+    ) -> Result<PatchEmploymentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employments/{employment_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1433,7 +1452,7 @@ pub struct FileResource<'a> {
 }
 
 impl<'a> FileResource<'a> {
-    pub async fn get(&self, id: &str, option: &RequestOption) -> Result<GetFileResp> {
+    pub async fn get(&self, id: &str, option: &RequestOption) -> Result<GetFileResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/files/{id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1457,7 +1476,7 @@ impl<'a> JobResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateJobResp> {
+    ) -> Result<CreateJobResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/jobs");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -1471,7 +1490,11 @@ impl<'a> JobResource<'a> {
         })
     }
 
-    pub async fn delete(&self, job_id: &str, option: &RequestOption) -> Result<DeleteJobResp> {
+    pub async fn delete(
+        &self,
+        job_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteJobResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/jobs/{job_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1484,7 +1507,7 @@ impl<'a> JobResource<'a> {
         })
     }
 
-    pub async fn get(&self, job_id: &str, option: &RequestOption) -> Result<GetJobResp> {
+    pub async fn get(&self, job_id: &str, option: &RequestOption) -> Result<GetJobResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/jobs/{job_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1503,7 +1526,7 @@ impl<'a> JobResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListJobResp> {
+    ) -> Result<ListJobResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/jobs");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1527,7 +1550,7 @@ impl<'a> JobResource<'a> {
         job_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchJobResp> {
+    ) -> Result<PatchJobResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/jobs/{job_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1552,7 +1575,7 @@ impl<'a> JobChangeResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateJobChangeResp> {
+    ) -> Result<CreateJobChangeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/job_changes");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -1576,7 +1599,7 @@ impl<'a> JobDataResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateJobDataResp> {
+    ) -> Result<CreateJobDataResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/job_datas");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -1594,7 +1617,7 @@ impl<'a> JobDataResource<'a> {
         &self,
         job_data_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteJobDataResp> {
+    ) -> Result<DeleteJobDataResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_datas/{job_data_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1607,7 +1630,11 @@ impl<'a> JobDataResource<'a> {
         })
     }
 
-    pub async fn get(&self, job_data_id: &str, option: &RequestOption) -> Result<GetJobDataResp> {
+    pub async fn get(
+        &self,
+        job_data_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetJobDataResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_datas/{job_data_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1626,7 +1653,7 @@ impl<'a> JobDataResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListJobDataResp> {
+    ) -> Result<ListJobDataResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/job_datas");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1650,7 +1677,7 @@ impl<'a> JobDataResource<'a> {
         job_data_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchJobDataResp> {
+    ) -> Result<PatchJobDataResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_datas/{job_data_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1675,7 +1702,7 @@ impl<'a> JobFamilyResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateJobFamilyResp> {
+    ) -> Result<CreateJobFamilyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/job_families");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -1693,7 +1720,7 @@ impl<'a> JobFamilyResource<'a> {
         &self,
         job_family_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteJobFamilyResp> {
+    ) -> Result<DeleteJobFamilyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_families/{job_family_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1710,7 +1737,7 @@ impl<'a> JobFamilyResource<'a> {
         &self,
         job_family_id: &str,
         option: &RequestOption,
-    ) -> Result<GetJobFamilyResp> {
+    ) -> Result<GetJobFamilyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_families/{job_family_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1729,7 +1756,7 @@ impl<'a> JobFamilyResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListJobFamilyResp> {
+    ) -> Result<ListJobFamilyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/job_families");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1753,7 +1780,7 @@ impl<'a> JobFamilyResource<'a> {
         job_family_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchJobFamilyResp> {
+    ) -> Result<PatchJobFamilyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_families/{job_family_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1777,7 +1804,7 @@ impl<'a> LeaveResource<'a> {
     pub async fn calendar_by_scope(
         &self,
         option: &RequestOption,
-    ) -> Result<CalendarByScopeLeaveResp> {
+    ) -> Result<CalendarByScopeLeaveResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/leaves/calendar_by_scope",
@@ -1798,7 +1825,7 @@ impl<'a> LeaveResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<LeaveBalancesLeaveResp> {
+    ) -> Result<LeaveBalancesLeaveResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/leaves/leave_balances",
@@ -1825,7 +1852,7 @@ impl<'a> LeaveResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<LeaveRequestHistoryLeaveResp> {
+    ) -> Result<LeaveRequestHistoryLeaveResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/leaves/leave_request_history",
@@ -1852,7 +1879,7 @@ impl<'a> LeaveResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<LeaveTypesLeaveResp> {
+    ) -> Result<LeaveTypesLeaveResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/leaves/leave_types");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1875,7 +1902,7 @@ impl<'a> LeaveResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<WorkCalendarLeaveResp> {
+    ) -> Result<WorkCalendarLeaveResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/leaves/work_calendar",
@@ -1896,7 +1923,7 @@ impl<'a> LeaveResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<WorkCalendarDateLeaveResp> {
+    ) -> Result<WorkCalendarDateLeaveResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/leaves/work_calendar_date",
@@ -1923,7 +1950,7 @@ impl<'a> LeaveGrantingRecordResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateLeaveGrantingRecordResp> {
+    ) -> Result<CreateLeaveGrantingRecordResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/leave_granting_records",
@@ -1944,7 +1971,7 @@ impl<'a> LeaveGrantingRecordResource<'a> {
         &self,
         leave_granting_record_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteLeaveGrantingRecordResp> {
+    ) -> Result<DeleteLeaveGrantingRecordResp, LarkError> {
         let path =
             format!("/open-apis/corehr/v1/leave_granting_records/{leave_granting_record_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -1968,7 +1995,7 @@ impl<'a> NationalIdTypeResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateNationalIdTypeResp> {
+    ) -> Result<CreateNationalIdTypeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/national_id_types");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -1986,7 +2013,7 @@ impl<'a> NationalIdTypeResource<'a> {
         &self,
         national_id_type_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteNationalIdTypeResp> {
+    ) -> Result<DeleteNationalIdTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/national_id_types/{national_id_type_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2003,7 +2030,7 @@ impl<'a> NationalIdTypeResource<'a> {
         &self,
         national_id_type_id: &str,
         option: &RequestOption,
-    ) -> Result<GetNationalIdTypeResp> {
+    ) -> Result<GetNationalIdTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/national_id_types/{national_id_type_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2022,7 +2049,7 @@ impl<'a> NationalIdTypeResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListNationalIdTypeResp> {
+    ) -> Result<ListNationalIdTypeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/national_id_types");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2046,7 +2073,7 @@ impl<'a> NationalIdTypeResource<'a> {
         national_id_type_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchNationalIdTypeResp> {
+    ) -> Result<PatchNationalIdTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/national_id_types/{national_id_type_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2071,7 +2098,7 @@ impl<'a> OffboardingResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryOffboardingResp> {
+    ) -> Result<QueryOffboardingResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/offboardings/query",
@@ -2092,7 +2119,7 @@ impl<'a> OffboardingResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<SearchOffboardingResp> {
+    ) -> Result<SearchOffboardingResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/offboardings/search",
@@ -2113,7 +2140,7 @@ impl<'a> OffboardingResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<SubmitOffboardingResp> {
+    ) -> Result<SubmitOffboardingResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/offboardings/submit",
@@ -2140,7 +2167,7 @@ impl<'a> PersonResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreatePersonResp> {
+    ) -> Result<CreatePersonResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/persons");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -2158,7 +2185,7 @@ impl<'a> PersonResource<'a> {
         &self,
         person_id: &str,
         option: &RequestOption,
-    ) -> Result<DeletePersonResp> {
+    ) -> Result<DeletePersonResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/persons/{person_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2171,7 +2198,11 @@ impl<'a> PersonResource<'a> {
         })
     }
 
-    pub async fn get(&self, person_id: &str, option: &RequestOption) -> Result<GetPersonResp> {
+    pub async fn get(
+        &self,
+        person_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetPersonResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/persons/{person_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2190,7 +2221,7 @@ impl<'a> PersonResource<'a> {
         person_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchPersonResp> {
+    ) -> Result<PatchPersonResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/persons/{person_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2209,7 +2240,7 @@ impl<'a> PersonResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UploadPersonResp> {
+    ) -> Result<UploadPersonResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/persons/upload");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -2233,7 +2264,7 @@ impl<'a> PreHireResource<'a> {
         &self,
         pre_hire_id: &str,
         option: &RequestOption,
-    ) -> Result<DeletePreHireResp> {
+    ) -> Result<DeletePreHireResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/pre_hires/{pre_hire_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2246,7 +2277,11 @@ impl<'a> PreHireResource<'a> {
         })
     }
 
-    pub async fn get(&self, pre_hire_id: &str, option: &RequestOption) -> Result<GetPreHireResp> {
+    pub async fn get(
+        &self,
+        pre_hire_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetPreHireResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/pre_hires/{pre_hire_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2265,7 +2300,7 @@ impl<'a> PreHireResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListPreHireResp> {
+    ) -> Result<ListPreHireResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/pre_hires");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2289,7 +2324,7 @@ impl<'a> PreHireResource<'a> {
         pre_hire_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchPreHireResp> {
+    ) -> Result<PatchPreHireResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/pre_hires/{pre_hire_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2314,7 +2349,7 @@ impl<'a> ProcessFormVariableDataResource<'a> {
         &self,
         process_id: &str,
         option: &RequestOption,
-    ) -> Result<GetProcessFormVariableDataResp> {
+    ) -> Result<GetProcessFormVariableDataResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/processes/{process_id}/form_variable_data");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2339,7 +2374,7 @@ impl<'a> SecurityGroupResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSecurityGroupResp> {
+    ) -> Result<ListSecurityGroupResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/security_groups");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2362,7 +2397,7 @@ impl<'a> SecurityGroupResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QuerySecurityGroupResp> {
+    ) -> Result<QuerySecurityGroupResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/security_groups/query",
@@ -2389,7 +2424,7 @@ impl<'a> SubdivisionResource<'a> {
         &self,
         subdivision_id: &str,
         option: &RequestOption,
-    ) -> Result<GetSubdivisionResp> {
+    ) -> Result<GetSubdivisionResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/subdivisions/{subdivision_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2408,7 +2443,7 @@ impl<'a> SubdivisionResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSubdivisionResp> {
+    ) -> Result<ListSubdivisionResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/subdivisions");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2437,7 +2472,7 @@ impl<'a> SubregionResource<'a> {
         &self,
         subregion_id: &str,
         option: &RequestOption,
-    ) -> Result<GetSubregionResp> {
+    ) -> Result<GetSubregionResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/subregions/{subregion_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2456,7 +2491,7 @@ impl<'a> SubregionResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSubregionResp> {
+    ) -> Result<ListSubregionResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/subregions");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -2481,7 +2516,10 @@ pub struct TransferReasonResource<'a> {
 }
 
 impl<'a> TransferReasonResource<'a> {
-    pub async fn query(&self, option: &RequestOption) -> Result<QueryTransferReasonResp> {
+    pub async fn query(
+        &self,
+        option: &RequestOption,
+    ) -> Result<QueryTransferReasonResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/transfer_reasons/query",
@@ -2503,7 +2541,7 @@ pub struct TransferTypeResource<'a> {
 }
 
 impl<'a> TransferTypeResource<'a> {
-    pub async fn query(&self, option: &RequestOption) -> Result<QueryTransferTypeResp> {
+    pub async fn query(&self, option: &RequestOption) -> Result<QueryTransferTypeResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/corehr/v1/transfer_types/query",
@@ -2528,7 +2566,7 @@ impl<'a> JobLevelResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateJobLevelResp> {
+    ) -> Result<CreateJobLevelResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/job_levels");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -2546,7 +2584,7 @@ impl<'a> JobLevelResource<'a> {
         &self,
         job_level_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteJobLevelResp> {
+    ) -> Result<DeleteJobLevelResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_levels/{job_level_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2564,7 +2602,7 @@ impl<'a> JobLevelResource<'a> {
         job_level_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchJobLevelResp> {
+    ) -> Result<PatchJobLevelResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_levels/{job_level_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2581,7 +2619,11 @@ impl<'a> JobLevelResource<'a> {
 }
 
 impl<'a> CurrencyResource<'a> {
-    pub async fn get(&self, currency_id: &str, option: &RequestOption) -> Result<GetCurrencyResp> {
+    pub async fn get(
+        &self,
+        currency_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetCurrencyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/currencies/{currency_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2601,7 +2643,7 @@ impl<'a> LocationResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateLocationResp> {
+    ) -> Result<CreateLocationResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/locations");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -2619,7 +2661,7 @@ impl<'a> LocationResource<'a> {
         &self,
         location_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteLocationResp> {
+    ) -> Result<DeleteLocationResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/locations/{location_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2638,7 +2680,7 @@ impl<'a> DepartmentResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateDepartmentResp> {
+    ) -> Result<CreateDepartmentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/departments");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -2656,7 +2698,7 @@ impl<'a> DepartmentResource<'a> {
         &self,
         department_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteDepartmentResp> {
+    ) -> Result<DeleteDepartmentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2674,7 +2716,7 @@ impl<'a> DepartmentResource<'a> {
         department_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchDepartmentResp> {
+    ) -> Result<PatchDepartmentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/departments/{department_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2695,7 +2737,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateWorkingHoursTypeResp> {
+    ) -> Result<CreateWorkingHoursTypeResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/corehr/v1/working_hours_types",
@@ -2716,7 +2758,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         &self,
         working_hours_type_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteWorkingHoursTypeResp> {
+    ) -> Result<DeleteWorkingHoursTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/working_hours_types/{working_hours_type_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2733,7 +2775,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         &self,
         working_hours_type_id: &str,
         option: &RequestOption,
-    ) -> Result<GetWorkingHoursTypeResp> {
+    ) -> Result<GetWorkingHoursTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/working_hours_types/{working_hours_type_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2752,7 +2794,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         working_hours_type_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchWorkingHoursTypeResp> {
+    ) -> Result<PatchWorkingHoursTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/working_hours_types/{working_hours_type_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];

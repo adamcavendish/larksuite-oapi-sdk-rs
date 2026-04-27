@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -843,7 +843,7 @@ impl<'a> CalendarResource<'a> {
         &self,
         body: &CreateCalendarReqBody,
         option: &RequestOption,
-    ) -> Result<CreateCalendarResp> {
+    ) -> Result<CreateCalendarResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/calendars");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -856,7 +856,11 @@ impl<'a> CalendarResource<'a> {
         })
     }
 
-    pub async fn get(&self, calendar_id: &str, option: &RequestOption) -> Result<GetCalendarResp> {
+    pub async fn get(
+        &self,
+        calendar_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetCalendarResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -874,7 +878,7 @@ impl<'a> CalendarResource<'a> {
         calendar_id: &str,
         body: &PatchCalendarReqBody,
         option: &RequestOption,
-    ) -> Result<PatchCalendarResp> {
+    ) -> Result<PatchCalendarResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -888,7 +892,11 @@ impl<'a> CalendarResource<'a> {
         })
     }
 
-    pub async fn delete(&self, calendar_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        calendar_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -906,7 +914,7 @@ impl<'a> CalendarResource<'a> {
         page_token: Option<&str>,
         sync_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCalendarResp> {
+    ) -> Result<ListCalendarResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/calendar/v4/calendars");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -931,7 +939,7 @@ impl<'a> CalendarResource<'a> {
         &self,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetCalendarResp> {
+    ) -> Result<GetCalendarResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/primary",
@@ -953,7 +961,7 @@ impl<'a> CalendarResource<'a> {
         &self,
         body: &MgetCalendarReqBody,
         option: &RequestOption,
-    ) -> Result<MgetCalendarResp> {
+    ) -> Result<MgetCalendarResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/calendars/mget");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -971,7 +979,7 @@ impl<'a> CalendarResource<'a> {
         body: &PrimarysCalendarReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PrimarysCalendarResp> {
+    ) -> Result<PrimarysCalendarResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/primarys",
@@ -996,7 +1004,7 @@ impl<'a> CalendarResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<SearchCalendarResp> {
+    ) -> Result<SearchCalendarResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/search",
@@ -1022,7 +1030,7 @@ impl<'a> CalendarResource<'a> {
         &self,
         calendar_id: &str,
         option: &RequestOption,
-    ) -> Result<SubscribeCalendarResp> {
+    ) -> Result<SubscribeCalendarResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/subscribe");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -1036,7 +1044,7 @@ impl<'a> CalendarResource<'a> {
         })
     }
 
-    pub async fn subscription(&self, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn subscription(&self, option: &RequestOption) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/subscription",
@@ -1054,7 +1062,7 @@ impl<'a> CalendarResource<'a> {
         &self,
         calendar_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/unsubscribe");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -1066,7 +1074,7 @@ impl<'a> CalendarResource<'a> {
         })
     }
 
-    pub async fn unsubscription(&self, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn unsubscription(&self, option: &RequestOption) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/unsubscription",
@@ -1092,7 +1100,7 @@ impl<'a> CalendarEventResource<'a> {
         body: &CreateEventReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateEventResp> {
+    ) -> Result<CreateEventResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1115,7 +1123,7 @@ impl<'a> CalendarEventResource<'a> {
         event_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetEventResp> {
+    ) -> Result<GetEventResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1138,7 +1146,7 @@ impl<'a> CalendarEventResource<'a> {
         body: &PatchEventReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchEventResp> {
+    ) -> Result<PatchEventResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1161,7 +1169,7 @@ impl<'a> CalendarEventResource<'a> {
         event_id: &str,
         need_notification: Option<bool>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1188,7 +1196,7 @@ impl<'a> CalendarEventResource<'a> {
         end_time: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListEventResp> {
+    ) -> Result<ListEventResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1231,7 +1239,7 @@ impl<'a> CalendarEventResource<'a> {
         end_time: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<InstanceViewResp> {
+    ) -> Result<InstanceViewResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/instance_view");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1263,7 +1271,7 @@ impl<'a> CalendarEventResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<InstancesResp> {
+    ) -> Result<InstancesResp, LarkError> {
         let path =
             format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/instances");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1295,7 +1303,7 @@ impl<'a> CalendarEventResource<'a> {
         event_id: &str,
         body: &ReplyEventReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/reply");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -1318,7 +1326,7 @@ impl<'a> CalendarEventResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<SearchEventResp> {
+    ) -> Result<SearchEventResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/search");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1345,7 +1353,7 @@ impl<'a> CalendarEventResource<'a> {
         &self,
         calendar_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/subscription");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1361,7 +1369,7 @@ impl<'a> CalendarEventResource<'a> {
         &self,
         calendar_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/unsubscription");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1386,7 +1394,7 @@ impl<'a> CalendarAttendeeResource<'a> {
         body: &CreateAttendeeReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateAttendeeResp> {
+    ) -> Result<CreateAttendeeResp, LarkError> {
         let path =
             format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -1411,7 +1419,7 @@ impl<'a> CalendarAttendeeResource<'a> {
         body: &DeleteAttendeeReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees/batch_delete"
         );
@@ -1437,7 +1445,7 @@ impl<'a> CalendarAttendeeResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAttendeeResp> {
+    ) -> Result<ListAttendeeResp, LarkError> {
         let path =
             format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1472,7 +1480,7 @@ impl<'a> CalendarAclResource<'a> {
         body: &CreateAclReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateAclResp> {
+    ) -> Result<CreateAclResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1494,7 +1502,7 @@ impl<'a> CalendarAclResource<'a> {
         calendar_id: &str,
         acl_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls/{acl_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1513,7 +1521,7 @@ impl<'a> CalendarAclResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListAclResp> {
+    ) -> Result<ListAclResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1539,7 +1547,7 @@ impl<'a> CalendarAclResource<'a> {
         &self,
         calendar_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls/subscription");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1555,7 +1563,7 @@ impl<'a> CalendarAclResource<'a> {
         &self,
         calendar_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls/unsubscription");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1578,7 +1586,7 @@ impl<'a> TimeZoneResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListTimeZoneResp> {
+    ) -> Result<ListTimeZoneResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/calendar/v4/timezones");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -1607,7 +1615,7 @@ impl<'a> ExchangeBindingResource<'a> {
         body: &CreateExchangeBindingReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateExchangeBindingResp> {
+    ) -> Result<CreateExchangeBindingResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/calendar/v4/exchange_bindings",
@@ -1631,7 +1639,7 @@ impl<'a> ExchangeBindingResource<'a> {
         exchange_binding_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetExchangeBindingResp> {
+    ) -> Result<GetExchangeBindingResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/exchange_bindings/{exchange_binding_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1651,7 +1659,7 @@ impl<'a> ExchangeBindingResource<'a> {
         &self,
         exchange_binding_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/exchange_bindings/{exchange_binding_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1669,7 +1677,7 @@ pub struct CalendarSettingResource<'a> {
 }
 
 impl<'a> CalendarSettingResource<'a> {
-    pub async fn get(&self, option: &RequestOption) -> Result<GetCalendarSettingResp> {
+    pub async fn get(&self, option: &RequestOption) -> Result<GetCalendarSettingResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/calendar/v4/settings");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         let (api_resp, raw) =
@@ -1685,7 +1693,7 @@ impl<'a> CalendarSettingResource<'a> {
         &self,
         body: &PatchCalendarSettingReqBody,
         option: &RequestOption,
-    ) -> Result<PatchCalendarSettingResp> {
+    ) -> Result<PatchCalendarSettingResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::PATCH, "/open-apis/calendar/v4/settings");
         api_req.supported_access_token_types = vec![AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -1702,7 +1710,7 @@ impl<'a> CalendarSettingResource<'a> {
         &self,
         body: &GenerateCaldavConfReqBody,
         option: &RequestOption,
-    ) -> Result<GenerateCaldavConfResp> {
+    ) -> Result<GenerateCaldavConfResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/calendar/v4/settings/generate_caldav_conf",
@@ -1729,7 +1737,7 @@ impl<'a> FreeBusyResource<'a> {
         body: &ListFreeBusyReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListFreeBusyResp> {
+    ) -> Result<ListFreeBusyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/freebusy/list");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -1750,7 +1758,7 @@ impl<'a> FreeBusyResource<'a> {
         body: &BatchFreeBusyReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchFreeBusyResp> {
+    ) -> Result<BatchFreeBusyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/freebusy/batch");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -1782,7 +1790,7 @@ impl<'a> CalendarEventAttendeeChatMemberResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListChatMemberResp> {
+    ) -> Result<ListChatMemberResp, LarkError> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees/{attendee_id}/chat_members"
         );
@@ -1817,7 +1825,7 @@ impl<'a> CalendarEventMeetingChatResource<'a> {
         calendar_id: &str,
         event_id: &str,
         option: &RequestOption,
-    ) -> Result<CreateMeetingChatResp> {
+    ) -> Result<CreateMeetingChatResp, LarkError> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_chat"
         );
@@ -1838,7 +1846,7 @@ impl<'a> CalendarEventMeetingChatResource<'a> {
         event_id: &str,
         meeting_chat_id: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_chat"
         );
@@ -1866,7 +1874,7 @@ impl<'a> CalendarEventMeetingMinuteResource<'a> {
         calendar_id: &str,
         event_id: &str,
         option: &RequestOption,
-    ) -> Result<CreateMeetingMinuteResp> {
+    ) -> Result<CreateMeetingMinuteResp, LarkError> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_minute"
         );
@@ -1892,7 +1900,7 @@ impl<'a> TimeoffEventResource<'a> {
         body: &CreateTimeoffEventReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateTimeoffEventResp> {
+    ) -> Result<CreateTimeoffEventResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/timeoff_events");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1912,7 +1920,7 @@ impl<'a> TimeoffEventResource<'a> {
         &self,
         timeoff_event_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/timeoff_events/{timeoff_event_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];

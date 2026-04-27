@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::transport;
 
@@ -107,7 +107,7 @@ impl<'a> MinutesResource<'a> {
         minutes_token: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetMinutesResp> {
+    ) -> Result<GetMinutesResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -136,7 +136,7 @@ impl<'a> ParticipantResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListParticipantResp> {
+    ) -> Result<ListParticipantResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/participants");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -169,7 +169,7 @@ impl<'a> TranscriptResource<'a> {
         minutes_token: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetTranscriptResp> {
+    ) -> Result<GetTranscriptResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/transcript");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -195,7 +195,7 @@ impl<'a> MinuteMediaResource<'a> {
         &self,
         minutes_token: &str,
         option: &RequestOption,
-    ) -> Result<GetMinuteMediaResp> {
+    ) -> Result<GetMinuteMediaResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/media");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -219,7 +219,7 @@ impl<'a> MinuteStatisticsResource<'a> {
         minutes_token: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetMinuteStatisticsResp> {
+    ) -> Result<GetMinuteStatisticsResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/statistics");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];

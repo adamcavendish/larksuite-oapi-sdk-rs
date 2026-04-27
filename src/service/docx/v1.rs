@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
@@ -309,7 +309,7 @@ impl<'a> DocumentResource<'a> {
         &self,
         body: &CreateDocumentReqBody,
         option: &RequestOption,
-    ) -> Result<CreateDocumentResp> {
+    ) -> Result<CreateDocumentResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/docx/v1/documents");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -322,7 +322,11 @@ impl<'a> DocumentResource<'a> {
         })
     }
 
-    pub async fn get(&self, document_id: &str, option: &RequestOption) -> Result<GetDocumentResp> {
+    pub async fn get(
+        &self,
+        document_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetDocumentResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{document_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -339,7 +343,7 @@ impl<'a> DocumentResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ConvertDocumentResp> {
+    ) -> Result<ConvertDocumentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/docx/v1/documents/blocks/convert",
@@ -361,7 +365,7 @@ impl<'a> DocumentResource<'a> {
         document_id: &str,
         lang: Option<i32>,
         option: &RequestOption,
-    ) -> Result<GetDocumentRawContentResp> {
+    ) -> Result<GetDocumentRawContentResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{document_id}/raw_content");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -391,7 +395,7 @@ impl<'a> DocumentBlockResource<'a> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateBlockResp> {
+    ) -> Result<CreateBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}/children");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -420,7 +424,7 @@ impl<'a> DocumentBlockResource<'a> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetBlockResp> {
+    ) -> Result<GetBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -449,7 +453,7 @@ impl<'a> DocumentBlockResource<'a> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<UpdateBlockResp> {
+    ) -> Result<UpdateBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -478,7 +482,7 @@ impl<'a> DocumentBlockResource<'a> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchUpdateBlockResp> {
+    ) -> Result<BatchUpdateBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/batch_update");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -507,7 +511,7 @@ impl<'a> DocumentBlockResource<'a> {
         body: &DeleteBlocksReqBody,
         document_revision_id: Option<i64>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}/children/batch_delete"
         );
@@ -535,7 +539,7 @@ impl<'a> DocumentBlockResource<'a> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListBlockResp> {
+    ) -> Result<ListBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -572,7 +576,7 @@ impl<'a> DocumentBlockResource<'a> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListBlockResp> {
+    ) -> Result<ListBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}/children");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -610,7 +614,7 @@ impl<'a> BuildingBlockResource<'a> {
         document_id: &str,
         block_id: &str,
         option: &RequestOption,
-    ) -> Result<GetBuildingBlockResp> {
+    ) -> Result<GetBuildingBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{document_id}/building_blocks/{block_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -633,7 +637,7 @@ impl ChatAnnouncementResource<'_> {
         &self,
         chat_id: &str,
         option: &RequestOption,
-    ) -> Result<GetChatAnnouncementResp> {
+    ) -> Result<GetChatAnnouncementResp, LarkError> {
         let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -660,7 +664,7 @@ impl ChatAnnouncementBlockResource<'_> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchUpdateChatAnnouncementBlockResp> {
+    ) -> Result<BatchUpdateChatAnnouncementBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/batch_update");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -690,7 +694,7 @@ impl ChatAnnouncementBlockResource<'_> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetChatAnnouncementBlockResp> {
+    ) -> Result<GetChatAnnouncementBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -720,7 +724,7 @@ impl ChatAnnouncementBlockResource<'_> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListChatAnnouncementBlockResp> {
+    ) -> Result<ListChatAnnouncementBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -761,7 +765,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         body: &serde_json::Value,
         document_revision_id: Option<i64>,
         option: &RequestOption,
-    ) -> Result<BatchDeleteChatAnnouncementBlockChildrenResp> {
+    ) -> Result<BatchDeleteChatAnnouncementBlockChildrenResp, LarkError> {
         let path = format!(
             "/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}/children/batch_delete"
         );
@@ -791,7 +795,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateChatAnnouncementBlockChildrenResp> {
+    ) -> Result<CreateChatAnnouncementBlockChildrenResp, LarkError> {
         let path =
             format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}/children");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -825,7 +829,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetChatAnnouncementBlockChildrenResp> {
+    ) -> Result<GetChatAnnouncementBlockChildrenResp, LarkError> {
         let path =
             format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}/children");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -868,7 +872,7 @@ impl DocumentBlockDescendantResource<'_> {
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateDocumentBlockDescendantResp> {
+    ) -> Result<CreateDocumentBlockDescendantResp, LarkError> {
         let path =
             format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}/descendant");
         let mut api_req = ApiReq::new(http::Method::POST, &path);

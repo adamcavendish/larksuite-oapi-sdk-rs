@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::ApiResp;
 use crate::transport;
@@ -110,7 +110,7 @@ impl<'a> WhiteboardResource<'a> {
         &self,
         body: &CreateBoardReqBody,
         option: &RequestOption,
-    ) -> Result<CreateBoardResp> {
+    ) -> Result<CreateBoardResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/board/v1/whiteboards");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -123,7 +123,11 @@ impl<'a> WhiteboardResource<'a> {
         })
     }
 
-    pub async fn get(&self, whiteboard_id: &str, option: &RequestOption) -> Result<GetBoardResp> {
+    pub async fn get(
+        &self,
+        whiteboard_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetBoardResp, LarkError> {
         let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -140,7 +144,7 @@ impl<'a> WhiteboardResource<'a> {
         &self,
         whiteboard_id: &str,
         option: &RequestOption,
-    ) -> Result<DownloadAsImageWhiteboardResp> {
+    ) -> Result<DownloadAsImageWhiteboardResp, LarkError> {
         let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/download_as_image");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -160,7 +164,7 @@ impl<'a> WhiteboardResource<'a> {
         &self,
         whiteboard_id: &str,
         option: &RequestOption,
-    ) -> Result<ThemeWhiteboardResp> {
+    ) -> Result<ThemeWhiteboardResp, LarkError> {
         let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/theme");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -178,7 +182,7 @@ impl<'a> WhiteboardResource<'a> {
         whiteboard_id: &str,
         body: &UpdateThemeWhiteboardReqBody,
         option: &RequestOption,
-    ) -> Result<UpdateThemeWhiteboardResp> {
+    ) -> Result<UpdateThemeWhiteboardResp, LarkError> {
         let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/update_theme");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -203,7 +207,7 @@ impl<'a> WhiteboardNodeResource<'a> {
         whiteboard_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateWhiteboardNodeResp> {
+    ) -> Result<CreateWhiteboardNodeResp, LarkError> {
         let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/nodes");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -222,7 +226,7 @@ impl<'a> WhiteboardNodeResource<'a> {
         whiteboard_id: &str,
         body: &CreatePlantumlWhiteboardNodeReqBody,
         option: &RequestOption,
-    ) -> Result<CreatePlantumlWhiteboardNodeResp> {
+    ) -> Result<CreatePlantumlWhiteboardNodeResp, LarkError> {
         let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/nodes/plantuml");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -240,7 +244,7 @@ impl<'a> WhiteboardNodeResource<'a> {
         &self,
         whiteboard_id: &str,
         option: &RequestOption,
-    ) -> Result<ListWhiteboardNodeResp> {
+    ) -> Result<ListWhiteboardNodeResp, LarkError> {
         let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/nodes");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];

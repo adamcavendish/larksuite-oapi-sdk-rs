@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -79,7 +79,7 @@ impl AppFeedCardV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateAppFeedCardV2Resp> {
+    ) -> Result<CreateAppFeedCardV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v2/app_feed_card");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -105,7 +105,7 @@ impl AppFeedCardBatchV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<DeleteAppFeedCardBatchV2Resp> {
+    ) -> Result<DeleteAppFeedCardBatchV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::DELETE, "/open-apis/im/v2/app_feed_card/batch");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -122,7 +122,7 @@ impl AppFeedCardBatchV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateAppFeedCardBatchV2Resp> {
+    ) -> Result<UpdateAppFeedCardBatchV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::PUT, "/open-apis/im/v2/app_feed_card/batch");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -147,7 +147,7 @@ impl BizEntityTagRelationV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateBizEntityTagRelationV2Resp> {
+    ) -> Result<CreateBizEntityTagRelationV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/im/v2/biz_entity_tag_relation",
@@ -165,7 +165,10 @@ impl BizEntityTagRelationV2Resource<'_> {
         })
     }
 
-    pub async fn get(&self, option: &RequestOption) -> Result<GetBizEntityTagRelationV2Resp> {
+    pub async fn get(
+        &self,
+        option: &RequestOption,
+    ) -> Result<GetBizEntityTagRelationV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/im/v2/biz_entity_tag_relation",
@@ -186,7 +189,7 @@ impl BizEntityTagRelationV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateBizEntityTagRelationV2Resp> {
+    ) -> Result<UpdateBizEntityTagRelationV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::PUT,
             "/open-apis/im/v2/biz_entity_tag_relation",
@@ -216,7 +219,7 @@ impl ChatButtonV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateChatButtonV2Resp> {
+    ) -> Result<UpdateChatButtonV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::PUT, "/open-apis/im/v2/chat_button");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -241,7 +244,7 @@ impl FeedCardV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BotTimeSensitiveFeedCardV2Resp> {
+    ) -> Result<BotTimeSensitiveFeedCardV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::PATCH,
             "/open-apis/im/v2/feed_cards/bot_time_sentive",
@@ -262,7 +265,7 @@ impl FeedCardV2Resource<'_> {
         feed_card_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchFeedCardV2Resp> {
+    ) -> Result<PatchFeedCardV2Resp, LarkError> {
         let path = format!("/open-apis/im/v2/feed_cards/{feed_card_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -288,7 +291,7 @@ impl TagV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateTagV2Resp> {
+    ) -> Result<CreateTagV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v2/tags");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -307,7 +310,7 @@ impl TagV2Resource<'_> {
         tag_id: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<PatchTagV2Resp> {
+    ) -> Result<PatchTagV2Resp, LarkError> {
         let path = format!("/open-apis/im/v2/tags/{tag_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -334,7 +337,7 @@ impl UrlPreviewV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchUpdateUrlPreviewV2Resp> {
+    ) -> Result<BatchUpdateUrlPreviewV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/im/v2/url_previews/batch_update",

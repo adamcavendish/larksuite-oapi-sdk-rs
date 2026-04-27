@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -66,7 +66,7 @@ impl<'a> PayrollRecordResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListPayrollRecordResp> {
+    ) -> Result<ListPayrollRecordResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/payroll_records");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = period {
@@ -103,7 +103,7 @@ impl AcctItemResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAcctItemResp> {
+    ) -> Result<ListAcctItemResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/acct_items");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -139,7 +139,7 @@ impl CostAllocationDetailResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCostAllocationDetailResp> {
+    ) -> Result<ListCostAllocationDetailResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/payroll/v1/cost_allocation_details",
@@ -184,7 +184,7 @@ impl CostAllocationPlanResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCostAllocationPlanResp> {
+    ) -> Result<ListCostAllocationPlanResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/payroll/v1/cost_allocation_plans",
@@ -226,7 +226,7 @@ impl CostAllocationReportResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListCostAllocationReportResp> {
+    ) -> Result<ListCostAllocationReportResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/payroll/v1/cost_allocation_reports",
@@ -270,7 +270,7 @@ impl DatasourceResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListDatasourceResp> {
+    ) -> Result<ListDatasourceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/datasources");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -303,7 +303,7 @@ impl DatasourceRecordResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<QueryDatasourceRecordResp> {
+    ) -> Result<QueryDatasourceRecordResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/payroll/v1/datasource_records/query",
@@ -330,7 +330,7 @@ impl DatasourceRecordResource<'_> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<SaveDatasourceRecordResp> {
+    ) -> Result<SaveDatasourceRecordResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/payroll/v1/datasource_records/save",
@@ -360,7 +360,7 @@ impl PaygroupResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListPaygroupResp> {
+    ) -> Result<ListPaygroupResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/paygroups");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -391,7 +391,7 @@ impl PaymentActivityResource<'_> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ArchivePaymentActivityResp> {
+    ) -> Result<ArchivePaymentActivityResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/payroll/v1/payment_activitys/archive",
@@ -417,7 +417,7 @@ impl PaymentActivityResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListPaymentActivityResp> {
+    ) -> Result<ListPaymentActivityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/payment_activitys");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         if let Some(v) = pay_period_start_date {
@@ -464,7 +464,7 @@ impl PaymentActivityDetailResource<'_> {
         include_segment_data: Option<bool>,
         acct_item_ids: Option<&[&str]>,
         option: &RequestOption,
-    ) -> Result<ListPaymentActivityDetailResp> {
+    ) -> Result<ListPaymentActivityDetailResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/payroll/v1/payment_activity_details",
@@ -509,7 +509,7 @@ impl PaymentDetailResource<'_> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryPaymentDetailResp> {
+    ) -> Result<QueryPaymentDetailResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/payroll/v1/payment_detail/query",

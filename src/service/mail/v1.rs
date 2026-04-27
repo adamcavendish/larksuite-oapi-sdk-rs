@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
@@ -314,7 +314,7 @@ impl<'a> MailgroupResource<'a> {
         &self,
         body: &CreateMailgroupReqBody,
         option: &RequestOption,
-    ) -> Result<CreateMailgroupResp> {
+    ) -> Result<CreateMailgroupResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/mail/v1/mailgroups");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -331,7 +331,7 @@ impl<'a> MailgroupResource<'a> {
         &self,
         mailgroup_id: &str,
         option: &RequestOption,
-    ) -> Result<GetMailgroupResp> {
+    ) -> Result<GetMailgroupResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -344,7 +344,11 @@ impl<'a> MailgroupResource<'a> {
         })
     }
 
-    pub async fn delete(&self, mailgroup_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        mailgroup_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -362,7 +366,7 @@ impl<'a> MailgroupResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListMailgroupResp> {
+    ) -> Result<ListMailgroupResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/mail/v1/mailgroups");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = manager_user_id {
@@ -389,7 +393,7 @@ impl<'a> MailgroupResource<'a> {
         mailgroup_id: &str,
         body: &CreateMailgroupReqBody,
         option: &RequestOption,
-    ) -> Result<GetMailgroupResp> {
+    ) -> Result<GetMailgroupResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -409,7 +413,7 @@ impl<'a> MailgroupResource<'a> {
         mailgroup_id: &str,
         body: &CreateMailgroupReqBody,
         option: &RequestOption,
-    ) -> Result<GetMailgroupResp> {
+    ) -> Result<GetMailgroupResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -435,7 +439,7 @@ impl<'a> MailgroupMemberResource<'a> {
         body: &MailgroupMember,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetMailgroupMemberResp> {
+    ) -> Result<GetMailgroupMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -457,7 +461,7 @@ impl<'a> MailgroupMemberResource<'a> {
         mailgroup_id: &str,
         member_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members/{member_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -476,7 +480,7 @@ impl<'a> MailgroupMemberResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListMailgroupMemberResp> {
+    ) -> Result<ListMailgroupMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -506,7 +510,7 @@ impl<'a> MailgroupMemberResource<'a> {
         body: &BatchCreateMailgroupMemberReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchCreateMailgroupMemberResp> {
+    ) -> Result<BatchCreateMailgroupMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members/batch_create");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -530,7 +534,7 @@ impl<'a> MailgroupMemberResource<'a> {
         mailgroup_id: &str,
         body: &BatchDeleteMailgroupMemberReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members/batch_delete");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -550,7 +554,7 @@ impl<'a> MailgroupMemberResource<'a> {
         member_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetMailgroupMemberResp> {
+    ) -> Result<GetMailgroupMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members/{member_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -576,7 +580,7 @@ impl<'a> PublicMailboxResource<'a> {
         &self,
         body: &CreatePublicMailboxReqBody,
         option: &RequestOption,
-    ) -> Result<CreatePublicMailboxResp> {
+    ) -> Result<CreatePublicMailboxResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/mail/v1/public_mailboxes");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -593,7 +597,7 @@ impl<'a> PublicMailboxResource<'a> {
         &self,
         public_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<GetPublicMailboxResp> {
+    ) -> Result<GetPublicMailboxResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -610,7 +614,7 @@ impl<'a> PublicMailboxResource<'a> {
         &self,
         public_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -627,7 +631,7 @@ impl<'a> PublicMailboxResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListPublicMailboxResp> {
+    ) -> Result<ListPublicMailboxResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/mail/v1/public_mailboxes");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_token {
@@ -652,7 +656,7 @@ impl<'a> PublicMailboxResource<'a> {
         public_mailbox_id: &str,
         body: &CreatePublicMailboxReqBody,
         option: &RequestOption,
-    ) -> Result<GetPublicMailboxResp> {
+    ) -> Result<GetPublicMailboxResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -671,7 +675,7 @@ impl<'a> PublicMailboxResource<'a> {
         &self,
         public_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/remove_to_recycle_bin"
         );
@@ -691,7 +695,7 @@ impl<'a> PublicMailboxResource<'a> {
         public_mailbox_id: &str,
         body: &CreatePublicMailboxReqBody,
         option: &RequestOption,
-    ) -> Result<GetPublicMailboxResp> {
+    ) -> Result<GetPublicMailboxResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -717,7 +721,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
         body: &PublicMailboxMember,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -738,7 +742,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
         public_mailbox_id: &str,
         member_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/{member_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -758,7 +762,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListPublicMailboxMemberResp> {
+    ) -> Result<ListPublicMailboxMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -788,7 +792,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
         body: &BatchCreatePublicMailboxMemberReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchCreatePublicMailboxMemberResp> {
+    ) -> Result<BatchCreatePublicMailboxMemberResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/batch_create");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -813,7 +817,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
         public_mailbox_id: &str,
         body: &BatchDeletePublicMailboxMemberReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/batch_delete");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -832,7 +836,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
         &self,
         public_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/clear");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -851,7 +855,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
         member_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetPublicMailboxMemberResp> {
+    ) -> Result<GetPublicMailboxMemberResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/{member_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1110,7 +1114,7 @@ impl UserMailboxMessageResource<'_> {
         user_mailbox_id: &str,
         message_id: &str,
         option: &RequestOption,
-    ) -> Result<GetUserMailboxMessageResp> {
+    ) -> Result<GetUserMailboxMessageResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/{message_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1133,7 +1137,7 @@ impl UserMailboxMessageResource<'_> {
         owner_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetByCardUserMailboxMessageResp> {
+    ) -> Result<GetByCardUserMailboxMessageResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/get_by_card");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1166,7 +1170,7 @@ impl UserMailboxMessageResource<'_> {
         folder_id: Option<&str>,
         only_unread: Option<bool>,
         option: &RequestOption,
-    ) -> Result<ListUserMailboxMessageResp> {
+    ) -> Result<ListUserMailboxMessageResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1198,7 +1202,7 @@ impl UserMailboxMessageResource<'_> {
         user_mailbox_id: &str,
         body: &SendUserMailboxMessageReqBody,
         option: &RequestOption,
-    ) -> Result<SendUserMailboxMessageResp> {
+    ) -> Result<SendUserMailboxMessageResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/send");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -1228,7 +1232,7 @@ impl UserMailboxMessageAttachmentResource<'_> {
         message_id: &str,
         attachment_ids: &[&str],
         option: &RequestOption,
-    ) -> Result<DownloadUrlUserMailboxMessageAttachmentResp> {
+    ) -> Result<DownloadUrlUserMailboxMessageAttachmentResp, LarkError> {
         let path = format!(
             "/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/{message_id}/attachments/download_url"
         );
@@ -1261,7 +1265,7 @@ impl UserMailboxFolderResource<'_> {
         user_mailbox_id: &str,
         body: &Folder,
         option: &RequestOption,
-    ) -> Result<CreateUserMailboxFolderResp> {
+    ) -> Result<CreateUserMailboxFolderResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1282,7 +1286,7 @@ impl UserMailboxFolderResource<'_> {
         user_mailbox_id: &str,
         folder_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteUserMailboxFolderResp> {
+    ) -> Result<DeleteUserMailboxFolderResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders/{folder_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -1302,7 +1306,7 @@ impl UserMailboxFolderResource<'_> {
         user_mailbox_id: &str,
         folder_type: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListUserMailboxFolderResp> {
+    ) -> Result<ListUserMailboxFolderResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1326,7 +1330,7 @@ impl UserMailboxFolderResource<'_> {
         folder_id: &str,
         body: &Folder,
         option: &RequestOption,
-    ) -> Result<PatchUserMailboxFolderResp> {
+    ) -> Result<PatchUserMailboxFolderResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders/{folder_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -1356,7 +1360,7 @@ impl UserMailboxMailContactResource<'_> {
         user_mailbox_id: &str,
         body: &MailContact,
         option: &RequestOption,
-    ) -> Result<CreateUserMailboxMailContactResp> {
+    ) -> Result<CreateUserMailboxMailContactResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1377,7 +1381,7 @@ impl UserMailboxMailContactResource<'_> {
         user_mailbox_id: &str,
         mail_contact_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteUserMailboxMailContactResp> {
+    ) -> Result<DeleteUserMailboxMailContactResp, LarkError> {
         let path = format!(
             "/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts/{mail_contact_id}"
         );
@@ -1399,7 +1403,7 @@ impl UserMailboxMailContactResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListUserMailboxMailContactResp> {
+    ) -> Result<ListUserMailboxMailContactResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1426,7 +1430,7 @@ impl UserMailboxMailContactResource<'_> {
         mail_contact_id: &str,
         body: &MailContact,
         option: &RequestOption,
-    ) -> Result<PatchUserMailboxMailContactResp> {
+    ) -> Result<PatchUserMailboxMailContactResp, LarkError> {
         let path = format!(
             "/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts/{mail_contact_id}"
         );
@@ -1457,7 +1461,7 @@ impl UserMailboxRuleResource<'_> {
         user_mailbox_id: &str,
         body: &Rule,
         option: &RequestOption,
-    ) -> Result<CreateUserMailboxRuleResp> {
+    ) -> Result<CreateUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1478,7 +1482,7 @@ impl UserMailboxRuleResource<'_> {
         user_mailbox_id: &str,
         rule_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteUserMailboxRuleResp> {
+    ) -> Result<DeleteUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules/{rule_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1496,7 +1500,7 @@ impl UserMailboxRuleResource<'_> {
         &self,
         user_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<ListUserMailboxRuleResp> {
+    ) -> Result<ListUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1516,7 +1520,7 @@ impl UserMailboxRuleResource<'_> {
         user_mailbox_id: &str,
         body: &ReorderUserMailboxRuleReqBody,
         option: &RequestOption,
-    ) -> Result<ReorderUserMailboxRuleResp> {
+    ) -> Result<ReorderUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules/reorder");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1537,7 +1541,7 @@ impl UserMailboxRuleResource<'_> {
         rule_id: &str,
         body: &Rule,
         option: &RequestOption,
-    ) -> Result<UpdateUserMailboxRuleResp> {
+    ) -> Result<UpdateUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules/{rule_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1566,7 +1570,7 @@ impl MailgroupAliasResource<'_> {
         mailgroup_id: &str,
         body: &CreateMailgroupAliasReqBody,
         option: &RequestOption,
-    ) -> Result<CreateMailgroupAliasResp> {
+    ) -> Result<CreateMailgroupAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1587,7 +1591,7 @@ impl MailgroupAliasResource<'_> {
         mailgroup_id: &str,
         alias_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases/{alias_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1604,7 +1608,7 @@ impl MailgroupAliasResource<'_> {
         &self,
         mailgroup_id: &str,
         option: &RequestOption,
-    ) -> Result<ListMailgroupAliasResp> {
+    ) -> Result<ListMailgroupAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1632,7 +1636,7 @@ impl MailgroupManagerResource<'_> {
         mailgroup_id: &str,
         body: &BatchCreateMailgroupManagerReqBody,
         option: &RequestOption,
-    ) -> Result<BatchCreateMailgroupManagerResp> {
+    ) -> Result<BatchCreateMailgroupManagerResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers/batch_create");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1653,7 +1657,7 @@ impl MailgroupManagerResource<'_> {
         mailgroup_id: &str,
         body: &BatchDeleteMailgroupManagerReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers/batch_delete");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1673,7 +1677,7 @@ impl MailgroupManagerResource<'_> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListMailgroupManagerResp> {
+    ) -> Result<ListMailgroupManagerResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1708,7 +1712,7 @@ impl MailgroupPermissionMemberResource<'_> {
         body: &MailgroupPermissionMember,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateMailgroupPermissionMemberResp> {
+    ) -> Result<CreateMailgroupPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1732,7 +1736,7 @@ impl MailgroupPermissionMemberResource<'_> {
         mailgroup_id: &str,
         permission_member_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
             "/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/{permission_member_id}"
         );
@@ -1753,7 +1757,7 @@ impl MailgroupPermissionMemberResource<'_> {
         permission_member_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetMailgroupPermissionMemberResp> {
+    ) -> Result<GetMailgroupPermissionMemberResp, LarkError> {
         let path = format!(
             "/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/{permission_member_id}"
         );
@@ -1783,7 +1787,7 @@ impl MailgroupPermissionMemberResource<'_> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListMailgroupPermissionMemberResp> {
+    ) -> Result<ListMailgroupPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1816,7 +1820,7 @@ impl MailgroupPermissionMemberResource<'_> {
         body: &BatchCreateMailgroupPermissionMemberReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchCreateMailgroupPermissionMemberResp> {
+    ) -> Result<BatchCreateMailgroupPermissionMemberResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/batch_create");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -1841,7 +1845,7 @@ impl MailgroupPermissionMemberResource<'_> {
         mailgroup_id: &str,
         body: &BatchDeleteMailgroupPermissionMemberReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/batch_delete");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -1869,7 +1873,7 @@ impl PublicMailboxAliasResource<'_> {
         public_mailbox_id: &str,
         body: &CreatePublicMailboxAliasReqBody,
         option: &RequestOption,
-    ) -> Result<CreatePublicMailboxAliasResp> {
+    ) -> Result<CreatePublicMailboxAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1890,7 +1894,7 @@ impl PublicMailboxAliasResource<'_> {
         public_mailbox_id: &str,
         alias_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases/{alias_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -1908,7 +1912,7 @@ impl PublicMailboxAliasResource<'_> {
         &self,
         public_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<ListPublicMailboxAliasResp> {
+    ) -> Result<ListPublicMailboxAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1935,7 +1939,7 @@ impl UserResource<'_> {
         &self,
         body: &QueryUserReqBody,
         option: &RequestOption,
-    ) -> Result<QueryUserResp> {
+    ) -> Result<QueryUserResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/mail/v1/users/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -1963,7 +1967,7 @@ impl UserMailboxResource<'_> {
         user_mailbox_id: &str,
         transfer_mailbox: Option<&str>,
         option: &RequestOption,
-    ) -> Result<DeleteUserMailboxResp> {
+    ) -> Result<DeleteUserMailboxResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1993,7 +1997,7 @@ impl UserMailboxAliasResource<'_> {
         user_mailbox_id: &str,
         body: &CreateUserMailboxAliasReqBody,
         option: &RequestOption,
-    ) -> Result<CreateUserMailboxAliasResp> {
+    ) -> Result<CreateUserMailboxAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/aliases");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2014,7 +2018,7 @@ impl UserMailboxAliasResource<'_> {
         user_mailbox_id: &str,
         alias_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteUserMailboxAliasResp> {
+    ) -> Result<DeleteUserMailboxAliasResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/aliases/{alias_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -2033,7 +2037,7 @@ impl UserMailboxAliasResource<'_> {
         &self,
         user_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<ListUserMailboxAliasResp> {
+    ) -> Result<ListUserMailboxAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/aliases");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -2060,7 +2064,7 @@ impl UserMailboxEventResource<'_> {
         &self,
         user_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<SubscribeUserMailboxEventResp> {
+    ) -> Result<SubscribeUserMailboxEventResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/event/subscribe");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -2079,7 +2083,7 @@ impl UserMailboxEventResource<'_> {
         &self,
         user_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<SubscriptionUserMailboxEventResp> {
+    ) -> Result<SubscriptionUserMailboxEventResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/event/subscription");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -2099,7 +2103,7 @@ impl UserMailboxEventResource<'_> {
         &self,
         user_mailbox_id: &str,
         option: &RequestOption,
-    ) -> Result<UnsubscribeUserMailboxEventResp> {
+    ) -> Result<UnsubscribeUserMailboxEventResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/event/unsubscribe");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User];

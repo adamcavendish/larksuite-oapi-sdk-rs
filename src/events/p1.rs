@@ -8,7 +8,7 @@ use std::pin::Pin;
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::{Error, Result};
+use crate::error::LarkError;
 use crate::event::EventDispatcher;
 
 // ── P1 payload types ──────────────────────────────────────────────────────────
@@ -427,20 +427,22 @@ pub struct P1OutApprovalV4 {
 
 fn wrap_handler<T, F, Fut>(
     handler: F,
-) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync + 'static
+) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
++ Send
++ Sync
++ 'static
 where
     T: for<'de> serde::Deserialize<'de> + Send + 'static,
     F: Fn(T) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<()>> + Send + 'static,
+    Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
 {
     move |val: serde_json::Value| {
         let result: std::result::Result<T, _> = serde_json::from_value(val);
         match result {
-            Ok(typed) => {
-                Box::pin(handler(typed)) as Pin<Box<dyn Future<Output = Result<()>> + Send>>
-            }
+            Ok(typed) => Box::pin(handler(typed))
+                as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>,
             Err(e) => Box::pin(async move {
-                Err(Error::Event(format!(
+                Err(LarkError::Event(format!(
                     "failed to deserialize event payload: {e}"
                 )))
             }),
@@ -454,7 +456,7 @@ impl EventDispatcher {
     pub fn on_p1_order_paid_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1OrderPaidV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("order_paid", wrap_handler(handler))
     }
@@ -462,7 +464,7 @@ impl EventDispatcher {
     pub fn on_p1_app_uninstalled_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1AppUninstalledV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("app_uninstalled", wrap_handler(handler))
     }
@@ -470,7 +472,7 @@ impl EventDispatcher {
     pub fn on_p1_app_status_changed_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1AppStatusChangedV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("app_status_change", wrap_handler(handler))
     }
@@ -478,7 +480,7 @@ impl EventDispatcher {
     pub fn on_p1_app_open_v6<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1AppOpenV6) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("app_open", wrap_handler(handler))
     }
@@ -486,7 +488,7 @@ impl EventDispatcher {
     pub fn on_p1_message_receive_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1MessageReceiveV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("message", wrap_handler(handler))
     }
@@ -494,7 +496,7 @@ impl EventDispatcher {
     pub fn on_p1_message_read_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1MessageReadV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("message_read", wrap_handler(handler))
     }
@@ -502,7 +504,7 @@ impl EventDispatcher {
     pub fn on_p1_add_bot_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1AddBotV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("add_bot", wrap_handler(handler))
     }
@@ -510,7 +512,7 @@ impl EventDispatcher {
     pub fn on_p1_remove_bot_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1RemoveBotV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("remove_bot", wrap_handler(handler))
     }
@@ -518,7 +520,7 @@ impl EventDispatcher {
     pub fn on_p1_p2p_chat_created_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1P2PChatCreatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("p2p_chat_create", wrap_handler(handler))
     }
@@ -526,7 +528,7 @@ impl EventDispatcher {
     pub fn on_p1_chat_disband_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1ChatDisbandV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("chat_disband", wrap_handler(handler))
     }
@@ -534,7 +536,7 @@ impl EventDispatcher {
     pub fn on_p1_group_setting_updated_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1GroupSettingUpdatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("group_setting_update", wrap_handler(handler))
     }
@@ -545,7 +547,7 @@ impl EventDispatcher {
     pub fn on_p1_user_in_out_chat_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1UserInOutChatV1) -> Fut + Send + Sync + 'static + Clone,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("add_user_to_chat", wrap_handler(handler.clone()))
             .on_event("remove_user_from_chat", wrap_handler(handler.clone()))
@@ -555,7 +557,7 @@ impl EventDispatcher {
     pub fn on_p1_user_status_changed_v3<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1UserStatusChangedV3) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("user_status_change", wrap_handler(handler))
     }
@@ -565,7 +567,7 @@ impl EventDispatcher {
     pub fn on_p1_user_changed_v3<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1UserChangedV3) -> Fut + Send + Sync + 'static + Clone,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("user_add", wrap_handler(handler.clone()))
             .on_event("user_leave", wrap_handler(handler.clone()))
@@ -577,7 +579,7 @@ impl EventDispatcher {
     pub fn on_p1_department_changed_v3<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1DepartmentChangedV3) -> Fut + Send + Sync + 'static + Clone,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("dept_add", wrap_handler(handler.clone()))
             .on_event("dept_delete", wrap_handler(handler.clone()))
@@ -587,7 +589,7 @@ impl EventDispatcher {
     pub fn on_p1_contact_scope_changed_v3<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1ContactScopeChangedV3) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("contact_scope_change", wrap_handler(handler))
     }
@@ -597,7 +599,7 @@ impl EventDispatcher {
     pub fn on_p1_third_party_meeting_room_changed_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1ThirdPartyMeetingRoomChangedV1) -> Fut + Send + Sync + 'static + Clone,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event(
             "third_party_meeting_room_event_created",
@@ -616,7 +618,7 @@ impl EventDispatcher {
     pub fn on_p1_leave_approval_v4<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1LeaveApprovalV4) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("leave_approvalV2", wrap_handler(handler))
     }
@@ -624,7 +626,7 @@ impl EventDispatcher {
     pub fn on_p1_work_approval_v4<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1WorkApprovalV4) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("work_approval", wrap_handler(handler))
     }
@@ -632,7 +634,7 @@ impl EventDispatcher {
     pub fn on_p1_shift_approval_v4<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1ShiftApprovalV4) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("shift_approval", wrap_handler(handler))
     }
@@ -640,7 +642,7 @@ impl EventDispatcher {
     pub fn on_p1_remedy_approval_v4<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1RemedyApprovalV4) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("remedy_approval", wrap_handler(handler))
     }
@@ -648,7 +650,7 @@ impl EventDispatcher {
     pub fn on_p1_trip_approval_v4<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1TripApprovalV4) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("trip_approval", wrap_handler(handler))
     }
@@ -656,7 +658,7 @@ impl EventDispatcher {
     pub fn on_p1_out_approval_v4<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P1OutApprovalV4) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("out_approval", wrap_handler(handler))
     }
@@ -664,7 +666,7 @@ impl EventDispatcher {
     pub fn on_app_ticket_event<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(AppTicketEvent) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("app_ticket", wrap_handler(handler))
     }

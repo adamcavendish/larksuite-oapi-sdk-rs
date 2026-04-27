@@ -7,7 +7,7 @@ use crate::constants::{
     ERR_CODE_APP_ACCESS_TOKEN_INVALID, ERR_CODE_APP_TICKET_INVALID,
     ERR_CODE_TENANT_ACCESS_TOKEN_INVALID, USER_AGENT,
 };
-use crate::error::{Error, Result};
+use crate::error::LarkError;
 use crate::req::{ApiReq, FormDataValue, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::token::{AppTicketManager, TokenManager};
@@ -16,7 +16,7 @@ pub(crate) async fn request(
     config: &Config,
     api_req: &ApiReq,
     option: &RequestOption,
-) -> Result<ApiResp> {
+) -> Result<ApiResp, LarkError> {
     let span = tracing::info_span!(
         "lark.request",
         method = %api_req.http_method,
@@ -25,7 +25,7 @@ pub(crate) async fn request(
 
     let token_type = span.in_scope(|| {
         validate(config, api_req, option)?;
-        Ok::<_, Error>(determine_token_type(config, api_req, option))
+        Ok::<_, LarkError>(determine_token_type(config, api_req, option))
     })?;
 
     do_request(config, api_req, option, token_type)
@@ -37,7 +37,7 @@ pub(crate) async fn request_typed<T: for<'de> serde::Deserialize<'de>>(
     config: &Config,
     api_req: &ApiReq,
     option: &RequestOption,
-) -> Result<(ApiResp, RawResponse<T>)> {
+) -> Result<(ApiResp, RawResponse<T>), LarkError> {
     let resp = request(config, api_req, option).await?;
 
     if option.file_download {
@@ -52,17 +52,17 @@ pub(crate) async fn request_typed<T: for<'de> serde::Deserialize<'de>>(
 
     let raw: RawResponse<T> = serde_json::from_slice(&resp.raw_body)?;
     if !raw.code_error.success() {
-        return Err(Error::Api(Box::new(raw.code_error)));
+        return Err(LarkError::Api(Box::new(raw.code_error)));
     }
     Ok((resp, raw))
 }
 
-fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result<()> {
+fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result<(), LarkError> {
     if config.app_id.is_empty() {
-        return Err(Error::IllegalParam("app_id is empty".to_string()));
+        return Err(LarkError::IllegalParam("app_id is empty".to_string()));
     }
     if config.app_secret.is_empty() {
-        return Err(Error::IllegalParam("app_secret is empty".to_string()));
+        return Err(LarkError::IllegalParam("app_secret is empty".to_string()));
     }
 
     if config.app_type == AppType::Marketplace {
@@ -70,7 +70,7 @@ fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result
             .supported_access_token_types
             .contains(&AccessTokenType::Tenant);
         if needs_tenant_token && option.tenant_key.is_none() && config.enable_token_cache {
-            return Err(Error::IllegalParam(
+            return Err(LarkError::IllegalParam(
                 "marketplace app requires tenant_key for tenant access token".to_string(),
             ));
         }
@@ -78,12 +78,12 @@ fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result
 
     if let Some(ref headers) = option.headers {
         if headers.contains_key("X-Request-Id") {
-            return Err(Error::IllegalParam(
+            return Err(LarkError::IllegalParam(
                 "use X-Request-Id as header key is not allowed".to_string(),
             ));
         }
         if headers.contains_key("Request-Id") {
-            return Err(Error::IllegalParam(
+            return Err(LarkError::IllegalParam(
                 "use Request-Id as header key is not allowed".to_string(),
             ));
         }
@@ -94,23 +94,26 @@ fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result
     Ok(())
 }
 
-fn validate_token_type(supported: &[AccessTokenType], option: &RequestOption) -> Result<()> {
+fn validate_token_type(
+    supported: &[AccessTokenType],
+    option: &RequestOption,
+) -> Result<(), LarkError> {
     if supported.is_empty() || supported.contains(&AccessTokenType::None) {
         return Ok(());
     }
 
     if option.user_access_token.is_some() && !supported.contains(&AccessTokenType::User) {
-        return Err(Error::IllegalParam(
+        return Err(LarkError::IllegalParam(
             "user access token is not supported for this API".to_string(),
         ));
     }
     if option.tenant_access_token.is_some() && !supported.contains(&AccessTokenType::Tenant) {
-        return Err(Error::IllegalParam(
+        return Err(LarkError::IllegalParam(
             "tenant access token is not supported for this API".to_string(),
         ));
     }
     if option.app_access_token.is_some() && !supported.contains(&AccessTokenType::App) {
-        return Err(Error::IllegalParam(
+        return Err(LarkError::IllegalParam(
             "app access token is not supported for this API".to_string(),
         ));
     }
@@ -169,7 +172,7 @@ async fn do_request(
     api_req: &ApiReq,
     option: &RequestOption,
     token_type: AccessTokenType,
-) -> Result<ApiResp> {
+) -> Result<ApiResp, LarkError> {
     let max_retries = config.max_retries;
     let mut last_err = None;
 
@@ -185,36 +188,36 @@ async fn do_request(
                         let _ = atm.apply_app_ticket(config).await;
                     }
                     if is_token_invalid_error(code_err.code) {
-                        last_err = Some(Error::Api(Box::new(code_err)));
+                        last_err = Some(LarkError::Api(Box::new(code_err)));
                         continue;
                     }
                 }
                 return Ok(resp);
             }
-            Err(Error::DialFailed(msg)) => {
-                last_err = Some(Error::DialFailed(msg));
+            Err(LarkError::DialFailed(msg)) => {
+                last_err = Some(LarkError::DialFailed(msg));
                 continue;
             }
-            Err(Error::ServerTimeout(msg)) => {
-                last_err = Some(Error::ServerTimeout(msg));
+            Err(LarkError::ServerTimeout(msg)) => {
+                last_err = Some(LarkError::ServerTimeout(msg));
                 continue;
             }
-            Err(Error::RateLimited(msg)) => {
-                last_err = Some(Error::RateLimited(msg));
+            Err(LarkError::RateLimited(msg)) => {
+                last_err = Some(LarkError::RateLimited(msg));
                 continue;
             }
             Err(e) => return Err(e),
         }
     }
 
-    Err(last_err.unwrap_or(Error::MaxRetries))
+    Err(last_err.unwrap_or(LarkError::MaxRetries))
 }
 
 async fn resolve_bearer_token(
     config: &Config,
     option: &RequestOption,
     token_type: AccessTokenType,
-) -> Result<Option<String>> {
+) -> Result<Option<String>, LarkError> {
     if !config.enable_token_cache {
         return match token_type {
             AccessTokenType::User => Ok(option.user_access_token.clone()),
@@ -254,25 +257,25 @@ pub(crate) async fn raw_send(
     option: &RequestOption,
     _token_type: AccessTokenType,
     bearer_token: Option<&str>,
-) -> Result<ApiResp> {
+) -> Result<ApiResp, LarkError> {
     let full_url = build_url(config, api_req);
 
     let mut builder = config
         .http_client
         .request(api_req.http_method.clone(), &full_url)
-        .map_err(|e| Error::IllegalParam(format!("invalid url: {e}")))?;
+        .map_err(|e| LarkError::IllegalParam(format!("invalid url: {e}")))?;
 
     builder = builder.header(UA_HEADER, HeaderValue::from_static(USER_AGENT));
 
     if let Some(ref id) = option.request_id {
         builder = builder
             .header_str(CUSTOM_REQUEST_ID, id.as_str())
-            .map_err(|e| Error::IllegalParam(format!("invalid request id header: {e}")))?;
+            .map_err(|e| LarkError::IllegalParam(format!("invalid request id header: {e}")))?;
     } else {
         let id = uuid::Uuid::new_v4().to_string();
         builder = builder
             .header_str(CUSTOM_REQUEST_ID, &id)
-            .map_err(|e| Error::IllegalParam(format!("invalid request id header: {e}")))?;
+            .map_err(|e| LarkError::IllegalParam(format!("invalid request id header: {e}")))?;
     }
 
     if let Some(token) = bearer_token {
@@ -284,7 +287,7 @@ pub(crate) async fn raw_send(
     {
         builder = builder
             .header_str("X-Lark-Helpdesk-Authorization", auth_token.as_str())
-            .map_err(|e| Error::IllegalParam(format!("invalid helpdesk header: {e}")))?;
+            .map_err(|e| LarkError::IllegalParam(format!("invalid helpdesk header: {e}")))?;
     }
 
     for (key, value) in &config.default_headers {
@@ -298,9 +301,9 @@ pub(crate) async fn raw_send(
 
     match &api_req.body {
         Some(ReqBody::Json(value)) => {
-            builder = builder
-                .json(value)
-                .map_err(|e| Error::IllegalParam(format!("failed to serialize json body: {e}")))?;
+            builder = builder.json(value).map_err(|e| {
+                LarkError::IllegalParam(format!("failed to serialize json body: {e}"))
+            })?;
         }
         Some(ReqBody::FormData(fields)) => {
             let mut form = aioduct::Multipart::new();
@@ -355,7 +358,7 @@ pub(crate) async fn raw_send(
     }
 
     let response = builder.send().await.map_err(|e| match e {
-        aioduct::Error::Timeout => Error::ClientTimeout("request timed out".to_string()),
+        aioduct::Error::Timeout => LarkError::ClientTimeout("request timed out".to_string()),
         aioduct::Error::Io(ref io_err)
             if matches!(
                 io_err.kind(),
@@ -364,9 +367,9 @@ pub(crate) async fn raw_send(
                     | std::io::ErrorKind::ConnectionAborted
             ) =>
         {
-            Error::DialFailed(e.to_string())
+            LarkError::DialFailed(e.to_string())
         }
-        other => Error::Http(other),
+        other => LarkError::Http(other),
     })?;
 
     let status_code = response.status().as_u16();
@@ -383,7 +386,7 @@ pub(crate) async fn raw_send(
             log_id = %log_id,
             "server timeout (504)"
         );
-        return Err(Error::ServerTimeout(
+        return Err(LarkError::ServerTimeout(
             "server returned 504 Gateway Timeout".to_string(),
         ));
     }
@@ -400,13 +403,13 @@ pub(crate) async fn raw_send(
             log_id = %log_id,
             "rate limited (429)"
         );
-        return Err(Error::RateLimited(
+        return Err(LarkError::RateLimited(
             "server returned 429 Too Many Requests".to_string(),
         ));
     }
 
     let header = response.headers().clone();
-    let raw_body = response.bytes().await.map_err(Error::Http)?.to_vec();
+    let raw_body = response.bytes().await.map_err(LarkError::Http)?.to_vec();
 
     let enabled = config
         .log_level

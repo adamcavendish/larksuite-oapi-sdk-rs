@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
@@ -755,7 +755,7 @@ impl<'a> AppResource<'a> {
         app_token: &str,
         body: &CopyAppReqBody,
         option: &RequestOption,
-    ) -> Result<CopyAppResp> {
+    ) -> Result<CopyAppResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/copy");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -776,7 +776,7 @@ impl<'a> AppResource<'a> {
         &self,
         body: &CreateAppReqBody,
         option: &RequestOption,
-    ) -> Result<CreateAppResp> {
+    ) -> Result<CreateAppResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/bitable/v1/apps");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         api_req.body = Some(ReqBody::json(body)?);
@@ -790,7 +790,11 @@ impl<'a> AppResource<'a> {
         })
     }
 
-    pub async fn get(&self, app_token: &str, option: &RequestOption) -> Result<GetAppResp> {
+    pub async fn get(
+        &self,
+        app_token: &str,
+        option: &RequestOption,
+    ) -> Result<GetAppResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -808,7 +812,7 @@ impl<'a> AppResource<'a> {
         app_token: &str,
         body: &UpdateAppReqBody,
         option: &RequestOption,
-    ) -> Result<UpdateAppResp> {
+    ) -> Result<UpdateAppResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -833,7 +837,7 @@ impl<'a> AppTableResource<'a> {
         app_token: &str,
         body: &CreateTableReqBody,
         option: &RequestOption,
-    ) -> Result<CreateTableResp> {
+    ) -> Result<CreateTableResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -853,7 +857,7 @@ impl<'a> AppTableResource<'a> {
         body: &BatchCreateTableReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchCreateTableResp> {
+    ) -> Result<BatchCreateTableResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/batch_create");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -875,7 +879,7 @@ impl<'a> AppTableResource<'a> {
         app_token: &str,
         table_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -892,7 +896,7 @@ impl<'a> AppTableResource<'a> {
         app_token: &str,
         table_ids: &[&str],
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/batch_delete");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -912,7 +916,7 @@ impl<'a> AppTableResource<'a> {
         table_id: &str,
         body: &PatchTableReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -931,7 +935,7 @@ impl<'a> AppTableResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListTableResp> {
+    ) -> Result<ListTableResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -962,7 +966,7 @@ impl<'a> AppTableViewResource<'a> {
         table_id: &str,
         body: &CreateViewReqBody,
         option: &RequestOption,
-    ) -> Result<CreateViewResp> {
+    ) -> Result<CreateViewResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -982,7 +986,7 @@ impl<'a> AppTableViewResource<'a> {
         table_id: &str,
         view_id: &str,
         option: &RequestOption,
-    ) -> Result<GetViewResp> {
+    ) -> Result<GetViewResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views/{view_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1003,7 +1007,7 @@ impl<'a> AppTableViewResource<'a> {
         view_id: &str,
         body: &PatchViewReqBody,
         option: &RequestOption,
-    ) -> Result<PatchViewResp> {
+    ) -> Result<PatchViewResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views/{view_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -1024,7 +1028,7 @@ impl<'a> AppTableViewResource<'a> {
         table_id: &str,
         view_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views/{view_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -1045,7 +1049,7 @@ impl<'a> AppTableViewResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListViewResp> {
+    ) -> Result<ListViewResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1079,7 +1083,7 @@ impl<'a> AppTableFieldResource<'a> {
         table_id: &str,
         body: &CreateFieldReqBody,
         option: &RequestOption,
-    ) -> Result<CreateFieldResp> {
+    ) -> Result<CreateFieldResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1100,7 +1104,7 @@ impl<'a> AppTableFieldResource<'a> {
         field_id: &str,
         body: &UpdateFieldReqBody,
         option: &RequestOption,
-    ) -> Result<UpdateFieldResp> {
+    ) -> Result<UpdateFieldResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields/{field_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
@@ -1121,7 +1125,7 @@ impl<'a> AppTableFieldResource<'a> {
         table_id: &str,
         field_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields/{field_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -1145,7 +1149,7 @@ impl<'a> AppTableFieldResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListFieldResp> {
+    ) -> Result<ListFieldResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1188,7 +1192,7 @@ impl<'a> AppTableRecordResource<'a> {
         body: &CreateRecordReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateRecordResp> {
+    ) -> Result<CreateRecordResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1213,7 +1217,7 @@ impl<'a> AppTableRecordResource<'a> {
         body: &UpdateRecordReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<UpdateRecordResp> {
+    ) -> Result<UpdateRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
@@ -1238,7 +1242,7 @@ impl<'a> AppTableRecordResource<'a> {
         record_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetRecordResp> {
+    ) -> Result<GetRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1261,7 +1265,7 @@ impl<'a> AppTableRecordResource<'a> {
         table_id: &str,
         record_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -1288,7 +1292,7 @@ impl<'a> AppTableRecordResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListRecordResp> {
+    ) -> Result<ListRecordResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1334,7 +1338,7 @@ impl<'a> AppTableRecordResource<'a> {
         body: &BatchCreateRecordReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchCreateRecordResp> {
+    ) -> Result<BatchCreateRecordResp, LarkError> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_create"
         );
@@ -1361,7 +1365,7 @@ impl<'a> AppTableRecordResource<'a> {
         body: &BatchUpdateRecordReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<BatchUpdateRecordResp> {
+    ) -> Result<BatchUpdateRecordResp, LarkError> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_update"
         );
@@ -1387,7 +1391,7 @@ impl<'a> AppTableRecordResource<'a> {
         table_id: &str,
         body: &BatchDeleteRecordReqBody,
         option: &RequestOption,
-    ) -> Result<BatchDeleteRecordResp> {
+    ) -> Result<BatchDeleteRecordResp, LarkError> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_delete"
         );
@@ -1412,7 +1416,7 @@ impl<'a> AppTableRecordResource<'a> {
         table_id: &str,
         body: &BatchGetRecordReqBody,
         option: &RequestOption,
-    ) -> Result<BatchGetRecordResp> {
+    ) -> Result<BatchGetRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_get");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -1439,7 +1443,7 @@ impl<'a> AppTableRecordResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<SearchRecordResp> {
+    ) -> Result<SearchRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/search");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -1477,7 +1481,7 @@ impl<'a> AppDashboardResource<'a> {
         block_id: &str,
         body: &CopyAppDashboardReqBody,
         option: &RequestOption,
-    ) -> Result<CopyAppDashboardResp> {
+    ) -> Result<CopyAppDashboardResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/dashboards/{block_id}/copy");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1497,7 +1501,7 @@ impl<'a> AppDashboardResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListDashboardResp> {
+    ) -> Result<ListDashboardResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/dashboards");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1531,7 +1535,7 @@ impl<'a> AppRoleResource<'a> {
         app_token: &str,
         body: &AppRoleReqBody,
         option: &RequestOption,
-    ) -> Result<CreateAppRoleResp> {
+    ) -> Result<CreateAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1553,7 +1557,7 @@ impl<'a> AppRoleResource<'a> {
         app_token: &str,
         role_id: &str,
         option: &RequestOption,
-    ) -> Result<DeleteAppRoleResp> {
+    ) -> Result<DeleteAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1574,7 +1578,7 @@ impl<'a> AppRoleResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAppRoleResp> {
+    ) -> Result<ListAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1602,7 +1606,7 @@ impl<'a> AppRoleResource<'a> {
         role_id: &str,
         body: &AppRoleReqBody,
         option: &RequestOption,
-    ) -> Result<UpdateAppRoleResp> {
+    ) -> Result<UpdateAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1633,7 +1637,7 @@ impl<'a> AppRoleMemberResource<'a> {
         role_id: &str,
         body: &BatchAppRoleMemberReqBody,
         option: &RequestOption,
-    ) -> Result<BatchCreateAppRoleMemberResp> {
+    ) -> Result<BatchCreateAppRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/batch_create");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -1656,7 +1660,7 @@ impl<'a> AppRoleMemberResource<'a> {
         role_id: &str,
         body: &BatchAppRoleMemberReqBody,
         option: &RequestOption,
-    ) -> Result<BatchDeleteAppRoleMemberResp> {
+    ) -> Result<BatchDeleteAppRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/batch_delete");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
@@ -1680,7 +1684,7 @@ impl<'a> AppRoleMemberResource<'a> {
         body: &CreateAppRoleMemberReqBody,
         member_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateAppRoleMemberResp> {
+    ) -> Result<CreateAppRoleMemberResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1706,7 +1710,7 @@ impl<'a> AppRoleMemberResource<'a> {
         member_id: &str,
         member_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<DeleteAppRoleMemberResp> {
+    ) -> Result<DeleteAppRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/{member_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
@@ -1732,7 +1736,7 @@ impl<'a> AppRoleMemberResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAppRoleMemberResp> {
+    ) -> Result<ListAppRoleMemberResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1769,7 +1773,7 @@ impl<'a> AppWorkflowResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAppWorkflowResp> {
+    ) -> Result<ListAppWorkflowResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/workflows");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1797,7 +1801,7 @@ impl<'a> AppWorkflowResource<'a> {
         workflow_id: &str,
         body: &UpdateWorkflowReqBody,
         option: &RequestOption,
-    ) -> Result<UpdateAppWorkflowResp> {
+    ) -> Result<UpdateAppWorkflowResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/workflows/{workflow_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -1827,7 +1831,7 @@ impl<'a> AppTableFormResource<'a> {
         table_id: &str,
         form_id: &str,
         option: &RequestOption,
-    ) -> Result<GetFormResp> {
+    ) -> Result<GetFormResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -1850,7 +1854,7 @@ impl<'a> AppTableFormResource<'a> {
         form_id: &str,
         body: &PatchAppTableFormReqBody,
         option: &RequestOption,
-    ) -> Result<PatchFormResp> {
+    ) -> Result<PatchFormResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
@@ -1883,7 +1887,7 @@ impl<'a> AppTableFormFieldResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListFormFieldResp> {
+    ) -> Result<ListFormFieldResp, LarkError> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}/fields"
         );
@@ -1914,7 +1918,7 @@ impl<'a> AppTableFormFieldResource<'a> {
         field_id: &str,
         body: &PatchAppTableFormFieldReqBody,
         option: &RequestOption,
-    ) -> Result<PatchFormFieldResp> {
+    ) -> Result<PatchFormFieldResp, LarkError> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}/fields/{field_id}"
         );

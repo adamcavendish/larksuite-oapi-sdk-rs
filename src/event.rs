@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::cache::Cache;
 use crate::crypto;
-use crate::error::{Error, Result};
+use crate::error::LarkError;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EventReq {
@@ -152,15 +152,21 @@ struct EncryptedBody {
 }
 
 pub type EventHandlerFn = Arc<
-    dyn Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync,
+    dyn Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
+        + Send
+        + Sync,
 >;
 
 pub type CustomizedEventHandlerFn = Arc<
-    dyn Fn(EventReq, EventV2Body) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync,
+    dyn Fn(EventReq, EventV2Body) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
+        + Send
+        + Sync,
 >;
 
 pub type CallbackHandlerFn = Arc<
-    dyn Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<serde_json::Value>> + Send>>
+    dyn Fn(
+            serde_json::Value,
+        ) -> Pin<Box<dyn Future<Output = Result<serde_json::Value, LarkError>> + Send>>
         + Send
         + Sync,
 >;
@@ -241,11 +247,11 @@ impl EventDispatcher {
     pub fn on_event<F, Fut>(mut self, event_type: impl Into<String>, handler: F) -> Self
     where
         F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         let event_type = event_type.into();
         let handler = Arc::new(
-            move |val: serde_json::Value| -> Pin<Box<dyn Future<Output = Result<()>> + Send>> {
+            move |val: serde_json::Value| -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>> {
                 Box::pin(handler(val))
             },
         );
@@ -256,12 +262,15 @@ impl EventDispatcher {
     pub fn on_callback<F, Fut>(mut self, callback_type: impl Into<String>, handler: F) -> Self
     where
         F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<serde_json::Value>> + Send + 'static,
+        Fut: Future<Output = Result<serde_json::Value, LarkError>> + Send + 'static,
     {
         let callback_type = callback_type.into();
-        let handler = Arc::new(move |val: serde_json::Value| -> Pin<Box<dyn Future<Output = Result<serde_json::Value>> + Send>> {
-            Box::pin(handler(val))
-        });
+        let handler =
+            Arc::new(
+                move |val: serde_json::Value| -> Pin<
+                    Box<dyn Future<Output = Result<serde_json::Value, LarkError>> + Send>,
+                > { Box::pin(handler(val)) },
+            );
         self.callback_handlers.insert(callback_type, handler);
         self
     }
@@ -271,13 +280,13 @@ impl EventDispatcher {
     pub fn on_customized_event<F, Fut>(mut self, event_type: impl Into<String>, handler: F) -> Self
     where
         F: Fn(EventReq, EventV2Body) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<()>> + Send + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         let event_type = event_type.into();
         let handler = Arc::new(
             move |req: EventReq,
                   body: EventV2Body|
-                  -> Pin<Box<dyn Future<Output = Result<()>> + Send>> {
+                  -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>> {
                 Box::pin(handler(req, body))
             },
         );
@@ -289,7 +298,7 @@ impl EventDispatcher {
     pub fn on_card_action_trigger<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(CardActionTriggerRequest) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<CardActionTriggerResponse>> + Send + 'static,
+        Fut: Future<Output = Result<CardActionTriggerResponse, LarkError>> + Send + 'static,
     {
         self.on_callback("card.action.trigger", move |val: serde_json::Value| {
             let req: CardActionTriggerRequest = serde_json::from_value(val).unwrap_or_default();
@@ -297,7 +306,7 @@ impl EventDispatcher {
             async move {
                 let resp = fut.await?;
                 serde_json::to_value(resp)
-                    .map_err(|e| Error::Event(format!("serialize trigger response: {e}")))
+                    .map_err(|e| LarkError::Event(format!("serialize trigger response: {e}")))
             }
         })
     }
@@ -306,7 +315,7 @@ impl EventDispatcher {
     pub fn on_url_preview_get<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(URLPreviewGetRequest) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<URLPreviewGetResponse>> + Send + 'static,
+        Fut: Future<Output = Result<URLPreviewGetResponse, LarkError>> + Send + 'static,
     {
         self.on_callback("url.preview.get", move |val: serde_json::Value| {
             let req: URLPreviewGetRequest = serde_json::from_value(val).unwrap_or_default();
@@ -314,7 +323,7 @@ impl EventDispatcher {
             async move {
                 let resp = fut.await?;
                 serde_json::to_value(resp)
-                    .map_err(|e| Error::Event(format!("serialize preview response: {e}")))
+                    .map_err(|e| LarkError::Event(format!("serialize preview response: {e}")))
             }
         })
     }
@@ -323,9 +332,9 @@ impl EventDispatcher {
     ///
     /// If an encrypt key is configured and the body contains an `"encrypt"` field,
     /// returns the encrypted ciphertext string. Otherwise returns the raw body as-is.
-    pub fn parse_req(&self, req: &EventReq) -> Result<String> {
+    pub fn parse_req(&self, req: &EventReq) -> Result<String, LarkError> {
         let body_str = std::str::from_utf8(&req.body)
-            .map_err(|e| Error::Event(format!("invalid utf8 body: {e}")))?;
+            .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))?;
 
         if self.event_encrypt_key.is_empty() {
             return Ok(body_str.to_string());
@@ -342,7 +351,7 @@ impl EventDispatcher {
     ///
     /// If an encrypt key is configured, decrypts the ciphertext. Otherwise
     /// returns the input unchanged. This is the second step after [`parse_req`].
-    pub fn decrypt_event(&self, cipher_event_json: &str) -> Result<String> {
+    pub fn decrypt_event(&self, cipher_event_json: &str) -> Result<String, LarkError> {
         if self.event_encrypt_key.is_empty() {
             return Ok(cipher_event_json.to_string());
         }
@@ -359,14 +368,14 @@ impl EventDispatcher {
         }
     }
 
-    async fn do_handle(&self, req: EventReq) -> Result<EventResp> {
+    async fn do_handle(&self, req: EventReq) -> Result<EventResp, LarkError> {
         let body_str = std::str::from_utf8(&req.body)
-            .map_err(|e| Error::Event(format!("invalid utf8 body: {e}")))?;
+            .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))?;
 
         let body_str = decrypt_if_needed(&self.event_encrypt_key, body_str)?;
 
         let parsed: EventV2Body = serde_json::from_str(&body_str)
-            .map_err(|e| Error::Event(format!("failed to parse event body: {e}")))?;
+            .map_err(|e| LarkError::Event(format!("failed to parse event body: {e}")))?;
 
         if parsed.req_type.as_deref() == Some("url_verification") {
             return self.handle_url_verification(&parsed);
@@ -408,12 +417,12 @@ impl EventDispatcher {
         })))
     }
 
-    fn handle_url_verification(&self, parsed: &EventV2Body) -> Result<EventResp> {
+    fn handle_url_verification(&self, parsed: &EventV2Body) -> Result<EventResp, LarkError> {
         if let Some(ref token) = parsed.token
             && token != &self.verification_token
             && !self.verification_token.is_empty()
         {
-            return Err(Error::Event("verification token mismatch".to_string()));
+            return Err(LarkError::Event("verification token mismatch".to_string()));
         }
 
         let challenge = parsed.challenge.as_deref().unwrap_or_default();
@@ -422,7 +431,7 @@ impl EventDispatcher {
         ))
     }
 
-    fn verify_signature(&self, req: &EventReq) -> Result<()> {
+    fn verify_signature(&self, req: &EventReq) -> Result<(), LarkError> {
         if self.event_encrypt_key.is_empty() {
             return Ok(());
         }
@@ -436,7 +445,9 @@ impl EventDispatcher {
             &req.body,
             &sig,
         ) {
-            return Err(Error::Event("signature verification failed".to_string()));
+            return Err(LarkError::Event(
+                "signature verification failed".to_string(),
+            ));
         }
 
         Ok(())
@@ -473,7 +484,7 @@ pub struct CustomResp {
 }
 
 pub type CardHandlerFn = Arc<
-    dyn Fn(CardAction) -> Pin<Box<dyn Future<Output = Result<CardHandlerResult>> + Send>>
+    dyn Fn(CardAction) -> Pin<Box<dyn Future<Output = Result<CardHandlerResult, LarkError>> + Send>>
         + Send
         + Sync,
 >;
@@ -523,15 +534,19 @@ impl CardActionHandler {
     ) -> Self
     where
         F: Fn(CardAction) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<serde_json::Value>> + Send + 'static,
+        Fut: Future<Output = Result<serde_json::Value, LarkError>> + Send + 'static,
     {
         Self {
             verification_token: verification_token.into(),
             event_encrypt_key: event_encrypt_key.into(),
-            handler: Arc::new(move |action: CardAction| -> Pin<Box<dyn Future<Output = Result<CardHandlerResult>> + Send>> {
-                let fut = handler(action);
-                Box::pin(async move { fut.await.map(CardHandlerResult::Json) })
-            }),
+            handler: Arc::new(
+                move |action: CardAction| -> Pin<
+                    Box<dyn Future<Output = Result<CardHandlerResult, LarkError>> + Send>,
+                > {
+                    let fut = handler(action);
+                    Box::pin(async move { fut.await.map(CardHandlerResult::Json) })
+                },
+            ),
             skip_sign_verify: false,
         }
     }
@@ -545,14 +560,16 @@ impl CardActionHandler {
     ) -> Self
     where
         F: Fn(CardAction) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<CardHandlerResult>> + Send + 'static,
+        Fut: Future<Output = Result<CardHandlerResult, LarkError>> + Send + 'static,
     {
         Self {
             verification_token: verification_token.into(),
             event_encrypt_key: event_encrypt_key.into(),
-            handler: Arc::new(move |action: CardAction| -> Pin<Box<dyn Future<Output = Result<CardHandlerResult>> + Send>> {
-                Box::pin(handler(action))
-            }),
+            handler: Arc::new(
+                move |action: CardAction| -> Pin<
+                    Box<dyn Future<Output = Result<CardHandlerResult, LarkError>> + Send>,
+                > { Box::pin(handler(action)) },
+            ),
             skip_sign_verify: false,
         }
     }
@@ -572,14 +589,14 @@ impl CardActionHandler {
         }
     }
 
-    async fn do_handle(&self, req: EventReq) -> Result<EventResp> {
+    async fn do_handle(&self, req: EventReq) -> Result<EventResp, LarkError> {
         let body_str = std::str::from_utf8(&req.body)
-            .map_err(|e| Error::Event(format!("invalid utf8 body: {e}")))?;
+            .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))?;
 
         let body_str = decrypt_if_needed(&self.event_encrypt_key, body_str)?;
 
         let parsed: serde_json::Value = serde_json::from_str(&body_str)
-            .map_err(|e| Error::Event(format!("failed to parse card body: {e}")))?;
+            .map_err(|e| LarkError::Event(format!("failed to parse card body: {e}")))?;
 
         if parsed.get("type").and_then(|v| v.as_str()) == Some("url_verification") {
             return self.handle_challenge(&parsed);
@@ -590,7 +607,7 @@ impl CardActionHandler {
         }
 
         let mut action: CardAction = serde_json::from_value(parsed)
-            .map_err(|e| Error::Event(format!("failed to parse card action: {e}")))?;
+            .map_err(|e| LarkError::Event(format!("failed to parse card action: {e}")))?;
         action.req = Some(req);
 
         let result = (self.handler)(action).await?;
@@ -615,12 +632,12 @@ impl CardActionHandler {
         }
     }
 
-    fn handle_challenge(&self, parsed: &serde_json::Value) -> Result<EventResp> {
+    fn handle_challenge(&self, parsed: &serde_json::Value) -> Result<EventResp, LarkError> {
         if let Some(token) = parsed.get("token").and_then(|v| v.as_str())
             && token != self.verification_token
             && !self.verification_token.is_empty()
         {
-            return Err(Error::Event("verification token mismatch".to_string()));
+            return Err(LarkError::Event("verification token mismatch".to_string()));
         }
 
         let challenge = parsed
@@ -636,7 +653,7 @@ impl CardActionHandler {
         &self,
         headers: &HashMap<String, Vec<String>>,
         body: &str,
-    ) -> Result<()> {
+    ) -> Result<(), LarkError> {
         if self.verification_token.is_empty() {
             return Ok(());
         }
@@ -645,7 +662,7 @@ impl CardActionHandler {
 
         if !crypto::verify_signature_sha1(&timestamp, &nonce, &self.verification_token, body, &sig)
         {
-            return Err(Error::Event(
+            return Err(LarkError::Event(
                 "card signature verification failed".to_string(),
             ));
         }
@@ -668,19 +685,21 @@ fn get_header(headers: &HashMap<String, Vec<String>>, key: &str) -> String {
 
 fn extract_signature_headers(
     headers: &HashMap<String, Vec<String>>,
-) -> Result<(String, String, String)> {
+) -> Result<(String, String, String), LarkError> {
     let timestamp = get_header(headers, "X-Lark-Request-Timestamp");
     let nonce = get_header(headers, "X-Lark-Request-Nonce");
     let sig = get_header(headers, "X-Lark-Signature");
 
     if sig.is_empty() {
-        return Err(Error::Event("missing X-Lark-Signature header".to_string()));
+        return Err(LarkError::Event(
+            "missing X-Lark-Signature header".to_string(),
+        ));
     }
 
     Ok((timestamp, nonce, sig))
 }
 
-fn decrypt_if_needed(encrypt_key: &str, body: &str) -> Result<String> {
+fn decrypt_if_needed(encrypt_key: &str, body: &str) -> Result<String, LarkError> {
     if encrypt_key.is_empty() {
         return Ok(body.to_string());
     }

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -63,7 +63,7 @@ impl<'a> OpenapiLogResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListOpenapiLogResp> {
+    ) -> Result<ListOpenapiLogResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/security_and_compliance/v1/openapi_logs",
@@ -103,7 +103,7 @@ impl<'a> OpenapiLogResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ListDataOpenapiLogResp> {
+    ) -> Result<ListDataOpenapiLogResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/security_and_compliance/v1/openapi_logs/list_data",

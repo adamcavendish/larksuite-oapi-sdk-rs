@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -321,7 +321,7 @@ impl<'a> SessionResource<'a> {
         &self,
         body: &CreateSessionReqBody,
         option: &RequestOption,
-    ) -> Result<CreateSessionResp> {
+    ) -> Result<CreateSessionResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/aily/v1/sessions");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -334,7 +334,11 @@ impl<'a> SessionResource<'a> {
         })
     }
 
-    pub async fn delete(&self, aily_session_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        aily_session_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -350,7 +354,7 @@ impl<'a> SessionResource<'a> {
         &self,
         aily_session_id: &str,
         option: &RequestOption,
-    ) -> Result<GetSessionResp> {
+    ) -> Result<GetSessionResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -368,7 +372,7 @@ impl<'a> SessionResource<'a> {
         aily_session_id: &str,
         body: &UpdateSessionReqBody,
         option: &RequestOption,
-    ) -> Result<UpdateSessionResp> {
+    ) -> Result<UpdateSessionResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -393,7 +397,7 @@ impl<'a> MessageResource<'a> {
         aily_session_id: &str,
         body: &CreateMessageReqBody,
         option: &RequestOption,
-    ) -> Result<CreateMessageResp> {
+    ) -> Result<CreateMessageResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/messages");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -412,7 +416,7 @@ impl<'a> MessageResource<'a> {
         aily_session_id: &str,
         aily_message_id: &str,
         option: &RequestOption,
-    ) -> Result<GetMessageResp> {
+    ) -> Result<GetMessageResp, LarkError> {
         let path =
             format!("/open-apis/aily/v1/sessions/{aily_session_id}/messages/{aily_message_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -432,7 +436,7 @@ impl<'a> MessageResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListMessageResp> {
+    ) -> Result<ListMessageResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/messages");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -462,7 +466,7 @@ impl<'a> RunResource<'a> {
         aily_session_id: &str,
         run_id: &str,
         option: &RequestOption,
-    ) -> Result<CancelRunResp> {
+    ) -> Result<CancelRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs/{run_id}/cancel");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -480,7 +484,7 @@ impl<'a> RunResource<'a> {
         aily_session_id: &str,
         body: &CreateRunReqBody,
         option: &RequestOption,
-    ) -> Result<CreateRunResp> {
+    ) -> Result<CreateRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -499,7 +503,7 @@ impl<'a> RunResource<'a> {
         aily_session_id: &str,
         run_id: &str,
         option: &RequestOption,
-    ) -> Result<GetRunResp> {
+    ) -> Result<GetRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs/{run_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -518,7 +522,7 @@ impl<'a> RunResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListRunResp> {
+    ) -> Result<ListRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -549,7 +553,7 @@ impl<'a> DataAssetResource<'a> {
         body: &CreateDataAssetReqBody,
         tenant_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateDataAssetResp> {
+    ) -> Result<CreateDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -572,7 +576,7 @@ impl<'a> DataAssetResource<'a> {
         data_asset_id: &str,
         tenant_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<DeleteDataAssetResp> {
+    ) -> Result<DeleteDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/{data_asset_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -594,7 +598,7 @@ impl<'a> DataAssetResource<'a> {
         data_asset_id: &str,
         tenant_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetDataAssetResp> {
+    ) -> Result<GetDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/{data_asset_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -618,7 +622,7 @@ impl<'a> DataAssetResource<'a> {
         page_token: Option<&str>,
         tenant_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListDataAssetResp> {
+    ) -> Result<ListDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -646,7 +650,7 @@ impl<'a> DataAssetResource<'a> {
         tenant_type: Option<&str>,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UploadFileDataAssetResp> {
+    ) -> Result<UploadFileDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/upload_file");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -677,7 +681,7 @@ impl<'a> DataAssetTagResource<'a> {
         page_token: Option<&str>,
         tenant_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListDataAssetTagResp> {
+    ) -> Result<ListDataAssetTagResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_asset_tags");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -710,7 +714,7 @@ impl<'a> KnowledgeResource<'a> {
         app_id: &str,
         body: &AskKnowledgeReqBody,
         option: &RequestOption,
-    ) -> Result<AskKnowledgeResp> {
+    ) -> Result<AskKnowledgeResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/knowledges/ask");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -735,7 +739,7 @@ impl<'a> SkillResource<'a> {
         app_id: &str,
         skill_id: &str,
         option: &RequestOption,
-    ) -> Result<GetSkillResp> {
+    ) -> Result<GetSkillResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/skills/{skill_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -754,7 +758,7 @@ impl<'a> SkillResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSkillResp> {
+    ) -> Result<ListSkillResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/skills");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
@@ -779,7 +783,7 @@ impl<'a> SkillResource<'a> {
         skill_id: &str,
         body: &StartSkillReqBody,
         option: &RequestOption,
-    ) -> Result<StartSkillResp> {
+    ) -> Result<StartSkillResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/skills/{skill_id}/start");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -166,7 +166,7 @@ impl<'a> AppResource<'a> {
         app_id: &str,
         lang: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetAppResp> {
+    ) -> Result<GetAppResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -188,7 +188,7 @@ impl<'a> AppResource<'a> {
         page_token: Option<&str>,
         lang: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAppResp> {
+    ) -> Result<ListAppResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/application/v6/applications");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -215,7 +215,7 @@ impl<'a> AppResource<'a> {
         user_id: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/application/v6/applications/{app_id}/management/check_admin");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -239,7 +239,7 @@ impl<'a> AppResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CheckBlacklistResp> {
+    ) -> Result<CheckBlacklistResp, LarkError> {
         let path = format!(
             "/open-apis/application/v6/applications/{app_id}/visibility/check_white_black_list"
         );
@@ -273,7 +273,7 @@ impl<'a> AppVersionResource<'a> {
         version_id: &str,
         lang: &str,
         option: &RequestOption,
-    ) -> Result<GetAppVersionResp> {
+    ) -> Result<GetAppVersionResp, LarkError> {
         let path =
             format!("/open-apis/application/v6/applications/{app_id}/app_versions/{version_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
@@ -296,7 +296,7 @@ impl<'a> AppVersionResource<'a> {
         page_token: Option<&str>,
         order: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListAppVersionResp> {
+    ) -> Result<ListAppVersionResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/app_versions");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -336,7 +336,7 @@ impl<'a> AppUsageResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetAppUsageResp> {
+    ) -> Result<GetAppUsageResp, LarkError> {
         let path = format!(
             "/open-apis/application/v6/applications/{app_id}/app_usage/department_overview"
         );
@@ -373,7 +373,7 @@ impl<'a> AppUsageResource<'a> {
         date: &str,
         cycle_type: i32,
         option: &RequestOption,
-    ) -> Result<GetAppUsageResp> {
+    ) -> Result<GetAppUsageResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{app_id}/app_usage/overview");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];

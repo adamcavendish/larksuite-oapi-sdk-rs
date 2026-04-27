@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -35,7 +35,7 @@ impl<'a> EntityResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateEntityResp> {
+    ) -> Result<CreateEntityResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/block/v2/entities");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -53,7 +53,7 @@ impl<'a> EntityResource<'a> {
         block_id: &str,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UpdateEntityResp> {
+    ) -> Result<UpdateEntityResp, LarkError> {
         let path = format!("/open-apis/block/v2/entities/{block_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -77,7 +77,7 @@ impl<'a> MessageResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateMessageResp> {
+    ) -> Result<CreateMessageResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/block/v2/message");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);

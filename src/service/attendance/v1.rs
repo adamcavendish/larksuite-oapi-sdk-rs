@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
 use crate::service::common::{DownloadResp, EmptyResp};
@@ -373,7 +373,7 @@ impl<'a> GroupResource<'a> {
         employee_type: &str,
         dept_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateGroupResp> {
+    ) -> Result<CreateGroupResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/groups");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.query_params.set("employee_type", employee_type);
@@ -396,7 +396,7 @@ impl<'a> GroupResource<'a> {
         employee_type: &str,
         dept_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetGroupResp> {
+    ) -> Result<GetGroupResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/groups/{group_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -413,7 +413,11 @@ impl<'a> GroupResource<'a> {
         })
     }
 
-    pub async fn delete(&self, group_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        group_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/groups/{group_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -430,7 +434,7 @@ impl<'a> GroupResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListGroupResp> {
+    ) -> Result<ListGroupResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/attendance/v1/groups");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -454,7 +458,7 @@ impl<'a> GroupResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListUserGroupResp> {
+    ) -> Result<ListUserGroupResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/groups/{group_id}/list_user");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -478,7 +482,7 @@ impl<'a> GroupResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<SearchGroupResp> {
+    ) -> Result<SearchGroupResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/groups/search");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -502,7 +506,7 @@ impl<'a> ShiftResource<'a> {
         &self,
         body: &CreateShiftReqBody,
         option: &RequestOption,
-    ) -> Result<CreateShiftResp> {
+    ) -> Result<CreateShiftResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/shifts");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -515,7 +519,11 @@ impl<'a> ShiftResource<'a> {
         })
     }
 
-    pub async fn get(&self, shift_id: &str, option: &RequestOption) -> Result<GetShiftResp> {
+    pub async fn get(
+        &self,
+        shift_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetShiftResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/shifts/{shift_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -528,7 +536,11 @@ impl<'a> ShiftResource<'a> {
         })
     }
 
-    pub async fn delete(&self, shift_id: &str, option: &RequestOption) -> Result<EmptyResp> {
+    pub async fn delete(
+        &self,
+        shift_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/shifts/{shift_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -545,7 +557,7 @@ impl<'a> ShiftResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListShiftResp> {
+    ) -> Result<ListShiftResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/attendance/v1/shifts");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -568,7 +580,7 @@ impl<'a> ShiftResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryShiftResp> {
+    ) -> Result<QueryShiftResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/shifts/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -593,7 +605,7 @@ impl<'a> UserSettingResource<'a> {
         body: &BatchGetUserSettingReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<BatchGetUserSettingResp> {
+    ) -> Result<BatchGetUserSettingResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/attendance/v1/user_settings/query",
@@ -621,7 +633,7 @@ impl<'a> RecordResource<'a> {
         body: &QueryRecordReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryRecordResp> {
+    ) -> Result<QueryRecordResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_tasks/query",
@@ -649,7 +661,7 @@ impl<'a> ApprovalInfoResource<'a> {
         body: &GetApprovalInfoReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<GetApprovalInfoResp> {
+    ) -> Result<GetApprovalInfoResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_approvals/query",
@@ -682,7 +694,7 @@ impl<'a> LeaveAccrualResource<'a> {
         page_token: Option<&str>,
         page_size: Option<i32>,
         option: &RequestOption,
-    ) -> Result<ListLeaveAccrualResp> {
+    ) -> Result<ListLeaveAccrualResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/attendance/v1/leave_accrual_record",
@@ -1011,7 +1023,7 @@ impl<'a> ArchiveRuleResource<'a> {
         &self,
         body: &UploadReportArchiveRuleReqBody,
         option: &RequestOption,
-    ) -> Result<UploadReportArchiveRuleResp> {
+    ) -> Result<UploadReportArchiveRuleResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/upload_report",
@@ -1032,7 +1044,7 @@ impl<'a> ArchiveRuleResource<'a> {
         &self,
         body: &UserStatsFieldsQueryArchiveRuleReqBody,
         option: &RequestOption,
-    ) -> Result<UserStatsFieldsQueryArchiveRuleResp> {
+    ) -> Result<UserStatsFieldsQueryArchiveRuleResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/user_stats_fields_query",
@@ -1053,7 +1065,7 @@ impl<'a> ArchiveRuleResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<DelReportArchiveRuleResp> {
+    ) -> Result<DelReportArchiveRuleResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/del_report",
@@ -1075,7 +1087,7 @@ impl<'a> ArchiveRuleResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListArchiveRuleResp> {
+    ) -> Result<ListArchiveRuleResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/attendance/v1/archive_rule");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = page_size {
@@ -1106,7 +1118,7 @@ impl<'a> LeaveAccrualRecordResource<'a> {
         body: &PatchLeaveAccrualRecordReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PatchLeaveAccrualRecordResp> {
+    ) -> Result<PatchLeaveAccrualRecordResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/leave_accrual_record/{leave_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1135,7 +1147,7 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
         leave_id: &str,
         body: &PatchLeaveEmployExpireRecordReqBody,
         option: &RequestOption,
-    ) -> Result<PatchLeaveEmployExpireRecordResp> {
+    ) -> Result<PatchLeaveEmployExpireRecordResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/leave_employ_expire_records/{leave_id}");
         let mut api_req = ApiReq::new(http::Method::PATCH, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1154,7 +1166,7 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
         &self,
         leave_id: &str,
         option: &RequestOption,
-    ) -> Result<GetLeaveEmployExpireRecordResp> {
+    ) -> Result<GetLeaveEmployExpireRecordResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/leave_employ_expire_records/{leave_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1178,7 +1190,7 @@ impl<'a> ApprovalInfoProcessResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ProcessApprovalInfoResp> {
+    ) -> Result<ProcessApprovalInfoResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/approval_infos/process",
@@ -1201,7 +1213,11 @@ pub struct FileResource<'a> {
 }
 
 impl<'a> FileResource<'a> {
-    pub async fn download(&self, file_id: &str, option: &RequestOption) -> Result<DownloadResp> {
+    pub async fn download(
+        &self,
+        file_id: &str,
+        option: &RequestOption,
+    ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/files/{file_id}/download");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1221,7 +1237,7 @@ impl<'a> FileResource<'a> {
         &self,
         body: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<UploadFileResp> {
+    ) -> Result<UploadFileResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/files/upload");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -1246,7 +1262,7 @@ impl<'a> UserApprovalResource<'a> {
         body: &CreateUserApprovalReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<CreateUserApprovalResp> {
+    ) -> Result<CreateUserApprovalResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_approvals",
@@ -1269,7 +1285,7 @@ impl<'a> UserApprovalResource<'a> {
         body: &QueryUserApprovalReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserApprovalResp> {
+    ) -> Result<QueryUserApprovalResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_approvals/query",
@@ -1298,7 +1314,7 @@ impl<'a> UserDailyShiftResource<'a> {
         body: &BatchCreateUserDailyShiftReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<BatchCreateUserDailyShiftResp> {
+    ) -> Result<BatchCreateUserDailyShiftResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_daily_shifts/batch_create",
@@ -1321,7 +1337,7 @@ impl<'a> UserDailyShiftResource<'a> {
         body: &serde_json::Value,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<BatchCreateTempUserDailyShiftResp> {
+    ) -> Result<BatchCreateTempUserDailyShiftResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_daily_shifts/batch_create_temp",
@@ -1344,7 +1360,7 @@ impl<'a> UserDailyShiftResource<'a> {
         body: &QueryUserDailyShiftReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserDailyShiftResp> {
+    ) -> Result<QueryUserDailyShiftResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_daily_shifts/query",
@@ -1373,7 +1389,7 @@ impl<'a> UserFlowResource<'a> {
         body: &BatchCreateUserFlowReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<BatchCreateUserFlowResp> {
+    ) -> Result<BatchCreateUserFlowResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_flows/batch_create",
@@ -1395,7 +1411,7 @@ impl<'a> UserFlowResource<'a> {
         &self,
         body: &BatchDelUserFlowReqBody,
         option: &RequestOption,
-    ) -> Result<BatchDelUserFlowResp> {
+    ) -> Result<BatchDelUserFlowResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_flows/batch_del",
@@ -1417,7 +1433,7 @@ impl<'a> UserFlowResource<'a> {
         user_flow_id: &str,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<GetUserFlowResp> {
+    ) -> Result<GetUserFlowResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/user_flows/{user_flow_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1437,7 +1453,7 @@ impl<'a> UserFlowResource<'a> {
         body: &QueryUserFlowReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserFlowResp> {
+    ) -> Result<QueryUserFlowResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_flows/query",
@@ -1466,7 +1482,7 @@ impl<'a> UserSettingResource2<'a> {
         body: &ModifyUserSettingReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<ModifyUserSettingResp> {
+    ) -> Result<ModifyUserSettingResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_settings/modify",
@@ -1489,7 +1505,7 @@ impl<'a> UserSettingResource2<'a> {
         body: &QueryUserSettingReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserSettingResp> {
+    ) -> Result<QueryUserSettingResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/attendance/v1/user_settings/query",
@@ -1518,7 +1534,7 @@ impl<'a> UserStatsDataResource<'a> {
         body: &QueryUserStatsDataReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserStatsDataResp> {
+    ) -> Result<QueryUserStatsDataResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_stats_datas/query",
@@ -1547,7 +1563,7 @@ impl<'a> UserStatsFieldResource<'a> {
         body: &QueryUserStatsFieldReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserStatsFieldResp> {
+    ) -> Result<QueryUserStatsFieldResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_stats_fields/query",
@@ -1576,7 +1592,7 @@ impl<'a> UserStatsViewResource<'a> {
         body: &QueryUserStatsViewReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserStatsViewResp> {
+    ) -> Result<QueryUserStatsViewResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_stats_views/query",
@@ -1600,7 +1616,7 @@ impl<'a> UserStatsViewResource<'a> {
         body: &UpdateUserStatsViewReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<UpdateUserStatsViewResp> {
+    ) -> Result<UpdateUserStatsViewResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/user_stats_views/{user_stats_view_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1627,7 +1643,7 @@ impl<'a> UserTaskResource<'a> {
         body: &QueryUserTaskReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserTaskResp> {
+    ) -> Result<QueryUserTaskResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_tasks/query",
@@ -1656,7 +1672,7 @@ impl<'a> UserTaskRemedyResource<'a> {
         body: &CreateUserTaskRemedyReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<CreateUserTaskRemedyResp> {
+    ) -> Result<CreateUserTaskRemedyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_task_remedys",
@@ -1679,7 +1695,7 @@ impl<'a> UserTaskRemedyResource<'a> {
         body: &QueryUserTaskRemedyReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserTaskRemedyResp> {
+    ) -> Result<QueryUserTaskRemedyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_task_remedys/query",
@@ -1702,7 +1718,7 @@ impl<'a> UserTaskRemedyResource<'a> {
         body: &QueryUserAllowedRemedysReqBody,
         employee_type: &str,
         option: &RequestOption,
-    ) -> Result<QueryUserAllowedRemedysUserTaskRemedyResp> {
+    ) -> Result<QueryUserAllowedRemedysUserTaskRemedyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/attendance/v1/user_task_remedys/query_user_allowed_remedys",

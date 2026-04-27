@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -70,7 +70,7 @@ impl<'a> PlanResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListPlanResp> {
+    ) -> Result<ListPlanResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/compensation/v1/plans");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -100,7 +100,7 @@ impl ArchiveResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateArchiveResp> {
+    ) -> Result<CreateArchiveResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/compensation/v1/archives");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(&body)?);
@@ -118,7 +118,7 @@ impl ArchiveResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryArchiveResp> {
+    ) -> Result<QueryArchiveResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/archives/query",
@@ -148,7 +148,7 @@ impl ChangeReasonResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListChangeReasonResp> {
+    ) -> Result<ListChangeReasonResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/compensation/v1/change_reasons",
@@ -183,7 +183,7 @@ impl IndicatorResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListIndicatorResp> {
+    ) -> Result<ListIndicatorResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/compensation/v1/indicators");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -215,7 +215,7 @@ impl ItemResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListItemResp> {
+    ) -> Result<ListItemResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/compensation/v1/items");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -247,7 +247,7 @@ impl ItemCategoryResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListItemCategoryResp> {
+    ) -> Result<ListItemCategoryResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/compensation/v1/item_categories",
@@ -281,7 +281,7 @@ impl LumpSumPaymentResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchCreateLumpSumPaymentResp> {
+    ) -> Result<BatchCreateLumpSumPaymentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/batch_create",
@@ -302,7 +302,7 @@ impl LumpSumPaymentResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchRemoveLumpSumPaymentResp> {
+    ) -> Result<BatchRemoveLumpSumPaymentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/batch_remove",
@@ -323,7 +323,7 @@ impl LumpSumPaymentResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchUpdateLumpSumPaymentResp> {
+    ) -> Result<BatchUpdateLumpSumPaymentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/batch_update",
@@ -344,7 +344,7 @@ impl LumpSumPaymentResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryLumpSumPaymentResp> {
+    ) -> Result<QueryLumpSumPaymentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/query",
@@ -365,7 +365,7 @@ impl LumpSumPaymentResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryDetailLumpSumPaymentResp> {
+    ) -> Result<QueryDetailLumpSumPaymentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/query_detail",
@@ -394,7 +394,7 @@ impl RecurringPaymentResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchCreateRecurringPaymentResp> {
+    ) -> Result<BatchCreateRecurringPaymentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/batch_create",
@@ -415,7 +415,7 @@ impl RecurringPaymentResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchRemoveRecurringPaymentResp> {
+    ) -> Result<BatchRemoveRecurringPaymentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/batch_remove",
@@ -436,7 +436,7 @@ impl RecurringPaymentResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<BatchUpdateRecurringPaymentResp> {
+    ) -> Result<BatchUpdateRecurringPaymentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/batch_update",
@@ -457,7 +457,7 @@ impl RecurringPaymentResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryRecurringPaymentResp> {
+    ) -> Result<QueryRecurringPaymentResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/query",
@@ -486,7 +486,7 @@ impl SocialArchiveResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QuerySocialArchiveResp> {
+    ) -> Result<QuerySocialArchiveResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/social_archive/query",
@@ -515,7 +515,7 @@ impl SocialArchiveAdjustRecordResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QuerySocialArchiveAdjustRecordResp> {
+    ) -> Result<QuerySocialArchiveAdjustRecordResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/social_archive_adjust_record/query",
@@ -540,7 +540,7 @@ pub struct SocialInsuranceResource<'a> {
 }
 
 impl SocialInsuranceResource<'_> {
-    pub async fn list(&self, option: &RequestOption) -> Result<ListSocialInsuranceResp> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListSocialInsuranceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::GET,
             "/open-apis/compensation/v1/social_insurances",
@@ -569,7 +569,7 @@ impl SocialPlanResource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListSocialPlanResp> {
+    ) -> Result<ListSocialPlanResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/compensation/v1/social_plans");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -592,7 +592,7 @@ impl SocialPlanResource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QuerySocialPlanResp> {
+    ) -> Result<QuerySocialPlanResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/compensation/v1/social_plans/query",

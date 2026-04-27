@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -64,7 +64,7 @@ impl<'a> TextResource<'a> {
         &self,
         body: &TranslateReqBody,
         option: &RequestOption,
-    ) -> Result<TranslateResp> {
+    ) -> Result<TranslateResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/translation/v1/text/translate",
@@ -84,7 +84,7 @@ impl<'a> TextResource<'a> {
         &self,
         body: &DetectLanguageReqBody,
         option: &RequestOption,
-    ) -> Result<DetectLanguageResp> {
+    ) -> Result<DetectLanguageResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/translation/v1/text/detect");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);

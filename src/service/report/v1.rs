@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::EmptyResp;
 use crate::transport;
@@ -129,7 +129,7 @@ impl<'a> RuleResource<'a> {
         include_deleted: Option<i32>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<QueryRuleResp> {
+    ) -> Result<QueryRuleResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/report/v1/rules/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = rule_name {
@@ -161,7 +161,7 @@ impl<'a> TaskResource<'a> {
         body: &QueryTaskReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<QueryTaskResp> {
+    ) -> Result<QueryTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/report/v1/tasks/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id_type {
@@ -191,7 +191,7 @@ impl<'a> RuleViewResource<'a> {
         body: &RemoveRuleViewReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/report/v1/rules/{rule_id}/views/remove");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];

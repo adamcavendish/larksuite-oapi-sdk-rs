@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -201,7 +201,7 @@ impl<'a> AiResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeVatInvoiceResp> {
+    ) -> Result<RecognizeVatInvoiceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/vat_invoice/recognize",
@@ -221,7 +221,7 @@ impl<'a> AiResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeBusinessCardResp> {
+    ) -> Result<RecognizeBusinessCardResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/business_card/recognize",
@@ -241,7 +241,7 @@ impl<'a> AiResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeIdCardResp> {
+    ) -> Result<RecognizeIdCardResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/id_card/recognize",
@@ -261,7 +261,7 @@ impl<'a> AiResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeBankCardResp> {
+    ) -> Result<RecognizeBankCardResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/bank_card/recognize",
@@ -281,7 +281,7 @@ impl<'a> AiResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeVehicleLicenseResp> {
+    ) -> Result<RecognizeVehicleLicenseResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/vehicle_license/recognize",
@@ -301,7 +301,7 @@ impl<'a> AiResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeTrainInvoiceResp> {
+    ) -> Result<RecognizeTrainInvoiceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/train_invoice/recognize",
@@ -321,7 +321,7 @@ impl<'a> AiResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeTaxiInvoiceResp> {
+    ) -> Result<RecognizeTaxiInvoiceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/taxi_invoice/recognize",
@@ -341,7 +341,7 @@ impl<'a> AiResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeContractResp> {
+    ) -> Result<RecognizeContractResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/contract/recognize",
@@ -369,7 +369,7 @@ impl<'a> ChinesePassportResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeChinesePassportRespV2> {
+    ) -> Result<RecognizeChinesePassportRespV2, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/chinese_passport/recognize",
@@ -396,7 +396,7 @@ impl<'a> DrivingLicenseResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeDrivingLicenseRespV2> {
+    ) -> Result<RecognizeDrivingLicenseRespV2, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/driving_license/recognize",
@@ -423,7 +423,7 @@ impl<'a> FoodManageLicenseResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeFoodManageLicenseResp> {
+    ) -> Result<RecognizeFoodManageLicenseResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/food_manage_license/recognize",
@@ -451,7 +451,7 @@ impl<'a> FoodProduceLicenseResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeFoodProduceLicenseResp> {
+    ) -> Result<RecognizeFoodProduceLicenseResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/food_produce_license/recognize",
@@ -479,7 +479,7 @@ impl<'a> HealthCertificateResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeHealthCertificateRespV2> {
+    ) -> Result<RecognizeHealthCertificateRespV2, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/health_certificate/recognize",
@@ -507,7 +507,7 @@ impl<'a> HkmMainlandTravelPermitResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeHkmMainlandTravelPermitRespV2> {
+    ) -> Result<RecognizeHkmMainlandTravelPermitRespV2, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/hkm_mainland_travel_permit/recognize",
@@ -535,7 +535,7 @@ impl<'a> TwMainlandTravelPermitResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeTwMainlandTravelPermitRespV2> {
+    ) -> Result<RecognizeTwMainlandTravelPermitRespV2, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/tw_mainland_travel_permit/recognize",
@@ -563,7 +563,7 @@ impl<'a> VehicleInvoiceResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeVehicleInvoiceResp> {
+    ) -> Result<RecognizeVehicleInvoiceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/vehicle_invoice/recognize",
@@ -590,7 +590,7 @@ impl<'a> ResumeResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<ParseResumeResp> {
+    ) -> Result<ParseResumeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/document_ai/v1/resume/parse");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -614,7 +614,7 @@ impl<'a> VatInvoiceResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeVatInvoiceRespV2> {
+    ) -> Result<RecognizeVatInvoiceRespV2, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/vat_invoice/recognize",
@@ -641,7 +641,7 @@ impl<'a> ContractResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<FieldExtractionContractResp> {
+    ) -> Result<FieldExtractionContractResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/contract/field_extraction",
@@ -678,7 +678,7 @@ impl<'a> BusinessLicenseResource<'a> {
         &self,
         body: &RecognizeFileReqBody,
         option: &RequestOption,
-    ) -> Result<RecognizeBusinessLicenseResp> {
+    ) -> Result<RecognizeBusinessLicenseResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/document_ai/v1/business_license/recognize",

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::parse_v2;
 use crate::transport;
@@ -85,7 +85,7 @@ macro_rules! post_query {
                 &self,
                 body: serde_json::Value,
                 option: &RequestOption,
-            ) -> Result<$resp> {
+            ) -> Result<$resp, LarkError> {
                 let mut api_req = ApiReq::new(http::Method::POST, $path);
                 api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
                 api_req.body = Some(ReqBody::json(&body)?);
@@ -119,7 +119,7 @@ impl AdditionalInformationV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ImportAdditionalInformationV2Resp> {
+    ) -> Result<ImportAdditionalInformationV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/performance/v2/additional_informations/import",
@@ -140,7 +140,7 @@ impl AdditionalInformationV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryAdditionalInformationV2Resp> {
+    ) -> Result<QueryAdditionalInformationV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/performance/v2/additional_informations/query",
@@ -167,7 +167,7 @@ impl AdditionalInformationsBatchV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<DeleteAdditionalInformationsBatchV2Resp> {
+    ) -> Result<DeleteAdditionalInformationsBatchV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::DELETE,
             "/open-apis/performance/v2/additional_informations/batch",
@@ -200,7 +200,7 @@ impl MetricDetailV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ImportMetricDetailV2Resp> {
+    ) -> Result<ImportMetricDetailV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/performance/v2/metric_details/import",
@@ -221,7 +221,7 @@ impl MetricDetailV2Resource<'_> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<QueryMetricDetailV2Resp> {
+    ) -> Result<QueryMetricDetailV2Resp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/performance/v2/metric_details/query",
@@ -262,7 +262,7 @@ impl MetricTagV2Resource<'_> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListMetricTagV2Resp> {
+    ) -> Result<ListMetricTagV2Resp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/performance/v2/metric_tags");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {

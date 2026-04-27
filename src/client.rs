@@ -6,7 +6,7 @@ use http::HeaderMap;
 use crate::cache::Cache;
 use crate::config::Config;
 use crate::constants::AppType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, RawResponse};
 use crate::service;
@@ -414,7 +414,11 @@ impl Client {
         crate::ws::WsClient::new(self.config.clone(), dispatcher)
     }
 
-    pub async fn do_req(&self, api_req: &ApiReq, option: &RequestOption) -> Result<ApiResp> {
+    pub async fn do_req(
+        &self,
+        api_req: &ApiReq,
+        option: &RequestOption,
+    ) -> Result<ApiResp, LarkError> {
         transport::request(&self.config, api_req, option).await
     }
 
@@ -422,11 +426,11 @@ impl Client {
         &self,
         api_req: &ApiReq,
         option: &RequestOption,
-    ) -> Result<(ApiResp, RawResponse<T>)> {
+    ) -> Result<(ApiResp, RawResponse<T>), LarkError> {
         transport::request_typed(&self.config, api_req, option).await
     }
 
-    pub async fn get(&self, path: &str, option: &RequestOption) -> Result<ApiResp> {
+    pub async fn get(&self, path: &str, option: &RequestOption) -> Result<ApiResp, LarkError> {
         let api_req = ApiReq::new(http::Method::GET, path);
         self.do_req(&api_req, option).await
     }
@@ -436,7 +440,7 @@ impl Client {
         path: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ApiResp> {
+    ) -> Result<ApiResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.body = Some(ReqBody::Json(body));
         self.do_req(&api_req, option).await
@@ -447,7 +451,7 @@ impl Client {
         path: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ApiResp> {
+    ) -> Result<ApiResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::PUT, path);
         api_req.body = Some(ReqBody::Json(body));
         self.do_req(&api_req, option).await
@@ -458,18 +462,18 @@ impl Client {
         path: &str,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<ApiResp> {
+    ) -> Result<ApiResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
         api_req.body = Some(ReqBody::Json(body));
         self.do_req(&api_req, option).await
     }
 
-    pub async fn delete(&self, path: &str, option: &RequestOption) -> Result<ApiResp> {
+    pub async fn delete(&self, path: &str, option: &RequestOption) -> Result<ApiResp, LarkError> {
         let api_req = ApiReq::new(http::Method::DELETE, path);
         self.do_req(&api_req, option).await
     }
 
-    pub async fn download_file(&self, url: &str) -> Result<Vec<u8>> {
+    pub async fn download_file(&self, url: &str) -> Result<Vec<u8>, LarkError> {
         let resp = self
             .config
             .http_client
@@ -481,7 +485,7 @@ impl Client {
         let bytes = resp.bytes().await?;
 
         if !status.is_success() {
-            return Err(crate::Error::Http(aioduct::Error::Status(status)));
+            return Err(crate::LarkError::Http(aioduct::Error::Status(status)));
         }
 
         Ok(bytes.to_vec())
@@ -490,7 +494,7 @@ impl Client {
     pub async fn get_app_access_token_by_self_built_app(
         &self,
         req: &crate::token::SelfBuiltAppTokenReq,
-    ) -> Result<(ApiResp, crate::token::AppTokenResponse)> {
+    ) -> Result<(ApiResp, crate::token::AppTokenResponse), LarkError> {
         crate::token::token_endpoint(
             &self.config,
             crate::constants::APP_ACCESS_TOKEN_INTERNAL_URL_PATH,
@@ -502,7 +506,7 @@ impl Client {
     pub async fn get_app_access_token_by_marketplace_app(
         &self,
         req: &crate::token::MarketplaceAppTokenReq,
-    ) -> Result<(ApiResp, crate::token::AppTokenResponse)> {
+    ) -> Result<(ApiResp, crate::token::AppTokenResponse), LarkError> {
         crate::token::token_endpoint(
             &self.config,
             crate::constants::APP_ACCESS_TOKEN_URL_PATH,
@@ -514,7 +518,7 @@ impl Client {
     pub async fn get_tenant_access_token_by_self_built_app(
         &self,
         req: &crate::token::SelfBuiltTenantTokenReq,
-    ) -> Result<(ApiResp, crate::token::TenantTokenResponse)> {
+    ) -> Result<(ApiResp, crate::token::TenantTokenResponse), LarkError> {
         crate::token::token_endpoint(
             &self.config,
             crate::constants::TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH,
@@ -526,7 +530,7 @@ impl Client {
     pub async fn get_tenant_access_token_by_marketplace_app(
         &self,
         req: &crate::token::MarketplaceTenantTokenReq,
-    ) -> Result<(ApiResp, crate::token::TenantTokenResponse)> {
+    ) -> Result<(ApiResp, crate::token::TenantTokenResponse), LarkError> {
         crate::token::token_endpoint(
             &self.config,
             crate::constants::TENANT_ACCESS_TOKEN_URL_PATH,
@@ -538,7 +542,7 @@ impl Client {
     pub async fn resend_app_ticket(
         &self,
         req: &crate::token::ResendAppTicketRequest,
-    ) -> Result<(ApiResp, crate::token::ResendAppTicketResponse)> {
+    ) -> Result<(ApiResp, crate::token::ResendAppTicketResponse), LarkError> {
         crate::token::token_endpoint(&self.config, crate::constants::APPLY_APP_TICKET_PATH, req)
             .await
     }

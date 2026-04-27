@@ -5,7 +5,7 @@ use std::pin::Pin;
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::{Error, Result};
+use crate::error::LarkError;
 use crate::event::EventDispatcher;
 
 // ── Event payload types ──
@@ -150,20 +150,22 @@ pub struct P2VcReserveConfigUpdatedV1 {
 
 fn wrap_handler<T, F, Fut>(
     handler: F,
-) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync + 'static
+) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
++ Send
++ Sync
++ 'static
 where
     T: for<'de> serde::Deserialize<'de> + Send + 'static,
     F: Fn(T) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<()>> + Send + 'static,
+    Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
 {
     move |val: serde_json::Value| {
         let result: std::result::Result<T, _> = serde_json::from_value(val);
         match result {
-            Ok(typed) => {
-                Box::pin(handler(typed)) as Pin<Box<dyn Future<Output = Result<()>> + Send>>
-            }
+            Ok(typed) => Box::pin(handler(typed))
+                as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>,
             Err(e) => Box::pin(async move {
-                Err(Error::Event(format!(
+                Err(LarkError::Event(format!(
                     "failed to deserialize event payload: {e}"
                 )))
             }),
@@ -178,7 +180,7 @@ macro_rules! vc_v1_handler {
         pub fn $method<F, Fut>(self, handler: F) -> Self
         where
             F: Fn($payload_type) -> Fut + Send + Sync + 'static,
-            Fut: Future<Output = Result<()>> + Send + 'static,
+            Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
         {
             self.on_event($event_key, wrap_handler(handler))
         }

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
@@ -821,7 +821,7 @@ impl<'a> ApprovalDefinitionResource<'a> {
         department_id_type: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateApprovalResp> {
+    ) -> Result<CreateApprovalResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/approvals");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = department_id_type {
@@ -847,7 +847,7 @@ impl<'a> ApprovalDefinitionResource<'a> {
         user_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetApprovalResp> {
+    ) -> Result<GetApprovalResp, LarkError> {
         let path = format!("/open-apis/approval/v4/approvals/{approval_code}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -880,7 +880,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         body: &CreateInstanceReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateInstanceResp> {
+    ) -> Result<CreateInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/instances");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -903,7 +903,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetInstanceResp> {
+    ) -> Result<GetInstanceResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -930,7 +930,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         body: &CancelInstanceReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/approval/v4/instances/cancel",
@@ -956,7 +956,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListInstanceResp> {
+    ) -> Result<ListInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/approval/v4/instances");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.query_params.set("approval_code", approval_code);
@@ -982,7 +982,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         body: &AddSignInstanceReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<AddSignInstanceResp> {
+    ) -> Result<AddSignInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/approval/v4/instances/add_sign",
@@ -1007,7 +1007,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         body: &CcInstanceReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CcInstanceResp> {
+    ) -> Result<CcInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/instances/cc");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1029,7 +1029,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         body: &PreviewInstanceReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<PreviewInstanceResp> {
+    ) -> Result<PreviewInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/approval/v4/instances/preview",
@@ -1056,7 +1056,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<QueryInstanceResp> {
+    ) -> Result<QueryInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/instances/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -1086,7 +1086,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         page_token: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SearchCcInstanceResp> {
+    ) -> Result<SearchCcInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/approval/v4/instances/search_cc",
@@ -1117,7 +1117,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         body: &SpecifiedRollback,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SpecifiedRollbackInstanceResp> {
+    ) -> Result<SpecifiedRollbackInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/approval/v4/instances/specified_rollback",
@@ -1148,7 +1148,7 @@ impl<'a> ApprovalTaskResource<'a> {
         body: &ApproveTaskReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/approve");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1168,7 +1168,7 @@ impl<'a> ApprovalTaskResource<'a> {
         body: &RejectTaskReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/reject");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1188,7 +1188,7 @@ impl<'a> ApprovalTaskResource<'a> {
         body: &TransferTaskReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/transfer");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1211,7 +1211,7 @@ impl<'a> ApprovalTaskResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<QueryTaskResp> {
+    ) -> Result<QueryTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/approval/v4/tasks/query");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         if let Some(v) = user_id {
@@ -1244,7 +1244,7 @@ impl<'a> ApprovalTaskResource<'a> {
         body: &TaskResubmit,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ResubmitTaskResp> {
+    ) -> Result<ResubmitTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/resubmit");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1268,7 +1268,7 @@ impl<'a> ApprovalTaskResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<SearchTaskResp> {
+    ) -> Result<SearchTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/search");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -1302,7 +1302,7 @@ impl<'a> ApprovalSubscribeResource<'a> {
         approval_code: &str,
         body: &SubscribeApprovalReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/approval/v4/approvals/{approval_code}/subscribe");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1320,7 +1320,7 @@ impl<'a> ApprovalSubscribeResource<'a> {
         approval_code: &str,
         body: &UnsubscribeApprovalReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/approval/v4/approvals/{approval_code}/unsubscribe");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1345,7 +1345,7 @@ impl<'a> ExternalApprovalResource<'a> {
         department_id_type: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateExternalApprovalResp> {
+    ) -> Result<CreateExternalApprovalResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/approval/v4/external_approvals",
@@ -1372,7 +1372,7 @@ impl<'a> ExternalApprovalResource<'a> {
         approval_code: &str,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetExternalApprovalResp> {
+    ) -> Result<GetExternalApprovalResp, LarkError> {
         let path = format!("/open-apis/approval/v4/external_approvals/{approval_code}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1398,7 +1398,7 @@ impl<'a> ExternalInstanceResource<'a> {
         &self,
         body: &CreateExternalInstanceReqBody,
         option: &RequestOption,
-    ) -> Result<CreateExternalInstanceResp> {
+    ) -> Result<CreateExternalInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/approval/v4/external_instances",
@@ -1418,7 +1418,7 @@ impl<'a> ExternalInstanceResource<'a> {
         &self,
         instances: &serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CheckExternalInstanceResp> {
+    ) -> Result<CheckExternalInstanceResp, LarkError> {
         let mut api_req = ApiReq::new(
             http::Method::POST,
             "/open-apis/approval/v4/external_instances/check",
@@ -1450,7 +1450,7 @@ impl<'a> InstanceCommentResource<'a> {
         user_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateInstanceCommentResp> {
+    ) -> Result<CreateInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1478,7 +1478,7 @@ impl<'a> InstanceCommentResource<'a> {
         user_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<DeleteInstanceCommentResp> {
+    ) -> Result<DeleteInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments/{comment_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1506,7 +1506,7 @@ impl<'a> InstanceCommentResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListInstanceCommentResp> {
+    ) -> Result<ListInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1538,7 +1538,7 @@ impl<'a> InstanceCommentResource<'a> {
         user_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<RemoveInstanceCommentResp> {
+    ) -> Result<RemoveInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments/remove");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -1572,7 +1572,7 @@ impl<'a> ExternalTaskResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListExternalTaskResp> {
+    ) -> Result<ListExternalTaskResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/approval/v4/external_tasks");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {

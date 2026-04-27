@@ -11,7 +11,7 @@ use crate::constants::{
     TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH, TENANT_ACCESS_TOKEN_KEY_PREFIX,
     TENANT_ACCESS_TOKEN_URL_PATH,
 };
-use crate::error::{Error, Result};
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
 
@@ -34,7 +34,7 @@ impl TokenManager {
         &self,
         config: &Config,
         app_ticket: Option<&str>,
-    ) -> Result<String> {
+    ) -> Result<String, LarkError> {
         let cache_key = format!("{APP_ACCESS_TOKEN_KEY_PREFIX}-{}", config.app_id);
         if let Some(token) = self.cache.get(&cache_key).await? {
             return Ok(token);
@@ -44,7 +44,7 @@ impl TokenManager {
             AppType::SelfBuilt => self.fetch_self_built_app_token(config).await,
             AppType::Marketplace => {
                 let ticket = app_ticket.ok_or_else(|| {
-                    Error::Token("app ticket is required for marketplace apps".to_string())
+                    LarkError::Token("app ticket is required for marketplace apps".to_string())
                 })?;
                 self.fetch_marketplace_app_token(config, ticket).await
             }
@@ -56,7 +56,7 @@ impl TokenManager {
         config: &Config,
         tenant_key: Option<&str>,
         app_ticket: Option<&str>,
-    ) -> Result<String> {
+    ) -> Result<String, LarkError> {
         let tk = tenant_key.unwrap_or_default();
         let cache_key = format!("{TENANT_ACCESS_TOKEN_KEY_PREFIX}-{}-{tk}", config.app_id);
         if let Some(token) = self.cache.get(&cache_key).await? {
@@ -67,7 +67,7 @@ impl TokenManager {
             AppType::SelfBuilt => self.fetch_self_built_tenant_token(config).await,
             AppType::Marketplace => {
                 let ticket = app_ticket.ok_or_else(|| {
-                    Error::Token("app ticket is required for marketplace apps".to_string())
+                    LarkError::Token("app ticket is required for marketplace apps".to_string())
                 })?;
                 self.fetch_marketplace_tenant_token(config, tenant_key, ticket)
                     .await
@@ -75,7 +75,7 @@ impl TokenManager {
         }
     }
 
-    async fn fetch_self_built_app_token(&self, config: &Config) -> Result<String> {
+    async fn fetch_self_built_app_token(&self, config: &Config) -> Result<String, LarkError> {
         let body = SelfBuiltTokenReq {
             app_id: &config.app_id,
             app_secret: &config.app_secret,
@@ -98,7 +98,7 @@ impl TokenManager {
         Ok(resp.app_access_token)
     }
 
-    async fn fetch_self_built_tenant_token(&self, config: &Config) -> Result<String> {
+    async fn fetch_self_built_tenant_token(&self, config: &Config) -> Result<String, LarkError> {
         let body = SelfBuiltTokenReq {
             app_id: &config.app_id,
             app_secret: &config.app_secret,
@@ -129,7 +129,7 @@ impl TokenManager {
         &self,
         config: &Config,
         app_ticket: &str,
-    ) -> Result<String> {
+    ) -> Result<String, LarkError> {
         let body = MarketplaceAppAccessTokenReq {
             app_id: &config.app_id,
             app_secret: &config.app_secret,
@@ -158,7 +158,7 @@ impl TokenManager {
         config: &Config,
         tenant_key: Option<&str>,
         app_ticket: &str,
-    ) -> Result<String> {
+    ) -> Result<String, LarkError> {
         let app_access_token = self.get_app_access_token(config, Some(app_ticket)).await?;
 
         let body = MarketplaceTenantAccessTokenReq {
@@ -189,7 +189,7 @@ impl TokenManager {
         config: &Config,
         path: &str,
         body: &impl Serialize,
-    ) -> Result<T> {
+    ) -> Result<T, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, path);
         api_req.body = Some(ReqBody::Json(serde_json::to_value(body)?));
         api_req.supported_access_token_types = vec![AccessTokenType::None];
@@ -199,7 +199,7 @@ impl TokenManager {
             transport::raw_send(config, &api_req, &option, AccessTokenType::None, None).await?;
 
         if api_resp.status_code != 200 {
-            return Err(Error::Token(format!(
+            return Err(LarkError::Token(format!(
                 "token request failed with status {}",
                 api_resp.status_code
             )));
@@ -225,7 +225,7 @@ impl AppTicketManager {
         Self { cache }
     }
 
-    pub async fn get(&self, config: &Config) -> Result<Option<String>> {
+    pub async fn get(&self, config: &Config) -> Result<Option<String>, LarkError> {
         let key = format!("{APP_TICKET_KEY_PREFIX}-{}", config.app_id);
         let ticket = self.cache.get(&key).await?;
 
@@ -236,12 +236,12 @@ impl AppTicketManager {
         self.cache.get(&key).await
     }
 
-    pub async fn set(&self, app_id: &str, value: &str, ttl: Duration) -> Result<()> {
+    pub async fn set(&self, app_id: &str, value: &str, ttl: Duration) -> Result<(), LarkError> {
         let key = format!("{APP_TICKET_KEY_PREFIX}-{app_id}");
         self.cache.set(&key, value, ttl).await
     }
 
-    pub(crate) async fn apply_app_ticket(&self, config: &Config) -> Result<()> {
+    pub(crate) async fn apply_app_ticket(&self, config: &Config) -> Result<(), LarkError> {
         let body = ResendAppTicketReq {
             app_id: &config.app_id,
             app_secret: &config.app_secret,
@@ -386,7 +386,7 @@ pub(crate) async fn token_endpoint<Req: Serialize, Resp: for<'de> Deserialize<'d
     config: &Config,
     path: &str,
     body: &Req,
-) -> Result<(crate::resp::ApiResp, Resp)> {
+) -> Result<(crate::resp::ApiResp, Resp), LarkError> {
     let mut api_req = ApiReq::new(http::Method::POST, path);
     api_req.body = Some(ReqBody::Json(serde_json::to_value(body)?));
     api_req.supported_access_token_types = vec![AccessTokenType::None];

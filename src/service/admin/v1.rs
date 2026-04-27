@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
-use crate::error::Result;
+use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{EmptyResp, parse_v2};
 use crate::transport;
@@ -209,7 +209,7 @@ impl<'a> PasswordResource<'a> {
         &self,
         body: &ResetPasswordReqBody,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/admin/v1/password/reset");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -231,7 +231,7 @@ impl<'a> BadgeResource<'a> {
         &self,
         body: &CreateBadgeReqBody,
         option: &RequestOption,
-    ) -> Result<CreateBadgeResp> {
+    ) -> Result<CreateBadgeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/admin/v1/badges");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::json(body)?);
@@ -244,7 +244,11 @@ impl<'a> BadgeResource<'a> {
         })
     }
 
-    pub async fn get(&self, badge_id: &str, option: &RequestOption) -> Result<GetBadgeResp> {
+    pub async fn get(
+        &self,
+        badge_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetBadgeResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{badge_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -263,7 +267,7 @@ impl<'a> BadgeResource<'a> {
         page_token: Option<&str>,
         name: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListBadgeResp> {
+    ) -> Result<ListBadgeResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/badges");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = page_size {
@@ -289,7 +293,7 @@ impl<'a> BadgeResource<'a> {
         badge_id: &str,
         body: &CreateBadgeReqBody,
         option: &RequestOption,
-    ) -> Result<UpdateBadgeResp> {
+    ) -> Result<UpdateBadgeResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{badge_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -317,7 +321,7 @@ impl<'a> BadgeGrantResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<CreateBadgeGrantResp> {
+    ) -> Result<CreateBadgeGrantResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants");
         let mut api_req = ApiReq::new(http::Method::POST, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -344,7 +348,7 @@ impl<'a> BadgeGrantResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetBadgeGrantResp> {
+    ) -> Result<GetBadgeGrantResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants/{grant_id}");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -368,7 +372,7 @@ impl<'a> BadgeGrantResource<'a> {
         badge_id: &str,
         grant_id: &str,
         option: &RequestOption,
-    ) -> Result<EmptyResp> {
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants/{grant_id}");
         let mut api_req = ApiReq::new(http::Method::DELETE, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -390,7 +394,7 @@ impl<'a> BadgeGrantResource<'a> {
         department_id_type: Option<&str>,
         name: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListBadgeGrantResp> {
+    ) -> Result<ListBadgeGrantResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants");
         let mut api_req = ApiReq::new(http::Method::GET, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -426,7 +430,7 @@ impl<'a> BadgeGrantResource<'a> {
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
-    ) -> Result<UpdateBadgeGrantResp> {
+    ) -> Result<UpdateBadgeGrantResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants/{grant_id}");
         let mut api_req = ApiReq::new(http::Method::PUT, &path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -464,7 +468,7 @@ impl<'a> AdminDeptStatResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<GetDeptStatResp> {
+    ) -> Result<GetDeptStatResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/dept_stats");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req
@@ -504,7 +508,7 @@ impl<'a> AdminDeptStatResource<'a> {
         target_geo: Option<&str>,
         with_product_version: Option<bool>,
         option: &RequestOption,
-    ) -> Result<ListAdminDeptStatResp> {
+    ) -> Result<ListAdminDeptStatResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/admin_dept_stats");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req
@@ -558,7 +562,7 @@ impl<'a> AdminUserStatResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAdminUserStatResp> {
+    ) -> Result<ListAdminUserStatResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/admin_user_stats");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -610,7 +614,7 @@ impl<'a> AuditInfoResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
-    ) -> Result<ListAuditInfoResp> {
+    ) -> Result<ListAuditInfoResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/audit_infos");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         if let Some(v) = user_id_type {
@@ -660,7 +664,7 @@ impl<'a> BadgeImageResource<'a> {
         &self,
         body: serde_json::Value,
         option: &RequestOption,
-    ) -> Result<CreateBadgeImageResp> {
+    ) -> Result<CreateBadgeImageResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/admin/v1/badge_images");
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::Json(body));
