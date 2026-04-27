@@ -909,8 +909,9 @@ impl MessageCard {
         self
     }
 
-    pub fn element(mut self, element: Value) -> Self {
-        self.elements.push(element);
+    pub fn element(mut self, element: impl Serialize) -> Self {
+        self.elements
+            .push(serde_json::to_value(element).unwrap_or_default());
         self
     }
 
@@ -1062,6 +1063,310 @@ impl MessageCardURL {
             ios_url: None,
             pc_url: None,
         }
+    }
+
+    pub fn url(mut self, url: impl Into<String>) -> Self {
+        self.url = Some(url.into());
+        self
+    }
+
+    pub fn android_url(mut self, url: impl Into<String>) -> Self {
+        self.android_url = Some(url.into());
+        self
+    }
+
+    pub fn ios_url(mut self, url: impl Into<String>) -> Self {
+        self.ios_url = Some(url.into());
+        self
+    }
+
+    pub fn pc_url(mut self, url: impl Into<String>) -> Self {
+        self.pc_url = Some(url.into());
+        self
+    }
+}
+
+fn message_card_action_tag() -> String {
+    "action".to_string()
+}
+
+fn message_card_select_static_tag() -> String {
+    "select_static".to_string()
+}
+
+fn message_card_multi_select_static_tag() -> String {
+    "multi_select_static".to_string()
+}
+
+fn message_card_select_person_tag() -> String {
+    "select_person".to_string()
+}
+
+/// Layout for a legacy message card action block.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MessageCardActionLayout {
+    Bisected,
+    Trisection,
+    Flow,
+}
+
+/// Confirmation dialog shown before running a legacy message card action.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardActionConfirm {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<MessageCardPlainText>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<MessageCardPlainText>,
+}
+
+impl MessageCardActionConfirm {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn title(mut self, title: MessageCardPlainText) -> Self {
+        self.title = Some(title);
+        self
+    }
+
+    pub fn text(mut self, text: MessageCardPlainText) -> Self {
+        self.text = Some(text);
+        self
+    }
+}
+
+/// Option item used by legacy embedded select menus and overflow menus.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardEmbedSelectOption {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<MessageCardPlainText>,
+    #[serde(skip_serializing_if = "String::is_empty", default)]
+    pub value: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub multi_url: Option<MessageCardURL>,
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+}
+
+impl MessageCardEmbedSelectOption {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn text(mut self, text: MessageCardPlainText) -> Self {
+        self.text = Some(text);
+        self
+    }
+
+    pub fn value(mut self, value: impl Into<String>) -> Self {
+        self.value = value.into();
+        self
+    }
+
+    pub fn url(mut self, url: impl Into<String>) -> Self {
+        self.url = Some(url.into());
+        self
+    }
+
+    pub fn multi_url(mut self, multi_url: MessageCardURL) -> Self {
+        self.multi_url = Some(multi_url);
+        self
+    }
+
+    pub fn option_type(mut self, option_type: impl Into<String>) -> Self {
+        self.r#type = Some(option_type.into());
+        self
+    }
+}
+
+/// Shared fields for legacy embedded select menu variants.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardEmbedSelectMenuBase {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub placeholder: Option<MessageCardPlainText>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub initial_option: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub initial_options: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub options: Vec<MessageCardEmbedSelectOption>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub confirm: Option<MessageCardActionConfirm>,
+}
+
+impl MessageCardEmbedSelectMenuBase {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn placeholder(mut self, placeholder: MessageCardPlainText) -> Self {
+        self.placeholder = Some(placeholder);
+        self
+    }
+
+    pub fn initial_option(mut self, initial_option: impl Into<String>) -> Self {
+        self.initial_option = Some(initial_option.into());
+        self
+    }
+
+    pub fn initial_options(mut self, initial_options: Vec<String>) -> Self {
+        self.initial_options = Some(initial_options);
+        self
+    }
+
+    pub fn option(mut self, option: MessageCardEmbedSelectOption) -> Self {
+        self.options.push(option);
+        self
+    }
+
+    pub fn options(mut self, options: Vec<MessageCardEmbedSelectOption>) -> Self {
+        self.options = options;
+        self
+    }
+
+    pub fn value(mut self, value: Value) -> Self {
+        self.value = Some(value);
+        self
+    }
+
+    pub fn confirm(mut self, confirm: MessageCardActionConfirm) -> Self {
+        self.confirm = Some(confirm);
+        self
+    }
+}
+
+/// Single-select static menu embedded in a legacy message card action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MessageCardEmbedSelectMenuStatic {
+    #[serde(default = "message_card_select_static_tag")]
+    pub tag: String,
+    #[serde(flatten)]
+    pub base: MessageCardEmbedSelectMenuBase,
+}
+
+impl Default for MessageCardEmbedSelectMenuStatic {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl MessageCardEmbedSelectMenuStatic {
+    pub fn new() -> Self {
+        Self {
+            tag: message_card_select_static_tag(),
+            base: MessageCardEmbedSelectMenuBase::new(),
+        }
+    }
+
+    pub fn base(mut self, base: MessageCardEmbedSelectMenuBase) -> Self {
+        self.base = base;
+        self
+    }
+}
+
+/// Multi-select static menu embedded in a legacy message card action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MessageCardEmbedSelectMenuMulti {
+    #[serde(default = "message_card_multi_select_static_tag")]
+    pub tag: String,
+    #[serde(flatten)]
+    pub base: MessageCardEmbedSelectMenuBase,
+}
+
+impl Default for MessageCardEmbedSelectMenuMulti {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl MessageCardEmbedSelectMenuMulti {
+    pub fn new() -> Self {
+        Self {
+            tag: message_card_multi_select_static_tag(),
+            base: MessageCardEmbedSelectMenuBase::new(),
+        }
+    }
+
+    pub fn base(mut self, base: MessageCardEmbedSelectMenuBase) -> Self {
+        self.base = base;
+        self
+    }
+}
+
+/// Person selector embedded in a legacy message card action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MessageCardEmbedSelectMenuPerson {
+    #[serde(default = "message_card_select_person_tag")]
+    pub tag: String,
+    #[serde(flatten)]
+    pub base: MessageCardEmbedSelectMenuBase,
+}
+
+impl Default for MessageCardEmbedSelectMenuPerson {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl MessageCardEmbedSelectMenuPerson {
+    pub fn new() -> Self {
+        Self {
+            tag: message_card_select_person_tag(),
+            base: MessageCardEmbedSelectMenuBase::new(),
+        }
+    }
+
+    pub fn base(mut self, base: MessageCardEmbedSelectMenuBase) -> Self {
+        self.base = base;
+        self
+    }
+}
+
+/// Multi-action layout block for legacy message cards.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MessageCardAction {
+    #[serde(default = "message_card_action_tag")]
+    pub tag: String,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub actions: Vec<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub layout: Option<MessageCardActionLayout>,
+}
+
+impl Default for MessageCardAction {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl MessageCardAction {
+    pub fn new() -> Self {
+        Self {
+            tag: message_card_action_tag(),
+            actions: Vec::new(),
+            layout: None,
+        }
+    }
+
+    pub fn action(mut self, action: impl Serialize) -> Self {
+        self.actions
+            .push(serde_json::to_value(action).unwrap_or_default());
+        self
+    }
+
+    pub fn actions(mut self, actions: Vec<Value>) -> Self {
+        self.actions = actions;
+        self
+    }
+
+    pub fn layout(mut self, layout: MessageCardActionLayout) -> Self {
+        self.layout = Some(layout);
+        self
     }
 }
 

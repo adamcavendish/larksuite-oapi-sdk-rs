@@ -383,3 +383,76 @@ fn message_card_serde_roundtrip() {
     assert_eq!(deserialized.header.unwrap().title.unwrap().content, "Test");
     assert_eq!(deserialized.config.unwrap().update_multi, Some(true));
 }
+
+#[test]
+fn message_card_action_select_menus() {
+    use larksuite_oapi_sdk_rs::card::*;
+
+    let option_a = MessageCardEmbedSelectOption::new()
+        .value("a")
+        .text(MessageCardPlainText::new("Option A"));
+    let option_b = MessageCardEmbedSelectOption::new()
+        .value("b")
+        .text(MessageCardPlainText::new("Option B"))
+        .url("https://example.com/b");
+
+    let static_menu = MessageCardEmbedSelectMenuStatic::new().base(
+        MessageCardEmbedSelectMenuBase::new()
+            .placeholder(MessageCardPlainText::new("Choose one"))
+            .initial_option("a")
+            .option(option_a.clone())
+            .option(option_b.clone())
+            .value(serde_json::json!({"scope": "single"})),
+    );
+
+    let multi_menu = MessageCardEmbedSelectMenuMulti::new().base(
+        MessageCardEmbedSelectMenuBase::new()
+            .placeholder(MessageCardPlainText::new("Choose many"))
+            .initial_options(vec!["a".to_string(), "b".to_string()])
+            .options(vec![option_a, option_b]),
+    );
+
+    let person_menu = MessageCardEmbedSelectMenuPerson::new().base(
+        MessageCardEmbedSelectMenuBase::new()
+            .placeholder(MessageCardPlainText::new("Choose person"))
+            .confirm(
+                MessageCardActionConfirm::new()
+                    .title(MessageCardPlainText::new("Confirm"))
+                    .text(MessageCardPlainText::new("Continue?")),
+            ),
+    );
+
+    let action = MessageCardAction::new()
+        .layout(MessageCardActionLayout::Flow)
+        .action(static_menu)
+        .action(multi_menu)
+        .action(person_menu);
+    let card = MessageCard::new().element(action);
+    let json = card.to_json();
+    let element = &json["elements"][0];
+
+    assert_eq!(element["tag"], "action");
+    assert_eq!(element["layout"], "flow");
+    assert_eq!(element["actions"][0]["tag"], "select_static");
+    assert_eq!(
+        element["actions"][0]["placeholder"]["content"],
+        "Choose one"
+    );
+    assert_eq!(element["actions"][0]["initial_option"], "a");
+    assert_eq!(
+        element["actions"][0]["options"][1]["url"],
+        "https://example.com/b"
+    );
+    assert_eq!(element["actions"][0]["value"]["scope"], "single");
+    assert_eq!(element["actions"][1]["tag"], "multi_select_static");
+    assert_eq!(element["actions"][1]["initial_options"][1], "b");
+    assert_eq!(element["actions"][2]["tag"], "select_person");
+    assert_eq!(
+        element["actions"][2]["confirm"]["title"]["content"],
+        "Confirm"
+    );
+
+    let decoded: MessageCardAction = serde_json::from_value(element.clone()).unwrap();
+    assert_eq!(decoded.layout, Some(MessageCardActionLayout::Flow));
+    assert_eq!(decoded.actions.len(), 3);
+}

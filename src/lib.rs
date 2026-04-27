@@ -26,6 +26,7 @@ pub mod crypto;
 pub mod error;
 pub mod event;
 pub mod events;
+pub mod http_handler;
 #[macro_use]
 mod macros;
 pub mod registration;

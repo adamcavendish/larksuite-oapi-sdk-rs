@@ -157,17 +157,27 @@ fn make_header(key: &str, value: &str) -> proto::Header {
 pub struct WsClient {
     config: Arc<Config>,
     dispatcher: Arc<EventDispatcher>,
+    domain: String,
+    log_level: Option<tracing::Level>,
     ping_interval: Arc<AtomicU64>,
     reconnect_interval: Arc<AtomicU64>,
     reconnect_nonce: Arc<AtomicU64>,
     auto_reconnect: Arc<AtomicBool>,
 }
 
+fn ws_log_enabled(log_level: Option<tracing::Level>, level: tracing::Level) -> bool {
+    log_level.is_none_or(|max| level <= max)
+}
+
 impl WsClient {
     pub fn new(config: Config, dispatcher: EventDispatcher) -> Self {
+        let domain = config.base_url.clone();
+        let log_level = config.log_level;
         Self {
             config: Arc::new(config),
             dispatcher: Arc::new(dispatcher),
+            domain,
+            log_level,
             ping_interval: Arc::new(AtomicU64::new(120)),
             reconnect_interval: Arc::new(AtomicU64::new(120)),
             reconnect_nonce: Arc::new(AtomicU64::new(30)),
@@ -180,6 +190,29 @@ impl WsClient {
     pub fn auto_reconnect(self, enable: bool) -> Self {
         self.auto_reconnect.store(enable, Ordering::Relaxed);
         self
+    }
+
+    /// Set the OpenAPI domain used to request the WebSocket endpoint.
+    ///
+    /// Defaults to the [`Config`] base URL (`https://open.feishu.cn` unless the
+    /// client builder overrides it). Set this to
+    /// `https://open.larksuite.com` for Lark global tenants.
+    pub fn domain(mut self, domain: impl Into<String>) -> Self {
+        self.domain = domain.into();
+        self
+    }
+
+    /// Set the maximum tracing level emitted by this WebSocket client.
+    ///
+    /// This mirrors the Go SDK's `WithLogLevel` option while keeping Rust's
+    /// [`tracing`] subscriber as the logging backend.
+    pub fn log_level(mut self, level: tracing::Level) -> Self {
+        self.log_level = Some(level);
+        self
+    }
+
+    fn log_enabled(&self, level: tracing::Level) -> bool {
+        ws_log_enabled(self.log_level, level)
     }
 
     fn apply_config(&self, conf: &ClientConfig) {
@@ -204,11 +237,15 @@ impl WsClient {
         loop {
             match self.run_once().await {
                 Ok(()) => {
-                    tracing::info!("ws connection closed");
+                    if self.log_enabled(tracing::Level::INFO) {
+                        tracing::info!("ws connection closed");
+                    }
                     consecutive_failures = 0;
                 }
                 Err(e) => {
-                    tracing::warn!("ws connection error: {e}");
+                    if self.log_enabled(tracing::Level::WARN) {
+                        tracing::warn!("ws connection error: {e}");
+                    }
                     consecutive_failures += 1;
                 }
             }
@@ -230,20 +267,26 @@ impl WsClient {
                 };
                 Duration::from_secs(interval + jitter)
             };
-            tracing::info!("reconnecting in {wait:?}");
+            if self.log_enabled(tracing::Level::INFO) {
+                tracing::info!("reconnecting in {wait:?}");
+            }
             sleep(wait).await;
         }
     }
 
     async fn run_once(&self) -> Result<(), LarkError> {
         let (url, service_id) = self.get_ws_url().await?;
-        tracing::info!("connecting to ws endpoint: {url}");
+        if self.log_enabled(tracing::Level::INFO) {
+            tracing::info!("connecting to ws endpoint: {url}");
+        }
 
         let (ws_stream, _) = connect_async(&url)
             .await
             .map_err(|e| LarkError::Event(format!("ws connect failed: {e}")))?;
 
-        tracing::info!("ws connected");
+        if self.log_enabled(tracing::Level::INFO) {
+            tracing::info!("ws connected");
+        }
 
         let mut pending_frags: HashMap<String, FragEntry> = HashMap::new();
 
@@ -254,6 +297,7 @@ impl WsClient {
         let ping_write = write.clone();
         let ping_interval = self.ping_interval.clone();
         let ping_service_id = service_id;
+        let ping_log_level = self.log_level;
         let ping_handle = tokio::spawn(async move {
             loop {
                 let secs = ping_interval.load(Ordering::Relaxed);
@@ -274,7 +318,9 @@ impl WsClient {
                 if (*w).send(Message::Binary(encoded.into())).await.is_err() {
                     break;
                 }
-                tracing::debug!("ws ping sent");
+                if ws_log_enabled(ping_log_level, tracing::Level::DEBUG) {
+                    tracing::debug!("ws ping sent");
+                }
             }
         });
 
@@ -282,7 +328,9 @@ impl WsClient {
             let msg = match msg {
                 Ok(m) => m,
                 Err(e) => {
-                    tracing::warn!("ws recv error: {e}");
+                    if self.log_enabled(tracing::Level::WARN) {
+                        tracing::warn!("ws recv error: {e}");
+                    }
                     break;
                 }
             };
@@ -291,12 +339,15 @@ impl WsClient {
                     if let Err(e) = self
                         .handle_binary_message(&data, &mut pending_frags, &write)
                         .await
+                        && self.log_enabled(tracing::Level::WARN)
                     {
                         tracing::warn!("ws frame handling error: {e}");
                     }
                 }
                 Message::Close(_) => {
-                    tracing::info!("ws server closed connection");
+                    if self.log_enabled(tracing::Level::INFO) {
+                        tracing::info!("ws server closed connection");
+                    }
                     break;
                 }
                 _ => {}
@@ -324,7 +375,9 @@ impl WsClient {
                 let msg_type = get_header(&frame.headers, HEADER_TYPE).unwrap_or_default();
                 match msg_type.as_str() {
                     MSG_TYPE_PING => {
-                        tracing::debug!("ws ping received, seq={}", frame.seq_id);
+                        if self.log_enabled(tracing::Level::DEBUG) {
+                            tracing::debug!("ws ping received, seq={}", frame.seq_id);
+                        }
                         let pong = proto::Frame {
                             method: METHOD_CONTROL,
                             service: frame.service,
@@ -341,17 +394,23 @@ impl WsClient {
                         let _ = (*w).send(Message::Binary(encoded.into())).await;
                     }
                     MSG_TYPE_PONG => {
-                        tracing::debug!("ws pong received");
+                        if self.log_enabled(tracing::Level::DEBUG) {
+                            tracing::debug!("ws pong received");
+                        }
                         if let Some(payload) = &frame.payload
                             && !payload.is_empty()
                             && let Ok(conf) = serde_json::from_slice::<ClientConfig>(payload)
                         {
-                            tracing::debug!("ws client config updated: {conf:?}");
+                            if self.log_enabled(tracing::Level::DEBUG) {
+                                tracing::debug!("ws client config updated: {conf:?}");
+                            }
                             self.apply_config(&conf);
                         }
                     }
                     _ => {
-                        tracing::debug!("ws unknown control type: {msg_type}");
+                        if self.log_enabled(tracing::Level::DEBUG) {
+                            tracing::debug!("ws unknown control type: {msg_type}");
+                        }
                     }
                 }
             }
@@ -419,7 +478,9 @@ impl WsClient {
                 let _ = (*w).send(Message::Binary(encoded.into())).await;
             }
             _ => {
-                tracing::debug!("ws unknown method: {}", frame.method);
+                if self.log_enabled(tracing::Level::DEBUG) {
+                    tracing::debug!("ws unknown method: {}", frame.method);
+                }
             }
         }
 
@@ -437,11 +498,13 @@ impl WsClient {
 
         let resp = self.dispatcher.handle(req).await;
         if resp.status_code != 200 {
-            tracing::warn!(
-                "event dispatch returned {}: {}",
-                resp.status_code,
-                String::from_utf8_lossy(&resp.body)
-            );
+            if self.log_enabled(tracing::Level::WARN) {
+                tracing::warn!(
+                    "event dispatch returned {}: {}",
+                    resp.status_code,
+                    String::from_utf8_lossy(&resp.body)
+                );
+            }
             return false;
         }
 
@@ -449,7 +512,7 @@ impl WsClient {
     }
 
     async fn get_ws_url(&self) -> Result<(String, i32), LarkError> {
-        let base = self.config.base_url.trim_end_matches('/');
+        let base = self.domain.trim_end_matches('/');
         let url = format!("{base}/callback/ws/endpoint");
 
         let body = serde_json::json!({
@@ -504,5 +567,69 @@ impl WsClient {
             .unwrap_or(0);
 
         Ok((data.url, service_id))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::sync::{Arc, Mutex as StdMutex};
+
+    use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
+
+    #[tokio::test]
+    async fn log_level_builder_overrides_config_default() {
+        let mut config = Config::new("app_id", "app_secret");
+        config.log_level = Some(tracing::Level::ERROR);
+        let dispatcher = EventDispatcher::new("", "");
+
+        let client = WsClient::new(config, dispatcher).log_level(tracing::Level::DEBUG);
+
+        assert_eq!(client.log_level, Some(tracing::Level::DEBUG));
+        assert!(client.log_enabled(tracing::Level::INFO));
+        assert!(client.log_enabled(tracing::Level::DEBUG));
+        assert!(!client.log_enabled(tracing::Level::TRACE));
+    }
+
+    #[tokio::test]
+    async fn get_ws_url_uses_custom_domain() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let request = Arc::new(StdMutex::new(String::new()));
+        let captured = Arc::clone(&request);
+
+        let handle = tokio::spawn(async move {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut buf = vec![0u8; 4096];
+            let n = stream.read(&mut buf).await.unwrap();
+            *captured.lock().unwrap() = String::from_utf8_lossy(&buf[..n]).into_owned();
+
+            let body = r#"{"code":0,"msg":"ok","data":{"URL":"wss://example.test/ws?service_id=42","ClientConfig":{"PingInterval":15,"ReconnectInterval":16,"ReconnectNonce":7}}}"#;
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+            stream.shutdown().await.unwrap();
+        });
+
+        let config = Config::new("app_id", "app_secret");
+        let dispatcher = EventDispatcher::new("", "");
+        let client = WsClient::new(config, dispatcher).domain(format!("http://{addr}/"));
+
+        let (url, service_id) = client.get_ws_url().await.unwrap();
+        handle.await.unwrap();
+
+        assert_eq!(url, "wss://example.test/ws?service_id=42");
+        assert_eq!(service_id, 42);
+        assert_eq!(client.ping_interval.load(Ordering::Relaxed), 15);
+        assert_eq!(client.reconnect_interval.load(Ordering::Relaxed), 16);
+        assert_eq!(client.reconnect_nonce.load(Ordering::Relaxed), 7);
+
+        let request = request.lock().unwrap();
+        assert!(request.starts_with("POST /callback/ws/endpoint HTTP/1.1"));
+        assert!(request.contains(r#""AppID":"app_id""#));
+        assert!(request.contains(r#""AppSecret":"app_secret""#));
     }
 }

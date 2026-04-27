@@ -672,15 +672,20 @@ impl CardActionHandler {
 }
 
 fn get_header_ref<'a>(headers: &'a HashMap<String, Vec<String>>, key: &str) -> Option<&'a str> {
-    headers.get(key).and_then(|v| v.first()).map(|s| s.as_str())
+    headers
+        .get(key)
+        .or_else(|| {
+            headers
+                .iter()
+                .find(|(name, _)| name.eq_ignore_ascii_case(key))
+                .map(|(_, values)| values)
+        })
+        .and_then(|v| v.first())
+        .map(|s| s.as_str())
 }
 
 fn get_header(headers: &HashMap<String, Vec<String>>, key: &str) -> String {
-    headers
-        .get(key)
-        .and_then(|v| v.first())
-        .cloned()
-        .unwrap_or_default()
+    get_header_ref(headers, key).unwrap_or_default().to_string()
 }
 
 fn extract_signature_headers(
