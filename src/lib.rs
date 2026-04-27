@@ -43,14 +43,18 @@ pub use cache::{Cache, LocalCache};
 pub use client::{Client, ClientBuilder};
 pub use config::Config;
 pub use constants::{AccessTokenType, AppType, FEISHU_BASE_URL, LARK_BASE_URL};
-pub use crypto::{event_decrypt, event_encrypt, verify_signature_sha1, verify_signature_sha256};
+pub use crypto::{
+    encrypted_event_msg, event_decrypt, event_encrypt, verify_signature_sha1,
+    verify_signature_sha256,
+};
 pub use error::{Error, Result};
 pub use event::{
     CallbackAction, CallbackCard, CallbackContext, CallbackHandlerFn, CallbackOperator, CardAction,
     CardActionHandler, CardActionTriggerRequest, CardActionTriggerResponse, CardHandlerFn,
-    CardHandlerResult, CustomResp, CustomizedEventHandlerFn, EventDispatcher, EventHandlerFn,
-    EventHeader, EventReq, EventResp, EventV2Body, InlinePreview, PreviewUrl, TemplateCard, Toast,
-    ToastI18n, URLPreviewGetRequest, URLPreviewGetResponse,
+    CardHandlerResult, CustomResp, CustomizedEventHandlerFn, EventBase, EventDispatcher,
+    EventHandlerFn, EventHeader, EventReq, EventResp, EventV1Header, EventV2Base, EventV2Body,
+    InlinePreview, PreviewUrl, TemplateCard, Toast, ToastI18n, URLPreviewGetRequest,
+    URLPreviewGetResponse,
 };
 pub use req::{
     ApiReq, FormDataBuilder, FormDataField, FormDataValue, PathParams, QueryParams, ReqBody,

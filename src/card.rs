@@ -19,6 +19,21 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+// ── Template color constants (matching Go SDK) ──
+
+pub const TEMPLATE_BLUE: &str = "blue";
+pub const TEMPLATE_WATHET: &str = "wathet";
+pub const TEMPLATE_TURQUOISE: &str = "turquoise";
+pub const TEMPLATE_GREEN: &str = "green";
+pub const TEMPLATE_YELLOW: &str = "yellow";
+pub const TEMPLATE_ORANGE: &str = "orange";
+pub const TEMPLATE_RED: &str = "red";
+pub const TEMPLATE_CARMINE: &str = "carmine";
+pub const TEMPLATE_VIOLET: &str = "violet";
+pub const TEMPLATE_PURPLE: &str = "purple";
+pub const TEMPLATE_INDIGO: &str = "indigo";
+pub const TEMPLATE_GREY: &str = "grey";
+
 // ── Card top-level ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -861,4 +876,201 @@ pub fn button(text: impl Into<String>, value: Value) -> ActionComponent {
             .button_type("default")
             .value(value),
     )
+}
+
+// ── MessageCard (legacy IM card builder, matches Go SDK) ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCard {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub config: Option<MessageCardConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub header: Option<MessageCardHeader>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub elements: Vec<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub i18n_elements: Option<MessageCardI18nElements>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub card_link: Option<MessageCardURL>,
+}
+
+impl MessageCard {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn config(mut self, config: MessageCardConfig) -> Self {
+        self.config = Some(config);
+        self
+    }
+
+    pub fn header(mut self, header: MessageCardHeader) -> Self {
+        self.header = Some(header);
+        self
+    }
+
+    pub fn element(mut self, element: Value) -> Self {
+        self.elements.push(element);
+        self
+    }
+
+    pub fn i18n_elements(mut self, i18n: MessageCardI18nElements) -> Self {
+        self.i18n_elements = Some(i18n);
+        self
+    }
+
+    pub fn card_link(mut self, link: MessageCardURL) -> Self {
+        self.card_link = Some(link);
+        self
+    }
+
+    pub fn to_json(&self) -> Value {
+        serde_json::to_value(self).unwrap_or_default()
+    }
+}
+
+// --- PLACEHOLDER_MSG_CARD_SUBTYPES ---
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enable_forward: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub update_multi: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub wide_screen_mode: Option<bool>,
+}
+
+impl MessageCardConfig {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn enable_forward(mut self, v: bool) -> Self {
+        self.enable_forward = Some(v);
+        self
+    }
+
+    pub fn update_multi(mut self, v: bool) -> Self {
+        self.update_multi = Some(v);
+        self
+    }
+
+    pub fn wide_screen_mode(mut self, v: bool) -> Self {
+        self.wide_screen_mode = Some(v);
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardHeader {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub template: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<MessageCardPlainText>,
+}
+
+impl MessageCardHeader {
+    pub fn new(title: impl Into<String>) -> Self {
+        Self {
+            template: None,
+            title: Some(MessageCardPlainText::new(title)),
+        }
+    }
+
+    pub fn template(mut self, template: impl Into<String>) -> Self {
+        self.template = Some(template.into());
+        self
+    }
+}
+
+// --- PLACEHOLDER_MSG_CARD_SUBTYPES_2 ---
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardPlainText {
+    #[serde(default)]
+    pub tag: String,
+    #[serde(default)]
+    pub content: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub lines: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub i18n: Option<MessageCardPlainTextI18n>,
+}
+
+impl MessageCardPlainText {
+    pub fn new(content: impl Into<String>) -> Self {
+        Self {
+            tag: "plain_text".to_string(),
+            content: content.into(),
+            lines: None,
+            i18n: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardLarkMd {
+    #[serde(default)]
+    pub tag: String,
+    #[serde(default)]
+    pub content: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub lines: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub i18n: Option<MessageCardPlainTextI18n>,
+}
+
+impl MessageCardLarkMd {
+    pub fn new(content: impl Into<String>) -> Self {
+        Self {
+            tag: "lark_md".to_string(),
+            content: content.into(),
+            lines: None,
+            i18n: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardPlainTextI18n {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardURL {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub android_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ios_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pc_url: Option<String>,
+}
+
+impl MessageCardURL {
+    pub fn new(url: impl Into<String>) -> Self {
+        Self {
+            url: Some(url.into()),
+            android_url: None,
+            ios_url: None,
+            pc_url: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessageCardI18nElements {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<Vec<Value>>,
 }

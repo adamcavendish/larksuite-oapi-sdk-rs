@@ -235,3 +235,18 @@ fn event_encrypt_with_event_dispatcher() {
     let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
     assert_eq!(parsed["challenge"], "from_encrypt");
 }
+
+#[test]
+fn encrypted_event_msg_roundtrip() {
+    use larksuite_oapi_sdk_rs::crypto::{encrypted_event_msg, event_decrypt};
+
+    let key = "test_encrypt_key";
+    let payload = serde_json::json!({"type": "url_verification", "challenge": "abc"});
+
+    let msg = encrypted_event_msg(&payload, key).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&msg).unwrap();
+    let encrypted = parsed["encrypt"].as_str().unwrap();
+    let decrypted = event_decrypt(key, encrypted).unwrap();
+    let inner: serde_json::Value = serde_json::from_str(&decrypted).unwrap();
+    assert_eq!(inner["challenge"], "abc");
+}

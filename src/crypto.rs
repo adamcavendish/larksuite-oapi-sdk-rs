@@ -104,3 +104,16 @@ pub fn verify_signature_sha1(
 
     constant_time_eq(result.as_bytes(), expected_sig.as_bytes())
 }
+
+/// Encrypt data and wrap it in a `{"encrypt": "..."}` JSON string, matching
+/// Go SDK's `EncryptedEventMsg`. Useful for constructing mock encrypted event
+/// payloads in tests.
+pub fn encrypted_event_msg(
+    data: &impl serde::Serialize,
+    encrypt_key: &str,
+) -> crate::Result<String> {
+    let json_bytes = serde_json::to_string(data)
+        .map_err(|e| crate::Error::Crypto(format!("json serialize failed: {e}")))?;
+    let encrypted = event_encrypt(encrypt_key, &json_bytes)?;
+    Ok(format!(r#"{{"encrypt":"{encrypted}"}}"#))
+}

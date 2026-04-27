@@ -1371,3 +1371,44 @@ async fn on_app_ticket_event_dispatches_typed() {
     assert_eq!(&*captured_ticket.lock().unwrap(), "ticket_xyz_123");
     assert_eq!(&*captured_app_id.lock().unwrap(), "my_app_id");
 }
+
+// ── Event base types ──
+
+#[test]
+fn event_v1_header_serde() {
+    use larksuite_oapi_sdk_rs::event::EventV1Header;
+    let json = r#"{"app_id":"app1","open_chat_id":"oc_123","open_id":"ou_456","tenant_key":"tk","type":"event_callback"}"#;
+    let header: EventV1Header = serde_json::from_str(json).unwrap();
+    assert_eq!(header.app_id, "app1");
+    assert_eq!(header.open_chat_id, "oc_123");
+    assert_eq!(header.open_id, "ou_456");
+    assert_eq!(header.tenant_key, "tk");
+    assert_eq!(header.event_type, "event_callback");
+}
+
+#[test]
+fn event_v2_base_tenant_key() {
+    use larksuite_oapi_sdk_rs::event::{EventHeader, EventV2Base};
+    let base = EventV2Base {
+        schema: "2.0".to_string(),
+        header: Some(EventHeader {
+            tenant_key: "tenant_abc".to_string(),
+            ..Default::default()
+        }),
+    };
+    assert_eq!(base.tenant_key(), "tenant_abc");
+
+    let empty = EventV2Base::default();
+    assert_eq!(empty.tenant_key(), "");
+}
+
+#[test]
+fn event_base_serde() {
+    use larksuite_oapi_sdk_rs::event::EventBase;
+    let json = r#"{"ts":"1620000000","uuid":"uuid-123","token":"tok","type":"event_callback"}"#;
+    let base: EventBase = serde_json::from_str(json).unwrap();
+    assert_eq!(base.ts, "1620000000");
+    assert_eq!(base.uuid, "uuid-123");
+    assert_eq!(base.token, "tok");
+    assert_eq!(base.event_type, "event_callback");
+}

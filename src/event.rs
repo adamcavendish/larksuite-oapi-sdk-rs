@@ -86,6 +86,54 @@ pub struct EventHeader {
     pub token: String,
 }
 
+/// P1 (v1.0 protocol) event header.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EventV1Header {
+    #[serde(default)]
+    pub app_id: String,
+    #[serde(default)]
+    pub open_chat_id: String,
+    #[serde(default)]
+    pub open_id: String,
+    #[serde(default)]
+    pub tenant_key: String,
+    #[serde(rename = "type", default)]
+    pub event_type: String,
+}
+
+/// P2 (v2.0 protocol) event base with schema and header.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EventV2Base {
+    #[serde(default)]
+    pub schema: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub header: Option<EventHeader>,
+}
+
+impl EventV2Base {
+    #[must_use]
+    #[inline]
+    pub fn tenant_key(&self) -> &str {
+        self.header
+            .as_ref()
+            .map(|h| h.tenant_key.as_str())
+            .unwrap_or_default()
+    }
+}
+
+/// P1 (v1.0 protocol) event body base fields.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EventBase {
+    #[serde(default)]
+    pub ts: String,
+    #[serde(default)]
+    pub uuid: String,
+    #[serde(default)]
+    pub token: String,
+    #[serde(rename = "type", default)]
+    pub event_type: String,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct EventV2Body {
     pub schema: Option<String>,

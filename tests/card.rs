@@ -326,3 +326,60 @@ fn test_template_card_in_callback_card() {
     assert_eq!(json["data"]["template_variable"]["name"], "Alice");
     assert_eq!(json["data"]["template_version_name"], "1.0.0");
 }
+
+#[test]
+fn template_color_constants() {
+    use larksuite_oapi_sdk_rs::card::*;
+    assert_eq!(TEMPLATE_BLUE, "blue");
+    assert_eq!(TEMPLATE_WATHET, "wathet");
+    assert_eq!(TEMPLATE_TURQUOISE, "turquoise");
+    assert_eq!(TEMPLATE_GREEN, "green");
+    assert_eq!(TEMPLATE_YELLOW, "yellow");
+    assert_eq!(TEMPLATE_ORANGE, "orange");
+    assert_eq!(TEMPLATE_RED, "red");
+    assert_eq!(TEMPLATE_CARMINE, "carmine");
+    assert_eq!(TEMPLATE_VIOLET, "violet");
+    assert_eq!(TEMPLATE_PURPLE, "purple");
+    assert_eq!(TEMPLATE_INDIGO, "indigo");
+    assert_eq!(TEMPLATE_GREY, "grey");
+}
+
+#[test]
+fn message_card_builder() {
+    use larksuite_oapi_sdk_rs::card::*;
+
+    let card = MessageCard::new()
+        .config(
+            MessageCardConfig::new()
+                .wide_screen_mode(true)
+                .enable_forward(false),
+        )
+        .header(MessageCardHeader::new("Hello").template(TEMPLATE_BLUE))
+        .element(
+            serde_json::json!({"tag": "div", "text": {"tag": "plain_text", "content": "world"}}),
+        )
+        .card_link(MessageCardURL::new("https://example.com"));
+
+    let json = card.to_json();
+    assert_eq!(json["config"]["wide_screen_mode"], true);
+    assert_eq!(json["config"]["enable_forward"], false);
+    assert_eq!(json["header"]["template"], "blue");
+    assert_eq!(json["header"]["title"]["tag"], "plain_text");
+    assert_eq!(json["header"]["title"]["content"], "Hello");
+    assert_eq!(json["elements"][0]["tag"], "div");
+    assert_eq!(json["card_link"]["url"], "https://example.com");
+}
+
+#[test]
+fn message_card_serde_roundtrip() {
+    use larksuite_oapi_sdk_rs::card::*;
+
+    let card = MessageCard::new()
+        .header(MessageCardHeader::new("Test"))
+        .config(MessageCardConfig::new().update_multi(true));
+
+    let json_str = serde_json::to_string(&card).unwrap();
+    let deserialized: MessageCard = serde_json::from_str(&json_str).unwrap();
+    assert_eq!(deserialized.header.unwrap().title.unwrap().content, "Test");
+    assert_eq!(deserialized.config.unwrap().update_multi, Some(true));
+}
