@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
@@ -778,6 +780,283 @@ impl_resp!(
     UpdatePermissionPublicPasswordRespData
 );
 
+#[derive(Debug, Clone)]
+struct PageIteratorState<T> {
+    next_page_token: Option<String>,
+    items: VecDeque<T>,
+    started: bool,
+    exhausted: bool,
+    limit: Option<usize>,
+    emitted: usize,
+}
+
+impl<T> Default for PageIteratorState<T> {
+    fn default() -> Self {
+        Self {
+            next_page_token: None,
+            items: VecDeque::new(),
+            started: false,
+            exhausted: false,
+            limit: None,
+            emitted: 0,
+        }
+    }
+}
+
+impl<T> PageIteratorState<T> {
+    fn limit(mut self, limit: usize) -> Self {
+        self.limit = (limit > 0).then_some(limit);
+        self
+    }
+
+    fn next_page_token(&self) -> Option<&str> {
+        self.next_page_token.as_deref()
+    }
+
+    fn page_token_for_request(&self) -> Option<&str> {
+        if self.started {
+            self.next_page_token.as_deref()
+        } else {
+            None
+        }
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        if self.limit.is_some_and(|limit| self.emitted >= limit) {
+            return None;
+        }
+        let item = self.items.pop_front()?;
+        self.emitted += 1;
+        Some(item)
+    }
+
+    fn should_fetch(&self) -> bool {
+        self.limit.is_none_or(|limit| self.emitted < limit)
+            && self.items.is_empty()
+            && !self.exhausted
+            && (!self.started || self.next_page_token.is_some())
+    }
+
+    fn accept_page(
+        &mut self,
+        items: Option<Vec<T>>,
+        page_token: Option<String>,
+        has_more: Option<bool>,
+    ) {
+        self.started = true;
+        self.items = items.unwrap_or_default().into();
+        self.next_page_token = page_token;
+        self.exhausted =
+            self.items.is_empty() || !has_more.unwrap_or(false) || self.next_page_token.is_none();
+    }
+}
+
+// ── Iterators ──
+
+#[derive(Debug, Clone)]
+pub struct FileCommentIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<FileComment>,
+    file_token: String,
+    file_type: String,
+    is_whole: Option<bool>,
+    is_solved: Option<bool>,
+    user_id_type: Option<String>,
+    page_size: Option<i32>,
+}
+
+impl<'a> FileCommentIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<FileComment>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = FileCommentResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.file_token,
+                &self.file_type,
+                self.is_whole,
+                self.is_solved,
+                self.state.page_token_for_request(),
+                self.page_size,
+                self.user_id_type.as_deref(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct FileCommentReplyIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<FileCommentReply>,
+    file_token: String,
+    comment_id: String,
+    file_type: String,
+    user_id_type: Option<String>,
+    page_size: Option<i32>,
+}
+
+impl<'a> FileCommentReplyIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<FileCommentReply>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = FileCommentReplyResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.file_token,
+                &self.comment_id,
+                &self.file_type,
+                self.page_size,
+                self.state.page_token_for_request(),
+                self.user_id_type.as_deref(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct FileVersionIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Version>,
+    file_token: String,
+    obj_type: String,
+    user_id_type: Option<String>,
+    page_size: Option<i32>,
+}
+
+impl<'a> FileVersionIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Version>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = FileVersionResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.file_token,
+                &self.obj_type,
+                self.page_size,
+                self.state.page_token_for_request(),
+                self.user_id_type.as_deref(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct FileViewRecordIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<FileViewRecord>,
+    file_token: String,
+    file_type: String,
+    viewer_id_type: Option<String>,
+    page_size: Option<i32>,
+}
+
+impl<'a> FileViewRecordIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<FileViewRecord>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = FileViewRecordResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.file_token,
+                &self.file_type,
+                self.page_size,
+                self.state.page_token_for_request(),
+                self.viewer_id_type.as_deref(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
 // ── Resources ──
 
 pub struct ExportTaskResource<'a> {
@@ -1373,6 +1652,27 @@ impl<'a> FileCommentResource<'a> {
         })
     }
 
+    pub fn list_by_iterator(
+        &self,
+        file_token: &str,
+        file_type: &str,
+        is_whole: Option<bool>,
+        is_solved: Option<bool>,
+        user_id_type: Option<&str>,
+        page_size: Option<i32>,
+    ) -> FileCommentIterator<'a> {
+        FileCommentIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            file_token: file_token.to_owned(),
+            file_type: file_type.to_owned(),
+            is_whole,
+            is_solved,
+            user_id_type: user_id_type.map(|v| v.to_owned()),
+            page_size,
+        }
+    }
+
     pub async fn patch(
         &self,
         file_token: &str,
@@ -1454,6 +1754,25 @@ impl<'a> FileCommentReplyResource<'a> {
             code_error: raw.code_error,
             data: raw.data,
         })
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        file_token: &str,
+        comment_id: &str,
+        file_type: &str,
+        user_id_type: Option<&str>,
+        page_size: Option<i32>,
+    ) -> FileCommentReplyIterator<'a> {
+        FileCommentReplyIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            file_token: file_token.to_owned(),
+            comment_id: comment_id.to_owned(),
+            file_type: file_type.to_owned(),
+            user_id_type: user_id_type.map(|v| v.to_owned()),
+            page_size,
+        }
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1689,6 +2008,23 @@ impl<'a> FileVersionResource<'a> {
             data: raw.data,
         })
     }
+
+    pub fn list_by_iterator(
+        &self,
+        file_token: &str,
+        obj_type: &str,
+        user_id_type: Option<&str>,
+        page_size: Option<i32>,
+    ) -> FileVersionIterator<'a> {
+        FileVersionIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            file_token: file_token.to_owned(),
+            obj_type: obj_type.to_owned(),
+            user_id_type: user_id_type.map(|v| v.to_owned()),
+            page_size,
+        }
+    }
 }
 
 pub struct FileViewRecordResource<'a> {
@@ -1726,6 +2062,23 @@ impl<'a> FileViewRecordResource<'a> {
             code_error: raw.code_error,
             data: raw.data,
         })
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        file_token: &str,
+        file_type: &str,
+        viewer_id_type: Option<&str>,
+        page_size: Option<i32>,
+    ) -> FileViewRecordIterator<'a> {
+        FileViewRecordIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            file_token: file_token.to_owned(),
+            file_type: file_type.to_owned(),
+            viewer_id_type: viewer_id_type.map(|v| v.to_owned()),
+            page_size,
+        }
     }
 }
 

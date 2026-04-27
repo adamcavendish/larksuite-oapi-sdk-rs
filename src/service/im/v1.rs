@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
@@ -911,9 +913,419 @@ impl_resp!(CreateImageResp, CreateImageRespData);
 impl_resp!(ForwardThreadResp, MessageRespData);
 
 #[derive(Debug, Clone)]
+struct PageIteratorState<T> {
+    next_page_token: Option<String>,
+    items: VecDeque<T>,
+    started: bool,
+    exhausted: bool,
+    limit: Option<usize>,
+    emitted: usize,
+}
+
+impl<T> Default for PageIteratorState<T> {
+    fn default() -> Self {
+        Self {
+            next_page_token: None,
+            items: VecDeque::new(),
+            started: false,
+            exhausted: false,
+            limit: None,
+            emitted: 0,
+        }
+    }
+}
+
+impl<T> PageIteratorState<T> {
+    fn limit(mut self, limit: usize) -> Self {
+        self.limit = (limit > 0).then_some(limit);
+        self
+    }
+
+    fn next_page_token(&self) -> Option<&str> {
+        self.next_page_token.as_deref()
+    }
+
+    fn page_token_for_request(&self) -> Option<&str> {
+        if self.started {
+            self.next_page_token.as_deref()
+        } else {
+            None
+        }
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        if self.limit.is_some_and(|limit| self.emitted >= limit) {
+            return None;
+        }
+        let item = self.items.pop_front()?;
+        self.emitted += 1;
+        Some(item)
+    }
+
+    fn should_fetch(&self) -> bool {
+        self.limit.is_none_or(|limit| self.emitted < limit)
+            && self.items.is_empty()
+            && !self.exhausted
+            && (!self.started || self.next_page_token.is_some())
+    }
+
+    fn accept_page(
+        &mut self,
+        items: Option<Vec<T>>,
+        page_token: Option<String>,
+        has_more: Option<bool>,
+    ) {
+        self.started = true;
+        self.items = items.unwrap_or_default().into();
+        self.next_page_token = page_token;
+        self.exhausted =
+            self.items.is_empty() || !has_more.unwrap_or(false) || self.next_page_token.is_none();
+    }
+}
+
+// ── Iterators ──
+
+#[derive(Debug, Clone)]
+pub struct ListMessageIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Message>,
+    container_id_type: String,
+    container_id: String,
+    start_time: Option<String>,
+    end_time: Option<String>,
+    sort_type: Option<String>,
+    page_size: Option<i64>,
+}
+
+impl<'a> ListMessageIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Message>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = MessageResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.container_id_type,
+                &self.container_id,
+                self.start_time.as_deref(),
+                self.end_time.as_deref(),
+                self.sort_type.as_deref(),
+                self.page_size,
+                self.state.page_token_for_request(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListMessageReactionIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<MessageReaction>,
+    message_id: String,
+    reaction_type: Option<String>,
+    page_size: Option<i64>,
+    user_id_type: Option<String>,
+}
+
+impl<'a> ListMessageReactionIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<MessageReaction>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = MessageReactionResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.message_id,
+                self.reaction_type.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                self.user_id_type.as_deref(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListPinIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Pin>,
+    chat_id: String,
+    start_time: Option<String>,
+    end_time: Option<String>,
+    page_size: Option<i64>,
+}
+
+impl<'a> ListPinIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Pin>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = PinResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.chat_id,
+                self.start_time.as_deref(),
+                self.end_time.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListChatIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<ListChat>,
+    user_id_type: Option<String>,
+    sort_type: Option<String>,
+    page_size: Option<i64>,
+}
+
+impl<'a> ListChatIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<ListChat>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = ChatResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                self.user_id_type.as_deref(),
+                self.sort_type.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SearchChatIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<ListChat>,
+    user_id_type: Option<String>,
+    query: Option<String>,
+    page_size: Option<i64>,
+}
+
+impl<'a> SearchChatIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<ListChat>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = ChatResource {
+            config: self.config,
+        };
+        let resp = resource
+            .search(
+                self.user_id_type.as_deref(),
+                self.query.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct GetChatMembersIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<ListMember>,
+    chat_id: String,
+    member_id_type: Option<String>,
+    page_size: Option<i64>,
+}
+
+impl<'a> GetChatMembersIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<ListMember>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = ChatMembersResource {
+            config: self.config,
+        };
+        let resp = resource
+            .get(
+                &self.chat_id,
+                self.member_id_type.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct GetChatModerationIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<ListModerator>,
+    chat_id: String,
+    user_id_type: Option<String>,
+    page_size: Option<i64>,
+}
+
+impl<'a> GetChatModerationIterator<'a> {
+    pub fn limit(mut self, limit: usize) -> Self {
+        self.state = self.state.limit(limit);
+        self
+    }
+
+    pub fn next_page_token(&self) -> Option<&str> {
+        self.state.next_page_token()
+    }
+
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<ListModerator>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = ChatModerationResource {
+            config: self.config,
+        };
+        let resp = resource
+            .get(
+                &self.chat_id,
+                self.user_id_type.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
 
 // ── Resources ──
 
+#[derive(Debug, Clone)]
 pub struct MessageResource<'a> {
     config: &'a Config,
 }
@@ -1071,6 +1483,27 @@ impl<'a> MessageResource<'a> {
             code_error: raw.code_error,
             data: raw.data,
         })
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        container_id_type: &str,
+        container_id: &str,
+        start_time: Option<&str>,
+        end_time: Option<&str>,
+        sort_type: Option<&str>,
+        page_size: Option<i64>,
+    ) -> ListMessageIterator<'a> {
+        ListMessageIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            container_id_type: container_id_type.to_owned(),
+            container_id: container_id.to_owned(),
+            start_time: start_time.map(|v| v.to_owned()),
+            end_time: end_time.map(|v| v.to_owned()),
+            sort_type: sort_type.map(|v| v.to_owned()),
+            page_size,
+        }
     }
 
     pub async fn forward(
@@ -1321,6 +1754,23 @@ impl<'a> MessageReactionResource<'a> {
             data: raw.data,
         })
     }
+
+    pub fn list_by_iterator(
+        &self,
+        message_id: &str,
+        reaction_type: Option<&str>,
+        page_size: Option<i64>,
+        user_id_type: Option<&str>,
+    ) -> ListMessageReactionIterator<'a> {
+        ListMessageReactionIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            message_id: message_id.to_owned(),
+            reaction_type: reaction_type.map(|v| v.to_owned()),
+            page_size,
+            user_id_type: user_id_type.map(|v| v.to_owned()),
+        }
+    }
 }
 
 pub struct MessageResourceDownload<'a> {
@@ -1482,6 +1932,23 @@ impl<'a> PinResource<'a> {
             code_error: raw.code_error,
             data: raw.data,
         })
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        chat_id: &str,
+        start_time: Option<&str>,
+        end_time: Option<&str>,
+        page_size: Option<i64>,
+    ) -> ListPinIterator<'a> {
+        ListPinIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            chat_id: chat_id.to_owned(),
+            start_time: start_time.map(|v| v.to_owned()),
+            end_time: end_time.map(|v| v.to_owned()),
+            page_size,
+        }
     }
 }
 
@@ -1778,6 +2245,36 @@ impl<'a> ChatResource<'a> {
             data: raw.data,
         })
     }
+
+    pub fn list_by_iterator(
+        &self,
+        user_id_type: Option<&str>,
+        sort_type: Option<&str>,
+        page_size: Option<i64>,
+    ) -> ListChatIterator<'a> {
+        ListChatIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            user_id_type: user_id_type.map(|v| v.to_owned()),
+            sort_type: sort_type.map(|v| v.to_owned()),
+            page_size,
+        }
+    }
+
+    pub fn search_by_iterator(
+        &self,
+        user_id_type: Option<&str>,
+        query: Option<&str>,
+        page_size: Option<i64>,
+    ) -> SearchChatIterator<'a> {
+        SearchChatIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            user_id_type: user_id_type.map(|v| v.to_owned()),
+            query: query.map(|v| v.to_owned()),
+            page_size,
+        }
+    }
 }
 
 pub struct ChatMembersResource<'a> {
@@ -1863,6 +2360,21 @@ impl<'a> ChatMembersResource<'a> {
             code_error: raw.code_error,
             data: raw.data,
         })
+    }
+
+    pub fn get_by_iterator(
+        &self,
+        chat_id: &str,
+        member_id_type: Option<&str>,
+        page_size: Option<i64>,
+    ) -> GetChatMembersIterator<'a> {
+        GetChatMembersIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            chat_id: chat_id.to_owned(),
+            member_id_type: member_id_type.map(|v| v.to_owned()),
+            page_size,
+        }
     }
 
     pub async fn is_in_chat(
@@ -2033,6 +2545,21 @@ impl<'a> ChatModerationResource<'a> {
             code_error: raw.code_error,
             data: raw.data,
         })
+    }
+
+    pub fn get_by_iterator(
+        &self,
+        chat_id: &str,
+        user_id_type: Option<&str>,
+        page_size: Option<i64>,
+    ) -> GetChatModerationIterator<'a> {
+        GetChatModerationIterator {
+            config: self.config,
+            state: PageIteratorState::default(),
+            chat_id: chat_id.to_owned(),
+            user_id_type: user_id_type.map(|v| v.to_owned()),
+            page_size,
+        }
     }
 
     pub async fn update(
