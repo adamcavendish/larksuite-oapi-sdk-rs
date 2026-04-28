@@ -125,7 +125,14 @@ fn build_qr_code_url(raw_url: &str, source: &str) -> Result<String, LarkError> {
     let mut parsed = url::Url::parse(raw_url)
         .map_err(|e| LarkError::Registration(format!("invalid QR URL: {e}")))?;
     {
+        let preserved: Vec<(String, String)> = parsed.query_pairs().into_owned().collect();
         let mut q = parsed.query_pairs_mut();
+        q.clear();
+        for (key, value) in preserved {
+            if key != "from" && key != "tp" && key != "source" {
+                q.append_pair(&key, &value);
+            }
+        }
         q.append_pair("from", "sdk");
         q.append_pair("tp", "sdk");
         if source.is_empty() {
@@ -272,7 +279,7 @@ pub async fn register_app(opts: Options) -> Result<RegisterAppResult, LarkError>
         }
 
         match resp.error.as_str() {
-            "authorization_pending" | "" => {
+            "authorization_pending" => {
                 if let Some(ref cb) = opts.on_status_change {
                     cb(&StatusChangeInfo {
                         status: STATUS_POLLING.into(),
@@ -280,6 +287,7 @@ pub async fn register_app(opts: Options) -> Result<RegisterAppResult, LarkError>
                     });
                 }
             }
+            "" => {}
             "slow_down" => {
                 interval += 5;
                 if let Some(ref cb) = opts.on_status_change {
@@ -302,5 +310,137 @@ pub async fn register_app(opts: Options) -> Result<RegisterAppResult, LarkError>
                 )));
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::{Arc, Mutex};
+    use std::time::Duration;
+
+    async fn mock_server_with_requests(
+        responses: Vec<String>,
+    ) -> (
+        std::net::SocketAddr,
+        tokio::task::JoinHandle<()>,
+        Arc<Mutex<Vec<String>>>,
+    ) {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let responses = Arc::new(responses);
+        let counter = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let requests = Arc::new(Mutex::new(Vec::new()));
+
+        let handle = tokio::spawn({
+            let requests = Arc::clone(&requests);
+            async move {
+                loop {
+                    let Ok((mut stream, _)) = listener.accept().await else {
+                        break;
+                    };
+                    let responses = Arc::clone(&responses);
+                    let counter = Arc::clone(&counter);
+                    let requests = Arc::clone(&requests);
+                    tokio::spawn(async move {
+                        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+                        let mut buf = vec![0u8; 8192];
+                        let Ok(n) = stream.read(&mut buf).await else {
+                            return;
+                        };
+                        requests
+                            .lock()
+                            .unwrap()
+                            .push(String::from_utf8_lossy(&buf[..n]).to_string());
+                        let idx = counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                        let resp_idx = idx.min(responses.len() - 1);
+                        let _ = stream.write_all(responses[resp_idx].as_bytes()).await;
+                        let _ = stream.shutdown().await;
+                    });
+                }
+            }
+        });
+
+        (addr, handle, requests)
+    }
+
+    #[test]
+    fn qr_url_preserves_unrelated_query_params() {
+        let url = build_qr_code_url(
+            "https://qr.example.com/scan?foo=bar&from=old&tp=old&source=other",
+            "local-test",
+        )
+        .unwrap();
+        let parsed = url::Url::parse(&url).unwrap();
+        let mut query = parsed.query_pairs();
+        assert!(query.clone().any(|(k, v)| k == "foo" && v == "bar"));
+        assert!(query.clone().any(|(k, v)| k == "from" && v == "sdk"));
+        assert!(query.clone().any(|(k, v)| k == "tp" && v == "sdk"));
+        assert!(query.any(|(k, v)| k == "source" && v == "rust-sdk/local-test"));
+    }
+
+    #[tokio::test(flavor = "current_thread", start_paused = true)]
+    async fn register_app_keeps_polling_on_empty_response() {
+        let page1 = r#"{"device_code":"device-empty","verification_uri_complete":"https://qr.example.com/scan?foo=bar&from=old&tp=old&source=other","interval":3,"expire_in":60}"#;
+        let page2 = r#"{}"#;
+        let page3 = r#"{"client_id":"cli_after_empty","client_secret":"sec_after_empty"}"#;
+        let (addr, _h, requests) = mock_server_with_requests(vec![
+            format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+                page1.len(),
+                page1
+            ),
+            format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+                page2.len(),
+                page2
+            ),
+            format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+                page3.len(),
+                page3
+            ),
+        ])
+        .await;
+
+        let qr_info = Arc::new(Mutex::new(None));
+        let qr_info_cb = Arc::clone(&qr_info);
+        let statuses = Arc::new(Mutex::new(Vec::new()));
+        let statuses_cb = Arc::clone(&statuses);
+        let handle = tokio::spawn(register_app(Options {
+            source: "local".to_string(),
+            domain: format!("http://{}", addr),
+            lark_domain: String::new(),
+            on_qr_code: Box::new(move |info| {
+                *qr_info_cb.lock().unwrap() = Some(info.clone());
+            }),
+            on_status_change: Some(Box::new(move |info| {
+                statuses_cb.lock().unwrap().push(info.status.clone());
+            })),
+        }));
+
+        for _ in 0..50 {
+            if requests.lock().unwrap().len() >= 2 {
+                break;
+            }
+            tokio::task::yield_now().await;
+        }
+        assert_eq!(requests.lock().unwrap().len(), 2);
+
+        tokio::time::advance(Duration::from_secs(3)).await;
+        tokio::task::yield_now().await;
+
+        let result = handle.await.unwrap().unwrap();
+        assert_eq!(result.client_id, "cli_after_empty");
+        assert_eq!(statuses.lock().unwrap().as_slice(), &[] as &[String]);
+
+        let qr_info = qr_info.lock().unwrap().clone().unwrap();
+        let parsed = url::Url::parse(&qr_info.url).unwrap();
+        let mut query = parsed.query_pairs();
+        assert!(query.clone().any(|(k, v)| k == "foo" && v == "bar"));
+        assert!(query.clone().any(|(k, v)| k == "from" && v == "sdk"));
+        assert!(query.clone().any(|(k, v)| k == "tp" && v == "sdk"));
+        assert!(query.any(|(k, v)| k == "source" && v == "rust-sdk/local"));
     }
 }

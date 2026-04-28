@@ -42,7 +42,7 @@ uuid = { version = "1", features = ["v4"] }
 prost-build = { version = "0.13", optional = true }
 
 [dev-dependencies]
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "test-util"] }
 tracing-subscriber = "0.3"
 
 [[example]]

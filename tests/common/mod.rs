@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::sync::Mutex;
 
 /// Spawn a TCP listener that returns canned HTTP responses.
 /// Each accepted connection reads one request then writes the response from
@@ -42,13 +43,13 @@ pub async fn mock_server_with_requests(
 ) -> (
     std::net::SocketAddr,
     tokio::task::JoinHandle<()>,
-    Arc<std::sync::Mutex<Vec<String>>>,
+    Arc<Mutex<Vec<String>>>,
 ) {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
     let responses = Arc::new(responses);
     let counter = Arc::new(std::sync::atomic::AtomicUsize::new(0));
-    let requests = Arc::new(std::sync::Mutex::new(Vec::new()));
+    let requests = Arc::new(Mutex::new(Vec::new()));
 
     let handle = tokio::spawn({
         let requests = Arc::clone(&requests);
