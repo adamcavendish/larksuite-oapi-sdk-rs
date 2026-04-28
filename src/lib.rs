@@ -46,7 +46,6 @@ pub use client::{Client, ClientBuilder};
 pub use config::Config;
 pub use constants::{AccessTokenType, AppType, FEISHU_BASE_URL, LARK_BASE_URL};
 // Re-export http::Method so downstream crates can build ApiReq without adding http directly.
-pub use http::Method as HttpMethod;
 pub use crypto::{
     encrypted_event_msg, event_decrypt, event_encrypt, verify_signature_sha1,
     verify_signature_sha256,
@@ -60,6 +59,7 @@ pub use event::{
     InlinePreview, PreviewUrl, TemplateCard, Toast, ToastI18n, URLPreviewGetRequest,
     URLPreviewGetResponse,
 };
+pub use http::Method as HttpMethod;
 pub use req::{
     ApiReq, FormDataBuilder, FormDataField, FormDataValue, PathParams, QueryParams, ReqBody,
     RequestOption,

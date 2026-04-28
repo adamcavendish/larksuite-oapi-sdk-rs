@@ -5,7 +5,7 @@ use http::HeaderMap;
 
 use crate::cache::Cache;
 use crate::config::Config;
-use crate::constants::AppType;
+use crate::constants::{AccessTokenType, AppType};
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, RawResponse};
@@ -431,7 +431,8 @@ impl Client {
     }
 
     pub async fn get(&self, path: &str, option: &RequestOption) -> Result<ApiResp, LarkError> {
-        let api_req = ApiReq::new(http::Method::GET, path);
+        let mut api_req = ApiReq::new(http::Method::GET, path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         self.do_req(&api_req, option).await
     }
 
@@ -442,6 +443,7 @@ impl Client {
         option: &RequestOption,
     ) -> Result<ApiResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::Json(body));
         self.do_req(&api_req, option).await
     }
@@ -453,6 +455,7 @@ impl Client {
         option: &RequestOption,
     ) -> Result<ApiResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::PUT, path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::Json(body));
         self.do_req(&api_req, option).await
     }
@@ -464,12 +467,14 @@ impl Client {
         option: &RequestOption,
     ) -> Result<ApiResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::PATCH, path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         api_req.body = Some(ReqBody::Json(body));
         self.do_req(&api_req, option).await
     }
 
     pub async fn delete(&self, path: &str, option: &RequestOption) -> Result<ApiResp, LarkError> {
-        let api_req = ApiReq::new(http::Method::DELETE, path);
+        let mut api_req = ApiReq::new(http::Method::DELETE, path);
+        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         self.do_req(&api_req, option).await
     }
 
