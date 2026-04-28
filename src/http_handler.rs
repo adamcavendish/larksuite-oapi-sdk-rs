@@ -83,6 +83,7 @@ pub async fn card_action_handler(
 mod tests {
     use super::*;
 
+    use crate::event::CardActionHandler;
     use http::header::HeaderName;
 
     #[test]
@@ -135,6 +136,33 @@ mod tests {
 
         assert_eq!(resp.status(), 200);
         assert_eq!(body["challenge"], "challenge-1");
+    }
+
+    #[tokio::test]
+    async fn card_action_handler_runs_handler() {
+        let handler = CardActionHandler::new("", "", |_action| async {
+            Ok(serde_json::json!({
+                "ok": true
+            }))
+        })
+        .skip_sign_verify();
+
+        let req = Request::builder()
+            .method("POST")
+            .uri("/webhook/card")
+            .body(
+                serde_json::to_vec(&serde_json::json!({
+                    "action": {}
+                }))
+                .unwrap(),
+            )
+            .unwrap();
+
+        let resp = card_action_handler(&handler, req).await;
+        let body: serde_json::Value = serde_json::from_slice(resp.body()).unwrap();
+
+        assert_eq!(resp.status(), 200);
+        assert_eq!(body["ok"], true);
     }
 
     #[tokio::test]
