@@ -350,7 +350,7 @@ impl EventDispatcher {
     /// Decrypt an event payload string.
     ///
     /// If an encrypt key is configured, decrypts the ciphertext. Otherwise
-    /// returns the input unchanged. This is the second step after [`parse_req`].
+    /// returns the input unchanged. This is the second step after [`Self::parse_req`].
     pub fn decrypt_event(&self, cipher_event_json: &str) -> Result<String, LarkError> {
         if self.event_encrypt_key.is_empty() {
             return Ok(cipher_event_json.to_string());
