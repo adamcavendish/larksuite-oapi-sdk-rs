@@ -84,3 +84,90 @@ pub async fn card_action_handler(
     };
     build_response(handler.handle(event_req).await)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use axum::body::{Body, Bytes};
+
+    async fn response_body(resp: Response) -> Bytes {
+        axum::body::to_bytes(resp.into_body(), 1024 * 1024)
+            .await
+            .unwrap()
+    }
+
+    #[tokio::test]
+    async fn event_handler_url_verification() {
+        let dispatcher = Arc::new(EventDispatcher::new("token", ""));
+        let body = serde_json::json!({
+            "type": "url_verification",
+            "token": "token",
+            "challenge": "challenge-1"
+        });
+        let req = Request::builder()
+            .method("POST")
+            .uri("/webhook/event")
+            .header("content-type", "application/json")
+            .body(Body::from(serde_json::to_vec(&body).unwrap()))
+            .unwrap();
+
+        let resp = event_handler(State(dispatcher), req).await;
+
+        assert_eq!(resp.status(), 200);
+        let body: serde_json::Value = serde_json::from_slice(&response_body(resp).await).unwrap();
+        assert_eq!(body["challenge"], "challenge-1");
+    }
+
+    #[tokio::test]
+    async fn event_handler_missing_signature_returns_500() {
+        let dispatcher = Arc::new(EventDispatcher::new("", "encrypt-key"));
+        // P2 protocol event with no signature headers — must fail verification
+        let body = serde_json::json!({
+            "schema": "2.0",
+            "header": {
+                "event_id": "evt-1",
+                "event_type": "im.message.receive_v1",
+                "app_id": "cli_test",
+                "tenant_key": "t1",
+                "create_time": "0"
+            },
+            "event": {}
+        });
+        let req = Request::builder()
+            .method("POST")
+            .uri("/webhook/event")
+            .header("content-type", "application/json")
+            .body(Body::from(serde_json::to_vec(&body).unwrap()))
+            .unwrap();
+
+        let resp = event_handler(State(dispatcher), req).await;
+
+        assert_eq!(resp.status(), 500);
+    }
+
+    #[tokio::test]
+    async fn card_action_handler_returns_json() {
+        let handler = Arc::new(
+            CardActionHandler::new("", "", |_action| async {
+                Ok(serde_json::json!({"ok": true}))
+            })
+            .skip_sign_verify(),
+        );
+
+        let req = Request::builder()
+            .method("POST")
+            .uri("/webhook/card")
+            .header("content-type", "application/json")
+            .body(Body::from(
+                serde_json::to_vec(&serde_json::json!({"action": {}})).unwrap(),
+            ))
+            .unwrap();
+
+        let resp = card_action_handler(State(handler), req).await;
+
+        assert_eq!(resp.status(), 200);
+        let body: serde_json::Value = serde_json::from_slice(&response_body(resp).await).unwrap();
+        assert_eq!(body["ok"], true);
+    }
+}

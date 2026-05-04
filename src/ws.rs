@@ -578,6 +578,8 @@ mod tests {
 
     use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
 
+    // ── Builder/config tests ──
+
     #[tokio::test]
     async fn log_level_builder_overrides_config_default() {
         let mut config = Config::new("app_id", "app_secret");
@@ -631,5 +633,138 @@ mod tests {
         assert!(request.starts_with("POST /callback/ws/endpoint HTTP/1.1"));
         assert!(request.contains(r#""AppID":"app_id""#));
         assert!(request.contains(r#""AppSecret":"app_secret""#));
+    }
+
+    // ── Protobuf frame encode/decode roundtrip ──
+
+    #[test]
+    fn frame_encode_decode_roundtrip_all_fields() {
+        let frame = proto::Frame {
+            seq_id: 1,
+            log_id: 100,
+            service: 42,
+            method: METHOD_DATA,
+            headers: vec![
+                make_header(HEADER_TYPE, MSG_TYPE_EVENT),
+                make_header(HEADER_SUM, "1"),
+            ],
+            payload_encoding: Some("json".into()),
+            payload_type: Some("event".into()),
+            payload: Some(b"hello world".to_vec()),
+            log_id_new: Some("new-log-id".into()),
+        };
+        let encoded = frame.encode_to_vec();
+        let decoded = proto::Frame::decode(encoded.as_slice()).unwrap();
+
+        assert_eq!(decoded.seq_id, 1);
+        assert_eq!(decoded.log_id, 100);
+        assert_eq!(decoded.service, 42);
+        assert_eq!(decoded.method, METHOD_DATA);
+        assert_eq!(decoded.headers.len(), 2);
+        assert_eq!(
+            get_header(&decoded.headers, HEADER_TYPE).as_deref(),
+            Some(MSG_TYPE_EVENT)
+        );
+        assert_eq!(
+            get_header(&decoded.headers, HEADER_SUM).as_deref(),
+            Some("1")
+        );
+        assert_eq!(decoded.payload_encoding.as_deref(), Some("json"));
+        assert_eq!(decoded.payload_type.as_deref(), Some("event"));
+        assert_eq!(decoded.payload.as_deref(), Some(b"hello world".as_slice()));
+        assert_eq!(decoded.log_id_new.as_deref(), Some("new-log-id"));
+    }
+
+    #[test]
+    fn frame_encode_decode_minimal_control_frame() {
+        let frame = proto::Frame {
+            seq_id: 0,
+            log_id: 0,
+            service: 1,
+            method: METHOD_CONTROL,
+            headers: vec![make_header(HEADER_TYPE, MSG_TYPE_PING)],
+            payload_encoding: None,
+            payload_type: None,
+            payload: None,
+            log_id_new: None,
+        };
+        let encoded = frame.encode_to_vec();
+        assert!(!encoded.is_empty());
+
+        let decoded = proto::Frame::decode(encoded.as_slice()).unwrap();
+        assert_eq!(decoded.method, METHOD_CONTROL);
+        assert_eq!(decoded.seq_id, 0);
+        assert!(decoded.payload.is_none());
+        assert_eq!(
+            get_header(&decoded.headers, HEADER_TYPE).as_deref(),
+            Some(MSG_TYPE_PING)
+        );
+    }
+
+    // ── Fragment reassembly ──
+
+    #[test]
+    fn frag_entry_new_creates_correct_capacity() {
+        let entry = FragEntry::new(3);
+        assert_eq!(entry.frames.len(), 3);
+        assert!(!entry.complete());
+    }
+
+    #[test]
+    fn frag_entry_insert_and_complete_in_order() {
+        let mut entry = FragEntry::new(2);
+        entry.insert(0, b"part0".to_vec());
+        assert!(!entry.complete());
+        entry.insert(1, b"part1".to_vec());
+        assert!(entry.complete());
+    }
+
+    #[test]
+    fn frag_entry_assemble_concatenates_in_order() {
+        let mut entry = FragEntry::new(3);
+        entry.insert(2, b"three".to_vec());
+        entry.insert(0, b"one-".to_vec());
+        entry.insert(1, b"two-".to_vec());
+        assert!(entry.complete());
+        assert_eq!(entry.assemble(), b"one-two-three");
+    }
+
+    #[test]
+    fn frag_entry_out_of_bounds_insert_is_noop() {
+        let mut entry = FragEntry::new(1);
+        entry.insert(5, b"oob".to_vec());
+        assert!(!entry.complete());
+        entry.insert(0, b"ok".to_vec());
+        assert!(entry.complete());
+    }
+
+    #[test]
+    fn frag_entry_not_expired_immediately() {
+        let entry = FragEntry::new(1);
+        assert!(!entry.expired());
+    }
+
+    // ── Header helpers ──
+
+    #[test]
+    fn get_header_finds_value() {
+        let headers = vec![make_header("type", "event"), make_header("sum", "3")];
+        assert_eq!(get_header(&headers, "type").as_deref(), Some("event"));
+        assert_eq!(get_header(&headers, "missing"), None);
+    }
+
+    #[test]
+    fn get_header_int_parses_and_defaults_to_zero() {
+        let headers = vec![make_header("sum", "5")];
+        assert_eq!(get_header_int(&headers, "sum"), 5);
+        assert_eq!(get_header_int(&headers, "missing"), 0);
+        assert_eq!(get_header_int(&[], "sum"), 0);
+    }
+
+    #[test]
+    fn make_header_creates_correct_struct() {
+        let h = make_header("key1", "val1");
+        assert_eq!(h.key, "key1");
+        assert_eq!(h.value, "val1");
     }
 }
