@@ -23,7 +23,7 @@ futures-util = { version = "0.3", optional = true }
 hex = "0.4"
 http = "1"
 percent-encoding = "2"
-aioduct = { version = "0.1.3", features = ["json", "tokio", "rustls"] }
+aioduct = { version = "0.1.7", features = ["json", "tokio", "rustls", "rustls-ring"] }
 rustls = { version = "0.23", default-features = false, features = ["ring"] }
 prost = { version = "0.13", optional = true }
 serde = { version = "1", features = ["derive"] }
