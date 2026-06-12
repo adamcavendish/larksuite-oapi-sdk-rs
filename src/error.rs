@@ -52,6 +52,10 @@ pub enum LarkError {
     /// App registration flow error.
     #[error("registration error: {0}")]
     Registration(String),
+
+    /// Client assertion (JWT bearer) error.
+    #[error("client assertion error: {0}")]
+    ClientAssertion(String),
 }
 
 impl From<crate::resp::CodeError> for LarkError {

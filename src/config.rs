@@ -6,6 +6,7 @@ use http::HeaderMap;
 
 use crate::cache::{Cache, LocalCache};
 use crate::constants::{AppType, FEISHU_BASE_URL};
+use crate::token::ClientAssertionProvider;
 
 static CRYPTO_PROVIDER_INIT: Once = Once::new();
 
@@ -24,6 +25,7 @@ pub(crate) fn install_default_crypto_provider() {
 #[derive(Clone)]
 pub struct Config {
     pub(crate) base_url: String,
+    pub(crate) oauth_base_url: String,
     pub(crate) app_id: String,
     pub(crate) app_secret: String,
     pub(crate) helpdesk_id: Option<String>,
@@ -39,6 +41,7 @@ pub struct Config {
     pub(crate) max_retries: u32,
     pub(crate) log_level: Option<tracing::Level>,
     pub(crate) log_req_at_debug: bool,
+    pub(crate) client_assertion_provider: Option<Arc<dyn ClientAssertionProvider>>,
 }
 
 impl Config {
@@ -48,6 +51,7 @@ impl Config {
         let http_client = aioduct::TokioClient::new();
         Self {
             base_url: FEISHU_BASE_URL.to_string(),
+            oauth_base_url: FEISHU_BASE_URL.to_string(),
             app_id: app_id.into(),
             app_secret: app_secret.into(),
             helpdesk_id: None,
@@ -63,6 +67,7 @@ impl Config {
             max_retries: 2,
             log_level: None,
             log_req_at_debug: false,
+            client_assertion_provider: None,
         }
     }
 
@@ -70,6 +75,12 @@ impl Config {
     #[inline]
     pub fn base_url(&self) -> &str {
         &self.base_url
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn oauth_base_url(&self) -> &str {
+        &self.oauth_base_url
     }
 
     #[must_use]
@@ -154,6 +165,12 @@ impl Config {
     #[inline]
     pub fn log_req_at_debug(&self) -> bool {
         self.log_req_at_debug
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn client_assertion_provider(&self) -> Option<&Arc<dyn ClientAssertionProvider>> {
+        self.client_assertion_provider.as_ref()
     }
 }
 

@@ -61,7 +61,18 @@ fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result
     if config.app_id.is_empty() {
         return Err(LarkError::IllegalParam("app_id is empty".to_string()));
     }
-    if config.app_secret.is_empty() {
+
+    let has_manual_token = option.user_access_token.is_some()
+        || option.tenant_access_token.is_some()
+        || option.app_access_token.is_some();
+
+    if config.client_assertion_provider.is_some() {
+        if config.app_type == AppType::Marketplace {
+            return Err(LarkError::ClientAssertion(
+                "ClientAssertion mode is not supported for marketplace apps".to_string(),
+            ));
+        }
+    } else if config.app_secret.is_empty() && !has_manual_token {
         return Err(LarkError::IllegalParam("app_secret is empty".to_string()));
     }
 
@@ -131,6 +142,29 @@ fn determine_token_type(
             .supported_access_token_types
             .contains(&AccessTokenType::None)
     {
+        return AccessTokenType::None;
+    }
+
+    if config.client_assertion_provider.is_some() {
+        if option.user_access_token.is_some()
+            && api_req
+                .supported_access_token_types
+                .contains(&AccessTokenType::User)
+        {
+            return AccessTokenType::User;
+        }
+        if api_req
+            .supported_access_token_types
+            .contains(&AccessTokenType::Tenant)
+        {
+            return AccessTokenType::Tenant;
+        }
+        if api_req
+            .supported_access_token_types
+            .contains(&AccessTokenType::App)
+        {
+            return AccessTokenType::App;
+        }
         return AccessTokenType::None;
     }
 
@@ -218,6 +252,23 @@ async fn resolve_bearer_token(
     option: &RequestOption,
     token_type: AccessTokenType,
 ) -> Result<Option<String>, LarkError> {
+    if config.client_assertion_provider.is_some() {
+        return match token_type {
+            AccessTokenType::User => Ok(option.user_access_token.clone()),
+            AccessTokenType::Tenant => {
+                let tm = TokenManager::new(config.token_cache.clone());
+                let token = tm
+                    .get_tenant_access_token(config, option.tenant_key.as_deref(), None)
+                    .await?;
+                Ok(Some(token))
+            }
+            AccessTokenType::None => Ok(None),
+            AccessTokenType::App => Err(LarkError::ClientAssertion(
+                "AppAccessToken APIs are not available in ClientAssertion mode".to_string(),
+            )),
+        };
+    }
+
     if !config.enable_token_cache {
         return match token_type {
             AccessTokenType::User => Ok(option.user_access_token.clone()),
@@ -251,6 +302,15 @@ async fn resolve_bearer_token(
     }
 }
 
+pub(crate) async fn raw_send_absolute_url(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+    bearer_token: Option<&str>,
+) -> Result<ApiResp, LarkError> {
+    raw_send_inner(config, api_req, option, bearer_token, true).await
+}
+
 pub(crate) async fn raw_send(
     config: &Config,
     api_req: &ApiReq,
@@ -258,7 +318,21 @@ pub(crate) async fn raw_send(
     _token_type: AccessTokenType,
     bearer_token: Option<&str>,
 ) -> Result<ApiResp, LarkError> {
-    let full_url = build_url(config, api_req);
+    raw_send_inner(config, api_req, option, bearer_token, false).await
+}
+
+async fn raw_send_inner(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+    bearer_token: Option<&str>,
+    absolute_url: bool,
+) -> Result<ApiResp, LarkError> {
+    let full_url = if absolute_url {
+        api_req.api_path.clone()
+    } else {
+        build_url(config, api_req)
+    };
 
     let mut builder = config
         .http_client

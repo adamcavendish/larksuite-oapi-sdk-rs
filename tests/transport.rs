@@ -32,7 +32,10 @@ async fn transport_rejects_empty_app_secret() {
 async fn transport_rejects_marketplace_missing_tenant_key() {
     use larksuite_oapi_sdk_rs::constants::AccessTokenType;
 
-    let client = Client::builder("app_id", "secret").marketplace().build().unwrap();
+    let client = Client::builder("app_id", "secret")
+        .marketplace()
+        .build()
+        .unwrap();
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
 
@@ -52,7 +55,8 @@ async fn transport_user_access_token_option_sets_header() {
     let client = Client::builder("app_id", "secret")
         .disable_token_cache()
         .base_url("http://127.0.0.1:1") // connection refused — intentional
-        .build().unwrap();
+        .build()
+        .unwrap();
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::User];
 

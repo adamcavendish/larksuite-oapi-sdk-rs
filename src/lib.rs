@@ -66,7 +66,8 @@ pub use req::{
 };
 pub use resp::{ApiResp, CodeError, CodeErrorInfo, RawResponse};
 pub use token::{
-    AppTicketManager, AppTokenResponse, MarketplaceAppTokenReq, MarketplaceTenantTokenReq,
-    ResendAppTicketRequest, ResendAppTicketResponse, SelfBuiltAppTokenReq, SelfBuiltTenantTokenReq,
-    TenantTokenResponse, TokenManager,
+    AppTicketManager, AppTokenResponse, ClientAssertionProvider, MarketplaceAppTokenReq,
+    MarketplaceTenantTokenReq, ResendAppTicketRequest, ResendAppTicketResponse,
+    SelfBuiltAppTokenReq, SelfBuiltTenantTokenReq, TargetInfo, TenantTokenResponse, Token,
+    TokenManager,
 };
