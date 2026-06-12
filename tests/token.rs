@@ -98,7 +98,10 @@ async fn token_tenant_cache_hit_returns_cached_value() {
     let client = Client::builder("app_id", "secret").build().unwrap();
     let cache = Arc::new(LocalCache::new());
 
-    let cache_key = format!("tenant_access_token-{}-tenant_1", client.config().app_id());
+    let cache_key = format!(
+        "tenant_access_token:app_secret:{}-tenant_1",
+        client.config().app_id()
+    );
     cache
         .set(
             &cache_key,
