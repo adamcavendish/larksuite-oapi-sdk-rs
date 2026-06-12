@@ -134,6 +134,13 @@ impl TokenManager {
             .token_request::<AppAccessTokenResp>(config, APP_ACCESS_TOKEN_INTERNAL_URL_PATH, &body)
             .await?;
 
+        if resp.code != 0 {
+            return Err(LarkError::Token(format!(
+                "app access token response error: code={}, msg={}",
+                resp.code, resp.msg
+            )));
+        }
+
         let cache_key = format!("{APP_ACCESS_TOKEN_KEY_PREFIX}-{}", config.app_id);
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
         if let Err(e) = self
@@ -164,6 +171,13 @@ impl TokenManager {
                 &body,
             )
             .await?;
+
+        if resp.code != 0 {
+            return Err(LarkError::Token(format!(
+                "tenant access token response error: code={}, msg={}",
+                resp.code, resp.msg
+            )));
+        }
 
         let tk = tenant_key.unwrap_or_default();
         let cache_key = format!(
@@ -197,6 +211,13 @@ impl TokenManager {
             .token_request::<AppAccessTokenResp>(config, APP_ACCESS_TOKEN_URL_PATH, &body)
             .await?;
 
+        if resp.code != 0 {
+            return Err(LarkError::Token(format!(
+                "marketplace app access token response error: code={}, msg={}",
+                resp.code, resp.msg
+            )));
+        }
+
         let cache_key = format!("{APP_ACCESS_TOKEN_KEY_PREFIX}-{}", config.app_id);
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
         if let Err(e) = self
@@ -226,6 +247,13 @@ impl TokenManager {
         let resp = self
             .token_request::<TenantAccessTokenResp>(config, TENANT_ACCESS_TOKEN_URL_PATH, &body)
             .await?;
+
+        if resp.code != 0 {
+            return Err(LarkError::Token(format!(
+                "marketplace tenant access token response error: code={}, msg={}",
+                resp.code, resp.msg
+            )));
+        }
 
         let tk = tenant_key.unwrap_or_default();
         let cache_key = format!(
@@ -439,6 +467,10 @@ struct MarketplaceTenantAccessTokenReq<'a> {
 #[derive(Deserialize)]
 struct AppAccessTokenResp {
     #[serde(default)]
+    code: i64,
+    #[serde(default)]
+    msg: String,
+    #[serde(default)]
     expire: u64,
     #[serde(default)]
     app_access_token: String,
@@ -446,6 +478,10 @@ struct AppAccessTokenResp {
 
 #[derive(Deserialize)]
 struct TenantAccessTokenResp {
+    #[serde(default)]
+    code: i64,
+    #[serde(default)]
+    msg: String,
     #[serde(default)]
     expire: u64,
     #[serde(default)]
