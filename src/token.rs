@@ -104,13 +104,16 @@ impl TokenManager {
         }
 
         let tk = tenant_key.unwrap_or_default();
-        let cache_key = format!("{TENANT_ACCESS_TOKEN_KEY_PREFIX}-{}-{tk}", config.app_id);
+        let cache_key = format!(
+            "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:app_secret:{}-{tk}",
+            config.app_id
+        );
         if let Some(token) = self.cache.get(&cache_key).await? {
             return Ok(token);
         }
 
         match config.app_type {
-            AppType::SelfBuilt => self.fetch_self_built_tenant_token(config).await,
+            AppType::SelfBuilt => self.fetch_self_built_tenant_token(config, tenant_key).await,
             AppType::Marketplace => {
                 let ticket = app_ticket.ok_or_else(|| {
                     LarkError::Token("app ticket is required for marketplace apps".to_string())
@@ -144,7 +147,11 @@ impl TokenManager {
         Ok(resp.app_access_token)
     }
 
-    async fn fetch_self_built_tenant_token(&self, config: &Config) -> Result<String, LarkError> {
+    async fn fetch_self_built_tenant_token(
+        &self,
+        config: &Config,
+        tenant_key: Option<&str>,
+    ) -> Result<String, LarkError> {
         let body = SelfBuiltTokenReq {
             app_id: &config.app_id,
             app_secret: &config.app_secret,
@@ -158,7 +165,11 @@ impl TokenManager {
             )
             .await?;
 
-        let cache_key = format!("{TENANT_ACCESS_TOKEN_KEY_PREFIX}-{}-", config.app_id);
+        let tk = tenant_key.unwrap_or_default();
+        let cache_key = format!(
+            "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:app_secret:{}-{tk}",
+            config.app_id
+        );
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
         if let Err(e) = self
             .cache
@@ -217,7 +228,10 @@ impl TokenManager {
             .await?;
 
         let tk = tenant_key.unwrap_or_default();
-        let cache_key = format!("{TENANT_ACCESS_TOKEN_KEY_PREFIX}-{}-{tk}", config.app_id);
+        let cache_key = format!(
+            "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:app_secret:{}-{tk}",
+            config.app_id
+        );
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
         if let Err(e) = self
             .cache

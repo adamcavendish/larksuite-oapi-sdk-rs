@@ -295,7 +295,7 @@ async fn transport_tenant_token_from_cache() {
     let cache = Arc::new(LocalCache::new());
     cache
         .set(
-            "tenant_access_token-test_app-",
+            "tenant_access_token:app_secret:test_app-",
             "cached-tenant-token",
             std::time::Duration::from_secs(3600),
         )
