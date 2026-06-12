@@ -479,7 +479,7 @@ struct OAuthTokenResp {
     token_type: String,
 }
 
-fn resolve_oauth_base_url(config: &Config) -> String {
+pub(crate) fn resolve_oauth_base_url(config: &Config) -> String {
     use crate::constants::{FEISHU_BASE_URL, FEISHU_OAUTH_BASE_URL, LARK_OAUTH_BASE_URL};
 
     if config.oauth_base_url != FEISHU_BASE_URL {
@@ -492,7 +492,7 @@ fn resolve_oauth_base_url(config: &Config) -> String {
     }
 }
 
-fn extract_aud_from_url(url: &str) -> Result<String, LarkError> {
+pub(crate) fn extract_aud_from_url(url: &str) -> Result<String, LarkError> {
     let parsed = url::Url::parse(url)
         .map_err(|e| LarkError::ClientAssertion(format!("invalid oauth base url: {e}")))?;
     parsed
