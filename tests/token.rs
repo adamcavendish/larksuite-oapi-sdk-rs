@@ -13,6 +13,7 @@ fn marketplace_client(addr: std::net::SocketAddr) -> Client {
         .marketplace()
         .disable_token_cache()
         .build()
+        .unwrap()
 }
 
 fn self_built_client(addr: std::net::SocketAddr) -> Client {
@@ -20,6 +21,7 @@ fn self_built_client(addr: std::net::SocketAddr) -> Client {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
+        .unwrap()
 }
 
 #[tokio::test]
@@ -27,7 +29,8 @@ async fn token_marketplace_requires_app_ticket() {
     let client = Client::builder("app_id", "secret")
         .marketplace()
         .disable_token_cache()
-        .build();
+        .build()
+        .unwrap();
 
     let cache = Arc::new(LocalCache::new());
     let tm = TokenManager::new(cache);
@@ -47,7 +50,8 @@ async fn token_marketplace_tenant_requires_app_ticket() {
     let client = Client::builder("app_id", "secret")
         .marketplace()
         .disable_token_cache()
-        .build();
+        .build()
+        .unwrap();
 
     let cache = Arc::new(LocalCache::new());
     let tm = TokenManager::new(cache);
@@ -66,7 +70,7 @@ async fn token_marketplace_tenant_requires_app_ticket() {
 async fn token_cache_hit_returns_cached_value() {
     use larksuite_oapi_sdk_rs::cache::Cache;
 
-    let client = Client::builder("app_id", "secret").build();
+    let client = Client::builder("app_id", "secret").build().unwrap();
     let cache = Arc::new(LocalCache::new());
 
     let cache_key = format!("app_access_token-{}", client.config().app_id());
@@ -91,7 +95,7 @@ async fn token_cache_hit_returns_cached_value() {
 async fn token_tenant_cache_hit_returns_cached_value() {
     use larksuite_oapi_sdk_rs::cache::Cache;
 
-    let client = Client::builder("app_id", "secret").build();
+    let client = Client::builder("app_id", "secret").build().unwrap();
     let cache = Arc::new(LocalCache::new());
 
     let cache_key = format!("tenant_access_token-{}-tenant_1", client.config().app_id());
@@ -196,7 +200,8 @@ async fn app_ticket_manager_get_triggers_apply_when_missing() {
 
     let client = Client::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
-        .build();
+        .build()
+        .unwrap();
 
     let cache: Arc<dyn Cache> = Arc::new(LocalCache::new());
     let atm = AppTicketManager::new(Arc::clone(&cache));

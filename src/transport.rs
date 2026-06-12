@@ -357,19 +357,26 @@ pub(crate) async fn raw_send(
         }
     }
 
-    let response = builder.send().await.map_err(|e| match e {
-        aioduct::Error::Timeout => LarkError::ClientTimeout("request timed out".to_string()),
-        aioduct::Error::Io(ref io_err)
-            if matches!(
-                io_err.kind(),
-                std::io::ErrorKind::ConnectionRefused
-                    | std::io::ErrorKind::ConnectionReset
-                    | std::io::ErrorKind::ConnectionAborted
-            ) =>
-        {
-            LarkError::DialFailed(e.to_string())
+    let response = builder.send().await.map_err(|e| {
+        let url = e.url().clone();
+        let err = e.into_error();
+        match err {
+            aioduct::Error::Timeout => {
+                tracing::debug!(%url, "request timed out");
+                LarkError::ClientTimeout("request timed out".to_string())
+            }
+            aioduct::Error::Io(ref io_err)
+                if matches!(
+                    io_err.kind(),
+                    std::io::ErrorKind::ConnectionRefused
+                        | std::io::ErrorKind::ConnectionReset
+                        | std::io::ErrorKind::ConnectionAborted
+                ) =>
+            {
+                LarkError::DialFailed(err.to_string())
+            }
+            other => LarkError::Http(other),
         }
-        other => LarkError::Http(other),
     })?;
 
     let status_code = response.status().as_u16();

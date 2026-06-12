@@ -2,12 +2,12 @@ use larksuite_oapi_sdk_rs::service::im::v1::CreateMessageReqBody;
 use larksuite_oapi_sdk_rs::{Client, RequestOption};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app_id = std::env::var("APP_ID").expect("APP_ID env var required");
     let app_secret = std::env::var("APP_SECRET").expect("APP_SECRET env var required");
     let chat_id = std::env::var("CHAT_ID").expect("CHAT_ID env var required");
 
-    let client = Client::builder(&app_id, &app_secret).build();
+    let client = Client::builder(&app_id, &app_secret).build()?;
 
     let option = RequestOption::default();
 
@@ -36,4 +36,6 @@ async fn main() {
     } else {
         println!("error: {:?}", resp.code_error);
     }
+
+    Ok(())
 }

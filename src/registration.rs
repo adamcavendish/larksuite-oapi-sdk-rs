@@ -145,7 +145,7 @@ fn build_qr_code_url(raw_url: &str, source: &str) -> Result<String, LarkError> {
 }
 
 async fn do_registration_request<T: for<'de> Deserialize<'de>>(
-    client: &aioduct::Client<aioduct::runtime::TokioRuntime>,
+    client: &aioduct::TokioClient,
     domain: &str,
     form: &[(&str, &str)],
 ) -> Result<T, LarkError> {
@@ -191,10 +191,10 @@ pub async fn register_app(opts: Options) -> Result<RegisterAppResult, LarkError>
 
     let client = {
         crate::config::install_default_crypto_provider();
-        aioduct::Client::builder()
+        aioduct::TokioClient::builder()
             .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
             .timeout(std::time::Duration::from_secs(30))
-            .build()
+            .build()?
     };
 
     let begin: BeginResponse = do_registration_request(
@@ -317,7 +317,6 @@ pub async fn register_app(opts: Options) -> Result<RegisterAppResult, LarkError>
 mod tests {
     use super::*;
     use std::sync::{Arc, Mutex};
-    use std::time::Duration;
 
     async fn mock_server_with_requests(
         responses: Vec<String>,
@@ -380,9 +379,9 @@ mod tests {
         assert!(query.any(|(k, v)| k == "source" && v == "rust-sdk/local-test"));
     }
 
-    #[tokio::test(flavor = "current_thread", start_paused = true)]
+    #[tokio::test(flavor = "current_thread")]
     async fn register_app_keeps_polling_on_empty_response() {
-        let page1 = r#"{"device_code":"device-empty","verification_uri_complete":"https://qr.example.com/scan?foo=bar&from=old&tp=old&source=other","interval":3,"expire_in":60}"#;
+        let page1 = r#"{"device_code":"device-empty","verification_uri_complete":"https://qr.example.com/scan?foo=bar&from=old&tp=old&source=other","interval":1,"expire_in":60}"#;
         let page2 = r#"{}"#;
         let page3 = r#"{"client_id":"cli_after_empty","client_secret":"sec_after_empty"}"#;
         let (addr, _h, requests) = mock_server_with_requests(vec![
@@ -421,15 +420,12 @@ mod tests {
         }));
 
         for _ in 0..50 {
-            if requests.lock().unwrap().len() >= 2 {
+            if requests.lock().unwrap().len() >= 3 {
                 break;
             }
-            tokio::task::yield_now().await;
+            tokio::time::sleep(std::time::Duration::from_millis(20)).await;
         }
-        assert_eq!(requests.lock().unwrap().len(), 2);
-
-        tokio::time::advance(Duration::from_secs(3)).await;
-        tokio::task::yield_now().await;
+        assert_eq!(requests.lock().unwrap().len(), 3);
 
         let result = handle.await.unwrap().unwrap();
         assert_eq!(result.client_id, "cli_after_empty");

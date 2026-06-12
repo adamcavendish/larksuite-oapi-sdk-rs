@@ -2,7 +2,6 @@ use std::sync::Arc;
 use std::sync::Once;
 use std::time::Duration;
 
-use aioduct::runtime::TokioRuntime;
 use http::HeaderMap;
 
 use crate::cache::{Cache, LocalCache};
@@ -31,7 +30,7 @@ pub struct Config {
     pub(crate) helpdesk_token: Option<String>,
     pub(crate) helpdesk_auth_token: Option<String>,
     pub(crate) req_timeout: Duration,
-    pub(crate) http_client: aioduct::Client<TokioRuntime>,
+    pub(crate) http_client: aioduct::TokioClient,
     pub(crate) app_type: AppType,
     pub(crate) enable_token_cache: bool,
     pub(crate) token_cache: Arc<dyn Cache>,
@@ -46,10 +45,7 @@ impl Config {
     pub(crate) fn new(app_id: impl Into<String>, app_secret: impl Into<String>) -> Self {
         let timeout = Duration::from_secs(30);
         install_default_crypto_provider();
-        let http_client = aioduct::Client::builder()
-            .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
-            .timeout(timeout)
-            .build();
+        let http_client = aioduct::TokioClient::new();
         Self {
             base_url: FEISHU_BASE_URL.to_string(),
             app_id: app_id.into(),

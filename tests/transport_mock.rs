@@ -14,6 +14,7 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
+        .unwrap()
 }
 
 // ── Happy path: successful JSON response ──
@@ -119,7 +120,7 @@ async fn transport_504_retries_then_fails() {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .max_retries(2)
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::None];
@@ -147,7 +148,7 @@ async fn transport_429_retries_then_fails() {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .max_retries(2)
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::None];
@@ -175,7 +176,7 @@ async fn transport_retry_succeeds_after_504() {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .max_retries(3)
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::None];
@@ -198,7 +199,7 @@ async fn transport_token_invalid_retries() {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .max_retries(2)
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::None];
@@ -242,7 +243,7 @@ async fn transport_bearer_token_user() {
     let client = Client::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -265,7 +266,7 @@ async fn transport_bearer_token_app() {
     let client = Client::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::App];
@@ -298,7 +299,7 @@ async fn transport_tenant_token_from_cache() {
     let client = Client::builder("test_app", "secret")
         .base_url(format!("http://{addr}"))
         .token_cache(cache)
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -330,7 +331,7 @@ async fn transport_app_token_from_cache() {
     let client = Client::builder("test_app", "secret")
         .base_url(format!("http://{addr}"))
         .token_cache(cache)
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::App];
@@ -427,7 +428,7 @@ async fn transport_helpdesk_auth() {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .helpdesk_credential("hd_id", "hd_token")
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/test");
     api_req.supported_access_token_types = vec![AccessTokenType::None];
@@ -454,7 +455,7 @@ async fn transport_default_headers() {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .default_headers(headers)
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::None];
@@ -528,7 +529,7 @@ async fn transport_self_built_token_fetch() {
 
     let client = Client::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::App];
@@ -554,7 +555,7 @@ async fn transport_self_built_tenant_token_fetch() {
 
     let client = Client::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -572,7 +573,7 @@ async fn transport_self_built_tenant_token_fetch() {
 async fn transport_rejects_user_token_on_tenant_only_api() {
     let client = Client::builder("app", "secret")
         .disable_token_cache()
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
@@ -591,7 +592,7 @@ async fn transport_rejects_user_token_on_tenant_only_api() {
 async fn transport_rejects_app_token_on_user_only_api() {
     let client = Client::builder("app", "secret")
         .disable_token_cache()
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::User];
@@ -610,7 +611,7 @@ async fn transport_rejects_app_token_on_user_only_api() {
 async fn transport_rejects_tenant_token_on_app_only_api() {
     let client = Client::builder("app", "secret")
         .disable_token_cache()
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::App];
@@ -756,7 +757,7 @@ async fn transport_cache_enabled_app_token_type() {
 
     let client = Client::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::App];
@@ -777,7 +778,7 @@ async fn transport_user_token_priority_over_tenant() {
 
     let client = Client::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
@@ -799,7 +800,7 @@ async fn transport_empty_supported_tokens_treated_as_none() {
 
     let client = Client::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
-        .build();
+        .build().unwrap();
 
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
 
@@ -821,7 +822,7 @@ async fn transport_log_level_filters_debug() {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .log_level(tracing::Level::ERROR)
-        .build();
+        .build().unwrap();
 
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::None];

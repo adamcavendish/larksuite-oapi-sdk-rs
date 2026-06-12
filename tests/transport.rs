@@ -8,7 +8,7 @@ fn default_option() -> RequestOption {
 
 #[tokio::test]
 async fn transport_rejects_empty_app_id() {
-    let client = Client::builder("", "secret").build();
+    let client = Client::builder("", "secret").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     let err = client
         .do_req(&api_req, &default_option())
@@ -19,7 +19,7 @@ async fn transport_rejects_empty_app_id() {
 
 #[tokio::test]
 async fn transport_rejects_empty_app_secret() {
-    let client = Client::builder("app_id", "").build();
+    let client = Client::builder("app_id", "").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     let err = client
         .do_req(&api_req, &default_option())
@@ -32,7 +32,7 @@ async fn transport_rejects_empty_app_secret() {
 async fn transport_rejects_marketplace_missing_tenant_key() {
     use larksuite_oapi_sdk_rs::constants::AccessTokenType;
 
-    let client = Client::builder("app_id", "secret").marketplace().build();
+    let client = Client::builder("app_id", "secret").marketplace().build().unwrap();
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
 
@@ -52,7 +52,7 @@ async fn transport_user_access_token_option_sets_header() {
     let client = Client::builder("app_id", "secret")
         .disable_token_cache()
         .base_url("http://127.0.0.1:1") // connection refused — intentional
-        .build();
+        .build().unwrap();
     let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::User];
 
@@ -71,7 +71,7 @@ async fn transport_user_access_token_option_sets_header() {
 
 #[tokio::test]
 async fn transport_rejects_reserved_x_request_id_header() {
-    let client = Client::builder("app_id", "secret").build();
+    let client = Client::builder("app_id", "secret").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
 
     let mut headers = http::HeaderMap::new();
@@ -87,7 +87,7 @@ async fn transport_rejects_reserved_x_request_id_header() {
 
 #[tokio::test]
 async fn transport_rejects_reserved_request_id_header() {
-    let client = Client::builder("app_id", "secret").build();
+    let client = Client::builder("app_id", "secret").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
 
     let mut headers = http::HeaderMap::new();

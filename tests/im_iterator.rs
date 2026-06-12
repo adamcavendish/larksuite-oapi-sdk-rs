@@ -11,6 +11,7 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
+        .unwrap()
 }
 
 #[tokio::test]

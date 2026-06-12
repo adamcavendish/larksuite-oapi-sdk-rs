@@ -11,7 +11,7 @@
 //!
 //! # #[tokio::main]
 //! # async fn main() {
-//! let client = Client::builder("APP_ID", "APP_SECRET").build();
+//! let client = Client::builder("APP_ID", "APP_SECRET").build().unwrap();
 //! let dispatcher = EventDispatcher::new("VERIFICATION_TOKEN", "ENCRYPT_KEY");
 //! client.ws_client(dispatcher).start().await.unwrap();
 //! # }
@@ -529,7 +529,8 @@ impl WsClient {
             .json(&body)
             .map_err(|e| LarkError::Event(format!("failed to serialize endpoint body: {e}")))?
             .send()
-            .await?;
+            .await
+            .map_err(|e| LarkError::Http(e.into_error()))?;
 
         let body: WsEndpointResp = resp.json().await?;
 

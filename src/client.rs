@@ -83,15 +83,15 @@ impl ClientBuilder {
         self
     }
 
-    pub fn build(self) -> Client {
+    pub fn build(self) -> Result<Client, LarkError> {
         let mut config = self.config;
-        config.http_client = aioduct::Client::builder()
+        config.http_client = aioduct::TokioClient::builder()
             .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
             .timeout(config.req_timeout)
-            .build();
+            .build()?;
         let client = Client { config };
         client.resend_app_ticket_if_marketplace();
-        client
+        Ok(client)
     }
 }
 
@@ -484,7 +484,8 @@ impl Client {
             .http_client
             .request(http::Method::GET, url)?
             .send()
-            .await?;
+            .await
+            .map_err(|e| LarkError::Http(e.into_error()))?;
 
         let status = resp.status();
         let bytes = resp.bytes().await?;

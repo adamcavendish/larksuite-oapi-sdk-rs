@@ -5,7 +5,7 @@
 //! ```rust,no_run
 //! use larksuite_oapi_sdk_rs::Client;
 //!
-//! let client = Client::builder("APP_ID", "APP_SECRET").build();
+//! let client = Client::builder("APP_ID", "APP_SECRET").build().unwrap();
 //! ```
 //!
 //! # Features
