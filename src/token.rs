@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -7,13 +8,46 @@ use crate::cache::Cache;
 use crate::config::Config;
 use crate::constants::{
     APP_ACCESS_TOKEN_INTERNAL_URL_PATH, APP_ACCESS_TOKEN_KEY_PREFIX, APP_ACCESS_TOKEN_URL_PATH,
-    APP_TICKET_KEY_PREFIX, APPLY_APP_TICKET_PATH, AccessTokenType, AppType, EXPIRY_DELTA_SECONDS,
-    TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH, TENANT_ACCESS_TOKEN_KEY_PREFIX,
+    APP_TICKET_KEY_PREFIX, APPLY_APP_TICKET_PATH, AccessTokenType, AppType,
+    CLIENT_ASSERTION_TYPE_JWT_BEARER, EXPIRY_DELTA_SECONDS, GRANT_TYPE_JWT_BEARER,
+    OAUTH_TOKEN_URL_PATH, TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH, TENANT_ACCESS_TOKEN_KEY_PREFIX,
     TENANT_ACCESS_TOKEN_URL_PATH,
 };
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
+
+// ── ClientAssertionProvider (JWT bearer token) ──
+
+/// Optional proxy routing info for the token request.
+#[derive(Debug, Clone)]
+pub struct TargetInfo {
+    /// Proxy service address (e.g. `https://proxy.example.com`).
+    pub target_service: String,
+    /// URL prefix appended to the proxy address.
+    pub target_prefix: String,
+}
+
+/// A signed JWT assertion token, optionally paired with proxy routing info.
+#[derive(Debug, Clone)]
+pub struct Token {
+    /// The signed JWT assertion string.
+    pub value: String,
+    /// Optional proxy routing target.
+    pub target_info: Option<TargetInfo>,
+}
+
+/// Produces a signed JWT assertion for the `urn:ietf:params:oauth:grant-type:jwt-bearer` flow.
+///
+/// Implementations must sign a JWT whose `aud` header matches the given audience
+/// and return the compact serialization.
+pub trait ClientAssertionProvider: Debug + Send + Sync {
+    /// Return a signed JWT assertion for the given audience.
+    fn retrieve_token(
+        &self,
+        aud: &str,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Token, LarkError>> + Send + '_>>;
+}
 
 pub struct TokenManager {
     cache: Arc<dyn Cache>,
@@ -35,6 +69,12 @@ impl TokenManager {
         config: &Config,
         app_ticket: Option<&str>,
     ) -> Result<String, LarkError> {
+        if config.client_assertion_provider.is_some() {
+            return Err(LarkError::ClientAssertion(
+                "AppAccessToken is not available in ClientAssertion mode".to_string(),
+            ));
+        }
+
         let cache_key = format!("{APP_ACCESS_TOKEN_KEY_PREFIX}-{}", config.app_id);
         if let Some(token) = self.cache.get(&cache_key).await? {
             return Ok(token);
@@ -57,6 +97,12 @@ impl TokenManager {
         tenant_key: Option<&str>,
         app_ticket: Option<&str>,
     ) -> Result<String, LarkError> {
+        if config.client_assertion_provider.is_some() {
+            return self
+                .get_tenant_token_by_client_assertion(config, tenant_key)
+                .await;
+        }
+
         let tk = tenant_key.unwrap_or_default();
         let cache_key = format!("{TENANT_ACCESS_TOKEN_KEY_PREFIX}-{}-{tk}", config.app_id);
         if let Some(token) = self.cache.get(&cache_key).await? {
@@ -208,6 +254,105 @@ impl TokenManager {
         let resp: T = serde_json::from_slice(&api_resp.raw_body)?;
         Ok(resp)
     }
+
+    async fn oauth_token_request<T: for<'de> Deserialize<'de>>(
+        &self,
+        config: &Config,
+        url: &str,
+        body: &impl Serialize,
+    ) -> Result<T, LarkError> {
+        let mut api_req = ApiReq::new(http::Method::POST, url);
+        api_req.body = Some(ReqBody::Json(serde_json::to_value(body)?));
+        api_req.supported_access_token_types = vec![AccessTokenType::None];
+
+        let option = RequestOption::default();
+        let api_resp = transport::raw_send_absolute_url(config, &api_req, &option, None).await?;
+
+        if api_resp.status_code != 200 {
+            return Err(LarkError::Token(format!(
+                "oauth token request failed with status {}",
+                api_resp.status_code
+            )));
+        }
+
+        let resp: T = serde_json::from_slice(&api_resp.raw_body)?;
+        Ok(resp)
+    }
+
+    async fn get_tenant_token_by_client_assertion(
+        &self,
+        config: &Config,
+        tenant_key: Option<&str>,
+    ) -> Result<String, LarkError> {
+        let oauth_base_url = resolve_oauth_base_url(config);
+        let aud = extract_aud_from_url(&oauth_base_url)?;
+
+        let tk = tenant_key.unwrap_or_default();
+        let token_key = format!(
+            "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:client_assertion:{}-{tk}-{aud}",
+            config.app_id
+        );
+
+        if let Some(token) = self.cache.get(&token_key).await? {
+            return Ok(token);
+        }
+
+        let provider = config.client_assertion_provider.as_ref().ok_or_else(|| {
+            LarkError::ClientAssertion("client assertion provider is not configured".to_string())
+        })?;
+
+        let assertion = provider.retrieve_token(&aud).await.map_err(|e| {
+            LarkError::ClientAssertion(format!("retrieve client assertion token failed: {e}"))
+        })?;
+
+        if assertion.value.is_empty() {
+            return Err(LarkError::ClientAssertion(
+                "client assertion token is empty".to_string(),
+            ));
+        }
+
+        let request_url = if let Some(ref target) = assertion.target_info {
+            format!(
+                "{}{}{OAUTH_TOKEN_URL_PATH}",
+                target.target_service.trim_end_matches('/'),
+                target.target_prefix,
+            )
+        } else {
+            format!(
+                "{}{OAUTH_TOKEN_URL_PATH}",
+                oauth_base_url.trim_end_matches('/')
+            )
+        };
+
+        let body = OAuthTokenReq {
+            grant_type: GRANT_TYPE_JWT_BEARER,
+            client_assertion_type: CLIENT_ASSERTION_TYPE_JWT_BEARER,
+            client_assertion: &assertion.value,
+            client_id: &config.app_id,
+        };
+
+        let resp = self
+            .oauth_token_request::<OAuthTokenResp>(config, &request_url, &body)
+            .await?;
+
+        if resp.access_token.is_empty() {
+            let msg = if !resp.error_description.is_empty() {
+                &resp.error_description
+            } else if !resp.error.is_empty() {
+                &resp.error
+            } else {
+                "oauth token response missing access token"
+            };
+            return Err(LarkError::ClientAssertion(msg.to_string()));
+        }
+
+        let ttl = Duration::from_secs(resp.expires_in.saturating_sub(EXPIRY_DELTA_SECONDS));
+        if let Err(e) = self.cache.set(&token_key, &resp.access_token, ttl).await {
+            tracing::warn!("client assertion tenant access token save cache: {e}");
+        }
+
+        Ok(resp.access_token)
+    }
 }
 
 pub struct AppTicketManager {
@@ -297,6 +442,63 @@ struct TenantAccessTokenResp {
 struct ResendAppTicketReq<'a> {
     app_id: &'a str,
     app_secret: &'a str,
+}
+
+#[derive(Serialize)]
+struct OAuthTokenReq<'a> {
+    grant_type: &'a str,
+    client_assertion_type: &'a str,
+    client_assertion: &'a str,
+    client_id: &'a str,
+}
+
+#[derive(Deserialize)]
+struct OAuthTokenResp {
+    #[serde(default)]
+    #[allow(dead_code)]
+    code: i64,
+    #[serde(default)]
+    error: String,
+    #[serde(default)]
+    error_description: String,
+    #[serde(default)]
+    access_token: String,
+    #[serde(default)]
+    expires_in: u64,
+    #[serde(default)]
+    #[allow(dead_code)]
+    refresh_token: String,
+    #[serde(default)]
+    #[allow(dead_code)]
+    refresh_token_expires_in: u64,
+    #[serde(default)]
+    #[allow(dead_code)]
+    scope: String,
+    #[serde(default)]
+    #[allow(dead_code)]
+    token_type: String,
+}
+
+fn resolve_oauth_base_url(config: &Config) -> String {
+    use crate::constants::{FEISHU_BASE_URL, FEISHU_OAUTH_BASE_URL, LARK_OAUTH_BASE_URL};
+
+    if config.oauth_base_url != FEISHU_BASE_URL {
+        return config.oauth_base_url.clone();
+    }
+    if config.base_url.contains("larksuite") {
+        LARK_OAUTH_BASE_URL.to_string()
+    } else {
+        FEISHU_OAUTH_BASE_URL.to_string()
+    }
+}
+
+fn extract_aud_from_url(url: &str) -> Result<String, LarkError> {
+    let parsed = url::Url::parse(url)
+        .map_err(|e| LarkError::ClientAssertion(format!("invalid oauth base url: {e}")))?;
+    parsed
+        .host_str()
+        .map(|h| h.to_string())
+        .ok_or_else(|| LarkError::ClientAssertion("oauth base url has no host".to_string()))
 }
 
 // ── Public token endpoint types (matching Go SDK) ──

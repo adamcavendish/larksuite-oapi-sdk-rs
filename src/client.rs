@@ -10,6 +10,7 @@ use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, RawResponse};
 use crate::service;
+use crate::token::ClientAssertionProvider;
 use crate::transport;
 
 /// Builder for [`Client`]. Construct via [`Client::builder`].
@@ -37,6 +38,16 @@ impl ClientBuilder {
 
     pub fn token_cache(mut self, cache: Arc<dyn Cache>) -> Self {
         self.config.token_cache = cache;
+        self
+    }
+
+    pub fn oauth_base_url(mut self, url: impl Into<String>) -> Self {
+        self.config.oauth_base_url = url.into();
+        self
+    }
+
+    pub fn client_assertion_provider(mut self, provider: Arc<dyn ClientAssertionProvider>) -> Self {
+        self.config.client_assertion_provider = Some(provider);
         self
     }
 

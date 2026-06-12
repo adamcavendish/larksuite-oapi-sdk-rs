@@ -15,16 +15,30 @@ pub const APP_ACCESS_TOKEN_URL_PATH: &str = "/open-apis/auth/v3/app_access_token
 pub const TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH: &str =
     "/open-apis/auth/v3/tenant_access_token/internal";
 pub const TENANT_ACCESS_TOKEN_URL_PATH: &str = "/open-apis/auth/v3/tenant_access_token";
+pub const OAUTH_TOKEN_URL_PATH: &str = "/oauth/v3/token";
 pub const APPLY_APP_TICKET_PATH: &str = "/open-apis/auth/v3/app_ticket/resend";
 
 pub const ERR_CODE_APP_TICKET_INVALID: i64 = 10012;
 pub const ERR_CODE_ACCESS_TOKEN_INVALID: i64 = 99991671;
 pub const ERR_CODE_APP_ACCESS_TOKEN_INVALID: i64 = 99991664;
 pub const ERR_CODE_TENANT_ACCESS_TOKEN_INVALID: i64 = 99991663;
+pub const ERR_CODE_CLIENT_ASSERTION_NOT_CONFIGURED: i64 = 7100;
+pub const ERR_CODE_CLIENT_ASSERTION_TOKEN_EMPTY: i64 = 7101;
+pub const ERR_CODE_CLIENT_ASSERTION_RETRIEVE_FAILED: i64 = 7102;
+pub const ERR_CODE_CLIENT_ASSERTION_MODE_NOT_SUPPORTED: i64 = 7103;
 
 pub const APP_TICKET_KEY_PREFIX: &str = "app_ticket";
 pub const APP_ACCESS_TOKEN_KEY_PREFIX: &str = "app_access_token";
 pub const TENANT_ACCESS_TOKEN_KEY_PREFIX: &str = "tenant_access_token";
+
+pub const GRANT_TYPE_JWT_BEARER: &str = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+pub const CLIENT_ASSERTION_TYPE_JWT_BEARER: &str =
+    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+
+/// Default OAuth base URL for Feishu (China).
+pub const FEISHU_OAUTH_BASE_URL: &str = "https://accounts.feishu.cn";
+/// Default OAuth base URL for Lark (international).
+pub const LARK_OAUTH_BASE_URL: &str = "https://accounts.larksuite.com";
 
 pub const EXPIRY_DELTA_SECONDS: u64 = 180;
 
