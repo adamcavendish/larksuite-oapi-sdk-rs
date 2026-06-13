@@ -1041,6 +1041,32 @@ pub struct MessageCardPlainTextI18n {
     pub en_us: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ja_jp: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_hk: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_tw: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vi_vn: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub th_th: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pt_br: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub es_es: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ko_kr: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub de_de: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fr_fr: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub it_it: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ru_ru: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ms_my: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1378,4 +1404,30 @@ pub struct MessageCardI18nElements {
     pub en_us: Option<Vec<Value>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ja_jp: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_hk: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh_tw: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id_id: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vi_vn: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub th_th: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pt_br: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub es_es: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ko_kr: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub de_de: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fr_fr: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub it_it: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ru_ru: Option<Vec<Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ms_my: Option<Vec<Value>>,
 }
