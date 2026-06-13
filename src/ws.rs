@@ -55,6 +55,16 @@ const HEADER_SEQ: &str = "seq";
 const HEADER_MESSAGE_ID: &str = "message_id";
 const HEADER_BIZ_RT: &str = "biz_rt";
 
+// Handshake error header keys (matching Go SDK consts)
+const HEADER_HANDSHAKE_STATUS: &str = "Handshake-Status";
+const HEADER_HANDSHAKE_MSG: &str = "Handshake-Msg";
+const HEADER_HANDSHAKE_AUTH_ERR_CODE: &str = "Handshake-Autherrcode";
+
+// Handshake error codes (matching Go SDK consts)
+const AUTH_FAILED: i32 = 514;
+const FORBIDDEN: i32 = 403;
+const EXCEED_CONN_LIMIT: i32 = 1000040350;
+
 // ── WS endpoint response ──
 
 #[derive(serde::Deserialize)]
@@ -158,6 +168,7 @@ pub struct WsClient {
     config: Arc<Config>,
     dispatcher: Arc<EventDispatcher>,
     domain: String,
+    headers: HashMap<String, String>,
     log_level: Option<tracing::Level>,
     ping_interval: Arc<AtomicU64>,
     reconnect_interval: Arc<AtomicU64>,
@@ -177,6 +188,7 @@ impl WsClient {
             config: Arc::new(config),
             dispatcher: Arc::new(dispatcher),
             domain,
+            headers: HashMap::new(),
             log_level,
             ping_interval: Arc::new(AtomicU64::new(120)),
             reconnect_interval: Arc::new(AtomicU64::new(120)),
@@ -199,6 +211,15 @@ impl WsClient {
     /// `https://open.larksuite.com` for Lark global tenants.
     pub fn domain(mut self, domain: impl Into<String>) -> Self {
         self.domain = domain.into();
+        self
+    }
+
+    /// Set custom headers that will be added to the bootstrap HTTP request
+    /// to the WebSocket endpoint.
+    ///
+    /// Mirrors the Go SDK's `WithHeaders` option.
+    pub fn headers(mut self, headers: HashMap<String, String>) -> Self {
+        self.headers = headers;
         self
     }
 
@@ -280,9 +301,14 @@ impl WsClient {
             tracing::info!("connecting to ws endpoint: {url}");
         }
 
-        let (ws_stream, _) = connect_async(&url)
+        let (ws_stream, resp) = connect_async(&url)
             .await
             .map_err(|e| LarkError::Event(format!("ws connect failed: {e}")))?;
+
+        // Parse handshake error headers on non-101 responses (Go SDK parseErr)
+        if resp.status() != http::StatusCode::SWITCHING_PROTOCOLS {
+            return Err(self.parse_handshake_error(&resp));
+        }
 
         if self.log_enabled(tracing::Level::INFO) {
             tracing::info!("ws connected");
@@ -520,12 +546,21 @@ impl WsClient {
             "AppSecret": self.config.app_secret,
         });
 
-        let resp = self
+        let mut req = self
             .config
             .http_client
             .post(&url)?
             .header_str("locale", "zh")
-            .map_err(|e| LarkError::Event(format!("invalid locale header: {e}")))?
+            .map_err(|e| LarkError::Event(format!("invalid locale header: {e}")))?;
+
+        // Merge custom headers (Go SDK WithHeaders)
+        for (k, v) in &self.headers {
+            req = req
+                .header_str(k, v)
+                .map_err(|e| LarkError::Event(format!("invalid header {k}: {e}")))?;
+        }
+
+        let resp = req
             .json(&body)
             .map_err(|e| LarkError::Event(format!("failed to serialize endpoint body: {e}")))?
             .send()
@@ -568,6 +603,41 @@ impl WsClient {
             .unwrap_or(0);
 
         Ok((data.url, service_id))
+    }
+
+    fn parse_handshake_error(
+        &self,
+        resp: &tokio_tungstenite::tungstenite::handshake::client::Response,
+    ) -> LarkError {
+        let headers = resp.headers();
+
+        let code_str = headers
+            .get(HEADER_HANDSHAKE_STATUS)
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or_default();
+        let msg = headers
+            .get(HEADER_HANDSHAKE_MSG)
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or_default();
+
+        let code: i32 = code_str.parse().unwrap_or(0);
+
+        match code {
+            AUTH_FAILED => {
+                let auth_code_str = headers
+                    .get(HEADER_HANDSHAKE_AUTH_ERR_CODE)
+                    .and_then(|v| v.to_str().ok())
+                    .unwrap_or_default();
+                let auth_code: i32 = auth_code_str.parse().unwrap_or(0);
+                if auth_code == EXCEED_CONN_LIMIT {
+                    LarkError::Event(format!("ws client error: code={code}, msg={msg}"))
+                } else {
+                    LarkError::Event(format!("ws server error: code={code}, msg={msg}"))
+                }
+            }
+            FORBIDDEN => LarkError::Event(format!("ws client error: code={code}, msg={msg}")),
+            _ => LarkError::Event(format!("ws server error: code={code}, msg={msg}")),
+        }
     }
 }
 
