@@ -126,18 +126,18 @@ impl EventMessageReader {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Emoji {
-    #[serde(default)]
-    pub emoji_type: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub emoji_type: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct I18nNames {
-    #[serde(default)]
-    pub zh_cn: String,
-    #[serde(default)]
-    pub en_us: String,
-    #[serde(default)]
-    pub ja_jp: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -196,14 +196,14 @@ pub struct ModeratorList {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RestrictedModeSetting {
-    #[serde(default)]
-    pub status: bool,
-    #[serde(default)]
-    pub screenshot_has_permission_setting: String,
-    #[serde(default)]
-    pub download_has_permission_setting: String,
-    #[serde(default)]
-    pub message_has_permission_setting: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub screenshot_has_permission_setting: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub download_has_permission_setting: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_has_permission_setting: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

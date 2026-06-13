@@ -137,7 +137,7 @@ fn message_reaction_created_has_typed_emoji_and_user() {
     .unwrap();
 
     assert_eq!(event.message_id, "om_reaction");
-    assert_eq!(event.reaction_type.emoji_type, "SMILE");
+    assert_eq!(event.reaction_type.emoji_type.as_deref(), Some("SMILE"));
     assert_eq!(event.operator_type, "user");
     assert_eq!(
         event.user_id.as_ref().and_then(UserId::open_id),
@@ -159,7 +159,7 @@ fn message_reaction_deleted_has_typed_emoji_and_app() {
 
     assert_eq!(event.operator_type, "app");
     assert_eq!(event.app_id, "cli_app_123");
-    assert_eq!(event.reaction_type.emoji_type, "THUMBUP");
+    assert_eq!(event.reaction_type.emoji_type.as_deref(), Some("THUMBUP"));
 }
 
 #[test]
@@ -211,7 +211,10 @@ fn chat_member_user_added_has_typed_operator_and_users() {
     assert_eq!(event.users[0].name, "Ada");
     assert_eq!(event.users[0].open_id(), Some("ou_u"));
     assert_eq!(event.name, "Team Chat");
-    assert_eq!(event.i18n_names.as_ref().unwrap().zh_cn, "组名");
+    assert_eq!(
+        event.i18n_names.as_ref().unwrap().zh_cn.as_deref(),
+        Some("组名")
+    );
 }
 
 #[test]
@@ -273,7 +276,10 @@ fn chat_disbanded_has_name_i18n_and_typed_operator() {
     .unwrap();
 
     assert_eq!(event.name, "Old Chat");
-    assert_eq!(event.i18n_names.as_ref().unwrap().en_us, "Old Group");
+    assert_eq!(
+        event.i18n_names.as_ref().unwrap().en_us.as_deref(),
+        Some("Old Group")
+    );
     assert_eq!(
         event.operator_id.as_ref().and_then(UserId::open_id),
         Some("ou_op")
@@ -316,6 +322,14 @@ fn chat_updated_has_typed_changes_and_moderator_list() {
     let mod_list = event.moderator_list.as_ref().unwrap();
     assert_eq!(mod_list.added_member_list.len(), 1);
     assert_eq!(mod_list.added_member_list[0].open_id(), Some("ou_mod"));
+    assert_eq!(
+        event
+            .after_change
+            .as_ref()
+            .and_then(|change| change.restricted_mode_setting.as_ref())
+            .and_then(|setting| setting.status),
+        Some(true)
+    );
 }
 
 #[test]
@@ -331,7 +345,10 @@ fn bot_added_and_deleted_have_name_i18n_and_typed_operator() {
     .unwrap();
 
     assert_eq!(added.name, "Bot Chat");
-    assert_eq!(added.i18n_names.as_ref().unwrap().en_us, "Robot Group");
+    assert_eq!(
+        added.i18n_names.as_ref().unwrap().en_us.as_deref(),
+        Some("Robot Group")
+    );
     assert_eq!(
         added.operator_id.as_ref().and_then(UserId::open_id),
         Some("ou_op")
@@ -370,6 +387,49 @@ fn bot_p2p_chat_entered_has_typed_operator() {
         event.operator_id.as_ref().and_then(UserId::open_id),
         Some("ou_enter")
     );
+}
+
+#[test]
+fn typed_event_subfields_accept_null_values() {
+    let reaction: P2MessageReactionCreatedV1 = serde_json::from_value(serde_json::json!({
+        "reaction_type": { "emoji_type": null }
+    }))
+    .unwrap();
+    assert_eq!(reaction.reaction_type.emoji_type, None);
+
+    let added: P2ChatMemberUserAddedV1 = serde_json::from_value(serde_json::json!({
+        "i18n_names": {
+            "zh_cn": null,
+            "en_us": null,
+            "ja_jp": null
+        }
+    }))
+    .unwrap();
+    let names = added.i18n_names.unwrap();
+    assert_eq!(names.zh_cn, None);
+    assert_eq!(names.en_us, None);
+    assert_eq!(names.ja_jp, None);
+
+    let updated: P2ChatUpdatedV1 = serde_json::from_value(serde_json::json!({
+        "after_change": {
+            "restricted_mode_setting": {
+                "status": null,
+                "screenshot_has_permission_setting": null,
+                "download_has_permission_setting": null,
+                "message_has_permission_setting": null
+            }
+        }
+    }))
+    .unwrap();
+    let setting = updated
+        .after_change
+        .unwrap()
+        .restricted_mode_setting
+        .unwrap();
+    assert_eq!(setting.status, None);
+    assert_eq!(setting.screenshot_has_permission_setting, None);
+    assert_eq!(setting.download_has_permission_setting, None);
+    assert_eq!(setting.message_has_permission_setting, None);
 }
 
 #[test]
