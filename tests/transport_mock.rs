@@ -1,5 +1,5 @@
 mod common;
-use common::{http_response, http_response_with_headers, mock_server};
+use common::{http_response, http_response_with_headers, mock_server, mock_server_with_requests};
 
 use std::sync::Arc;
 
@@ -58,6 +58,74 @@ async fn transport_typed_request_deserializes() {
         .await
         .unwrap();
     assert_eq!(raw.data.unwrap().name, "hello");
+}
+
+#[tokio::test]
+async fn transport_raw_request_typed_reuses_sdk_transport() {
+    #[derive(Debug, serde::Deserialize)]
+    struct TestData {
+        name: String,
+    }
+
+    let body = r#"{"code":0,"msg":"ok","data":{"name":"raw"}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/custom");
+    api_req.supported_access_token_types = vec![AccessTokenType::None];
+
+    let (_resp, raw) = client
+        .raw_request_typed::<TestData>(&api_req, &RequestOption::default())
+        .await
+        .unwrap();
+    assert_eq!(raw.data.unwrap().name, "raw");
+}
+
+#[tokio::test]
+async fn transport_raw_request_with_token_sets_supported_token_type() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _h, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let api_req = ApiReq::new(http::Method::GET, "/open-apis/custom");
+    let option = RequestOption {
+        app_access_token: Some("app-token-xyz".to_string()),
+        ..Default::default()
+    };
+
+    let resp = client
+        .raw_request_with_token(api_req, AccessTokenType::App, &option)
+        .await
+        .unwrap();
+    assert_eq!(resp.status_code, 200);
+    let request = requests.lock().unwrap().join("\n").to_ascii_lowercase();
+    assert!(request.contains("authorization: bearer app-token-xyz"));
+}
+
+#[tokio::test]
+async fn transport_raw_request_typed_with_token_sets_supported_token_type() {
+    #[derive(Debug, serde::Deserialize)]
+    struct TestData {
+        name: String,
+    }
+
+    let body = r#"{"code":0,"msg":"ok","data":{"name":"raw-token"}}"#;
+    let (addr, _h, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let api_req = ApiReq::new(http::Method::GET, "/open-apis/custom");
+    let option = RequestOption {
+        app_access_token: Some("app-token-xyz".to_string()),
+        ..Default::default()
+    };
+
+    let (_resp, raw) = client
+        .raw_request_typed_with_token::<TestData>(api_req, AccessTokenType::App, &option)
+        .await
+        .unwrap();
+    assert_eq!(raw.data.unwrap().name, "raw-token");
+    let request = requests.lock().unwrap().join("\n").to_ascii_lowercase();
+    assert!(request.contains("authorization: bearer app-token-xyz"));
 }
 
 // ── Typed request: API error code returns Err ──
