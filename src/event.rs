@@ -514,7 +514,7 @@ pub struct CardAction {
     #[serde(default)]
     pub timezone: String,
     #[serde(default)]
-    pub action: serde_json::Value,
+    pub action: CallbackAction,
     #[serde(default)]
     pub host: String,
     #[serde(default)]

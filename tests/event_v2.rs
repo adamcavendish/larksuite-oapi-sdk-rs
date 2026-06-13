@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use larksuite_oapi_sdk_rs::event::{
-    CardAction, CardActionHandler, CardHandlerResult, CustomResp, EventDispatcher, EventReq,
-    EventResp, ToastI18n,
+    CallbackAction, CardAction, CardActionHandler, CardHandlerResult, CustomResp, EventDispatcher,
+    EventReq, EventResp, ToastI18n,
 };
 
 // ── EventResp ──
@@ -294,7 +294,7 @@ async fn card_handler_wrong_verification_token() {
 
 #[tokio::test]
 async fn card_handler_dispatches_action() {
-    let received_action = Arc::new(Mutex::new(None::<serde_json::Value>));
+    let received_action = Arc::new(Mutex::new(None::<CallbackAction>));
     let received_clone = Arc::clone(&received_action);
 
     let handler = CardActionHandler::new("", "", move |action: CardAction| {
@@ -326,7 +326,7 @@ async fn card_handler_dispatches_action() {
     assert_eq!(resp.status_code, 200);
 
     let action_val = received_action.lock().unwrap().clone().unwrap();
-    assert_eq!(action_val["tag"], "button");
+    assert_eq!(action_val.tag, "button");
 }
 
 // ── EventDispatcher: SHA-256 signature verification ──
