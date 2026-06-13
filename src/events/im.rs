@@ -19,6 +19,30 @@ pub struct P2MessageReceiveV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+}
+
+impl UserId {
+    pub fn user_id(&self) -> Option<&str> {
+        self.user_id.as_deref()
+    }
+
+    pub fn open_id(&self) -> Option<&str> {
+        self.open_id.as_deref()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.union_id.as_deref()
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MessageSender {
     #[serde(default)]
     pub sender_id: Option<serde_json::Value>,
@@ -26,6 +50,54 @@ pub struct MessageSender {
     pub sender_type: String,
     #[serde(default)]
     pub tenant_key: String,
+}
+
+impl MessageSender {
+    pub fn sender_user_id(&self) -> Option<UserId> {
+        self.sender_id
+            .as_ref()
+            .and_then(|v| serde_json::from_value(v.clone()).ok())
+    }
+
+    pub fn open_id(&self) -> Option<&str> {
+        self.sender_id.as_ref()?.get("open_id")?.as_str()
+    }
+
+    pub fn user_id(&self) -> Option<&str> {
+        self.sender_id.as_ref()?.get("user_id")?.as_str()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.sender_id.as_ref()?.get("union_id")?.as_str()
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Mention {
+    #[serde(default)]
+    pub key: String,
+    #[serde(default)]
+    pub id: Option<UserId>,
+    #[serde(default)]
+    pub mentioned_type: String,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub tenant_key: String,
+}
+
+impl Mention {
+    pub fn open_id(&self) -> Option<&str> {
+        self.id.as_ref().and_then(UserId::open_id)
+    }
+
+    pub fn user_id(&self) -> Option<&str> {
+        self.id.as_ref().and_then(UserId::user_id)
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.id.as_ref().and_then(UserId::union_id)
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -36,6 +108,8 @@ pub struct Message {
     pub root_id: String,
     #[serde(default)]
     pub parent_id: String,
+    #[serde(default)]
+    pub thread_id: String,
     #[serde(default)]
     pub create_time: String,
     #[serde(default)]
@@ -50,6 +124,16 @@ pub struct Message {
     pub content: String,
     #[serde(default)]
     pub mentions: Vec<serde_json::Value>,
+}
+
+impl Message {
+    pub fn typed_mentions(&self) -> Result<Vec<Mention>, serde_json::Error> {
+        self.mentions
+            .iter()
+            .cloned()
+            .map(serde_json::from_value)
+            .collect()
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

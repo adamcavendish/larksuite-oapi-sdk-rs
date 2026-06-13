@@ -21,6 +21,63 @@ pub struct UserId {
     pub union_id: Option<String>,
 }
 
+impl UserId {
+    pub fn user_id(&self) -> Option<&str> {
+        self.user_id.as_deref()
+    }
+
+    pub fn open_id(&self) -> Option<&str> {
+        self.open_id.as_deref()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.union_id.as_deref()
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct MessageType(pub String);
+
+impl MessageType {
+    pub const TEXT: &'static str = "text";
+    pub const POST: &'static str = "post";
+    pub const IMAGE: &'static str = "image";
+    pub const FILE: &'static str = "file";
+    pub const AUDIO: &'static str = "audio";
+    pub const MEDIA: &'static str = "media";
+    pub const STICKER: &'static str = "sticker";
+    pub const INTERACTIVE: &'static str = "interactive";
+    pub const SHARE_CHAT: &'static str = "share_chat";
+    pub const SHARE_USER: &'static str = "share_user";
+
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl From<&str> for MessageType {
+    fn from(value: &str) -> Self {
+        Self::new(value)
+    }
+}
+
+impl From<String> for MessageType {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl From<MessageType> for String {
+    fn from(value: MessageType) -> Self {
+        value.0
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct I18nNames {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -57,6 +114,26 @@ pub struct Sender {
     pub tenant_key: Option<String>,
 }
 
+impl Sender {
+    pub fn open_id(&self) -> Option<&str> {
+        (self.id_type.as_deref() == Some("open_id"))
+            .then_some(self.id.as_deref())
+            .flatten()
+    }
+
+    pub fn user_id(&self) -> Option<&str> {
+        (self.id_type.as_deref() == Some("user_id"))
+            .then_some(self.id.as_deref())
+            .flatten()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        (self.id_type.as_deref() == Some("union_id"))
+            .then_some(self.id.as_deref())
+            .flatten()
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MessageBody {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -75,6 +152,26 @@ pub struct Mention {
     pub name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tenant_key: Option<String>,
+}
+
+impl Mention {
+    pub fn open_id(&self) -> Option<&str> {
+        (self.id_type.as_deref() == Some("open_id"))
+            .then_some(self.id.as_deref())
+            .flatten()
+    }
+
+    pub fn user_id(&self) -> Option<&str> {
+        (self.id_type.as_deref() == Some("user_id"))
+            .then_some(self.id.as_deref())
+            .flatten()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        (self.id_type.as_deref() == Some("union_id"))
+            .then_some(self.id.as_deref())
+            .flatten()
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -361,6 +458,35 @@ pub struct CreateMessageReqBody {
     pub uuid: Option<String>,
 }
 
+impl CreateMessageReqBody {
+    pub fn msg_type(mut self, msg_type: impl Into<MessageType>) -> Self {
+        self.msg_type = Some(msg_type.into().into());
+        self
+    }
+
+    pub fn interactive_card(
+        receive_id: impl Into<String>,
+        card: impl Serialize,
+    ) -> Result<Self, serde_json::Error> {
+        Ok(Self::interactive_card_content(
+            receive_id,
+            card_content(card)?,
+        ))
+    }
+
+    pub fn interactive_card_content(
+        receive_id: impl Into<String>,
+        content: impl Into<String>,
+    ) -> Self {
+        Self {
+            receive_id: Some(receive_id.into()),
+            msg_type: Some(MessageType::INTERACTIVE.to_string()),
+            content: Some(content.into()),
+            uuid: None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct ReplyMessageReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -373,10 +499,47 @@ pub struct ReplyMessageReqBody {
     pub uuid: Option<String>,
 }
 
+impl ReplyMessageReqBody {
+    pub fn msg_type(mut self, msg_type: impl Into<MessageType>) -> Self {
+        self.msg_type = Some(msg_type.into().into());
+        self
+    }
+
+    pub fn interactive_card(card: impl Serialize) -> Result<Self, serde_json::Error> {
+        Ok(Self::interactive_card_content(card_content(card)?))
+    }
+
+    pub fn interactive_card_content(content: impl Into<String>) -> Self {
+        Self {
+            content: Some(content.into()),
+            msg_type: Some(MessageType::INTERACTIVE.to_string()),
+            reply_in_thread: None,
+            uuid: None,
+        }
+    }
+
+    pub fn reply_in_thread(mut self, reply_in_thread: bool) -> Self {
+        self.reply_in_thread = Some(reply_in_thread);
+        self
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PatchMessageReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
+}
+
+impl PatchMessageReqBody {
+    pub fn interactive_card(card: impl Serialize) -> Result<Self, serde_json::Error> {
+        Ok(Self::interactive_card_content(card_content(card)?))
+    }
+
+    pub fn interactive_card_content(content: impl Into<String>) -> Self {
+        Self {
+            content: Some(content.into()),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -385,6 +548,28 @@ pub struct UpdateMessageReqBody {
     pub msg_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
+}
+
+impl UpdateMessageReqBody {
+    pub fn msg_type(mut self, msg_type: impl Into<MessageType>) -> Self {
+        self.msg_type = Some(msg_type.into().into());
+        self
+    }
+
+    pub fn interactive_card(card: impl Serialize) -> Result<Self, serde_json::Error> {
+        Ok(Self::interactive_card_content(card_content(card)?))
+    }
+
+    pub fn interactive_card_content(content: impl Into<String>) -> Self {
+        Self {
+            msg_type: Some(MessageType::INTERACTIVE.to_string()),
+            content: Some(content.into()),
+        }
+    }
+}
+
+fn card_content(card: impl Serialize) -> Result<String, serde_json::Error> {
+    serde_json::to_string(&card)
 }
 
 #[derive(Debug, Clone, Default, Serialize)]

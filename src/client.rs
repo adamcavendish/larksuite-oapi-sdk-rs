@@ -441,6 +441,57 @@ impl Client {
         transport::request_typed(&self.config, api_req, option).await
     }
 
+    /// Execute a custom OpenAPI request with SDK auth and token handling.
+    ///
+    /// This is the raw escape hatch for endpoints that do not have a generated
+    /// service wrapper yet. Prefer generated service methods when available.
+    /// Set [`ApiReq::supported_access_token_types`] to the token accepted by
+    /// the endpoint, or use [`Client::raw_request_with_token`] for the common
+    /// single-token case.
+    pub async fn raw_request(
+        &self,
+        api_req: &ApiReq,
+        option: &RequestOption,
+    ) -> Result<ApiResp, LarkError> {
+        self.do_req(api_req, option).await
+    }
+
+    /// Execute a custom OpenAPI request with the given supported token type.
+    pub async fn raw_request_with_token(
+        &self,
+        mut api_req: ApiReq,
+        token_type: AccessTokenType,
+        option: &RequestOption,
+    ) -> Result<ApiResp, LarkError> {
+        api_req.supported_access_token_types = vec![token_type];
+        self.do_req(&api_req, option).await
+    }
+
+    /// Execute a custom OpenAPI request and deserialize its `data` field.
+    ///
+    /// Set [`ApiReq::supported_access_token_types`] to the token accepted by
+    /// the endpoint, or use [`Client::raw_request_typed_with_token`] for the
+    /// common single-token case.
+    pub async fn raw_request_typed<T: for<'de> serde::Deserialize<'de>>(
+        &self,
+        api_req: &ApiReq,
+        option: &RequestOption,
+    ) -> Result<(ApiResp, RawResponse<T>), LarkError> {
+        self.do_req_typed(api_req, option).await
+    }
+
+    /// Execute a custom OpenAPI request with the given supported token type and
+    /// deserialize its `data` field.
+    pub async fn raw_request_typed_with_token<T: for<'de> serde::Deserialize<'de>>(
+        &self,
+        mut api_req: ApiReq,
+        token_type: AccessTokenType,
+        option: &RequestOption,
+    ) -> Result<(ApiResp, RawResponse<T>), LarkError> {
+        api_req.supported_access_token_types = vec![token_type];
+        self.do_req_typed(&api_req, option).await
+    }
+
     pub async fn get(&self, path: &str, option: &RequestOption) -> Result<ApiResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::GET, path);
         api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
