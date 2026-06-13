@@ -236,9 +236,10 @@ async fn do_request(
                 last_err = Some(LarkError::ServerTimeout(msg));
                 continue;
             }
-            Err(LarkError::RateLimited(msg)) => {
-                last_err = Some(LarkError::RateLimited(msg));
-                continue;
+            Err(LarkError::RateLimited(_)) => {
+                return Err(LarkError::RateLimited(
+                    "server returned 429 Too Many Requests".to_string(),
+                ));
             }
             Err(e) => return Err(e),
         }
