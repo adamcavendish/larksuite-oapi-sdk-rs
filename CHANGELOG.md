@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.1.1] - 2026-06-14
+
+### Event parity
+
+- Added Go-shaped typed IM event payload helpers for message readers,
+  reactions, recalls, chat metadata, bot P2P entry, member lists, and
+  topic/thread-aware message fields.
+- Replaced raw or stale P2 event payload shapes with typed structs for
+  contact, VC, CoreHR, Hire, application, drive, task, approval, calendar,
+  ACS, mail, minutes, meeting room, payroll, and performance modules.
+- Added missing Go-backed P2 event dispatcher registrations across the typed
+  event parity slices.
+- Added focused deserialization coverage for the new typed event payloads and
+  null/empty payload handling.
+
+### Cards and IM helpers
+
+- Added typed helpers for interactive card content and raw request token access.
+- Added typed IM topic and thread helpers for daemon/event routing flows.
+
+### Fixes
+
+- Accepted null IM event subfields without deserialization failures.
+- Removed crates.io publishing from the GitHub release workflow so releases only
+  create GitHub Release entries.
+
 ## [0.1.0] - 2026-06-13
 
 Initial release of larksuite-oapi-sdk-rs, a Rust port of the
@@ -66,4 +92,5 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.94.0+, edition 2024
 
+[0.1.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.1
 [0.1.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.0
