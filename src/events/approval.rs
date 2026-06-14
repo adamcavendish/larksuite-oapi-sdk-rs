@@ -11,55 +11,29 @@ use crate::event::EventDispatcher;
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2ApprovalInstanceCreatedV4 {
-    #[serde(default)]
-    pub instance_code: String,
-    #[serde(default)]
-    pub approval_code: String,
-    #[serde(default)]
-    pub type_: String,
-    #[serde(default)]
-    pub status: String,
-    #[serde(default)]
-    pub open_id: String,
-    #[serde(default)]
-    pub start_time: i64,
-    #[serde(default)]
-    pub end_time: i64,
+pub struct ApprovalEvent {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub widget_group_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub form_definition_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_obj: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timestamp: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2ApprovalTaskCreatedV4 {
-    #[serde(default)]
-    pub instance_code: String,
-    #[serde(default)]
-    pub approval_code: String,
-    #[serde(default)]
-    pub task_id: String,
-    #[serde(default)]
-    pub status: String,
-    #[serde(default)]
-    pub open_id: String,
-    #[serde(default)]
-    pub start_time: i64,
-    #[serde(default)]
-    pub end_time: i64,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2ApprovalCcCreatedV4 {
-    #[serde(default)]
-    pub instance_code: String,
-    #[serde(default)]
-    pub approval_code: String,
-    #[serde(default)]
-    pub open_id: String,
-    #[serde(default)]
-    pub read_status: String,
-    #[serde(default)]
-    pub start_time: i64,
-    #[serde(default)]
-    pub end_time: i64,
+pub struct P2ApprovalUpdatedV4 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object: Option<ApprovalEvent>,
 }
 
 // ── Handler registration helpers ──
@@ -92,30 +66,11 @@ where
 // ── EventDispatcher extension methods ──
 
 impl EventDispatcher {
-    pub fn on_p2_approval_instance_created_v4<F, Fut>(self, handler: F) -> Self
+    pub fn on_p2_approval_updated_v4<F, Fut>(self, handler: F) -> Self
     where
-        F: Fn(P2ApprovalInstanceCreatedV4) -> Fut + Send + Sync + 'static,
+        F: Fn(P2ApprovalUpdatedV4) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
-        self.on_event(
-            "approval.approval.instance.created_v4",
-            wrap_handler(handler),
-        )
-    }
-
-    pub fn on_p2_approval_task_created_v4<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ApprovalTaskCreatedV4) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("approval.approval.task.created_v4", wrap_handler(handler))
-    }
-
-    pub fn on_p2_approval_cc_created_v4<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ApprovalCcCreatedV4) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("approval.approval.cc.created_v4", wrap_handler(handler))
+        self.on_event("approval.approval.updated_v4", wrap_handler(handler))
     }
 }
