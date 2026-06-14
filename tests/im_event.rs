@@ -55,8 +55,7 @@ fn message_receive_topic_fields_are_typed() {
     assert_eq!(event.sender.user_id(), Some("user_sender"));
     assert_eq!(event.sender.union_id(), Some("on_sender"));
 
-    let mentions = event.message.typed_mentions().unwrap();
-    let mention = &mentions[0];
+    let mention = &event.message.mentions[0];
     assert_eq!(mention.key, "@_user_1");
     assert_eq!(mention.open_id(), Some("ou_mentioned"));
     assert_eq!(mention.user_id(), Some("user_mentioned"));
@@ -64,15 +63,14 @@ fn message_receive_topic_fields_are_typed() {
 }
 
 #[test]
-fn typed_mentions_returns_error_for_unexpected_shape() {
-    let event: P2MessageReceiveV1 = serde_json::from_value(serde_json::json!({
+fn message_receive_rejects_unexpected_mention_shape() {
+    let result: Result<P2MessageReceiveV1, _> = serde_json::from_value(serde_json::json!({
         "message": {
             "mentions": ["not-an-object"]
         }
-    }))
-    .unwrap();
+    }));
 
-    assert!(event.message.typed_mentions().is_err());
+    assert!(result.is_err());
 }
 
 #[test]
