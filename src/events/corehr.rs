@@ -291,8 +291,4 @@ event_handlers! {
     #[deprecated(note = "use on_p2_corehr_job_change_updated_v1 instead")]
     on_p2_corehr_job_changed_v1 => P2JobChangeUpdatedV1
         : "corehr.job_change.updated_v1",
-    on_p2_corehr_probation_updated_v1 => serde_json::Value
-        : "corehr.probation_management.updated_v1",
-    on_p2_corehr_org_role_authorization_updated_v2 => serde_json::Value
-        : "corehr.org_role_authorization.updated_v2",
 }

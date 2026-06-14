@@ -181,64 +181,6 @@ pub struct P2HireEhrImportTaskImportedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2HireJobCreatedV1 {
-    #[serde(default)]
-    pub job_id: String,
-    #[serde(default)]
-    pub job: serde_json::Value,
-    #[serde(default)]
-    pub operator_id: serde_json::Value,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2HireJobUpdatedV1 {
-    #[serde(default)]
-    pub job_id: String,
-    #[serde(default)]
-    pub job: serde_json::Value,
-    #[serde(default)]
-    pub operator_id: serde_json::Value,
-    #[serde(default)]
-    pub updated_fields: Vec<String>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2HireCandidateCreatedV1 {
-    #[serde(default)]
-    pub candidate_id: String,
-    #[serde(default)]
-    pub candidate: serde_json::Value,
-    #[serde(default)]
-    pub operator_id: serde_json::Value,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2HireInterviewCreatedV1 {
-    #[serde(default)]
-    pub interview_id: String,
-    #[serde(default)]
-    pub application_id: String,
-    #[serde(default)]
-    pub interview: serde_json::Value,
-    #[serde(default)]
-    pub operator_id: serde_json::Value,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2HireInterviewUpdatedV1 {
-    #[serde(default)]
-    pub interview_id: String,
-    #[serde(default)]
-    pub application_id: String,
-    #[serde(default)]
-    pub interview: serde_json::Value,
-    #[serde(default)]
-    pub operator_id: serde_json::Value,
-    #[serde(default)]
-    pub updated_fields: Vec<String>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireApplicationDeletedV1 {
     #[serde(default)]
     pub application_ids: Vec<String>,
@@ -367,20 +309,10 @@ event_handlers! {
         : "hire.ehr_import_task.imported_v1",
     on_p2_hire_ehr_import_task_for_internship_offer_imported_v1 => P2HireEhrImportTaskForInternshipOfferImportedV1
         : "hire.ehr_import_task_for_internship_offer.imported_v1",
-    on_p2_hire_job_created_v1 => P2HireJobCreatedV1
-        : "hire.job.created_v1",
-    on_p2_hire_job_updated_v1 => P2HireJobUpdatedV1
-        : "hire.job.updated_v1",
-    on_p2_hire_candidate_created_v1 => P2HireCandidateCreatedV1
-        : "hire.talent.created_v1",
     on_p2_hire_talent_deleted_v1 => P2HireTalentDeletedV1
         : "hire.talent.deleted_v1",
     on_p2_hire_talent_tag_subscription_v1 => P2HireTalentTagSubscriptionV1
         : "hire.talent.tag_subscription_v1",
-    on_p2_hire_interview_created_v1 => P2HireInterviewCreatedV1
-        : "hire.interview.created_v1",
-    on_p2_hire_interview_updated_v1 => P2HireInterviewUpdatedV1
-        : "hire.interview.updated_v1",
     on_p2_hire_eco_account_created_v1 => P2HireEcoAccountCreatedV1
         : "hire.eco_account.created_v1",
     on_p2_hire_eco_background_check_created_v1 => P2HireEcoBackgroundCheckCreatedV1

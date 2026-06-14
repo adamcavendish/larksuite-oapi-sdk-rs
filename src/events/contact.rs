@@ -300,18 +300,6 @@ event_handlers! {
         : "contact.employee_type_enum.updated_v3",
     on_p2_contact_employee_type_enum_deleted_v3 => P2ContactEmployeeTypeEnumDeletedV3
         : "contact.employee_type_enum.deleted_v3",
-    on_p2_contact_job_family_created_v3 => serde_json::Value
-        : "contact.job_family.created_v3",
-    on_p2_contact_job_family_updated_v3 => serde_json::Value
-        : "contact.job_family.updated_v3",
-    on_p2_contact_job_family_deleted_v3 => serde_json::Value
-        : "contact.job_family.deleted_v3",
-    on_p2_contact_job_level_created_v3 => serde_json::Value
-        : "contact.job_level.created_v3",
-    on_p2_contact_job_level_updated_v3 => serde_json::Value
-        : "contact.job_level.updated_v3",
-    on_p2_contact_job_level_deleted_v3 => serde_json::Value
-        : "contact.job_level.deleted_v3",
     on_p2_contact_custom_attr_event_updated_v3 => P2ContactCustomAttrEventUpdatedV3
         : "contact.custom_attr_event.updated_v3",
     on_p2_contact_employee_type_enum_actived_v3 => P2ContactEmployeeTypeEnumActivedV3
