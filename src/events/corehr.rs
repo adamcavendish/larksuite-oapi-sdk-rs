@@ -12,208 +12,206 @@ use crate::event::EventDispatcher;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UserId {
-    #[serde(default)]
-    pub user_id: String,
-    #[serde(default)]
-    pub union_id: String,
-    #[serde(default)]
-    pub open_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+}
+
+impl UserId {
+    pub fn user_id(&self) -> Option<&str> {
+        self.user_id.as_deref()
+    }
+
+    pub fn open_id(&self) -> Option<&str> {
+        self.open_id.as_deref()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.union_id.as_deref()
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ManagementScope {
-    #[serde(default)]
-    pub management_dimension: String,
-    #[serde(default)]
-    pub obj_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub management_dimension: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub obj_id: Option<String>,
 }
 
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2CommonDataIdUserMappingChangedV1 {
-    #[serde(default)]
-    pub change_type: String,
-    #[serde(default)]
-    pub id_transform_type: i32,
-    #[serde(default)]
-    pub corehr_id: String,
-    #[serde(default)]
-    pub people_admin_id: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub change_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id_transform_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub corehr_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub people_admin_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub feishu_id: Option<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2CommonDataMetaDataUpdatedV1 {
-    #[serde(default)]
-    pub api_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub api_name: Option<String>,
     #[serde(default)]
     pub field_changes: Vec<String>,
-    #[serde(default)]
-    pub metadata_type: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metadata_type: Option<String>,
     #[serde(default)]
     pub enum_value_changes: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2ContractV1 {
-    #[serde(default)]
-    pub contract_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2DepartmentCreatedV1 {
-    #[serde(default)]
-    pub department_id: String,
-    #[serde(default)]
-    pub object_type: i32,
-    #[serde(default)]
-    pub operator: serde_json::Value,
-    #[serde(default)]
-    pub opt_type: String,
-    #[serde(default)]
-    pub department: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2DepartmentUpdatedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
     #[serde(default)]
-    pub department_id: String,
-    #[serde(default)]
-    pub object_type: i32,
-    #[serde(default)]
-    pub operator: serde_json::Value,
-    #[serde(default)]
-    pub opt_type: String,
-    #[serde(default)]
-    pub updated_fields: Vec<String>,
-    #[serde(default)]
-    pub department: serde_json::Value,
+    pub field_changes: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2DepartmentDeletedV1 {
-    #[serde(default)]
-    pub department_id: String,
-    #[serde(default)]
-    pub object_type: i32,
-    #[serde(default)]
-    pub operator: serde_json::Value,
-    #[serde(default)]
-    pub opt_type: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2EmploymentCreatedV1 {
-    #[serde(default)]
-    pub employment_id: String,
-    #[serde(default)]
-    pub object_type: i32,
-    #[serde(default)]
-    pub operator: serde_json::Value,
-    #[serde(default)]
-    pub opt_type: String,
-    #[serde(default)]
-    pub employment: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_user_id: Option<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2EmploymentUpdatedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_user_id: Option<UserId>,
     #[serde(default)]
-    pub employment_id: String,
-    #[serde(default)]
-    pub object_type: i32,
-    #[serde(default)]
-    pub operator: serde_json::Value,
-    #[serde(default)]
-    pub opt_type: String,
-    #[serde(default)]
-    pub updated_fields: Vec<String>,
-    #[serde(default)]
-    pub employment: serde_json::Value,
+    pub field_changes: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2EmploymentConvertedV1 {
-    #[serde(default)]
-    pub employment_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2EmploymentDeletedV1 {
-    #[serde(default)]
-    pub employment_id: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_user_id: Option<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2EmploymentResignedV1 {
-    #[serde(default)]
-    pub employment_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2JobV1 {
-    #[serde(default)]
-    pub job_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2JobChangeUpdatedV1 {
-    #[serde(default)]
-    pub employment_id: String,
-    #[serde(default)]
-    pub job_change: serde_json::Value,
-    #[serde(default)]
-    pub operator_id: serde_json::Value,
-    #[serde(default)]
-    pub effective_date: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_user_id: Option<UserId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_change_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_mode: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_type_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_reason_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_key: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2JobDataChangedV1 {
-    #[serde(default)]
-    pub job_data_id: String,
-    #[serde(default)]
-    pub employment_id: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_data_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_user_id: Option<UserId>,
-    #[serde(default)]
-    pub job_change_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_change_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2JobDataIdV1 {
-    #[serde(default)]
-    pub job_data_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_data_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2JobDataEmployedV1 {
-    #[serde(default)]
-    pub job_data_id: String,
-    #[serde(default)]
-    pub employment_id: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_data_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_user_id: Option<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2OffboardingUpdatedV1 {
-    #[serde(default)]
-    pub employment_id: String,
-    #[serde(default)]
-    pub offboarding_reason: serde_json::Value,
-    #[serde(default)]
-    pub operator_id: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_user_id: Option<UserId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2OrgRoleAuthorizationUpdatedV1 {
-    #[serde(default)]
-    pub role_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_id: Option<String>,
     #[serde(default)]
     pub management_scope_list: Vec<ManagementScope>,
     #[serde(default)]
@@ -222,28 +220,28 @@ pub struct P2OrgRoleAuthorizationUpdatedV1 {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2PersonCreatedV1 {
-    #[serde(default)]
-    pub person_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2PersonDeletedV1 {
-    #[serde(default)]
-    pub person_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2PersonUpdatedV1 {
-    #[serde(default)]
-    pub person_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person_id: Option<String>,
     #[serde(default)]
     pub field_changes: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2PreHireUpdatedV1 {
-    #[serde(default)]
-    pub pre_hire_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pre_hire_id: Option<String>,
     #[serde(default)]
     pub field_changes: Vec<String>,
 }
@@ -275,7 +273,7 @@ where
     }
 }
 
-// ── EventDispatcher extension methods (all 28 corehr/v1 handlers) ──
+// ── EventDispatcher extension methods ──
 
 macro_rules! corehr_v1_handler {
     ($method:ident, $event_key:literal, $payload_type:ty) => {

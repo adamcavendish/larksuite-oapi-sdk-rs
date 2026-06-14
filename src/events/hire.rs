@@ -11,43 +11,201 @@ use crate::event::EventDispatcher;
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+}
+
+impl UserId {
+    pub fn user_id(&self) -> Option<&str> {
+        self.user_id.as_deref()
+    }
+
+    pub fn open_id(&self) -> Option<&str> {
+        self.open_id.as_deref()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.union_id.as_deref()
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DepartmentId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_department_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EcoAccountCustomFieldEventData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EcoBackgroundCheckCreateEventMobile {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EcoBackgroundCheckCreateEventCandidateInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<EcoBackgroundCheckCreateEventMobile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub first_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EcoBackgroundCheckCreateEventContactInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<EcoBackgroundCheckCreateEventMobile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EcoBackgroundCheckCreateEventCustomKv {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EcoExamCreateEventMobile {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EcoExamCreateEventCandidateInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<EcoExamCreateEventMobile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Cash {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub amount: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BonusAmount {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bonus_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub point_bonus: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cash: Option<Cash>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cash_bonus: Option<Vec<Cash>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Assets {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confirmed_bonus: Option<BonusAmount>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub paid_bonus: Option<BonusAmount>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentTag {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
+    pub type_: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationStageInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
+    pub type_: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireOfferStatusChangedV1 {
-    #[serde(default)]
-    pub offer_id: String,
-    #[serde(default)]
-    pub offer_type: i32,
-    #[serde(default)]
-    pub schema_id: String,
-    #[serde(default)]
-    pub application_id: String,
-    #[serde(default)]
-    pub offer_status: i32,
-    #[serde(default)]
-    pub job_id: String,
-    #[serde(default)]
-    pub talent_id: String,
-    #[serde(default)]
-    pub creator_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_status: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireApplicationStageChangedV1 {
-    #[serde(default)]
-    pub application_id: String,
-    #[serde(default)]
-    pub stage_id: String,
-    #[serde(default)]
-    pub operator: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub origin_stage_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_stage_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<i64>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireEhrImportTaskImportedV1 {
-    #[serde(default)]
-    pub task_id: String,
-    #[serde(default)]
-    pub application_id: String,
-    #[serde(default)]
-    pub operator: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ehr_department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ehr_requirement_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_user_id: Option<UserId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ehr_department: Option<DepartmentId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -111,69 +269,117 @@ pub struct P2HireInterviewUpdatedV1 {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireApplicationDeletedV1 {
     #[serde(default)]
-    pub application_id: String,
+    pub application_ids: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireEcoAccountCreatedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_name: Option<String>,
     #[serde(default)]
-    pub account_id: String,
-    #[serde(default)]
-    pub account: serde_json::Value,
+    pub usage_list: Vec<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field_list: Option<Vec<EcoAccountCustomFieldEventData>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireEcoBackgroundCheckCreatedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub background_check_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub package_id: Option<String>,
     #[serde(default)]
-    pub application_id: String,
-    #[serde(default)]
-    pub background_check: serde_json::Value,
+    pub additional_item_id_list: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub candidate_info: Option<EcoBackgroundCheckCreateEventCandidateInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_contact_info: Option<EcoBackgroundCheckCreateEventContactInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field_list: Option<Vec<EcoBackgroundCheckCreateEventCustomKv>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireEcoBackgroundCheckCanceledV1 {
-    #[serde(default)]
-    pub application_id: String,
-    #[serde(default)]
-    pub background_check: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub background_check_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub termination_reason: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireEcoExamCreatedV1 {
-    #[serde(default)]
-    pub application_id: String,
-    #[serde(default)]
-    pub exam: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exam_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub paper_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub candidate_info: Option<EcoExamCreateEventCandidateInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireEhrImportTaskForInternshipOfferImportedV1 {
-    #[serde(default)]
-    pub task_id: String,
-    #[serde(default)]
-    pub application_id: String,
-    #[serde(default)]
-    pub operator: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pre_onboard_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ehr_department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_user_id: Option<UserId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ehr_department: Option<DepartmentId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireReferralAccountAssetsUpdateV1 {
-    #[serde(default)]
-    pub account: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assets: Option<Assets>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireTalentDeletedV1 {
-    #[serde(default)]
-    pub talent_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2HireTalentTagSubscriptionV1 {
-    #[serde(default)]
-    pub talent_id: String,
-    #[serde(default)]
-    pub tag: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
+    pub type_: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag: Option<TalentTag>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lock_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_stage: Option<ApplicationStageInfo>,
 }
 
 // ── Handler registration helpers ──
@@ -203,7 +409,7 @@ where
     }
 }
 
-// ── EventDispatcher extension methods (all 17 hire/v1 handlers) ──
+// ── EventDispatcher extension methods ──
 
 macro_rules! hire_v1_handler {
     ($method:ident, $event_key:literal, $payload_type:ty) => {
