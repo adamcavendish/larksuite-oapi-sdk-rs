@@ -1,12 +1,6 @@
 //! Instant Messaging (IM) v1 event handlers.
 
-use std::future::Future;
-use std::pin::Pin;
-
 use serde::{Deserialize, Serialize};
-
-use crate::error::LarkError;
-use crate::event::EventDispatcher;
 
 // ── Event payload types ──
 
@@ -18,29 +12,7 @@ pub struct P2MessageReceiveV1 {
     pub message: Message,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct UserId {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub open_id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub union_id: Option<String>,
-}
-
-impl UserId {
-    pub fn user_id(&self) -> Option<&str> {
-        self.user_id.as_deref()
-    }
-
-    pub fn open_id(&self) -> Option<&str> {
-        self.open_id.as_deref()
-    }
-
-    pub fn union_id(&self) -> Option<&str> {
-        self.union_id.as_deref()
-    }
-}
+pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MessageSender {
@@ -462,140 +434,33 @@ pub struct P2ChatMemberBotDeletedV1 {
     pub i18n_names: Option<I18nNames>,
 }
 
-// ── Handler registration helpers ──
-
-fn wrap_handler<T, F, Fut>(
-    handler: F,
-) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
-+ Send
-+ Sync
-+ 'static
-where
-    T: for<'de> serde::Deserialize<'de> + Send + 'static,
-    F: Fn(T) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-{
-    move |val: serde_json::Value| {
-        let result: std::result::Result<T, _> = serde_json::from_value(val);
-        match result {
-            Ok(typed) => Box::pin(handler(typed))
-                as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>,
-            Err(e) => Box::pin(async move {
-                Err(LarkError::Event(format!(
-                    "failed to deserialize event payload: {e}"
-                )))
-            }),
-        }
-    }
-}
-
 // ── EventDispatcher extension methods ──
 
-impl EventDispatcher {
-    pub fn on_p2_im_message_receive_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MessageReceiveV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.message.receive_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_message_read_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MessageReadV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.message.message_read_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_message_recalled_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MessageRecalledV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.message.recalled_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_chat_member_user_added_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ChatMemberUserAddedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.chat.member.user.added_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_chat_member_user_deleted_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ChatMemberUserDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.chat.member.user.deleted_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_chat_disbanded_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ChatDisbandedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.chat.disbanded_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_chat_updated_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ChatUpdatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.chat.updated_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_message_reaction_created_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MessageReactionCreatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.message.reaction.created_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_message_reaction_deleted_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MessageReactionDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.message.reaction.deleted_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_chat_member_bot_added_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ChatMemberBotAddedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.chat.member.bot.added_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_chat_member_bot_deleted_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ChatMemberBotDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.chat.member.bot.deleted_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_im_chat_access_event_bot_p2p_chat_entered_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ChatAccessEventBotP2pChatEnteredV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event(
-            "im.chat.access_event.bot_p2p_chat_entered_v1",
-            wrap_handler(handler),
-        )
-    }
-
-    pub fn on_p2_im_chat_member_user_withdrawn_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2ChatMemberUserWithdrawnV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("im.chat.member.user.withdrawn_v1", wrap_handler(handler))
-    }
+event_handlers! {
+    on_p2_im_message_receive_v1 => P2MessageReceiveV1
+        : "im.message.receive_v1",
+    on_p2_im_message_read_v1 => P2MessageReadV1
+        : "im.message.message_read_v1",
+    on_p2_im_message_recalled_v1 => P2MessageRecalledV1
+        : "im.message.recalled_v1",
+    on_p2_im_chat_member_user_added_v1 => P2ChatMemberUserAddedV1
+        : "im.chat.member.user.added_v1",
+    on_p2_im_chat_member_user_deleted_v1 => P2ChatMemberUserDeletedV1
+        : "im.chat.member.user.deleted_v1",
+    on_p2_im_chat_disbanded_v1 => P2ChatDisbandedV1
+        : "im.chat.disbanded_v1",
+    on_p2_im_chat_updated_v1 => P2ChatUpdatedV1
+        : "im.chat.updated_v1",
+    on_p2_im_message_reaction_created_v1 => P2MessageReactionCreatedV1
+        : "im.message.reaction.created_v1",
+    on_p2_im_message_reaction_deleted_v1 => P2MessageReactionDeletedV1
+        : "im.message.reaction.deleted_v1",
+    on_p2_im_chat_member_bot_added_v1 => P2ChatMemberBotAddedV1
+        : "im.chat.member.bot.added_v1",
+    on_p2_im_chat_member_bot_deleted_v1 => P2ChatMemberBotDeletedV1
+        : "im.chat.member.bot.deleted_v1",
+    on_p2_im_chat_access_event_bot_p2p_chat_entered_v1 => P2ChatAccessEventBotP2pChatEnteredV1
+        : "im.chat.access_event.bot_p2p_chat_entered_v1",
+    on_p2_im_chat_member_user_withdrawn_v1 => P2ChatMemberUserWithdrawnV1
+        : "im.chat.member.user.withdrawn_v1",
 }

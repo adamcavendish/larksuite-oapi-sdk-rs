@@ -1,38 +1,10 @@
 //! CoreHR v2 event handlers.
 
-use std::future::Future;
-use std::pin::Pin;
-
 use serde::{Deserialize, Serialize};
-
-use crate::error::LarkError;
-use crate::event::EventDispatcher;
 
 // ── Event payload types ──
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct UserId {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub open_id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub union_id: Option<String>,
-}
-
-impl UserId {
-    pub fn user_id(&self) -> Option<&str> {
-        self.user_id.as_deref()
-    }
-
-    pub fn open_id(&self) -> Option<&str> {
-        self.open_id.as_deref()
-    }
-
-    pub fn union_id(&self) -> Option<&str> {
-        self.union_id.as_deref()
-    }
-}
+pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct OrganizationDomainEventData {
@@ -478,267 +450,95 @@ pub struct P2SignatureFileStatusUpdatedV2 {
     pub biz_process_id: Option<String>,
 }
 
-fn wrap_handler<T, F, Fut>(
-    handler: F,
-) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
-+ Send
-+ Sync
-+ 'static
-where
-    T: for<'de> serde::Deserialize<'de> + Send + 'static,
-    F: Fn(T) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-{
-    move |val: serde_json::Value| {
-        let result: std::result::Result<T, _> = serde_json::from_value(val);
-        match result {
-            Ok(typed) => Box::pin(handler(typed))
-                as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>,
-            Err(e) => Box::pin(async move {
-                Err(LarkError::Event(format!(
-                    "failed to deserialize event payload: {e}"
-                )))
-            }),
-        }
-    }
-}
-
-macro_rules! corehr_v2_handler {
-    ($method:ident, $event_key:literal, $payload_type:ty) => {
-        pub fn $method<F, Fut>(self, handler: F) -> Self
-        where
-            F: Fn($payload_type) -> Fut + Send + Sync + 'static,
-            Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-        {
-            self.on_event($event_key, wrap_handler(handler))
-        }
-    };
-}
-
-impl EventDispatcher {
-    corehr_v2_handler!(
-        on_p2_corehr_approval_groups_updated_v2,
-        "corehr.approval_groups.updated_v2",
-        P2ApprovalGroupsUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_company_created_v2,
-        "corehr.company.created_v2",
-        P2CompanyCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_company_deleted_v2,
-        "corehr.company.deleted_v2",
-        P2CompanyDeletedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_company_updated_v2,
-        "corehr.company.updated_v2",
-        P2CompanyUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_cost_center_created_v2,
-        "corehr.cost_center.created_v2",
-        P2CostCenterCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_cost_center_deleted_v2,
-        "corehr.cost_center.deleted_v2",
-        P2CostCenterDeletedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_cost_center_updated_v2,
-        "corehr.cost_center.updated_v2",
-        P2CostCenterUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_custom_org_created_v2,
-        "corehr.custom_org.created_v2",
-        P2CustomOrgCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_custom_org_deleted_v2,
-        "corehr.custom_org.deleted_v2",
-        P2CustomOrgDeletedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_custom_org_updated_v2,
-        "corehr.custom_org.updated_v2",
-        P2CustomOrgUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_department_created_v2,
-        "corehr.department.created_v2",
-        P2DepartmentCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_department_updated_v2,
-        "corehr.department.updated_v2",
-        P2DepartmentUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_employee_domain_event_v2,
-        "corehr.employee.domain_event_v2",
-        P2EmployeeDomainEventV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_change_status_updated_v2,
-        "corehr.job_change.status_updated_v2",
-        P2JobChangeStatusUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_change_updated_v2,
-        "corehr.job_change.updated_v2",
-        P2JobChangeUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_family_created_v2,
-        "corehr.job_family.created_v2",
-        P2JobFamilyCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_family_deleted_v2,
-        "corehr.job_family.deleted_v2",
-        P2JobFamilyDeletedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_family_updated_v2,
-        "corehr.job_family.updated_v2",
-        P2JobFamilyUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_grade_created_v2,
-        "corehr.job_grade.created_v2",
-        P2JobGradeCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_grade_deleted_v2,
-        "corehr.job_grade.deleted_v2",
-        P2JobGradeDeletedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_grade_updated_v2,
-        "corehr.job_grade.updated_v2",
-        P2JobGradeUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_level_created_v2,
-        "corehr.job_level.created_v2",
-        P2JobLevelCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_level_deleted_v2,
-        "corehr.job_level.deleted_v2",
-        P2JobLevelDeletedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_job_level_updated_v2,
-        "corehr.job_level.updated_v2",
-        P2JobLevelUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_location_created_v2,
-        "corehr.location.created_v2",
-        P2LocationCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_location_deleted_v2,
-        "corehr.location.deleted_v2",
-        P2LocationDeletedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_location_updated_v2,
-        "corehr.location.updated_v2",
-        P2LocationUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_offboarding_checklist_updated_v2,
-        "corehr.offboarding.checklist_updated_v2",
-        P2OffboardingChecklistUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_offboarding_status_updated_v2,
-        "corehr.offboarding.status_updated_v2",
-        P2OffboardingStatusUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_offboarding_updated_v2,
-        "corehr.offboarding.updated_v2",
-        P2OffboardingUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_pathway_created_v2,
-        "corehr.pathway.created_v2",
-        P2PathwayCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_pathway_deleted_v2,
-        "corehr.pathway.deleted_v2",
-        P2PathwayDeletedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_pathway_updated_v2,
-        "corehr.pathway.updated_v2",
-        P2PathwayUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_position_created_v2,
-        "corehr.position.created_v2",
-        P2PositionCreatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_position_deleted_v2,
-        "corehr.position.deleted_v2",
-        P2PositionDeletedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_position_updated_v2,
-        "corehr.position.updated_v2",
-        P2PositionUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_pre_hire_onboarding_task_changed_v2,
-        "corehr.pre_hire.onboarding_task_changed_v2",
-        P2PreHireOnboardingTaskChangedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_probation_updated_v2,
-        "corehr.probation.updated_v2",
-        P2ProbationUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_process_approver_updated_v2,
-        "corehr.process.approver.updated_v2",
-        P2ProcessApproverUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_process_cc_updated_v2,
-        "corehr.process.cc.updated_v2",
-        P2ProcessCcUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_process_node_updated_v2,
-        "corehr.process.node.updated_v2",
-        P2ProcessNodeUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_process_status_update_v2,
-        "corehr.process.status.update_v2",
-        P2ProcessStatusUpdateV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_process_updated_v2,
-        "corehr.process.updated_v2",
-        P2ProcessUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_process_comment_info_updated_v2,
-        "corehr.process_comment_info.updated_v2",
-        P2ProcessCommentInfoUpdatedV2
-    );
-    corehr_v2_handler!(
-        on_p2_corehr_signature_file_status_updated_v2,
-        "corehr.signature_file.status_updated_v2",
-        P2SignatureFileStatusUpdatedV2
-    );
+event_handlers! {
+    on_p2_corehr_approval_groups_updated_v2 => P2ApprovalGroupsUpdatedV2
+        : "corehr.approval_groups.updated_v2",
+    on_p2_corehr_company_created_v2 => P2CompanyCreatedV2
+        : "corehr.company.created_v2",
+    on_p2_corehr_company_deleted_v2 => P2CompanyDeletedV2
+        : "corehr.company.deleted_v2",
+    on_p2_corehr_company_updated_v2 => P2CompanyUpdatedV2
+        : "corehr.company.updated_v2",
+    on_p2_corehr_cost_center_created_v2 => P2CostCenterCreatedV2
+        : "corehr.cost_center.created_v2",
+    on_p2_corehr_cost_center_deleted_v2 => P2CostCenterDeletedV2
+        : "corehr.cost_center.deleted_v2",
+    on_p2_corehr_cost_center_updated_v2 => P2CostCenterUpdatedV2
+        : "corehr.cost_center.updated_v2",
+    on_p2_corehr_custom_org_created_v2 => P2CustomOrgCreatedV2
+        : "corehr.custom_org.created_v2",
+    on_p2_corehr_custom_org_deleted_v2 => P2CustomOrgDeletedV2
+        : "corehr.custom_org.deleted_v2",
+    on_p2_corehr_custom_org_updated_v2 => P2CustomOrgUpdatedV2
+        : "corehr.custom_org.updated_v2",
+    on_p2_corehr_department_created_v2 => P2DepartmentCreatedV2
+        : "corehr.department.created_v2",
+    on_p2_corehr_department_updated_v2 => P2DepartmentUpdatedV2
+        : "corehr.department.updated_v2",
+    on_p2_corehr_employee_domain_event_v2 => P2EmployeeDomainEventV2
+        : "corehr.employee.domain_event_v2",
+    on_p2_corehr_job_change_status_updated_v2 => P2JobChangeStatusUpdatedV2
+        : "corehr.job_change.status_updated_v2",
+    on_p2_corehr_job_change_updated_v2 => P2JobChangeUpdatedV2
+        : "corehr.job_change.updated_v2",
+    on_p2_corehr_job_family_created_v2 => P2JobFamilyCreatedV2
+        : "corehr.job_family.created_v2",
+    on_p2_corehr_job_family_deleted_v2 => P2JobFamilyDeletedV2
+        : "corehr.job_family.deleted_v2",
+    on_p2_corehr_job_family_updated_v2 => P2JobFamilyUpdatedV2
+        : "corehr.job_family.updated_v2",
+    on_p2_corehr_job_grade_created_v2 => P2JobGradeCreatedV2
+        : "corehr.job_grade.created_v2",
+    on_p2_corehr_job_grade_deleted_v2 => P2JobGradeDeletedV2
+        : "corehr.job_grade.deleted_v2",
+    on_p2_corehr_job_grade_updated_v2 => P2JobGradeUpdatedV2
+        : "corehr.job_grade.updated_v2",
+    on_p2_corehr_job_level_created_v2 => P2JobLevelCreatedV2
+        : "corehr.job_level.created_v2",
+    on_p2_corehr_job_level_deleted_v2 => P2JobLevelDeletedV2
+        : "corehr.job_level.deleted_v2",
+    on_p2_corehr_job_level_updated_v2 => P2JobLevelUpdatedV2
+        : "corehr.job_level.updated_v2",
+    on_p2_corehr_location_created_v2 => P2LocationCreatedV2
+        : "corehr.location.created_v2",
+    on_p2_corehr_location_deleted_v2 => P2LocationDeletedV2
+        : "corehr.location.deleted_v2",
+    on_p2_corehr_location_updated_v2 => P2LocationUpdatedV2
+        : "corehr.location.updated_v2",
+    on_p2_corehr_offboarding_checklist_updated_v2 => P2OffboardingChecklistUpdatedV2
+        : "corehr.offboarding.checklist_updated_v2",
+    on_p2_corehr_offboarding_status_updated_v2 => P2OffboardingStatusUpdatedV2
+        : "corehr.offboarding.status_updated_v2",
+    on_p2_corehr_offboarding_updated_v2 => P2OffboardingUpdatedV2
+        : "corehr.offboarding.updated_v2",
+    on_p2_corehr_pathway_created_v2 => P2PathwayCreatedV2
+        : "corehr.pathway.created_v2",
+    on_p2_corehr_pathway_deleted_v2 => P2PathwayDeletedV2
+        : "corehr.pathway.deleted_v2",
+    on_p2_corehr_pathway_updated_v2 => P2PathwayUpdatedV2
+        : "corehr.pathway.updated_v2",
+    on_p2_corehr_position_created_v2 => P2PositionCreatedV2
+        : "corehr.position.created_v2",
+    on_p2_corehr_position_deleted_v2 => P2PositionDeletedV2
+        : "corehr.position.deleted_v2",
+    on_p2_corehr_position_updated_v2 => P2PositionUpdatedV2
+        : "corehr.position.updated_v2",
+    on_p2_corehr_pre_hire_onboarding_task_changed_v2 => P2PreHireOnboardingTaskChangedV2
+        : "corehr.pre_hire.onboarding_task_changed_v2",
+    on_p2_corehr_probation_updated_v2 => P2ProbationUpdatedV2
+        : "corehr.probation.updated_v2",
+    on_p2_corehr_process_approver_updated_v2 => P2ProcessApproverUpdatedV2
+        : "corehr.process.approver.updated_v2",
+    on_p2_corehr_process_cc_updated_v2 => P2ProcessCcUpdatedV2
+        : "corehr.process.cc.updated_v2",
+    on_p2_corehr_process_node_updated_v2 => P2ProcessNodeUpdatedV2
+        : "corehr.process.node.updated_v2",
+    on_p2_corehr_process_status_update_v2 => P2ProcessStatusUpdateV2
+        : "corehr.process.status.update_v2",
+    on_p2_corehr_process_updated_v2 => P2ProcessUpdatedV2
+        : "corehr.process.updated_v2",
+    on_p2_corehr_process_comment_info_updated_v2 => P2ProcessCommentInfoUpdatedV2
+        : "corehr.process_comment_info.updated_v2",
+    on_p2_corehr_signature_file_status_updated_v2 => P2SignatureFileStatusUpdatedV2
+        : "corehr.signature_file.status_updated_v2",
 }

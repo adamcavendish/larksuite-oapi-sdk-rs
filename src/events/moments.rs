@@ -1,12 +1,6 @@
 //! Moments v1 event handlers.
 
-use std::future::Future;
-use std::pin::Pin;
-
 use serde::{Deserialize, Serialize};
-
-use crate::error::LarkError;
-use crate::event::EventDispatcher;
 
 // ── Event payload types ──
 
@@ -80,81 +74,21 @@ pub struct P2MomentsPostStatisticsUpdatedV1 {
     pub statistics: serde_json::Value,
 }
 
-// ── Handler registration helpers ──
-
-fn wrap_handler<T, F, Fut>(
-    handler: F,
-) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
-+ Send
-+ Sync
-+ 'static
-where
-    T: for<'de> serde::Deserialize<'de> + Send + 'static,
-    F: Fn(T) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-{
-    move |val: serde_json::Value| {
-        let result: std::result::Result<T, _> = serde_json::from_value(val);
-        match result {
-            Ok(typed) => Box::pin(handler(typed))
-                as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>,
-            Err(e) => Box::pin(async move {
-                Err(LarkError::Event(format!(
-                    "failed to deserialize event payload: {e}"
-                )))
-            }),
-        }
-    }
-}
-
 // ── EventDispatcher extension methods (all 7 moments/v1 handlers) ──
 
-macro_rules! moments_v1_handler {
-    ($method:ident, $event_key:literal, $payload_type:ty) => {
-        pub fn $method<F, Fut>(self, handler: F) -> Self
-        where
-            F: Fn($payload_type) -> Fut + Send + Sync + 'static,
-            Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-        {
-            self.on_event($event_key, wrap_handler(handler))
-        }
-    };
-}
-
-impl EventDispatcher {
-    moments_v1_handler!(
-        on_p2_moments_post_created_v1,
-        "moments.post.created_v1",
-        P2MomentsPostCreatedV1
-    );
-    moments_v1_handler!(
-        on_p2_moments_post_deleted_v1,
-        "moments.post.deleted_v1",
-        P2MomentsPostDeletedV1
-    );
-    moments_v1_handler!(
-        on_p2_moments_reaction_created_v1,
-        "moments.reaction.created_v1",
-        P2MomentsReactionCreatedV1
-    );
-    moments_v1_handler!(
-        on_p2_moments_reaction_deleted_v1,
-        "moments.reaction.deleted_v1",
-        P2MomentsReactionDeletedV1
-    );
-    moments_v1_handler!(
-        on_p2_moments_comment_created_v1,
-        "moments.comment.created_v1",
-        P2MomentsCommentCreatedV1
-    );
-    moments_v1_handler!(
-        on_p2_moments_comment_deleted_v1,
-        "moments.comment.deleted_v1",
-        P2MomentsCommentDeletedV1
-    );
-    moments_v1_handler!(
-        on_p2_moments_post_statistics_updated_v1,
-        "moments.post_statistics.updated_v1",
-        P2MomentsPostStatisticsUpdatedV1
-    );
+event_handlers! {
+    on_p2_moments_post_created_v1 => P2MomentsPostCreatedV1
+        : "moments.post.created_v1",
+    on_p2_moments_post_deleted_v1 => P2MomentsPostDeletedV1
+        : "moments.post.deleted_v1",
+    on_p2_moments_reaction_created_v1 => P2MomentsReactionCreatedV1
+        : "moments.reaction.created_v1",
+    on_p2_moments_reaction_deleted_v1 => P2MomentsReactionDeletedV1
+        : "moments.reaction.deleted_v1",
+    on_p2_moments_comment_created_v1 => P2MomentsCommentCreatedV1
+        : "moments.comment.created_v1",
+    on_p2_moments_comment_deleted_v1 => P2MomentsCommentDeletedV1
+        : "moments.comment.deleted_v1",
+    on_p2_moments_post_statistics_updated_v1 => P2MomentsPostStatisticsUpdatedV1
+        : "moments.post_statistics.updated_v1",
 }
