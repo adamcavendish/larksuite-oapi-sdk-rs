@@ -8,44 +8,70 @@ use serde::{Deserialize, Serialize};
 use crate::error::LarkError;
 use crate::event::EventDispatcher;
 
-// ── Event payload types ──
+// ── Shared sub-types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2TaskCreatedV1 {
-    #[serde(default)]
-    pub task: serde_json::Value,
-    #[serde(default)]
-    pub created_by: serde_json::Value,
+pub struct UserId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+}
+
+impl UserId {
+    pub fn user_id(&self) -> Option<&str> {
+        self.user_id.as_deref()
+    }
+
+    pub fn open_id(&self) -> Option<&str> {
+        self.open_id.as_deref()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.union_id.as_deref()
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2TaskDeletedV1 {
+pub struct UserIdList {
     #[serde(default)]
-    pub task: serde_json::Value,
-    #[serde(default)]
-    pub deleted_by: serde_json::Value,
+    pub user_id_list: Vec<UserId>,
+}
+
+// ── Event payload types ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2TaskUpdateTenantV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id_list: Option<UserIdList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_type: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2TaskUpdatedV1 {
-    #[serde(default)]
-    pub task: serde_json::Value,
-    #[serde(default)]
-    pub update_fields: Vec<String>,
-    #[serde(default)]
-    pub updated_by: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub obj_type: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2TaskCommentUpdatedV1 {
-    #[serde(default)]
-    pub task: serde_json::Value,
-    #[serde(default)]
-    pub comment: serde_json::Value,
-    #[serde(default)]
-    pub update_fields: Vec<String>,
-    #[serde(default)]
-    pub updated_by: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub obj_type: Option<i32>,
 }
 
 // ── Handler registration helpers ──
@@ -77,36 +103,32 @@ where
 
 // ── EventDispatcher extension methods ──
 
+macro_rules! task_v1_handler {
+    ($method:ident, $event_key:literal, $payload_type:ty) => {
+        pub fn $method<F, Fut>(self, handler: F) -> Self
+        where
+            F: Fn($payload_type) -> Fut + Send + Sync + 'static,
+            Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
+        {
+            self.on_event($event_key, wrap_handler(handler))
+        }
+    };
+}
+
 impl EventDispatcher {
-    pub fn on_p2_task_created_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2TaskCreatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("task.task.created_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_task_deleted_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2TaskDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("task.task.deleted_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_task_updated_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2TaskUpdatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("task.task.updated_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_task_comment_updated_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2TaskCommentUpdatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("task.task.comment.updated_v1", wrap_handler(handler))
-    }
+    task_v1_handler!(
+        on_p2_task_update_tenant_v1,
+        "task.task.update_tenant_v1",
+        P2TaskUpdateTenantV1
+    );
+    task_v1_handler!(
+        on_p2_task_updated_v1,
+        "task.task.updated_v1",
+        P2TaskUpdatedV1
+    );
+    task_v1_handler!(
+        on_p2_task_comment_updated_v1,
+        "task.task.comment.updated_v1",
+        P2TaskCommentUpdatedV1
+    );
 }
