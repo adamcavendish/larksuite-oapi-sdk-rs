@@ -11,25 +11,73 @@ use crate::event::EventDispatcher;
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2PerformanceStageTaskCreatedV1 {
-    #[serde(default)]
-    pub activity_id: String,
-    #[serde(default)]
-    pub stage_task: serde_json::Value,
-    #[serde(default)]
-    pub operator_id: serde_json::Value,
+pub struct UserId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+}
+
+impl UserId {
+    pub fn user_id(&self) -> Option<&str> {
+        self.user_id.as_deref()
+    }
+
+    pub fn open_id(&self) -> Option<&str> {
+        self.open_id.as_deref()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.union_id.as_deref()
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2PerformanceStageTaskUpdatedV1 {
+pub struct StageChange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review_stage_role: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReviewDataChange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<UserId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semester_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_id: Option<String>,
     #[serde(default)]
-    pub activity_id: String,
+    pub stage_changes: Vec<StageChange>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenResult {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<UserId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semester_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2ReviewDataChangedV2 {
     #[serde(default)]
-    pub stage_task: serde_json::Value,
+    pub items: Vec<ReviewDataChange>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2StageTaskOpenResultV2 {
     #[serde(default)]
-    pub operator_id: serde_json::Value,
-    #[serde(default)]
-    pub changed_fields: Vec<String>,
+    pub items: Vec<OpenResult>,
 }
 
 // ── Handler registration helpers ──
@@ -62,19 +110,22 @@ where
 // ── EventDispatcher extension methods ──
 
 impl EventDispatcher {
-    pub fn on_p2_performance_stage_task_created_v1<F, Fut>(self, handler: F) -> Self
+    pub fn on_p2_performance_review_data_changed_v2<F, Fut>(self, handler: F) -> Self
     where
-        F: Fn(P2PerformanceStageTaskCreatedV1) -> Fut + Send + Sync + 'static,
+        F: Fn(P2ReviewDataChangedV2) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
-        self.on_event("performance.stage_task.created_v2", wrap_handler(handler))
+        self.on_event("performance.review_data.changed_v2", wrap_handler(handler))
     }
 
-    pub fn on_p2_performance_stage_task_updated_v1<F, Fut>(self, handler: F) -> Self
+    pub fn on_p2_performance_stage_task_open_result_v2<F, Fut>(self, handler: F) -> Self
     where
-        F: Fn(P2PerformanceStageTaskUpdatedV1) -> Fut + Send + Sync + 'static,
+        F: Fn(P2StageTaskOpenResultV2) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
-        self.on_event("performance.stage_task.updated_v2", wrap_handler(handler))
+        self.on_event(
+            "performance.stage_task.open_result_v2",
+            wrap_handler(handler),
+        )
     }
 }
