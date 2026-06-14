@@ -12,36 +12,34 @@ use crate::event::EventDispatcher;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2MeetingRoomCreatedV1 {
-    #[serde(default)]
-    pub room_id: String,
-    #[serde(default)]
-    pub room: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2MeetingRoomUpdatedV1 {
-    #[serde(default)]
-    pub room_id: String,
-    #[serde(default)]
-    pub room: serde_json::Value,
-    #[serde(default)]
-    pub old_room: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2MeetingRoomDeletedV1 {
-    #[serde(default)]
-    pub room_id: String,
-    #[serde(default)]
-    pub room: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2MeetingRoomStatusChangedV1 {
-    #[serde(default)]
-    pub room_id: String,
-    #[serde(default)]
-    pub room: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
 }
 
 // ── Handler registration helpers ──
@@ -79,7 +77,10 @@ impl EventDispatcher {
         F: Fn(P2MeetingRoomCreatedV1) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
-        self.on_event("meeting_room.room.created_v1", wrap_handler(handler))
+        self.on_event(
+            "meeting_room.meeting_room.created_v1",
+            wrap_handler(handler),
+        )
     }
 
     pub fn on_p2_meeting_room_updated_v1<F, Fut>(self, handler: F) -> Self
@@ -87,7 +88,10 @@ impl EventDispatcher {
         F: Fn(P2MeetingRoomUpdatedV1) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
-        self.on_event("meeting_room.room.updated_v1", wrap_handler(handler))
+        self.on_event(
+            "meeting_room.meeting_room.updated_v1",
+            wrap_handler(handler),
+        )
     }
 
     pub fn on_p2_meeting_room_deleted_v1<F, Fut>(self, handler: F) -> Self
@@ -95,7 +99,10 @@ impl EventDispatcher {
         F: Fn(P2MeetingRoomDeletedV1) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
-        self.on_event("meeting_room.room.deleted_v1", wrap_handler(handler))
+        self.on_event(
+            "meeting_room.meeting_room.deleted_v1",
+            wrap_handler(handler),
+        )
     }
 
     pub fn on_p2_meeting_room_status_changed_v1<F, Fut>(self, handler: F) -> Self
@@ -103,6 +110,9 @@ impl EventDispatcher {
         F: Fn(P2MeetingRoomStatusChangedV1) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
-        self.on_event("meeting_room.room.status_changed_v1", wrap_handler(handler))
+        self.on_event(
+            "meeting_room.meeting_room.status_changed_v1",
+            wrap_handler(handler),
+        )
     }
 }
