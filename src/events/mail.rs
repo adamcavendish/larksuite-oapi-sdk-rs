@@ -11,31 +11,45 @@ use crate::event::EventDispatcher;
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2MailboxCreatedV1 {
-    #[serde(default)]
-    pub mailbox_id: String,
-    #[serde(default)]
-    pub mailbox: serde_json::Value,
+pub struct UserId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+}
+
+impl UserId {
+    pub fn user_id(&self) -> Option<&str> {
+        self.user_id.as_deref()
+    }
+
+    pub fn open_id(&self) -> Option<&str> {
+        self.open_id.as_deref()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.union_id.as_deref()
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2MailboxDeletedV1 {
+pub struct Subscriber {
     #[serde(default)]
-    pub mailbox_id: String,
+    pub user_ids: Vec<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2PublicMailboxCreatedV1 {
-    #[serde(default)]
-    pub public_mailbox_id: String,
-    #[serde(default)]
-    pub public_mailbox: serde_json::Value,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2PublicMailboxDeletedV1 {
-    #[serde(default)]
-    pub public_mailbox_id: String,
+pub struct P2UserMailboxEventMessageReceivedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mail_address: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mailbox_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subscriber: Option<Subscriber>,
 }
 
 // ── Handler registration helpers ──
@@ -68,35 +82,14 @@ where
 // ── EventDispatcher extension methods ──
 
 impl EventDispatcher {
-    pub fn on_p2_mail_mailbox_created_v1<F, Fut>(self, handler: F) -> Self
+    pub fn on_p2_mail_user_mailbox_event_message_received_v1<F, Fut>(self, handler: F) -> Self
     where
-        F: Fn(P2MailboxCreatedV1) -> Fut + Send + Sync + 'static,
+        F: Fn(P2UserMailboxEventMessageReceivedV1) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
-        self.on_event("mail.mailbox.created_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_mail_mailbox_deleted_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2MailboxDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("mail.mailbox.deleted_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_mail_public_mailbox_created_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2PublicMailboxCreatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("mail.public_mailbox.created_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_mail_public_mailbox_deleted_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2PublicMailboxDeletedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("mail.public_mailbox.deleted_v1", wrap_handler(handler))
+        self.on_event(
+            "mail.user_mailbox.event.message_received_v1",
+            wrap_handler(handler),
+        )
     }
 }

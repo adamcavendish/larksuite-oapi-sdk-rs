@@ -11,31 +11,53 @@ use crate::event::EventDispatcher;
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2AcsUserUpdatedV1 {
-    #[serde(default)]
-    pub user_id: String,
-    #[serde(default)]
-    pub user: serde_json::Value,
-    #[serde(default)]
-    pub operator_id: serde_json::Value,
+pub struct UserId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+}
+
+impl UserId {
+    pub fn user_id(&self) -> Option<&str> {
+        self.user_id.as_deref()
+    }
+
+    pub fn open_id(&self) -> Option<&str> {
+        self.open_id.as_deref()
+    }
+
+    pub fn union_id(&self) -> Option<&str> {
+        self.union_id.as_deref()
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct P2AcsAccessRecordCreatedV1 {
-    #[serde(default)]
-    pub record_id: String,
-    #[serde(default)]
-    pub user_id: String,
-    #[serde(default)]
-    pub device_id: String,
-    #[serde(default)]
-    pub is_door_open: bool,
-    #[serde(default)]
-    pub access_time: String,
-    #[serde(default)]
-    pub door_id: String,
-    #[serde(default)]
-    pub reason: String,
+pub struct P2AccessRecordCreatedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub access_record_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<UserId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_clock_in: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_door_open: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub access_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2AcsUserUpdatedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<UserId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub card: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub face_uploaded: Option<bool>,
 }
 
 // ── Handler registration helpers ──
@@ -68,19 +90,19 @@ where
 // ── EventDispatcher extension methods ──
 
 impl EventDispatcher {
+    pub fn on_p2_acs_access_record_created_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2AccessRecordCreatedV1) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
+    {
+        self.on_event("acs.access_record.created_v1", wrap_handler(handler))
+    }
+
     pub fn on_p2_acs_user_updated_v1<F, Fut>(self, handler: F) -> Self
     where
         F: Fn(P2AcsUserUpdatedV1) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         self.on_event("acs.user.updated_v1", wrap_handler(handler))
-    }
-
-    pub fn on_p2_acs_access_record_created_v1<F, Fut>(self, handler: F) -> Self
-    where
-        F: Fn(P2AcsAccessRecordCreatedV1) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-    {
-        self.on_event("acs.access_record.created_v1", wrap_handler(handler))
     }
 }
