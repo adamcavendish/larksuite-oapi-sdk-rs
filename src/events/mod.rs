@@ -8,6 +8,7 @@ pub mod attendance;
 pub mod baike;
 pub mod bitable;
 pub mod calendar;
+pub mod common;
 pub mod compensation;
 pub mod contact;
 pub mod corehr;

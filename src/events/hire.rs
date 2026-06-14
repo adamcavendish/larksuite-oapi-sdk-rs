@@ -1,38 +1,10 @@
 //! Hire v1 event handlers.
 
-use std::future::Future;
-use std::pin::Pin;
-
 use serde::{Deserialize, Serialize};
-
-use crate::error::LarkError;
-use crate::event::EventDispatcher;
 
 // ── Event payload types ──
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct UserId {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub open_id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub union_id: Option<String>,
-}
-
-impl UserId {
-    pub fn user_id(&self) -> Option<&str> {
-        self.user_id.as_deref()
-    }
-
-    pub fn open_id(&self) -> Option<&str> {
-        self.open_id.as_deref()
-    }
-
-    pub fn union_id(&self) -> Option<&str> {
-        self.union_id.as_deref()
-    }
-}
+pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DepartmentId {
@@ -382,131 +354,41 @@ pub struct P2HireTalentTagSubscriptionV1 {
     pub application_stage: Option<ApplicationStageInfo>,
 }
 
-// ── Handler registration helpers ──
-
-fn wrap_handler<T, F, Fut>(
-    handler: F,
-) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
-+ Send
-+ Sync
-+ 'static
-where
-    T: for<'de> serde::Deserialize<'de> + Send + 'static,
-    F: Fn(T) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-{
-    move |val: serde_json::Value| {
-        let result: std::result::Result<T, _> = serde_json::from_value(val);
-        match result {
-            Ok(typed) => Box::pin(handler(typed))
-                as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>,
-            Err(e) => Box::pin(async move {
-                Err(LarkError::Event(format!(
-                    "failed to deserialize event payload: {e}"
-                )))
-            }),
-        }
-    }
-}
-
 // ── EventDispatcher extension methods ──
 
-macro_rules! hire_v1_handler {
-    ($method:ident, $event_key:literal, $payload_type:ty) => {
-        pub fn $method<F, Fut>(self, handler: F) -> Self
-        where
-            F: Fn($payload_type) -> Fut + Send + Sync + 'static,
-            Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
-        {
-            self.on_event($event_key, wrap_handler(handler))
-        }
-    };
-}
-
-impl EventDispatcher {
-    hire_v1_handler!(
-        on_p2_hire_offer_status_changed_v1,
-        "hire.offer.status_changed_v1",
-        P2HireOfferStatusChangedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_application_stage_changed_v1,
-        "hire.application.stage_changed_v1",
-        P2HireApplicationStageChangedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_application_deleted_v1,
-        "hire.application.deleted_v1",
-        P2HireApplicationDeletedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_ehr_import_task_imported_v1,
-        "hire.ehr_import_task.imported_v1",
-        P2HireEhrImportTaskImportedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_ehr_import_task_for_internship_offer_imported_v1,
-        "hire.ehr_import_task_for_internship_offer.imported_v1",
-        P2HireEhrImportTaskForInternshipOfferImportedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_job_created_v1,
-        "hire.job.created_v1",
-        P2HireJobCreatedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_job_updated_v1,
-        "hire.job.updated_v1",
-        P2HireJobUpdatedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_candidate_created_v1,
-        "hire.talent.created_v1",
-        P2HireCandidateCreatedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_talent_deleted_v1,
-        "hire.talent.deleted_v1",
-        P2HireTalentDeletedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_talent_tag_subscription_v1,
-        "hire.talent.tag_subscription_v1",
-        P2HireTalentTagSubscriptionV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_interview_created_v1,
-        "hire.interview.created_v1",
-        P2HireInterviewCreatedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_interview_updated_v1,
-        "hire.interview.updated_v1",
-        P2HireInterviewUpdatedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_eco_account_created_v1,
-        "hire.eco_account.created_v1",
-        P2HireEcoAccountCreatedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_eco_background_check_created_v1,
-        "hire.eco_background_check.created_v1",
-        P2HireEcoBackgroundCheckCreatedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_eco_background_check_canceled_v1,
-        "hire.eco_background_check.canceled_v1",
-        P2HireEcoBackgroundCheckCanceledV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_eco_exam_created_v1,
-        "hire.eco_exam.created_v1",
-        P2HireEcoExamCreatedV1
-    );
-    hire_v1_handler!(
-        on_p2_hire_referral_account_assets_update_v1,
-        "hire.referral_account.assets_update_v1",
-        P2HireReferralAccountAssetsUpdateV1
-    );
+event_handlers! {
+    on_p2_hire_offer_status_changed_v1 => P2HireOfferStatusChangedV1
+        : "hire.offer.status_changed_v1",
+    on_p2_hire_application_stage_changed_v1 => P2HireApplicationStageChangedV1
+        : "hire.application.stage_changed_v1",
+    on_p2_hire_application_deleted_v1 => P2HireApplicationDeletedV1
+        : "hire.application.deleted_v1",
+    on_p2_hire_ehr_import_task_imported_v1 => P2HireEhrImportTaskImportedV1
+        : "hire.ehr_import_task.imported_v1",
+    on_p2_hire_ehr_import_task_for_internship_offer_imported_v1 => P2HireEhrImportTaskForInternshipOfferImportedV1
+        : "hire.ehr_import_task_for_internship_offer.imported_v1",
+    on_p2_hire_job_created_v1 => P2HireJobCreatedV1
+        : "hire.job.created_v1",
+    on_p2_hire_job_updated_v1 => P2HireJobUpdatedV1
+        : "hire.job.updated_v1",
+    on_p2_hire_candidate_created_v1 => P2HireCandidateCreatedV1
+        : "hire.talent.created_v1",
+    on_p2_hire_talent_deleted_v1 => P2HireTalentDeletedV1
+        : "hire.talent.deleted_v1",
+    on_p2_hire_talent_tag_subscription_v1 => P2HireTalentTagSubscriptionV1
+        : "hire.talent.tag_subscription_v1",
+    on_p2_hire_interview_created_v1 => P2HireInterviewCreatedV1
+        : "hire.interview.created_v1",
+    on_p2_hire_interview_updated_v1 => P2HireInterviewUpdatedV1
+        : "hire.interview.updated_v1",
+    on_p2_hire_eco_account_created_v1 => P2HireEcoAccountCreatedV1
+        : "hire.eco_account.created_v1",
+    on_p2_hire_eco_background_check_created_v1 => P2HireEcoBackgroundCheckCreatedV1
+        : "hire.eco_background_check.created_v1",
+    on_p2_hire_eco_background_check_canceled_v1 => P2HireEcoBackgroundCheckCanceledV1
+        : "hire.eco_background_check.canceled_v1",
+    on_p2_hire_eco_exam_created_v1 => P2HireEcoExamCreatedV1
+        : "hire.eco_exam.created_v1",
+    on_p2_hire_referral_account_assets_update_v1 => P2HireReferralAccountAssetsUpdateV1
+        : "hire.referral_account.assets_update_v1",
 }

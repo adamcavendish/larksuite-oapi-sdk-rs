@@ -25,10 +25,10 @@ pub mod constants;
 pub mod crypto;
 pub mod error;
 pub mod event;
-pub mod events;
-pub mod http_handler;
 #[macro_use]
 mod macros;
+pub mod events;
+pub mod http_handler;
 pub mod registration;
 pub mod req;
 pub mod resp;
