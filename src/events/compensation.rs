@@ -10,12 +10,16 @@ use crate::event::EventDispatcher;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2CompensationArchiveChangedV1 {
-    #[serde(default)]
-    pub employment_id: String,
-    #[serde(default)]
-    pub archive_id: String,
-    #[serde(default)]
-    pub effective_date: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operate_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub before_tid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub after_tid: Option<String>,
 }
 
 fn wrap_handler<T, F, Fut>(

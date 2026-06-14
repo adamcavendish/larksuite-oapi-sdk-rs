@@ -10,14 +10,20 @@ use crate::event::EventDispatcher;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct P2ApaasWorkspaceRecordChangeV1 {
-    #[serde(default)]
-    pub app_id: String,
-    #[serde(default)]
-    pub namespace: String,
-    #[serde(default)]
-    pub record_ids: Vec<String>,
-    #[serde(default)]
-    pub object_api_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub workspace: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table: Option<String>,
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
+    pub type_: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub before: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub after: Option<String>,
 }
 
 fn wrap_handler<T, F, Fut>(
