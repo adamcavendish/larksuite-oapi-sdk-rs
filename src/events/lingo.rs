@@ -1,1 +1,0 @@
-//! Lingo event module.

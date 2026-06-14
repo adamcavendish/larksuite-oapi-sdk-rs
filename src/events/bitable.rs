@@ -1,1 +1,0 @@
-//! Bitable event module.
