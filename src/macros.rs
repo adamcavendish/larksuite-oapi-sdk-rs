@@ -26,6 +26,82 @@ macro_rules! service_accessor {
     };
 }
 
+/// Define a card struct with one optional field per Lark locale.
+///
+/// Lark cards carry per-locale content across the same 16 locales. This macro
+/// generates the struct with each locale as an `Option<$value>` field (skipped
+/// when `None`), so the 16-field shape lives in one place instead of being
+/// repeated per struct.
+///
+/// With a trailing `set`, it also emits a fluent `pub fn <locale>(self, value)`
+/// setter for every locale.
+///
+/// ```ignore
+/// // fields only
+/// card_locale_struct!(MessageCardPlainTextI18n, String);
+/// // fields plus per-locale setters
+/// card_locale_struct!(I18nElements, Vec<Element>, set);
+/// ```
+macro_rules! card_locale_struct {
+    ($(#[$meta:meta])* $name:ident, $value:ty) => {
+        $(#[$meta])*
+        #[derive(Debug, Clone, Default, ::serde::Serialize, ::serde::Deserialize)]
+        pub struct $name {
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub zh_cn: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub en_us: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub ja_jp: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub zh_hk: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub zh_tw: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub id_id: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub vi_vn: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub th_th: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub pt_br: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub es_es: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub ko_kr: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub de_de: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub fr_fr: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub it_it: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub ru_ru: Option<$value>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub ms_my: Option<$value>,
+        }
+    };
+    ($(#[$meta:meta])* $name:ident, $value:ty, set) => {
+        card_locale_struct!($(#[$meta])* $name, $value);
+        impl $name {
+            pub fn new() -> Self {
+                Self::default()
+            }
+            card_locale_struct!(@setter $value, zh_cn, en_us, ja_jp, zh_hk, zh_tw,
+                id_id, vi_vn, th_th, pt_br, es_es, ko_kr, de_de, fr_fr, it_it,
+                ru_ru, ms_my);
+        }
+    };
+    (@setter $value:ty, $($locale:ident),+ $(,)?) => {
+        $(
+            pub fn $locale(mut self, value: $value) -> Self {
+                self.$locale = Some(value);
+                self
+            }
+        )+
+    };
+}
+
 macro_rules! impl_resp {
     ($name:ident, $data:ty) => {
         #[derive(Debug, Clone)]
