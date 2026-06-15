@@ -1,3 +1,31 @@
+/// Generate [`Client`](crate::Client) service accessor methods.
+///
+/// Each invocation expands to a `pub fn` that constructs the service version
+/// struct and borrows the client's config. Four tokens:
+///
+/// ```ignore
+/// service_accessor!(method_name, module, version, VersionType);
+/// service_accessor!(method_name, module, version, VersionType, deprecated = "reason");
+/// ```
+///
+/// `method_name` is the public method name on `Client`. `module`, `version`,
+/// and `VersionType` select the path `service::$module::$version::$VersionType`.
+macro_rules! service_accessor {
+    ($method:ident, $mod:ident, $ver:ident, $vty:ident) => {
+        #[inline]
+        pub fn $method(&self) -> $crate::service::$mod::$ver::$vty<'_> {
+            $crate::service::$mod::$ver::$vty::new(&self.config)
+        }
+    };
+    ($method:ident, $mod:ident, $ver:ident, $vty:ident, deprecated = $note:literal) => {
+        #[deprecated(note = $note)]
+        #[inline]
+        pub fn $method(&self) -> $crate::service::$mod::$ver::$vty<'_> {
+            $crate::service::$mod::$ver::$vty::new(&self.config)
+        }
+    };
+}
+
 macro_rules! impl_resp {
     ($name:ident, $data:ty) => {
         #[derive(Debug, Clone)]
