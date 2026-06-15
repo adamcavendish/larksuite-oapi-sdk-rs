@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.1.2] - 2026-06-15
+
+### Event parity
+
+- Replaced raw or stale P2 event payload shapes with typed structs for the
+  security and compliance, compensation, apaas, moments, and helpdesk modules.
+- Typed the IM message sender and mentions fields, removing the raw
+  `serde_json::Value` shapes in favor of `UserId` and `Mention`.
+- Removed stale raw event handler registrations that no longer matched the Go
+  SDK event keys.
+- Removed unsupported raw event modules and placeholder event modules without
+  Go-backed payloads.
+- Reduced typed event boilerplate with a shared `event_handlers!` macro and a
+  common `events::common` module for shared payload types.
+
+### Internal
+
+- Added a `service_accessor!` macro to generate the `Client` service accessors,
+  collapsing the repeated accessor boilerplate.
+- Routed `EventDispatcher` and `CardActionHandler` through a shared dispatch
+  pipeline for decryption, challenge handling, and signature verification.
+- Isolated bearer token resolution into client assertion, direct, and cached
+  modes within the transport module.
+
+### Breaking changes
+
+- `MessageSender.sender_id` is now `Option<UserId>` and `Message.mentions` is now
+  `Vec<Mention>`; code reading these fields as raw `serde_json::Value` must update.
+- Removed the unsupported and placeholder event modules; references to them no
+  longer resolve.
+
 ## [0.1.1] - 2026-06-14
 
 ### Event parity
@@ -92,5 +123,6 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.94.0+, edition 2024
 
+[0.1.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.2
 [0.1.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.1
 [0.1.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.0
