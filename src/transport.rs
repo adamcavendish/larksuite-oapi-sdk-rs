@@ -253,32 +253,82 @@ async fn resolve_bearer_token(
     option: &RequestOption,
     token_type: AccessTokenType,
 ) -> Result<Option<String>, LarkError> {
+    token_resolver(config)
+        .resolve(config, option, token_type)
+        .await
+}
+
+enum TokenResolver {
+    ClientAssertion,
+    Direct,
+    Cached,
+}
+
+fn token_resolver(config: &Config) -> TokenResolver {
     if config.client_assertion_provider.is_some() {
-        return match token_type {
-            AccessTokenType::User => Ok(option.user_access_token.clone()),
-            AccessTokenType::Tenant => {
-                let tm = TokenManager::new(config.token_cache.clone());
-                let token = tm
-                    .get_tenant_access_token(config, option.tenant_key.as_deref(), None)
-                    .await?;
-                Ok(Some(token))
+        TokenResolver::ClientAssertion
+    } else if !config.enable_token_cache {
+        TokenResolver::Direct
+    } else {
+        TokenResolver::Cached
+    }
+}
+
+impl TokenResolver {
+    async fn resolve(
+        self,
+        config: &Config,
+        option: &RequestOption,
+        token_type: AccessTokenType,
+    ) -> Result<Option<String>, LarkError> {
+        match self {
+            Self::ClientAssertion => {
+                resolve_client_assertion_token(config, option, token_type).await
             }
-            AccessTokenType::None => Ok(None),
-            AccessTokenType::App => Err(LarkError::ClientAssertion(
-                "AppAccessToken APIs are not available in ClientAssertion mode".to_string(),
-            )),
-        };
+            Self::Direct => resolve_direct_token(option, token_type),
+            Self::Cached => resolve_cached_token(config, option, token_type).await,
+        }
     }
+}
 
-    if !config.enable_token_cache {
-        return match token_type {
-            AccessTokenType::User => Ok(option.user_access_token.clone()),
-            AccessTokenType::Tenant => Ok(option.tenant_access_token.clone()),
-            AccessTokenType::App => Ok(option.app_access_token.clone()),
-            AccessTokenType::None => Ok(None),
-        };
+async fn resolve_client_assertion_token(
+    config: &Config,
+    option: &RequestOption,
+    token_type: AccessTokenType,
+) -> Result<Option<String>, LarkError> {
+    match token_type {
+        AccessTokenType::User => Ok(option.user_access_token.clone()),
+        AccessTokenType::Tenant => {
+            let tm = TokenManager::new(config.token_cache.clone());
+            let token = tm
+                .get_tenant_access_token(config, option.tenant_key.as_deref(), None)
+                .await?;
+            Ok(Some(token))
+        }
+        AccessTokenType::None => Ok(None),
+        AccessTokenType::App => Err(LarkError::ClientAssertion(
+            "AppAccessToken APIs are not available in ClientAssertion mode".to_string(),
+        )),
     }
+}
 
+fn resolve_direct_token(
+    option: &RequestOption,
+    token_type: AccessTokenType,
+) -> Result<Option<String>, LarkError> {
+    match token_type {
+        AccessTokenType::User => Ok(option.user_access_token.clone()),
+        AccessTokenType::Tenant => Ok(option.tenant_access_token.clone()),
+        AccessTokenType::App => Ok(option.app_access_token.clone()),
+        AccessTokenType::None => Ok(None),
+    }
+}
+
+async fn resolve_cached_token(
+    config: &Config,
+    option: &RequestOption,
+    token_type: AccessTokenType,
+) -> Result<Option<String>, LarkError> {
     match token_type {
         AccessTokenType::User => Ok(option.user_access_token.clone()),
         AccessTokenType::App => {
