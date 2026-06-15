@@ -144,277 +144,79 @@ impl Client {
         crate::token::AppTicketManager::new(self.config.token_cache.clone())
     }
 
-    pub fn admin(&self) -> service::admin::v1::V1<'_> {
-        service::admin::v1::V1::new(&self.config)
-    }
-
-    pub fn acs(&self) -> service::acs::v1::V1<'_> {
-        service::acs::v1::V1::new(&self.config)
-    }
-
-    pub fn aily(&self) -> service::aily::v1::V1<'_> {
-        service::aily::v1::V1::new(&self.config)
-    }
-
-    pub fn application(&self) -> service::application::v1::V1<'_> {
-        service::application::v1::V1::new(&self.config)
-    }
-
-    pub fn application_v6(&self) -> service::application::v6::V6<'_> {
-        service::application::v6::V6::new(&self.config)
-    }
-
-    pub fn attendance(&self) -> service::attendance::v1::V1<'_> {
-        service::attendance::v1::V1::new(&self.config)
-    }
-
-    pub fn approval(&self) -> service::approval::v4::V4<'_> {
-        service::approval::v4::V4::new(&self.config)
-    }
-
-    pub fn auth(&self) -> service::auth::v3::V3<'_> {
-        service::auth::v3::V3::new(&self.config)
-    }
-
-    pub fn authen(&self) -> service::authen::v1::V1<'_> {
-        service::authen::v1::V1::new(&self.config)
-    }
-
-    pub fn bitable(&self) -> service::bitable::v1::V1<'_> {
-        service::bitable::v1::V1::new(&self.config)
-    }
-
-    pub fn calendar(&self) -> service::calendar::v4::V4<'_> {
-        service::calendar::v4::V4::new(&self.config)
-    }
-
-    pub fn contact(&self) -> service::contact::v3::V3<'_> {
-        service::contact::v3::V3::new(&self.config)
-    }
-
-    pub fn corehr(&self) -> service::corehr::v1::V1<'_> {
-        service::corehr::v1::V1::new(&self.config)
-    }
-
-    pub fn corehr_v2(&self) -> service::corehr::v2::V2<'_> {
-        service::corehr::v2::V2::new(&self.config)
-    }
-
-    pub fn docx(&self) -> service::docx::v1::V1<'_> {
-        service::docx::v1::V1::new(&self.config)
-    }
-
-    pub fn drive(&self) -> service::drive::v1::V1<'_> {
-        service::drive::v1::V1::new(&self.config)
-    }
-
-    pub fn drive_v2(&self) -> service::drive::v2::V2<'_> {
-        service::drive::v2::V2::new(&self.config)
-    }
-
-    pub fn helpdesk(&self) -> service::helpdesk::v1::V1<'_> {
-        service::helpdesk::v1::V1::new(&self.config)
-    }
-
-    pub fn hire(&self) -> service::hire::v1::V1<'_> {
-        service::hire::v1::V1::new(&self.config)
-    }
-
-    pub fn hire_v2(&self) -> service::hire::v2::V2<'_> {
-        service::hire::v2::V2::new(&self.config)
-    }
-
-    pub fn im(&self) -> service::im::v1::V1<'_> {
-        service::im::v1::V1::new(&self.config)
-    }
-
-    pub fn sheets(&self) -> service::sheets::v3::V3<'_> {
-        service::sheets::v3::V3::new(&self.config)
-    }
-
-    pub fn task(&self) -> service::task::v1::V1<'_> {
-        service::task::v1::V1::new(&self.config)
-    }
-
-    pub fn im_v2(&self) -> service::im::v2::V2<'_> {
-        service::im::v2::V2::new(&self.config)
-    }
-
-    pub fn task_v2(&self) -> service::task::v2::V2<'_> {
-        service::task::v2::V2::new(&self.config)
-    }
-
-    pub fn tenant(&self) -> service::tenant::v2::V2<'_> {
-        service::tenant::v2::V2::new(&self.config)
-    }
-
-    pub fn baike(&self) -> service::baike::v1::V1<'_> {
-        service::baike::v1::V1::new(&self.config)
-    }
-
-    pub fn lingo(&self) -> service::lingo::v1::V1<'_> {
-        service::lingo::v1::V1::new(&self.config)
-    }
-
-    pub fn mail(&self) -> service::mail::v1::V1<'_> {
-        service::mail::v1::V1::new(&self.config)
-    }
-
-    pub fn minutes(&self) -> service::minutes::v1::V1<'_> {
-        service::minutes::v1::V1::new(&self.config)
-    }
-
-    pub fn okr(&self) -> service::okr::v1::V1<'_> {
-        service::okr::v1::V1::new(&self.config)
-    }
-
-    pub fn translation(&self) -> service::translation::v1::V1<'_> {
-        service::translation::v1::V1::new(&self.config)
-    }
-
-    pub fn search(&self) -> service::search::v2::V2<'_> {
-        service::search::v2::V2::new(&self.config)
-    }
-
-    pub fn vc(&self) -> service::vc::v1::V1<'_> {
-        service::vc::v1::V1::new(&self.config)
-    }
-
-    #[deprecated(
-        note = "use wiki_v2() for consistency — un-suffixed accessors return v1 elsewhere"
-    )]
-    pub fn wiki(&self) -> service::wiki::v2::V2<'_> {
-        service::wiki::v2::V2::new(&self.config)
-    }
-
-    pub fn wiki_v2(&self) -> service::wiki::v2::V2<'_> {
-        service::wiki::v2::V2::new(&self.config)
-    }
-
-    pub fn wiki_v1(&self) -> service::wiki::v1::V1<'_> {
-        service::wiki::v1::V1::new(&self.config)
-    }
-
-    pub fn passport(&self) -> service::passport::v1::V1<'_> {
-        service::passport::v1::V1::new(&self.config)
-    }
-
-    pub fn report(&self) -> service::report::v1::V1<'_> {
-        service::report::v1::V1::new(&self.config)
-    }
-
-    pub fn workplace(&self) -> service::workplace::v1::V1<'_> {
-        service::workplace::v1::V1::new(&self.config)
-    }
-
-    pub fn face_detection(&self) -> service::face_detection::v1::V1<'_> {
-        service::face_detection::v1::V1::new(&self.config)
-    }
-
-    pub fn human_authentication(&self) -> service::human_authentication::v1::V1<'_> {
-        service::human_authentication::v1::V1::new(&self.config)
-    }
-
-    pub fn optical_char_recognition(&self) -> service::optical_char_recognition::v1::V1<'_> {
-        service::optical_char_recognition::v1::V1::new(&self.config)
-    }
-
-    pub fn speech_to_text(&self) -> service::speech_to_text::v1::V1<'_> {
-        service::speech_to_text::v1::V1::new(&self.config)
-    }
-
-    pub fn verification(&self) -> service::verification::v1::V1<'_> {
-        service::verification::v1::V1::new(&self.config)
-    }
-
-    pub fn document_ai(&self) -> service::document_ai::v1::V1<'_> {
-        service::document_ai::v1::V1::new(&self.config)
-    }
-
-    pub fn mdm(&self) -> service::mdm::v1::V1<'_> {
-        service::mdm::v1::V1::new(&self.config)
-    }
-
-    pub fn mdm_v3(&self) -> service::mdm::v3::V3<'_> {
-        service::mdm::v3::V3::new(&self.config)
-    }
-
-    pub fn personal_settings(&self) -> service::personal_settings::v1::V1<'_> {
-        service::personal_settings::v1::V1::new(&self.config)
-    }
-
-    pub fn security_and_compliance(&self) -> service::security_and_compliance::v1::V1<'_> {
-        service::security_and_compliance::v1::V1::new(&self.config)
-    }
-
-    pub fn security_and_compliance_v2(&self) -> service::security_and_compliance::v2::V2<'_> {
-        service::security_and_compliance::v2::V2::new(&self.config)
-    }
-
-    pub fn moments(&self) -> service::moments::v1::V1<'_> {
-        service::moments::v1::V1::new(&self.config)
-    }
-
-    pub fn meeting_room(&self) -> service::meeting_room::v1::V1<'_> {
-        service::meeting_room::v1::V1::new(&self.config)
-    }
-
-    pub fn ehr(&self) -> service::ehr::v1::V1<'_> {
-        service::ehr::v1::V1::new(&self.config)
-    }
-
-    pub fn compensation(&self) -> service::compensation::v1::V1<'_> {
-        service::compensation::v1::V1::new(&self.config)
-    }
-
-    pub fn payroll(&self) -> service::payroll::v1::V1<'_> {
-        service::payroll::v1::V1::new(&self.config)
-    }
-
-    pub fn performance(&self) -> service::performance::v1::V1<'_> {
-        service::performance::v1::V1::new(&self.config)
-    }
-
-    pub fn performance_v2(&self) -> service::performance::v2::V2<'_> {
-        service::performance::v2::V2::new(&self.config)
-    }
-
-    pub fn directory(&self) -> service::directory::v1::V1<'_> {
-        service::directory::v1::V1::new(&self.config)
-    }
-
-    pub fn docs(&self) -> service::docs::v1::V1<'_> {
-        service::docs::v1::V1::new(&self.config)
-    }
-
-    pub fn apaas(&self) -> service::apaas::v1::V1<'_> {
-        service::apaas::v1::V1::new(&self.config)
-    }
-
-    pub fn base_v2(&self) -> service::base::v2::V2<'_> {
-        service::base::v2::V2::new(&self.config)
-    }
-
-    pub fn block(&self) -> service::block::v1::V1<'_> {
-        service::block::v1::V1::new(&self.config)
-    }
-
-    pub fn block_v2(&self) -> service::block::v2::V2<'_> {
-        service::block::v2::V2::new(&self.config)
-    }
-
-    pub fn board(&self) -> service::board::v1::V1<'_> {
-        service::board::v1::V1::new(&self.config)
-    }
-
-    pub fn cardkit(&self) -> service::cardkit::v1::V1<'_> {
-        service::cardkit::v1::V1::new(&self.config)
-    }
-
-    pub fn event(&self) -> service::event::v1::V1<'_> {
-        service::event::v1::V1::new(&self.config)
-    }
-
+    service_accessor!(admin, admin, v1, V1);
+    service_accessor!(acs, acs, v1, V1);
+    service_accessor!(aily, aily, v1, V1);
+    service_accessor!(application, application, v1, V1);
+    service_accessor!(application_v6, application, v6, V6);
+    service_accessor!(attendance, attendance, v1, V1);
+    service_accessor!(approval, approval, v4, V4);
+    service_accessor!(auth, auth, v3, V3);
+    service_accessor!(authen, authen, v1, V1);
+    service_accessor!(bitable, bitable, v1, V1);
+    service_accessor!(calendar, calendar, v4, V4);
+    service_accessor!(contact, contact, v3, V3);
+    service_accessor!(corehr, corehr, v1, V1);
+    service_accessor!(corehr_v2, corehr, v2, V2);
+    service_accessor!(docx, docx, v1, V1);
+    service_accessor!(drive, drive, v1, V1);
+    service_accessor!(drive_v2, drive, v2, V2);
+    service_accessor!(helpdesk, helpdesk, v1, V1);
+    service_accessor!(hire, hire, v1, V1);
+    service_accessor!(hire_v2, hire, v2, V2);
+    service_accessor!(im, im, v1, V1);
+    service_accessor!(sheets, sheets, v3, V3);
+    service_accessor!(task, task, v1, V1);
+    service_accessor!(im_v2, im, v2, V2);
+    service_accessor!(task_v2, task, v2, V2);
+    service_accessor!(tenant, tenant, v2, V2);
+    service_accessor!(baike, baike, v1, V1);
+    service_accessor!(lingo, lingo, v1, V1);
+    service_accessor!(mail, mail, v1, V1);
+    service_accessor!(minutes, minutes, v1, V1);
+    service_accessor!(okr, okr, v1, V1);
+    service_accessor!(translation, translation, v1, V1);
+    service_accessor!(search, search, v2, V2);
+    service_accessor!(vc, vc, v1, V1);
+    service_accessor!(
+        wiki,
+        wiki,
+        v2,
+        V2,
+        deprecated = "use wiki_v2() for consistency — un-suffixed accessors return v1 elsewhere"
+    );
+    service_accessor!(wiki_v2, wiki, v2, V2);
+    service_accessor!(wiki_v1, wiki, v1, V1);
+    service_accessor!(passport, passport, v1, V1);
+    service_accessor!(report, report, v1, V1);
+    service_accessor!(workplace, workplace, v1, V1);
+    service_accessor!(face_detection, face_detection, v1, V1);
+    service_accessor!(human_authentication, human_authentication, v1, V1);
+    service_accessor!(optical_char_recognition, optical_char_recognition, v1, V1);
+    service_accessor!(speech_to_text, speech_to_text, v1, V1);
+    service_accessor!(verification, verification, v1, V1);
+    service_accessor!(document_ai, document_ai, v1, V1);
+    service_accessor!(mdm, mdm, v1, V1);
+    service_accessor!(mdm_v3, mdm, v3, V3);
+    service_accessor!(personal_settings, personal_settings, v1, V1);
+    service_accessor!(security_and_compliance, security_and_compliance, v1, V1);
+    service_accessor!(security_and_compliance_v2, security_and_compliance, v2, V2);
+    service_accessor!(moments, moments, v1, V1);
+    service_accessor!(meeting_room, meeting_room, v1, V1);
+    service_accessor!(ehr, ehr, v1, V1);
+    service_accessor!(compensation, compensation, v1, V1);
+    service_accessor!(payroll, payroll, v1, V1);
+    service_accessor!(performance, performance, v1, V1);
+    service_accessor!(performance_v2, performance, v2, V2);
+    service_accessor!(directory, directory, v1, V1);
+    service_accessor!(docs, docs, v1, V1);
+    service_accessor!(apaas, apaas, v1, V1);
+    service_accessor!(base_v2, base, v2, V2);
+    service_accessor!(block, block, v1, V1);
+    service_accessor!(block_v2, block, v2, V2);
+    service_accessor!(board, board, v1, V1);
+    service_accessor!(cardkit, cardkit, v1, V1);
+    service_accessor!(event, event, v1, V1);
     pub fn ext(&self) -> service::ext::ExtService<'_> {
         service::ext::ExtService::new(&self.config)
     }

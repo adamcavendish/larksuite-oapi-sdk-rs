@@ -171,14 +171,125 @@ pub type CallbackHandlerFn = Arc<
         + Sync,
 >;
 
+// ── Shared dispatch pipeline ──
+
+#[derive(Debug, Clone)]
+enum SignAlgorithm {
+    Sha256,
+    Sha1,
+}
+
+/// Internal result produced by [`DispatchPipeline::process`].
+enum PipelineResult {
+    /// URL verification challenge — return this response immediately.
+    Challenge(EventResp),
+    /// Decrypted, verified event body with the original request.
+    Event { body_str: String, req: EventReq },
+}
+
+/// Shared pre-processing pipeline used by both [`EventDispatcher`] and
+/// [`CardActionHandler`]. Owns decode, decryption, challenge handling, and
+/// signature verification.
+#[derive(Debug, Clone)]
+struct DispatchPipeline {
+    verification_token: String,
+    event_encrypt_key: String,
+    skip_sign_verify: bool,
+    sign_algorithm: SignAlgorithm,
+}
+
+impl DispatchPipeline {
+    fn new(
+        verification_token: String,
+        event_encrypt_key: String,
+        sign_algorithm: SignAlgorithm,
+    ) -> Self {
+        Self {
+            verification_token,
+            event_encrypt_key,
+            skip_sign_verify: false,
+            sign_algorithm,
+        }
+    }
+
+    fn process(&self, req: EventReq) -> Result<PipelineResult, LarkError> {
+        let body_str = std::str::from_utf8(&req.body)
+            .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))?;
+
+        let body_str = decrypt_if_needed(&self.event_encrypt_key, body_str)?;
+
+        let parsed: serde_json::Value = serde_json::from_str(&body_str)
+            .map_err(|e| LarkError::Event(format!("failed to parse body: {e}")))?;
+
+        // Check for URL verification in both V2 ("req_type") and card ("type") shapes.
+        let is_challenge = parsed.get("type").and_then(|v| v.as_str()) == Some("url_verification")
+            || parsed.get("req_type").and_then(|v| v.as_str()) == Some("url_verification");
+
+        if is_challenge {
+            if let Some(ref token) = parsed.get("token").and_then(|v| v.as_str())
+                && token != &self.verification_token
+                && !self.verification_token.is_empty()
+            {
+                return Err(LarkError::Event("verification token mismatch".to_string()));
+            }
+            let challenge = parsed
+                .get("challenge")
+                .and_then(|v| v.as_str())
+                .unwrap_or_default();
+            return Ok(PipelineResult::Challenge(EventResp::success(
+                serde_json::json!({ "challenge": challenge }),
+            )));
+        }
+
+        if !self.skip_sign_verify {
+            match self.sign_algorithm {
+                SignAlgorithm::Sha256 => {
+                    if !self.event_encrypt_key.is_empty() {
+                        let (timestamp, nonce, sig) = extract_signature_headers(&req.headers)?;
+                        if !crypto::verify_signature_sha256(
+                            &timestamp,
+                            &nonce,
+                            &self.event_encrypt_key,
+                            &req.body,
+                            &sig,
+                        ) {
+                            return Err(LarkError::Event(
+                                "signature verification failed".to_string(),
+                            ));
+                        }
+                    }
+                }
+                SignAlgorithm::Sha1 => {
+                    if !self.verification_token.is_empty() {
+                        let (timestamp, nonce, sig) = extract_signature_headers(&req.headers)?;
+                        if !crypto::verify_signature_sha1(
+                            &timestamp,
+                            &nonce,
+                            &self.verification_token,
+                            &body_str,
+                            &sig,
+                        ) {
+                            return Err(LarkError::Event(
+                                "card signature verification failed".to_string(),
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(PipelineResult::Event { body_str, req })
+    }
+}
+
+// ── EventDispatcher ──
+
 #[must_use]
 pub struct EventDispatcher {
     event_handlers: HashMap<String, EventHandlerFn>,
     customized_event_handlers: HashMap<String, CustomizedEventHandlerFn>,
     callback_handlers: HashMap<String, CallbackHandlerFn>,
-    verification_token: String,
-    event_encrypt_key: String,
-    skip_sign_verify: bool,
+    pipeline: DispatchPipeline,
     token_cache: Option<Arc<dyn Cache>>,
 }
 
@@ -191,15 +302,17 @@ impl EventDispatcher {
             event_handlers: HashMap::new(),
             customized_event_handlers: HashMap::new(),
             callback_handlers: HashMap::new(),
-            verification_token: verification_token.into(),
-            event_encrypt_key: event_encrypt_key.into(),
-            skip_sign_verify: false,
+            pipeline: DispatchPipeline::new(
+                verification_token.into(),
+                event_encrypt_key.into(),
+                SignAlgorithm::Sha256,
+            ),
             token_cache: None,
         }
     }
 
     pub fn skip_sign_verify(mut self) -> Self {
-        self.skip_sign_verify = true;
+        self.pipeline.skip_sign_verify = true;
         self
     }
 
@@ -336,7 +449,7 @@ impl EventDispatcher {
         let body_str = std::str::from_utf8(&req.body)
             .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))?;
 
-        if self.event_encrypt_key.is_empty() {
+        if self.pipeline.event_encrypt_key.is_empty() {
             return Ok(body_str.to_string());
         }
 
@@ -352,10 +465,10 @@ impl EventDispatcher {
     /// If an encrypt key is configured, decrypts the ciphertext. Otherwise
     /// returns the input unchanged. This is the second step after [`Self::parse_req`].
     pub fn decrypt_event(&self, cipher_event_json: &str) -> Result<String, LarkError> {
-        if self.event_encrypt_key.is_empty() {
+        if self.pipeline.event_encrypt_key.is_empty() {
             return Ok(cipher_event_json.to_string());
         }
-        crypto::event_decrypt(&self.event_encrypt_key, cipher_event_json)
+        crypto::event_decrypt(&self.pipeline.event_encrypt_key, cipher_event_json)
     }
 
     pub async fn handle(&self, req: EventReq) -> EventResp {
@@ -369,21 +482,13 @@ impl EventDispatcher {
     }
 
     async fn do_handle(&self, req: EventReq) -> Result<EventResp, LarkError> {
-        let body_str = std::str::from_utf8(&req.body)
-            .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))?;
-
-        let body_str = decrypt_if_needed(&self.event_encrypt_key, body_str)?;
+        let (body_str, req) = match self.pipeline.process(req)? {
+            PipelineResult::Challenge(resp) => return Ok(resp),
+            PipelineResult::Event { body_str, req } => (body_str, req),
+        };
 
         let parsed: EventV2Body = serde_json::from_str(&body_str)
             .map_err(|e| LarkError::Event(format!("failed to parse event body: {e}")))?;
-
-        if parsed.req_type.as_deref() == Some("url_verification") {
-            return self.handle_url_verification(&parsed);
-        }
-
-        if !self.skip_sign_verify {
-            self.verify_signature(&req)?;
-        }
 
         let event_type = parsed
             .header
@@ -415,42 +520,6 @@ impl EventDispatcher {
         Ok(EventResp::success(serde_json::json!({
             "msg": format!("no handler for event type: {event_type}")
         })))
-    }
-
-    fn handle_url_verification(&self, parsed: &EventV2Body) -> Result<EventResp, LarkError> {
-        if let Some(ref token) = parsed.token
-            && token != &self.verification_token
-            && !self.verification_token.is_empty()
-        {
-            return Err(LarkError::Event("verification token mismatch".to_string()));
-        }
-
-        let challenge = parsed.challenge.as_deref().unwrap_or_default();
-        Ok(EventResp::success(
-            serde_json::json!({ "challenge": challenge }),
-        ))
-    }
-
-    fn verify_signature(&self, req: &EventReq) -> Result<(), LarkError> {
-        if self.event_encrypt_key.is_empty() {
-            return Ok(());
-        }
-
-        let (timestamp, nonce, sig) = extract_signature_headers(&req.headers)?;
-
-        if !crypto::verify_signature_sha256(
-            &timestamp,
-            &nonce,
-            &self.event_encrypt_key,
-            &req.body,
-            &sig,
-        ) {
-            return Err(LarkError::Event(
-                "signature verification failed".to_string(),
-            ));
-        }
-
-        Ok(())
     }
 }
 
@@ -491,10 +560,8 @@ pub type CardHandlerFn = Arc<
 
 #[must_use]
 pub struct CardActionHandler {
-    verification_token: String,
-    event_encrypt_key: String,
+    pipeline: DispatchPipeline,
     handler: CardHandlerFn,
-    skip_sign_verify: bool,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -537,8 +604,11 @@ impl CardActionHandler {
         Fut: Future<Output = Result<serde_json::Value, LarkError>> + Send + 'static,
     {
         Self {
-            verification_token: verification_token.into(),
-            event_encrypt_key: event_encrypt_key.into(),
+            pipeline: DispatchPipeline::new(
+                verification_token.into(),
+                event_encrypt_key.into(),
+                SignAlgorithm::Sha1,
+            ),
             handler: Arc::new(
                 move |action: CardAction| -> Pin<
                     Box<dyn Future<Output = Result<CardHandlerResult, LarkError>> + Send>,
@@ -547,7 +617,6 @@ impl CardActionHandler {
                     Box::pin(async move { fut.await.map(CardHandlerResult::Json) })
                 },
             ),
-            skip_sign_verify: false,
         }
     }
 
@@ -563,19 +632,21 @@ impl CardActionHandler {
         Fut: Future<Output = Result<CardHandlerResult, LarkError>> + Send + 'static,
     {
         Self {
-            verification_token: verification_token.into(),
-            event_encrypt_key: event_encrypt_key.into(),
+            pipeline: DispatchPipeline::new(
+                verification_token.into(),
+                event_encrypt_key.into(),
+                SignAlgorithm::Sha1,
+            ),
             handler: Arc::new(
                 move |action: CardAction| -> Pin<
                     Box<dyn Future<Output = Result<CardHandlerResult, LarkError>> + Send>,
                 > { Box::pin(handler(action)) },
             ),
-            skip_sign_verify: false,
         }
     }
 
     pub fn skip_sign_verify(mut self) -> Self {
-        self.skip_sign_verify = true;
+        self.pipeline.skip_sign_verify = true;
         self
     }
 
@@ -590,21 +661,13 @@ impl CardActionHandler {
     }
 
     async fn do_handle(&self, req: EventReq) -> Result<EventResp, LarkError> {
-        let body_str = std::str::from_utf8(&req.body)
-            .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))?;
-
-        let body_str = decrypt_if_needed(&self.event_encrypt_key, body_str)?;
+        let (body_str, req) = match self.pipeline.process(req)? {
+            PipelineResult::Challenge(resp) => return Ok(resp),
+            PipelineResult::Event { body_str, req } => (body_str, req),
+        };
 
         let parsed: serde_json::Value = serde_json::from_str(&body_str)
             .map_err(|e| LarkError::Event(format!("failed to parse card body: {e}")))?;
-
-        if parsed.get("type").and_then(|v| v.as_str()) == Some("url_verification") {
-            return self.handle_challenge(&parsed);
-        }
-
-        if !self.skip_sign_verify {
-            self.verify_signature_sha1(&req.headers, &body_str)?;
-        }
 
         let mut action: CardAction = serde_json::from_value(parsed)
             .map_err(|e| LarkError::Event(format!("failed to parse card action: {e}")))?;
@@ -630,44 +693,6 @@ impl CardActionHandler {
                 })
             }
         }
-    }
-
-    fn handle_challenge(&self, parsed: &serde_json::Value) -> Result<EventResp, LarkError> {
-        if let Some(token) = parsed.get("token").and_then(|v| v.as_str())
-            && token != self.verification_token
-            && !self.verification_token.is_empty()
-        {
-            return Err(LarkError::Event("verification token mismatch".to_string()));
-        }
-
-        let challenge = parsed
-            .get("challenge")
-            .and_then(|v| v.as_str())
-            .unwrap_or_default();
-        Ok(EventResp::success(
-            serde_json::json!({ "challenge": challenge }),
-        ))
-    }
-
-    fn verify_signature_sha1(
-        &self,
-        headers: &HashMap<String, Vec<String>>,
-        body: &str,
-    ) -> Result<(), LarkError> {
-        if self.verification_token.is_empty() {
-            return Ok(());
-        }
-
-        let (timestamp, nonce, sig) = extract_signature_headers(headers)?;
-
-        if !crypto::verify_signature_sha1(&timestamp, &nonce, &self.verification_token, body, &sig)
-        {
-            return Err(LarkError::Event(
-                "card signature verification failed".to_string(),
-            ));
-        }
-
-        Ok(())
     }
 }
 

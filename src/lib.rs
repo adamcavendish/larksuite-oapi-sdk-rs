@@ -17,6 +17,8 @@
 //! - **WebSocket client** — feature-gated (`ws`) persistent long-connection event stream via [`ws::WsClient`].
 //! - **Axum adapter** — feature-gated (`axum`) integration for HTTP servers.
 
+#[macro_use]
+mod macros;
 pub mod cache;
 pub mod card;
 pub mod client;
@@ -25,8 +27,6 @@ pub mod constants;
 pub mod crypto;
 pub mod error;
 pub mod event;
-#[macro_use]
-mod macros;
 pub mod events;
 pub mod http_handler;
 pub mod registration;
