@@ -1,4 +1,5 @@
 use http::header::{CONTENT_TYPE, HeaderValue, USER_AGENT as UA_HEADER};
+use serde_json::Value;
 use tracing::Instrument;
 
 use crate::config::Config;
@@ -455,12 +456,22 @@ async fn raw_send_inner(
     }
 
     if config.log_req_at_debug {
+        let sensitive_endpoint = is_sensitive_log_endpoint(&full_url);
         match &api_req.body {
-            Some(ReqBody::Json(v)) => {
+            Some(ReqBody::Json(_)) if sensitive_endpoint => {
                 tracing::debug!(
                     method = %api_req.http_method,
                     url = %full_url,
-                    body = %v,
+                    body = "<omitted sensitive token request>",
+                    "lark.request"
+                );
+            }
+            Some(ReqBody::Json(v)) => {
+                let redacted = redact_json_for_logging(v);
+                tracing::debug!(
+                    method = %api_req.http_method,
+                    url = %full_url,
+                    body = %redacted,
                     "lark.request"
                 );
             }
@@ -552,11 +563,7 @@ async fn raw_send_inner(
                 .get(CONTENT_TYPE)
                 .and_then(|v| v.to_str().ok())
                 .unwrap_or("");
-            let body_str = if content_type.contains("json") || content_type.contains("text") {
-                String::from_utf8_lossy(&raw_body)
-            } else {
-                format!("<binary> len {}", raw_body.len()).into()
-            };
+            let body_str = response_body_for_debug(&full_url, content_type, &raw_body);
             tracing::debug!(
                 status = status_code,
                 url = %full_url,
@@ -573,6 +580,82 @@ async fn raw_send_inner(
         header,
         raw_body,
     })
+}
+
+fn response_body_for_debug<'a>(
+    raw_url: &str,
+    content_type: &str,
+    raw_body: &'a [u8],
+) -> std::borrow::Cow<'a, str> {
+    if is_sensitive_log_endpoint(raw_url) {
+        return "<omitted sensitive token response>".into();
+    }
+
+    let content_type = content_type.to_ascii_lowercase();
+    if content_type.contains("json") {
+        match serde_json::from_slice::<Value>(raw_body) {
+            Ok(value) => redact_json_for_logging(&value).to_string().into(),
+            Err(_) => format!("<unparseable json> len {}", raw_body.len()).into(),
+        }
+    } else if content_type.contains("text") {
+        String::from_utf8_lossy(raw_body)
+    } else {
+        format!("<binary> len {}", raw_body.len()).into()
+    }
+}
+
+fn is_sensitive_log_endpoint(raw_url: &str) -> bool {
+    let path = url::Url::parse(raw_url)
+        .ok()
+        .map(|url| url.path().to_string())
+        .unwrap_or_else(|| raw_url.split('?').next().unwrap_or(raw_url).to_string());
+
+    matches!(
+        path.as_str(),
+        crate::constants::OAUTH_TOKEN_URL_PATH
+            | crate::constants::APP_ACCESS_TOKEN_INTERNAL_URL_PATH
+            | crate::constants::APP_ACCESS_TOKEN_URL_PATH
+            | crate::constants::TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH
+            | crate::constants::TENANT_ACCESS_TOKEN_URL_PATH
+            | crate::constants::APPLY_APP_TICKET_PATH
+    )
+}
+
+fn redact_json_for_logging(value: &Value) -> Value {
+    match value {
+        Value::Object(map) => Value::Object(
+            map.iter()
+                .map(|(key, value)| {
+                    let value = if is_sensitive_json_key(key) {
+                        Value::String("<redacted>".to_string())
+                    } else {
+                        redact_json_for_logging(value)
+                    };
+                    (key.clone(), value)
+                })
+                .collect(),
+        ),
+        Value::Array(values) => Value::Array(values.iter().map(redact_json_for_logging).collect()),
+        _ => value.clone(),
+    }
+}
+
+fn is_sensitive_json_key(key: &str) -> bool {
+    let normalized: String = key
+        .chars()
+        .filter(|ch| ch.is_ascii_alphanumeric())
+        .flat_map(char::to_lowercase)
+        .collect();
+    matches!(
+        normalized.as_str(),
+        "appsecret"
+            | "appticket"
+            | "clientassertion"
+            | "accesstoken"
+            | "refreshtoken"
+            | "appaccesstoken"
+            | "tenantaccesstoken"
+    )
 }
 
 fn build_url(config: &Config, api_req: &ApiReq) -> String {
@@ -691,5 +774,63 @@ mod tests {
         let url = build_url(&config, &api_req);
         assert!(!url.contains("a/b?c#d e"));
         assert!(url.contains("a%2Fb%3Fc%23d%20e"));
+    }
+
+    #[test]
+    fn detects_sensitive_token_log_endpoints() {
+        assert!(is_sensitive_log_endpoint(
+            "https://open.feishu.cn/oauth/v3/token"
+        ));
+        assert!(is_sensitive_log_endpoint(
+            "https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal?x=1"
+        ));
+        assert!(is_sensitive_log_endpoint(
+            "/open-apis/auth/v3/tenant_access_token"
+        ));
+        assert!(is_sensitive_log_endpoint(
+            "/open-apis/auth/v3/app_ticket/resend"
+        ));
+        assert!(!is_sensitive_log_endpoint(
+            "https://open.feishu.cn/open-apis/im/v1/messages"
+        ));
+    }
+
+    #[test]
+    fn redacts_sensitive_json_fields_recursively() {
+        let value = serde_json::json!({
+            "app_secret": "s3cr3t-value",
+            "clientAssertion": "assertion-value",
+            "nested": {
+                "access_token": "access-value",
+                "refreshToken": "refresh-value",
+                "ordinary": "kept"
+            },
+            "items": [
+                { "tenant_access_token": "tenant-value" },
+                { "name": "visible" }
+            ]
+        });
+
+        let redacted = redact_json_for_logging(&value);
+        let rendered = redacted.to_string();
+        assert!(!rendered.contains("s3cr3t-value"));
+        assert!(!rendered.contains("assertion-value"));
+        assert!(!rendered.contains("access-value"));
+        assert!(!rendered.contains("refresh-value"));
+        assert!(!rendered.contains("tenant-value"));
+        assert!(rendered.contains("kept"));
+        assert!(rendered.contains("visible"));
+        assert_eq!(redacted["app_secret"], "<redacted>");
+        assert_eq!(redacted["nested"]["ordinary"], "kept");
+    }
+
+    #[test]
+    fn malformed_json_response_debug_body_is_omitted() {
+        let body = br#"{"access_token":"leaked-token""#;
+        let rendered =
+            response_body_for_debug("/open-apis/im/v1/messages", "application/json", body);
+
+        assert_eq!(rendered, "<unparseable json> len 30");
+        assert!(!rendered.contains("leaked-token"));
     }
 }
