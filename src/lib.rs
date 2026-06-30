@@ -21,6 +21,8 @@
 mod macros;
 pub mod cache;
 pub mod card;
+#[cfg(feature = "channel")]
+pub mod channel;
 pub mod client;
 pub mod config;
 pub mod constants;
@@ -65,6 +67,7 @@ pub use req::{
     RequestOption,
 };
 pub use resp::{ApiResp, CodeError, CodeErrorInfo, RawResponse};
+pub use service::go_v397::{GoV397, GoV397Endpoint, GoV397EndpointMeta};
 pub use token::{
     AppTicketManager, AppTokenResponse, ClientAssertionProvider, MarketplaceAppTokenReq,
     MarketplaceTenantTokenReq, ResendAppTicketRequest, ResendAppTicketResponse,

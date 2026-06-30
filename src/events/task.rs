@@ -40,6 +40,20 @@ pub struct P2TaskCommentUpdatedV1 {
     pub obj_type: Option<i32>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2TaskUpdateUserAccessV2Data {
+    #[serde(default)]
+    pub event_types: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_guid: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct P2TaskUpdateUserAccessV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event: Option<P2TaskUpdateUserAccessV2Data>,
+}
+
 // ── EventDispatcher extension methods ──
 
 event_handlers! {
@@ -49,4 +63,6 @@ event_handlers! {
         : "task.task.updated_v1",
     on_p2_task_comment_updated_v1 => P2TaskCommentUpdatedV1
         : "task.task.comment.updated_v1",
+    on_p2_task_update_user_access_v2 => P2TaskUpdateUserAccessV2
+        : "task.task.update_user_access_v2",
 }

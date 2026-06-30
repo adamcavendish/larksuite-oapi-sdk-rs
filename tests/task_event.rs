@@ -1,5 +1,5 @@
 use larksuite_oapi_sdk_rs::events::task::{
-    P2TaskCommentUpdatedV1, P2TaskUpdateTenantV1, P2TaskUpdatedV1,
+    P2TaskCommentUpdatedV1, P2TaskUpdateTenantV1, P2TaskUpdateUserAccessV2, P2TaskUpdatedV1,
 };
 
 #[test]
@@ -53,6 +53,21 @@ fn task_comment_updated_event_matches_go_shape() {
 }
 
 #[test]
+fn task_update_user_access_event_is_typed() {
+    let event: P2TaskUpdateUserAccessV2 = serde_json::from_value(serde_json::json!({
+        "event": {
+            "event_types": ["task.task.updated_v1"],
+            "task_guid": "task_1"
+        }
+    }))
+    .unwrap();
+
+    let data = event.event.as_ref().unwrap();
+    assert_eq!(data.event_types, ["task.task.updated_v1"]);
+    assert_eq!(data.task_guid.as_deref(), Some("task_1"));
+}
+
+#[test]
 fn task_event_structs_accept_empty_and_null_payloads() {
     let updated: P2TaskUpdatedV1 = serde_json::from_value(serde_json::json!({})).unwrap();
     assert!(updated.task_id.is_none());
@@ -63,4 +78,8 @@ fn task_event_structs_accept_empty_and_null_payloads() {
     }))
     .unwrap();
     assert!(tenant.user_id_list.is_none());
+
+    let user_access: P2TaskUpdateUserAccessV2 =
+        serde_json::from_value(serde_json::json!({ "event": null })).unwrap();
+    assert!(user_access.event.is_none());
 }

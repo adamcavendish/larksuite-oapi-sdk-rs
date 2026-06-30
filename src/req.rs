@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::Path;
 
 use http::HeaderMap;
 use serde::Serialize;
@@ -154,6 +155,22 @@ impl FormDataBuilder {
             },
         });
         self
+    }
+
+    pub fn file_by_path(
+        self,
+        name: impl Into<String>,
+        path: impl AsRef<Path>,
+        content_type: Option<impl Into<String>>,
+    ) -> Result<Self, std::io::Error> {
+        let path = path.as_ref();
+        let data = std::fs::read(path)?;
+        let filename = path
+            .file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or("unknown-file")
+            .to_string();
+        Ok(self.file(name, filename, data, content_type))
     }
 
     pub fn build(self) -> Vec<FormDataField> {

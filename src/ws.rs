@@ -30,6 +30,7 @@ use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
 use crate::config::Config;
+use crate::constants::HEADER_X_TARGET_SERVICE;
 use crate::error::LarkError;
 use crate::event::EventDispatcher;
 
@@ -164,6 +165,9 @@ fn make_header(key: &str, value: &str) -> proto::Header {
 
 // ── WebSocket client ──
 
+type LifecycleCallback = Arc<dyn Fn() + Send + Sync>;
+type ErrorCallback = Arc<dyn Fn(&LarkError) + Send + Sync>;
+
 pub struct WsClient {
     config: Arc<Config>,
     dispatcher: Arc<EventDispatcher>,
@@ -174,6 +178,11 @@ pub struct WsClient {
     reconnect_interval: Arc<AtomicU64>,
     reconnect_nonce: Arc<AtomicU64>,
     auto_reconnect: Arc<AtomicBool>,
+    on_ready: Option<LifecycleCallback>,
+    on_error: Option<ErrorCallback>,
+    on_reconnecting: Option<LifecycleCallback>,
+    on_reconnected: Option<LifecycleCallback>,
+    on_disconnected: Option<LifecycleCallback>,
 }
 
 fn ws_log_enabled(log_level: Option<tracing::Level>, level: tracing::Level) -> bool {
@@ -194,6 +203,11 @@ impl WsClient {
             reconnect_interval: Arc::new(AtomicU64::new(120)),
             reconnect_nonce: Arc::new(AtomicU64::new(30)),
             auto_reconnect: Arc::new(AtomicBool::new(true)),
+            on_ready: None,
+            on_error: None,
+            on_reconnecting: None,
+            on_reconnected: None,
+            on_disconnected: None,
         }
     }
 
@@ -232,6 +246,46 @@ impl WsClient {
         self
     }
 
+    pub fn on_ready<F>(mut self, handler: F) -> Self
+    where
+        F: Fn() + Send + Sync + 'static,
+    {
+        self.on_ready = Some(Arc::new(handler));
+        self
+    }
+
+    pub fn on_error<F>(mut self, handler: F) -> Self
+    where
+        F: Fn(&LarkError) + Send + Sync + 'static,
+    {
+        self.on_error = Some(Arc::new(handler));
+        self
+    }
+
+    pub fn on_reconnecting<F>(mut self, handler: F) -> Self
+    where
+        F: Fn() + Send + Sync + 'static,
+    {
+        self.on_reconnecting = Some(Arc::new(handler));
+        self
+    }
+
+    pub fn on_reconnected<F>(mut self, handler: F) -> Self
+    where
+        F: Fn() + Send + Sync + 'static,
+    {
+        self.on_reconnected = Some(Arc::new(handler));
+        self
+    }
+
+    pub fn on_disconnected<F>(mut self, handler: F) -> Self
+    where
+        F: Fn() + Send + Sync + 'static,
+    {
+        self.on_disconnected = Some(Arc::new(handler));
+        self
+    }
+
     fn log_enabled(&self, level: tracing::Level) -> bool {
         ws_log_enabled(self.log_level, level)
     }
@@ -256,7 +310,8 @@ impl WsClient {
     pub async fn start(self) -> Result<(), LarkError> {
         let mut consecutive_failures: u32 = 0;
         loop {
-            match self.run_once().await {
+            let was_reconnecting = consecutive_failures > 0;
+            match self.run_once(was_reconnecting).await {
                 Ok(()) => {
                     if self.log_enabled(tracing::Level::INFO) {
                         tracing::info!("ws connection closed");
@@ -266,6 +321,9 @@ impl WsClient {
                 Err(e) => {
                     if self.log_enabled(tracing::Level::WARN) {
                         tracing::warn!("ws connection error: {e}");
+                    }
+                    if let Some(ref handler) = self.on_error {
+                        handler(&e);
                     }
                     consecutive_failures += 1;
                 }
@@ -291,11 +349,14 @@ impl WsClient {
             if self.log_enabled(tracing::Level::INFO) {
                 tracing::info!("reconnecting in {wait:?}");
             }
+            if let Some(ref handler) = self.on_reconnecting {
+                handler();
+            }
             sleep(wait).await;
         }
     }
 
-    async fn run_once(&self) -> Result<(), LarkError> {
+    async fn run_once(&self, was_reconnecting: bool) -> Result<(), LarkError> {
         let (url, service_id) = self.get_ws_url().await?;
         if self.log_enabled(tracing::Level::INFO) {
             tracing::info!("connecting to ws endpoint: {url}");
@@ -312,6 +373,12 @@ impl WsClient {
 
         if self.log_enabled(tracing::Level::INFO) {
             tracing::info!("ws connected");
+        }
+        if was_reconnecting && let Some(ref handler) = self.on_reconnected {
+            handler();
+        }
+        if let Some(ref handler) = self.on_ready {
+            handler();
         }
 
         let mut pending_frags: HashMap<String, FragEntry> = HashMap::new();
@@ -381,6 +448,9 @@ impl WsClient {
         }
 
         ping_handle.abort();
+        if let Some(ref handler) = self.on_disconnected {
+            handler();
+        }
         Ok(())
     }
 
@@ -539,12 +609,44 @@ impl WsClient {
 
     async fn get_ws_url(&self) -> Result<(String, i32), LarkError> {
         let base = self.domain.trim_end_matches('/');
-        let url = format!("{base}/callback/ws/endpoint");
+        let mut url = format!("{base}/callback/ws/endpoint");
 
-        let body = serde_json::json!({
+        let mut body = serde_json::json!({
             "AppID": self.config.app_id,
             "AppSecret": self.config.app_secret,
         });
+        let mut target_service_header = None;
+
+        if let Some(ref provider) = self.config.client_assertion_provider {
+            let aud = extract_ws_aud(&self.domain)?;
+            let assertion = provider.retrieve_token(&aud).await.map_err(|e| {
+                LarkError::ClientAssertion(format!("retrieve client assertion token failed: {e}"))
+            })?;
+            if assertion.value.is_empty() {
+                return Err(LarkError::ClientAssertion(
+                    "client assertion token is empty".to_string(),
+                ));
+            }
+            body["AppSecret"] = serde_json::Value::String(String::new());
+            body["ClientAssertion"] = serde_json::Value::String(assertion.value);
+            if let Some(ref target) = assertion.target_info {
+                let target_service = if target.target_service.contains("://") {
+                    target.target_service.clone()
+                } else {
+                    format!("https://{}", target.target_service)
+                };
+                url = format!(
+                    "{}{}/callback/ws/endpoint",
+                    target_service.trim_end_matches('/'),
+                    target.target_prefix
+                );
+                target_service_header = Some(aud);
+            }
+        } else if self.config.app_secret.is_empty() {
+            return Err(LarkError::ClientAssertion(
+                "appSecret and clientAssertionProvider cannot be nil".to_string(),
+            ));
+        }
 
         let mut req = self
             .config
@@ -558,6 +660,11 @@ impl WsClient {
             req = req
                 .header_str(k, v)
                 .map_err(|e| LarkError::Event(format!("invalid header {k}: {e}")))?;
+        }
+        if let Some(ref aud) = target_service_header {
+            req = req
+                .header_str(HEADER_X_TARGET_SERVICE, aud)
+                .map_err(|e| LarkError::Event(format!("invalid target service header: {e}")))?;
         }
 
         let resp = req
@@ -639,6 +746,22 @@ impl WsClient {
             _ => LarkError::Event(format!("ws server error: code={code}, msg={msg}")),
         }
     }
+}
+
+fn extract_ws_aud(raw_url: &str) -> Result<String, LarkError> {
+    let with_scheme;
+    let url = if raw_url.contains("://") {
+        raw_url
+    } else {
+        with_scheme = format!("https://{raw_url}");
+        &with_scheme
+    };
+    let parsed = url::Url::parse(url)
+        .map_err(|e| LarkError::ClientAssertion(format!("invalid ws domain: {e}")))?;
+    parsed
+        .host_str()
+        .map(ToString::to_string)
+        .ok_or_else(|| LarkError::ClientAssertion(format!("invalid ws domain: {raw_url}")))
 }
 
 #[cfg(test)]
