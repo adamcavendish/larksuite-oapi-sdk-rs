@@ -107,7 +107,7 @@ impl ClientBuilder {
 }
 
 /// Lark/Feishu API client. All service accessors borrow `&self` and are zero-cost wrappers.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Client {
     config: Config,
 }
