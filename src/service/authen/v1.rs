@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
-use crate::constants::AccessTokenType;
+use crate::constants::{AccessTokenType, HEADER_X_TARGET_SERVICE};
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::token;
@@ -371,11 +371,12 @@ impl<'a> AccessToken<'a> {
         option: &RequestOption,
     ) -> Result<AccessTokenResp, LarkError> {
         let oauth_base_url = token::resolve_oauth_base_url(self.config);
-        let request_url = format!(
+        let mut request_url = format!(
             "{}{}",
             oauth_base_url.trim_end_matches('/'),
             crate::constants::OAUTH_TOKEN_URL_PATH
         );
+        let mut request_option = option.clone();
 
         let mut body = body.clone();
         body.client_id = Some(self.config.app_id.clone());
@@ -392,6 +393,28 @@ impl<'a> AccessToken<'a> {
             }
             body.client_assertion_type =
                 Some(crate::constants::CLIENT_ASSERTION_TYPE_JWT_BEARER.to_string());
+            if let Some(ref target) = assertion.target_info {
+                let target_service = if target.target_service.contains("://") {
+                    target.target_service.clone()
+                } else {
+                    format!("https://{}", target.target_service)
+                };
+                request_url = format!(
+                    "{}{}{}",
+                    target_service.trim_end_matches('/'),
+                    target.target_prefix,
+                    crate::constants::OAUTH_TOKEN_URL_PATH
+                );
+                let headers = request_option
+                    .headers
+                    .get_or_insert_with(http::HeaderMap::new);
+                headers.insert(
+                    HEADER_X_TARGET_SERVICE,
+                    http::HeaderValue::from_str(&aud).map_err(|e| {
+                        LarkError::ClientAssertion(format!("invalid target service header: {e}"))
+                    })?,
+                );
+            }
             body.client_assertion = Some(assertion.value);
         } else if !self.config.app_secret.is_empty() {
             body.client_secret = Some(self.config.app_secret.clone());
@@ -407,7 +430,7 @@ impl<'a> AccessToken<'a> {
         api_req.body = Some(ReqBody::json(&body)?);
 
         let api_resp =
-            transport::raw_send_absolute_url(self.config, &api_req, option, None).await?;
+            transport::raw_send_absolute_url(self.config, &api_req, &request_option, None).await?;
 
         let resp_body: OAuthTokenResponseBody =
             serde_json::from_slice(&api_resp.raw_body).unwrap_or_default();

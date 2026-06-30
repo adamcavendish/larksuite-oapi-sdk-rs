@@ -147,3 +147,32 @@ fn form_data_builder_file_without_content_type() {
         _ => panic!("expected File variant"),
     }
 }
+
+#[test]
+fn form_data_builder_file_by_path_uses_file_name_and_contents() {
+    let path = std::env::temp_dir().join(format!(
+        "larksuite-oapi-sdk-rs-{}.txt",
+        uuid::Uuid::new_v4()
+    ));
+    std::fs::write(&path, b"path content").unwrap();
+
+    let fields = FormDataBuilder::new()
+        .file_by_path("file", &path, Some("text/plain"))
+        .unwrap()
+        .build();
+    std::fs::remove_file(&path).unwrap();
+
+    assert_eq!(fields.len(), 1);
+    match &fields[0].value {
+        larksuite_oapi_sdk_rs::FormDataValue::File {
+            content_type,
+            filename,
+            data,
+        } => {
+            assert_eq!(content_type.as_deref(), Some("text/plain"));
+            assert_eq!(filename, path.file_name().unwrap().to_str().unwrap());
+            assert_eq!(data, b"path content");
+        }
+        _ => panic!("expected File variant"),
+    }
+}

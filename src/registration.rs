@@ -4,7 +4,10 @@
 //! `/oauth/v1/app/registration` endpoint to create a new app by
 //! having the user scan a QR code.
 
-use serde::Deserialize;
+use std::io::Write as _;
+
+use base64::Engine as _;
+use serde::{Deserialize, Serialize};
 
 use crate::error::LarkError;
 
@@ -31,6 +34,75 @@ pub struct StatusChangeInfo {
     pub interval: u64,
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct AppPreset {
+    pub avatar: Vec<String>,
+    pub name: String,
+    pub desc: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct AppAddons {
+    #[serde(default, skip_serializing_if = "AppAddonsScopes::is_empty")]
+    pub scopes: AppAddonsScopes,
+    #[serde(default, skip_serializing_if = "AppAddonsEvents::is_empty")]
+    pub events: AppAddonsEvents,
+    #[serde(default, skip_serializing_if = "AppAddonsCallbacks::is_empty")]
+    pub callbacks: AppAddonsCallbacks,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct AppAddonsScopes {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tenant: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub user: Vec<String>,
+}
+
+impl AppAddonsScopes {
+    fn is_empty(&self) -> bool {
+        self.tenant.is_empty() && self.user.is_empty()
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct AppAddonsEvents {
+    #[serde(default, skip_serializing_if = "AppAddonsEventItems::is_empty")]
+    pub items: AppAddonsEventItems,
+}
+
+impl AppAddonsEvents {
+    fn is_empty(&self) -> bool {
+        self.items.is_empty()
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct AppAddonsEventItems {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tenant: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub user: Vec<String>,
+}
+
+impl AppAddonsEventItems {
+    fn is_empty(&self) -> bool {
+        self.tenant.is_empty() && self.user.is_empty()
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct AppAddonsCallbacks {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub items: Vec<String>,
+}
+
+impl AppAddonsCallbacks {
+    fn is_empty(&self) -> bool {
+        self.items.is_empty()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct UserInfo {
     pub open_id: String,
@@ -51,6 +123,10 @@ pub struct Options {
     pub source: String,
     pub domain: String,
     pub lark_domain: String,
+    pub app_preset: Option<AppPreset>,
+    pub addons: Option<AppAddons>,
+    pub create_only: bool,
+    pub app_id: String,
     pub on_qr_code: OnQRCode,
     pub on_status_change: Option<OnStatusChange>,
 }
@@ -121,7 +197,69 @@ fn build_endpoint_url(domain: &str) -> String {
     format!("{}{ENDPOINT}", domain.trim_end_matches('/'))
 }
 
-fn build_qr_code_url(raw_url: &str, source: &str) -> Result<String, LarkError> {
+fn validate_addons_list(values: &[String], path: &str) -> Result<usize, LarkError> {
+    for (idx, value) in values.iter().enumerate() {
+        if value.is_empty() {
+            return Err(LarkError::Registration(format!(
+                "registration: {path}[{idx}] must be a non-empty string"
+            )));
+        }
+    }
+    Ok(values.len())
+}
+
+fn encode_addons(addons: &AppAddons) -> Result<String, LarkError> {
+    let mut count = 0usize;
+    count += validate_addons_list(&addons.scopes.tenant, "Addons.Scopes.Tenant")?;
+    count += validate_addons_list(&addons.scopes.user, "Addons.Scopes.User")?;
+    count += validate_addons_list(&addons.events.items.tenant, "Addons.Events.Items.Tenant")?;
+    count += validate_addons_list(&addons.events.items.user, "Addons.Events.Items.User")?;
+    count += validate_addons_list(&addons.callbacks.items, "Addons.Callbacks.Items")?;
+    if count == 0 {
+        return Err(LarkError::Registration(
+            "registration: Addons must contain at least one scope, event or callback".into(),
+        ));
+    }
+
+    let body = serde_json::to_vec(addons).map_err(|e| {
+        LarkError::Registration(format!("registration: marshal Addons failed: {e}"))
+    })?;
+    let mut encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::default());
+    encoder
+        .write_all(&body)
+        .map_err(|e| LarkError::Registration(format!("registration: gzip Addons failed: {e}")))?;
+    let compressed = encoder
+        .finish()
+        .map_err(|e| LarkError::Registration(format!("registration: gzip Addons failed: {e}")))?;
+    Ok(base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(compressed))
+}
+
+fn app_preset_pairs(preset: &AppPreset) -> Result<Vec<(String, String)>, LarkError> {
+    if preset.avatar.len() > 6 {
+        return Err(LarkError::Registration(format!(
+            "registration: AppPreset.Avatar supports at most 6 URLs, got {}",
+            preset.avatar.len()
+        )));
+    }
+    let mut pairs = Vec::new();
+    for (idx, avatar) in preset.avatar.iter().enumerate() {
+        if avatar.is_empty() {
+            return Err(LarkError::Registration(format!(
+                "registration: AppPreset.Avatar[{idx}] must be a non-empty string"
+            )));
+        }
+        pairs.push(("avatar".to_string(), avatar.clone()));
+    }
+    if !preset.name.is_empty() {
+        pairs.push(("name".to_string(), preset.name.clone()));
+    }
+    if !preset.desc.is_empty() {
+        pairs.push(("desc".to_string(), preset.desc.clone()));
+    }
+    Ok(pairs)
+}
+
+fn build_qr_code_url(raw_url: &str, opts: &Options) -> Result<String, LarkError> {
     let mut parsed = url::Url::parse(raw_url)
         .map_err(|e| LarkError::Registration(format!("invalid QR URL: {e}")))?;
     {
@@ -135,10 +273,29 @@ fn build_qr_code_url(raw_url: &str, source: &str) -> Result<String, LarkError> {
         }
         q.append_pair("from", "sdk");
         q.append_pair("tp", "sdk");
-        if source.is_empty() {
+        if opts.source.is_empty() {
             q.append_pair("source", SDK_NAME);
         } else {
-            q.append_pair("source", &format!("{SDK_NAME}/{source}"));
+            q.append_pair("source", &format!("{SDK_NAME}/{}", opts.source));
+        }
+        if let Some(ref preset) = opts.app_preset {
+            for (key, value) in app_preset_pairs(preset)? {
+                q.append_pair(&key, &value);
+            }
+        }
+        if let Some(ref addons) = opts.addons {
+            q.append_pair("addons", &encode_addons(addons)?);
+        }
+        if opts.create_only {
+            q.append_pair("createOnly", "true");
+        }
+        if !opts.app_id.is_empty() {
+            if opts.app_id.trim().is_empty() {
+                return Err(LarkError::Registration(
+                    "registration: Options.AppID must be a non-empty string".into(),
+                ));
+            }
+            q.append_pair("clientID", &opts.app_id);
         }
     }
     Ok(parsed.to_string())
@@ -220,7 +377,7 @@ pub async fn register_app(opts: Options) -> Result<RegisterAppResult, LarkError>
         ));
     }
 
-    let qr_url = build_qr_code_url(&begin.verification_uri_complete, &opts.source)?;
+    let qr_url = build_qr_code_url(&begin.verification_uri_complete, &opts)?;
     let expire_in = normalize_expire_in(begin.expire_in);
     (opts.on_qr_code)(&QRCodeInfo {
         url: qr_url,
@@ -366,9 +523,20 @@ mod tests {
 
     #[test]
     fn qr_url_preserves_unrelated_query_params() {
+        let opts = Options {
+            source: "local-test".to_string(),
+            domain: String::new(),
+            lark_domain: String::new(),
+            app_preset: None,
+            addons: None,
+            create_only: false,
+            app_id: String::new(),
+            on_qr_code: Box::new(|_| {}),
+            on_status_change: None,
+        };
         let url = build_qr_code_url(
             "https://qr.example.com/scan?foo=bar&from=old&tp=old&source=other",
-            "local-test",
+            &opts,
         )
         .unwrap();
         let parsed = url::Url::parse(&url).unwrap();
@@ -377,6 +545,70 @@ mod tests {
         assert!(query.clone().any(|(k, v)| k == "from" && v == "sdk"));
         assert!(query.clone().any(|(k, v)| k == "tp" && v == "sdk"));
         assert!(query.any(|(k, v)| k == "source" && v == "rust-sdk/local-test"));
+    }
+
+    #[test]
+    fn qr_url_adds_preset_addons_create_only_and_app_id() {
+        let opts = Options {
+            source: String::new(),
+            domain: String::new(),
+            lark_domain: String::new(),
+            app_preset: Some(AppPreset {
+                avatar: vec!["https://example.com/a.png".into()],
+                name: "Bot {user}".into(),
+                desc: "Desc {user}".into(),
+            }),
+            addons: Some(AppAddons {
+                scopes: AppAddonsScopes {
+                    tenant: vec!["im:message:send_as_bot".into()],
+                    user: vec!["calendar:calendar:read".into()],
+                },
+                events: AppAddonsEvents {
+                    items: AppAddonsEventItems {
+                        tenant: vec!["im.message.receive_v1".into()],
+                        user: Vec::new(),
+                    },
+                },
+                callbacks: AppAddonsCallbacks {
+                    items: vec!["card.action.trigger".into()],
+                },
+            }),
+            create_only: true,
+            app_id: "cli_existing".into(),
+            on_qr_code: Box::new(|_| {}),
+            on_status_change: None,
+        };
+
+        let url = build_qr_code_url("https://qr.example.com/scan", &opts).unwrap();
+        let parsed = url::Url::parse(&url).unwrap();
+        let pairs: std::collections::HashMap<_, _> = parsed.query_pairs().into_owned().collect();
+        assert_eq!(pairs.get("source").map(String::as_str), Some("rust-sdk"));
+        assert_eq!(
+            pairs.get("avatar").map(String::as_str),
+            Some("https://example.com/a.png")
+        );
+        assert_eq!(pairs.get("name").map(String::as_str), Some("Bot {user}"));
+        assert_eq!(pairs.get("desc").map(String::as_str), Some("Desc {user}"));
+        assert_eq!(pairs.get("createOnly").map(String::as_str), Some("true"));
+        assert_eq!(
+            pairs.get("clientID").map(String::as_str),
+            Some("cli_existing")
+        );
+
+        let addons = pairs.get("addons").unwrap();
+        let compressed = base64::engine::general_purpose::URL_SAFE_NO_PAD
+            .decode(addons)
+            .unwrap();
+        let mut decoder = flate2::read::GzDecoder::new(compressed.as_slice());
+        let mut decoded = String::new();
+        std::io::Read::read_to_string(&mut decoder, &mut decoded).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&decoded).unwrap();
+        assert_eq!(json["scopes"]["tenant"][0], "im:message:send_as_bot");
+        assert_eq!(
+            json["events"]["items"]["tenant"][0],
+            "im.message.receive_v1"
+        );
+        assert_eq!(json["callbacks"]["items"][0], "card.action.trigger");
     }
 
     #[tokio::test(flavor = "current_thread")]
@@ -411,6 +643,10 @@ mod tests {
             source: "local".to_string(),
             domain: format!("http://{}", addr),
             lark_domain: String::new(),
+            app_preset: None,
+            addons: None,
+            create_only: false,
+            app_id: String::new(),
             on_qr_code: Box::new(move |info| {
                 *qr_info_cb.lock().unwrap() = Some(info.clone());
             }),

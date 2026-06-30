@@ -148,7 +148,9 @@ impl Client {
     service_accessor!(acs, acs, v1, V1);
     service_accessor!(aily, aily, v1, V1);
     service_accessor!(application, application, v1, V1);
+    service_accessor!(application_v5, application, v5, V5);
     service_accessor!(application_v6, application, v6, V6);
+    service_accessor!(application_v7, application, v7, V7);
     service_accessor!(attendance, attendance, v1, V1);
     service_accessor!(approval, approval, v4, V4);
     service_accessor!(auth, auth, v3, V3);
@@ -166,10 +168,12 @@ impl Client {
     service_accessor!(hire_v2, hire, v2, V2);
     service_accessor!(im, im, v1, V1);
     service_accessor!(sheets, sheets, v3, V3);
+    service_accessor!(spark, spark, v1, V1);
     service_accessor!(task, task, v1, V1);
     service_accessor!(im_v2, im, v2, V2);
     service_accessor!(task_v2, task, v2, V2);
     service_accessor!(tenant, tenant, v2, V2);
+    service_accessor!(trust_party, trust_party, v1, V1);
     service_accessor!(baike, baike, v1, V1);
     service_accessor!(lingo, lingo, v1, V1);
     service_accessor!(mail, mail, v1, V1);
@@ -219,6 +223,10 @@ impl Client {
     service_accessor!(event, event, v1, V1);
     pub fn ext(&self) -> service::ext::ExtService<'_> {
         service::ext::ExtService::new(&self.config)
+    }
+
+    pub fn go_v397(&self) -> service::go_v397::GoV397<'_> {
+        service::go_v397::GoV397::new(&self.config)
     }
 
     /// Create a [`WsClient`](crate::ws::WsClient) that shares this client's token cache.

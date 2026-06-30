@@ -9,6 +9,7 @@ pub const HTTP_HEADER_KEY_REQUEST_ID: &str = "X-Request-Id";
 pub const HTTP_HEADER_REQUEST_ID: &str = "Request-Id";
 pub const HTTP_HEADER_KEY_LOG_ID: &str = "X-Tt-Logid";
 pub const CUSTOM_REQUEST_ID: &str = "Oapi-Sdk-Request-Id";
+pub const HEADER_X_TARGET_SERVICE: &str = "X-Target-Service";
 
 pub const APP_ACCESS_TOKEN_INTERNAL_URL_PATH: &str = "/open-apis/auth/v3/app_access_token/internal";
 pub const APP_ACCESS_TOKEN_URL_PATH: &str = "/open-apis/auth/v3/app_access_token";

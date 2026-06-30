@@ -388,6 +388,11 @@ impl EventDispatcher {
         self
     }
 
+    #[cfg(feature = "channel")]
+    pub(crate) fn has_callback_handler(&self, callback_type: &str) -> bool {
+        self.callback_handlers.contains_key(callback_type)
+    }
+
     /// Register a raw event handler that receives the full [`EventReq`] and
     /// parsed [`EventV2Body`], including headers, raw body, and request URI.
     pub fn on_customized_event<F, Fut>(mut self, event_type: impl Into<String>, handler: F) -> Self
