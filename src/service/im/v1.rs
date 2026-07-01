@@ -6,7 +6,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
-use crate::service::common::{DownloadResp, EmptyResp};
+use crate::service::common::{DownloadResp, EmptyResp, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -2025,19 +2025,16 @@ impl<'a> MessageResourceDownload<'a> {
         option: &RequestOption,
     ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/resources/{file_key}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("type", resource_type);
-        let mut opt = option.clone();
-        opt.file_download = true;
-        let api_resp = transport::request(self.config, &api_req, &opt).await?;
-        let file_name = api_resp.file_name_by_header();
-        let data = api_resp.raw_body.clone();
-        Ok(DownloadResp {
-            api_resp,
-            file_name,
-            data,
-        })
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("type", resource_type)
+        .download()
+        .await
     }
 }
 
@@ -2246,18 +2243,15 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/im/v1/files/{file_key}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let mut opt = option.clone();
-        opt.file_download = true;
-        let api_resp = transport::request(self.config, &api_req, &opt).await?;
-        let file_name = api_resp.file_name_by_header();
-        let data = api_resp.raw_body.clone();
-        Ok(DownloadResp {
-            api_resp,
-            file_name,
-            data,
-        })
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .download()
+        .await
     }
 }
 
@@ -2304,18 +2298,15 @@ impl<'a> ImageResource<'a> {
         option: &RequestOption,
     ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/im/v1/images/{image_key}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let mut opt = option.clone();
-        opt.file_download = true;
-        let api_resp = transport::request(self.config, &api_req, &opt).await?;
-        let file_name = api_resp.file_name_by_header();
-        let data = api_resp.raw_body.clone();
-        Ok(DownloadResp {
-            api_resp,
-            file_name,
-            data,
-        })
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .download()
+        .await
     }
 }
 
