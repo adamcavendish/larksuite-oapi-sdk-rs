@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -48,6 +48,24 @@ pub struct ActivityListData {
 
 impl_resp!(ListActivityResp, ActivityListData);
 
+// -- Query parameter types --
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListActivityQuery<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListActivityQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct ActivityResource<'a> {
@@ -61,16 +79,25 @@ impl<'a> ActivityResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListActivityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/performance/v1/activities");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ActivityListData>(self.config, &api_req, option).await?;
+        let query = ListActivityQuery::new().page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListActivityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListActivityResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/performance/v1/activities",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .send::<ActivityListData>()
+        .await?;
         Ok(ListActivityResp {
             api_resp,
             code_error: raw.code_error,
