@@ -71,6 +71,7 @@ use larksuite_oapi_sdk_rs::service::{
         ListJobRequirementQuery as ListHireJobRequirementQuery,
         ListOfferQuery as ListHireOfferQuery, ListTalentQuery as ListHireTalentQuery,
     },
+    lingo::v1::{GetEntityQuery as GetLingoEntityQuery, ListEntityQuery as ListLingoEntityQuery},
     meeting_room::v1::{
         ListBuildingQuery as ListMeetingRoomBuildingQuery, ListRoomQuery as ListMeetingRoomQuery,
     },
@@ -276,6 +277,77 @@ async fn lingo_file_download_smoke() {
     assert_eq!(resp.data, body.as_bytes());
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/lingo/v1/files/file-token-1/download"));
+}
+
+#[tokio::test]
+async fn lingo_entity_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"entity":{"id":"entity-1","description":"term"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .lingo()
+        .entity
+        .get_by_query(
+            &GetLingoEntityQuery::new("entity-1")
+                .provider("provider-1")
+                .outer_id("outer-1")
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.entity.as_ref())
+            .and_then(|entity| entity.id.as_deref()),
+        Some("entity-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/lingo/v1/entities/entity-1?"));
+    assert!(request.contains("provider=provider-1"));
+    assert!(request.contains("outer_id=outer-1"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn lingo_entity_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"entities":[{"id":"entity-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .lingo()
+        .entity
+        .list_by_query(
+            &ListLingoEntityQuery::new()
+                .page(PageQuery::new().page_size(20).page_token("next-page"))
+                .repo_id("repo-1")
+                .provider("provider-1")
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.entities.first())
+            .and_then(|entity| entity.id.as_deref()),
+        Some("entity-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/lingo/v1/entities?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("repo_id=repo-1"));
+    assert!(request.contains("provider=provider-1"));
+    assert!(request.contains("user_id_type=open_id"));
 }
 
 // ── Bitable ──

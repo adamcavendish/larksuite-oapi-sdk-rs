@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{DownloadResp, EmptyResp, RestRequest, parse_v2};
+use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -117,6 +117,76 @@ impl_resp_v2!(UpdateDraftResp, serde_json::Value);
 impl_resp_v2!(UploadFileResp, serde_json::Value);
 impl_resp_v2!(ListRepoResp, serde_json::Value);
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetEntityQuery<'a> {
+    pub entity_id: &'a str,
+    pub provider: Option<&'a str>,
+    pub outer_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetEntityQuery<'a> {
+    pub fn new(entity_id: &'a str) -> Self {
+        Self {
+            entity_id,
+            provider: None,
+            outer_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn provider(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.provider = value.into();
+        self
+    }
+
+    pub fn outer_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.outer_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListEntityQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub repo_id: Option<&'a str>,
+    pub provider: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListEntityQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+
+    pub fn repo_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.repo_id = value.into();
+        self
+    }
+
+    pub fn provider(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.provider = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct EntityResource<'a> {
@@ -208,20 +278,31 @@ impl<'a> EntityResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetEntityResp, LarkError> {
-        let path = format!("/open-apis/lingo/v1/entities/{entity_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = provider {
-            api_req.query_params.set("provider", v);
-        }
-        if let Some(v) = outer_id {
-            api_req.query_params.set("outer_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<EntityData>(self.config, &api_req, option).await?;
+        let query = GetEntityQuery::new(entity_id)
+            .provider(provider)
+            .outer_id(outer_id)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetEntityResp, LarkError> {
+        let path = format!("/open-apis/lingo/v1/entities/{}", query.entity_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("provider", query.provider)
+        .query("outer_id", query.outer_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<EntityData>()
+        .await?;
         Ok(GetEntityResp {
             api_resp,
             code_error: raw.code_error,
@@ -238,25 +319,32 @@ impl<'a> EntityResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListEntityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/lingo/v1/entities");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = repo_id {
-            api_req.query_params.set("repo_id", v);
-        }
-        if let Some(v) = provider {
-            api_req.query_params.set("provider", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<EntityListData>(self.config, &api_req, option).await?;
+        let query = ListEntityQuery::new()
+            .page(PageQuery::from_parts(page_size, page_token))
+            .repo_id(repo_id)
+            .provider(provider)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListEntityResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/lingo/v1/entities",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("repo_id", query.repo_id)
+        .query("provider", query.provider)
+        .query("user_id_type", query.user_id_type)
+        .send::<EntityListData>()
+        .await?;
         Ok(ListEntityResp {
             api_resp,
             code_error: raw.code_error,
