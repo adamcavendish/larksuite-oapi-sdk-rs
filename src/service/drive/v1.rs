@@ -870,6 +870,53 @@ impl<T> PageIteratorState<T> {
     }
 }
 
+mod multipart_form {
+    use crate::req::{FormDataField, FormDataValue};
+
+    pub(super) fn upload_all_fields(
+        file_name: &str,
+        parent_type: &str,
+        parent_node: &str,
+        size: i64,
+        checksum: Option<&str>,
+        extra: Option<&str>,
+        data: Vec<u8>,
+    ) -> Vec<FormDataField> {
+        let mut fields = vec![
+            text("file_name", file_name),
+            text("parent_type", parent_type),
+            text("parent_node", parent_node),
+            text("size", size),
+            file("file", file_name, data),
+        ];
+        if let Some(value) = checksum {
+            fields.push(text("checksum", value));
+        }
+        if let Some(value) = extra {
+            fields.push(text("extra", value));
+        }
+        fields
+    }
+
+    fn text(name: &str, value: impl ToString) -> FormDataField {
+        FormDataField {
+            name: name.to_string(),
+            value: FormDataValue::Text(value.to_string()),
+        }
+    }
+
+    fn file(name: &str, filename: &str, data: Vec<u8>) -> FormDataField {
+        FormDataField {
+            name: name.to_string(),
+            value: FormDataValue::File {
+                filename: filename.to_string(),
+                data,
+                content_type: None,
+            },
+        }
+    }
+}
+
 // ── Iterators ──
 
 #[derive(Debug, Clone)]
@@ -1533,38 +1580,15 @@ impl<'a> FileResource<'a> {
     ) -> Result<UploadAllFileResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/files/upload_all");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let mut fields = vec![
-            FormDataField {
-                name: "file_name".into(),
-                value: FormDataValue::Text(file_name.to_string()),
-            },
-            FormDataField {
-                name: "parent_type".into(),
-                value: FormDataValue::Text(parent_type.to_string()),
-            },
-            FormDataField {
-                name: "parent_node".into(),
-                value: FormDataValue::Text(parent_node.to_string()),
-            },
-            FormDataField {
-                name: "size".into(),
-                value: FormDataValue::Text(size.to_string()),
-            },
-            FormDataField {
-                name: "file".into(),
-                value: FormDataValue::File {
-                    filename: file_name.to_string(),
-                    data,
-                    content_type: None,
-                },
-            },
-        ];
-        if let Some(v) = checksum {
-            fields.push(FormDataField {
-                name: "checksum".into(),
-                value: FormDataValue::Text(v.to_string()),
-            });
-        }
+        let fields = multipart_form::upload_all_fields(
+            file_name,
+            parent_type,
+            parent_node,
+            size,
+            checksum,
+            None,
+            data,
+        );
         api_req.body = Some(ReqBody::FormData(fields));
         let (api_resp, raw) =
             transport::request_typed::<UploadAllFileRespData>(self.config, &api_req, option)
@@ -2446,44 +2470,15 @@ impl<'a> MediaResource<'a> {
     ) -> Result<UploadAllMediaResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/medias/upload_all");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let mut fields = vec![
-            FormDataField {
-                name: "file_name".into(),
-                value: FormDataValue::Text(file_name.to_string()),
-            },
-            FormDataField {
-                name: "parent_type".into(),
-                value: FormDataValue::Text(parent_type.to_string()),
-            },
-            FormDataField {
-                name: "parent_node".into(),
-                value: FormDataValue::Text(parent_node.to_string()),
-            },
-            FormDataField {
-                name: "size".into(),
-                value: FormDataValue::Text(size.to_string()),
-            },
-            FormDataField {
-                name: "file".into(),
-                value: FormDataValue::File {
-                    filename: file_name.to_string(),
-                    data,
-                    content_type: None,
-                },
-            },
-        ];
-        if let Some(v) = checksum {
-            fields.push(FormDataField {
-                name: "checksum".into(),
-                value: FormDataValue::Text(v.to_string()),
-            });
-        }
-        if let Some(v) = extra {
-            fields.push(FormDataField {
-                name: "extra".into(),
-                value: FormDataValue::Text(v.to_string()),
-            });
-        }
+        let fields = multipart_form::upload_all_fields(
+            file_name,
+            parent_type,
+            parent_node,
+            size,
+            checksum,
+            extra,
+            data,
+        );
         api_req.body = Some(ReqBody::FormData(fields));
         let (api_resp, raw) =
             transport::request_typed::<UploadAllMediaRespData>(self.config, &api_req, option)
