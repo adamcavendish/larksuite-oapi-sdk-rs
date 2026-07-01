@@ -6,7 +6,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
+use crate::service::common::{PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Shared sub-types ──
@@ -510,6 +510,66 @@ pub struct EmployeeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetEmployeeQuery<'a> {
+    pub employment_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetEmployeeQuery<'a> {
+    pub fn new(employment_id: &'a str) -> Self {
+        Self {
+            employment_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListEmployeeQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListEmployeeQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> EmployeeResource<'a> {
     pub async fn get(
         &self,
@@ -517,14 +577,26 @@ impl<'a> EmployeeResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetEmployeeResp, LarkError> {
-        let path = format!("/open-apis/corehr/v1/employments/{employment_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<EmployeeData>(self.config, &api_req, option).await?;
+        let query = GetEmployeeQuery::new(employment_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetEmployeeResp, LarkError> {
+        let path = format!("/open-apis/corehr/v1/employments/{}", query.employment_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<EmployeeData>()
+        .await?;
         Ok(GetEmployeeResp {
             api_resp,
             code_error: raw.code_error,
@@ -539,19 +611,29 @@ impl<'a> EmployeeResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListEmployeeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/employments");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<EmployeeListData>(self.config, &api_req, option).await?;
+        let query = ListEmployeeQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListEmployeeResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/employments",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page_query())
+        .send::<EmployeeListData>()
+        .await?;
         Ok(ListEmployeeResp {
             api_resp,
             code_error: raw.code_error,
@@ -564,6 +646,66 @@ pub struct DepartmentResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetDepartmentQuery<'a> {
+    pub department_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetDepartmentQuery<'a> {
+    pub fn new(department_id: &'a str) -> Self {
+        Self {
+            department_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListDepartmentQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListDepartmentQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> DepartmentResource<'a> {
     pub async fn get(
         &self,
@@ -571,14 +713,26 @@ impl<'a> DepartmentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetDepartmentResp, LarkError> {
-        let path = format!("/open-apis/corehr/v1/departments/{department_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DepartmentData>(self.config, &api_req, option).await?;
+        let query = GetDepartmentQuery::new(department_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetDepartmentResp, LarkError> {
+        let path = format!("/open-apis/corehr/v1/departments/{}", query.department_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<DepartmentData>()
+        .await?;
         Ok(GetDepartmentResp {
             api_resp,
             code_error: raw.code_error,
@@ -593,19 +747,29 @@ impl<'a> DepartmentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/departments");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DepartmentListData>(self.config, &api_req, option).await?;
+        let query = ListDepartmentQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListDepartmentResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/departments",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page_query())
+        .send::<DepartmentListData>()
+        .await?;
         Ok(ListDepartmentResp {
             api_resp,
             code_error: raw.code_error,
@@ -618,6 +782,39 @@ pub struct JobLevelResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobLevelQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListJobLevelQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> JobLevelResource<'a> {
     pub async fn get(
         &self,
@@ -625,10 +822,15 @@ impl<'a> JobLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<GetJobLevelResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_levels/{job_level_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<JobLevelData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<JobLevelData>()
+        .await?;
         Ok(GetJobLevelResp {
             api_resp,
             code_error: raw.code_error,
@@ -642,16 +844,27 @@ impl<'a> JobLevelResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobLevelResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/job_levels");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<JobLevelListData>(self.config, &api_req, option).await?;
+        let query = ListJobLevelQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobLevelQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobLevelResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/job_levels",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<JobLevelListData>()
+        .await?;
         Ok(ListJobLevelResp {
             api_resp,
             code_error: raw.code_error,
@@ -664,6 +877,39 @@ pub struct CompanyResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListCompanyQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListCompanyQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> CompanyResource<'a> {
     pub async fn get(
         &self,
@@ -671,10 +917,15 @@ impl<'a> CompanyResource<'a> {
         option: &RequestOption,
     ) -> Result<GetCompanyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/companies/{company_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<CompanyData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<CompanyData>()
+        .await?;
         Ok(GetCompanyResp {
             api_resp,
             code_error: raw.code_error,
@@ -688,16 +939,27 @@ impl<'a> CompanyResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCompanyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/companies");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CompanyListData>(self.config, &api_req, option).await?;
+        let query = ListCompanyQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCompanyQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCompanyResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/companies",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<CompanyListData>()
+        .await?;
         Ok(ListCompanyResp {
             api_resp,
             code_error: raw.code_error,
