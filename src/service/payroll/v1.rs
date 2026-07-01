@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
+use crate::service::common::{PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -52,6 +52,379 @@ impl_resp_v2!(ListPaymentActivityResp, serde_json::Value);
 impl_resp_v2!(ListPaymentActivityDetailResp, serde_json::Value);
 impl_resp_v2!(QueryPaymentDetailResp, serde_json::Value);
 
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListPayrollRecordQuery<'a> {
+    pub period: Option<&'a str>,
+    pub employee_id: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListPayrollRecordQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn period(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.period = value.into();
+        self
+    }
+
+    pub fn employee_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.employee_id = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListAcctItemQuery<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListAcctItemQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListCostAllocationDetailQuery<'a> {
+    pub cost_allocation_plan_id: Option<&'a str>,
+    pub pay_period: Option<&'a str>,
+    pub report_type: Option<i32>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListCostAllocationDetailQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn cost_allocation_plan_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.cost_allocation_plan_id = value.into();
+        self
+    }
+
+    pub fn pay_period(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.pay_period = value.into();
+        self
+    }
+
+    pub fn report_type(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.report_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListCostAllocationPlanQuery<'a> {
+    pub pay_period: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListCostAllocationPlanQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn pay_period(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.pay_period = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListCostAllocationReportQuery<'a> {
+    pub cost_allocation_plan_id: Option<&'a str>,
+    pub pay_period: Option<&'a str>,
+    pub report_type: Option<i32>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListCostAllocationReportQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn cost_allocation_plan_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.cost_allocation_plan_id = value.into();
+        self
+    }
+
+    pub fn pay_period(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.pay_period = value.into();
+        self
+    }
+
+    pub fn report_type(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.report_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListDatasourceQuery<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListDatasourceQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct QueryDatasourceRecordQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> QueryDatasourceRecordQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListPaygroupQuery<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListPaygroupQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListPaymentActivityQuery<'a> {
+    pub pay_period_start_date: Option<&'a str>,
+    pub pay_period_end_date: Option<&'a str>,
+    pub statuses: Option<&'a [i32]>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListPaymentActivityQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn pay_period_start_date(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.pay_period_start_date = value.into();
+        self
+    }
+
+    pub fn pay_period_end_date(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.pay_period_end_date = value.into();
+        self
+    }
+
+    pub fn statuses(mut self, value: impl Into<Option<&'a [i32]>>) -> Self {
+        self.statuses = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListPaymentActivityDetailQuery<'a> {
+    pub activity_id: &'a str,
+    pub page_index: Option<i32>,
+    pub page_size: Option<i32>,
+    pub include_segment_data: Option<bool>,
+    pub acct_item_ids: Option<&'a [&'a str]>,
+}
+
+impl<'a> ListPaymentActivityDetailQuery<'a> {
+    pub fn new(activity_id: &'a str) -> Self {
+        Self {
+            activity_id,
+            page_index: None,
+            page_size: None,
+            include_segment_data: None,
+            acct_item_ids: None,
+        }
+    }
+
+    pub fn page_index(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_index = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn include_segment_data(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.include_segment_data = value.into();
+        self
+    }
+
+    pub fn acct_item_ids(mut self, value: impl Into<Option<&'a [&'a str]>>) -> Self {
+        self.acct_item_ids = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct QueryPaymentDetailQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> QueryPaymentDetailQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
 // ── Resources ──
 
 pub struct PayrollRecordResource<'a> {
@@ -67,22 +440,30 @@ impl<'a> PayrollRecordResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListPayrollRecordResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/payroll_records");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = period {
-            api_req.query_params.set("period", v);
-        }
-        if let Some(v) = employee_id {
-            api_req.query_params.set("employee_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RecordListData>(self.config, &api_req, option).await?;
+        let query = ListPayrollRecordQuery::new()
+            .period(period)
+            .employee_id(employee_id)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListPayrollRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListPayrollRecordResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/payroll/v1/payroll_records",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("period", query.period)
+        .query("employee_id", query.employee_id)
+        .page_query(query.page)
+        .send::<RecordListData>()
+        .await?;
         Ok(ListPayrollRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -104,17 +485,25 @@ impl AcctItemResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAcctItemResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/acct_items");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListAcctItemQuery::new().page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAcctItemQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAcctItemResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/payroll/v1/acct_items",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListAcctItemResp {
             api_resp,
             code_error,
@@ -140,29 +529,32 @@ impl CostAllocationDetailResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCostAllocationDetailResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListCostAllocationDetailQuery::new()
+            .cost_allocation_plan_id(cost_allocation_plan_id)
+            .pay_period(pay_period)
+            .report_type(report_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCostAllocationDetailQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCostAllocationDetailResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/cost_allocation_details",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = cost_allocation_plan_id {
-            api_req.query_params.set("cost_allocation_plan_id", v);
-        }
-        if let Some(v) = pay_period {
-            api_req.query_params.set("pay_period", v);
-        }
-        if let Some(v) = report_type {
-            api_req.query_params.set("report_type", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("cost_allocation_plan_id", query.cost_allocation_plan_id)
+        .query("pay_period", query.pay_period)
+        .query("report_type", query.report_type)
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListCostAllocationDetailResp {
             api_resp,
             code_error,
@@ -185,23 +577,28 @@ impl CostAllocationPlanResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCostAllocationPlanResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListCostAllocationPlanQuery::new()
+            .pay_period(pay_period)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCostAllocationPlanQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCostAllocationPlanResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/cost_allocation_plans",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = pay_period {
-            api_req.query_params.set("pay_period", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("pay_period", query.pay_period)
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListCostAllocationPlanResp {
             api_resp,
             code_error,
@@ -227,29 +624,32 @@ impl CostAllocationReportResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCostAllocationReportResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListCostAllocationReportQuery::new()
+            .cost_allocation_plan_id(cost_allocation_plan_id)
+            .pay_period(pay_period)
+            .report_type(report_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCostAllocationReportQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCostAllocationReportResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/cost_allocation_reports",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = cost_allocation_plan_id {
-            api_req.query_params.set("cost_allocation_plan_id", v);
-        }
-        if let Some(v) = pay_period {
-            api_req.query_params.set("pay_period", v);
-        }
-        if let Some(v) = report_type {
-            api_req.query_params.set("report_type", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("cost_allocation_plan_id", query.cost_allocation_plan_id)
+        .query("pay_period", query.pay_period)
+        .query("report_type", query.report_type)
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListCostAllocationReportResp {
             api_resp,
             code_error,
@@ -271,17 +671,25 @@ impl DatasourceResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListDatasourceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/datasources");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListDatasourceQuery::new().page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListDatasourceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListDatasourceResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/payroll/v1/datasources",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListDatasourceResp {
             api_resp,
             code_error,
@@ -304,21 +712,27 @@ impl DatasourceRecordResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<QueryDatasourceRecordResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = QueryDatasourceRecordQuery::new(body)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryDatasourceRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryDatasourceRecordResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/payroll/v1/datasource_records/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryDatasourceRecordResp {
             api_resp,
             code_error,
@@ -361,17 +775,25 @@ impl PaygroupResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListPaygroupResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/paygroups");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListPaygroupQuery::new().page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListPaygroupQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListPaygroupResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/payroll/v1/paygroups",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListPaygroupResp {
             api_resp,
             code_error,
@@ -418,28 +840,32 @@ impl PaymentActivityResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListPaymentActivityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/payroll/v1/payment_activitys");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = pay_period_start_date {
-            api_req.query_params.set("pay_period_start_date", v);
-        }
-        if let Some(v) = pay_period_end_date {
-            api_req.query_params.set("pay_period_end_date", v);
-        }
-        if let Some(statuses) = statuses {
-            for s in statuses {
-                api_req.query_params.add("statuses", s.to_string());
-            }
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListPaymentActivityQuery::new()
+            .pay_period_start_date(pay_period_start_date)
+            .pay_period_end_date(pay_period_end_date)
+            .statuses(statuses)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListPaymentActivityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListPaymentActivityResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/payroll/v1/payment_activitys",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("pay_period_start_date", query.pay_period_start_date)
+        .query("pay_period_end_date", query.pay_period_end_date)
+        .query_values("statuses", query.statuses)
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListPaymentActivityResp {
             api_resp,
             code_error,
@@ -465,31 +891,33 @@ impl PaymentActivityDetailResource<'_> {
         acct_item_ids: Option<&[&str]>,
         option: &RequestOption,
     ) -> Result<ListPaymentActivityDetailResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListPaymentActivityDetailQuery::new(activity_id)
+            .page_index(page_index)
+            .page_size(page_size)
+            .include_segment_data(include_segment_data)
+            .acct_item_ids(acct_item_ids);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListPaymentActivityDetailQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListPaymentActivityDetailResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/payment_activity_details",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("activity_id", activity_id);
-        if let Some(v) = page_index {
-            api_req.query_params.set("page_index", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = include_segment_data {
-            api_req
-                .query_params
-                .set("include_segment_data", v.to_string());
-        }
-        if let Some(ids) = acct_item_ids {
-            for id in ids {
-                api_req.query_params.add("acct_item_ids", *id);
-            }
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("activity_id", query.activity_id)
+        .query("page_index", query.page_index)
+        .query("page_size", query.page_size)
+        .query("include_segment_data", query.include_segment_data)
+        .query_values("acct_item_ids", query.acct_item_ids)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListPaymentActivityDetailResp {
             api_resp,
             code_error,
@@ -510,15 +938,25 @@ impl PaymentDetailResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryPaymentDetailResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = QueryPaymentDetailQuery::new(body);
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryPaymentDetailQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryPaymentDetailResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/payroll/v1/payment_detail/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryPaymentDetailResp {
             api_resp,
             code_error,
