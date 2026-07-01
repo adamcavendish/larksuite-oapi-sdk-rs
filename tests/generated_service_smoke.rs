@@ -53,6 +53,11 @@ use larksuite_oapi_sdk_rs::service::{
         v1::{ListFileQuery, ListFileVersionQuery, ListFileViewRecordQuery},
         v2::ListFileLikeQuery,
     },
+    hire::v1::{
+        GetApplicationQuery as GetHireApplicationQuery, GetJobQuery as GetHireJobQuery,
+        GetTalentQuery as GetHireTalentQuery, ListApplicationQuery as ListHireApplicationQuery,
+        ListJobQuery as ListHireJobQuery, ListTalentQuery as ListHireTalentQuery,
+    },
     task::{CreateTaskReqBody, ListTaskQuery},
     vc::{
         GetMeetingListQuery, GetParticipantListQuery, GetParticipantQualityListQuery,
@@ -2989,6 +2994,232 @@ async fn helpdesk_faq_image_download_smoke() {
     assert_eq!(resp.data, body.as_bytes());
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/helpdesk/v1/faqs/faq-1/image/image-key-1"));
+}
+
+// ── Hire ──
+
+#[tokio::test]
+async fn hire_job_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"job":{"id":"job-1"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = GetHireJobQuery::new("job-1")
+        .user_id_type("open_id")
+        .department_id_type("open_department_id")
+        .job_level_id_type("job_level_id")
+        .job_family_id_type("job_family_id");
+    let resp = client
+        .hire()
+        .job
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(resp.data.unwrap().job.unwrap().id.as_deref(), Some("job-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/jobs/job-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=open_department_id"));
+    assert!(request.contains("job_level_id_type=job_level_id"));
+    assert!(request.contains("job_family_id_type=job_family_id"));
+}
+
+#[tokio::test]
+async fn hire_job_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"job-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListHireJobQuery::new()
+        .update_start_time("1618500278663")
+        .update_end_time("1618500279999")
+        .user_id_type("open_id")
+        .department_id_type("open_department_id")
+        .job_level_id_type("job_level_id")
+        .job_family_id_type("job_family_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .hire()
+        .job
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0].id.as_deref(), Some("job-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/jobs?"));
+    assert!(request.contains("update_start_time=1618500278663"));
+    assert!(request.contains("update_end_time=1618500279999"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=open_department_id"));
+    assert!(request.contains("job_level_id_type=job_level_id"));
+    assert!(request.contains("job_family_id_type=job_family_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn hire_talent_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"talent":{"id":"talent-1"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = GetHireTalentQuery::new("talent-1").user_id_type("open_id");
+    let resp = client
+        .hire()
+        .talent
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data.unwrap().talent.unwrap().id.as_deref(),
+        Some("talent-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/talents/talent-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn hire_talent_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"talent-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListHireTalentQuery::new()
+        .keyword("product")
+        .update_start_time("1618500278663")
+        .update_end_time("1618500279999")
+        .sort_by(1)
+        .query_option("ignore_empty_error")
+        .user_id_type("open_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .hire()
+        .talent
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0].id.as_deref(), Some("talent-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/talents?"));
+    assert!(request.contains("keyword=product"));
+    assert!(request.contains("update_start_time=1618500278663"));
+    assert!(request.contains("update_end_time=1618500279999"));
+    assert!(request.contains("sort_by=1"));
+    assert!(request.contains("query_option=ignore_empty_error"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn hire_application_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"application":{"id":"app-1"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = GetHireApplicationQuery::new("app-1").user_id_type("open_id");
+    let resp = client
+        .hire()
+        .application
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data.unwrap().application.unwrap().id.as_deref(),
+        Some("app-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/applications/app-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn hire_application_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"app-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListHireApplicationQuery::new()
+        .process_id("process-1")
+        .job_id("job-1")
+        .stage_id("stage-1")
+        .talent_id("talent-1")
+        .active_status(1)
+        .user_id_type("open_id")
+        .update_start_time("1618500278663")
+        .update_end_time("1618500279999")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .hire()
+        .application
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0].id.as_deref(), Some("app-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/applications?"));
+    assert!(request.contains("process_id=process-1"));
+    assert!(request.contains("job_id=job-1"));
+    assert!(request.contains("stage_id=stage-1"));
+    assert!(request.contains("talent_id=talent-1"));
+    assert!(request.contains("active_status=1"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("update_start_time=1618500278663"));
+    assert!(request.contains("update_end_time=1618500279999"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn hire_application_list_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"app-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .hire()
+        .application
+        .list(
+            Some(20),
+            Some("next-page"),
+            Some("job-1"),
+            Some("stage-1"),
+            Some("talent-1"),
+            Some(1),
+            Some("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0].id.as_deref(), Some("app-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/applications?"));
+    assert!(request.contains("job_id=job-1"));
+    assert!(request.contains("stage_id=stage-1"));
+    assert!(request.contains("talent_id=talent-1"));
+    assert!(request.contains("active_status=1"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
 }
 
 // ── VC ──
