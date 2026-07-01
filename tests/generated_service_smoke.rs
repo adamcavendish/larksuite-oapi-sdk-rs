@@ -5,6 +5,7 @@ use common::{http_response, http_response_with_headers, mock_server_with_request
 use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::{
+    bitable::v1::{ListTableQuery, ListViewQuery},
     common::PageQuery,
     contact::v3::{
         ChildrenDepartmentQuery, FindUserByDepartmentQuery, ListDepartmentQuery,
@@ -33,6 +34,86 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
         .disable_token_cache()
         .build()
         .unwrap()
+}
+
+// ── Bitable ──
+
+#[tokio::test]
+async fn bitable_table_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"table_id":"tbl-1","name":"Tasks"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListTableQuery::new("app-token-1")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .bitable()
+        .table
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0].name.as_deref(), Some("Tasks"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/bitable/v1/apps/app-token-1/tables?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn bitable_view_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"view_id":"view-1","view_name":"Grid"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListViewQuery::new("app-token-1", "tbl-1")
+        .user_id_type("open_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .bitable()
+        .view
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0].view_name.as_deref(), Some("Grid"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/bitable/v1/apps/app-token-1/tables/tbl-1/views?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn bitable_view_list_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"view_id":"view-1","view_name":"Grid"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .bitable()
+        .view
+        .list(
+            "app-token-1",
+            "tbl-1",
+            Some(20),
+            Some("next-page"),
+            Some("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/bitable/v1/apps/app-token-1/tables/tbl-1/views?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
 }
 
 // ── IM ──

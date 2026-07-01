@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, parse_v2};
+use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -831,6 +831,44 @@ pub struct AppTableResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListTableQuery<'a> {
+    pub app_token: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListTableQuery<'a> {
+    pub fn new(app_token: &'a str) -> Self {
+        Self {
+            app_token,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> AppTableResource<'a> {
     pub async fn create(
         &self,
@@ -936,17 +974,28 @@ impl<'a> AppTableResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListTableResp, LarkError> {
-        let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TableListData>(self.config, &api_req, option).await?;
+        let query = ListTableQuery::new(app_token)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTableQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTableResp, LarkError> {
+        let path = format!("/open-apis/bitable/v1/apps/{}/tables", query.app_token);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<TableListData>()
+        .await?;
         Ok(ListTableResp {
             api_resp,
             code_error: raw.code_error,
@@ -957,6 +1006,53 @@ impl<'a> AppTableResource<'a> {
 
 pub struct AppTableViewResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListViewQuery<'a> {
+    pub app_token: &'a str,
+    pub table_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListViewQuery<'a> {
+    pub fn new(app_token: &'a str, table_id: &'a str) -> Self {
+        Self {
+            app_token,
+            table_id,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> AppTableViewResource<'a> {
@@ -1050,20 +1146,33 @@ impl<'a> AppTableViewResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListViewResp, LarkError> {
-        let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ViewListData>(self.config, &api_req, option).await?;
+        let query = ListViewQuery::new(app_token, table_id)
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListViewQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListViewResp, LarkError> {
+        let path = format!(
+            "/open-apis/bitable/v1/apps/{}/tables/{}/views",
+            query.app_token, query.table_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .send::<ViewListData>()
+        .await?;
         Ok(ListViewResp {
             api_resp,
             code_error: raw.code_error,
