@@ -326,6 +326,34 @@ impl<'a> ListMailgroupQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListMailgroupMemberQuery<'a> {
+    pub mailgroup_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListMailgroupMemberQuery<'a> {
+    pub fn new(mailgroup_id: &'a str) -> Self {
+        Self {
+            mailgroup_id,
+            user_id_type: None,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct MailgroupResource<'a> {
@@ -513,21 +541,32 @@ impl<'a> MailgroupMemberResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListMailgroupMemberResp, LarkError> {
-        let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MailgroupMemberListData>(self.config, &api_req, option)
-                .await?;
+        let query = ListMailgroupMemberQuery::new(mailgroup_id)
+            .user_id_type(user_id_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListMailgroupMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListMailgroupMemberResp, LarkError> {
+        let path = format!(
+            "/open-apis/mail/v1/mailgroups/{}/members",
+            query.mailgroup_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send::<MailgroupMemberListData>()
+        .await?;
         Ok(ListMailgroupMemberResp {
             api_resp,
             code_error: raw.code_error,
