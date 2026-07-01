@@ -1645,6 +1645,114 @@ pub struct FileCommentResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct BatchQueryFileCommentQuery<'a> {
+    pub file_token: &'a str,
+    pub file_type: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub body: &'a BatchQueryFileCommentReqBody,
+}
+
+impl<'a> BatchQueryFileCommentQuery<'a> {
+    pub fn new(
+        file_token: &'a str,
+        file_type: &'a str,
+        body: &'a BatchQueryFileCommentReqBody,
+    ) -> Self {
+        Self {
+            file_token,
+            file_type,
+            user_id_type: None,
+            body,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetFileCommentQuery<'a> {
+    pub file_token: &'a str,
+    pub comment_id: &'a str,
+    pub file_type: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetFileCommentQuery<'a> {
+    pub fn new(file_token: &'a str, comment_id: &'a str, file_type: &'a str) -> Self {
+        Self {
+            file_token,
+            comment_id,
+            file_type,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListFileCommentQuery<'a> {
+    pub file_token: &'a str,
+    pub file_type: &'a str,
+    pub is_whole: Option<bool>,
+    pub is_solved: Option<bool>,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListFileCommentQuery<'a> {
+    pub fn new(file_token: &'a str, file_type: &'a str) -> Self {
+        Self {
+            file_token,
+            file_type,
+            is_whole: None,
+            is_solved: None,
+            page: PageQuery::new(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn is_whole(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.is_whole = value.into();
+        self
+    }
+
+    pub fn is_solved(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.is_solved = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> FileCommentResource<'a> {
     pub async fn batch_query(
         &self,
@@ -1654,19 +1762,31 @@ impl<'a> FileCommentResource<'a> {
         body: &BatchQueryFileCommentReqBody,
         option: &RequestOption,
     ) -> Result<BatchQueryFileCommentResp, LarkError> {
-        let path = format!("/open-apis/drive/v1/files/{file_token}/comments/batch_query");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<BatchQueryFileCommentRespData>(
+        let query =
+            BatchQueryFileCommentQuery::new(file_token, file_type, body).user_id_type(user_id_type);
+        self.batch_query_by_query(&query, option).await
+    }
+
+    pub async fn batch_query_by_query(
+        &self,
+        query: &BatchQueryFileCommentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchQueryFileCommentResp, LarkError> {
+        let path = format!(
+            "/open-apis/drive/v1/files/{}/comments/batch_query",
+            query.file_token
+        );
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
+        .query("file_type", query.file_type)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<BatchQueryFileCommentRespData>()
         .await?;
         Ok(BatchQueryFileCommentResp {
             api_resp,
@@ -1708,15 +1828,31 @@ impl<'a> FileCommentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetFileCommentResp, LarkError> {
-        let path = format!("/open-apis/drive/v1/files/{file_token}/comments/{comment_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<FileComment>(self.config, &api_req, option).await?;
+        let query =
+            GetFileCommentQuery::new(file_token, comment_id, file_type).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetFileCommentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetFileCommentResp, LarkError> {
+        let path = format!(
+            "/open-apis/drive/v1/files/{}/comments/{}",
+            query.file_token, query.comment_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("file_type", query.file_type)
+        .query("user_id_type", query.user_id_type)
+        .send::<FileComment>()
+        .await?;
         Ok(GetFileCommentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1736,28 +1872,34 @@ impl<'a> FileCommentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFileCommentResp, LarkError> {
-        let path = format!("/open-apis/drive/v1/files/{file_token}/comments");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = is_whole {
-            api_req.query_params.set("is_whole", v.to_string());
-        }
-        if let Some(v) = is_solved {
-            api_req.query_params.set("is_solved", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListFileCommentRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ListFileCommentQuery::new(file_token, file_type)
+            .is_whole(is_whole)
+            .is_solved(is_solved)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFileCommentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFileCommentResp, LarkError> {
+        let path = format!("/open-apis/drive/v1/files/{}/comments", query.file_token);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("file_type", query.file_type)
+        .query("is_whole", query.is_whole)
+        .query("is_solved", query.is_solved)
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .send::<ListFileCommentRespData>()
+        .await?;
         Ok(ListFileCommentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1812,6 +1954,48 @@ pub struct FileCommentReplyResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListFileCommentReplyQuery<'a> {
+    pub file_token: &'a str,
+    pub comment_id: &'a str,
+    pub file_type: &'a str,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListFileCommentReplyQuery<'a> {
+    pub fn new(file_token: &'a str, comment_id: &'a str, file_type: &'a str) -> Self {
+        Self {
+            file_token,
+            comment_id,
+            file_type,
+            page: PageQuery::new(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> FileCommentReplyResource<'a> {
     pub async fn delete(
         &self,
@@ -1846,22 +2030,33 @@ impl<'a> FileCommentReplyResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFileCommentReplyResp, LarkError> {
-        let path = format!("/open-apis/drive/v1/files/{file_token}/comments/{comment_id}/replies");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListFileCommentReplyRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ListFileCommentReplyQuery::new(file_token, comment_id, file_type)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFileCommentReplyQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFileCommentReplyResp, LarkError> {
+        let path = format!(
+            "/open-apis/drive/v1/files/{}/comments/{}/replies",
+            query.file_token, query.comment_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("file_type", query.file_type)
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .send::<ListFileCommentReplyRespData>()
+        .await?;
         Ok(ListFileCommentReplyResp {
             api_resp,
             code_error: raw.code_error,
