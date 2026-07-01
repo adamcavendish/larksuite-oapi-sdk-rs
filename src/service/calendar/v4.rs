@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::EmptyResp;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -838,6 +838,72 @@ pub struct CalendarResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetCalendarQuery<'a> {
+    pub calendar_id: &'a str,
+}
+
+impl<'a> GetCalendarQuery<'a> {
+    pub fn new(calendar_id: &'a str) -> Self {
+        Self { calendar_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListCalendarQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub sync_token: Option<&'a str>,
+}
+
+impl<'a> ListCalendarQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn sync_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.sync_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SearchCalendarQuery<'a> {
+    pub body: &'a SearchCalendarReqBody,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> SearchCalendarQuery<'a> {
+    pub fn new(body: &'a SearchCalendarReqBody) -> Self {
+        Self {
+            body,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
 impl<'a> CalendarResource<'a> {
     pub async fn create(
         &self,
@@ -861,11 +927,25 @@ impl<'a> CalendarResource<'a> {
         calendar_id: &str,
         option: &RequestOption,
     ) -> Result<GetCalendarResp, LarkError> {
-        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<Calendar>(self.config, &api_req, option).await?;
+        let query = GetCalendarQuery::new(calendar_id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetCalendarQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetCalendarResp, LarkError> {
+        let path = format!("/open-apis/calendar/v4/calendars/{}", query.calendar_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<Calendar>()
+        .await?;
         Ok(GetCalendarResp {
             api_resp,
             code_error: raw.code_error,
@@ -915,19 +995,29 @@ impl<'a> CalendarResource<'a> {
         sync_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCalendarResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/calendar/v4/calendars");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = sync_token {
-            api_req.query_params.set("sync_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CalendarListData>(self.config, &api_req, option).await?;
+        let query = ListCalendarQuery {
+            page: PageQuery::from_parts(page_size, page_token),
+            sync_token,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCalendarQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCalendarResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/calendar/v4/calendars",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("sync_token", query.sync_token)
+        .send::<CalendarListData>()
+        .await?;
         Ok(ListCalendarResp {
             api_resp,
             code_error: raw.code_error,
@@ -1005,20 +1095,28 @@ impl<'a> CalendarResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<SearchCalendarResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = SearchCalendarQuery {
+            body,
+            page: PageQuery::from_parts(page_size, page_token),
+        };
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchCalendarQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchCalendarResp, LarkError> {
+        let request = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SearchCalendarData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .json_body(query.body)?;
+        let (api_resp, raw) = request.send::<SearchCalendarData>().await?;
         Ok(SearchCalendarResp {
             api_resp,
             code_error: raw.code_error,
@@ -1093,6 +1191,202 @@ pub struct CalendarEventResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetEventQuery<'a> {
+    pub calendar_id: &'a str,
+    pub event_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetEventQuery<'a> {
+    pub fn new(calendar_id: &'a str, event_id: &'a str) -> Self {
+        Self {
+            calendar_id,
+            event_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListEventQuery<'a> {
+    pub calendar_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub anchor_time: Option<&'a str>,
+    pub sync_token: Option<&'a str>,
+    pub start_time: Option<&'a str>,
+    pub end_time: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListEventQuery<'a> {
+    pub fn new(calendar_id: &'a str) -> Self {
+        Self {
+            calendar_id,
+            page: PageQuery::new(),
+            anchor_time: None,
+            sync_token: None,
+            start_time: None,
+            end_time: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn anchor_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.anchor_time = value.into();
+        self
+    }
+
+    pub fn sync_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.sync_token = value.into();
+        self
+    }
+
+    pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_time = value.into();
+        self
+    }
+
+    pub fn end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_time = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct InstanceViewEventQuery<'a> {
+    pub calendar_id: &'a str,
+    pub start_time: Option<&'a str>,
+    pub end_time: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> InstanceViewEventQuery<'a> {
+    pub fn new(calendar_id: &'a str) -> Self {
+        Self {
+            calendar_id,
+            start_time: None,
+            end_time: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_time = value.into();
+        self
+    }
+
+    pub fn end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_time = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct InstancesEventQuery<'a> {
+    pub calendar_id: &'a str,
+    pub event_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub start_time: Option<&'a str>,
+    pub end_time: Option<&'a str>,
+}
+
+impl<'a> InstancesEventQuery<'a> {
+    pub fn new(calendar_id: &'a str, event_id: &'a str) -> Self {
+        Self {
+            calendar_id,
+            event_id,
+            page: PageQuery::new(),
+            start_time: None,
+            end_time: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_time = value.into();
+        self
+    }
+
+    pub fn end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_time = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SearchEventQuery<'a> {
+    pub calendar_id: &'a str,
+    pub body: &'a SearchEventReqBody,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> SearchEventQuery<'a> {
+    pub fn new(calendar_id: &'a str, body: &'a SearchEventReqBody) -> Self {
+        Self {
+            calendar_id,
+            body,
+            page: PageQuery::new(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> CalendarEventResource<'a> {
     pub async fn create(
         &self,
@@ -1124,14 +1418,29 @@ impl<'a> CalendarEventResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetEventResp, LarkError> {
-        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CalendarEventData>(self.config, &api_req, option).await?;
+        let query = GetEventQuery::new(calendar_id, event_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetEventQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetEventResp, LarkError> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{}/events/{}",
+            query.calendar_id, query.event_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<CalendarEventData>()
+        .await?;
         Ok(GetEventResp {
             api_resp,
             code_error: raw.code_error,
@@ -1197,33 +1506,42 @@ impl<'a> CalendarEventResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListEventResp, LarkError> {
-        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = anchor_time {
-            api_req.query_params.set("anchor_time", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = sync_token {
-            api_req.query_params.set("sync_token", v);
-        }
-        if let Some(v) = start_time {
-            api_req.query_params.set("start_time", v);
-        }
-        if let Some(v) = end_time {
-            api_req.query_params.set("end_time", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CalendarEventListData>(self.config, &api_req, option)
-                .await?;
+        let query = ListEventQuery {
+            calendar_id,
+            page: PageQuery::from_parts(page_size, page_token),
+            anchor_time,
+            sync_token,
+            start_time,
+            end_time,
+            user_id_type,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListEventQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListEventResp, LarkError> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{}/events",
+            query.calendar_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("anchor_time", query.anchor_time)
+        .query("sync_token", query.sync_token)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("user_id_type", query.user_id_type)
+        .send::<CalendarEventListData>()
+        .await?;
         Ok(ListEventResp {
             api_resp,
             code_error: raw.code_error,
@@ -1240,20 +1558,34 @@ impl<'a> CalendarEventResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<InstanceViewResp, LarkError> {
-        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/instance_view");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = start_time {
-            api_req.query_params.set("start_time", v);
-        }
-        if let Some(v) = end_time {
-            api_req.query_params.set("end_time", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<InstanceViewData>(self.config, &api_req, option).await?;
+        let query = InstanceViewEventQuery::new(calendar_id)
+            .start_time(start_time)
+            .end_time(end_time)
+            .user_id_type(user_id_type);
+        self.instance_view_by_query(&query, option).await
+    }
+
+    pub async fn instance_view_by_query(
+        &self,
+        query: &InstanceViewEventQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<InstanceViewResp, LarkError> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{}/events/instance_view",
+            query.calendar_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("user_id_type", query.user_id_type)
+        .send::<InstanceViewData>()
+        .await?;
         Ok(InstanceViewResp {
             api_resp,
             code_error: raw.code_error,
@@ -1272,24 +1604,37 @@ impl<'a> CalendarEventResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<InstancesResp, LarkError> {
-        let path =
-            format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/instances");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = start_time {
-            api_req.query_params.set("start_time", v);
-        }
-        if let Some(v) = end_time {
-            api_req.query_params.set("end_time", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<InstancesData>(self.config, &api_req, option).await?;
+        let query = InstancesEventQuery {
+            calendar_id,
+            event_id,
+            page: PageQuery::from_parts(page_size, page_token),
+            start_time,
+            end_time,
+        };
+        self.instances_by_query(&query, option).await
+    }
+
+    pub async fn instances_by_query(
+        &self,
+        query: &InstancesEventQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<InstancesResp, LarkError> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{}/events/{}/instances",
+            query.calendar_id, query.event_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .page_query(query.page)
+        .send::<InstancesData>()
+        .await?;
         Ok(InstancesResp {
             api_resp,
             code_error: raw.code_error,
@@ -1327,21 +1672,35 @@ impl<'a> CalendarEventResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<SearchEventResp, LarkError> {
-        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/search");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SearchEventData>(self.config, &api_req, option).await?;
+        let query = SearchEventQuery {
+            calendar_id,
+            body,
+            page: PageQuery::from_parts(page_size, page_token),
+            user_id_type,
+        };
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchEventQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchEventResp, LarkError> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{}/events/search",
+            query.calendar_id
+        );
+        let request = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .json_body(query.body)?;
+        let (api_resp, raw) = request.send::<SearchEventData>().await?;
         Ok(SearchEventResp {
             api_resp,
             code_error: raw.code_error,
@@ -1384,6 +1743,41 @@ impl<'a> CalendarEventResource<'a> {
 
 pub struct CalendarAttendeeResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListAttendeeQuery<'a> {
+    pub calendar_id: &'a str,
+    pub event_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListAttendeeQuery<'a> {
+    pub fn new(calendar_id: &'a str, event_id: &'a str) -> Self {
+        Self {
+            calendar_id,
+            event_id,
+            page: PageQuery::new(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
 }
 
 impl<'a> CalendarAttendeeResource<'a> {
@@ -1446,21 +1840,35 @@ impl<'a> CalendarAttendeeResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAttendeeResp, LarkError> {
-        let path =
-            format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AttendeeListData>(self.config, &api_req, option).await?;
+        let query = ListAttendeeQuery {
+            calendar_id,
+            event_id,
+            page: PageQuery::from_parts(page_size, page_token),
+            user_id_type,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAttendeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAttendeeResp, LarkError> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{}/events/{}/attendees",
+            query.calendar_id, query.event_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .send::<AttendeeListData>()
+        .await?;
         Ok(ListAttendeeResp {
             api_resp,
             code_error: raw.code_error,
@@ -1471,6 +1879,39 @@ impl<'a> CalendarAttendeeResource<'a> {
 
 pub struct CalendarAclResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListAclQuery<'a> {
+    pub calendar_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListAclQuery<'a> {
+    pub fn new(calendar_id: &'a str) -> Self {
+        Self {
+            calendar_id,
+            page: PageQuery::new(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
 }
 
 impl<'a> CalendarAclResource<'a> {
@@ -1522,20 +1963,34 @@ impl<'a> CalendarAclResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListAclResp, LarkError> {
-        let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AclListData>(self.config, &api_req, option).await?;
+        let query = ListAclQuery {
+            calendar_id,
+            page: PageQuery::from_parts(page_size, page_token),
+            user_id_type,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAclQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAclResp, LarkError> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{}/acls",
+            query.calendar_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send::<AclListData>()
+        .await?;
         Ok(ListAclResp {
             api_resp,
             code_error: raw.code_error,
@@ -1580,6 +2035,28 @@ pub struct TimeZoneResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListTimeZoneQuery<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListTimeZoneQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
 impl<'a> TimeZoneResource<'a> {
     pub async fn list(
         &self,
@@ -1587,16 +2064,27 @@ impl<'a> TimeZoneResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListTimeZoneResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/calendar/v4/timezones");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TimeZoneListData>(self.config, &api_req, option).await?;
+        let query = ListTimeZoneQuery {
+            page: PageQuery::from_parts(page_size, page_token),
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTimeZoneQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTimeZoneResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/calendar/v4/timezones",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .send::<TimeZoneListData>()
+        .await?;
         Ok(ListTimeZoneResp {
             api_resp,
             code_error: raw.code_error,
@@ -1731,6 +2219,48 @@ pub struct FreeBusyResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListFreeBusyQuery<'a> {
+    pub body: &'a ListFreeBusyReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListFreeBusyQuery<'a> {
+    pub fn new(body: &'a ListFreeBusyReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct BatchFreeBusyQuery<'a> {
+    pub body: &'a BatchFreeBusyReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> BatchFreeBusyQuery<'a> {
+    pub fn new(body: &'a BatchFreeBusyReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> FreeBusyResource<'a> {
     pub async fn list(
         &self,
@@ -1738,14 +2268,25 @@ impl<'a> FreeBusyResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFreeBusyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/freebusy/list");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FreeBusyData>(self.config, &api_req, option).await?;
+        let query = ListFreeBusyQuery::new(body).user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFreeBusyQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFreeBusyResp, LarkError> {
+        let request = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/calendar/v4/freebusy/list",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?;
+        let (api_resp, raw) = request.send::<FreeBusyData>().await?;
         Ok(ListFreeBusyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1759,14 +2300,25 @@ impl<'a> FreeBusyResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchFreeBusyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/freebusy/batch");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BatchFreeBusyData>(self.config, &api_req, option).await?;
+        let query = BatchFreeBusyQuery::new(body).user_id_type(user_id_type);
+        self.batch_by_query(&query, option).await
+    }
+
+    pub async fn batch_by_query(
+        &self,
+        query: &BatchFreeBusyQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchFreeBusyResp, LarkError> {
+        let request = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/calendar/v4/freebusy/batch",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?;
+        let (api_resp, raw) = request.send::<BatchFreeBusyData>().await?;
         Ok(BatchFreeBusyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1777,6 +2329,43 @@ impl<'a> FreeBusyResource<'a> {
 
 pub struct CalendarEventAttendeeChatMemberResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListChatMemberQuery<'a> {
+    pub calendar_id: &'a str,
+    pub event_id: &'a str,
+    pub attendee_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListChatMemberQuery<'a> {
+    pub fn new(calendar_id: &'a str, event_id: &'a str, attendee_id: &'a str) -> Self {
+        Self {
+            calendar_id,
+            event_id,
+            attendee_id,
+            page: PageQuery::new(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
 }
 
 impl<'a> CalendarEventAttendeeChatMemberResource<'a> {
@@ -1791,22 +2380,36 @@ impl<'a> CalendarEventAttendeeChatMemberResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListChatMemberResp, LarkError> {
+        let query = ListChatMemberQuery {
+            calendar_id,
+            event_id,
+            attendee_id,
+            page: PageQuery::from_parts(page_size, page_token),
+            user_id_type,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListChatMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListChatMemberResp, LarkError> {
         let path = format!(
-            "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees/{attendee_id}/chat_members"
+            "/open-apis/calendar/v4/calendars/{}/events/{}/attendees/{}/chat_members",
+            query.calendar_id, query.event_id, query.attendee_id
         );
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ChatMemberListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .send::<ChatMemberListData>()
+        .await?;
         Ok(ListChatMemberResp {
             api_resp,
             code_error: raw.code_error,
