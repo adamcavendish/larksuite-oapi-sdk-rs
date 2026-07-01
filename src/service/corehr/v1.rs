@@ -1701,6 +1701,39 @@ pub struct ContractResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListContractQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListContractQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> ContractResource<'a> {
     pub async fn create(
         &self,
@@ -1743,11 +1776,15 @@ impl<'a> ContractResource<'a> {
         option: &RequestOption,
     ) -> Result<GetContractResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/contracts/{contract_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetContractResp {
             api_resp,
             code_error,
@@ -1761,17 +1798,27 @@ impl<'a> ContractResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListContractResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/contracts");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListContractQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListContractQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListContractResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/contracts",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListContractResp {
             api_resp,
             code_error,
@@ -1804,6 +1851,39 @@ pub struct CountryRegionResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListCountryRegionQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListCountryRegionQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> CountryRegionResource<'a> {
     pub async fn get(
         &self,
@@ -1811,11 +1891,15 @@ impl<'a> CountryRegionResource<'a> {
         option: &RequestOption,
     ) -> Result<GetCountryRegionResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/country_regions/{country_region_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetCountryRegionResp {
             api_resp,
             code_error,
@@ -1829,17 +1913,27 @@ impl<'a> CountryRegionResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCountryRegionResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/country_regions");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListCountryRegionQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCountryRegionQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCountryRegionResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/country_regions",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListCountryRegionResp {
             api_resp,
             code_error,
@@ -1912,6 +2006,39 @@ pub struct EmployeeTypeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListEmployeeTypeQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListEmployeeTypeQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> EmployeeTypeResource<'a> {
     pub async fn create(
         &self,
@@ -1954,11 +2081,15 @@ impl<'a> EmployeeTypeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetEmployeeTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employee_types/{employee_type_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetEmployeeTypeResp {
             api_resp,
             code_error,
@@ -1972,17 +2103,27 @@ impl<'a> EmployeeTypeResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListEmployeeTypeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/employee_types");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListEmployeeTypeQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListEmployeeTypeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListEmployeeTypeResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/employee_types",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListEmployeeTypeResp {
             api_resp,
             code_error,
