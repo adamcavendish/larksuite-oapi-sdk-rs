@@ -7,7 +7,8 @@ use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::{
     common::PageQuery,
     contact::v3::{
-        ChildrenDepartmentQuery, ListDepartmentQuery, SearchDepartmentQuery,
+        ChildrenDepartmentQuery, FindUserByDepartmentQuery, ListDepartmentQuery,
+        ListEmployeeTypeEnumQuery, ListScopeQuery, ListUserQuery, SearchDepartmentQuery,
         SearchDepartmentReqBody,
     },
     directory::{
@@ -202,6 +203,152 @@ async fn contact_department_children_by_query_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/contact/v3/departments/od-parent/children?"));
     assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_user_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"user_id":"u-1","name":"Ada"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListUserQuery::new()
+        .user_id_type("open_id")
+        .department_id_type("department_id")
+        .department_id("od-1")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .contact()
+        .user
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items.as_ref().unwrap()[0].name.as_deref(), Some("Ada"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/users?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("department_id=od-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_user_find_by_department_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"user_id":"u-2","name":"Grace"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .contact()
+        .user
+        .find_by_department(
+            "od-1",
+            Some("open_id"),
+            Some("department_id"),
+            Some(20),
+            Some("next-page"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(
+        data.items.as_ref().unwrap()[0].name.as_deref(),
+        Some("Grace")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/users/find_by_department?"));
+    assert!(request.contains("department_id=od-1"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_user_find_by_department_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = FindUserByDepartmentQuery::new("od-1")
+        .department_id_type("department_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .contact()
+        .user
+        .find_by_department_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/users/find_by_department?"));
+    assert!(request.contains("department_id=od-1"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_scope_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"department_ids":["od-1"],"user_ids":["u-1"],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListScopeQuery::new()
+        .user_id_type("open_id")
+        .department_id_type("department_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .contact()
+        .scope
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.department_ids.as_ref().unwrap()[0], "od-1");
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/scopes?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_employee_type_enum_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"enum_id":"enum-1","enum_value":"full_time"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListEmployeeTypeEnumQuery::new()
+        .page_size(20)
+        .page_token("next-page");
+    let resp = client
+        .contact()
+        .employee_type_enum
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(
+        data.items.as_ref().unwrap()[0].enum_id.as_deref(),
+        Some("enum-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/employee_type_enums?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }
