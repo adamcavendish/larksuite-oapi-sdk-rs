@@ -77,7 +77,10 @@ use larksuite_oapi_sdk_rs::service::{
         ListEntityQuery as ListLingoEntityQuery, SearchEntityQuery as SearchLingoEntityQuery,
         SearchLingoEntityReqBody,
     },
-    mail::v1::ListMailgroupQuery as ListMailMailgroupQuery,
+    mail::v1::{
+        ListMailgroupMemberQuery as ListMailMailgroupMemberQuery,
+        ListMailgroupQuery as ListMailMailgroupQuery,
+    },
     meeting_room::v1::{
         ListBuildingQuery as ListMeetingRoomBuildingQuery, ListRoomQuery as ListMeetingRoomQuery,
     },
@@ -457,6 +460,39 @@ async fn mail_mailgroup_list_by_query_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/mail/v1/mailgroups?"));
     assert!(request.contains("manager_user_id=ou-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn mail_mailgroup_member_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"member_id":"member-1","user_id":"ou-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .mail()
+        .mailgroup_member
+        .list_by_query(
+            &ListMailMailgroupMemberQuery::new("mg-1")
+                .user_id_type("open_id")
+                .page(PageQuery::new().page_size(20).page_token("next-page")),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.items.first())
+            .and_then(|member| member.member_id.as_deref()),
+        Some("member-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/mail/v1/mailgroups/mg-1/members?"));
+    assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }
