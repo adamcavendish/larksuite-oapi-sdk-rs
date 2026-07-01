@@ -3,10 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
+use crate::req::RequestOption;
 use crate::resp::ApiResp;
-use crate::service::common::RestRequest;
-use crate::transport;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -39,6 +38,41 @@ pub struct GetAttachmentResp {
     pub api_resp: ApiResp,
     pub file_name: Option<String>,
     pub data: Vec<u8>,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListEmployeeQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub view: Option<&'a str>,
+    pub status: Option<&'a [i32]>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListEmployeeQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn view(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.view = value.into();
+        self
+    }
+
+    pub fn status(mut self, value: impl Into<Option<&'a [i32]>>) -> Self {
+        self.status = value.into();
+        self
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
 }
 
 // ── Resources ──
@@ -85,27 +119,32 @@ impl<'a> EmployeeResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListEhrEmployeeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/ehr/v1/employees");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = view {
-            api_req.query_params.set("view", v);
-        }
-        if let Some(statuses) = status {
-            for s in statuses {
-                api_req.query_params.add("status", s.to_string());
-            }
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<EmployeeListData>(self.config, &api_req, option).await?;
+        let query = ListEmployeeQuery::new()
+            .user_id_type(user_id_type)
+            .view(view)
+            .status(status.as_deref())
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListEhrEmployeeResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/ehr/v1/employees",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("view", query.view)
+        .query_values("status", query.status)
+        .page_query(query.page)
+        .send::<EmployeeListData>()
+        .await?;
         Ok(ListEhrEmployeeResp {
             api_resp,
             code_error: raw.code_error,
