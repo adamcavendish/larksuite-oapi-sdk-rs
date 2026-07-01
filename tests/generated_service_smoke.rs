@@ -42,15 +42,24 @@ use larksuite_oapi_sdk_rs::service::{
     },
     common::PageQuery,
     contact::v3::{
+        BatchCreateFunctionalRoleMemberQuery, BatchCreateFunctionalRoleMemberReqBody,
+        BatchDeleteFunctionalRoleMemberQuery, BatchDeleteFunctionalRoleMemberReqBody,
         BatchDepartmentQuery as BatchContactDepartmentQuery, BatchGetIdUserQuery,
         BatchGetIdUserReqBody, BatchUserQuery as BatchContactUserQuery, ChildrenDepartmentQuery,
         FindUserByDepartmentQuery, GetDepartmentQuery as GetContactDepartmentQuery,
+        GetFunctionalRoleMemberQuery as GetContactFunctionalRoleMemberQuery,
         GetGroupQuery as GetContactGroupQuery, GetUserQuery as GetContactUserQuery,
-        ListDepartmentQuery, ListDepartmentUnitQuery, ListEmployeeTypeEnumQuery, ListScopeQuery,
-        ListUnitQuery, ListUserQuery, MemberBelongGroupQuery, ResurrectUserQuery,
-        ResurrectUserReqBody, SearchDepartmentQuery, SearchDepartmentReqBody,
-        SimplelistGroupMemberQuery, SimplelistGroupQuery, UnbindDepartmentChatQuery,
-        UnbindDepartmentChatReqBody, UserDepartmentInfo,
+        ListCustomAttrQuery, ListDepartmentQuery, ListDepartmentUnitQuery,
+        ListEmployeeTypeEnumQuery,
+        ListFunctionalRoleMemberQuery as ListContactFunctionalRoleMemberQuery,
+        ListJobFamilyQuery as ListContactJobFamilyQuery,
+        ListJobLevelQuery as ListContactJobLevelQuery,
+        ListJobTitleQuery as ListContactJobTitleQuery, ListScopeQuery, ListUnitQuery,
+        ListUserQuery, ListWorkCityQuery, MemberBelongGroupQuery, ResurrectUserQuery,
+        ResurrectUserReqBody, ScopesFunctionalRoleMemberQuery, ScopesFunctionalRoleMemberReqBody,
+        SearchDepartmentQuery, SearchDepartmentReqBody, SimplelistGroupMemberQuery,
+        SimplelistGroupQuery, UnbindDepartmentChatQuery, UnbindDepartmentChatReqBody,
+        UserDepartmentInfo,
     },
     corehr::v1::{
         GetDepartmentQuery as GetCorehrDepartmentQuery, GetEmployeeQuery as GetCorehrEmployeeQuery,
@@ -2166,6 +2175,335 @@ async fn contact_employee_type_enum_list_by_query_smoke() {
     );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/contact/v3/employee_type_enums?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_functional_role_member_batch_create_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"results":[{"user_id":"u-1","reason":0}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = BatchCreateFunctionalRoleMemberReqBody {
+        members: Some(vec!["u-1".to_string()]),
+    };
+    let resp = client
+        .contact()
+        .functional_role_member
+        .batch_create_by_query(
+            &BatchCreateFunctionalRoleMemberQuery::new("role-1", &body).user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.results.as_ref())
+            .and_then(|results| results.first())
+            .and_then(|result| result.user_id.as_deref()),
+        Some("u-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(
+        request
+            .contains("POST /open-apis/contact/v3/functional_roles/role-1/members/batch_create?")
+    );
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains(r#""members":["u-1"]"#));
+}
+
+#[tokio::test]
+async fn contact_functional_role_member_batch_delete_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"result":[{"user_id":"u-1","reason":0}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = BatchDeleteFunctionalRoleMemberReqBody {
+        members: Some(vec!["u-1".to_string()]),
+    };
+    let resp = client
+        .contact()
+        .functional_role_member
+        .batch_delete_by_query(
+            &BatchDeleteFunctionalRoleMemberQuery::new("role-1", &body).user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.result.as_ref())
+            .and_then(|results| results.first())
+            .and_then(|result| result.user_id.as_deref()),
+        Some("u-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(
+        request
+            .contains("PATCH /open-apis/contact/v3/functional_roles/role-1/members/batch_delete?")
+    );
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains(r#""members":["u-1"]"#));
+}
+
+#[tokio::test]
+async fn contact_functional_role_member_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"member":{"user_id":"u-1","scope_type":"department","department_ids":["od-1"]}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .contact()
+        .functional_role_member
+        .get_by_query(
+            &GetContactFunctionalRoleMemberQuery::new("role-1", "u-1")
+                .user_id_type("open_id")
+                .department_id_type("department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.member.as_ref())
+            .and_then(|member| member.user_id.as_deref()),
+        Some("u-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/functional_roles/role-1/members/u-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+}
+
+#[tokio::test]
+async fn contact_functional_role_member_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"members":[{"user_id":"u-1","scope_type":"department","department_ids":["od-1"]}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListContactFunctionalRoleMemberQuery::new("role-1")
+        .user_id_type("open_id")
+        .department_id_type("department_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .contact()
+        .functional_role_member
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.members.as_ref())
+            .and_then(|members| members.first())
+            .and_then(|member| member.scope_type.as_deref()),
+        Some("department")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/functional_roles/role-1/members?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_functional_role_member_scopes_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"results":[{"user_id":"u-1","reason":0}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = ScopesFunctionalRoleMemberReqBody {
+        members: Some(vec!["u-1".to_string()]),
+        departments: Some(vec!["od-1".to_string()]),
+    };
+    let resp = client
+        .contact()
+        .functional_role_member
+        .scopes_by_query(
+            &ScopesFunctionalRoleMemberQuery::new("role-1", &body)
+                .user_id_type("open_id")
+                .department_id_type("department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(
+        request.contains("PATCH /open-apis/contact/v3/functional_roles/role-1/members/scopes?")
+    );
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains(r#""members":["u-1"]"#));
+    assert!(request.contains(r#""departments":["od-1"]"#));
+}
+
+#[tokio::test]
+async fn contact_job_level_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"job_level_id":"level-1","name":"L1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListContactJobLevelQuery::new()
+        .name("L1")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .contact()
+        .job_level
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.items.as_ref())
+            .and_then(|items| items.first())
+            .and_then(|level| level.job_level_id.as_deref()),
+        Some("level-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/job_levels?"));
+    assert!(request.contains("name=L1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_job_family_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"job_family_id":"family-1","name":"Engineering"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListContactJobFamilyQuery::new()
+        .name("Engineering")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .contact()
+        .job_family
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.items.as_ref())
+            .and_then(|items| items.first())
+            .and_then(|family| family.job_family_id.as_deref()),
+        Some("family-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/job_families?"));
+    assert!(request.contains("name=Engineering"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_job_title_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"job_title_id":"title-1","name":"Engineer"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListContactJobTitleQuery::new()
+        .page_size(20)
+        .page_token("next-page");
+    let resp = client
+        .contact()
+        .job_title
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.items.as_ref())
+            .and_then(|items| items.first())
+            .and_then(|title| title.job_title_id.as_deref()),
+        Some("title-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/job_titles?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_work_city_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"work_city_id":"city-1","name":"Shanghai"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListWorkCityQuery::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .contact()
+        .work_city
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.items.as_ref())
+            .and_then(|items| items.first())
+            .and_then(|city| city.work_city_id.as_deref()),
+        Some("city-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/work_cities?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_custom_attr_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"attr-1","name":"Nickname"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListCustomAttrQuery::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .contact()
+        .custom_attr
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.items.as_ref())
+            .and_then(|items| items.first())
+            .and_then(|item| item.get("id"))
+            .and_then(|id| id.as_str()),
+        Some("attr-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/custom_attrs?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }

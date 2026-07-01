@@ -3253,6 +3253,164 @@ pub struct FunctionalRoleMemberResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct BatchCreateFunctionalRoleMemberQuery<'a> {
+    pub role_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub body: &'a BatchCreateFunctionalRoleMemberReqBody,
+}
+
+impl<'a> BatchCreateFunctionalRoleMemberQuery<'a> {
+    pub fn new(role_id: &'a str, body: &'a BatchCreateFunctionalRoleMemberReqBody) -> Self {
+        Self {
+            role_id,
+            user_id_type: None,
+            body,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct BatchDeleteFunctionalRoleMemberQuery<'a> {
+    pub role_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub body: &'a BatchDeleteFunctionalRoleMemberReqBody,
+}
+
+impl<'a> BatchDeleteFunctionalRoleMemberQuery<'a> {
+    pub fn new(role_id: &'a str, body: &'a BatchDeleteFunctionalRoleMemberReqBody) -> Self {
+        Self {
+            role_id,
+            user_id_type: None,
+            body,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetFunctionalRoleMemberQuery<'a> {
+    pub role_id: &'a str,
+    pub member_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> GetFunctionalRoleMemberQuery<'a> {
+    pub fn new(role_id: &'a str, member_id: &'a str) -> Self {
+        Self {
+            role_id,
+            member_id,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListFunctionalRoleMemberQuery<'a> {
+    pub role_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> ListFunctionalRoleMemberQuery<'a> {
+    pub fn new(role_id: &'a str) -> Self {
+        Self {
+            role_id,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ScopesFunctionalRoleMemberQuery<'a> {
+    pub role_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub body: &'a ScopesFunctionalRoleMemberReqBody,
+}
+
+impl<'a> ScopesFunctionalRoleMemberQuery<'a> {
+    pub fn new(role_id: &'a str, body: &'a ScopesFunctionalRoleMemberReqBody) -> Self {
+        Self {
+            role_id,
+            user_id_type: None,
+            department_id_type: None,
+            body,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> FunctionalRoleMemberResource<'a> {
     pub async fn batch_create(
         &self,
@@ -3261,18 +3419,30 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         body: &BatchCreateFunctionalRoleMemberReqBody,
         option: &RequestOption,
     ) -> Result<BatchCreateFunctionalRoleMemberResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members/batch_create");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<BatchCreateFunctionalRoleMemberRespData>(
+        let query =
+            BatchCreateFunctionalRoleMemberQuery::new(role_id, body).user_id_type(user_id_type);
+        self.batch_create_by_query(&query, option).await
+    }
+
+    pub async fn batch_create_by_query(
+        &self,
+        query: &BatchCreateFunctionalRoleMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchCreateFunctionalRoleMemberResp, LarkError> {
+        let path = format!(
+            "/open-apis/contact/v3/functional_roles/{}/members/batch_create",
+            query.role_id
+        );
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<BatchCreateFunctionalRoleMemberRespData>()
         .await?;
         Ok(BatchCreateFunctionalRoleMemberResp {
             api_resp,
@@ -3288,18 +3458,30 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         body: &BatchDeleteFunctionalRoleMemberReqBody,
         option: &RequestOption,
     ) -> Result<BatchDeleteFunctionalRoleMemberResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members/batch_delete");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<BatchDeleteFunctionalRoleMemberRespData>(
+        let query =
+            BatchDeleteFunctionalRoleMemberQuery::new(role_id, body).user_id_type(user_id_type);
+        self.batch_delete_by_query(&query, option).await
+    }
+
+    pub async fn batch_delete_by_query(
+        &self,
+        query: &BatchDeleteFunctionalRoleMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteFunctionalRoleMemberResp, LarkError> {
+        let path = format!(
+            "/open-apis/contact/v3/functional_roles/{}/members/batch_delete",
+            query.role_id
+        );
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<BatchDeleteFunctionalRoleMemberRespData>()
         .await?;
         Ok(BatchDeleteFunctionalRoleMemberResp {
             api_resp,
@@ -3316,20 +3498,31 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetFunctionalRoleMemberResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members/{member_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        let (api_resp, raw) = transport::request_typed::<GetFunctionalRoleMemberRespData>(
+        let query = GetFunctionalRoleMemberQuery::new(role_id, member_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetFunctionalRoleMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetFunctionalRoleMemberResp, LarkError> {
+        let path = format!(
+            "/open-apis/contact/v3/functional_roles/{}/members/{}",
+            query.role_id, query.member_id
+        );
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .send::<GetFunctionalRoleMemberRespData>()
         .await?;
         Ok(GetFunctionalRoleMemberResp {
             api_resp,
@@ -3347,26 +3540,34 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFunctionalRoleMemberResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        let (api_resp, raw) = transport::request_typed::<ListFunctionalRoleMemberRespData>(
+        let query = ListFunctionalRoleMemberQuery::new(role_id)
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFunctionalRoleMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFunctionalRoleMemberResp, LarkError> {
+        let path = format!(
+            "/open-apis/contact/v3/functional_roles/{}/members",
+            query.role_id
+        );
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .send::<ListFunctionalRoleMemberRespData>()
         .await?;
         Ok(ListFunctionalRoleMemberResp {
             api_resp,
@@ -3383,21 +3584,32 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         body: &ScopesFunctionalRoleMemberReqBody,
         option: &RequestOption,
     ) -> Result<ScopesFunctionalRoleMemberResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/functional_roles/{role_id}/members/scopes");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<ScopesFunctionalRoleMemberRespData>(
+        let query = ScopesFunctionalRoleMemberQuery::new(role_id, body)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.scopes_by_query(&query, option).await
+    }
+
+    pub async fn scopes_by_query(
+        &self,
+        query: &ScopesFunctionalRoleMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ScopesFunctionalRoleMemberResp, LarkError> {
+        let path = format!(
+            "/open-apis/contact/v3/functional_roles/{}/members/scopes",
+            query.role_id
+        );
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send::<ScopesFunctionalRoleMemberRespData>()
         .await?;
         Ok(ScopesFunctionalRoleMemberResp {
             api_resp,
@@ -3409,6 +3621,45 @@ impl<'a> FunctionalRoleMemberResource<'a> {
 
 pub struct JobLevelResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobLevelQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub name: Option<&'a str>,
+}
+
+impl<'a> ListJobLevelQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.name = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> JobLevelResource<'a> {
@@ -3490,19 +3741,29 @@ impl<'a> JobLevelResource<'a> {
         name: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobLevelResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/job_levels");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = name {
-            api_req.query_params.set("name", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListJobLevelRespData>(self.config, &api_req, option).await?;
+        let query = ListJobLevelQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .name(name);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobLevelQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobLevelResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/job_levels",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("name", query.name)
+        .send::<ListJobLevelRespData>()
+        .await?;
         Ok(ListJobLevelResp {
             api_resp,
             code_error: raw.code_error,
@@ -3513,6 +3774,45 @@ impl<'a> JobLevelResource<'a> {
 
 pub struct JobFamilyResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobFamilyQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub name: Option<&'a str>,
+}
+
+impl<'a> ListJobFamilyQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.name = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> JobFamilyResource<'a> {
@@ -3594,20 +3894,29 @@ impl<'a> JobFamilyResource<'a> {
         name: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobFamilyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/job_families");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = name {
-            api_req.query_params.set("name", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListJobFamilyRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ListJobFamilyQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .name(name);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobFamilyQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobFamilyResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/job_families",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("name", query.name)
+        .send::<ListJobFamilyRespData>()
+        .await?;
         Ok(ListJobFamilyResp {
             api_resp,
             code_error: raw.code_error,
@@ -3618,6 +3927,39 @@ impl<'a> JobFamilyResource<'a> {
 
 pub struct JobTitleResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobTitleQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListJobTitleQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> JobTitleResource<'a> {
@@ -3644,16 +3986,27 @@ impl<'a> JobTitleResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobTitleResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/job_titles");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListJobTitleRespData>(self.config, &api_req, option).await?;
+        let query = ListJobTitleQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobTitleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobTitleResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/job_titles",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<ListJobTitleRespData>()
+        .await?;
         Ok(ListJobTitleResp {
             api_resp,
             code_error: raw.code_error,
@@ -3664,6 +4017,39 @@ impl<'a> JobTitleResource<'a> {
 
 pub struct WorkCityResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListWorkCityQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListWorkCityQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> WorkCityResource<'a> {
@@ -3690,16 +4076,27 @@ impl<'a> WorkCityResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListWorkCityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/work_cities");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListWorkCityRespData>(self.config, &api_req, option).await?;
+        let query = ListWorkCityQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListWorkCityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListWorkCityResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/work_cities",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<ListWorkCityRespData>()
+        .await?;
         Ok(ListWorkCityResp {
             api_resp,
             code_error: raw.code_error,
@@ -3712,6 +4109,39 @@ pub struct CustomAttrResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListCustomAttrQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListCustomAttrQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> CustomAttrResource<'a> {
     pub async fn list(
         &self,
@@ -3719,16 +4149,27 @@ impl<'a> CustomAttrResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCustomAttrResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/custom_attrs");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CustomAttrListData>(self.config, &api_req, option).await?;
+        let query = ListCustomAttrQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCustomAttrQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCustomAttrResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/custom_attrs",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<CustomAttrListData>()
+        .await?;
         Ok(ListCustomAttrResp {
             api_resp,
             code_error: raw.code_error,
