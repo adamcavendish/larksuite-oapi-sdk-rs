@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -78,6 +78,46 @@ impl_resp!(GetRoomResp, RoomData);
 impl_resp!(ListRoomResp, RoomListData);
 impl_resp!(ListBuildingResp, BuildingListData);
 
+// -- Query parameter types --
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListRoomQuery<'a> {
+    pub building_id: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListRoomQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn building_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.building_id = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListBuildingQuery<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListBuildingQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct RoomResource<'a> {
@@ -91,10 +131,15 @@ impl<'a> RoomResource<'a> {
         option: &RequestOption,
     ) -> Result<GetRoomResp, LarkError> {
         let path = format!("/open-apis/meeting_room/v1/rooms/{room_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<RoomData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<RoomData>()
+        .await?;
         Ok(GetRoomResp {
             api_resp,
             code_error: raw.code_error,
@@ -109,19 +154,28 @@ impl<'a> RoomResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListRoomResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/meeting_room/v1/rooms");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = building_id {
-            api_req.query_params.set("building_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RoomListData>(self.config, &api_req, option).await?;
+        let query = ListRoomQuery::new()
+            .building_id(building_id)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListRoomQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListRoomResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/meeting_room/v1/rooms",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("building_id", query.building_id)
+        .page_query(query.page)
+        .send::<RoomListData>()
+        .await?;
         Ok(ListRoomResp {
             api_resp,
             code_error: raw.code_error,
@@ -141,16 +195,25 @@ impl<'a> BuildingResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListBuildingResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/meeting_room/v1/buildings");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BuildingListData>(self.config, &api_req, option).await?;
+        let query = ListBuildingQuery::new().page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListBuildingQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListBuildingResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/meeting_room/v1/buildings",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .send::<BuildingListData>()
+        .await?;
         Ok(ListBuildingResp {
             api_resp,
             code_error: raw.code_error,
