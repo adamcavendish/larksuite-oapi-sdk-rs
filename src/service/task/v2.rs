@@ -225,6 +225,66 @@ impl<'a> GetTaskV2Query<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct GetAttachmentV2Query<'a> {
+    pub attachment_guid: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetAttachmentV2Query<'a> {
+    pub fn new(attachment_guid: &'a str) -> Self {
+        Self {
+            attachment_guid,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListAttachmentV2Query<'a> {
+    pub resource_type: Option<&'a str>,
+    pub resource_id: Option<&'a str>,
+    pub updated_mesc: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListAttachmentV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn resource_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.resource_type = value.into();
+        self
+    }
+
+    pub fn resource_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.resource_id = value.into();
+        self
+    }
+
+    pub fn updated_mesc(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.updated_mesc = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
 // ── Response types ─────────────────────────────────────────────────────────────
 
 impl_resp_v2!(CreateTaskV2Resp, TaskV2Data);
@@ -696,15 +756,26 @@ impl<'a> AttachmentV2Resource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetAttachmentV2Resp, LarkError> {
-        let path = format!("/open-apis/task/v2/attachments/{attachment_guid}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AttachmentData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetAttachmentV2Query::new(attachment_guid).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetAttachmentV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<GetAttachmentV2Resp, LarkError> {
+        let path = format!("/open-apis/task/v2/attachments/{}", query.attachment_guid);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<AttachmentData>()
+        .await?;
         Ok(GetAttachmentV2Resp {
             api_resp,
             code_error,
@@ -737,23 +808,32 @@ impl<'a> AttachmentV2Resource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAttachmentV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/attachments");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = resource_type {
-            api_req.query_params.set("resource_type", v);
-        }
-        if let Some(v) = resource_id {
-            api_req.query_params.set("resource_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AttachmentListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListAttachmentV2Query::new()
+            .resource_type(resource_type)
+            .resource_id(resource_id)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAttachmentV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAttachmentV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/task/v2/attachments",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("resource_type", query.resource_type)
+        .query("resource_id", query.resource_id)
+        .query("updated_mesc", query.updated_mesc)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send_v2::<AttachmentListData>()
+        .await?;
         Ok(ListAttachmentV2Resp {
             api_resp,
             code_error,
