@@ -6,7 +6,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
-use crate::service::common::{DownloadResp, EmptyResp};
+use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -1166,6 +1166,63 @@ pub struct FileResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListFileQuery<'a> {
+    pub folder_token: Option<&'a str>,
+    pub order_by: Option<&'a str>,
+    pub direction: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListFileQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn folder_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.folder_token = value.into();
+        self
+    }
+
+    pub fn order_by(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.order_by = value.into();
+        self
+    }
+
+    pub fn direction(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.direction = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> FileResource<'a> {
     pub async fn copy(
         &self,
@@ -1354,28 +1411,35 @@ impl<'a> FileResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFileResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/drive/v1/files");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = folder_token {
-            api_req.query_params.set("folder_token", v);
-        }
-        if let Some(v) = order_by {
-            api_req.query_params.set("order_by", v);
-        }
-        if let Some(v) = direction {
-            api_req.query_params.set("direction", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListFileRespData>(self.config, &api_req, option).await?;
+        let query = ListFileQuery::new()
+            .folder_token(folder_token)
+            .order_by(order_by)
+            .direction(direction)
+            .user_id_type(user_id_type)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFileQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFileResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/drive/v1/files",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("folder_token", query.folder_token)
+        .query("order_by", query.order_by)
+        .query("direction", query.direction)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page_query())
+        .send::<ListFileRespData>()
+        .await?;
         Ok(ListFileResp {
             api_resp,
             code_error: raw.code_error,
