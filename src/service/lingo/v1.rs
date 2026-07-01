@@ -187,6 +187,58 @@ impl<'a> ListEntityQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct SearchEntityQuery<'a> {
+    pub body: &'a SearchLingoEntityReqBody,
+    pub page: PageQuery<'a>,
+    pub repo_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> SearchEntityQuery<'a> {
+    pub fn new(body: &'a SearchLingoEntityReqBody) -> Self {
+        Self {
+            body,
+            page: PageQuery::default(),
+            repo_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+
+    pub fn repo_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.repo_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListClassificationQuery<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListClassificationQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct EntityResource<'a> {
@@ -361,23 +413,31 @@ impl<'a> EntityResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchEntityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/entities/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = repo_id {
-            api_req.query_params.set("repo_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<EntityListData>(self.config, &api_req, option).await?;
+        let query = SearchEntityQuery::new(body)
+            .repo_id(repo_id)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchEntityResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/lingo/v1/entities/search",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("repo_id", query.repo_id)
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<EntityListData>()
+        .await?;
         Ok(SearchEntityResp {
             api_resp,
             code_error: raw.code_error,
@@ -433,17 +493,26 @@ impl<'a> ClassificationResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListClassificationResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/lingo/v1/classifications");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query =
+            ListClassificationQuery::new().page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListClassificationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListClassificationResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/lingo/v1/classifications",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListClassificationResp {
             api_resp,
             code_error,
