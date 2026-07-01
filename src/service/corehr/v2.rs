@@ -2417,6 +2417,138 @@ pub struct SignatureFileV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListSignatureFileV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub signature_file_id: Option<&'a str>,
+    pub states: Option<&'a str>,
+    pub update_time_start: Option<&'a str>,
+    pub update_time_end: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub template_ids: Option<&'a str>,
+    pub select_sign_url: Option<bool>,
+}
+
+impl<'a> ListSignatureFileV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn signature_file_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.signature_file_id = value.into();
+        self
+    }
+
+    pub fn states(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.states = value.into();
+        self
+    }
+
+    pub fn update_time_start(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_time_start = value.into();
+        self
+    }
+
+    pub fn update_time_end(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_time_end = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn template_ids(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.template_ids = value.into();
+        self
+    }
+
+    pub fn select_sign_url(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.select_sign_url = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListByBizIdSignatureFileV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub biz_process_id: Option<&'a str>,
+    pub biz_type: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub select_sign_url: Option<bool>,
+}
+
+impl<'a> ListByBizIdSignatureFileV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn biz_process_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.biz_process_id = value.into();
+        self
+    }
+
+    pub fn biz_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.biz_type = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn select_sign_url(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.select_sign_url = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl SignatureFileV2Resource<'_> {
     pub async fn download(
         &self,
@@ -2444,17 +2576,34 @@ impl SignatureFileV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSignatureFileV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/signature_files");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListSignatureFileV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListSignatureFileV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListSignatureFileV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v2/signature_files",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("signature_file_id", query.signature_file_id)
+        .query("states", query.states)
+        .query("update_time_start", query.update_time_start)
+        .query("update_time_end", query.update_time_end)
+        .query("user_id_type", query.user_id_type)
+        .query("template_ids", query.template_ids)
+        .query("select_sign_url", query.select_sign_url)
+        .send_v2::<ListData>()
+        .await?;
         Ok(ListSignatureFileV2Resp {
             api_resp,
             code_error,
@@ -2468,20 +2617,31 @@ impl SignatureFileV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListByBizIdSignatureFileV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListByBizIdSignatureFileV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_biz_id_by_query(&query, option).await
+    }
+
+    pub async fn list_by_biz_id_by_query(
+        &self,
+        query: &ListByBizIdSignatureFileV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListByBizIdSignatureFileV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/signature_files/list_by_biz_id",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("biz_process_id", query.biz_process_id)
+        .query("biz_type", query.biz_type)
+        .query("user_id_type", query.user_id_type)
+        .query("select_sign_url", query.select_sign_url)
+        .send_v2::<ListData>()
+        .await?;
         Ok(ListByBizIdSignatureFileV2Resp {
             api_resp,
             code_error,
@@ -2509,6 +2669,51 @@ pub struct SignatureNodeV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListByFileIdSignatureNodeV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub file_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListByFileIdSignatureNodeV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn file_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.file_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl SignatureNodeV2Resource<'_> {
     pub async fn list_by_file_id(
         &self,
@@ -2516,20 +2721,29 @@ impl SignatureNodeV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListByFileIdSignatureNodeV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListByFileIdSignatureNodeV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_file_id_by_query(&query, option).await
+    }
+
+    pub async fn list_by_file_id_by_query(
+        &self,
+        query: &ListByFileIdSignatureNodeV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListByFileIdSignatureNodeV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/signature_nodes/list_by_file_id",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("file_id", query.file_id)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<ListData>()
+        .await?;
         Ok(ListByFileIdSignatureNodeV2Resp {
             api_resp,
             code_error,
@@ -2544,6 +2758,51 @@ pub struct SignatureTemplateV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SearchSignatureTemplateV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub template_ids: Option<&'a str>,
+    pub select_custom_field: Option<bool>,
+}
+
+impl<'a> SearchSignatureTemplateV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn template_ids(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.template_ids = value.into();
+        self
+    }
+
+    pub fn select_custom_field(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.select_custom_field = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl SignatureTemplateV2Resource<'_> {
     pub async fn search(
         &self,
@@ -2551,20 +2810,29 @@ impl SignatureTemplateV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchSignatureTemplateV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = SearchSignatureTemplateV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchSignatureTemplateV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchSignatureTemplateV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/signature_templates/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("template_ids", query.template_ids)
+        .query("select_custom_field", query.select_custom_field)
+        .send_v2::<ListData>()
+        .await?;
         Ok(SearchSignatureTemplateV2Resp {
             api_resp,
             code_error,
@@ -2579,6 +2847,75 @@ pub struct SignatureTemplateInfoWithThumbnailV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListSignatureTemplateInfoWithThumbnailV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub name: Option<&'a str>,
+    pub category_apiname: Option<&'a str>,
+    pub usage_apiname: Option<&'a str>,
+    pub active: Option<bool>,
+    pub need_region_info: Option<bool>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListSignatureTemplateInfoWithThumbnailV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.name = value.into();
+        self
+    }
+
+    pub fn category_apiname(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.category_apiname = value.into();
+        self
+    }
+
+    pub fn usage_apiname(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.usage_apiname = value.into();
+        self
+    }
+
+    pub fn active(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.active = value.into();
+        self
+    }
+
+    pub fn need_region_info(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.need_region_info = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl SignatureTemplateInfoWithThumbnailV2Resource<'_> {
     pub async fn list(
         &self,
@@ -2586,20 +2923,33 @@ impl SignatureTemplateInfoWithThumbnailV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSignatureTemplateInfoWithThumbnailV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListSignatureTemplateInfoWithThumbnailV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListSignatureTemplateInfoWithThumbnailV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListSignatureTemplateInfoWithThumbnailV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/signature_template_info_with_thumbnails",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("name", query.name)
+        .query("category_apiname", query.category_apiname)
+        .query("usage_apiname", query.usage_apiname)
+        .query("active", query.active)
+        .query("need_region_info", query.need_region_info)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<ListData>()
+        .await?;
         Ok(ListSignatureTemplateInfoWithThumbnailV2Resp {
             api_resp,
             code_error,
@@ -2614,6 +2964,75 @@ pub struct WorkforcePlanV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListWorkforcePlanV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub limit: Option<i32>,
+    pub offset: Option<i32>,
+    pub get_all_plan: Option<bool>,
+    pub active: Option<bool>,
+    pub start_date: Option<&'a str>,
+    pub end_date: Option<&'a str>,
+}
+
+impl<'a> ListWorkforcePlanV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn limit(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.limit = value.into();
+        self
+    }
+
+    pub fn offset(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.offset = value.into();
+        self
+    }
+
+    pub fn get_all_plan(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.get_all_plan = value.into();
+        self
+    }
+
+    pub fn active(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.active = value.into();
+        self
+    }
+
+    pub fn start_date(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_date = value.into();
+        self
+    }
+
+    pub fn end_date(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_date = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl WorkforcePlanV2Resource<'_> {
     pub async fn list(
         &self,
@@ -2621,17 +3040,33 @@ impl WorkforcePlanV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListWorkforcePlanV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/workforce_plans");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListWorkforcePlanV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListWorkforcePlanV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListWorkforcePlanV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v2/workforce_plans",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("limit", query.limit)
+        .query("offset", query.offset)
+        .query("get_all_plan", query.get_all_plan)
+        .query("active", query.active)
+        .query("start_date", query.start_date)
+        .query("end_date", query.end_date)
+        .send_v2::<ListData>()
+        .await?;
         Ok(ListWorkforcePlanV2Resp {
             api_resp,
             code_error,
