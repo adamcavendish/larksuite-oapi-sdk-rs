@@ -5,6 +5,11 @@ use common::{http_response, mock_server_with_requests};
 use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::{
+    directory::{
+        ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
+        ListShareEntityQuery,
+    },
+    drive::v2::ListFileLikeQuery,
     task::{CreateTaskReqBody, ListTaskQuery},
     vc::{
         GetMeetingListQuery, GetParticipantListQuery, GetParticipantQualityListQuery,
@@ -122,6 +127,61 @@ async fn drive_list_files_smoke() {
     assert!(request.contains("GET /open-apis/drive/v1/files"));
 }
 
+#[tokio::test]
+async fn drive_v2_file_like_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"files":[{"token":"like-1","name":"Alice","type":"user"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListFileLikeQuery::new("file-token-1")
+        .user_id_type("open_id")
+        .page_size(20)
+        .page_token("next-page");
+    let resp = client
+        .drive_v2()
+        .file_like
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.files.len(), 1);
+    assert_eq!(data.files[0].name.as_deref(), Some("Alice"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v2/files/file-token-1/likes?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn drive_v2_file_like_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"files":[],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive_v2()
+        .file_like
+        .list(
+            "file-token-1",
+            Some("open_id"),
+            Some(20),
+            Some("next-page"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v2/files/file-token-1/likes?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
 // ── CoreHR ──
 
 #[tokio::test]
@@ -144,6 +204,235 @@ async fn corehr_get_employee_smoke() {
     );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/employments/emp-1?user_id_type=open_id"));
+}
+
+// ── Directory ──
+
+#[tokio::test]
+async fn directory_user_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"user_id":"u-1","name":"Alice"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListDirectoryUserQuery::new()
+        .user_id_type("open_id")
+        .page_size(50)
+        .page_token("next-page");
+    let resp = client
+        .directory()
+        .user
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items.len(), 1);
+    assert_eq!(data.items[0].name.as_deref(), Some("Alice"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/directory/v1/users?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=50"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn directory_user_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .directory()
+        .user
+        .list(
+            Some("open_id"),
+            Some(50),
+            Some("next-page"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/directory/v1/users?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=50"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn directory_collaboration_rule_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCollaborationRuleQuery::new()
+        .target_tenant_key("target-tenant")
+        .tenant_id("tenant-1")
+        .page_size(20)
+        .page_token("next-page");
+    let resp = client
+        .directory()
+        .collaboration_rule
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/directory/v1/collaboration_rules?"));
+    assert!(request.contains("target_tenant_key=target-tenant"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn directory_collaboration_rule_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .directory()
+        .collaboration_rule
+        .list(
+            Some("target-tenant"),
+            Some("tenant-1"),
+            Some(20),
+            Some("next-page"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/directory/v1/collaboration_rules?"));
+    assert!(request.contains("target_tenant_key=target-tenant"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn directory_collaboration_tenant_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCollaborationTenantQuery::new()
+        .tenant_id("tenant-1")
+        .page_size(20)
+        .page_token("next-page");
+    let resp = client
+        .directory()
+        .collaboration_tenant
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/directory/v1/collaboration_tenants?"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn directory_collaboration_tenant_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .directory()
+        .collaboration_tenant
+        .list(
+            Some("tenant-1"),
+            Some(20),
+            Some("next-page"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/directory/v1/collaboration_tenants?"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn directory_share_entity_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListShareEntityQuery::new()
+        .target_tenant_key("target-tenant")
+        .target_department_id("department-1")
+        .target_group_id("group-1")
+        .is_select_subject(true)
+        .tenant_id("tenant-1")
+        .page_size(20)
+        .page_token("next-page");
+    let resp = client
+        .directory()
+        .share_entity
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/directory/v1/share_entities?"));
+    assert!(request.contains("target_tenant_key=target-tenant"));
+    assert!(request.contains("target_department_id=department-1"));
+    assert!(request.contains("target_group_id=group-1"));
+    assert!(request.contains("is_select_subject=true"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn directory_share_entity_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .directory()
+        .share_entity
+        .list(
+            Some("target-tenant"),
+            Some("department-1"),
+            Some("group-1"),
+            Some(true),
+            Some("tenant-1"),
+            Some(20),
+            Some("next-page"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/directory/v1/share_entities?"));
+    assert!(request.contains("target_tenant_key=target-tenant"));
+    assert!(request.contains("target_department_id=department-1"));
+    assert!(request.contains("target_group_id=group-1"));
+    assert!(request.contains("is_select_subject=true"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
 }
 
 // ── Calendar ──

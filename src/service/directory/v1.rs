@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyRespV2 as EmptyResp, parse_v2};
+use crate::service::common::{EmptyRespV2 as EmptyResp, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -58,6 +58,35 @@ pub struct UserResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListDirectoryUserQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListDirectoryUserQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+}
+
 impl<'a> UserResource<'a> {
     pub async fn list(
         &self,
@@ -66,19 +95,30 @@ impl<'a> UserResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListUserResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/directory/v1/users");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<UserListData>(self.config, &api_req, option).await?;
+        let query = ListDirectoryUserQuery::new()
+            .user_id_type(user_id_type)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListDirectoryUserQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListUserResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/directory/v1/users",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .send::<UserListData>()
+        .await?;
         Ok(ListUserResp {
             api_resp,
             code_error: raw.code_error,
@@ -91,6 +131,41 @@ impl<'a> UserResource<'a> {
 
 pub struct CollaborationRuleResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListCollaborationRuleQuery<'a> {
+    pub target_tenant_key: Option<&'a str>,
+    pub tenant_id: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListCollaborationRuleQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn target_tenant_key(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.target_tenant_key = value.into();
+        self
+    }
+
+    pub fn tenant_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.tenant_id = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
 }
 
 impl CollaborationRuleResource<'_> {
@@ -156,26 +231,32 @@ impl CollaborationRuleResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCollaborationRuleResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListCollaborationRuleQuery::new()
+            .target_tenant_key(target_tenant_key)
+            .tenant_id(tenant_id)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCollaborationRuleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCollaborationRuleResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/directory/v1/collaboration_rules",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = target_tenant_key {
-            api_req.query_params.set("target_tenant_key", v);
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("target_tenant_key", query.target_tenant_key)
+        .query("tenant_id", query.tenant_id)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListCollaborationRuleResp {
             api_resp,
             code_error,
@@ -217,6 +298,35 @@ pub struct CollaborationTenantResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListCollaborationTenantQuery<'a> {
+    pub tenant_id: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListCollaborationTenantQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn tenant_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.tenant_id = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+}
+
 impl CollaborationTenantResource<'_> {
     pub async fn list(
         &self,
@@ -225,23 +335,30 @@ impl CollaborationTenantResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCollaborationTenantResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListCollaborationTenantQuery::new()
+            .tenant_id(tenant_id)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCollaborationTenantQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCollaborationTenantResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/directory/v1/collaboration_tenants",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("tenant_id", query.tenant_id)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListCollaborationTenantResp {
             api_resp,
             code_error,
@@ -254,6 +371,59 @@ impl CollaborationTenantResource<'_> {
 
 pub struct ShareEntityResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListShareEntityQuery<'a> {
+    pub target_tenant_key: Option<&'a str>,
+    pub target_department_id: Option<&'a str>,
+    pub target_group_id: Option<&'a str>,
+    pub is_select_subject: Option<bool>,
+    pub tenant_id: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListShareEntityQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn target_tenant_key(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.target_tenant_key = value.into();
+        self
+    }
+
+    pub fn target_department_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.target_department_id = value.into();
+        self
+    }
+
+    pub fn target_group_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.target_group_id = value.into();
+        self
+    }
+
+    pub fn is_select_subject(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.is_select_subject = value.into();
+        self
+    }
+
+    pub fn tenant_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.tenant_id = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
 }
 
 impl ShareEntityResource<'_> {
@@ -269,32 +439,38 @@ impl ShareEntityResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListShareEntityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/directory/v1/share_entities");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = target_tenant_key {
-            api_req.query_params.set("target_tenant_key", v);
-        }
-        if let Some(v) = target_department_id {
-            api_req.query_params.set("target_department_id", v);
-        }
-        if let Some(v) = target_group_id {
-            api_req.query_params.set("target_group_id", v);
-        }
-        if let Some(v) = is_select_subject {
-            api_req.query_params.set("is_select_subject", v.to_string());
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListShareEntityQuery::new()
+            .target_tenant_key(target_tenant_key)
+            .target_department_id(target_department_id)
+            .target_group_id(target_group_id)
+            .is_select_subject(is_select_subject)
+            .tenant_id(tenant_id)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListShareEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListShareEntityResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/directory/v1/share_entities",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("target_tenant_key", query.target_tenant_key)
+        .query("target_department_id", query.target_department_id)
+        .query("target_group_id", query.target_group_id)
+        .query("is_select_subject", query.is_select_subject)
+        .query("tenant_id", query.tenant_id)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListShareEntityResp {
             api_resp,
             code_error,
