@@ -1792,6 +1792,75 @@ pub struct InterviewResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListInterviewQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub application_id: Option<&'a str>,
+    pub interview_id: Option<&'a str>,
+    pub start_time: Option<&'a str>,
+    pub end_time: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+}
+
+impl<'a> ListInterviewQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.application_id = value.into();
+        self
+    }
+
+    pub fn interview_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.interview_id = value.into();
+        self
+    }
+
+    pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_time = value.into();
+        self
+    }
+
+    pub fn end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_time = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> InterviewResource<'a> {
     #[allow(clippy::too_many_arguments)]
     pub async fn list(
@@ -1805,31 +1874,38 @@ impl<'a> InterviewResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListInterviewResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/interviews");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = application_id {
-            api_req.query_params.set("application_id", v);
-        }
-        if let Some(v) = interview_id {
-            api_req.query_params.set("interview_id", v);
-        }
-        if let Some(v) = start_time {
-            api_req.query_params.set("start_time", v);
-        }
-        if let Some(v) = end_time {
-            api_req.query_params.set("end_time", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<InterviewListData>(self.config, &api_req, option).await?;
+        let query = ListInterviewQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .application_id(application_id)
+            .interview_id(interview_id)
+            .start_time(start_time)
+            .end_time(end_time)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListInterviewQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/interviews",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("application_id", query.application_id)
+        .query("interview_id", query.interview_id)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("user_id_type", query.user_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .send::<InterviewListData>()
+        .await?;
         Ok(ListInterviewResp {
             api_resp,
             code_error: raw.code_error,
@@ -1859,6 +1935,112 @@ impl<'a> InterviewResource<'a> {
 
 pub struct OfferResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetOfferQuery<'a> {
+    pub offer_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+    pub job_family_id_type: Option<&'a str>,
+    pub employee_type_id_type: Option<&'a str>,
+}
+
+impl<'a> GetOfferQuery<'a> {
+    pub fn new(offer_id: &'a str) -> Self {
+        Self {
+            offer_id,
+            user_id_type: None,
+            department_id_type: None,
+            job_level_id_type: None,
+            job_family_id_type: None,
+            employee_type_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub fn job_family_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_family_id_type = value.into();
+        self
+    }
+
+    pub fn employee_type_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.employee_type_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListOfferQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub application_id: Option<&'a str>,
+    pub talent_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub employee_type_id_type: Option<&'a str>,
+}
+
+impl<'a> ListOfferQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.application_id = value.into();
+        self
+    }
+
+    pub fn talent_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.talent_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn employee_type_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.employee_type_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> OfferResource<'a> {
@@ -1912,14 +2094,30 @@ impl<'a> OfferResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetOfferResp, LarkError> {
-        let path = format!("/open-apis/hire/v1/offers/{offer_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetOfferData>(self.config, &api_req, option).await?;
+        let query = GetOfferQuery::new(offer_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetOfferQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetOfferResp, LarkError> {
+        let path = format!("/open-apis/hire/v1/offers/{}", query.offer_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .query("job_family_id_type", query.job_family_id_type)
+        .query("employee_type_id_type", query.employee_type_id_type)
+        .send::<GetOfferData>()
+        .await?;
         Ok(GetOfferResp {
             api_resp,
             code_error: raw.code_error,
@@ -1953,22 +2151,33 @@ impl<'a> OfferResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListOfferResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/offers");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = application_id {
-            api_req.query_params.set("application_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<OfferListData>(self.config, &api_req, option).await?;
+        let query = ListOfferQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .application_id(application_id)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListOfferQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListOfferResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/offers",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("application_id", query.application_id)
+        .query("talent_id", query.talent_id)
+        .query("user_id_type", query.user_id_type)
+        .query("employee_type_id_type", query.employee_type_id_type)
+        .send::<OfferListData>()
+        .await?;
         Ok(ListOfferResp {
             api_resp,
             code_error: raw.code_error,
@@ -1999,6 +2208,99 @@ impl<'a> OfferResource<'a> {
 
 pub struct JobRequirementResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobRequirementQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub job_id: Option<&'a str>,
+    pub create_time_begin: Option<&'a str>,
+    pub create_time_end: Option<&'a str>,
+    pub update_time_begin: Option<&'a str>,
+    pub update_time_end: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+    pub job_family_id_type: Option<&'a str>,
+    pub employee_type_id_type: Option<&'a str>,
+}
+
+impl<'a> ListJobRequirementQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn job_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_id = value.into();
+        self
+    }
+
+    pub fn create_time_begin(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.create_time_begin = value.into();
+        self
+    }
+
+    pub fn create_time_end(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.create_time_end = value.into();
+        self
+    }
+
+    pub fn update_time_begin(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_time_begin = value.into();
+        self
+    }
+
+    pub fn update_time_end(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_time_end = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub fn job_family_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_family_id_type = value.into();
+        self
+    }
+
+    pub fn employee_type_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.employee_type_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> JobRequirementResource<'a> {
@@ -2086,35 +2388,43 @@ impl<'a> JobRequirementResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobRequirementResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/job_requirements");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = job_id {
-            api_req.query_params.set("job_id", v);
-        }
-        if let Some(v) = create_time_begin {
-            api_req.query_params.set("create_time_begin", v);
-        }
-        if let Some(v) = create_time_end {
-            api_req.query_params.set("create_time_end", v);
-        }
-        if let Some(v) = update_time_begin {
-            api_req.query_params.set("update_time_begin", v);
-        }
-        if let Some(v) = update_time_end {
-            api_req.query_params.set("update_time_end", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<JobRequirementListData>(self.config, &api_req, option)
-                .await?;
+        let query = ListJobRequirementQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .job_id(job_id)
+            .create_time_begin(create_time_begin)
+            .create_time_end(create_time_end)
+            .update_time_begin(update_time_begin)
+            .update_time_end(update_time_end)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobRequirementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobRequirementResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/job_requirements",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("job_id", query.job_id)
+        .query("create_time_begin", query.create_time_begin)
+        .query("create_time_end", query.create_time_end)
+        .query("update_time_begin", query.update_time_begin)
+        .query("update_time_end", query.update_time_end)
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .query("job_family_id_type", query.job_family_id_type)
+        .query("employee_type_id_type", query.employee_type_id_type)
+        .send::<JobRequirementListData>()
+        .await?;
         Ok(ListJobRequirementResp {
             api_resp,
             code_error: raw.code_error,
