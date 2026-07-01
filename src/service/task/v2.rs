@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
+use crate::service::common::{PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Generic response data types ───────────────────────────────────────────────
@@ -123,7 +123,7 @@ pub struct ActivitySubscriptionListData {
 
 // ── Params types ───────────────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct TaskListParams<'a> {
     pub page_size: Option<i32>,
     pub page_token: Option<&'a str>,
@@ -131,6 +131,98 @@ pub struct TaskListParams<'a> {
     pub created_from: Option<&'a str>,
     pub created_to: Option<&'a str>,
     pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> TaskListParams<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn completed(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.completed = value.into();
+        self
+    }
+
+    pub fn created_from(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.created_from = value.into();
+        self
+    }
+
+    pub fn created_to(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.created_to = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListTaskV2Query<'a> {
+    pub page: PageQuery<'a>,
+    pub completed: Option<bool>,
+    pub task_type: Option<&'a str>,
+    pub agent_task_status: Option<i32>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListTaskV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn completed(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.completed = value.into();
+        self
+    }
+
+    pub fn task_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.task_type = value.into();
+        self
+    }
+
+    pub fn agent_task_status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.agent_task_status = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetTaskV2Query<'a> {
+    pub task_guid: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetTaskV2Query<'a> {
+    pub fn new(task_guid: &'a str) -> Self {
+        Self {
+            task_guid,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
 }
 
 // ── Response types ─────────────────────────────────────────────────────────────
@@ -247,15 +339,26 @@ impl<'a> TaskV2Resource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetTaskV2Resp, LarkError> {
-        let path = format!("/open-apis/task/v2/tasks/{task_guid}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TaskV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetTaskV2Query::new(task_guid).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetTaskV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<GetTaskV2Resp, LarkError> {
+        let path = format!("/open-apis/task/v2/tasks/{}", query.task_guid);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<TaskV2Data>()
+        .await?;
         Ok(GetTaskV2Resp {
             api_resp,
             code_error,
@@ -311,20 +414,31 @@ impl<'a> TaskV2Resource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListTaskV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TaskV2ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListTaskV2Query::new()
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTaskV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTaskV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/task/v2/tasks",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query("completed", query.completed)
+        .query("type", query.task_type)
+        .query("agent_task_status", query.agent_task_status)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<TaskV2ListData>()
+        .await?;
         Ok(ListTaskV2Resp {
             api_resp,
             code_error,
