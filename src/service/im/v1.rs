@@ -1569,6 +1569,108 @@ pub struct MessageResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetMessageQuery<'a> {
+    pub message_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetMessageQuery<'a> {
+    pub fn new(message_id: &'a str) -> Self {
+        Self {
+            message_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListMessageQuery<'a> {
+    pub container_id_type: &'a str,
+    pub container_id: &'a str,
+    pub start_time: Option<&'a str>,
+    pub end_time: Option<&'a str>,
+    pub sort_type: Option<&'a str>,
+    pub page_size: Option<i64>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListMessageQuery<'a> {
+    pub fn new(container_id_type: &'a str, container_id: &'a str) -> Self {
+        Self {
+            container_id_type,
+            container_id,
+            start_time: None,
+            end_time: None,
+            sort_type: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_time = value.into();
+        self
+    }
+
+    pub fn end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_time = value.into();
+        self
+    }
+
+    pub fn sort_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.sort_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ReadUsersMessageQuery<'a> {
+    pub message_id: &'a str,
+    pub user_id_type: &'a str,
+    pub page_size: Option<i64>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ReadUsersMessageQuery<'a> {
+    pub fn new(message_id: &'a str, user_id_type: &'a str) -> Self {
+        Self {
+            message_id,
+            user_id_type,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+}
+
 impl<'a> MessageResource<'a> {
     pub async fn create(
         &self,
@@ -1667,14 +1769,26 @@ impl<'a> MessageResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetMessageResp, LarkError> {
-        let path = format!("/open-apis/im/v1/messages/{message_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetMessageRespData>(self.config, &api_req, option).await?;
+        let query = GetMessageQuery::new(message_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetMessageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetMessageResp, LarkError> {
+        let path = format!("/open-apis/im/v1/messages/{}", query.message_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<GetMessageRespData>()
+        .await?;
         Ok(GetMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -1694,29 +1808,39 @@ impl<'a> MessageResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListMessageResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/im/v1/messages");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("container_id_type", container_id_type);
-        api_req.query_params.set("container_id", container_id);
-        if let Some(v) = start_time {
-            api_req.query_params.set("start_time", v);
-        }
-        if let Some(v) = end_time {
-            api_req.query_params.set("end_time", v);
-        }
-        if let Some(v) = sort_type {
-            api_req.query_params.set("sort_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListMessageRespData>(self.config, &api_req, option).await?;
+        let query = ListMessageQuery {
+            container_id_type,
+            container_id,
+            start_time,
+            end_time,
+            sort_type,
+            page_size,
+            page_token,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListMessageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListMessageResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/im/v1/messages",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("container_id_type", query.container_id_type)
+        .query("container_id", query.container_id)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("sort_type", query.sort_type)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .send::<ListMessageRespData>()
+        .await?;
         Ok(ListMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -1805,19 +1929,33 @@ impl<'a> MessageResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ReadUsersMessageResp, LarkError> {
-        let path = format!("/open-apis/im/v1/messages/{message_id}/read_users");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("user_id_type", user_id_type);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ReadUsersMessageRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ReadUsersMessageQuery {
+            message_id,
+            user_id_type,
+            page_size,
+            page_token,
+        };
+        self.read_users_by_query(&query, option).await
+    }
+
+    pub async fn read_users_by_query(
+        &self,
+        query: &ReadUsersMessageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ReadUsersMessageResp, LarkError> {
+        let path = format!("/open-apis/im/v1/messages/{}/read_users", query.message_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .send::<ReadUsersMessageRespData>()
+        .await?;
         Ok(ReadUsersMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -1914,6 +2052,48 @@ pub struct MessageReactionResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListMessageReactionQuery<'a> {
+    pub message_id: &'a str,
+    pub reaction_type: Option<&'a str>,
+    pub page_token: Option<&'a str>,
+    pub page_size: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListMessageReactionQuery<'a> {
+    pub fn new(message_id: &'a str) -> Self {
+        Self {
+            message_id,
+            reaction_type: None,
+            page_token: None,
+            page_size: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn reaction_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.reaction_type = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> MessageReactionResource<'a> {
     pub async fn create(
         &self,
@@ -1969,24 +2149,35 @@ impl<'a> MessageReactionResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListMessageReactionResp, LarkError> {
-        let path = format!("/open-apis/im/v1/messages/{message_id}/reactions");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = reaction_type {
-            api_req.query_params.set("reaction_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListMessageReactionRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ListMessageReactionQuery {
+            message_id,
+            reaction_type,
+            page_token,
+            page_size,
+            user_id_type,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListMessageReactionQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListMessageReactionResp, LarkError> {
+        let path = format!("/open-apis/im/v1/messages/{}/reactions", query.message_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("reaction_type", query.reaction_type)
+        .query("page_token", query.page_token)
+        .query("page_size", query.page_size)
+        .query("user_id_type", query.user_id_type)
+        .send::<ListMessageReactionRespData>()
+        .await?;
         Ok(ListMessageReactionResp {
             api_resp,
             code_error: raw.code_error,
@@ -2103,6 +2294,48 @@ pub struct PinResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListPinQuery<'a> {
+    pub chat_id: &'a str,
+    pub start_time: Option<&'a str>,
+    pub end_time: Option<&'a str>,
+    pub page_token: Option<&'a str>,
+    pub page_size: Option<i64>,
+}
+
+impl<'a> ListPinQuery<'a> {
+    pub fn new(chat_id: &'a str) -> Self {
+        Self {
+            chat_id,
+            start_time: None,
+            end_time: None,
+            page_token: None,
+            page_size: None,
+        }
+    }
+
+    pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_time = value.into();
+        self
+    }
+
+    pub fn end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_time = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+}
+
 impl<'a> PinResource<'a> {
     pub async fn create(
         &self,
@@ -2146,23 +2379,35 @@ impl<'a> PinResource<'a> {
         page_size: Option<i64>,
         option: &RequestOption,
     ) -> Result<ListPinResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/im/v1/pins");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("chat_id", chat_id);
-        if let Some(v) = start_time {
-            api_req.query_params.set("start_time", v);
-        }
-        if let Some(v) = end_time {
-            api_req.query_params.set("end_time", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListPinRespData>(self.config, &api_req, option).await?;
+        let query = ListPinQuery {
+            chat_id,
+            start_time,
+            end_time,
+            page_token,
+            page_size,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListPinQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListPinResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/im/v1/pins",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("chat_id", query.chat_id)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("page_token", query.page_token)
+        .query("page_size", query.page_size)
+        .send::<ListPinRespData>()
+        .await?;
         Ok(ListPinResp {
             api_resp,
             code_error: raw.code_error,
@@ -2314,6 +2559,97 @@ pub struct ChatResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetChatQuery<'a> {
+    pub chat_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetChatQuery<'a> {
+    pub fn new(chat_id: &'a str) -> Self {
+        Self {
+            chat_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListChatQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub sort_type: Option<&'a str>,
+    pub page_token: Option<&'a str>,
+    pub page_size: Option<i64>,
+}
+
+impl<'a> ListChatQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn sort_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.sort_type = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct SearchChatQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub query: Option<&'a str>,
+    pub page_token: Option<&'a str>,
+    pub page_size: Option<i64>,
+}
+
+impl<'a> SearchChatQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn query(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.query = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+}
+
 impl<'a> ChatResource<'a> {
     pub async fn create(
         &self,
@@ -2358,14 +2694,26 @@ impl<'a> ChatResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetChatResp, LarkError> {
-        let path = format!("/open-apis/im/v1/chats/{chat_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetChatRespData>(self.config, &api_req, option).await?;
+        let query = GetChatQuery::new(chat_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetChatQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetChatResp, LarkError> {
+        let path = format!("/open-apis/im/v1/chats/{}", query.chat_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<GetChatRespData>()
+        .await?;
         Ok(GetChatResp {
             api_resp,
             code_error: raw.code_error,
@@ -2422,22 +2770,33 @@ impl<'a> ChatResource<'a> {
         page_size: Option<i64>,
         option: &RequestOption,
     ) -> Result<ListChatResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/im/v1/chats");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = sort_type {
-            api_req.query_params.set("sort_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListChatRespData>(self.config, &api_req, option).await?;
+        let query = ListChatQuery {
+            user_id_type,
+            sort_type,
+            page_token,
+            page_size,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListChatQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListChatResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/im/v1/chats",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("sort_type", query.sort_type)
+        .query("page_token", query.page_token)
+        .query("page_size", query.page_size)
+        .send::<ListChatRespData>()
+        .await?;
         Ok(ListChatResp {
             api_resp,
             code_error: raw.code_error,
@@ -2453,22 +2812,33 @@ impl<'a> ChatResource<'a> {
         page_size: Option<i64>,
         option: &RequestOption,
     ) -> Result<ListChatResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/im/v1/chats/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = query {
-            api_req.query_params.set("query", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListChatRespData>(self.config, &api_req, option).await?;
+        let query = SearchChatQuery {
+            user_id_type,
+            query,
+            page_token,
+            page_size,
+        };
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchChatQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListChatResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/im/v1/chats/search",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("query", query.query)
+        .query("page_token", query.page_token)
+        .query("page_size", query.page_size)
+        .send::<ListChatRespData>()
+        .await?;
         Ok(ListChatResp {
             api_resp,
             code_error: raw.code_error,
@@ -2509,6 +2879,53 @@ impl<'a> ChatResource<'a> {
 
 pub struct ChatMembersResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetChatMembersQuery<'a> {
+    pub chat_id: &'a str,
+    pub member_id_type: Option<&'a str>,
+    pub page_token: Option<&'a str>,
+    pub page_size: Option<i64>,
+}
+
+impl<'a> GetChatMembersQuery<'a> {
+    pub fn new(chat_id: &'a str) -> Self {
+        Self {
+            chat_id,
+            member_id_type: None,
+            page_token: None,
+            page_size: None,
+        }
+    }
+
+    pub fn member_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.member_id_type = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct IsInChatMembersQuery<'a> {
+    pub chat_id: &'a str,
+}
+
+impl<'a> IsInChatMembersQuery<'a> {
+    pub fn new(chat_id: &'a str) -> Self {
+        Self { chat_id }
+    }
 }
 
 impl<'a> ChatMembersResource<'a> {
@@ -2570,21 +2987,33 @@ impl<'a> ChatMembersResource<'a> {
         page_size: Option<i64>,
         option: &RequestOption,
     ) -> Result<GetChatMembersResp, LarkError> {
-        let path = format!("/open-apis/im/v1/chats/{chat_id}/members");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = member_id_type {
-            api_req.query_params.set("member_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetChatMembersRespData>(self.config, &api_req, option)
-                .await?;
+        let query = GetChatMembersQuery {
+            chat_id,
+            member_id_type,
+            page_token,
+            page_size,
+        };
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetChatMembersQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetChatMembersResp, LarkError> {
+        let path = format!("/open-apis/im/v1/chats/{}/members", query.chat_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("member_id_type", query.member_id_type)
+        .query("page_token", query.page_token)
+        .query("page_size", query.page_size)
+        .send::<GetChatMembersRespData>()
+        .await?;
         Ok(GetChatMembersResp {
             api_resp,
             code_error: raw.code_error,
@@ -2612,12 +3041,28 @@ impl<'a> ChatMembersResource<'a> {
         chat_id: &str,
         option: &RequestOption,
     ) -> Result<IsInChatChatMembersResp, LarkError> {
-        let path = format!("/open-apis/im/v1/chats/{chat_id}/members/is_in_chat");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<IsInChatChatMembersRespData>(self.config, &api_req, option)
-                .await?;
+        let query = IsInChatMembersQuery::new(chat_id);
+        self.is_in_chat_by_query(&query, option).await
+    }
+
+    pub async fn is_in_chat_by_query(
+        &self,
+        query: &IsInChatMembersQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<IsInChatChatMembersResp, LarkError> {
+        let path = format!(
+            "/open-apis/im/v1/chats/{}/members/is_in_chat",
+            query.chat_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<IsInChatChatMembersRespData>()
+        .await?;
         Ok(IsInChatChatMembersResp {
             api_resp,
             code_error: raw.code_error,
@@ -2700,6 +3145,27 @@ pub struct ChatAnnouncementResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetChatAnnouncementQuery<'a> {
+    pub chat_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetChatAnnouncementQuery<'a> {
+    pub fn new(chat_id: &'a str) -> Self {
+        Self {
+            chat_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> ChatAnnouncementResource<'a> {
     pub async fn get(
         &self,
@@ -2707,15 +3173,26 @@ impl<'a> ChatAnnouncementResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetChatAnnouncementResp, LarkError> {
-        let path = format!("/open-apis/im/v1/chats/{chat_id}/announcement");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetChatAnnouncementRespData>(self.config, &api_req, option)
-                .await?;
+        let query = GetChatAnnouncementQuery::new(chat_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetChatAnnouncementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetChatAnnouncementResp, LarkError> {
+        let path = format!("/open-apis/im/v1/chats/{}/announcement", query.chat_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<GetChatAnnouncementRespData>()
+        .await?;
         Ok(GetChatAnnouncementResp {
             api_resp,
             code_error: raw.code_error,
@@ -2746,6 +3223,41 @@ pub struct ChatModerationResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetChatModerationQuery<'a> {
+    pub chat_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub page_token: Option<&'a str>,
+    pub page_size: Option<i64>,
+}
+
+impl<'a> GetChatModerationQuery<'a> {
+    pub fn new(chat_id: &'a str) -> Self {
+        Self {
+            chat_id,
+            user_id_type: None,
+            page_token: None,
+            page_size: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+}
+
 impl<'a> ChatModerationResource<'a> {
     pub async fn get(
         &self,
@@ -2755,21 +3267,33 @@ impl<'a> ChatModerationResource<'a> {
         page_size: Option<i64>,
         option: &RequestOption,
     ) -> Result<GetChatModerationResp, LarkError> {
-        let path = format!("/open-apis/im/v1/chats/{chat_id}/moderation");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetChatModerationRespData>(self.config, &api_req, option)
-                .await?;
+        let query = GetChatModerationQuery {
+            chat_id,
+            user_id_type,
+            page_token,
+            page_size,
+        };
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetChatModerationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetChatModerationResp, LarkError> {
+        let path = format!("/open-apis/im/v1/chats/{}/moderation", query.chat_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("page_token", query.page_token)
+        .query("page_size", query.page_size)
+        .send::<GetChatModerationRespData>()
+        .await?;
         Ok(GetChatModerationResp {
             api_resp,
             code_error: raw.code_error,
