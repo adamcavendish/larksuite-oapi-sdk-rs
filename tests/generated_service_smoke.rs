@@ -10,7 +10,7 @@ use larksuite_oapi_sdk_rs::service::{
         ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
         ListShareEntityQuery,
     },
-    drive::v2::ListFileLikeQuery,
+    drive::{v1::ListFileQuery, v2::ListFileLikeQuery},
     task::{CreateTaskReqBody, ListTaskQuery},
     vc::{
         GetMeetingListQuery, GetParticipantListQuery, GetParticipantQualityListQuery,
@@ -97,7 +97,43 @@ async fn drive_get_export_task_smoke() {
 }
 
 #[tokio::test]
-async fn drive_list_files_smoke() {
+async fn drive_list_files_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"files":[{"token":"file-1","name":"doc.pdf","type":"file"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListFileQuery::new()
+        .folder_token("folder-1")
+        .order_by("EditedTime")
+        .direction("DESC")
+        .user_id_type("open_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .drive()
+        .file
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.files.as_ref().unwrap().len(), 1);
+    assert_eq!(
+        data.files.as_ref().unwrap()[0].name.as_deref(),
+        Some("doc.pdf")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v1/files?"));
+    assert!(request.contains("folder_token=folder-1"));
+    assert!(request.contains("order_by=EditedTime"));
+    assert!(request.contains("direction=DESC"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn drive_list_files_positional_adapter_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"files":[{"token":"file-1","name":"doc.pdf","type":"file"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
