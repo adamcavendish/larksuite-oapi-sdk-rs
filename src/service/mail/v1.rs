@@ -354,6 +354,23 @@ impl<'a> ListMailgroupMemberQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListPublicMailboxQuery<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListPublicMailboxQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct MailgroupResource<'a> {
@@ -703,17 +720,26 @@ impl<'a> PublicMailboxResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListPublicMailboxResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/mail/v1/public_mailboxes");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<PublicMailboxListData>(self.config, &api_req, option)
-                .await?;
+        let query =
+            ListPublicMailboxQuery::new().page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListPublicMailboxQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListPublicMailboxResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/mail/v1/public_mailboxes",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .send::<PublicMailboxListData>()
+        .await?;
         Ok(ListPublicMailboxResp {
             api_resp,
             code_error: raw.code_error,
