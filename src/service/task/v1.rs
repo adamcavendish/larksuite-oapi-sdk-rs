@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::EmptyResp;
+use crate::service::common::{EmptyResp, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -302,6 +302,53 @@ pub struct TaskResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListTaskQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub start_create_time: Option<&'a str>,
+    pub end_create_time: Option<&'a str>,
+    pub task_completed: Option<bool>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListTaskQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn start_create_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_create_time = value.into();
+        self
+    }
+
+    pub fn end_create_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_create_time = value.into();
+        self
+    }
+
+    pub fn task_completed(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.task_completed = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> TaskResource<'a> {
     pub async fn create(
         &self,
@@ -309,14 +356,17 @@ impl<'a> TaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/task/v1/tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TaskData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/task/v1/tasks",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<TaskData>()
+        .await?;
         Ok(CreateTaskResp {
             api_resp,
             code_error: raw.code_error,
@@ -427,28 +477,36 @@ impl<'a> TaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v1/tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = start_create_time {
-            api_req.query_params.set("start_create_time", v);
-        }
-        if let Some(v) = end_create_time {
-            api_req.query_params.set("end_create_time", v);
-        }
-        if let Some(v) = task_completed {
-            api_req.query_params.set("task_completed", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TaskListData>(self.config, &api_req, option).await?;
+        let query = ListTaskQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .start_create_time(start_create_time)
+            .end_create_time(end_create_time)
+            .task_completed(task_completed)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTaskResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/task/v1/tasks",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .query("start_create_time", query.start_create_time)
+        .query("end_create_time", query.end_create_time)
+        .query("task_completed", query.task_completed)
+        .query("user_id_type", query.user_id_type)
+        .send::<TaskListData>()
+        .await?;
         Ok(ListTaskResp {
             api_resp,
             code_error: raw.code_error,
