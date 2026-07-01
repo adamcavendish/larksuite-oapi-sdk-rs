@@ -83,7 +83,10 @@ use larksuite_oapi_sdk_rs::service::{
     security_and_compliance::{v1::ListOpenapiLogQuery, v2::ListDeviceRecordV2Query},
     task::{
         CreateTaskReqBody, ListTaskQuery,
-        v2::{GetAttachmentV2Query, GetTaskV2Query, ListAttachmentV2Query, ListTaskV2Query},
+        v2::{
+            GetAttachmentV2Query, GetCommentV2Query, GetCustomFieldV2Query, GetTaskV2Query,
+            ListAttachmentV2Query, ListCommentV2Query, ListCustomFieldV2Query, ListTaskV2Query,
+        },
     },
     vc::{
         GetMeetingListQuery, GetParticipantListQuery, GetParticipantQualityListQuery,
@@ -3544,6 +3547,178 @@ async fn task_v2_attachment_list_by_query_smoke() {
     assert!(request.contains("resource_type=task"));
     assert!(request.contains("resource_id=task-guid-1"));
     assert!(request.contains("updated_mesc=1700000000000"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn task_v2_comment_get_by_query_smoke() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"comment":{"id":"comment-1","content":"Looks good"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = GetCommentV2Query::new("comment-1").user_id_type("open_id");
+    let resp = client
+        .task_v2()
+        .comment
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let comment = resp.data.unwrap().comment.unwrap();
+    assert_eq!(comment["id"].as_str(), Some("comment-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/task/v2/comments/comment-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn task_v2_comment_list_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"comment-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .task_v2()
+        .comment
+        .list(
+            Some("task"),
+            Some("task-guid-1"),
+            Some(20),
+            Some("next-page"),
+            Some("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/task/v2/comments?"));
+    assert!(request.contains("resource_type=task"));
+    assert!(request.contains("resource_id=task-guid-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn task_v2_comment_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"comment-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCommentV2Query::new()
+        .resource_type("task")
+        .resource_id("task-guid-1")
+        .direction("asc")
+        .user_id_type("open_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .task_v2()
+        .comment
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items.len(), 1);
+    assert_eq!(data.items[0]["id"].as_str(), Some("comment-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/task/v2/comments?"));
+    assert!(request.contains("resource_type=task"));
+    assert!(request.contains("resource_id=task-guid-1"));
+    assert!(request.contains("direction=asc"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn task_v2_custom_field_get_by_query_smoke() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"custom_field":{"guid":"field-1","name":"Priority"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = GetCustomFieldV2Query::new("field-1").user_id_type("open_id");
+    let resp = client
+        .task_v2()
+        .custom_field
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let custom_field = resp.data.unwrap().custom_field.unwrap();
+    assert_eq!(custom_field["guid"].as_str(), Some("field-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/task/v2/custom_fields/field-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn task_v2_custom_field_list_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"guid":"field-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .task_v2()
+        .custom_field
+        .list(
+            Some("tasklist"),
+            Some("tasklist-guid-1"),
+            Some(20),
+            Some("next-page"),
+            Some("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/task/v2/custom_fields?"));
+    assert!(request.contains("resource_type=tasklist"));
+    assert!(request.contains("resource_id=tasklist-guid-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn task_v2_custom_field_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"guid":"field-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCustomFieldV2Query::new()
+        .resource_type("tasklist")
+        .resource_id("tasklist-guid-1")
+        .update_msec("1700000000000")
+        .user_id_type("open_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .task_v2()
+        .custom_field
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items.len(), 1);
+    assert_eq!(data.items[0]["guid"].as_str(), Some("field-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/task/v2/custom_fields?"));
+    assert!(request.contains("resource_type=tasklist"));
+    assert!(request.contains("resource_id=tasklist-guid-1"));
+    assert!(request.contains("update_msec=1700000000000"));
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
