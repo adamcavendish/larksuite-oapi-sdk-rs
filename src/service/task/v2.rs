@@ -285,6 +285,126 @@ impl<'a> ListAttachmentV2Query<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct GetCommentV2Query<'a> {
+    pub comment_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetCommentV2Query<'a> {
+    pub fn new(comment_id: &'a str) -> Self {
+        Self {
+            comment_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListCommentV2Query<'a> {
+    pub resource_type: Option<&'a str>,
+    pub resource_id: Option<&'a str>,
+    pub direction: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListCommentV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn resource_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.resource_type = value.into();
+        self
+    }
+
+    pub fn resource_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.resource_id = value.into();
+        self
+    }
+
+    pub fn direction(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.direction = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetCustomFieldV2Query<'a> {
+    pub custom_field_guid: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetCustomFieldV2Query<'a> {
+    pub fn new(custom_field_guid: &'a str) -> Self {
+        Self {
+            custom_field_guid,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListCustomFieldV2Query<'a> {
+    pub resource_type: Option<&'a str>,
+    pub resource_id: Option<&'a str>,
+    pub update_msec: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListCustomFieldV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn resource_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.resource_type = value.into();
+        self
+    }
+
+    pub fn resource_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.resource_id = value.into();
+        self
+    }
+
+    pub fn update_msec(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_msec = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
 // ── Response types ─────────────────────────────────────────────────────────────
 
 impl_resp_v2!(CreateTaskV2Resp, TaskV2Data);
@@ -895,15 +1015,26 @@ impl<'a> CommentV2Resource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetCommentV2Resp, LarkError> {
-        let path = format!("/open-apis/task/v2/comments/{comment_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CommentV2Data>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetCommentV2Query::new(comment_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetCommentV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<GetCommentV2Resp, LarkError> {
+        let path = format!("/open-apis/task/v2/comments/{}", query.comment_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<CommentV2Data>()
+        .await?;
         Ok(GetCommentV2Resp {
             api_resp,
             code_error,
@@ -961,26 +1092,33 @@ impl<'a> CommentV2Resource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCommentV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/comments");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = resource_type {
-            api_req.query_params.set("resource_type", v);
-        }
-        if let Some(v) = resource_id {
-            api_req.query_params.set("resource_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CommentV2ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListCommentV2Query::new()
+            .resource_type(resource_type)
+            .resource_id(resource_id)
+            .user_id_type(user_id_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCommentV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCommentV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/task/v2/comments",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("resource_type", query.resource_type)
+        .query("resource_id", query.resource_id)
+        .query("direction", query.direction)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send_v2::<CommentV2ListData>()
+        .await?;
         Ok(ListCommentV2Resp {
             api_resp,
             code_error,
@@ -1024,15 +1162,29 @@ impl<'a> CustomFieldV2Resource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetCustomFieldV2Resp, LarkError> {
-        let path = format!("/open-apis/task/v2/custom_fields/{custom_field_guid}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CustomFieldData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetCustomFieldV2Query::new(custom_field_guid).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetCustomFieldV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<GetCustomFieldV2Resp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v2/custom_fields/{}",
+            query.custom_field_guid
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<CustomFieldData>()
+        .await?;
         Ok(GetCustomFieldV2Resp {
             api_resp,
             code_error,
@@ -1073,26 +1225,33 @@ impl<'a> CustomFieldV2Resource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCustomFieldV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/task/v2/custom_fields");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = resource_type {
-            api_req.query_params.set("resource_type", v);
-        }
-        if let Some(v) = resource_id {
-            api_req.query_params.set("resource_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CustomFieldListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListCustomFieldV2Query::new()
+            .resource_type(resource_type)
+            .resource_id(resource_id)
+            .user_id_type(user_id_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCustomFieldV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCustomFieldV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/task/v2/custom_fields",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("resource_type", query.resource_type)
+        .query("resource_id", query.resource_id)
+        .query("update_msec", query.update_msec)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send_v2::<CustomFieldListData>()
+        .await?;
         Ok(ListCustomFieldV2Resp {
             api_resp,
             code_error,
