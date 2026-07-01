@@ -42,9 +42,13 @@ use larksuite_oapi_sdk_rs::service::{
     },
     common::PageQuery,
     contact::v3::{
-        ChildrenDepartmentQuery, FindUserByDepartmentQuery, ListDepartmentQuery,
-        ListEmployeeTypeEnumQuery, ListScopeQuery, ListUserQuery, SearchDepartmentQuery,
-        SearchDepartmentReqBody,
+        BatchDepartmentQuery as BatchContactDepartmentQuery, BatchGetIdUserQuery,
+        BatchGetIdUserReqBody, BatchUserQuery as BatchContactUserQuery, ChildrenDepartmentQuery,
+        FindUserByDepartmentQuery, GetDepartmentQuery as GetContactDepartmentQuery,
+        GetUserQuery as GetContactUserQuery, ListDepartmentQuery, ListEmployeeTypeEnumQuery,
+        ListScopeQuery, ListUserQuery, ResurrectUserQuery, ResurrectUserReqBody,
+        SearchDepartmentQuery, SearchDepartmentReqBody, UnbindDepartmentChatQuery,
+        UnbindDepartmentChatReqBody, UserDepartmentInfo,
     },
     corehr::v1::{
         GetDepartmentQuery as GetCorehrDepartmentQuery, GetEmployeeQuery as GetCorehrEmployeeQuery,
@@ -1524,6 +1528,93 @@ async fn contact_department_list_by_query_smoke() {
 }
 
 #[tokio::test]
+async fn contact_department_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"department":{"department_id":"od-1","name":"Engineering"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .contact()
+        .department
+        .get_by_query(
+            &GetContactDepartmentQuery::new("od-1")
+                .user_id_type("open_id")
+                .department_id_type("department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.department.as_ref())
+            .and_then(|department| department.name.as_deref()),
+        Some("Engineering")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/departments/od-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+}
+
+#[tokio::test]
+async fn contact_department_batch_by_query_smoke() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"items":[{"department_id":"od-1","name":"Engineering"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let department_ids = ["od-1", "od-2"];
+    let resp = client
+        .contact()
+        .department
+        .batch_by_query(
+            &BatchContactDepartmentQuery::new(&department_ids)
+                .department_id_type("department_id")
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/departments/batch?"));
+    assert!(request.contains("department_ids=od-1"));
+    assert!(request.contains("department_ids=od-2"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn contact_department_unbind_chat_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = UnbindDepartmentChatReqBody {
+        department_id: Some("od-1".to_string()),
+    };
+    let resp = client
+        .contact()
+        .department
+        .unbind_department_chat_by_query(
+            &UnbindDepartmentChatQuery::new(&body).department_id_type("department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/contact/v3/departments/unbind_department_chat?"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains(r#""department_id":"od-1""#));
+}
+
+#[tokio::test]
 async fn contact_department_children_positional_adapter_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"items":[{"department_id":"od-child","name":"Platform"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
@@ -1641,6 +1732,128 @@ async fn contact_user_list_by_query_smoke() {
     assert!(request.contains("department_id=od-1"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn contact_user_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"user":{"user_id":"u-1","name":"Ada"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .contact()
+        .user
+        .get_by_query(
+            &GetContactUserQuery::new("u-1")
+                .user_id_type("open_id")
+                .department_id_type("department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.user.as_ref())
+            .and_then(|user| user.name.as_deref()),
+        Some("Ada")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/users/u-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+}
+
+#[tokio::test]
+async fn contact_user_batch_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"user_id":"u-1","name":"Ada"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let user_ids = ["u-1", "u-2"];
+    let resp = client
+        .contact()
+        .user
+        .batch_by_query(
+            &BatchContactUserQuery::new(&user_ids)
+                .user_id_type("open_id")
+                .department_id_type("department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/contact/v3/users/batch?"));
+    assert!(request.contains("user_ids=u-1"));
+    assert!(request.contains("user_ids=u-2"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+}
+
+#[tokio::test]
+async fn contact_user_batch_get_id_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"user_list":[{"user_id":"u-1","email":"ada@example.com"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = BatchGetIdUserReqBody {
+        emails: Some(vec!["ada@example.com".to_string()]),
+        mobiles: None,
+        include_resigned: Some(true),
+    };
+    let resp = client
+        .contact()
+        .user
+        .batch_get_id_by_query(
+            &BatchGetIdUserQuery::new(&body).user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/contact/v3/users/batch_get_id?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains(r#""emails":["ada@example.com"]"#));
+    assert!(request.contains(r#""include_resigned":true"#));
+}
+
+#[tokio::test]
+async fn contact_user_resurrect_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = ResurrectUserReqBody {
+        departments: Some(vec![UserDepartmentInfo {
+            department_id: Some("od-1".to_string()),
+        }]),
+        subscription_ids: Some(vec!["sub-1".to_string()]),
+    };
+    let resp = client
+        .contact()
+        .user
+        .resurrect_by_query(
+            &ResurrectUserQuery::new("u-1", &body)
+                .user_id_type("open_id")
+                .department_id_type("department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/contact/v3/users/u-1/resurrect?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains(r#""department_id":"od-1""#));
+    assert!(request.contains(r#""subscription_ids":["sub-1"]"#));
 }
 
 #[tokio::test]
