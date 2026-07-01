@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::EmptyResp;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -939,6 +939,219 @@ pub struct DepartmentResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListDepartmentQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub parent_department_id: Option<&'a str>,
+    pub fetch_child: Option<bool>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListDepartmentQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn parent_department_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.parent_department_id = value.into();
+        self
+    }
+
+    pub fn fetch_child(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.fetch_child = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ChildrenDepartmentQuery<'a> {
+    pub department_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub fetch_child: Option<bool>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ChildrenDepartmentQuery<'a> {
+    pub fn new(department_id: &'a str) -> Self {
+        Self {
+            department_id,
+            user_id_type: None,
+            department_id_type: None,
+            fetch_child: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn fetch_child(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.fetch_child = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ParentDepartmentQuery<'a> {
+    pub department_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ParentDepartmentQuery<'a> {
+    pub fn new(department_id: &'a str) -> Self {
+        Self {
+            department_id,
+            user_id_type: None,
+            department_id_type: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SearchDepartmentQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> SearchDepartmentQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> DepartmentResource<'a> {
     pub async fn create(
         &self,
@@ -1106,29 +1319,35 @@ impl<'a> DepartmentResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/departments");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = parent_department_id {
-            api_req.query_params.set("parent_department_id", v);
-        }
-        if let Some(v) = fetch_child {
-            api_req.query_params.set("fetch_child", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListDepartmentRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ListDepartmentQuery::new()
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .parent_department_id(parent_department_id)
+            .fetch_child(fetch_child)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListDepartmentResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/departments",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("parent_department_id", query.parent_department_id)
+        .query("fetch_child", query.fetch_child)
+        .page_query(query.page_query())
+        .send::<ListDepartmentRespData>()
+        .await?;
         Ok(ListDepartmentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1175,27 +1394,37 @@ impl<'a> DepartmentResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ChildrenDepartmentResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/departments/{department_id}/children");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = fetch_child {
-            api_req.query_params.set("fetch_child", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListDepartmentRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ChildrenDepartmentQuery::new(department_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .fetch_child(fetch_child)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.children_by_query(&query, option).await
+    }
+
+    pub async fn children_by_query(
+        &self,
+        query: &ChildrenDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ChildrenDepartmentResp, LarkError> {
+        let path = format!(
+            "/open-apis/contact/v3/departments/{}/children",
+            query.department_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("fetch_child", query.fetch_child)
+        .page_query(query.page_query())
+        .send::<ListDepartmentRespData>()
+        .await?;
         Ok(ChildrenDepartmentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1212,27 +1441,32 @@ impl<'a> DepartmentResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ParentDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ParentDepartmentQuery::new(department_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .page_token(page_token)
+            .page_size(page_size);
+        self.parent_by_query(&query, option).await
+    }
+
+    pub async fn parent_by_query(
+        &self,
+        query: &ParentDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ParentDepartmentResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/contact/v3/departments/parent",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("department_id", department_id);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListDepartmentRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("department_id", query.department_id)
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .page_query(query.page_query())
+        .send::<ListDepartmentRespData>()
+        .await?;
         Ok(ParentDepartmentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1249,27 +1483,33 @@ impl<'a> DepartmentResource<'a> {
         body: &SearchDepartmentReqBody,
         option: &RequestOption,
     ) -> Result<SearchDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = SearchDepartmentQuery::new()
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .page_token(page_token)
+            .page_size(page_size);
+        self.search_by_query(&query, body, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchDepartmentQuery<'_>,
+        body: &SearchDepartmentReqBody,
+        option: &RequestOption,
+    ) -> Result<SearchDepartmentResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/contact/v3/departments/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SearchDepartmentRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .page_query(query.page_query())
+        .json_body(body)?
+        .send::<SearchDepartmentRespData>()
+        .await?;
         Ok(SearchDepartmentResp {
             api_resp,
             code_error: raw.code_error,
