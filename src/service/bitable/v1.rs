@@ -2052,6 +2052,46 @@ pub struct AppRoleMemberResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListAppRoleMemberQuery<'a> {
+    pub app_token: &'a str,
+    pub role_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListAppRoleMemberQuery<'a> {
+    pub fn new(app_token: &'a str, role_id: &'a str) -> Self {
+        Self {
+            app_token,
+            role_id,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> AppRoleMemberResource<'a> {
     /// Batch-create members for a custom role.
     /// POST /open-apis/bitable/v1/apps/:app_token/roles/:role_id/members/batch_create
@@ -2161,19 +2201,31 @@ impl<'a> AppRoleMemberResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAppRoleMemberResp, LarkError> {
-        let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AppRoleMemberListData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListAppRoleMemberQuery::new(app_token, role_id)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAppRoleMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAppRoleMemberResp, LarkError> {
+        let path = format!(
+            "/open-apis/bitable/v1/apps/{}/roles/{}/members",
+            query.app_token, query.role_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<AppRoleMemberListData>()
+        .await?;
         Ok(ListAppRoleMemberResp {
             api_resp,
             code_error,
@@ -2348,6 +2400,48 @@ pub struct AppTableFormFieldResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListFormFieldQuery<'a> {
+    pub app_token: &'a str,
+    pub table_id: &'a str,
+    pub form_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListFormFieldQuery<'a> {
+    pub fn new(app_token: &'a str, table_id: &'a str, form_id: &'a str) -> Self {
+        Self {
+            app_token,
+            table_id,
+            form_id,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> AppTableFormFieldResource<'a> {
     /// List form fields.
     /// GET /open-apis/bitable/v1/apps/:app_token/tables/:table_id/forms/:form_id/fields
@@ -2360,19 +2454,31 @@ impl<'a> AppTableFormFieldResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFormFieldResp, LarkError> {
+        let query = ListFormFieldQuery::new(app_token, table_id, form_id)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFormFieldQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFormFieldResp, LarkError> {
         let path = format!(
-            "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}/fields"
+            "/open-apis/bitable/v1/apps/{}/tables/{}/forms/{}/fields",
+            query.app_token, query.table_id, query.form_id
         );
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<FormFieldListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<FormFieldListData>()
+        .await?;
         Ok(ListFormFieldResp {
             api_resp,
             code_error: raw.code_error,
