@@ -259,6 +259,42 @@ async fn drive_file_upload_all_smoke() {
 }
 
 #[tokio::test]
+async fn drive_file_upload_part_smoke() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .file
+        .upload_part(
+            "upload-id-1",
+            2,
+            3,
+            Some("checksum-1"),
+            b"abc".to_vec(),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/drive/v1/files/upload_part"));
+    assert!(request.contains("name=\"upload_id\""));
+    assert!(request.contains("upload-id-1"));
+    assert!(request.contains("name=\"seq\""));
+    assert!(request.contains("\r\n2\r\n"));
+    assert!(request.contains("name=\"size\""));
+    assert!(request.contains("\r\n3\r\n"));
+    assert!(request.contains("name=\"checksum\""));
+    assert!(request.contains("checksum-1"));
+    assert!(request.contains("name=\"file\""));
+    assert!(request.contains("filename=\"part\""));
+    assert!(request.contains("abc"));
+}
+
+#[tokio::test]
 async fn drive_v2_file_like_list_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"files":[{"token":"like-1","name":"Alice","type":"user"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
@@ -443,6 +479,42 @@ async fn drive_media_upload_all_smoke() {
     assert!(request.contains("extra-value"));
     assert!(request.contains("name=\"file\""));
     assert!(request.contains("filename=\"clip.mp4\""));
+    assert!(request.contains("clip"));
+}
+
+#[tokio::test]
+async fn drive_media_upload_part_smoke() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .media
+        .upload_part(
+            "upload-id-1",
+            2,
+            4,
+            Some("checksum-1"),
+            b"clip".to_vec(),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/drive/v1/medias/upload_part"));
+    assert!(request.contains("name=\"upload_id\""));
+    assert!(request.contains("upload-id-1"));
+    assert!(request.contains("name=\"seq\""));
+    assert!(request.contains("\r\n2\r\n"));
+    assert!(request.contains("name=\"size\""));
+    assert!(request.contains("\r\n4\r\n"));
+    assert!(request.contains("name=\"checksum\""));
+    assert!(request.contains("checksum-1"));
+    assert!(request.contains("name=\"file\""));
+    assert!(request.contains("filename=\"part\""));
     assert!(request.contains("clip"));
 }
 

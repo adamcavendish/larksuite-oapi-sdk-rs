@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
+use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
 use crate::transport;
 
@@ -898,6 +898,25 @@ mod multipart_form {
         fields
     }
 
+    pub(super) fn upload_part_fields(
+        upload_id: &str,
+        seq: i32,
+        size: i64,
+        checksum: Option<&str>,
+        data: Vec<u8>,
+    ) -> Vec<FormDataField> {
+        let mut fields = vec![
+            text("upload_id", upload_id),
+            text("seq", seq),
+            text("size", size),
+            file("file", "part", data),
+        ];
+        if let Some(value) = checksum {
+            fields.push(text("checksum", value));
+        }
+        fields
+    }
+
     fn text(name: &str, value: impl ToString) -> FormDataField {
         FormDataField {
             name: name.to_string(),
@@ -1611,34 +1630,7 @@ impl<'a> FileResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/files/upload_part");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let mut fields = vec![
-            FormDataField {
-                name: "upload_id".into(),
-                value: FormDataValue::Text(upload_id.to_string()),
-            },
-            FormDataField {
-                name: "seq".into(),
-                value: FormDataValue::Text(seq.to_string()),
-            },
-            FormDataField {
-                name: "size".into(),
-                value: FormDataValue::Text(size.to_string()),
-            },
-            FormDataField {
-                name: "file".into(),
-                value: FormDataValue::File {
-                    filename: "part".to_string(),
-                    data,
-                    content_type: None,
-                },
-            },
-        ];
-        if let Some(v) = checksum {
-            fields.push(FormDataField {
-                name: "checksum".into(),
-                value: FormDataValue::Text(v.to_string()),
-            });
-        }
+        let fields = multipart_form::upload_part_fields(upload_id, seq, size, checksum, data);
         api_req.body = Some(ReqBody::FormData(fields));
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
@@ -2501,34 +2493,7 @@ impl<'a> MediaResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/medias/upload_part");
         api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let mut fields = vec![
-            FormDataField {
-                name: "upload_id".into(),
-                value: FormDataValue::Text(upload_id.to_string()),
-            },
-            FormDataField {
-                name: "seq".into(),
-                value: FormDataValue::Text(seq.to_string()),
-            },
-            FormDataField {
-                name: "size".into(),
-                value: FormDataValue::Text(size.to_string()),
-            },
-            FormDataField {
-                name: "file".into(),
-                value: FormDataValue::File {
-                    filename: "part".to_string(),
-                    data,
-                    content_type: None,
-                },
-            },
-        ];
-        if let Some(v) = checksum {
-            fields.push(FormDataField {
-                name: "checksum".into(),
-                value: FormDataValue::Text(v.to_string()),
-            });
-        }
+        let fields = multipart_form::upload_part_fields(upload_id, seq, size, checksum, data);
         api_req.body = Some(ReqBody::FormData(fields));
         let (api_resp, raw) =
             transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
