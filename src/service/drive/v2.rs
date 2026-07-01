@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
-use crate::service::common::RestRequest;
+use crate::service::common::{PageQuery, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -118,6 +118,16 @@ impl<'a> ListFileLikeQuery<'a> {
         self.page_token = value.into();
         self
     }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> FileLikeResource<'a> {
@@ -150,8 +160,7 @@ impl<'a> FileLikeResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .send::<FileLikeListData>()
         .await?;
         Ok(FileLikeListResp {

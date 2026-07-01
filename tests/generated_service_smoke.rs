@@ -136,8 +136,7 @@ async fn drive_v2_file_like_list_by_query_smoke() {
     let client = client_for(addr);
     let query = ListFileLikeQuery::new("file-token-1")
         .user_id_type("open_id")
-        .page_size(20)
-        .page_token("next-page");
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
     let resp = client
         .drive_v2()
         .file_like
