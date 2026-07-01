@@ -217,8 +217,7 @@ async fn directory_user_list_by_query_smoke() {
     let client = client_for(addr);
     let query = ListDirectoryUserQuery::new()
         .user_id_type("open_id")
-        .page_size(50)
-        .page_token("next-page");
+        .page(PageQuery::new().page_size(50).page_token("next-page"));
     let resp = client
         .directory()
         .user
@@ -272,8 +271,7 @@ async fn directory_collaboration_rule_list_by_query_smoke() {
     let query = ListCollaborationRuleQuery::new()
         .target_tenant_key("target-tenant")
         .tenant_id("tenant-1")
-        .page_size(20)
-        .page_token("next-page");
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
     let resp = client
         .directory()
         .collaboration_rule
@@ -326,8 +324,7 @@ async fn directory_collaboration_tenant_list_by_query_smoke() {
     let client = client_for(addr);
     let query = ListCollaborationTenantQuery::new()
         .tenant_id("tenant-1")
-        .page_size(20)
-        .page_token("next-page");
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
     let resp = client
         .directory()
         .collaboration_tenant
@@ -381,8 +378,7 @@ async fn directory_share_entity_list_by_query_smoke() {
         .target_group_id("group-1")
         .is_select_subject(true)
         .tenant_id("tenant-1")
-        .page_size(20)
-        .page_token("next-page");
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
     let resp = client
         .directory()
         .share_entity

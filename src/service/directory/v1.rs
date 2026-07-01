@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyRespV2 as EmptyResp, RestRequest, parse_v2};
+use crate::service::common::{EmptyRespV2 as EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -85,6 +85,16 @@ impl<'a> ListDirectoryUserQuery<'a> {
         self.page_token = value.into();
         self
     }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> UserResource<'a> {
@@ -115,8 +125,7 @@ impl<'a> UserResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .send::<UserListData>()
         .await?;
         Ok(ListUserResp {
@@ -165,6 +174,16 @@ impl<'a> ListCollaborationRuleQuery<'a> {
     pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.page_token = value.into();
         self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
     }
 }
 
@@ -253,8 +272,7 @@ impl CollaborationRuleResource<'_> {
         )
         .query("target_tenant_key", query.target_tenant_key)
         .query("tenant_id", query.tenant_id)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .send_v2::<serde_json::Value>()
         .await?;
         Ok(ListCollaborationRuleResp {
@@ -325,6 +343,16 @@ impl<'a> ListCollaborationTenantQuery<'a> {
         self.page_token = value.into();
         self
     }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl CollaborationTenantResource<'_> {
@@ -355,8 +383,7 @@ impl CollaborationTenantResource<'_> {
             option,
         )
         .query("tenant_id", query.tenant_id)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .send_v2::<serde_json::Value>()
         .await?;
         Ok(ListCollaborationTenantResp {
@@ -424,6 +451,16 @@ impl<'a> ListShareEntityQuery<'a> {
         self.page_token = value.into();
         self
     }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl ShareEntityResource<'_> {
@@ -467,8 +504,7 @@ impl ShareEntityResource<'_> {
         .query("target_group_id", query.target_group_id)
         .query("is_select_subject", query.is_select_subject)
         .query("tenant_id", query.tenant_id)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .send_v2::<serde_json::Value>()
         .await?;
         Ok(ListShareEntityResp {
