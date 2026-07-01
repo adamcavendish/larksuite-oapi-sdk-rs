@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, parse_v2};
+use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -303,6 +303,29 @@ impl_resp!(
 );
 impl_resp!(ListMailgroupManagerResp, MailgroupManagerListData);
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListMailgroupQuery<'a> {
+    pub manager_user_id: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListMailgroupQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn manager_user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.manager_user_id = value.into();
+        self
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct MailgroupResource<'a> {
@@ -367,19 +390,28 @@ impl<'a> MailgroupResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListMailgroupResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/mail/v1/mailgroups");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = manager_user_id {
-            api_req.query_params.set("manager_user_id", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MailgroupListData>(self.config, &api_req, option).await?;
+        let query = ListMailgroupQuery::new()
+            .manager_user_id(manager_user_id)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListMailgroupQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListMailgroupResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/mail/v1/mailgroups",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("manager_user_id", query.manager_user_id)
+        .page_query(query.page)
+        .send::<MailgroupListData>()
+        .await?;
         Ok(ListMailgroupResp {
             api_resp,
             code_error: raw.code_error,
