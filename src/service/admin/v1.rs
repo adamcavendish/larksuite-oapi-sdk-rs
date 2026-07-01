@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, parse_v2};
+use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -226,6 +226,46 @@ pub struct BadgeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetBadgeQuery<'a> {
+    pub badge_id: &'a str,
+}
+
+impl<'a> GetBadgeQuery<'a> {
+    pub fn new(badge_id: &'a str) -> Self {
+        Self { badge_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListBadgeQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub name: Option<&'a str>,
+}
+
+impl<'a> ListBadgeQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.name = value.into();
+        self
+    }
+}
+
 impl<'a> BadgeResource<'a> {
     pub async fn create(
         &self,
@@ -249,11 +289,25 @@ impl<'a> BadgeResource<'a> {
         badge_id: &str,
         option: &RequestOption,
     ) -> Result<GetBadgeResp, LarkError> {
-        let path = format!("/open-apis/admin/v1/badges/{badge_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<BadgeData>(self.config, &api_req, option).await?;
+        let query = GetBadgeQuery::new(badge_id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetBadgeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetBadgeResp, LarkError> {
+        let path = format!("/open-apis/admin/v1/badges/{}", query.badge_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<BadgeData>()
+        .await?;
         Ok(GetBadgeResp {
             api_resp,
             code_error: raw.code_error,
@@ -268,19 +322,29 @@ impl<'a> BadgeResource<'a> {
         name: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListBadgeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/badges");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = name {
-            api_req.query_params.set("name", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BadgeListData>(self.config, &api_req, option).await?;
+        let query = ListBadgeQuery {
+            page: PageQuery::from_parts(page_size, page_token),
+            name,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListBadgeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListBadgeResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/admin/v1/badges",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query("name", query.name)
+        .send::<BadgeListData>()
+        .await?;
         Ok(ListBadgeResp {
             api_resp,
             code_error: raw.code_error,
@@ -311,6 +375,83 @@ impl<'a> BadgeResource<'a> {
 
 pub struct BadgeGrantResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetBadgeGrantQuery<'a> {
+    pub badge_id: &'a str,
+    pub grant_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> GetBadgeGrantQuery<'a> {
+    pub fn new(badge_id: &'a str, grant_id: &'a str) -> Self {
+        Self {
+            badge_id,
+            grant_id,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListBadgeGrantQuery<'a> {
+    pub badge_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub name: Option<&'a str>,
+}
+
+impl<'a> ListBadgeGrantQuery<'a> {
+    pub fn new(badge_id: &'a str) -> Self {
+        Self {
+            badge_id,
+            page: PageQuery::new(),
+            user_id_type: None,
+            department_id_type: None,
+            name: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.name = value.into();
+        self
+    }
 }
 
 impl<'a> BadgeGrantResource<'a> {
@@ -349,17 +490,32 @@ impl<'a> BadgeGrantResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetBadgeGrantResp, LarkError> {
-        let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants/{grant_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BadgeGrantData>(self.config, &api_req, option).await?;
+        let query = GetBadgeGrantQuery::new(badge_id, grant_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetBadgeGrantQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetBadgeGrantResp, LarkError> {
+        let path = format!(
+            "/open-apis/admin/v1/badges/{}/grants/{}",
+            query.badge_id, query.grant_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .send::<BadgeGrantData>()
+        .await?;
         Ok(GetBadgeGrantResp {
             api_resp,
             code_error: raw.code_error,
@@ -395,26 +551,35 @@ impl<'a> BadgeGrantResource<'a> {
         name: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListBadgeGrantResp, LarkError> {
-        let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = name {
-            api_req.query_params.set("name", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BadgeGrantListData>(self.config, &api_req, option).await?;
+        let query = ListBadgeGrantQuery {
+            badge_id,
+            page: PageQuery::from_parts(page_size, page_token),
+            user_id_type,
+            department_id_type,
+            name,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListBadgeGrantQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListBadgeGrantResp, LarkError> {
+        let path = format!("/open-apis/admin/v1/badges/{}/grants", query.badge_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("name", query.name)
+        .send::<BadgeGrantListData>()
+        .await?;
         Ok(ListBadgeGrantResp {
             api_resp,
             code_error: raw.code_error,
@@ -456,6 +621,100 @@ pub struct AdminDeptStatResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetAdminDeptStatQuery<'a> {
+    pub department_id_type: &'a str,
+    pub start_date: &'a str,
+    pub end_date: &'a str,
+    pub department_id: &'a str,
+    pub contains_child_dept: bool,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> GetAdminDeptStatQuery<'a> {
+    pub fn new(
+        department_id_type: &'a str,
+        start_date: &'a str,
+        end_date: &'a str,
+        department_id: &'a str,
+        contains_child_dept: bool,
+    ) -> Self {
+        Self {
+            department_id_type,
+            start_date,
+            end_date,
+            department_id,
+            contains_child_dept,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListAdminDeptStatQuery<'a> {
+    pub department_id_type: &'a str,
+    pub start_date: &'a str,
+    pub end_date: &'a str,
+    pub department_id: &'a str,
+    pub contains_child_dept: bool,
+    pub page: PageQuery<'a>,
+    pub target_geo: Option<&'a str>,
+    pub with_product_version: Option<bool>,
+}
+
+impl<'a> ListAdminDeptStatQuery<'a> {
+    pub fn new(
+        department_id_type: &'a str,
+        start_date: &'a str,
+        end_date: &'a str,
+        department_id: &'a str,
+        contains_child_dept: bool,
+    ) -> Self {
+        Self {
+            department_id_type,
+            start_date,
+            end_date,
+            department_id,
+            contains_child_dept,
+            page: PageQuery::new(),
+            target_geo: None,
+            with_product_version: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn target_geo(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.target_geo = value.into();
+        self
+    }
+
+    pub fn with_product_version(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.with_product_version = value.into();
+        self
+    }
+}
+
 impl<'a> AdminDeptStatResource<'a> {
     #[allow(clippy::too_many_arguments)]
     pub async fn get(
@@ -469,25 +728,37 @@ impl<'a> AdminDeptStatResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetDeptStatResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/dept_stats");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("department_id_type", department_id_type);
-        api_req.query_params.set("start_date", start_date);
-        api_req.query_params.set("end_date", end_date);
-        api_req.query_params.set("department_id", department_id);
-        api_req
-            .query_params
-            .set("contains_child_dept", contains_child_dept.to_string());
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DeptStatListData>(self.config, &api_req, option).await?;
+        let query = GetAdminDeptStatQuery {
+            department_id_type,
+            start_date,
+            end_date,
+            department_id,
+            contains_child_dept,
+            page: PageQuery::from_parts(page_size, page_token),
+        };
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetAdminDeptStatQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetDeptStatResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/admin/v1/dept_stats",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("department_id_type", query.department_id_type)
+        .query("start_date", query.start_date)
+        .query("end_date", query.end_date)
+        .query("department_id", query.department_id)
+        .query("contains_child_dept", query.contains_child_dept)
+        .page_query(query.page)
+        .send::<DeptStatListData>()
+        .await?;
         Ok(GetDeptStatResp {
             api_resp,
             code_error: raw.code_error,
@@ -509,34 +780,41 @@ impl<'a> AdminDeptStatResource<'a> {
         with_product_version: Option<bool>,
         option: &RequestOption,
     ) -> Result<ListAdminDeptStatResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/admin_dept_stats");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("department_id_type", department_id_type);
-        api_req.query_params.set("start_date", start_date);
-        api_req.query_params.set("end_date", end_date);
-        api_req.query_params.set("department_id", department_id);
-        api_req
-            .query_params
-            .set("contains_child_dept", contains_child_dept.to_string());
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = target_geo {
-            api_req.query_params.set("target_geo", v);
-        }
-        if let Some(v) = with_product_version {
-            api_req
-                .query_params
-                .set("with_product_version", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListAdminDeptStatQuery {
+            department_id_type,
+            start_date,
+            end_date,
+            department_id,
+            contains_child_dept,
+            page: PageQuery::from_parts(page_size, page_token),
+            target_geo,
+            with_product_version,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAdminDeptStatQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAdminDeptStatResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/admin/v1/admin_dept_stats",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("department_id_type", query.department_id_type)
+        .query("start_date", query.start_date)
+        .query("end_date", query.end_date)
+        .query("department_id", query.department_id)
+        .query("contains_child_dept", query.contains_child_dept)
+        .page_query(query.page)
+        .query("target_geo", query.target_geo)
+        .query("with_product_version", query.with_product_version)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListAdminDeptStatResp {
             api_resp,
             code_error,
@@ -547,6 +825,62 @@ impl<'a> AdminDeptStatResource<'a> {
 
 pub struct AdminUserStatResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListAdminUserStatQuery<'a> {
+    pub start_date: &'a str,
+    pub end_date: &'a str,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub department_id: Option<&'a str>,
+    pub user_id: Option<&'a str>,
+}
+
+impl<'a> ListAdminUserStatQuery<'a> {
+    pub fn new(start_date: &'a str, end_date: &'a str) -> Self {
+        Self {
+            start_date,
+            end_date,
+            page: PageQuery::new(),
+            user_id_type: None,
+            department_id_type: None,
+            department_id: None,
+            user_id: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn department_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id = value.into();
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
 }
 
 impl<'a> AdminUserStatResource<'a> {
@@ -563,31 +897,39 @@ impl<'a> AdminUserStatResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAdminUserStatResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/admin_user_stats");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.query_params.set("start_date", start_date);
-        api_req.query_params.set("end_date", end_date);
-        if let Some(v) = department_id {
-            api_req.query_params.set("department_id", v);
-        }
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListAdminUserStatQuery {
+            start_date,
+            end_date,
+            page: PageQuery::from_parts(page_size, page_token),
+            user_id_type,
+            department_id_type,
+            department_id,
+            user_id,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAdminUserStatQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAdminUserStatResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/admin/v1/admin_user_stats",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("start_date", query.start_date)
+        .query("end_date", query.end_date)
+        .query("department_id", query.department_id)
+        .query("user_id", query.user_id)
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListAdminUserStatResp {
             api_resp,
             code_error,
@@ -598,6 +940,70 @@ impl<'a> AdminUserStatResource<'a> {
 
 pub struct AuditInfoResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListAuditInfoQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+    pub latest: Option<&'a str>,
+    pub oldest: Option<&'a str>,
+    pub event_name: Option<&'a str>,
+    pub operator_type: Option<&'a str>,
+    pub operator_value: Option<&'a str>,
+    pub event_module: Option<i32>,
+}
+
+impl<'a> ListAuditInfoQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn latest(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.latest = value.into();
+        self
+    }
+
+    pub fn oldest(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.oldest = value.into();
+        self
+    }
+
+    pub fn event_name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.event_name = value.into();
+        self
+    }
+
+    pub fn operator_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.operator_type = value.into();
+        self
+    }
+
+    pub fn operator_value(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.operator_value = value.into();
+        self
+    }
+
+    pub fn event_module(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.event_module = value.into();
+        self
+    }
 }
 
 impl<'a> AuditInfoResource<'a> {
@@ -615,38 +1021,41 @@ impl<'a> AuditInfoResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAuditInfoResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/admin/v1/audit_infos");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = latest {
-            api_req.query_params.set("latest", v);
-        }
-        if let Some(v) = oldest {
-            api_req.query_params.set("oldest", v);
-        }
-        if let Some(v) = event_name {
-            api_req.query_params.set("event_name", v);
-        }
-        if let Some(v) = operator_type {
-            api_req.query_params.set("operator_type", v);
-        }
-        if let Some(v) = operator_value {
-            api_req.query_params.set("operator_value", v);
-        }
-        if let Some(v) = event_module {
-            api_req.query_params.set("event_module", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListAuditInfoQuery {
+            page: PageQuery::from_parts(page_size, page_token),
+            user_id_type,
+            latest,
+            oldest,
+            event_name,
+            operator_type,
+            operator_value,
+            event_module,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAuditInfoQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAuditInfoResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/admin/v1/audit_infos",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("latest", query.latest)
+        .query("oldest", query.oldest)
+        .query("event_name", query.event_name)
+        .query("operator_type", query.operator_type)
+        .query("operator_value", query.operator_value)
+        .query("event_module", query.event_module)
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListAuditInfoResp {
             api_resp,
             code_error,
