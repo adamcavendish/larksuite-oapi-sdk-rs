@@ -1230,6 +1230,29 @@ async fn vc_resource_reservation_list_by_query_smoke() {
 }
 
 #[tokio::test]
+async fn vc_export_download_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"file_token":"download-1"}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .vc()
+        .export
+        .download("file-token-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data.unwrap()["file_token"].as_str(),
+        Some("download-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/exports/download?"));
+    assert!(request.contains("file_token=file-token-1"));
+}
+
+#[tokio::test]
 async fn vc_get_meeting_positional_adapter_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"meeting":{"id":"m-1","topic":"Sprint Review"}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;

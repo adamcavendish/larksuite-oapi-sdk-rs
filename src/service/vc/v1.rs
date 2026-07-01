@@ -1319,12 +1319,16 @@ impl<'a> ExportResource<'a> {
         file_token: &str,
         option: &RequestOption,
     ) -> Result<DownloadExportResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/exports/download");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("file_token", file_token);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/exports/download",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("file_token", file_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(DownloadExportResp {
             api_resp,
             code_error,
