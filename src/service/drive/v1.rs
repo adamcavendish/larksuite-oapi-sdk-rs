@@ -2008,6 +2008,53 @@ pub struct FileVersionResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListFileVersionQuery<'a> {
+    pub file_token: &'a str,
+    pub obj_type: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListFileVersionQuery<'a> {
+    pub fn new(file_token: &'a str, obj_type: &'a str) -> Self {
+        Self {
+            file_token,
+            obj_type,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> FileVersionResource<'a> {
     pub async fn create(
         &self,
@@ -2089,22 +2136,31 @@ impl<'a> FileVersionResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFileVersionResp, LarkError> {
-        let path = format!("/open-apis/drive/v1/files/{file_token}/versions");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("obj_type", obj_type);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListFileVersionRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ListFileVersionQuery::new(file_token, obj_type)
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFileVersionQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFileVersionResp, LarkError> {
+        let path = format!("/open-apis/drive/v1/files/{}/versions", query.file_token);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("obj_type", query.obj_type)
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .send::<ListFileVersionRespData>()
+        .await?;
         Ok(ListFileVersionResp {
             api_resp,
             code_error: raw.code_error,
@@ -2134,6 +2190,53 @@ pub struct FileViewRecordResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListFileViewRecordQuery<'a> {
+    pub file_token: &'a str,
+    pub file_type: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub viewer_id_type: Option<&'a str>,
+}
+
+impl<'a> ListFileViewRecordQuery<'a> {
+    pub fn new(file_token: &'a str, file_type: &'a str) -> Self {
+        Self {
+            file_token,
+            file_type,
+            page_size: None,
+            page_token: None,
+            viewer_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn viewer_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.viewer_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> FileViewRecordResource<'a> {
     pub async fn list(
         &self,
@@ -2144,22 +2247,34 @@ impl<'a> FileViewRecordResource<'a> {
         viewer_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFileViewRecordResp, LarkError> {
-        let path = format!("/open-apis/drive/v1/files/{file_token}/view_records");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = viewer_id_type {
-            api_req.query_params.set("viewer_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListFileViewRecordRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ListFileViewRecordQuery::new(file_token, file_type)
+            .page_size(page_size)
+            .page_token(page_token)
+            .viewer_id_type(viewer_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFileViewRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFileViewRecordResp, LarkError> {
+        let path = format!(
+            "/open-apis/drive/v1/files/{}/view_records",
+            query.file_token
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("file_type", query.file_type)
+        .page_query(query.page_query())
+        .query("viewer_id_type", query.viewer_id_type)
+        .send::<ListFileViewRecordRespData>()
+        .await?;
         Ok(ListFileViewRecordResp {
             api_resp,
             code_error: raw.code_error,
