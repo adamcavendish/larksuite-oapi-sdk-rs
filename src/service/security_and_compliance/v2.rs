@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
+use crate::service::common::{PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -30,6 +30,22 @@ impl_resp_v2!(GetDeviceRecordV2Resp, DeviceRecordData);
 impl_resp_v2!(ListDeviceRecordV2Resp, DeviceRecordListData);
 impl_resp_v2!(MineDeviceRecordV2Resp, DeviceRecordListData);
 impl_resp_v2!(UpdateDeviceRecordV2Resp, DeviceRecordData);
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListDeviceRecordV2Query<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListDeviceRecordV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
 
 pub struct V2<'a> {
     pub device_apply_record: DeviceApplyRecordV2Resource<'a>,
@@ -142,20 +158,26 @@ impl DeviceRecordV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListDeviceRecordV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query =
+            ListDeviceRecordV2Query::new().page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListDeviceRecordV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListDeviceRecordV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/security_and_compliance/v2/device_records",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DeviceRecordListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .send_v2::<DeviceRecordListData>()
+        .await?;
         Ok(ListDeviceRecordV2Resp {
             api_resp,
             code_error,
