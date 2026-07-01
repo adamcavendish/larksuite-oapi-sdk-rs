@@ -216,6 +216,49 @@ async fn drive_file_download_smoke() {
 }
 
 #[tokio::test]
+async fn drive_file_upload_all_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"file_token":"file-token-1"}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .file
+        .upload_all(
+            "report.txt",
+            "explorer",
+            "folder-token-1",
+            3,
+            Some("checksum-1"),
+            b"abc".to_vec(),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data.unwrap().file_token.as_deref(),
+        Some("file-token-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/drive/v1/files/upload_all"));
+    assert!(request.contains("name=\"file_name\""));
+    assert!(request.contains("report.txt"));
+    assert!(request.contains("name=\"parent_type\""));
+    assert!(request.contains("explorer"));
+    assert!(request.contains("name=\"parent_node\""));
+    assert!(request.contains("folder-token-1"));
+    assert!(request.contains("name=\"size\""));
+    assert!(request.contains("\r\n3\r\n"));
+    assert!(request.contains("name=\"checksum\""));
+    assert!(request.contains("checksum-1"));
+    assert!(request.contains("name=\"file\""));
+    assert!(request.contains("filename=\"report.txt\""));
+    assert!(request.contains("abc"));
+}
+
+#[tokio::test]
 async fn drive_v2_file_like_list_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"files":[{"token":"like-1","name":"Alice","type":"user"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
@@ -355,6 +398,52 @@ async fn drive_media_download_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/drive/v1/medias/media-token-1/download?"));
     assert!(request.contains("extra=extra-value"));
+}
+
+#[tokio::test]
+async fn drive_media_upload_all_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"file_token":"media-token-1"}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .media
+        .upload_all(
+            "clip.mp4",
+            "explorer",
+            "folder-token-1",
+            4,
+            Some("checksum-1"),
+            Some("extra-value"),
+            b"clip".to_vec(),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data.unwrap().file_token.as_deref(),
+        Some("media-token-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/drive/v1/medias/upload_all"));
+    assert!(request.contains("name=\"file_name\""));
+    assert!(request.contains("clip.mp4"));
+    assert!(request.contains("name=\"parent_type\""));
+    assert!(request.contains("explorer"));
+    assert!(request.contains("name=\"parent_node\""));
+    assert!(request.contains("folder-token-1"));
+    assert!(request.contains("name=\"size\""));
+    assert!(request.contains("\r\n4\r\n"));
+    assert!(request.contains("name=\"checksum\""));
+    assert!(request.contains("checksum-1"));
+    assert!(request.contains("name=\"extra\""));
+    assert!(request.contains("extra-value"));
+    assert!(request.contains("name=\"file\""));
+    assert!(request.contains("filename=\"clip.mp4\""));
+    assert!(request.contains("clip"));
 }
 
 // ── CoreHR ──
