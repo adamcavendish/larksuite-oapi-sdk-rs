@@ -107,6 +107,19 @@ impl<'a> RestRequest<'a> {
         self
     }
 
+    pub(crate) fn query_values<I, T>(mut self, key: &str, values: Option<I>) -> Self
+    where
+        I: IntoIterator<Item = T>,
+        T: ToString,
+    {
+        if let Some(values) = values {
+            for value in values {
+                self.api_req.query_params.add(key, value.to_string());
+            }
+        }
+        self
+    }
+
     pub(crate) fn page_query(self, page: PageQuery<'_>) -> Self {
         self.query("page_size", page.page_size)
             .query("page_token", page.page_token)

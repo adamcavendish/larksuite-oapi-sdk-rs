@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
+use crate::service::common::{PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -34,6 +34,30 @@ impl_resp_v2!(QueryReviewTemplateV2Resp, serde_json::Value);
 impl_resp_v2!(QueryRevieweeV2Resp, serde_json::Value);
 impl_resp_v2!(WriteUserGroupUserRelV2Resp, serde_json::Value);
 impl_resp_v2!(QueryUserInfoV2Resp, serde_json::Value);
+
+// -- Query parameter types --
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListMetricTagV2Query<'a> {
+    pub tag_ids: Option<&'a [&'a str]>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListMetricTagV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn tag_ids(mut self, value: impl Into<Option<&'a [&'a str]>>) -> Self {
+        self.tag_ids = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
 
 pub struct V2<'a> {
     pub activity: ActivityV2Resource<'a>,
@@ -263,17 +287,26 @@ impl MetricTagV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListMetricTagV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/performance/v2/metric_tags");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MetricTagListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListMetricTagV2Query::new().page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListMetricTagV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListMetricTagV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/performance/v2/metric_tags",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query_values("tag_ids", query.tag_ids)
+        .send_v2::<MetricTagListData>()
+        .await?;
         Ok(ListMetricTagV2Resp {
             api_resp,
             code_error,
