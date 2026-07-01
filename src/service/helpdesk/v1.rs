@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{DownloadResp, EmptyResp, RestRequest};
+use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -671,17 +671,130 @@ pub struct TicketResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetTicketQuery<'a> {
+    pub ticket_id: &'a str,
+}
+
+impl<'a> GetTicketQuery<'a> {
+    pub fn new(ticket_id: &'a str) -> Self {
+        Self { ticket_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListTicketQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub ticket_id: Option<&'a str>,
+    pub agent_id: Option<&'a str>,
+    pub closed_by_id: Option<&'a str>,
+    pub status: Option<i32>,
+    pub guest_id: Option<&'a str>,
+    pub keyword: Option<&'a str>,
+    pub create_time_start: Option<i64>,
+    pub create_time_end: Option<i64>,
+}
+
+impl<'a> ListTicketQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn ticket_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.ticket_id = value.into();
+        self
+    }
+
+    pub fn agent_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.agent_id = value.into();
+        self
+    }
+
+    pub fn closed_by_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.closed_by_id = value.into();
+        self
+    }
+
+    pub fn status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.status = value.into();
+        self
+    }
+
+    pub fn guest_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.guest_id = value.into();
+        self
+    }
+
+    pub fn keyword(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.keyword = value.into();
+        self
+    }
+
+    pub fn create_time_start(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.create_time_start = value.into();
+        self
+    }
+
+    pub fn create_time_end(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.create_time_end = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct CustomizedFieldsTicketQuery {
+    pub visible_only: Option<bool>,
+}
+
+impl CustomizedFieldsTicketQuery {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn visible_only(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.visible_only = value.into();
+        self
+    }
+}
+
 impl<'a> TicketResource<'a> {
     pub async fn get(
         &self,
         ticket_id: &str,
         option: &RequestOption,
     ) -> Result<GetTicketResp, LarkError> {
-        let path = format!("/open-apis/helpdesk/v1/tickets/{ticket_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<TicketData>(self.config, &api_req, option).await?;
+        let query = GetTicketQuery::new(ticket_id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetTicketQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetTicketResp, LarkError> {
+        let path = format!("/open-apis/helpdesk/v1/tickets/{}", query.ticket_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<TicketData>()
+        .await?;
         Ok(GetTicketResp {
             api_resp,
             code_error: raw.code_error,
@@ -722,40 +835,43 @@ impl<'a> TicketResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListTicketResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/tickets");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = ticket_id {
-            api_req.query_params.set("ticket_id", v);
-        }
-        if let Some(v) = agent_id {
-            api_req.query_params.set("agent_id", v);
-        }
-        if let Some(v) = closed_by_id {
-            api_req.query_params.set("closed_by_id", v);
-        }
-        if let Some(v) = status {
-            api_req.query_params.set("status", v.to_string());
-        }
-        if let Some(v) = guest_id {
-            api_req.query_params.set("guest_id", v);
-        }
-        if let Some(v) = keyword {
-            api_req.query_params.set("keyword", v);
-        }
-        if let Some(v) = create_time_start {
-            api_req.query_params.set("create_time_start", v.to_string());
-        }
-        if let Some(v) = create_time_end {
-            api_req.query_params.set("create_time_end", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TicketListData>(self.config, &api_req, option).await?;
+        let query = ListTicketQuery {
+            page: PageQuery::from_parts(page_size, page_token),
+            ticket_id,
+            agent_id,
+            closed_by_id,
+            status,
+            guest_id,
+            keyword,
+            create_time_start,
+            create_time_end,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTicketQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTicketResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/tickets",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("ticket_id", query.ticket_id)
+        .query("agent_id", query.agent_id)
+        .query("closed_by_id", query.closed_by_id)
+        .query("status", query.status)
+        .query("guest_id", query.guest_id)
+        .query("keyword", query.keyword)
+        .query("create_time_start", query.create_time_start)
+        .query("create_time_end", query.create_time_end)
+        .page_query(query.page)
+        .send::<TicketListData>()
+        .await?;
         Ok(ListTicketResp {
             api_resp,
             code_error: raw.code_error,
@@ -804,19 +920,24 @@ impl<'a> TicketResource<'a> {
         visible_only: Option<bool>,
         option: &RequestOption,
     ) -> Result<CustomizedFieldsTicketResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = CustomizedFieldsTicketQuery { visible_only };
+        self.customized_fields_by_query(&query, option).await
+    }
+
+    pub async fn customized_fields_by_query(
+        &self,
+        query: &CustomizedFieldsTicketQuery,
+        option: &RequestOption,
+    ) -> Result<CustomizedFieldsTicketResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/customized_fields",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = visible_only {
-            api_req.query_params.set("visible_only", v.to_string());
-        }
-        let (api_resp, raw) = transport::request_typed::<CustomizedFieldsTicketRespData>(
-            self.config,
-            &api_req,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .query("visible_only", query.visible_only)
+        .send::<CustomizedFieldsTicketRespData>()
         .await?;
         Ok(CustomizedFieldsTicketResp {
             api_resp,
@@ -851,6 +972,48 @@ pub struct TicketMessageResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListTicketMessageQuery<'a> {
+    pub ticket_id: &'a str,
+    pub time_start: Option<i64>,
+    pub time_end: Option<i64>,
+    pub page_token: Option<i64>,
+    pub page_size: Option<i32>,
+}
+
+impl<'a> ListTicketMessageQuery<'a> {
+    pub fn new(ticket_id: &'a str) -> Self {
+        Self {
+            ticket_id,
+            time_start: None,
+            time_end: None,
+            page_token: None,
+            page_size: None,
+        }
+    }
+
+    pub fn time_start(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.time_start = value.into();
+        self
+    }
+
+    pub fn time_end(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.time_end = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+}
+
 impl<'a> TicketMessageResource<'a> {
     pub async fn create(
         &self,
@@ -879,24 +1042,38 @@ impl<'a> TicketMessageResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListTicketMessageResp, LarkError> {
-        let path = format!("/open-apis/helpdesk/v1/tickets/{ticket_id}/messages");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = time_start {
-            api_req.query_params.set("time_start", v.to_string());
-        }
-        if let Some(v) = time_end {
-            api_req.query_params.set("time_end", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TicketMessageListData>(self.config, &api_req, option)
-                .await?;
+        let query = ListTicketMessageQuery {
+            ticket_id,
+            time_start,
+            time_end,
+            page_token,
+            page_size,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTicketMessageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTicketMessageResp, LarkError> {
+        let path = format!(
+            "/open-apis/helpdesk/v1/tickets/{}/messages",
+            query.ticket_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("time_start", query.time_start)
+        .query("time_end", query.time_end)
+        .query("page_token", query.page_token)
+        .query("page_size", query.page_size)
+        .send::<TicketMessageListData>()
+        .await?;
         Ok(ListTicketMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -930,19 +1107,48 @@ pub struct AgentResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListAgentQuery {
+    pub status: Option<i32>,
+}
+
+impl ListAgentQuery {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.status = value.into();
+        self
+    }
+}
+
 impl<'a> AgentResource<'a> {
     pub async fn list(
         &self,
         status: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListAgentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/agents");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = status {
-            api_req.query_params.set("status", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AgentListData>(self.config, &api_req, option).await?;
+        let query = ListAgentQuery { status };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAgentQuery,
+        option: &RequestOption,
+    ) -> Result<ListAgentResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/agents",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("status", query.status)
+        .send::<AgentListData>()
+        .await?;
         Ok(ListAgentResp {
             api_resp,
             code_error: raw.code_error,
@@ -986,6 +1192,18 @@ pub struct AgentSchedulesResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetAgentSchedulesQuery<'a> {
+    pub agent_id: &'a str,
+}
+
+impl<'a> GetAgentSchedulesQuery<'a> {
+    pub fn new(agent_id: &'a str) -> Self {
+        Self { agent_id }
+    }
+}
+
 impl<'a> AgentSchedulesResource<'a> {
     pub async fn delete(
         &self,
@@ -1009,11 +1227,25 @@ impl<'a> AgentSchedulesResource<'a> {
         agent_id: &str,
         option: &RequestOption,
     ) -> Result<GetAgentSchedulesResp, LarkError> {
-        let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}/schedules");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = GetAgentSchedulesQuery::new(agent_id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetAgentSchedulesQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetAgentSchedulesResp, LarkError> {
+        let path = format!("/open-apis/helpdesk/v1/agents/{}/schedules", query.agent_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(GetAgentSchedulesResp {
             api_resp,
             code_error: raw.code_error,
@@ -1045,6 +1277,23 @@ pub struct AgentScheduleResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListAgentScheduleQuery<'a> {
+    pub status: Option<&'a [i32]>,
+}
+
+impl<'a> ListAgentScheduleQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn status(mut self, value: impl Into<Option<&'a [i32]>>) -> Self {
+        self.status = value.into();
+        self
+    }
+}
+
 impl<'a> AgentScheduleResource<'a> {
     pub async fn create(
         &self,
@@ -1068,15 +1317,25 @@ impl<'a> AgentScheduleResource<'a> {
         status: Option<&[i32]>,
         option: &RequestOption,
     ) -> Result<ListAgentScheduleResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/agent_schedules");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(vals) = status {
-            for v in vals {
-                api_req.query_params.add("status", v.to_string());
-            }
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = ListAgentScheduleQuery { status };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAgentScheduleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAgentScheduleResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/agent_schedules",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query_values("status", query.status)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(ListAgentScheduleResp {
             api_resp,
             code_error: raw.code_error,
@@ -1087,6 +1346,35 @@ impl<'a> AgentScheduleResource<'a> {
 
 pub struct CategoryResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetCategoryQuery<'a> {
+    pub id: &'a str,
+}
+
+impl<'a> GetCategoryQuery<'a> {
+    pub fn new(id: &'a str) -> Self {
+        Self { id }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListCategoryQuery<'a> {
+    pub language: Option<&'a str>,
+}
+
+impl<'a> ListCategoryQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn language(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.language = value.into();
+        self
+    }
 }
 
 impl<'a> CategoryResource<'a> {
@@ -1112,11 +1400,25 @@ impl<'a> CategoryResource<'a> {
         id: &str,
         option: &RequestOption,
     ) -> Result<GetCategoryResp, LarkError> {
-        let path = format!("/open-apis/helpdesk/v1/categories/{id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<CategoryData>(self.config, &api_req, option).await?;
+        let query = GetCategoryQuery::new(id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetCategoryQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetCategoryResp, LarkError> {
+        let path = format!("/open-apis/helpdesk/v1/categories/{}", query.id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<CategoryData>()
+        .await?;
         Ok(GetCategoryResp {
             api_resp,
             code_error: raw.code_error,
@@ -1159,13 +1461,25 @@ impl<'a> CategoryResource<'a> {
         language: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCategoryResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/categories");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = language {
-            api_req.query_params.set("language", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CategoryListData>(self.config, &api_req, option).await?;
+        let query = ListCategoryQuery { language };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCategoryQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCategoryResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/categories",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("language", query.language)
+        .send::<CategoryListData>()
+        .await?;
         Ok(ListCategoryResp {
             api_resp,
             code_error: raw.code_error,
@@ -1176,6 +1490,86 @@ impl<'a> CategoryResource<'a> {
 
 pub struct FaqResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetFaqQuery<'a> {
+    pub id: &'a str,
+}
+
+impl<'a> GetFaqQuery<'a> {
+    pub fn new(id: &'a str) -> Self {
+        Self { id }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListFaqQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub category_id: Option<&'a str>,
+    pub keyword: Option<&'a str>,
+}
+
+impl<'a> ListFaqQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn category_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.category_id = value.into();
+        self
+    }
+
+    pub fn keyword(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.keyword = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct SearchFaqQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub query: Option<&'a str>,
+    pub base64: Option<&'a str>,
+}
+
+impl<'a> SearchFaqQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn query(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.query = value.into();
+        self
+    }
+
+    pub fn base64(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.base64 = value.into();
+        self
+    }
 }
 
 impl<'a> FaqResource<'a> {
@@ -1197,11 +1591,25 @@ impl<'a> FaqResource<'a> {
     }
 
     pub async fn get(&self, id: &str, option: &RequestOption) -> Result<GetFaqResp, LarkError> {
-        let path = format!("/open-apis/helpdesk/v1/faqs/{id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<FaqData>(self.config, &api_req, option).await?;
+        let query = GetFaqQuery::new(id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetFaqQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetFaqResp, LarkError> {
+        let path = format!("/open-apis/helpdesk/v1/faqs/{}", query.id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<FaqData>()
+        .await?;
         Ok(GetFaqResp {
             api_resp,
             code_error: raw.code_error,
@@ -1247,22 +1655,31 @@ impl<'a> FaqResource<'a> {
         keyword: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFaqResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/faqs");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = category_id {
-            api_req.query_params.set("category_id", v);
-        }
-        if let Some(v) = keyword {
-            api_req.query_params.set("keyword", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<FaqListData>(self.config, &api_req, option).await?;
+        let query = ListFaqQuery {
+            page: PageQuery::from_parts(page_size, page_token),
+            category_id,
+            keyword,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFaqQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFaqResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/faqs",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query("category_id", query.category_id)
+        .query("keyword", query.keyword)
+        .send::<FaqListData>()
+        .await?;
         Ok(ListFaqResp {
             api_resp,
             code_error: raw.code_error,
@@ -1296,22 +1713,31 @@ impl<'a> FaqResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<SearchFaqResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/faqs/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = query {
-            api_req.query_params.set("query", v);
-        }
-        if let Some(v) = base64 {
-            api_req.query_params.set("base64", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<SearchFaqRespData>(self.config, &api_req, option).await?;
+        let query = SearchFaqQuery {
+            page: PageQuery::from_parts(page_size, page_token),
+            query,
+            base64,
+        };
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchFaqQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchFaqResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/faqs/search",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("query", query.query)
+        .query("base64", query.base64)
+        .page_query(query.page)
+        .send::<SearchFaqRespData>()
+        .await?;
         Ok(SearchFaqResp {
             api_resp,
             code_error: raw.code_error,
