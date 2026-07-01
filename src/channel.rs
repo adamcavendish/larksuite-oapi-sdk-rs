@@ -1,6 +1,7 @@
 mod builder;
 mod handler;
 mod identity;
+mod normalize;
 mod policy;
 mod runtime;
 mod state;
@@ -15,8 +16,9 @@ pub use runtime::Channel;
 pub use stream::{StreamUpdate, split_markdown, split_text, text_content};
 pub use types::{
     BotMembership, BotMembershipAction, ChannelDecision, ChannelEvent, ChannelMention,
-    ChannelSender, NormalizedCardAction, NormalizedMessage, NormalizedReaction, ReactionAction,
-    RejectEvent, RejectReason, SendTarget,
+    ChannelResource, ChannelSender, MediaKind, NormalizedCardAction, NormalizedMessage,
+    NormalizedReaction, ReactionAction, ReceiveIdType, RejectEvent, RejectReason, SendInput,
+    SendResult, SendTarget, UploadInput, UploadResult,
 };
 
 #[cfg(test)]

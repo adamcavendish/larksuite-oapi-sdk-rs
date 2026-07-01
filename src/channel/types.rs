@@ -7,7 +7,7 @@ use crate::events::common::UserId;
 use crate::events::im::P2MessageReceiveV1;
 
 use super::identity::BotIdentity;
-use super::stream::extract_text_content;
+use super::normalize::parse_content;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChannelSender {
@@ -26,7 +26,7 @@ impl ChannelSender {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ChannelMention {
     pub key: String,
     pub id: Option<UserId>,
@@ -82,11 +82,12 @@ pub struct NormalizedMessage {
     pub mentions: Vec<ChannelMention>,
     pub mention_all: bool,
     pub mentioned_bot: bool,
+    pub resources: Vec<ChannelResource>,
 }
 
 impl NormalizedMessage {
     pub fn from_event(event: P2MessageReceiveV1) -> Self {
-        let text = extract_text_content(&event.message.message_type, &event.message.content);
+        let normalized = parse_content(&event.message.message_type, &event.message.content);
         let mentions: Vec<_> = event
             .message
             .mentions
@@ -100,7 +101,11 @@ impl NormalizedMessage {
                 is_bot: false,
             })
             .collect();
-        let mention_all = mentions.iter().any(ChannelMention::is_mention_all);
+        let mention_all = mentions.iter().any(ChannelMention::is_mention_all)
+            || normalized
+                .text
+                .as_deref()
+                .is_some_and(|text| text.contains("@_all") || text.contains("@all"));
         Self {
             message_id: event.message.message_id,
             root_id: event.message.root_id,
@@ -110,7 +115,7 @@ impl NormalizedMessage {
             chat_type: event.message.chat_type,
             message_type: event.message.message_type,
             content: event.message.content,
-            text,
+            text: normalized.text,
             create_time: event.message.create_time,
             update_time: event.message.update_time,
             sender: ChannelSender {
@@ -121,6 +126,7 @@ impl NormalizedMessage {
             mentions,
             mention_all,
             mentioned_bot: false,
+            resources: normalized.resources,
         }
     }
 
@@ -133,6 +139,29 @@ impl NormalizedMessage {
                 mention.is_bot = true;
                 self.mentioned_bot = true;
             }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ChannelResource {
+    #[serde(rename = "type")]
+    pub resource_type: String,
+    pub file_key: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub file_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration_ms: Option<i32>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub cover_image_key: String,
+}
+
+impl ChannelResource {
+    pub fn new(resource_type: impl Into<String>, file_key: impl Into<String>) -> Self {
+        Self {
+            resource_type: resource_type.into(),
+            file_key: file_key.into(),
+            ..Default::default()
         }
     }
 }
@@ -264,4 +293,102 @@ impl SendTarget {
             receive_id: receive_id.into(),
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ReceiveIdType {
+    ChatId,
+    OpenId,
+    UserId,
+    UnionId,
+    Email,
+}
+
+impl ReceiveIdType {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::ChatId => "chat_id",
+            Self::OpenId => "open_id",
+            Self::UserId => "user_id",
+            Self::UnionId => "union_id",
+            Self::Email => "email",
+        }
+    }
+
+    pub fn detect(value: &str) -> Result<Self, crate::LarkError> {
+        if value.is_empty() {
+            return Err(crate::LarkError::IllegalParam("receive_id is empty".into()));
+        }
+        if value.starts_with("oc_") {
+            Ok(Self::ChatId)
+        } else if value.starts_with("ou_") {
+            Ok(Self::OpenId)
+        } else if value.starts_with("on_") {
+            Ok(Self::UnionId)
+        } else if value.contains('@') {
+            Ok(Self::Email)
+        } else {
+            Ok(Self::UserId)
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MediaKind {
+    Image,
+    File,
+    Audio,
+    Video,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UploadInput {
+    pub kind: Option<MediaKind>,
+    pub source_path: Option<String>,
+    pub source_bytes: Option<Vec<u8>>,
+    pub source_url: Option<String>,
+    pub file_name: Option<String>,
+    pub duration: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct UploadResult {
+    pub kind: Option<MediaKind>,
+    pub file_key: String,
+    pub duration_ms: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SendInput {
+    pub receive_id: Option<String>,
+    pub chat_id: Option<String>,
+    pub user_id: Option<String>,
+    pub msg_type: Option<String>,
+    pub reply_message_id: Option<String>,
+    pub text: Option<String>,
+    pub markdown: Option<String>,
+    pub title: Option<String>,
+    pub image_key: Option<String>,
+    pub file_key: Option<String>,
+    pub audio_key: Option<String>,
+    pub video_key: Option<String>,
+    pub card: Option<String>,
+    pub post: Option<String>,
+    pub share_chat_id: Option<String>,
+    pub share_user_id: Option<String>,
+    pub sticker_file_key: Option<String>,
+    pub image_path: Option<String>,
+    pub file_path: Option<String>,
+    pub media: Option<UploadInput>,
+    #[serde(default)]
+    pub mentions: Vec<ChannelMention>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SendResult {
+    pub message_id: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub chunk_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_id: Option<String>,
 }

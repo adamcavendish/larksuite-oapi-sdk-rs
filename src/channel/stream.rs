@@ -1,7 +1,5 @@
 use std::time::{Duration, Instant};
 
-use crate::service::im::v1::MessageType;
-
 #[derive(Debug, Clone)]
 pub struct StreamUpdate {
     pub message_id: String,
@@ -82,19 +80,4 @@ pub fn split_markdown(markdown: &str, max_chars: usize) -> Vec<String> {
         chunks.push(current);
     }
     chunks
-}
-
-pub(super) fn extract_text_content(message_type: &str, content: &str) -> Option<String> {
-    if message_type != MessageType::TEXT {
-        return None;
-    }
-    serde_json::from_str::<serde_json::Value>(content)
-        .ok()
-        .and_then(|value| {
-            value
-                .get("text")
-                .and_then(|text| text.as_str())
-                .map(str::to_owned)
-        })
-        .or_else(|| Some(content.to_string()).filter(|s| !s.is_empty()))
 }
