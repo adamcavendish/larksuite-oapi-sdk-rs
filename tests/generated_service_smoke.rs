@@ -9,6 +9,13 @@ use larksuite_oapi_sdk_rs::service::{
         GetUserQuery as GetAcsUserQuery, ListAccessRecordQuery as ListAcsAccessRecordQuery,
         ListUserQuery as ListAcsUserQuery,
     },
+    application::v6::{
+        ApplicationContactsRangeConfigurationQuery, ContactsRangeSuggestApplicationAppVersionQuery,
+        GetApplicationAppVersionQuery as GetApplicationV6AppVersionQuery,
+        GetApplicationCollaboratorsQuery, GetApplicationQuery as GetApplicationV6Query,
+        ListAppRecommendRuleQuery, ListApplicationAppVersionQuery, ListApplicationFeedbackQuery,
+        ListApplicationQuery as ListApplicationV6Query, UnderauditlistApplicationQuery,
+    },
     approval::v4::{
         CcSearch, GetApprovalQuery, GetExternalApprovalQuery, GetInstanceQuery, InstanceSearch,
         ListExternalTaskQuery, ListExternalTaskReqBody, ListInstanceCommentQuery,
@@ -5004,6 +5011,313 @@ async fn approval_external_task_list_by_query_smoke() {
     assert!(request.contains("page_token=next-page"));
     assert!(request.contains(r#""approval_codes":["apv-1"]"#));
     assert!(request.contains(r#""user_ids":["ou-1"]"#));
+}
+
+// ── Application v6 ──
+
+#[tokio::test]
+async fn application_v6_app_recommend_rule_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"rule-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .app_recommend_rule
+        .list_by_query(
+            &ListAppRecommendRuleQuery::new()
+                .page_size(20)
+                .page_token("next-page")
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.get("items"))
+            .and_then(|items| items.as_array())
+            .map(Vec::len),
+        Some(1)
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/application/v6/app_recommend_rules?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_contacts_range_configuration_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"scope-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .application
+        .contacts_range_configuration_by_query(
+            &ApplicationContactsRangeConfigurationQuery::new("cli_a")
+                .page_size(50)
+                .page_token("next-page")
+                .department_id_type("open_department_id")
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains(
+        "GET /open-apis/application/v6/applications/cli_a/contacts_range_configuration?"
+    ));
+    assert!(request.contains("page_size=50"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("department_id_type=open_department_id"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"app":{"app_id":"cli_a"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .application
+        .get_by_query(
+            &GetApplicationV6Query::new("cli_a")
+                .lang("zh_cn")
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.get("app"))
+            .and_then(|app| app.get("app_id"))
+            .and_then(|app_id| app_id.as_str()),
+        Some("cli_a")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/application/v6/applications/cli_a?"));
+    assert!(request.contains("lang=zh_cn"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"app_id":"cli_a"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .application
+        .list_by_query(
+            &ListApplicationV6Query::new()
+                .page_size(20)
+                .page_token("next-page")
+                .user_id_type("open_id")
+                .lang("zh_cn")
+                .status(1)
+                .payment_type(2)
+                .owner_type(3),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/application/v6/applications?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("lang=zh_cn"));
+    assert!(request.contains("status=1"));
+    assert!(request.contains("payment_type=2"));
+    assert!(request.contains("owner_type=3"));
+}
+
+#[tokio::test]
+async fn application_v6_underauditlist_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"app_id":"cli_a"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .application
+        .underauditlist_by_query(
+            &UnderauditlistApplicationQuery::new()
+                .lang("zh_cn")
+                .page_size(20)
+                .page_token("next-page")
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/application/v6/applications/underauditlist?"));
+    assert!(request.contains("lang=zh_cn"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_app_version_contacts_range_suggest_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"scope-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .application_app_version
+        .contacts_range_suggest_by_query(
+            &ContactsRangeSuggestApplicationAppVersionQuery::new("cli_a", "ver-1")
+                .department_id_type("open_department_id")
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains(
+        "GET /open-apis/application/v6/applications/cli_a/app_versions/ver-1/contacts_range_suggest?"
+    ));
+    assert!(request.contains("department_id_type=open_department_id"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_app_version_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"app_version":{"version_id":"ver-1"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .application_app_version
+        .get_by_query(
+            &GetApplicationV6AppVersionQuery::new("cli_a", "ver-1")
+                .lang("zh_cn")
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(
+        request.contains("GET /open-apis/application/v6/applications/cli_a/app_versions/ver-1?")
+    );
+    assert!(request.contains("lang=zh_cn"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_app_version_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"version_id":"ver-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .application_app_version
+        .list_by_query(
+            &ListApplicationAppVersionQuery::new("cli_a")
+                .lang("zh_cn")
+                .page_size(20)
+                .page_token("next-page")
+                .order(1)
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/application/v6/applications/cli_a/app_versions?"));
+    assert!(request.contains("lang=zh_cn"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("order=1"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_collaborators_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"user_id":"ou-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .application_collaborators
+        .get_by_query(
+            &GetApplicationCollaboratorsQuery::new("cli_a").user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/application/v6/applications/cli_a/collaborators?"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_feedback_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"feedback_id":"fb-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .application_v6()
+        .application_feedback
+        .list_by_query(
+            &ListApplicationFeedbackQuery::new("cli_a")
+                .from_date("2026-06-01")
+                .to_date("2026-06-30")
+                .feedback_type(1)
+                .status(2)
+                .user_id_type("open_id")
+                .page_size(20)
+                .page_token("next-page"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/application/v6/applications/cli_a/feedbacks?"));
+    assert!(request.contains("from_date=2026-06-01"));
+    assert!(request.contains("to_date=2026-06-30"));
+    assert!(request.contains("feedback_type=1"));
+    assert!(request.contains("status=2"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
 }
 
 // ── ACS ──
