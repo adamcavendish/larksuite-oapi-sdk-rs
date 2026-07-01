@@ -1799,6 +1799,44 @@ pub struct AppDashboardResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListDashboardQuery<'a> {
+    pub app_token: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListDashboardQuery<'a> {
+    pub fn new(app_token: &'a str) -> Self {
+        Self {
+            app_token,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> AppDashboardResource<'a> {
     /// Copy a dashboard.
     /// POST /open-apis/bitable/v1/apps/:app_token/dashboards/:block_id/copy
@@ -1829,17 +1867,28 @@ impl<'a> AppDashboardResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListDashboardResp, LarkError> {
-        let path = format!("/open-apis/bitable/v1/apps/{app_token}/dashboards");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DashboardListData>(self.config, &api_req, option).await?;
+        let query = ListDashboardQuery::new(app_token)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListDashboardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListDashboardResp, LarkError> {
+        let path = format!("/open-apis/bitable/v1/apps/{}/dashboards", query.app_token);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<DashboardListData>()
+        .await?;
         Ok(ListDashboardResp {
             api_resp,
             code_error: raw.code_error,
@@ -1852,6 +1901,44 @@ impl<'a> AppDashboardResource<'a> {
 
 pub struct AppRoleResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListAppRoleQuery<'a> {
+    pub app_token: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListAppRoleQuery<'a> {
+    pub fn new(app_token: &'a str) -> Self {
+        Self {
+            app_token,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> AppRoleResource<'a> {
@@ -1906,18 +1993,28 @@ impl<'a> AppRoleResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAppRoleResp, LarkError> {
-        let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AppRoleListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListAppRoleQuery::new(app_token)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAppRoleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAppRoleResp, LarkError> {
+        let path = format!("/open-apis/bitable/v1/apps/{}/roles", query.app_token);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<AppRoleListData>()
+        .await?;
         Ok(ListAppRoleResp {
             api_resp,
             code_error,
@@ -2091,6 +2188,44 @@ pub struct AppWorkflowResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListAppWorkflowQuery<'a> {
+    pub app_token: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListAppWorkflowQuery<'a> {
+    pub fn new(app_token: &'a str) -> Self {
+        Self {
+            app_token,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> AppWorkflowResource<'a> {
     /// List automation workflows for a bitable app.
     /// GET /open-apis/bitable/v1/apps/:app_token/workflows
@@ -2101,18 +2236,28 @@ impl<'a> AppWorkflowResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAppWorkflowResp, LarkError> {
-        let path = format!("/open-apis/bitable/v1/apps/{app_token}/workflows");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<WorkflowListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListAppWorkflowQuery::new(app_token)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAppWorkflowQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAppWorkflowResp, LarkError> {
+        let path = format!("/open-apis/bitable/v1/apps/{}/workflows", query.app_token);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<WorkflowListData>()
+        .await?;
         Ok(ListAppWorkflowResp {
             api_resp,
             code_error,
