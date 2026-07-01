@@ -292,6 +292,158 @@ pub struct RoomResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct CreateRoomQuery<'a> {
+    pub body: &'a CreateRoomReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateRoomQuery<'a> {
+    pub fn new(body: &'a CreateRoomReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetRoomQuery<'a> {
+    pub room_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetRoomQuery<'a> {
+    pub fn new(room_id: &'a str) -> Self {
+        Self {
+            room_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct UpdateRoomQuery<'a> {
+    pub room_id: &'a str,
+    pub body: &'a UpdateRoomReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UpdateRoomQuery<'a> {
+    pub fn new(room_id: &'a str, body: &'a UpdateRoomReqBody) -> Self {
+        Self {
+            room_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListRoomQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub room_level_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListRoomQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn room_level_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.room_level_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct MgetRoomQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> MgetRoomQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct SearchRoomQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> SearchRoomQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> RoomResource<'a> {
     pub async fn create(
         &self,
@@ -299,14 +451,26 @@ impl<'a> RoomResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateRoomResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/rooms");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<RoomData>(self.config, &api_req, option).await?;
+        let query = CreateRoomQuery::new(body).user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateRoomQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateRoomResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/rooms",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<RoomData>()
+        .await?;
         Ok(CreateRoomResp {
             api_resp,
             code_error: raw.code_error,
@@ -320,14 +484,26 @@ impl<'a> RoomResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetRoomResp, LarkError> {
-        let path = format!("/open-apis/vc/v1/rooms/{room_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RoomData>(self.config, &api_req, option).await?;
+        let query = GetRoomQuery::new(room_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetRoomQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetRoomResp, LarkError> {
+        let path = format!("/open-apis/vc/v1/rooms/{}", query.room_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<RoomData>()
+        .await?;
         Ok(GetRoomResp {
             api_resp,
             code_error: raw.code_error,
@@ -342,15 +518,27 @@ impl<'a> RoomResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/vc/v1/rooms/{room_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = UpdateRoomQuery::new(room_id, body).user_id_type(user_id_type);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateRoomQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/vc/v1/rooms/{}", query.room_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -381,22 +569,31 @@ impl<'a> RoomResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListRoomResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/rooms");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = room_level_id {
-            api_req.query_params.set("room_level_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RoomListData>(self.config, &api_req, option).await?;
+        let query = ListRoomQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .room_level_id(room_level_id)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListRoomQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListRoomResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/rooms",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("room_level_id", query.room_level_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<RoomListData>()
+        .await?;
         Ok(ListRoomResp {
             api_resp,
             code_error: raw.code_error,
@@ -410,15 +607,26 @@ impl<'a> RoomResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<MgetRoomResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/rooms/mget");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = MgetRoomQuery::new(&body).user_id_type(user_id_type);
+        self.mget_by_query(&query, option).await
+    }
+
+    pub async fn mget_by_query(
+        &self,
+        query: &MgetRoomQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<MgetRoomResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/rooms/mget",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(MgetRoomResp {
             api_resp,
             code_error,
@@ -432,15 +640,26 @@ impl<'a> RoomResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchRoomResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/rooms/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = SearchRoomQuery::new(&body).user_id_type(user_id_type);
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchRoomQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchRoomResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/rooms/search",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SearchRoomResp {
             api_resp,
             code_error,
@@ -451,6 +670,27 @@ impl<'a> RoomResource<'a> {
 
 pub struct RoomConfigResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct SetRoomConfigQuery<'a> {
+    pub body: &'a SetRoomConfigReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> SetRoomConfigQuery<'a> {
+    pub fn new(body: &'a SetRoomConfigReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -566,14 +806,26 @@ impl<'a> RoomConfigResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/room_configs/set");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = SetRoomConfigQuery::new(body).user_id_type(user_id_type);
+        self.set_by_query(&query, option).await
+    }
+
+    pub async fn set_by_query(
+        &self,
+        query: &SetRoomConfigQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/room_configs/set",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1439,6 +1691,92 @@ pub struct ReserveResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ApplyReserveQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ApplyReserveQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetReserveQuery<'a> {
+    pub reserve_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetReserveQuery<'a> {
+    pub fn new(reserve_id: &'a str) -> Self {
+        Self {
+            reserve_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetActiveMeetingReserveQuery<'a> {
+    pub reserve_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetActiveMeetingReserveQuery<'a> {
+    pub fn new(reserve_id: &'a str) -> Self {
+        Self {
+            reserve_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct UpdateReserveQuery<'a> {
+    pub reserve_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UpdateReserveQuery<'a> {
+    pub fn new(reserve_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            reserve_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> ReserveResource<'a> {
     /// POST /open-apis/vc/v1/reserves/apply — 预约会议
     pub async fn apply(
@@ -1447,15 +1785,26 @@ impl<'a> ReserveResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ApplyReserveResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/reserves/apply");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ApplyReserveQuery::new(&body).user_id_type(user_id_type);
+        self.apply_by_query(&query, option).await
+    }
+
+    pub async fn apply_by_query(
+        &self,
+        query: &ApplyReserveQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ApplyReserveResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/reserves/apply",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ApplyReserveResp {
             api_resp,
             code_error,
@@ -1488,15 +1837,26 @@ impl<'a> ReserveResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetReserveResp, LarkError> {
-        let path = format!("/open-apis/vc/v1/reserves/{reserve_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetReserveQuery::new(reserve_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetReserveQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetReserveResp, LarkError> {
+        let path = format!("/open-apis/vc/v1/reserves/{}", query.reserve_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetReserveResp {
             api_resp,
             code_error,
@@ -1511,15 +1871,29 @@ impl<'a> ReserveResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetActiveMeetingReserveResp, LarkError> {
-        let path = format!("/open-apis/vc/v1/reserves/{reserve_id}/get_active_meeting");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetActiveMeetingReserveQuery::new(reserve_id).user_id_type(user_id_type);
+        self.get_active_meeting_by_query(&query, option).await
+    }
+
+    pub async fn get_active_meeting_by_query(
+        &self,
+        query: &GetActiveMeetingReserveQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetActiveMeetingReserveResp, LarkError> {
+        let path = format!(
+            "/open-apis/vc/v1/reserves/{}/get_active_meeting",
+            query.reserve_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetActiveMeetingReserveResp {
             api_resp,
             code_error,
@@ -1535,16 +1909,27 @@ impl<'a> ReserveResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateReserveResp, LarkError> {
-        let path = format!("/open-apis/vc/v1/reserves/{reserve_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UpdateReserveQuery::new(reserve_id, &body).user_id_type(user_id_type);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateReserveQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateReserveResp, LarkError> {
+        let path = format!("/open-apis/vc/v1/reserves/{}", query.reserve_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UpdateReserveResp {
             api_resp,
             code_error,
