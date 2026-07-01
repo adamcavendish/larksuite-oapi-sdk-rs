@@ -1,6 +1,6 @@
 mod common;
 
-use common::{http_response, mock_server_with_requests};
+use common::{http_response, http_response_with_headers, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::req::RequestOption;
@@ -100,6 +100,30 @@ async fn drive_get_export_task_smoke() {
 }
 
 #[tokio::test]
+async fn drive_export_task_download_smoke() {
+    let body = "export-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Disposition: attachment; filename=\"export.bin\"\r\nContent-Type: application/octet-stream\r\n",
+        body,
+    )])
+    .await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .export_task
+        .download("file-token-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert_eq!(resp.file_name.as_deref(), Some("export.bin"));
+    assert_eq!(resp.data, body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v1/export_tasks/file/file-token-1/download"));
+}
+
+#[tokio::test]
 async fn drive_list_files_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"files":[{"token":"file-1","name":"doc.pdf","type":"file"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
@@ -165,6 +189,30 @@ async fn drive_list_files_positional_adapter_smoke() {
     );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/drive/v1/files"));
+}
+
+#[tokio::test]
+async fn drive_file_download_smoke() {
+    let body = "file-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Disposition: attachment; filename=\"file.bin\"\r\nContent-Type: application/octet-stream\r\n",
+        body,
+    )])
+    .await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .file
+        .download("file-token-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert_eq!(resp.file_name.as_deref(), Some("file.bin"));
+    assert_eq!(resp.data, body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v1/files/file-token-1/download"));
 }
 
 #[tokio::test]
@@ -278,6 +326,35 @@ async fn drive_file_view_record_list_by_query_smoke() {
     assert!(request.contains("viewer_id_type=open_id"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn drive_media_download_smoke() {
+    let body = "media-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Disposition: attachment; filename=\"media.bin\"\r\nContent-Type: application/octet-stream\r\n",
+        body,
+    )])
+    .await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .media
+        .download(
+            "media-token-1",
+            Some("extra-value"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(resp.file_name.as_deref(), Some("media.bin"));
+    assert_eq!(resp.data, body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v1/medias/media-token-1/download?"));
+    assert!(request.contains("extra=extra-value"));
 }
 
 // ── CoreHR ──

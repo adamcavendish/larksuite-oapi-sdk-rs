@@ -1147,18 +1147,15 @@ impl<'a> ExportTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/drive/v1/export_tasks/file/{file_token}/download");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let mut opt = option.clone();
-        opt.file_download = true;
-        let api_resp = transport::request(self.config, &api_req, &opt).await?;
-        let file_name = api_resp.file_name_by_header();
-        let data = api_resp.raw_body.clone();
-        Ok(DownloadResp {
-            api_resp,
-            file_name,
-            data,
-        })
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .download()
+        .await
     }
 }
 
@@ -1318,18 +1315,15 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/download");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let mut opt = option.clone();
-        opt.file_download = true;
-        let api_resp = transport::request(self.config, &api_req, &opt).await?;
-        let file_name = api_resp.file_name_by_header();
-        let data = api_resp.raw_body.clone();
-        Ok(DownloadResp {
-            api_resp,
-            file_name,
-            data,
-        })
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .download()
+        .await
     }
 
     pub async fn subscribe(
@@ -2384,21 +2378,16 @@ impl<'a> MediaResource<'a> {
         option: &RequestOption,
     ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/drive/v1/medias/{file_token}/download");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = extra {
-            api_req.query_params.set("extra", v);
-        }
-        let mut opt = option.clone();
-        opt.file_download = true;
-        let api_resp = transport::request(self.config, &api_req, &opt).await?;
-        let file_name = api_resp.file_name_by_header();
-        let data = api_resp.raw_body.clone();
-        Ok(DownloadResp {
-            api_resp,
-            file_name,
-            data,
-        })
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("extra", extra)
+        .download()
+        .await
     }
 
     pub async fn upload_prepare(
