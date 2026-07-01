@@ -1185,6 +1185,67 @@ pub struct AppTableFieldResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListFieldQuery<'a> {
+    pub app_token: &'a str,
+    pub table_id: &'a str,
+    pub view_id: Option<&'a str>,
+    pub text_field_as_array: Option<bool>,
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListFieldQuery<'a> {
+    pub fn new(app_token: &'a str, table_id: &'a str) -> Self {
+        Self {
+            app_token,
+            table_id,
+            view_id: None,
+            text_field_as_array: None,
+            user_id_type: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn view_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.view_id = value.into();
+        self
+    }
+
+    pub fn text_field_as_array(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.text_field_as_array = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> AppTableFieldResource<'a> {
     pub async fn create(
         &self,
@@ -1259,28 +1320,37 @@ impl<'a> AppTableFieldResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListFieldResp, LarkError> {
-        let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = view_id {
-            api_req.query_params.set("view_id", v);
-        }
-        if let Some(v) = text_field_as_array {
-            api_req
-                .query_params
-                .set("text_field_as_array", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<FieldListData>(self.config, &api_req, option).await?;
+        let query = ListFieldQuery::new(app_token, table_id)
+            .view_id(view_id)
+            .text_field_as_array(text_field_as_array)
+            .user_id_type(user_id_type)
+            .page_token(page_token)
+            .page_size(page_size);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFieldQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFieldResp, LarkError> {
+        let path = format!(
+            "/open-apis/bitable/v1/apps/{}/tables/{}/fields",
+            query.app_token, query.table_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("view_id", query.view_id)
+        .query("text_field_as_array", query.text_field_as_array)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page_query())
+        .send::<FieldListData>()
+        .await?;
         Ok(ListFieldResp {
             api_resp,
             code_error: raw.code_error,
