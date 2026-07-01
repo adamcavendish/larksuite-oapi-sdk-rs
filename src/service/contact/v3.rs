@@ -1545,6 +1545,109 @@ pub struct UserResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListUserQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub department_id: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListUserQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn department_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct FindUserByDepartmentQuery<'a> {
+    pub department_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> FindUserByDepartmentQuery<'a> {
+    pub fn new(department_id: &'a str) -> Self {
+        Self {
+            department_id,
+            user_id_type: None,
+            department_id_type: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> UserResource<'a> {
     pub async fn create(
         &self,
@@ -1685,25 +1788,33 @@ impl<'a> UserResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListUserResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/users");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = department_id {
-            api_req.query_params.set("department_id", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListUserRespData>(self.config, &api_req, option).await?;
+        let query = ListUserQuery::new()
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .department_id(department_id)
+            .page_token(page_token)
+            .page_size(page_size);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListUserQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListUserResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/users",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("department_id", query.department_id)
+        .page_query(query.page_query())
+        .send::<ListUserRespData>()
+        .await?;
         Ok(ListUserResp {
             api_resp,
             code_error: raw.code_error,
@@ -1772,26 +1883,32 @@ impl<'a> UserResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<FindByDepartmentUserResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = FindUserByDepartmentQuery::new(department_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.find_by_department_by_query(&query, option).await
+    }
+
+    pub async fn find_by_department_by_query(
+        &self,
+        query: &FindUserByDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<FindByDepartmentUserResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/contact/v3/users/find_by_department",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("department_id", department_id);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListUserRespData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("department_id", query.department_id)
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .page_query(query.page_query())
+        .send::<ListUserRespData>()
+        .await?;
         Ok(FindByDepartmentUserResp {
             api_resp,
             code_error: raw.code_error,
@@ -1848,6 +1965,51 @@ pub struct ScopeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListScopeQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListScopeQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> ScopeResource<'a> {
     pub async fn list(
         &self,
@@ -1857,22 +2019,31 @@ impl<'a> ScopeResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListScopeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/scopes");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListScopeRespData>(self.config, &api_req, option).await?;
+        let query = ListScopeQuery::new()
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .page_token(page_token)
+            .page_size(page_size);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListScopeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListScopeResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/scopes",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .page_query(query.page_query())
+        .send::<ListScopeRespData>()
+        .await?;
         Ok(ListScopeResp {
             api_resp,
             code_error: raw.code_error,
@@ -1883,6 +2054,39 @@ impl<'a> ScopeResource<'a> {
 
 pub struct EmployeeTypeEnumResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListEmployeeTypeEnumQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListEmployeeTypeEnumQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> EmployeeTypeEnumResource<'a> {
@@ -1955,20 +2159,27 @@ impl<'a> EmployeeTypeEnumResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListEmployeeTypeEnumResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListEmployeeTypeEnumQuery::new()
+            .page_token(page_token)
+            .page_size(page_size);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListEmployeeTypeEnumQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListEmployeeTypeEnumResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/contact/v3/employee_type_enums",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListEmployeeTypeEnumRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<ListEmployeeTypeEnumRespData>()
+        .await?;
         Ok(ListEmployeeTypeEnumResp {
             api_resp,
             code_error: raw.code_error,
