@@ -18,10 +18,13 @@ use larksuite_oapi_sdk_rs::service::{
     },
     corehr::v1::{
         GetDepartmentQuery as GetCorehrDepartmentQuery, GetEmployeeQuery as GetCorehrEmployeeQuery,
-        ListCompanyQuery as ListCorehrCompanyQuery, ListCurrencyQuery as ListCorehrCurrencyQuery,
+        ListCompanyQuery as ListCorehrCompanyQuery, ListContractQuery as ListCorehrContractQuery,
+        ListCountryRegionQuery as ListCorehrCountryRegionQuery,
+        ListCurrencyQuery as ListCorehrCurrencyQuery,
         ListDepartmentQuery as ListCorehrDepartmentQuery,
-        ListEmployeeQuery as ListCorehrEmployeeQuery, ListJobLevelQuery as ListCorehrJobLevelQuery,
-        ListLocationQuery as ListCorehrLocationQuery,
+        ListEmployeeQuery as ListCorehrEmployeeQuery,
+        ListEmployeeTypeQuery as ListCorehrEmployeeTypeQuery,
+        ListJobLevelQuery as ListCorehrJobLevelQuery, ListLocationQuery as ListCorehrLocationQuery,
         ListWorkingHoursTypeQuery as ListCorehrWorkingHoursTypeQuery,
     },
     directory::{
@@ -1701,6 +1704,78 @@ async fn corehr_working_hours_type_list_by_query_smoke() {
     assert_eq!(data.items[0].id.as_deref(), Some("hours-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/working_hours_types?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_contract_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"contract-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListCorehrContractQuery::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .contract
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("contract-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/contracts?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_country_region_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"country-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrCountryRegionQuery::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .country_region
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("country-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/country_regions?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_employee_type_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"type-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrEmployeeTypeQuery::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .employee_type
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("type-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/employee_types?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }
