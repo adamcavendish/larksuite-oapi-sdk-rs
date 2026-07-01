@@ -49,6 +49,36 @@ macro_rules! impl_query_value_to_string {
 
 impl_query_value_to_string!(bool, i32, i64, u32, u64, usize);
 
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct PageQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> PageQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn from_parts(page_size: Option<i32>, page_token: Option<&'a str>) -> Self {
+        Self {
+            page_size,
+            page_token,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+}
+
 pub(crate) struct RestRequest<'a> {
     config: &'a Config,
     api_req: ApiReq,
@@ -75,6 +105,11 @@ impl<'a> RestRequest<'a> {
     pub(crate) fn query<T: QueryValue>(mut self, key: &str, value: T) -> Self {
         value.set_query(&mut self.api_req, key);
         self
+    }
+
+    pub(crate) fn page_query(self, page: PageQuery<'_>) -> Self {
+        self.query("page_size", page.page_size)
+            .query("page_token", page.page_token)
     }
 
     pub(crate) fn json_body<T: serde::Serialize>(mut self, body: &T) -> Result<Self, LarkError> {
