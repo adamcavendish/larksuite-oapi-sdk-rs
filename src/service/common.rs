@@ -5,6 +5,97 @@ pub use crate::req::{ApiReq, ReqBody, RequestOption};
 pub use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::transport;
 
+pub(crate) trait QueryValue {
+    fn set_query(self, req: &mut ApiReq, key: &str);
+}
+
+impl<T: QueryValue> QueryValue for Option<T> {
+    fn set_query(self, req: &mut ApiReq, key: &str) {
+        if let Some(value) = self {
+            value.set_query(req, key);
+        }
+    }
+}
+
+impl QueryValue for &str {
+    fn set_query(self, req: &mut ApiReq, key: &str) {
+        req.query_params.set(key, self);
+    }
+}
+
+impl QueryValue for String {
+    fn set_query(self, req: &mut ApiReq, key: &str) {
+        req.query_params.set(key, self);
+    }
+}
+
+impl QueryValue for &String {
+    fn set_query(self, req: &mut ApiReq, key: &str) {
+        req.query_params.set(key, self);
+    }
+}
+
+macro_rules! impl_query_value_to_string {
+    ($($ty:ty),* $(,)?) => {
+        $(
+            impl QueryValue for $ty {
+                fn set_query(self, req: &mut ApiReq, key: &str) {
+                    req.query_params.set(key, self.to_string());
+                }
+            }
+        )*
+    };
+}
+
+impl_query_value_to_string!(bool, i32, i64, u32, u64, usize);
+
+pub(crate) struct RestRequest<'a> {
+    config: &'a Config,
+    api_req: ApiReq,
+    option: &'a RequestOption,
+}
+
+impl<'a> RestRequest<'a> {
+    pub(crate) fn new(
+        config: &'a Config,
+        method: http::Method,
+        path: impl Into<String>,
+        supported_access_token_types: Vec<AccessTokenType>,
+        option: &'a RequestOption,
+    ) -> Self {
+        let mut api_req = ApiReq::new(method, path);
+        api_req.supported_access_token_types = supported_access_token_types;
+        Self {
+            config,
+            api_req,
+            option,
+        }
+    }
+
+    pub(crate) fn query<T: QueryValue>(mut self, key: &str, value: T) -> Self {
+        value.set_query(&mut self.api_req, key);
+        self
+    }
+
+    pub(crate) fn json_body<T: serde::Serialize>(mut self, body: &T) -> Result<Self, LarkError> {
+        self.api_req.body = Some(ReqBody::json(body)?);
+        Ok(self)
+    }
+
+    pub(crate) async fn send<T: for<'de> serde::Deserialize<'de>>(
+        self,
+    ) -> Result<(ApiResp, RawResponse<T>), LarkError> {
+        transport::request_typed::<T>(self.config, &self.api_req, self.option).await
+    }
+
+    pub(crate) async fn send_v2<T: for<'de> serde::Deserialize<'de>>(
+        self,
+    ) -> Result<(ApiResp, Option<CodeError>, Option<T>), LarkError> {
+        let (api_resp, raw) = self.send::<T>().await?;
+        Ok(parse_v2(api_resp, raw))
+    }
+}
+
 pub fn parse_v2<T>(
     api_resp: ApiResp,
     raw: RawResponse<T>,

@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, parse_v2};
+use crate::service::common::{EmptyResp, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -1772,8 +1772,103 @@ pub struct MeetingListResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetMeetingListQuery<'a> {
+    pub start_time: &'a str,
+    pub end_time: &'a str,
+    pub meeting_status: Option<i32>,
+    pub meeting_no: Option<&'a str>,
+    pub user_id: Option<&'a str>,
+    pub room_id: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetMeetingListQuery<'a> {
+    pub fn new(start_time: &'a str, end_time: &'a str) -> Self {
+        Self {
+            start_time,
+            end_time,
+            meeting_status: None,
+            meeting_no: None,
+            user_id: None,
+            room_id: None,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn meeting_status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.meeting_status = value.into();
+        self
+    }
+
+    pub fn meeting_no(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.meeting_no = value.into();
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn room_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.room_id = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> MeetingListResource<'a> {
     /// GET /open-apis/vc/v1/meeting_list
+    pub async fn get_by_query(
+        &self,
+        query: &GetMeetingListQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetMeetingListResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/meeting_list",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("meeting_status", query.meeting_status)
+        .query("meeting_no", query.meeting_no)
+        .query("user_id", query.user_id)
+        .query("room_id", query.room_id)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
+        Ok(GetMeetingListResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub async fn get(
         &self,
@@ -1788,39 +1883,15 @@ impl<'a> MeetingListResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetMeetingListResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/meeting_list");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("start_time", start_time);
-        api_req.query_params.set("end_time", end_time);
-        if let Some(v) = meeting_status {
-            api_req.query_params.set("meeting_status", v.to_string());
-        }
-        if let Some(v) = meeting_no {
-            api_req.query_params.set("meeting_no", v);
-        }
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = room_id {
-            api_req.query_params.set("room_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
-        Ok(GetMeetingListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        let query = GetMeetingListQuery::new(start_time, end_time)
+            .meeting_status(meeting_status)
+            .meeting_no(meeting_no)
+            .user_id(user_id)
+            .room_id(room_id)
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
     }
 }
 
