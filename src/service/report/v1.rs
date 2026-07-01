@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::EmptyResp;
+use crate::service::common::{EmptyResp, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -116,6 +116,56 @@ pub struct RemoveRuleViewReqBody {
     pub user_ids: Option<Vec<String>>,
 }
 
+// -- Query parameter types --
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct QueryRuleQuery<'a> {
+    pub rule_name: Option<&'a str>,
+    pub include_deleted: Option<i32>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> QueryRuleQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn rule_name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.rule_name = value.into();
+        self
+    }
+
+    pub fn include_deleted(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.include_deleted = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct QueryTaskQuery<'a> {
+    pub body: &'a QueryTaskReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> QueryTaskQuery<'a> {
+    pub fn new(body: &'a QueryTaskReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct RuleResource<'a> {
@@ -130,19 +180,30 @@ impl<'a> RuleResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<QueryRuleResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/report/v1/rules/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = rule_name {
-            api_req.query_params.set("rule_name", v);
-        }
-        if let Some(v) = include_deleted {
-            api_req.query_params.set("include_deleted", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RuleListData>(self.config, &api_req, option).await?;
+        let query = QueryRuleQuery::new()
+            .rule_name(rule_name)
+            .include_deleted(include_deleted)
+            .user_id_type(user_id_type);
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryRuleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryRuleResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/report/v1/rules/query",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("rule_name", query.rule_name)
+        .query("include_deleted", query.include_deleted)
+        .query("user_id_type", query.user_id_type)
+        .send::<RuleListData>()
+        .await?;
         Ok(QueryRuleResp {
             api_resp,
             code_error: raw.code_error,
@@ -162,14 +223,26 @@ impl<'a> TaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<QueryTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/report/v1/tasks/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TaskListData>(self.config, &api_req, option).await?;
+        let query = QueryTaskQuery::new(body).user_id_type(user_id_type);
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryTaskResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/report/v1/tasks/query",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<TaskListData>()
+        .await?;
         Ok(QueryTaskResp {
             api_resp,
             code_error: raw.code_error,
