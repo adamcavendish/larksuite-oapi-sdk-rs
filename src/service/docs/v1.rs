@@ -4,6 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
+use crate::service::common::RestRequest;
 use crate::transport;
 
 // ── Domain types ──
@@ -65,6 +66,41 @@ pub struct ContentData {
 
 impl_resp!(GetContentResp, ContentData);
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetContentQuery<'a> {
+    pub doc_token: &'a str,
+    pub doc_type: Option<&'a str>,
+    pub content_type: Option<&'a str>,
+    pub lang: Option<&'a str>,
+}
+
+impl<'a> GetContentQuery<'a> {
+    pub fn new(doc_token: &'a str) -> Self {
+        Self {
+            doc_token,
+            doc_type: None,
+            content_type: None,
+            lang: None,
+        }
+    }
+
+    pub fn doc_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.doc_type = value.into();
+        self
+    }
+
+    pub fn content_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.content_type = value.into();
+        self
+    }
+
+    pub fn lang(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.lang = value.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct DocumentResource<'a> {
@@ -103,20 +139,31 @@ impl<'a> ContentResource<'a> {
         lang: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetContentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/docs/v1/content");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("doc_token", doc_token);
-        if let Some(v) = doc_type {
-            api_req.query_params.set("doc_type", v);
-        }
-        if let Some(v) = content_type {
-            api_req.query_params.set("content_type", v);
-        }
-        if let Some(v) = lang {
-            api_req.query_params.set("lang", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ContentData>(self.config, &api_req, option).await?;
+        let query = GetContentQuery::new(doc_token)
+            .doc_type(doc_type)
+            .content_type(content_type)
+            .lang(lang);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetContentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetContentResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/docs/v1/content",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("doc_token", query.doc_token)
+        .query("doc_type", query.doc_type)
+        .query("content_type", query.content_type)
+        .query("lang", query.lang)
+        .send::<ContentData>()
+        .await?;
         Ok(GetContentResp {
             api_resp,
             code_error: raw.code_error,

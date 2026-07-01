@@ -53,6 +53,7 @@ use larksuite_oapi_sdk_rs::service::{
         ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
         ListShareEntityQuery,
     },
+    docs::v1::GetContentQuery as GetDocsContentQuery,
     drive::{
         v1::{ListFileQuery, ListFileVersionQuery, ListFileViewRecordQuery},
         v2::ListFileLikeQuery,
@@ -2749,6 +2750,38 @@ async fn contact_list_department_smoke() {
 }
 
 // ── Docx ──
+
+#[tokio::test]
+async fn docs_content_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"content":"hello","revision":3}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .docs()
+        .content
+        .get_by_query(
+            &GetDocsContentQuery::new("doc-token-1")
+                .doc_type("docx")
+                .content_type("markdown")
+                .lang("en"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data.as_ref().and_then(|data| data.content.as_deref()),
+        Some("hello")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/docs/v1/content?"));
+    assert!(request.contains("doc_token=doc-token-1"));
+    assert!(request.contains("doc_type=docx"));
+    assert!(request.contains("content_type=markdown"));
+    assert!(request.contains("lang=en"));
+}
 
 #[tokio::test]
 async fn docx_get_document_smoke() {
