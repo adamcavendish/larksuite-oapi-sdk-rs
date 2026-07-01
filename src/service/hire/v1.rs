@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, parse_v2};
+use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -756,6 +756,117 @@ pub struct JobResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetJobQuery<'a> {
+    pub job_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+    pub job_family_id_type: Option<&'a str>,
+}
+
+impl<'a> GetJobQuery<'a> {
+    pub fn new(job_id: &'a str) -> Self {
+        Self {
+            job_id,
+            user_id_type: None,
+            department_id_type: None,
+            job_level_id_type: None,
+            job_family_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub fn job_family_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_family_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub update_start_time: Option<&'a str>,
+    pub update_end_time: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+    pub job_family_id_type: Option<&'a str>,
+}
+
+impl<'a> ListJobQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn update_start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_start_time = value.into();
+        self
+    }
+
+    pub fn update_end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_end_time = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub fn job_family_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_family_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> JobResource<'a> {
     pub async fn get(
         &self,
@@ -763,14 +874,29 @@ impl<'a> JobResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetJobResp, LarkError> {
-        let path = format!("/open-apis/hire/v1/jobs/{job_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<JobData>(self.config, &api_req, option).await?;
+        let query = GetJobQuery::new(job_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetJobQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetJobResp, LarkError> {
+        let path = format!("/open-apis/hire/v1/jobs/{}", query.job_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .query("job_family_id_type", query.job_family_id_type)
+        .send::<JobData>()
+        .await?;
         Ok(GetJobResp {
             api_resp,
             code_error: raw.code_error,
@@ -787,25 +913,36 @@ impl<'a> JobResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/jobs");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = update_start_time {
-            api_req.query_params.set("update_start_time", v);
-        }
-        if let Some(v) = update_end_time {
-            api_req.query_params.set("update_end_time", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<JobListData>(self.config, &api_req, option).await?;
+        let query = ListJobQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .update_start_time(update_start_time)
+            .update_end_time(update_end_time)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/jobs",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("update_start_time", query.update_start_time)
+        .query("update_end_time", query.update_end_time)
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .query("job_family_id_type", query.job_family_id_type)
+        .send::<JobListData>()
+        .await?;
         Ok(ListJobResp {
             api_resp,
             code_error: raw.code_error,
@@ -973,6 +1110,96 @@ pub struct TalentResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetTalentQuery<'a> {
+    pub talent_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetTalentQuery<'a> {
+    pub fn new(talent_id: &'a str) -> Self {
+        Self {
+            talent_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListTalentQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub keyword: Option<&'a str>,
+    pub update_start_time: Option<&'a str>,
+    pub update_end_time: Option<&'a str>,
+    pub sort_by: Option<i32>,
+    pub query_option: Option<&'a str>,
+}
+
+impl<'a> ListTalentQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn keyword(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.keyword = value.into();
+        self
+    }
+
+    pub fn update_start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_start_time = value.into();
+        self
+    }
+
+    pub fn update_end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_end_time = value.into();
+        self
+    }
+
+    pub fn sort_by(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.sort_by = value.into();
+        self
+    }
+
+    pub fn query_option(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.query_option = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> TalentResource<'a> {
     pub async fn create(
         &self,
@@ -1001,14 +1228,26 @@ impl<'a> TalentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetTalentResp, LarkError> {
-        let path = format!("/open-apis/hire/v1/talents/{talent_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TalentData>(self.config, &api_req, option).await?;
+        let query = GetTalentQuery::new(talent_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetTalentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetTalentResp, LarkError> {
+        let path = format!("/open-apis/hire/v1/talents/{}", query.talent_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<TalentData>()
+        .await?;
         Ok(GetTalentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1023,19 +1262,34 @@ impl<'a> TalentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListTalentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/talents");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TalentListData>(self.config, &api_req, option).await?;
+        let query = ListTalentQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTalentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTalentResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/talents",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .query("keyword", query.keyword)
+        .query("update_start_time", query.update_start_time)
+        .query("update_end_time", query.update_end_time)
+        .query("sort_by", query.sort_by)
+        .query("query_option", query.query_option)
+        .send::<TalentListData>()
+        .await?;
         Ok(ListTalentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1193,6 +1447,108 @@ pub struct ApplicationResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetApplicationQuery<'a> {
+    pub application_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetApplicationQuery<'a> {
+    pub fn new(application_id: &'a str) -> Self {
+        Self {
+            application_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListApplicationQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub job_id: Option<&'a str>,
+    pub stage_id: Option<&'a str>,
+    pub talent_id: Option<&'a str>,
+    pub active_status: Option<i32>,
+    pub user_id_type: Option<&'a str>,
+    pub process_id: Option<&'a str>,
+    pub update_start_time: Option<&'a str>,
+    pub update_end_time: Option<&'a str>,
+}
+
+impl<'a> ListApplicationQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn job_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_id = value.into();
+        self
+    }
+
+    pub fn stage_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.stage_id = value.into();
+        self
+    }
+
+    pub fn talent_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.talent_id = value.into();
+        self
+    }
+
+    pub fn active_status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.active_status = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn process_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.process_id = value.into();
+        self
+    }
+
+    pub fn update_start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_start_time = value.into();
+        self
+    }
+
+    pub fn update_end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_end_time = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> ApplicationResource<'a> {
     pub async fn create(
         &self,
@@ -1217,14 +1573,26 @@ impl<'a> ApplicationResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetApplicationResp, LarkError> {
-        let path = format!("/open-apis/hire/v1/applications/{application_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ApplicationData>(self.config, &api_req, option).await?;
+        let query = GetApplicationQuery::new(application_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetApplicationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetApplicationResp, LarkError> {
+        let path = format!("/open-apis/hire/v1/applications/{}", query.application_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<ApplicationData>()
+        .await?;
         Ok(GetApplicationResp {
             api_resp,
             code_error: raw.code_error,
@@ -1280,31 +1648,40 @@ impl<'a> ApplicationResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListApplicationResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/applications");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = job_id {
-            api_req.query_params.set("job_id", v);
-        }
-        if let Some(v) = stage_id {
-            api_req.query_params.set("stage_id", v);
-        }
-        if let Some(v) = talent_id {
-            api_req.query_params.set("talent_id", v);
-        }
-        if let Some(v) = active_status {
-            api_req.query_params.set("active_status", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ApplicationListData>(self.config, &api_req, option).await?;
+        let query = ListApplicationQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .job_id(job_id)
+            .stage_id(stage_id)
+            .talent_id(talent_id)
+            .active_status(active_status)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListApplicationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListApplicationResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/applications",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("job_id", query.job_id)
+        .query("stage_id", query.stage_id)
+        .query("talent_id", query.talent_id)
+        .query("active_status", query.active_status)
+        .query("user_id_type", query.user_id_type)
+        .query("process_id", query.process_id)
+        .query("update_start_time", query.update_start_time)
+        .query("update_end_time", query.update_end_time)
+        .send::<ApplicationListData>()
+        .await?;
         Ok(ListApplicationResp {
             api_resp,
             code_error: raw.code_error,
