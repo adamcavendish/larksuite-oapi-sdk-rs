@@ -40,6 +40,136 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
         .unwrap()
 }
 
+// ── Attendance ──
+
+#[tokio::test]
+async fn attendance_file_download_smoke() {
+    let body = "attendance-file-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Disposition: attachment; filename=\"attendance-file.bin\"\r\nContent-Type: application/octet-stream\r\n",
+        body,
+    )])
+    .await;
+
+    let client = client_for(addr);
+    let resp = client
+        .attendance()
+        .file
+        .download("file-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert_eq!(resp.file_name.as_deref(), Some("attendance-file.bin"));
+    assert_eq!(resp.data, body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/attendance/v1/files/file-1/download"));
+}
+
+// ── Baike ──
+
+#[tokio::test]
+async fn baike_file_download_smoke() {
+    let body = "baike-file-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Disposition: attachment; filename=\"baike-file.bin\"\r\nContent-Type: application/octet-stream\r\n",
+        body,
+    )])
+    .await;
+
+    let client = client_for(addr);
+    let resp = client
+        .baike()
+        .file
+        .download("file-token-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert_eq!(resp.file_name.as_deref(), Some("baike-file.bin"));
+    assert_eq!(resp.data, body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/baike/v1/files/file-token-1/download"));
+}
+
+// ── Board ──
+
+#[tokio::test]
+async fn board_whiteboard_download_as_image_smoke() {
+    let body = "whiteboard-image-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Disposition: attachment; filename=\"whiteboard.png\"\r\nContent-Type: image/png\r\n",
+        body,
+    )])
+    .await;
+
+    let client = client_for(addr);
+    let resp = client
+        .board()
+        .whiteboard
+        .download_as_image("whiteboard-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert_eq!(resp.file_name.as_deref(), Some("whiteboard.png"));
+    assert_eq!(resp.data, body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/board/v1/whiteboards/whiteboard-1/download_as_image"));
+}
+
+// ── EHR ──
+
+#[tokio::test]
+async fn ehr_attachment_get_download_smoke() {
+    let body = "ehr-attachment-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Disposition: attachment; filename=\"attachment.pdf\"\r\nContent-Type: application/pdf\r\n",
+        body,
+    )])
+    .await;
+
+    let client = client_for(addr);
+    let resp = client
+        .ehr()
+        .attachment
+        .get("attachment-token-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert_eq!(resp.file_name.as_deref(), Some("attachment.pdf"));
+    assert_eq!(resp.data, body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/ehr/v1/attachments/attachment-token-1"));
+}
+
+// ── Lingo ──
+
+#[tokio::test]
+async fn lingo_file_download_smoke() {
+    let body = "lingo-file-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Disposition: attachment; filename=\"lingo-file.bin\"\r\nContent-Type: application/octet-stream\r\n",
+        body,
+    )])
+    .await;
+
+    let client = client_for(addr);
+    let resp = client
+        .lingo()
+        .file
+        .download("file-token-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert_eq!(resp.file_name.as_deref(), Some("lingo-file.bin"));
+    assert_eq!(resp.data, body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/lingo/v1/files/file-token-1/download"));
+}
+
 // ── Bitable ──
 
 #[tokio::test]
