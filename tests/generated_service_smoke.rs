@@ -6,7 +6,11 @@ use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::{
     task::{CreateTaskReqBody, ListTaskQuery},
-    vc::GetMeetingListQuery,
+    vc::{
+        GetMeetingListQuery, GetParticipantListQuery, GetParticipantQualityListQuery,
+        GetResourceReservationListQuery, GetTopUserReportQuery, ListAlertQuery,
+        ListMeetingByNoQuery, RoomConfigQuery,
+    },
 };
 
 fn client_for(addr: std::net::SocketAddr) -> Client {
@@ -483,6 +487,370 @@ async fn helpdesk_get_faq_smoke() {
 }
 
 // ── VC ──
+
+#[tokio::test]
+async fn vc_room_config_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"room_config":{"room_background":"blue"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = RoomConfigQuery::new(1)
+        .country_id("country-1")
+        .district_id("district-1")
+        .building_id("building-1")
+        .floor_name("3F")
+        .room_id("room-1")
+        .user_id_type("open_id");
+    let resp = client
+        .vc()
+        .room_config
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(
+        data.room_config.unwrap().room_background.as_deref(),
+        Some("blue")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/room_configs/query?"));
+    assert!(request.contains("scope=1"));
+    assert!(request.contains("country_id=country-1"));
+    assert!(request.contains("district_id=district-1"));
+    assert!(request.contains("building_id=building-1"));
+    assert!(request.contains("floor_name=3F"));
+    assert!(request.contains("room_id=room-1"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn vc_room_config_query_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"ok":true}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .vc()
+        .room_config
+        .query(
+            1,
+            Some("country-1"),
+            Some("district-1"),
+            Some("building-1"),
+            Some("3F"),
+            Some("room-1"),
+            Some("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/room_configs/query?"));
+    assert!(request.contains("scope=1"));
+    assert!(request.contains("country_id=country-1"));
+    assert!(request.contains("district_id=district-1"));
+    assert!(request.contains("building_id=building-1"));
+    assert!(request.contains("floor_name=3F"));
+    assert!(request.contains("room_id=room-1"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn vc_meeting_list_by_no_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"meeting_briefs":[{"id":"m-1","topic":"Sprint Review"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListMeetingByNoQuery::new("meeting-no", "1700000000", "1700000100")
+        .page_size(20)
+        .page_token("next-page")
+        .user_id_type("open_id");
+    let resp = client
+        .vc()
+        .meeting
+        .list_by_no_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(resp.data.unwrap().meeting_briefs.len(), 1);
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/meetings/list_by_no?"));
+    assert!(request.contains("meeting_no=meeting-no"));
+    assert!(request.contains("start_time=1700000000"));
+    assert!(request.contains("end_time=1700000100"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn vc_report_top_user_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .vc()
+        .report
+        .get_top_user(
+            "1700000000",
+            "1700000100",
+            50,
+            1,
+            Some(2),
+            Some("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/reports/get_top_user?"));
+    assert!(request.contains("start_time=1700000000"));
+    assert!(request.contains("end_time=1700000100"));
+    assert!(request.contains("limit=50"));
+    assert!(request.contains("order_by=1"));
+    assert!(request.contains("meeting_type=2"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn vc_report_top_user_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = GetTopUserReportQuery::new("1700000000", "1700000100", 50, 1)
+        .meeting_type(2)
+        .user_id_type("open_id");
+    let resp = client
+        .vc()
+        .report
+        .get_top_user_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/reports/get_top_user?"));
+    assert!(request.contains("start_time=1700000000"));
+    assert!(request.contains("end_time=1700000100"));
+    assert!(request.contains("limit=50"));
+    assert!(request.contains("order_by=1"));
+    assert!(request.contains("meeting_type=2"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn vc_alert_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListAlertQuery::new()
+        .page_size(20)
+        .page_token("next-page")
+        .start_time("1700000000")
+        .end_time("1700000100")
+        .query_type(1)
+        .query_value("room-1");
+    let resp = client
+        .vc()
+        .alert
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/alerts?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("start_time=1700000000"));
+    assert!(request.contains("end_time=1700000100"));
+    assert!(request.contains("query_type=1"));
+    assert!(request.contains("query_value=room-1"));
+}
+
+#[tokio::test]
+async fn vc_participant_list_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .vc()
+        .participant_list
+        .get(
+            "1700000000",
+            "1700000100",
+            Some(1),
+            "meeting-no",
+            Some("user-1"),
+            Some("room-1"),
+            Some(20),
+            Some("next-page"),
+            Some("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/participant_list?"));
+    assert!(request.contains("meeting_start_time=1700000000"));
+    assert!(request.contains("meeting_end_time=1700000100"));
+    assert!(request.contains("meeting_status=1"));
+    assert!(request.contains("meeting_no=meeting-no"));
+    assert!(request.contains("user_id=user-1"));
+    assert!(request.contains("room_id=room-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn vc_participant_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = GetParticipantListQuery::new("1700000000", "1700000100", "meeting-no")
+        .meeting_status(1)
+        .user_id("user-1")
+        .room_id("room-1")
+        .page_size(20)
+        .page_token("next-page")
+        .user_id_type("open_id");
+    let resp = client
+        .vc()
+        .participant_list
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/participant_list?"));
+    assert!(request.contains("meeting_start_time=1700000000"));
+    assert!(request.contains("meeting_end_time=1700000100"));
+    assert!(request.contains("meeting_status=1"));
+    assert!(request.contains("meeting_no=meeting-no"));
+    assert!(request.contains("user_id=user-1"));
+    assert!(request.contains("room_id=room-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn vc_participant_quality_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        GetParticipantQualityListQuery::new("1700000000", "1700000100", "meeting-no", "1700000050")
+            .user_id("user-1")
+            .room_id("room-1")
+            .page_size(20)
+            .page_token("next-page")
+            .user_id_type("open_id");
+    let resp = client
+        .vc()
+        .participant_quality_list
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/participant_quality_list?"));
+    assert!(request.contains("meeting_start_time=1700000000"));
+    assert!(request.contains("meeting_end_time=1700000100"));
+    assert!(request.contains("meeting_no=meeting-no"));
+    assert!(request.contains("join_time=1700000050"));
+    assert!(request.contains("user_id=user-1"));
+    assert!(request.contains("room_id=room-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn vc_resource_reservation_list_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .vc()
+        .resource_reservation_list
+        .get(
+            "level-1",
+            Some(true),
+            "1700000000",
+            "1700000100",
+            Some("room-1,room-2"),
+            Some(false),
+            Some(20),
+            Some("next-page"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/resource_reservation_list?"));
+    assert!(request.contains("room_level_id=level-1"));
+    assert!(request.contains("has_video=true"));
+    assert!(request.contains("start_time=1700000000"));
+    assert!(request.contains("end_time=1700000100"));
+    assert!(request.contains("room_ids=room-1%2Croom-2"));
+    assert!(request.contains("is_exclude=false"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn vc_resource_reservation_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = GetResourceReservationListQuery::new("level-1", "1700000000", "1700000100")
+        .has_video(true)
+        .room_ids("room-1,room-2")
+        .is_exclude(false)
+        .page_size(20)
+        .page_token("next-page");
+    let resp = client
+        .vc()
+        .resource_reservation_list
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/vc/v1/resource_reservation_list?"));
+    assert!(request.contains("room_level_id=level-1"));
+    assert!(request.contains("has_video=true"));
+    assert!(request.contains("start_time=1700000000"));
+    assert!(request.contains("end_time=1700000100"));
+    assert!(request.contains("room_ids=room-1%2Croom-2"));
+    assert!(request.contains("is_exclude=false"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
 
 #[tokio::test]
 async fn vc_get_meeting_positional_adapter_smoke() {

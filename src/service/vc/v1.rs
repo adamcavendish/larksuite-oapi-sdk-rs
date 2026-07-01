@@ -453,7 +453,91 @@ pub struct RoomConfigResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct RoomConfigQuery<'a> {
+    pub scope: i32,
+    pub country_id: Option<&'a str>,
+    pub district_id: Option<&'a str>,
+    pub building_id: Option<&'a str>,
+    pub floor_name: Option<&'a str>,
+    pub room_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> RoomConfigQuery<'a> {
+    pub fn new(scope: i32) -> Self {
+        Self {
+            scope,
+            country_id: None,
+            district_id: None,
+            building_id: None,
+            floor_name: None,
+            room_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn country_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.country_id = value.into();
+        self
+    }
+
+    pub fn district_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.district_id = value.into();
+        self
+    }
+
+    pub fn building_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.building_id = value.into();
+        self
+    }
+
+    pub fn floor_name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.floor_name = value.into();
+        self
+    }
+
+    pub fn room_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.room_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> RoomConfigResource<'a> {
+    pub async fn get_by_query(
+        &self,
+        query: &RoomConfigQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetRoomConfigResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/room_configs/query",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("scope", query.scope)
+        .query("country_id", query.country_id)
+        .query("district_id", query.district_id)
+        .query("building_id", query.building_id)
+        .query("floor_name", query.floor_name)
+        .query("room_id", query.room_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<RoomConfigData>()
+        .await?;
+        Ok(GetRoomConfigResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub async fn get(
         &self,
@@ -466,34 +550,14 @@ impl<'a> RoomConfigResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetRoomConfigResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/room_configs/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("scope", scope.to_string());
-        if let Some(v) = country_id {
-            api_req.query_params.set("country_id", v);
-        }
-        if let Some(v) = district_id {
-            api_req.query_params.set("district_id", v);
-        }
-        if let Some(v) = building_id {
-            api_req.query_params.set("building_id", v);
-        }
-        if let Some(v) = floor_name {
-            api_req.query_params.set("floor_name", v);
-        }
-        if let Some(v) = room_id {
-            api_req.query_params.set("room_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RoomConfigData>(self.config, &api_req, option).await?;
-        Ok(GetRoomConfigResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        let query = RoomConfigQuery::new(scope)
+            .country_id(country_id)
+            .district_id(district_id)
+            .building_id(building_id)
+            .floor_name(floor_name)
+            .room_id(room_id)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
     }
 
     pub async fn set(
@@ -570,30 +634,37 @@ impl<'a> RoomConfigResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<QueryRoomConfigResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/room_configs/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("scope", scope.to_string());
-        if let Some(v) = country_id {
-            api_req.query_params.set("country_id", v);
-        }
-        if let Some(v) = district_id {
-            api_req.query_params.set("district_id", v);
-        }
-        if let Some(v) = building_id {
-            api_req.query_params.set("building_id", v);
-        }
-        if let Some(v) = floor_name {
-            api_req.query_params.set("floor_name", v);
-        }
-        if let Some(v) = room_id {
-            api_req.query_params.set("room_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = RoomConfigQuery::new(scope)
+            .country_id(country_id)
+            .district_id(district_id)
+            .building_id(building_id)
+            .floor_name(floor_name)
+            .room_id(room_id)
+            .user_id_type(user_id_type);
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &RoomConfigQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryRoomConfigResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/room_configs/query",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("scope", query.scope)
+        .query("country_id", query.country_id)
+        .query("district_id", query.district_id)
+        .query("building_id", query.building_id)
+        .query("floor_name", query.floor_name)
+        .query("room_id", query.room_id)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryRoomConfigResp {
             api_resp,
             code_error,
@@ -604,6 +675,45 @@ impl<'a> RoomConfigResource<'a> {
 
 pub struct MeetingResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListMeetingByNoQuery<'a> {
+    pub meeting_no: &'a str,
+    pub start_time: &'a str,
+    pub end_time: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListMeetingByNoQuery<'a> {
+    pub fn new(meeting_no: &'a str, start_time: &'a str, end_time: &'a str) -> Self {
+        Self {
+            meeting_no,
+            start_time,
+            end_time,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
 }
 
 impl<'a> MeetingResource<'a> {
@@ -721,22 +831,33 @@ impl<'a> MeetingResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListMeetingResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/meetings/list_by_no");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("meeting_no", meeting_no);
-        api_req.query_params.set("start_time", start_time);
-        api_req.query_params.set("end_time", end_time);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MeetingListData>(self.config, &api_req, option).await?;
+        let query = ListMeetingByNoQuery::new(meeting_no, start_time, end_time)
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_no_query(&query, option).await
+    }
+
+    pub async fn list_by_no_query(
+        &self,
+        query: &ListMeetingByNoQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListMeetingResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/meetings/list_by_no",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("meeting_no", query.meeting_no)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .query("user_id_type", query.user_id_type)
+        .send::<MeetingListData>()
+        .await?;
         Ok(ListMeetingResp {
             api_resp,
             code_error: raw.code_error,
@@ -784,6 +905,40 @@ pub struct ReportResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetTopUserReportQuery<'a> {
+    pub start_time: &'a str,
+    pub end_time: &'a str,
+    pub limit: i32,
+    pub order_by: i32,
+    pub meeting_type: Option<i32>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetTopUserReportQuery<'a> {
+    pub fn new(start_time: &'a str, end_time: &'a str, limit: i32, order_by: i32) -> Self {
+        Self {
+            start_time,
+            end_time,
+            limit,
+            order_by,
+            meeting_type: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn meeting_type(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.meeting_type = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> ReportResource<'a> {
     pub async fn get_daily(
         &self,
@@ -823,20 +978,32 @@ impl<'a> ReportResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/reports/get_top_user");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("start_time", start_time);
-        api_req.query_params.set("end_time", end_time);
-        api_req.query_params.set("limit", limit.to_string());
-        api_req.query_params.set("order_by", order_by.to_string());
-        if let Some(v) = meeting_type {
-            api_req.query_params.set("meeting_type", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = GetTopUserReportQuery::new(start_time, end_time, limit, order_by)
+            .meeting_type(meeting_type)
+            .user_id_type(user_id_type);
+        self.get_top_user_by_query(&query, option).await
+    }
+
+    pub async fn get_top_user_by_query(
+        &self,
+        query: &GetTopUserReportQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/reports/get_top_user",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("limit", query.limit)
+        .query("order_by", query.order_by)
+        .query("meeting_type", query.meeting_type)
+        .query("user_id_type", query.user_id_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -919,8 +1086,82 @@ pub struct AlertResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListAlertQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub start_time: Option<&'a str>,
+    pub end_time: Option<&'a str>,
+    pub query_type: Option<i32>,
+    pub query_value: Option<&'a str>,
+}
+
+impl<'a> ListAlertQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_time = value.into();
+        self
+    }
+
+    pub fn end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_time = value.into();
+        self
+    }
+
+    pub fn query_type(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.query_type = value.into();
+        self
+    }
+
+    pub fn query_value(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.query_value = value.into();
+        self
+    }
+}
+
 impl<'a> AlertResource<'a> {
     /// GET /open-apis/vc/v1/alerts — 获取告警记录
+    pub async fn list_by_query(
+        &self,
+        query: &ListAlertQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAlertResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/alerts",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("query_type", query.query_type)
+        .query("query_value", query.query_value)
+        .send_v2::<serde_json::Value>()
+        .await?;
+        Ok(ListAlertResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub async fn list(
         &self,
@@ -932,34 +1173,14 @@ impl<'a> AlertResource<'a> {
         query_value: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAlertResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/alerts");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = start_time {
-            api_req.query_params.set("start_time", v);
-        }
-        if let Some(v) = end_time {
-            api_req.query_params.set("end_time", v);
-        }
-        if let Some(v) = query_type {
-            api_req.query_params.set("query_type", v.to_string());
-        }
-        if let Some(v) = query_value {
-            api_req.query_params.set("query_value", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
-        Ok(ListAlertResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        let query = ListAlertQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .start_time(start_time)
+            .end_time(end_time)
+            .query_type(query_type)
+            .query_value(query_value);
+        self.list_by_query(&query, option).await
     }
 }
 
@@ -1901,8 +2122,102 @@ pub struct ParticipantListResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetParticipantListQuery<'a> {
+    pub meeting_start_time: &'a str,
+    pub meeting_end_time: &'a str,
+    pub meeting_no: &'a str,
+    pub meeting_status: Option<i32>,
+    pub user_id: Option<&'a str>,
+    pub room_id: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetParticipantListQuery<'a> {
+    pub fn new(
+        meeting_start_time: &'a str,
+        meeting_end_time: &'a str,
+        meeting_no: &'a str,
+    ) -> Self {
+        Self {
+            meeting_start_time,
+            meeting_end_time,
+            meeting_no,
+            meeting_status: None,
+            user_id: None,
+            room_id: None,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn meeting_status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.meeting_status = value.into();
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn room_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.room_id = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> ParticipantListResource<'a> {
     /// GET /open-apis/vc/v1/participant_list
+    pub async fn get_by_query(
+        &self,
+        query: &GetParticipantListQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetParticipantListResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/participant_list",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("meeting_start_time", query.meeting_start_time)
+        .query("meeting_end_time", query.meeting_end_time)
+        .query("meeting_no", query.meeting_no)
+        .query("meeting_status", query.meeting_status)
+        .query("user_id", query.user_id)
+        .query("room_id", query.room_id)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
+        Ok(GetParticipantListResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub async fn get(
         &self,
@@ -1917,41 +2232,14 @@ impl<'a> ParticipantListResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetParticipantListResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/participant_list");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req
-            .query_params
-            .set("meeting_start_time", meeting_start_time);
-        api_req
-            .query_params
-            .set("meeting_end_time", meeting_end_time);
-        api_req.query_params.set("meeting_no", meeting_no);
-        if let Some(v) = meeting_status {
-            api_req.query_params.set("meeting_status", v.to_string());
-        }
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = room_id {
-            api_req.query_params.set("room_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
-        Ok(GetParticipantListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        let query = GetParticipantListQuery::new(meeting_start_time, meeting_end_time, meeting_no)
+            .meeting_status(meeting_status)
+            .user_id(user_id)
+            .room_id(room_id)
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
     }
 }
 
@@ -1961,8 +2249,98 @@ pub struct ParticipantQualityListResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetParticipantQualityListQuery<'a> {
+    pub meeting_start_time: &'a str,
+    pub meeting_end_time: &'a str,
+    pub meeting_no: &'a str,
+    pub join_time: &'a str,
+    pub user_id: Option<&'a str>,
+    pub room_id: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetParticipantQualityListQuery<'a> {
+    pub fn new(
+        meeting_start_time: &'a str,
+        meeting_end_time: &'a str,
+        meeting_no: &'a str,
+        join_time: &'a str,
+    ) -> Self {
+        Self {
+            meeting_start_time,
+            meeting_end_time,
+            meeting_no,
+            join_time,
+            user_id: None,
+            room_id: None,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn room_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.room_id = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> ParticipantQualityListResource<'a> {
     /// GET /open-apis/vc/v1/participant_quality_list
+    pub async fn get_by_query(
+        &self,
+        query: &GetParticipantQualityListQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetParticipantQualityListResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/participant_quality_list",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("meeting_start_time", query.meeting_start_time)
+        .query("meeting_end_time", query.meeting_end_time)
+        .query("meeting_no", query.meeting_no)
+        .query("join_time", query.join_time)
+        .query("user_id", query.user_id)
+        .query("room_id", query.room_id)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
+        Ok(GetParticipantQualityListResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub async fn get(
         &self,
@@ -1977,42 +2355,18 @@ impl<'a> ParticipantQualityListResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetParticipantQualityListResp, LarkError> {
-        let mut api_req = ApiReq::new(
-            http::Method::GET,
-            "/open-apis/vc/v1/participant_quality_list",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req
-            .query_params
-            .set("meeting_start_time", meeting_start_time);
-        api_req
-            .query_params
-            .set("meeting_end_time", meeting_end_time);
-        api_req.query_params.set("meeting_no", meeting_no);
-        api_req.query_params.set("join_time", join_time);
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = room_id {
-            api_req.query_params.set("room_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
-        Ok(GetParticipantQualityListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        let query = GetParticipantQualityListQuery::new(
+            meeting_start_time,
+            meeting_end_time,
+            meeting_no,
+            join_time,
+        )
+        .user_id(user_id)
+        .room_id(room_id)
+        .page_size(page_size)
+        .page_token(page_token)
+        .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
     }
 }
 
@@ -2022,8 +2376,90 @@ pub struct ResourceReservationListResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetResourceReservationListQuery<'a> {
+    pub room_level_id: &'a str,
+    pub start_time: &'a str,
+    pub end_time: &'a str,
+    pub has_video: Option<bool>,
+    pub room_ids: Option<&'a str>,
+    pub is_exclude: Option<bool>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> GetResourceReservationListQuery<'a> {
+    pub fn new(room_level_id: &'a str, start_time: &'a str, end_time: &'a str) -> Self {
+        Self {
+            room_level_id,
+            start_time,
+            end_time,
+            has_video: None,
+            room_ids: None,
+            is_exclude: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn has_video(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.has_video = value.into();
+        self
+    }
+
+    pub fn room_ids(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.room_ids = value.into();
+        self
+    }
+
+    pub fn is_exclude(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.is_exclude = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+}
+
 impl<'a> ResourceReservationListResource<'a> {
     /// GET /open-apis/vc/v1/resource_reservation_list
+    pub async fn get_by_query(
+        &self,
+        query: &GetResourceReservationListQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetResourceReservationListResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/resource_reservation_list",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("room_level_id", query.room_level_id)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("has_video", query.has_video)
+        .query("room_ids", query.room_ids)
+        .query("is_exclude", query.is_exclude)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+        Ok(GetResourceReservationListResp {
+            api_resp,
+            code_error,
+            data,
+        })
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub async fn get(
         &self,
@@ -2037,37 +2473,13 @@ impl<'a> ResourceReservationListResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetResourceReservationListResp, LarkError> {
-        let mut api_req = ApiReq::new(
-            http::Method::GET,
-            "/open-apis/vc/v1/resource_reservation_list",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("room_level_id", room_level_id);
-        api_req.query_params.set("start_time", start_time);
-        api_req.query_params.set("end_time", end_time);
-        if let Some(v) = has_video {
-            api_req.query_params.set("has_video", v.to_string());
-        }
-        if let Some(v) = room_ids {
-            api_req.query_params.set("room_ids", v);
-        }
-        if let Some(v) = is_exclude {
-            api_req.query_params.set("is_exclude", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
-        Ok(GetResourceReservationListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        let query = GetResourceReservationListQuery::new(room_level_id, start_time, end_time)
+            .has_video(has_video)
+            .room_ids(room_ids)
+            .is_exclude(is_exclude)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.get_by_query(&query, option).await
     }
 }
 
