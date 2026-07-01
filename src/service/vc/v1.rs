@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, RestRequest, parse_v2};
+use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -710,6 +710,16 @@ impl<'a> ListMeetingByNoQuery<'a> {
         self
     }
 
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+
     pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.user_id_type = value.into();
         self
@@ -853,8 +863,7 @@ impl<'a> MeetingResource<'a> {
         .query("meeting_no", query.meeting_no)
         .query("start_time", query.start_time)
         .query("end_time", query.end_time)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
         .send::<MeetingListData>()
         .await?;
@@ -1112,6 +1121,16 @@ impl<'a> ListAlertQuery<'a> {
         self
     }
 
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+
     pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.start_time = value.into();
         self
@@ -1147,8 +1166,7 @@ impl<'a> AlertResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .query("start_time", query.start_time)
         .query("end_time", query.end_time)
         .query("query_type", query.query_type)
@@ -2052,6 +2070,16 @@ impl<'a> GetMeetingListQuery<'a> {
         self
     }
 
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+
     pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.user_id_type = value.into();
         self
@@ -2078,8 +2106,7 @@ impl<'a> MeetingListResource<'a> {
         .query("meeting_no", query.meeting_no)
         .query("user_id", query.user_id)
         .query("room_id", query.room_id)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
         .send_v2::<serde_json::Value>()
         .await?;
@@ -2180,6 +2207,16 @@ impl<'a> GetParticipantListQuery<'a> {
         self
     }
 
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+
     pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.user_id_type = value.into();
         self
@@ -2206,8 +2243,7 @@ impl<'a> ParticipantListResource<'a> {
         .query("meeting_status", query.meeting_status)
         .query("user_id", query.user_id)
         .query("room_id", query.room_id)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
         .send_v2::<serde_json::Value>()
         .await?;
@@ -2303,6 +2339,16 @@ impl<'a> GetParticipantQualityListQuery<'a> {
         self
     }
 
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+
     pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.user_id_type = value.into();
         self
@@ -2329,8 +2375,7 @@ impl<'a> ParticipantQualityListResource<'a> {
         .query("join_time", query.join_time)
         .query("user_id", query.user_id)
         .query("room_id", query.room_id)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
         .send_v2::<serde_json::Value>()
         .await?;
@@ -2427,6 +2472,16 @@ impl<'a> GetResourceReservationListQuery<'a> {
         self.page_token = value.into();
         self
     }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> ResourceReservationListResource<'a> {
@@ -2449,8 +2504,7 @@ impl<'a> ResourceReservationListResource<'a> {
         .query("has_video", query.has_video)
         .query("room_ids", query.room_ids)
         .query("is_exclude", query.is_exclude)
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .send_v2::<serde_json::Value>()
         .await?;
         Ok(GetResourceReservationListResp {

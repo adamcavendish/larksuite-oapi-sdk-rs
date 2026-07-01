@@ -850,8 +850,7 @@ async fn vc_meeting_list_by_no_query_smoke() {
 
     let client = client_for(addr);
     let query = ListMeetingByNoQuery::new("meeting-no", "1700000000", "1700000100")
-        .page_size(20)
-        .page_token("next-page")
+        .page(PageQuery::new().page_size(20).page_token("next-page"))
         .user_id_type("open_id");
     let resp = client
         .vc()
@@ -938,8 +937,7 @@ async fn vc_alert_list_by_query_smoke() {
 
     let client = client_for(addr);
     let query = ListAlertQuery::new()
-        .page_size(20)
-        .page_token("next-page")
+        .page(PageQuery::new().page_size(20).page_token("next-page"))
         .start_time("1700000000")
         .end_time("1700000100")
         .query_type(1)
@@ -1010,8 +1008,7 @@ async fn vc_participant_list_by_query_smoke() {
         .meeting_status(1)
         .user_id("user-1")
         .room_id("room-1")
-        .page_size(20)
-        .page_token("next-page")
+        .page(PageQuery::new().page_size(20).page_token("next-page"))
         .user_id_type("open_id");
     let resp = client
         .vc()
@@ -1044,8 +1041,7 @@ async fn vc_participant_quality_list_by_query_smoke() {
         GetParticipantQualityListQuery::new("1700000000", "1700000100", "meeting-no", "1700000050")
             .user_id("user-1")
             .room_id("room-1")
-            .page_size(20)
-            .page_token("next-page")
+            .page(PageQuery::new().page_size(20).page_token("next-page"))
             .user_id_type("open_id");
     let resp = client
         .vc()
@@ -1114,8 +1110,7 @@ async fn vc_resource_reservation_list_by_query_smoke() {
         .has_video(true)
         .room_ids("room-1,room-2")
         .is_exclude(false)
-        .page_size(20)
-        .page_token("next-page");
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
     let resp = client
         .vc()
         .resource_reservation_list
@@ -1180,7 +1175,9 @@ async fn vc_get_meeting_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let query = GetMeetingListQuery::new("m-1", "").user_id_type("open_id");
+    let query = GetMeetingListQuery::new("m-1", "")
+        .page(PageQuery::new().page_size(20).page_token("next-page"))
+        .user_id_type("open_id");
     let resp = client
         .vc()
         .meeting_list
@@ -1194,6 +1191,8 @@ async fn vc_get_meeting_smoke() {
     assert!(request.contains("GET /open-apis/vc/v1/meeting_list?"));
     assert!(request.contains("start_time=m-1"));
     assert!(request.contains("end_time="));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
     assert!(request.contains("user_id_type=open_id"));
 }
 
