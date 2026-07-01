@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, parse_v2};
+use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -104,6 +104,50 @@ impl_resp!(ListAcsUserResp, AcsUserListData);
 impl_resp!(ListAccessRecordResp, AccessRecordListData);
 impl_resp!(ListDeviceResp, DeviceListData);
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetUserQuery<'a> {
+    pub user_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetUserQuery<'a> {
+    pub fn new(user_id: &'a str) -> Self {
+        Self {
+            user_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListUserQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListUserQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── New data types (v2 pattern) ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -164,14 +208,26 @@ impl<'a> AcsUserResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetAcsUserResp, LarkError> {
-        let path = format!("/open-apis/acs/v1/users/{user_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AcsUserData>(self.config, &api_req, option).await?;
+        let query = GetUserQuery::new(user_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetUserQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetAcsUserResp, LarkError> {
+        let path = format!("/open-apis/acs/v1/users/{}", query.user_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<AcsUserData>()
+        .await?;
         Ok(GetAcsUserResp {
             api_resp,
             code_error: raw.code_error,
@@ -186,19 +242,28 @@ impl<'a> AcsUserResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAcsUserResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/acs/v1/users");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AcsUserListData>(self.config, &api_req, option).await?;
+        let query = ListUserQuery::new()
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListUserQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAcsUserResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/acs/v1/users",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .send::<AcsUserListData>()
+        .await?;
         Ok(ListAcsUserResp {
             api_resp,
             code_error: raw.code_error,
