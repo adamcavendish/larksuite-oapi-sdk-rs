@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, parse_v2};
+use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -808,6 +808,367 @@ impl_resp_v2!(ResubmitTaskResp, serde_json::Value);
 impl_resp_v2!(SearchTaskResp, serde_json::Value);
 impl_resp_v2!(ListExternalTaskResp, serde_json::Value);
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetApprovalQuery<'a> {
+    pub approval_code: &'a str,
+    pub locale: Option<&'a str>,
+    pub user_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetApprovalQuery<'a> {
+    pub fn new(approval_code: &'a str) -> Self {
+        Self {
+            approval_code,
+            locale: None,
+            user_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn locale(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.locale = value.into();
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetInstanceQuery<'a> {
+    pub instance_id: &'a str,
+    pub locale: Option<&'a str>,
+    pub user_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetInstanceQuery<'a> {
+    pub fn new(instance_id: &'a str) -> Self {
+        Self {
+            instance_id,
+            locale: None,
+            user_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn locale(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.locale = value.into();
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListInstanceQuery<'a> {
+    pub approval_code: &'a str,
+    pub start_time: &'a str,
+    pub end_time: &'a str,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListInstanceQuery<'a> {
+    pub fn new(approval_code: &'a str, start_time: &'a str, end_time: &'a str) -> Self {
+        Self {
+            approval_code,
+            start_time,
+            end_time,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct QueryInstanceQuery<'a> {
+    pub body: &'a InstanceSearch,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> QueryInstanceQuery<'a> {
+    pub fn new(body: &'a InstanceSearch) -> Self {
+        Self {
+            body,
+            page: PageQuery::new(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SearchCcInstanceQuery<'a> {
+    pub body: &'a CcSearch,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> SearchCcInstanceQuery<'a> {
+    pub fn new(body: &'a CcSearch) -> Self {
+        Self {
+            body,
+            page: PageQuery::new(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct QueryTaskQuery<'a> {
+    pub user_id: Option<&'a str>,
+    pub topic: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> QueryTaskQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn topic(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.topic = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SearchTaskQuery<'a> {
+    pub body: &'a TaskSearch,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> SearchTaskQuery<'a> {
+    pub fn new(body: &'a TaskSearch) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetExternalApprovalQuery<'a> {
+    pub approval_code: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetExternalApprovalQuery<'a> {
+    pub fn new(approval_code: &'a str) -> Self {
+        Self {
+            approval_code,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListInstanceCommentQuery<'a> {
+    pub instance_id: &'a str,
+    pub user_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListInstanceCommentQuery<'a> {
+    pub fn new(instance_id: &'a str) -> Self {
+        Self {
+            instance_id,
+            user_id: None,
+            user_id_type: None,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListExternalTaskQuery<'a> {
+    pub body: &'a ListExternalTaskReqBody,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListExternalTaskQuery<'a> {
+    pub fn new(body: &'a ListExternalTaskReqBody) -> Self {
+        Self {
+            body,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct ApprovalDefinitionResource<'a> {
@@ -848,20 +1209,31 @@ impl<'a> ApprovalDefinitionResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetApprovalResp, LarkError> {
-        let path = format!("/open-apis/approval/v4/approvals/{approval_code}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = locale {
-            api_req.query_params.set("locale", v);
-        }
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ApprovalDefinition>(self.config, &api_req, option).await?;
+        let query = GetApprovalQuery::new(approval_code)
+            .locale(locale)
+            .user_id(user_id)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetApprovalQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetApprovalResp, LarkError> {
+        let path = format!("/open-apis/approval/v4/approvals/{}", query.approval_code);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("locale", query.locale)
+        .query("user_id", query.user_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<ApprovalDefinition>()
+        .await?;
         Ok(GetApprovalResp {
             api_resp,
             code_error: raw.code_error,
@@ -904,20 +1276,31 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetInstanceResp, LarkError> {
-        let path = format!("/open-apis/approval/v4/instances/{instance_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = locale {
-            api_req.query_params.set("locale", v);
-        }
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ApprovalInstance>(self.config, &api_req, option).await?;
+        let query = GetInstanceQuery::new(instance_id)
+            .locale(locale)
+            .user_id(user_id)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetInstanceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetInstanceResp, LarkError> {
+        let path = format!("/open-apis/approval/v4/instances/{}", query.instance_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("locale", query.locale)
+        .query("user_id", query.user_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<ApprovalInstance>()
+        .await?;
         Ok(GetInstanceResp {
             api_resp,
             code_error: raw.code_error,
@@ -957,19 +1340,29 @@ impl<'a> ApprovalInstanceResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/approval/v4/instances");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("approval_code", approval_code);
-        api_req.query_params.set("start_time", start_time);
-        api_req.query_params.set("end_time", end_time);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<InstanceListData>(self.config, &api_req, option).await?;
+        let query = ListInstanceQuery::new(approval_code, start_time, end_time)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListInstanceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListInstanceResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/approval/v4/instances",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("approval_code", query.approval_code)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .page_query(query.page)
+        .send::<InstanceListData>()
+        .await?;
         Ok(ListInstanceResp {
             api_resp,
             code_error: raw.code_error,
@@ -1057,21 +1450,29 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<QueryInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/instances/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = QueryInstanceQuery::new(body)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryInstanceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryInstanceResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/approval/v4/instances/query",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryInstanceResp {
             api_resp,
             code_error,
@@ -1087,24 +1488,29 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchCcInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = SearchCcInstanceQuery::new(body)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.search_cc_by_query(&query, option).await
+    }
+
+    pub async fn search_cc_by_query(
+        &self,
+        query: &SearchCcInstanceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchCcInstanceResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/search_cc",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SearchCcInstanceResp {
             api_resp,
             code_error,
@@ -1212,26 +1618,32 @@ impl<'a> ApprovalTaskResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<QueryTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/approval/v4/tasks/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = topic {
-            api_req.query_params.set("topic", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = QueryTaskQuery::new()
+            .user_id(user_id)
+            .topic(topic)
+            .user_id_type(user_id_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryTaskResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/approval/v4/tasks/query",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id", query.user_id)
+        .query("topic", query.topic)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryTaskResp {
             api_resp,
             code_error,
@@ -1269,21 +1681,29 @@ impl<'a> ApprovalTaskResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = SearchTaskQuery::new(body)
+            .user_id_type(user_id_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchTaskResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/approval/v4/tasks/search",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SearchTaskResp {
             api_resp,
             code_error,
@@ -1373,14 +1793,29 @@ impl<'a> ExternalApprovalResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetExternalApprovalResp, LarkError> {
-        let path = format!("/open-apis/approval/v4/external_approvals/{approval_code}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ExternalApproval>(self.config, &api_req, option).await?;
+        let query = GetExternalApprovalQuery::new(approval_code).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetExternalApprovalQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetExternalApprovalResp, LarkError> {
+        let path = format!(
+            "/open-apis/approval/v4/external_approvals/{}",
+            query.approval_code
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<ExternalApproval>()
+        .await?;
         Ok(GetExternalApprovalResp {
             api_resp,
             code_error: raw.code_error,
@@ -1507,24 +1942,34 @@ impl<'a> InstanceCommentResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListInstanceCommentResp, LarkError> {
-        let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListInstanceCommentQuery::new(instance_id)
+            .user_id(user_id)
+            .user_id_type(user_id_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListInstanceCommentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListInstanceCommentResp, LarkError> {
+        let path = format!(
+            "/open-apis/approval/v4/instances/{}/comments",
+            query.instance_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id", query.user_id)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListInstanceCommentResp {
             api_resp,
             code_error,
@@ -1573,18 +2018,27 @@ impl<'a> ExternalTaskResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListExternalTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/approval/v4/external_tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query =
+            ListExternalTaskQuery::new(body).page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListExternalTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListExternalTaskResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/approval/v4/external_tasks",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListExternalTaskResp {
             api_resp,
             code_error,
