@@ -5,6 +5,7 @@ use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
 use crate::resp::ApiResp;
+use crate::service::common::RestRequest;
 use crate::transport;
 
 // ── Domain types ──
@@ -53,17 +54,19 @@ impl<'a> AttachmentResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAttachmentResp, LarkError> {
         let path = format!("/open-apis/ehr/v1/attachments/{token}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let mut opt = option.clone();
-        opt.file_download = true;
-        let api_resp = transport::request(self.config, &api_req, &opt).await?;
-        let file_name = api_resp.file_name_by_header();
-        let data = api_resp.raw_body.clone();
+        let download = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .download()
+        .await?;
         Ok(GetAttachmentResp {
-            api_resp,
-            file_name,
-            data,
+            api_resp: download.api_resp,
+            file_name: download.file_name,
+            data: download.data,
         })
     }
 }

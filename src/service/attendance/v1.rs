@@ -5,7 +5,7 @@ use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
-use crate::service::common::{DownloadResp, EmptyResp};
+use crate::service::common::{DownloadResp, EmptyResp, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -1219,18 +1219,15 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<DownloadResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/files/{file_id}/download");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let mut opt = option.clone();
-        opt.file_download = true;
-        let api_resp = transport::request(self.config, &api_req, &opt).await?;
-        let file_name = api_resp.file_name_by_header();
-        let data = api_resp.raw_body.clone();
-        Ok(DownloadResp {
-            api_resp,
-            file_name,
-            data,
-        })
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .download()
+        .await
     }
 
     pub async fn upload(
