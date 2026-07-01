@@ -35,6 +35,10 @@ use larksuite_oapi_sdk_rs::service::{
         ListWorkingHoursTypeQuery as ListCorehrWorkingHoursTypeQuery,
         SearchOffboardingQuery as SearchCorehrOffboardingQuery,
     },
+    corehr::v2::{
+        ListApproverV2Query as ListCorehrApproverV2Query, ListBpV2Query as ListCorehrBpV2Query,
+        ListJobV2Query as ListCorehrJobV2Query, ListProcessV2Query as ListCorehrProcessV2Query,
+    },
     directory::{
         ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
         ListShareEntityQuery,
@@ -2051,6 +2055,102 @@ async fn corehr_transfer_type_query_smoke() {
     assert_eq!(data["items"][0]["id"].as_str(), Some("type-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/transfer_types/query"));
+}
+
+#[tokio::test]
+async fn corehr_v2_approver_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"approver-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrApproverV2Query::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr_v2()
+        .approver
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0]["id"].as_str(), Some("approver-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v2/approvers?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_v2_bp_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"bp-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListCorehrBpV2Query::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr_v2()
+        .bp
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0]["id"].as_str(), Some("bp-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v2/bps?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_v2_job_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"job-v2-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListCorehrJobV2Query::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr_v2()
+        .job
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0]["id"].as_str(), Some("job-v2-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v2/jobs?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_v2_process_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"process-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrProcessV2Query::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr_v2()
+        .process
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0]["id"].as_str(), Some("process-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v2/processes?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
 }
 
 // ── Directory ──

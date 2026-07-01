@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
+use crate::service::common::{PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Generic response data types ───────────────────────────────────────────────
@@ -429,6 +429,39 @@ pub struct ApproverV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListApproverV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListApproverV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl ApproverV2Resource<'_> {
     pub async fn list(
         &self,
@@ -436,17 +469,27 @@ impl ApproverV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListApproverV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/approvers");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListApproverV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListApproverV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListApproverV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v2/approvers",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<ListData>()
+        .await?;
         Ok(ListApproverV2Resp {
             api_resp,
             code_error,
@@ -530,6 +573,39 @@ pub struct BpV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListBpV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListBpV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl BpV2Resource<'_> {
     post_method!(
         get_by_department,
@@ -544,17 +620,27 @@ impl BpV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListBpV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/bps");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListBpV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListBpV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListBpV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v2/bps",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<ListData>()
+        .await?;
         Ok(ListBpV2Resp {
             api_resp,
             code_error,
@@ -1218,6 +1304,39 @@ pub struct JobV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListJobV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl JobV2Resource<'_> {
     post_method!(
         batch_get,
@@ -1250,17 +1369,27 @@ impl JobV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/jobs");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListJobV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v2/jobs",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<ListData>()
+        .await?;
         Ok(ListJobV2Resp {
             api_resp,
             code_error,
@@ -1953,6 +2082,39 @@ pub struct ProcessV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListProcessV2Query<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListProcessV2Query<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl ProcessV2Resource<'_> {
     pub async fn flow_variable_data(
         &self,
@@ -1996,17 +2158,27 @@ impl ProcessV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListProcessV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v2/processes");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListProcessV2Query::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListProcessV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListProcessV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v2/processes",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<ListData>()
+        .await?;
         Ok(ListProcessV2Resp {
             api_resp,
             code_error,
