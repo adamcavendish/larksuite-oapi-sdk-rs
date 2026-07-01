@@ -175,6 +175,19 @@ pub struct PermissionPublicV2Resource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetPermissionPublicV2Query<'a> {
+    pub token: &'a str,
+    pub token_type: &'a str,
+}
+
+impl<'a> GetPermissionPublicV2Query<'a> {
+    pub fn new(token: &'a str, token_type: &'a str) -> Self {
+        Self { token, token_type }
+    }
+}
+
 impl<'a> PermissionPublicV2Resource<'a> {
     pub async fn get(
         &self,
@@ -182,12 +195,26 @@ impl<'a> PermissionPublicV2Resource<'a> {
         r#type: &str,
         option: &RequestOption,
     ) -> Result<GetPermissionPublicV2Resp, LarkError> {
-        let path = format!("/open-apis/drive/v2/permissions/{token}/public");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", r#type);
-        let (api_resp, raw) =
-            transport::request_typed::<PermissionPublicV2>(self.config, &api_req, option).await?;
+        let query = GetPermissionPublicV2Query::new(token, r#type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetPermissionPublicV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<GetPermissionPublicV2Resp, LarkError> {
+        let path = format!("/open-apis/drive/v2/permissions/{}/public", query.token);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("type", query.token_type)
+        .send::<PermissionPublicV2>()
+        .await?;
         Ok(GetPermissionPublicV2Resp {
             api_resp,
             code_error: raw.code_error,

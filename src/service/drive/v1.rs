@@ -2731,6 +2731,36 @@ pub struct PermissionMemberResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListPermissionMemberQuery<'a> {
+    pub token: &'a str,
+    pub token_type: &'a str,
+    pub fields: Option<&'a str>,
+    pub perm_type: Option<&'a str>,
+}
+
+impl<'a> ListPermissionMemberQuery<'a> {
+    pub fn new(token: &'a str, token_type: &'a str) -> Self {
+        Self {
+            token,
+            token_type,
+            fields: None,
+            perm_type: None,
+        }
+    }
+
+    pub fn fields(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.fields = value.into();
+        self
+    }
+
+    pub fn perm_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.perm_type = value.into();
+        self
+    }
+}
+
 impl<'a> PermissionMemberResource<'a> {
     pub async fn auth(
         &self,
@@ -2843,19 +2873,30 @@ impl<'a> PermissionMemberResource<'a> {
         perm_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListPermissionMemberResp, LarkError> {
-        let path = format!("/open-apis/drive/v1/permissions/{token}/members");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        if let Some(v) = fields {
-            api_req.query_params.set("fields", v);
-        }
-        if let Some(v) = perm_type {
-            api_req.query_params.set("perm_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListPermissionMemberRespData>(self.config, &api_req, option)
-                .await?;
+        let query = ListPermissionMemberQuery::new(token, token_type)
+            .fields(fields)
+            .perm_type(perm_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListPermissionMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListPermissionMemberResp, LarkError> {
+        let path = format!("/open-apis/drive/v1/permissions/{}/members", query.token);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("type", query.token_type)
+        .query("fields", query.fields)
+        .query("perm_type", query.perm_type)
+        .send::<ListPermissionMemberRespData>()
+        .await?;
         Ok(ListPermissionMemberResp {
             api_resp,
             code_error: raw.code_error,
@@ -2935,6 +2976,19 @@ pub struct PermissionPublicResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetPermissionPublicQuery<'a> {
+    pub token: &'a str,
+    pub token_type: &'a str,
+}
+
+impl<'a> GetPermissionPublicQuery<'a> {
+    pub fn new(token: &'a str, token_type: &'a str) -> Self {
+        Self { token, token_type }
+    }
+}
+
 impl<'a> PermissionPublicResource<'a> {
     pub async fn get(
         &self,
@@ -2942,15 +2996,25 @@ impl<'a> PermissionPublicResource<'a> {
         token_type: &str,
         option: &RequestOption,
     ) -> Result<GetPermissionPublicV1Resp, LarkError> {
-        let path = format!("/open-apis/drive/v1/permissions/{token}/public");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        let (api_resp, raw) = transport::request_typed::<GetPermissionPublicV1RespData>(
+        let query = GetPermissionPublicQuery::new(token, token_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetPermissionPublicQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetPermissionPublicV1Resp, LarkError> {
+        let path = format!("/open-apis/drive/v1/permissions/{}/public", query.token);
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
+        .query("type", query.token_type)
+        .send::<GetPermissionPublicV1RespData>()
         .await?;
         Ok(GetPermissionPublicV1Resp {
             api_resp,

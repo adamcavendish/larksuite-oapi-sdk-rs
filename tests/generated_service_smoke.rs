@@ -65,10 +65,11 @@ use larksuite_oapi_sdk_rs::service::{
     drive::{
         v1::{
             BatchQueryFileCommentQuery, BatchQueryFileCommentReqBody, GetFileCommentQuery,
-            ListFileCommentQuery, ListFileCommentReplyQuery, ListFileQuery, ListFileVersionQuery,
-            ListFileViewRecordQuery,
+            GetPermissionPublicQuery as GetDrivePermissionPublicQuery, ListFileCommentQuery,
+            ListFileCommentReplyQuery, ListFileQuery, ListFileVersionQuery,
+            ListFileViewRecordQuery, ListPermissionMemberQuery,
         },
-        v2::ListFileLikeQuery,
+        v2::{GetPermissionPublicV2Query as GetDrivePermissionPublicV2Query, ListFileLikeQuery},
     },
     ehr::v1::ListEmployeeQuery as ListEhrEmployeeQuery,
     hire::v1::{
@@ -1629,6 +1630,97 @@ async fn drive_file_comment_reply_list_by_query_smoke() {
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
     assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn drive_permission_member_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"member_id":"ou-1","member_type":"user","perm":"view"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .permission_member
+        .list_by_query(
+            &ListPermissionMemberQuery::new("file-token-1", "doc")
+                .fields("member_id,perm")
+                .perm_type("container"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.items.as_ref())
+            .and_then(|items| items.first())
+            .and_then(|member| member.member_id.as_deref()),
+        Some("ou-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v1/permissions/file-token-1/members?"));
+    assert!(request.contains("type=doc"));
+    assert!(request.contains("fields=member_id%2Cperm"));
+    assert!(request.contains("perm_type=container"));
+}
+
+#[tokio::test]
+async fn drive_permission_public_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"permission_public":{"external_access":true,"share_entity":"tenant_readable"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .permission_public
+        .get_by_query(
+            &GetDrivePermissionPublicQuery::new("file-token-1", "doc"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.permission_public.as_ref())
+            .and_then(|permission| permission.external_access),
+        Some(true)
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v1/permissions/file-token-1/public?"));
+    assert!(request.contains("type=doc"));
+}
+
+#[tokio::test]
+async fn drive_v2_permission_public_get_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"external_access_entity":"anyone","share_entity":"tenant_readable"}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive_v2()
+        .permission_public
+        .get_by_query(
+            &GetDrivePermissionPublicV2Query::new("file-token-1", "doc"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|permission| permission.external_access_entity.as_deref()),
+        Some("anyone")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v2/permissions/file-token-1/public?"));
+    assert!(request.contains("type=doc"));
 }
 
 #[tokio::test]
