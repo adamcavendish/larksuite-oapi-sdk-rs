@@ -5,6 +5,7 @@ use common::{http_response, mock_server_with_requests};
 use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::{
+    common::PageQuery,
     directory::{
         ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
         ListShareEntityQuery,
@@ -665,8 +666,7 @@ async fn task_list_by_query_smoke() {
 
     let client = client_for(addr);
     let query = ListTaskQuery::new()
-        .page_size(20)
-        .page_token("next-page")
+        .page(PageQuery::new().page_size(20).page_token("next-page"))
         .task_completed(false)
         .user_id_type("open_id");
     let resp = client

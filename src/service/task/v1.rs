@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, RestRequest};
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -328,6 +328,16 @@ impl<'a> ListTaskQuery<'a> {
         self
     }
 
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+
     pub fn start_create_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.start_create_time = value.into();
         self
@@ -499,8 +509,7 @@ impl<'a> TaskResource<'a> {
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", query.page_size)
-        .query("page_token", query.page_token)
+        .page_query(query.page_query())
         .query("start_create_time", query.start_create_time)
         .query("end_create_time", query.end_create_time)
         .query("task_completed", query.task_completed)
