@@ -1152,6 +1152,83 @@ impl<'a> SearchDepartmentQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetDepartmentQuery<'a> {
+    pub department_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> GetDepartmentQuery<'a> {
+    pub fn new(department_id: &'a str) -> Self {
+        Self {
+            department_id,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct BatchDepartmentQuery<'a> {
+    pub department_ids: &'a [&'a str],
+    pub department_id_type: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> BatchDepartmentQuery<'a> {
+    pub fn new(department_ids: &'a [&'a str]) -> Self {
+        Self {
+            department_ids,
+            department_id_type: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct UnbindDepartmentChatQuery<'a> {
+    pub body: &'a UnbindDepartmentChatReqBody,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> UnbindDepartmentChatQuery<'a> {
+    pub fn new(body: &'a UnbindDepartmentChatReqBody) -> Self {
+        Self {
+            body,
+            department_id_type: None,
+        }
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> DepartmentResource<'a> {
     pub async fn create(
         &self,
@@ -1210,18 +1287,29 @@ impl<'a> DepartmentResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetDepartmentResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/departments/{department_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetDepartmentRespData>(self.config, &api_req, option)
-                .await?;
+        let query = GetDepartmentQuery::new(department_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetDepartmentResp, LarkError> {
+        let path = format!("/open-apis/contact/v3/departments/{}", query.department_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .send::<GetDepartmentRespData>()
+        .await?;
         Ok(GetDepartmentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1362,20 +1450,29 @@ impl<'a> DepartmentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/departments/batch");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        for id in department_ids {
-            api_req.query_params.add("department_ids", *id);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BatchDepartmentRespData>(self.config, &api_req, option)
-                .await?;
+        let query = BatchDepartmentQuery::new(department_ids)
+            .department_id_type(department_id_type)
+            .user_id_type(user_id_type);
+        self.batch_by_query(&query, option).await
+    }
+
+    pub async fn batch_by_query(
+        &self,
+        query: &BatchDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchDepartmentResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/departments/batch",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query_values("department_ids", Some(query.department_ids.iter().copied()))
+        .query("department_id_type", query.department_id_type)
+        .query("user_id_type", query.user_id_type)
+        .send::<BatchDepartmentRespData>()
+        .await?;
         Ok(BatchDepartmentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1523,17 +1620,26 @@ impl<'a> DepartmentResource<'a> {
         body: &UnbindDepartmentChatReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = UnbindDepartmentChatQuery::new(body).department_id_type(department_id_type);
+        self.unbind_department_chat_by_query(&query, option).await
+    }
+
+    pub async fn unbind_department_chat_by_query(
+        &self,
+        query: &UnbindDepartmentChatQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/contact/v3/departments/unbind_department_chat",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1648,6 +1754,113 @@ impl<'a> FindUserByDepartmentQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetUserQuery<'a> {
+    pub user_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> GetUserQuery<'a> {
+    pub fn new(user_id: &'a str) -> Self {
+        Self {
+            user_id,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct BatchUserQuery<'a> {
+    pub user_ids: &'a [&'a str],
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> BatchUserQuery<'a> {
+    pub fn new(user_ids: &'a [&'a str]) -> Self {
+        Self {
+            user_ids,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct BatchGetIdUserQuery<'a> {
+    pub body: &'a BatchGetIdUserReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> BatchGetIdUserQuery<'a> {
+    pub fn new(body: &'a BatchGetIdUserReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ResurrectUserQuery<'a> {
+    pub user_id: &'a str,
+    pub body: &'a ResurrectUserReqBody,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> ResurrectUserQuery<'a> {
+    pub fn new(user_id: &'a str, body: &'a ResurrectUserReqBody) -> Self {
+        Self {
+            user_id,
+            body,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> UserResource<'a> {
     pub async fn create(
         &self,
@@ -1707,17 +1920,29 @@ impl<'a> UserResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetUserResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/users/{user_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetUserRespData>(self.config, &api_req, option).await?;
+        let query = GetUserQuery::new(user_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetUserQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetUserResp, LarkError> {
+        let path = format!("/open-apis/contact/v3/users/{}", query.user_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .send::<GetUserRespData>()
+        .await?;
         Ok(GetUserResp {
             api_resp,
             code_error: raw.code_error,
@@ -1829,19 +2054,29 @@ impl<'a> UserResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchUserResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/users/batch");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        for id in user_ids {
-            api_req.query_params.add("user_ids", *id);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BatchUserRespData>(self.config, &api_req, option).await?;
+        let query = BatchUserQuery::new(user_ids)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.batch_by_query(&query, option).await
+    }
+
+    pub async fn batch_by_query(
+        &self,
+        query: &BatchUserQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchUserResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/users/batch",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query_values("user_ids", Some(query.user_ids.iter().copied()))
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .send::<BatchUserRespData>()
+        .await?;
         Ok(BatchUserResp {
             api_resp,
             code_error: raw.code_error,
@@ -1855,18 +2090,26 @@ impl<'a> UserResource<'a> {
         body: &BatchGetIdUserReqBody,
         option: &RequestOption,
     ) -> Result<BatchGetIdUserResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = BatchGetIdUserQuery::new(body).user_id_type(user_id_type);
+        self.batch_get_id_by_query(&query, option).await
+    }
+
+    pub async fn batch_get_id_by_query(
+        &self,
+        query: &BatchGetIdUserQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchGetIdUserResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/contact/v3/users/batch_get_id",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BatchGetIdUserRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<BatchGetIdUserRespData>()
+        .await?;
         Ok(BatchGetIdUserResp {
             api_resp,
             code_error: raw.code_error,
@@ -1924,18 +2167,30 @@ impl<'a> UserResource<'a> {
         body: &ResurrectUserReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/users/{user_id}/resurrect");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = ResurrectUserQuery::new(user_id, body)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.resurrect_by_query(&query, option).await
+    }
+
+    pub async fn resurrect_by_query(
+        &self,
+        query: &ResurrectUserQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/contact/v3/users/{}/resurrect", query.user_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
