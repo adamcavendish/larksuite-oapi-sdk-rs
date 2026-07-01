@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::req::{ApiReq, RequestOption};
 use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 use crate::transport;
 
@@ -359,11 +359,408 @@ impl<'a> ListTaskQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateTaskQuery<'a> {
+    pub body: &'a CreateTaskReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateTaskQuery<'a> {
+    pub fn new(body: &'a CreateTaskReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetTaskQuery<'a> {
+    pub task_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetTaskQuery<'a> {
+    pub fn new(task_id: &'a str) -> Self {
+        Self {
+            task_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct PatchTaskQuery<'a> {
+    pub task_id: &'a str,
+    pub body: &'a PatchTaskReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> PatchTaskQuery<'a> {
+    pub fn new(task_id: &'a str, body: &'a PatchTaskReqBody) -> Self {
+        Self {
+            task_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct BatchDeleteTaskMemberQuery<'a> {
+    pub task_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> BatchDeleteTaskMemberQuery<'a> {
+    pub fn new(task_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            task_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+pub type BatchDeleteCollaboratorQuery<'a> = BatchDeleteTaskMemberQuery<'a>;
+pub type BatchDeleteFollowerQuery<'a> = BatchDeleteTaskMemberQuery<'a>;
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateCommentQuery<'a> {
+    pub task_id: &'a str,
+    pub body: &'a CreateCommentReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateCommentQuery<'a> {
+    pub fn new(task_id: &'a str, body: &'a CreateCommentReqBody) -> Self {
+        Self {
+            task_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetCommentQuery<'a> {
+    pub task_id: &'a str,
+    pub comment_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetCommentQuery<'a> {
+    pub fn new(task_id: &'a str, comment_id: &'a str) -> Self {
+        Self {
+            task_id,
+            comment_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct UpdateCommentQuery<'a> {
+    pub task_id: &'a str,
+    pub comment_id: &'a str,
+    pub body: &'a UpdateCommentReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UpdateCommentQuery<'a> {
+    pub fn new(task_id: &'a str, comment_id: &'a str, body: &'a UpdateCommentReqBody) -> Self {
+        Self {
+            task_id,
+            comment_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListCommentQuery<'a> {
+    pub task_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListCommentQuery<'a> {
+    pub fn new(task_id: &'a str) -> Self {
+        Self {
+            task_id,
+            page: PageQuery::default(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateFollowerQuery<'a> {
+    pub task_id: &'a str,
+    pub body: &'a CreateFollowerReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateFollowerQuery<'a> {
+    pub fn new(task_id: &'a str, body: &'a CreateFollowerReqBody) -> Self {
+        Self {
+            task_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteFollowerQuery<'a> {
+    pub task_id: &'a str,
+    pub follower_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> DeleteFollowerQuery<'a> {
+    pub fn new(task_id: &'a str, follower_id: &'a str) -> Self {
+        Self {
+            task_id,
+            follower_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListFollowerQuery<'a> {
+    pub task_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListFollowerQuery<'a> {
+    pub fn new(task_id: &'a str) -> Self {
+        Self {
+            task_id,
+            page: PageQuery::default(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateCollaboratorQuery<'a> {
+    pub task_id: &'a str,
+    pub body: &'a CreateCollaboratorReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateCollaboratorQuery<'a> {
+    pub fn new(task_id: &'a str, body: &'a CreateCollaboratorReqBody) -> Self {
+        Self {
+            task_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteCollaboratorQuery<'a> {
+    pub task_id: &'a str,
+    pub collaborator_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> DeleteCollaboratorQuery<'a> {
+    pub fn new(task_id: &'a str, collaborator_id: &'a str) -> Self {
+        Self {
+            task_id,
+            collaborator_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListCollaboratorQuery<'a> {
+    pub task_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListCollaboratorQuery<'a> {
+    pub fn new(task_id: &'a str) -> Self {
+        Self {
+            task_id,
+            page: PageQuery::default(),
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateReminderQuery<'a> {
+    pub task_id: &'a str,
+    pub body: &'a CreateReminderReqBody,
+}
+
+impl<'a> CreateReminderQuery<'a> {
+    pub fn new(task_id: &'a str, body: &'a CreateReminderReqBody) -> Self {
+        Self { task_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetReminderQuery<'a> {
+    pub task_id: &'a str,
+    pub reminder_id: &'a str,
+}
+
+impl<'a> GetReminderQuery<'a> {
+    pub fn new(task_id: &'a str, reminder_id: &'a str) -> Self {
+        Self {
+            task_id,
+            reminder_id,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct UpdateReminderQuery<'a> {
+    pub task_id: &'a str,
+    pub reminder_id: &'a str,
+    pub body: &'a UpdateReminderReqBody,
+}
+
+impl<'a> UpdateReminderQuery<'a> {
+    pub fn new(task_id: &'a str, reminder_id: &'a str, body: &'a UpdateReminderReqBody) -> Self {
+        Self {
+            task_id,
+            reminder_id,
+            body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListReminderQuery<'a> {
+    pub task_id: &'a str,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListReminderQuery<'a> {
+    pub fn new(task_id: &'a str) -> Self {
+        Self {
+            task_id,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
 impl<'a> TaskResource<'a> {
     pub async fn create(
         &self,
         body: &CreateTaskReqBody,
         user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<CreateTaskResp, LarkError> {
+        let query = CreateTaskQuery::new(body).user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateTaskResp, LarkError> {
         let (api_resp, raw) = RestRequest::new(
@@ -373,8 +770,8 @@ impl<'a> TaskResource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .query("user_id_type", user_id_type)
-        .json_body(body)?
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
         .send::<TaskData>()
         .await?;
         Ok(CreateTaskResp {
@@ -390,14 +787,26 @@ impl<'a> TaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetTaskResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TaskData>(self.config, &api_req, option).await?;
+        let query = GetTaskQuery::new(task_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetTaskResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<TaskData>()
+        .await?;
         Ok(GetTaskResp {
             api_resp,
             code_error: raw.code_error,
@@ -412,15 +821,27 @@ impl<'a> TaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchTaskResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TaskData>(self.config, &api_req, option).await?;
+        let query = PatchTaskQuery::new(task_id, body).user_id_type(user_id_type);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchTaskResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<TaskData>()
+        .await?;
         Ok(PatchTaskResp {
             api_resp,
             code_error: raw.code_error,
@@ -530,15 +951,31 @@ impl<'a> TaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchDeleteCollaboratorResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/batch_delete_collaborator");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = BatchDeleteCollaboratorQuery::new(task_id, body).user_id_type(user_id_type);
+        self.batch_delete_collaborator_by_query(&query, option)
+            .await
+    }
+
+    pub async fn batch_delete_collaborator_by_query(
+        &self,
+        query: &BatchDeleteCollaboratorQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteCollaboratorResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/batch_delete_collaborator",
+            query.task_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(BatchDeleteCollaboratorResp {
             api_resp,
             code_error: raw.code_error,
@@ -553,15 +990,30 @@ impl<'a> TaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchDeleteFollowerResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/batch_delete_follower");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = BatchDeleteFollowerQuery::new(task_id, body).user_id_type(user_id_type);
+        self.batch_delete_follower_by_query(&query, option).await
+    }
+
+    pub async fn batch_delete_follower_by_query(
+        &self,
+        query: &BatchDeleteFollowerQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteFollowerResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/batch_delete_follower",
+            query.task_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(BatchDeleteFollowerResp {
             api_resp,
             code_error: raw.code_error,
@@ -582,15 +1034,27 @@ impl<'a> TaskCommentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateCommentResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/comments");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CommentData>(self.config, &api_req, option).await?;
+        let query = CreateCommentQuery::new(task_id, body).user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateCommentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateCommentResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/comments", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<CommentData>()
+        .await?;
         Ok(CreateCommentResp {
             api_resp,
             code_error: raw.code_error,
@@ -605,14 +1069,29 @@ impl<'a> TaskCommentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetCommentResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/comments/{comment_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CommentData>(self.config, &api_req, option).await?;
+        let query = GetCommentQuery::new(task_id, comment_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetCommentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetCommentResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/comments/{}",
+            query.task_id, query.comment_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<CommentData>()
+        .await?;
         Ok(GetCommentResp {
             api_resp,
             code_error: raw.code_error,
@@ -628,15 +1107,30 @@ impl<'a> TaskCommentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateCommentResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/comments/{comment_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CommentData>(self.config, &api_req, option).await?;
+        let query = UpdateCommentQuery::new(task_id, comment_id, body).user_id_type(user_id_type);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateCommentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateCommentResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/comments/{}",
+            query.task_id, query.comment_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<CommentData>()
+        .await?;
         Ok(UpdateCommentResp {
             api_resp,
             code_error: raw.code_error,
@@ -669,20 +1163,29 @@ impl<'a> TaskCommentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCommentResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/comments");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<CommentListData>(self.config, &api_req, option).await?;
+        let query = ListCommentQuery::new(task_id)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCommentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCommentResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/comments", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .send::<CommentListData>()
+        .await?;
         Ok(ListCommentResp {
             api_resp,
             code_error: raw.code_error,
@@ -703,15 +1206,27 @@ impl<'a> TaskFollowerResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateFollowerResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/followers");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FollowerData>(self.config, &api_req, option).await?;
+        let query = CreateFollowerQuery::new(task_id, body).user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateFollowerQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateFollowerResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/followers", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<FollowerData>()
+        .await?;
         Ok(CreateFollowerResp {
             api_resp,
             code_error: raw.code_error,
@@ -726,14 +1241,29 @@ impl<'a> TaskFollowerResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/followers/{follower_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = DeleteFollowerQuery::new(task_id, follower_id).user_id_type(user_id_type);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteFollowerQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/followers/{}",
+            query.task_id, query.follower_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -748,20 +1278,29 @@ impl<'a> TaskFollowerResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListFollowerResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/followers");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MemberListData>(self.config, &api_req, option).await?;
+        let query = ListFollowerQuery::new(task_id)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFollowerQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFollowerResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/followers", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .send::<MemberListData>()
+        .await?;
         Ok(ListFollowerResp {
             api_resp,
             code_error: raw.code_error,
@@ -782,15 +1321,27 @@ impl<'a> TaskCollaboratorResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateCollaboratorResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/collaborators");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CollaboratorData>(self.config, &api_req, option).await?;
+        let query = CreateCollaboratorQuery::new(task_id, body).user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateCollaboratorQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateCollaboratorResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/collaborators", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<CollaboratorData>()
+        .await?;
         Ok(CreateCollaboratorResp {
             api_resp,
             code_error: raw.code_error,
@@ -805,14 +1356,30 @@ impl<'a> TaskCollaboratorResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/collaborators/{collaborator_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query =
+            DeleteCollaboratorQuery::new(task_id, collaborator_id).user_id_type(user_id_type);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteCollaboratorQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/collaborators/{}",
+            query.task_id, query.collaborator_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -827,20 +1394,29 @@ impl<'a> TaskCollaboratorResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListCollaboratorResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/collaborators");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MemberListData>(self.config, &api_req, option).await?;
+        let query = ListCollaboratorQuery::new(task_id)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListCollaboratorQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListCollaboratorResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/collaborators", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .send::<MemberListData>()
+        .await?;
         Ok(ListCollaboratorResp {
             api_resp,
             code_error: raw.code_error,
@@ -860,12 +1436,26 @@ impl<'a> TaskReminderResource<'a> {
         body: &CreateReminderReqBody,
         option: &RequestOption,
     ) -> Result<CreateReminderResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ReminderData>(self.config, &api_req, option).await?;
+        let query = CreateReminderQuery::new(task_id, body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateReminderQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateReminderResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/reminders", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<ReminderData>()
+        .await?;
         Ok(CreateReminderResp {
             api_resp,
             code_error: raw.code_error,
@@ -879,11 +1469,28 @@ impl<'a> TaskReminderResource<'a> {
         reminder_id: &str,
         option: &RequestOption,
     ) -> Result<GetReminderResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders/{reminder_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<ReminderData>(self.config, &api_req, option).await?;
+        let query = GetReminderQuery::new(task_id, reminder_id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetReminderQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetReminderResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/reminders/{}",
+            query.task_id, query.reminder_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<ReminderData>()
+        .await?;
         Ok(GetReminderResp {
             api_resp,
             code_error: raw.code_error,
@@ -898,12 +1505,29 @@ impl<'a> TaskReminderResource<'a> {
         body: &UpdateReminderReqBody,
         option: &RequestOption,
     ) -> Result<UpdateReminderResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders/{reminder_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ReminderData>(self.config, &api_req, option).await?;
+        let query = UpdateReminderQuery::new(task_id, reminder_id, body);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateReminderQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateReminderResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/reminders/{}",
+            query.task_id, query.reminder_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<ReminderData>()
+        .await?;
         Ok(UpdateReminderResp {
             api_resp,
             code_error: raw.code_error,
@@ -935,17 +1559,27 @@ impl<'a> TaskReminderResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListReminderResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ReminderListData>(self.config, &api_req, option).await?;
+        let query =
+            ListReminderQuery::new(task_id).page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListReminderQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListReminderResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/reminders", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .send::<ReminderListData>()
+        .await?;
         Ok(ListReminderResp {
             api_resp,
             code_error: raw.code_error,
