@@ -81,7 +81,10 @@ use larksuite_oapi_sdk_rs::service::{
         QueryTaskReqBody as QueryReportTaskReqBody,
     },
     security_and_compliance::{v1::ListOpenapiLogQuery, v2::ListDeviceRecordV2Query},
-    task::{CreateTaskReqBody, ListTaskQuery},
+    task::{
+        CreateTaskReqBody, ListTaskQuery,
+        v2::{GetTaskV2Query, ListTaskV2Query},
+    },
     vc::{
         GetMeetingListQuery, GetParticipantListQuery, GetParticipantQualityListQuery,
         GetResourceReservationListQuery, GetTopUserReportQuery, ListAlertQuery,
@@ -3374,6 +3377,92 @@ async fn task_list_by_query_smoke() {
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
     assert!(request.contains("task_completed=false"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+// ── Task v2 ──
+
+#[tokio::test]
+async fn task_v2_get_by_query_smoke() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"task":{"guid":"task-guid-1","summary":"Fix bug"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = GetTaskV2Query::new("task-guid-1").user_id_type("open_id");
+    let resp = client
+        .task_v2()
+        .task
+        .get_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let task = resp.data.unwrap().task.unwrap();
+    assert_eq!(task["guid"].as_str(), Some("task-guid-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/task/v2/tasks/task-guid-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn task_v2_list_positional_adapter_smoke() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"items":[{"guid":"task-guid-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .task_v2()
+        .task
+        .list(
+            Some(20),
+            Some("next-page"),
+            Some("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/task/v2/tasks?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn task_v2_list_by_query_smoke() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"items":[{"guid":"task-guid-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListTaskV2Query::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"))
+        .completed(false)
+        .task_type("my_tasks")
+        .agent_task_status(1)
+        .user_id_type("open_id");
+    let resp = client
+        .task_v2()
+        .task
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items.len(), 1);
+    assert_eq!(data.items[0]["guid"].as_str(), Some("task-guid-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/task/v2/tasks?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("completed=false"));
+    assert!(request.contains("type=my_tasks"));
+    assert!(request.contains("agent_task_status=1"));
     assert!(request.contains("user_id_type=open_id"));
 }
 
