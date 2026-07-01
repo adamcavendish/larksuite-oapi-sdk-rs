@@ -24,7 +24,10 @@ use larksuite_oapi_sdk_rs::service::{
         ListDepartmentQuery as ListCorehrDepartmentQuery,
         ListEmployeeQuery as ListCorehrEmployeeQuery,
         ListEmployeeTypeQuery as ListCorehrEmployeeTypeQuery,
-        ListJobLevelQuery as ListCorehrJobLevelQuery, ListLocationQuery as ListCorehrLocationQuery,
+        ListJobDataQuery as ListCorehrJobDataQuery, ListJobFamilyQuery as ListCorehrJobFamilyQuery,
+        ListJobLevelQuery as ListCorehrJobLevelQuery, ListJobQuery as ListCorehrJobQuery,
+        ListLocationQuery as ListCorehrLocationQuery,
+        ListNationalIdTypeQuery as ListCorehrNationalIdTypeQuery,
         ListWorkingHoursTypeQuery as ListCorehrWorkingHoursTypeQuery,
     },
     directory::{
@@ -1776,6 +1779,102 @@ async fn corehr_employee_type_list_by_query_smoke() {
     assert_eq!(data["items"][0]["id"].as_str(), Some("type-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/employee_types?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_job_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"job-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListCorehrJobQuery::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .job
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("job-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/jobs?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_job_data_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"job-data-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListCorehrJobDataQuery::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .job_data
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("job-data-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/job_datas?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_job_family_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"job-family-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrJobFamilyQuery::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .job_family
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("job-family-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/job_families?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_national_id_type_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"nid-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrNationalIdTypeQuery::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .national_id_type
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("nid-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/national_id_types?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }

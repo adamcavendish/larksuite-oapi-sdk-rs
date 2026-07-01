@@ -2237,6 +2237,39 @@ pub struct JobResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListJobQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> JobResource<'a> {
     pub async fn create(
         &self,
@@ -2275,11 +2308,15 @@ impl<'a> JobResource<'a> {
 
     pub async fn get(&self, job_id: &str, option: &RequestOption) -> Result<GetJobResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/jobs/{job_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetJobResp {
             api_resp,
             code_error,
@@ -2293,17 +2330,27 @@ impl<'a> JobResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/jobs");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListJobQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/jobs",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListJobResp {
             api_resp,
             code_error,
@@ -2360,6 +2407,39 @@ pub struct JobDataResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobDataQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListJobDataQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> JobDataResource<'a> {
     pub async fn create(
         &self,
@@ -2402,11 +2482,15 @@ impl<'a> JobDataResource<'a> {
         option: &RequestOption,
     ) -> Result<GetJobDataResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_datas/{job_data_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetJobDataResp {
             api_resp,
             code_error,
@@ -2420,17 +2504,27 @@ impl<'a> JobDataResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobDataResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/job_datas");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListJobDataQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobDataQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobDataResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/job_datas",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListJobDataResp {
             api_resp,
             code_error,
@@ -2461,6 +2555,39 @@ impl<'a> JobDataResource<'a> {
 
 pub struct JobFamilyResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobFamilyQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListJobFamilyQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> JobFamilyResource<'a> {
@@ -2505,11 +2632,15 @@ impl<'a> JobFamilyResource<'a> {
         option: &RequestOption,
     ) -> Result<GetJobFamilyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_families/{job_family_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetJobFamilyResp {
             api_resp,
             code_error,
@@ -2523,17 +2654,27 @@ impl<'a> JobFamilyResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobFamilyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/job_families");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListJobFamilyQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobFamilyQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobFamilyResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/job_families",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListJobFamilyResp {
             api_resp,
             code_error,
@@ -2756,6 +2897,39 @@ pub struct NationalIdTypeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListNationalIdTypeQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListNationalIdTypeQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> NationalIdTypeResource<'a> {
     pub async fn create(
         &self,
@@ -2798,11 +2972,15 @@ impl<'a> NationalIdTypeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetNationalIdTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/national_id_types/{national_id_type_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetNationalIdTypeResp {
             api_resp,
             code_error,
@@ -2816,17 +2994,27 @@ impl<'a> NationalIdTypeResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListNationalIdTypeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/national_id_types");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListNationalIdTypeQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListNationalIdTypeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListNationalIdTypeResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/national_id_types",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListNationalIdTypeResp {
             api_resp,
             code_error,
