@@ -2661,7 +2661,7 @@ impl_resp_v2!(CreateByAttachmentWebsiteDeliveryResp, serde_json::Value);
 impl_resp_v2!(CreateByResumeWebsiteDeliveryResp, serde_json::Value);
 impl_resp_v2!(SearchWebsiteJobPostResp, serde_json::Value);
 
-// ── New response types (Phase 10) ──
+// ── Additional response types ──
 
 impl_resp_v2!(OfferApplicationResp, serde_json::Value);
 impl_resp_v2!(ListApplicationInterviewResp2, serde_json::Value);
@@ -4663,6 +4663,58 @@ pub struct ApplicationInterviewResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListApplicationInterviewQuery<'a> {
+    pub application_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+}
+
+impl<'a> ListApplicationInterviewQuery<'a> {
+    pub fn new(application_id: &'a str) -> Self {
+        Self {
+            application_id,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+            job_level_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl ApplicationInterviewResource<'_> {
     pub async fn list(
         &self,
@@ -4672,21 +4724,34 @@ impl ApplicationInterviewResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListApplicationInterviewResp2, LarkError> {
-        let path = format!("/open-apis/hire/v1/applications/{application_id}/interviews");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListApplicationInterviewQuery::new(application_id)
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListApplicationInterviewQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListApplicationInterviewResp2, LarkError> {
+        let path = format!(
+            "/open-apis/hire/v1/applications/{}/interviews",
+            query.application_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListApplicationInterviewResp2 {
             api_resp,
             code_error,
@@ -4729,6 +4794,57 @@ pub struct EvaluationTaskResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListEvaluationTaskQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id: Option<&'a str>,
+    pub activity_status: Option<i32>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListEvaluationTaskQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn activity_status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.activity_status = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl EvaluationTaskResource<'_> {
     pub async fn list(
         &self,
@@ -4737,20 +4853,31 @@ impl EvaluationTaskResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListEvaluationTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/evaluation_tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListEvaluationTaskQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListEvaluationTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListEvaluationTaskResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/evaluation_tasks",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("user_id", query.user_id)
+        .query("activity_status", query.activity_status)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListEvaluationTaskResp {
             api_resp,
             code_error,
@@ -4791,6 +4918,57 @@ pub struct ExamMarkingTaskResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListExamMarkingTaskQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id: Option<&'a str>,
+    pub activity_status: Option<i32>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListExamMarkingTaskQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn activity_status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.activity_status = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl ExamMarkingTaskResource<'_> {
     pub async fn list(
         &self,
@@ -4799,20 +4977,31 @@ impl ExamMarkingTaskResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListExamMarkingTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/exam_marking_tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListExamMarkingTaskQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListExamMarkingTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListExamMarkingTaskResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/exam_marking_tasks",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("user_id", query.user_id)
+        .query("activity_status", query.activity_status)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListExamMarkingTaskResp {
             api_resp,
             code_error,
@@ -5065,6 +5254,57 @@ pub struct InterviewTaskResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListInterviewTaskQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id: Option<&'a str>,
+    pub activity_status: Option<i32>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListInterviewTaskQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn activity_status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.activity_status = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl InterviewTaskResource<'_> {
     pub async fn list(
         &self,
@@ -5073,20 +5313,31 @@ impl InterviewTaskResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListInterviewTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/hire/v1/interview_tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListInterviewTaskQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListInterviewTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewTaskResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/interview_tasks",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("user_id", query.user_id)
+        .query("activity_status", query.activity_status)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListInterviewTaskResp {
             api_resp,
             code_error,
