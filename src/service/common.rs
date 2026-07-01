@@ -129,6 +129,19 @@ impl<'a> RestRequest<'a> {
         let (api_resp, raw) = self.send::<T>().await?;
         Ok(parse_v2(api_resp, raw))
     }
+
+    pub(crate) async fn download(self) -> Result<DownloadResp, LarkError> {
+        let mut option = self.option.clone();
+        option.file_download = true;
+        let api_resp = transport::request(self.config, &self.api_req, &option).await?;
+        let file_name = api_resp.file_name_by_header();
+        let data = api_resp.raw_body.clone();
+        Ok(DownloadResp {
+            api_resp,
+            file_name,
+            data,
+        })
+    }
 }
 
 pub fn parse_v2<T>(
