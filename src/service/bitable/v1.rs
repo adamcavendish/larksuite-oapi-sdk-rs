@@ -1363,6 +1363,135 @@ pub struct AppTableRecordResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListRecordQuery<'a> {
+    pub app_token: &'a str,
+    pub table_id: &'a str,
+    pub view_id: Option<&'a str>,
+    pub filter: Option<&'a str>,
+    pub sort: Option<&'a str>,
+    pub field_names: Option<&'a str>,
+    pub text_field_as_array: Option<bool>,
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListRecordQuery<'a> {
+    pub fn new(app_token: &'a str, table_id: &'a str) -> Self {
+        Self {
+            app_token,
+            table_id,
+            view_id: None,
+            filter: None,
+            sort: None,
+            field_names: None,
+            text_field_as_array: None,
+            user_id_type: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn view_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.view_id = value.into();
+        self
+    }
+
+    pub fn filter(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.filter = value.into();
+        self
+    }
+
+    pub fn sort(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.sort = value.into();
+        self
+    }
+
+    pub fn field_names(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.field_names = value.into();
+        self
+    }
+
+    pub fn text_field_as_array(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.text_field_as_array = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct SearchRecordQuery<'a> {
+    pub app_token: &'a str,
+    pub table_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> SearchRecordQuery<'a> {
+    pub fn new(app_token: &'a str, table_id: &'a str) -> Self {
+        Self {
+            app_token,
+            table_id,
+            user_id_type: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> AppTableRecordResource<'a> {
     pub async fn create(
         &self,
@@ -1472,37 +1601,43 @@ impl<'a> AppTableRecordResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListRecordResp, LarkError> {
-        let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = view_id {
-            api_req.query_params.set("view_id", v);
-        }
-        if let Some(v) = filter {
-            api_req.query_params.set("filter", v);
-        }
-        if let Some(v) = sort {
-            api_req.query_params.set("sort", v);
-        }
-        if let Some(v) = field_names {
-            api_req.query_params.set("field_names", v);
-        }
-        if let Some(v) = text_field_as_array {
-            api_req
-                .query_params
-                .set("text_field_as_array", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RecordListData>(self.config, &api_req, option).await?;
+        let query = ListRecordQuery::new(app_token, table_id)
+            .view_id(view_id)
+            .filter(filter)
+            .sort(sort)
+            .field_names(field_names)
+            .text_field_as_array(text_field_as_array)
+            .user_id_type(user_id_type)
+            .page_token(page_token)
+            .page_size(page_size);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListRecordResp, LarkError> {
+        let path = format!(
+            "/open-apis/bitable/v1/apps/{}/tables/{}/records",
+            query.app_token, query.table_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("view_id", query.view_id)
+        .query("filter", query.filter)
+        .query("sort", query.sort)
+        .query("field_names", query.field_names)
+        .query("text_field_as_array", query.text_field_as_array)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page_query())
+        .send::<RecordListData>()
+        .await?;
         Ok(ListRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -1623,22 +1758,35 @@ impl<'a> AppTableRecordResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<SearchRecordResp, LarkError> {
-        let path =
-            format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/search");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SearchRecordData>(self.config, &api_req, option).await?;
+        let query = SearchRecordQuery::new(app_token, table_id)
+            .user_id_type(user_id_type)
+            .page_token(page_token)
+            .page_size(page_size);
+        self.search_by_query(&query, body, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchRecordQuery<'_>,
+        body: &SearchRecordReqBody,
+        option: &RequestOption,
+    ) -> Result<SearchRecordResp, LarkError> {
+        let path = format!(
+            "/open-apis/bitable/v1/apps/{}/tables/{}/records/search",
+            query.app_token, query.table_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page_query())
+        .json_body(body)?
+        .send::<SearchRecordData>()
+        .await?;
         Ok(SearchRecordResp {
             api_resp,
             code_error: raw.code_error,
