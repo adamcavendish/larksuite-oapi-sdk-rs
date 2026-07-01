@@ -148,6 +148,47 @@ impl<'a> ListUserQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListAccessRecordQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub from: Option<i64>,
+    pub to: Option<i64>,
+    pub device_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListAccessRecordQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+
+    pub fn from(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.from = value.into();
+        self
+    }
+
+    pub fn to(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.to = value.into();
+        self
+    }
+
+    pub fn device_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.device_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── New data types (v2 pattern) ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -310,28 +351,34 @@ impl<'a> AccessRecordResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAccessRecordResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/acs/v1/access_records");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = from {
-            api_req.query_params.set("from", v.to_string());
-        }
-        if let Some(v) = to {
-            api_req.query_params.set("to", v.to_string());
-        }
-        if let Some(v) = device_id {
-            api_req.query_params.set("device_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AccessRecordListData>(self.config, &api_req, option).await?;
+        let query = ListAccessRecordQuery::new()
+            .page(PageQuery::from_parts(page_size, page_token))
+            .from(from)
+            .to(to)
+            .device_id(device_id)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAccessRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAccessRecordResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/acs/v1/access_records",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query("from", query.from)
+        .query("to", query.to)
+        .query("device_id", query.device_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<AccessRecordListData>()
+        .await?;
         Ok(ListAccessRecordResp {
             api_resp,
             code_error: raw.code_error,
