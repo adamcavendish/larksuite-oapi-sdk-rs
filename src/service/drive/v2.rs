@@ -4,6 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, RequestOption};
+use crate::service::common::RestRequest;
 use crate::transport;
 
 // ── Domain types ──
@@ -84,6 +85,41 @@ pub struct FileLikeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListFileLikeQuery<'a> {
+    pub file_token: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListFileLikeQuery<'a> {
+    pub fn new(file_token: &'a str) -> Self {
+        Self {
+            file_token,
+            user_id_type: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+}
+
 impl<'a> FileLikeResource<'a> {
     pub async fn list(
         &self,
@@ -93,20 +129,31 @@ impl<'a> FileLikeResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<FileLikeListResp, LarkError> {
-        let path = format!("/open-apis/drive/v2/files/{file_token}/likes");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<FileLikeListData>(self.config, &api_req, option).await?;
+        let query = ListFileLikeQuery::new(file_token)
+            .user_id_type(user_id_type)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListFileLikeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<FileLikeListResp, LarkError> {
+        let path = format!("/open-apis/drive/v2/files/{}/likes", query.file_token);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .send::<FileLikeListData>()
+        .await?;
         Ok(FileLikeListResp {
             api_resp,
             code_error: raw.code_error,
