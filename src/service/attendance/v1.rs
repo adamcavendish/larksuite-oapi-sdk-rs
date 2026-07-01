@@ -5,7 +5,7 @@ use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError};
-use crate::service::common::{DownloadResp, EmptyResp, RestRequest};
+use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
 use crate::transport;
 
 // ── Domain types ──
@@ -366,6 +366,123 @@ pub struct GroupResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct CreateGroupQuery<'a> {
+    pub body: &'a CreateOrUpdateGroupReqBody,
+    pub employee_type: &'a str,
+    pub dept_type: Option<&'a str>,
+}
+
+impl<'a> CreateGroupQuery<'a> {
+    pub fn new(body: &'a CreateOrUpdateGroupReqBody, employee_type: &'a str) -> Self {
+        Self {
+            body,
+            employee_type,
+            dept_type: None,
+        }
+    }
+
+    pub fn dept_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.dept_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetGroupQuery<'a> {
+    pub group_id: &'a str,
+    pub employee_type: &'a str,
+    pub dept_type: Option<&'a str>,
+}
+
+impl<'a> GetGroupQuery<'a> {
+    pub fn new(group_id: &'a str, employee_type: &'a str) -> Self {
+        Self {
+            group_id,
+            employee_type,
+            dept_type: None,
+        }
+    }
+
+    pub fn dept_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.dept_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListGroupQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListGroupQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListUserGroupQuery<'a> {
+    pub group_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListUserGroupQuery<'a> {
+    pub fn new(group_id: &'a str) -> Self {
+        Self {
+            group_id,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> GroupResource<'a> {
     pub async fn create(
         &self,
@@ -374,15 +491,27 @@ impl<'a> GroupResource<'a> {
         dept_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateGroupResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/groups");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        if let Some(v) = dept_type {
-            api_req.query_params.set("dept_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<GroupData>(self.config, &api_req, option).await?;
+        let query = CreateGroupQuery::new(body, employee_type).dept_type(dept_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateGroupQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateGroupResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/attendance/v1/groups",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", query.employee_type)
+        .query("dept_type", query.dept_type)
+        .json_body(query.body)?
+        .send::<GroupData>()
+        .await?;
         Ok(CreateGroupResp {
             api_resp,
             code_error: raw.code_error,
@@ -397,15 +526,27 @@ impl<'a> GroupResource<'a> {
         dept_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetGroupResp, LarkError> {
-        let path = format!("/open-apis/attendance/v1/groups/{group_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        if let Some(v) = dept_type {
-            api_req.query_params.set("dept_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GroupData>(self.config, &api_req, option).await?;
+        let query = GetGroupQuery::new(group_id, employee_type).dept_type(dept_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetGroupQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetGroupResp, LarkError> {
+        let path = format!("/open-apis/attendance/v1/groups/{}", query.group_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", query.employee_type)
+        .query("dept_type", query.dept_type)
+        .send::<GroupData>()
+        .await?;
         Ok(GetGroupResp {
             api_resp,
             code_error: raw.code_error,
@@ -435,16 +576,27 @@ impl<'a> GroupResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListGroupResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/attendance/v1/groups");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GroupListData>(self.config, &api_req, option).await?;
+        let query = ListGroupQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListGroupQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListGroupResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/attendance/v1/groups",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<GroupListData>()
+        .await?;
         Ok(ListGroupResp {
             api_resp,
             code_error: raw.code_error,
@@ -459,18 +611,31 @@ impl<'a> GroupResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListUserGroupResp, LarkError> {
-        let path = format!("/open-apis/attendance/v1/groups/{group_id}/list_user");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListUserGroupQuery::new(group_id)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_user_by_query(&query, option).await
+    }
+
+    pub async fn list_user_by_query(
+        &self,
+        query: &ListUserGroupQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListUserGroupResp, LarkError> {
+        let path = format!(
+            "/open-apis/attendance/v1/groups/{}/list_user",
+            query.group_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListUserGroupResp {
             api_resp,
             code_error,
@@ -499,6 +664,39 @@ impl<'a> GroupResource<'a> {
 
 pub struct ShiftResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListShiftQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListShiftQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> ShiftResource<'a> {
@@ -558,17 +756,27 @@ impl<'a> ShiftResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListShiftResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/attendance/v1/shifts");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListShiftQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListShiftQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListShiftResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/attendance/v1/shifts",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListShiftResp {
             api_resp,
             code_error,
@@ -599,6 +807,22 @@ pub struct UserSettingResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct BatchGetUserSettingQuery<'a> {
+    pub body: &'a BatchGetUserSettingReqBody,
+    pub employee_type: &'a str,
+}
+
+impl<'a> BatchGetUserSettingQuery<'a> {
+    pub fn new(body: &'a BatchGetUserSettingReqBody, employee_type: &'a str) -> Self {
+        Self {
+            body,
+            employee_type,
+        }
+    }
+}
+
 impl<'a> UserSettingResource<'a> {
     pub async fn batch_get(
         &self,
@@ -606,15 +830,26 @@ impl<'a> UserSettingResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<BatchGetUserSettingResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = BatchGetUserSettingQuery::new(body, employee_type);
+        self.batch_get_by_query(&query, option).await
+    }
+
+    pub async fn batch_get_by_query(
+        &self,
+        query: &BatchGetUserSettingQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchGetUserSettingResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/attendance/v1/user_settings/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UserSettingListData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", query.employee_type)
+        .json_body(query.body)?
+        .send::<UserSettingListData>()
+        .await?;
         Ok(BatchGetUserSettingResp {
             api_resp,
             code_error: raw.code_error,
@@ -627,6 +862,22 @@ pub struct RecordResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct QueryRecordQuery<'a> {
+    pub body: &'a QueryRecordReqBody,
+    pub employee_type: &'a str,
+}
+
+impl<'a> QueryRecordQuery<'a> {
+    pub fn new(body: &'a QueryRecordReqBody, employee_type: &'a str) -> Self {
+        Self {
+            body,
+            employee_type,
+        }
+    }
+}
+
 impl<'a> RecordResource<'a> {
     pub async fn query(
         &self,
@@ -634,15 +885,26 @@ impl<'a> RecordResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryRecordResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = QueryRecordQuery::new(body, employee_type);
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryRecordResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_tasks/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<RecordListData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", query.employee_type)
+        .json_body(query.body)?
+        .send::<RecordListData>()
+        .await?;
         Ok(QueryRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -655,6 +917,22 @@ pub struct ApprovalInfoResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetApprovalInfoQuery<'a> {
+    pub body: &'a GetApprovalInfoReqBody,
+    pub employee_type: &'a str,
+}
+
+impl<'a> GetApprovalInfoQuery<'a> {
+    pub fn new(body: &'a GetApprovalInfoReqBody, employee_type: &'a str) -> Self {
+        Self {
+            body,
+            employee_type,
+        }
+    }
+}
+
 impl<'a> ApprovalInfoResource<'a> {
     pub async fn get(
         &self,
@@ -662,15 +940,26 @@ impl<'a> ApprovalInfoResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<GetApprovalInfoResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = GetApprovalInfoQuery::new(body, employee_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetApprovalInfoQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetApprovalInfoResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_approvals/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ApprovalInfoListData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", query.employee_type)
+        .json_body(query.body)?
+        .send::<ApprovalInfoListData>()
+        .await?;
         Ok(GetApprovalInfoResp {
             api_resp,
             code_error: raw.code_error,
@@ -681,6 +970,65 @@ impl<'a> ApprovalInfoResource<'a> {
 
 pub struct LeaveAccrualResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListLeaveAccrualQuery<'a> {
+    pub employment_id: &'a str,
+    pub leave_type_id: Option<&'a str>,
+    pub accrual_date_from: Option<&'a str>,
+    pub accrual_date_to: Option<&'a str>,
+    pub page_token: Option<&'a str>,
+    pub page_size: Option<i32>,
+}
+
+impl<'a> ListLeaveAccrualQuery<'a> {
+    pub fn new(employment_id: &'a str) -> Self {
+        Self {
+            employment_id,
+            leave_type_id: None,
+            accrual_date_from: None,
+            accrual_date_to: None,
+            page_token: None,
+            page_size: None,
+        }
+    }
+
+    pub fn leave_type_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.leave_type_id = value.into();
+        self
+    }
+
+    pub fn accrual_date_from(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.accrual_date_from = value.into();
+        self
+    }
+
+    pub fn accrual_date_to(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.accrual_date_to = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> LeaveAccrualResource<'a> {
@@ -695,29 +1043,34 @@ impl<'a> LeaveAccrualResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListLeaveAccrualResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListLeaveAccrualQuery::new(employment_id)
+            .leave_type_id(leave_type_id)
+            .accrual_date_from(accrual_date_from)
+            .accrual_date_to(accrual_date_to)
+            .page_token(page_token)
+            .page_size(page_size);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListLeaveAccrualQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListLeaveAccrualResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/attendance/v1/leave_accrual_record",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employment_id", employment_id);
-        if let Some(v) = leave_type_id {
-            api_req.query_params.set("leave_type_id", v);
-        }
-        if let Some(v) = accrual_date_from {
-            api_req.query_params.set("accrual_date_from", v);
-        }
-        if let Some(v) = accrual_date_to {
-            api_req.query_params.set("accrual_date_to", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<LeaveAccrualListData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employment_id", query.employment_id)
+        .query("leave_type_id", query.leave_type_id)
+        .query("accrual_date_from", query.accrual_date_from)
+        .query("accrual_date_to", query.accrual_date_to)
+        .page_query(query.page_query())
+        .send::<LeaveAccrualListData>()
+        .await?;
         Ok(ListLeaveAccrualResp {
             api_resp,
             code_error: raw.code_error,
@@ -1018,6 +1371,39 @@ pub struct ArchiveRuleResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListArchiveRuleQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListArchiveRuleQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> ArchiveRuleResource<'a> {
     pub async fn upload_report(
         &self,
@@ -1088,17 +1474,27 @@ impl<'a> ArchiveRuleResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListArchiveRuleResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/attendance/v1/archive_rule");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListArchiveRuleQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListArchiveRuleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListArchiveRuleResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/attendance/v1/archive_rule",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListArchiveRuleResp {
             api_resp,
             code_error,
@@ -1111,6 +1507,29 @@ pub struct LeaveAccrualRecordResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct PatchLeaveAccrualRecordQuery<'a> {
+    pub leave_id: &'a str,
+    pub body: &'a PatchLeaveAccrualRecordReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> PatchLeaveAccrualRecordQuery<'a> {
+    pub fn new(leave_id: &'a str, body: &'a PatchLeaveAccrualRecordReqBody) -> Self {
+        Self {
+            leave_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> LeaveAccrualRecordResource<'a> {
     pub async fn patch(
         &self,
@@ -1119,16 +1538,30 @@ impl<'a> LeaveAccrualRecordResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchLeaveAccrualRecordResp, LarkError> {
-        let path = format!("/open-apis/attendance/v1/leave_accrual_record/{leave_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = PatchLeaveAccrualRecordQuery::new(leave_id, body).user_id_type(user_id_type);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchLeaveAccrualRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchLeaveAccrualRecordResp, LarkError> {
+        let path = format!(
+            "/open-apis/attendance/v1/leave_accrual_record/{}",
+            query.leave_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchLeaveAccrualRecordResp {
             api_resp,
             code_error,
