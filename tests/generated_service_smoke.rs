@@ -28,7 +28,12 @@ use larksuite_oapi_sdk_rs::service::{
         ListJobLevelQuery as ListCorehrJobLevelQuery, ListJobQuery as ListCorehrJobQuery,
         ListLocationQuery as ListCorehrLocationQuery,
         ListNationalIdTypeQuery as ListCorehrNationalIdTypeQuery,
+        ListPreHireQuery as ListCorehrPreHireQuery,
+        ListSecurityGroupQuery as ListCorehrSecurityGroupQuery,
+        ListSubdivisionQuery as ListCorehrSubdivisionQuery,
+        ListSubregionQuery as ListCorehrSubregionQuery,
         ListWorkingHoursTypeQuery as ListCorehrWorkingHoursTypeQuery,
+        SearchOffboardingQuery as SearchCorehrOffboardingQuery,
     },
     directory::{
         ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
@@ -1877,6 +1882,175 @@ async fn corehr_national_id_type_list_by_query_smoke() {
     assert!(request.contains("GET /open-apis/corehr/v1/national_id_types?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_offboarding_search_by_query_smoke() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"items":[{"offboarding_id":"off-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = SearchCorehrOffboardingQuery::new()
+        .user_id_type("open_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let body = serde_json::json!({"employment_id": "emp-1"});
+    let resp = client
+        .corehr()
+        .offboarding
+        .search_by_query(&query, body, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(
+        data.items.unwrap()[0].offboarding_id.as_deref(),
+        Some("off-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/corehr/v1/offboardings/search?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains(r#""employment_id":"emp-1""#));
+}
+
+#[tokio::test]
+async fn corehr_pre_hire_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"pre-hire-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListCorehrPreHireQuery::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .pre_hire
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("pre-hire-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/pre_hires?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_security_group_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"security-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrSecurityGroupQuery::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .security_group
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("security-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/security_groups?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_subdivision_list_by_query_smoke() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"items":[{"id":"subdivision-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrSubdivisionQuery::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .subdivision
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("subdivision-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/subdivisions?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_subregion_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"subregion-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrSubregionQuery::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .subregion
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("subregion-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/subregions?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_transfer_reason_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"reason-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr()
+        .transfer_reason
+        .query(&RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("reason-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/transfer_reasons/query"));
+}
+
+#[tokio::test]
+async fn corehr_transfer_type_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"type-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr()
+        .transfer_type
+        .query(&RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data["items"][0]["id"].as_str(), Some("type-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/transfer_types/query"));
 }
 
 // ── Directory ──
