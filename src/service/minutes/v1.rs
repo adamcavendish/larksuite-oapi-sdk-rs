@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -95,6 +95,109 @@ pub struct MinuteStatisticsData {
 impl_resp!(GetMinuteMediaResp, MinuteMediaData);
 impl_resp!(GetMinuteStatisticsResp, MinuteStatisticsData);
 
+// -- Query parameter types --
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetMinutesQuery<'a> {
+    pub minutes_token: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetMinutesQuery<'a> {
+    pub fn new(minutes_token: &'a str) -> Self {
+        Self {
+            minutes_token,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListParticipantQuery<'a> {
+    pub minutes_token: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListParticipantQuery<'a> {
+    pub fn new(minutes_token: &'a str) -> Self {
+        Self {
+            minutes_token,
+            user_id_type: None,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetTranscriptQuery<'a> {
+    pub minutes_token: &'a str,
+    pub need_speaker: Option<bool>,
+    pub need_timestamp: Option<bool>,
+    pub file_format: Option<&'a str>,
+}
+
+impl<'a> GetTranscriptQuery<'a> {
+    pub fn new(minutes_token: &'a str) -> Self {
+        Self {
+            minutes_token,
+            need_speaker: None,
+            need_timestamp: None,
+            file_format: None,
+        }
+    }
+
+    pub fn need_speaker(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.need_speaker = value.into();
+        self
+    }
+
+    pub fn need_timestamp(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.need_timestamp = value.into();
+        self
+    }
+
+    pub fn file_format(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.file_format = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetMinuteStatisticsQuery<'a> {
+    pub minutes_token: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetMinuteStatisticsQuery<'a> {
+    pub fn new(minutes_token: &'a str) -> Self {
+        Self {
+            minutes_token,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct MinutesResource<'a> {
@@ -108,14 +211,29 @@ impl<'a> MinutesResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetMinutesResp, LarkError> {
-        let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MinutesInfoData>(self.config, &api_req, option).await?;
+        self.get_by_query(
+            &GetMinutesQuery::new(minutes_token).user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetMinutesQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetMinutesResp, LarkError> {
+        let path = format!("/open-apis/minutes/v1/minutes/{}", query.minutes_token);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<MinutesInfoData>()
+        .await?;
         Ok(GetMinutesResp {
             api_resp,
             code_error: raw.code_error,
@@ -137,20 +255,32 @@ impl<'a> ParticipantResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListParticipantResp, LarkError> {
-        let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/participants");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ParticipantListData>(self.config, &api_req, option).await?;
+        let query = ListParticipantQuery::new(minutes_token)
+            .user_id_type(user_id_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListParticipantQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListParticipantResp, LarkError> {
+        let path = format!(
+            "/open-apis/minutes/v1/minutes/{}/participants",
+            query.minutes_token
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send::<ParticipantListData>()
+        .await?;
         Ok(ListParticipantResp {
             api_resp,
             code_error: raw.code_error,
@@ -171,13 +301,44 @@ impl<'a> TranscriptResource<'a> {
         option: &RequestOption,
     ) -> Result<GetTranscriptResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/transcript");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<TranscriptData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .send::<TranscriptData>()
+        .await?;
+        Ok(GetTranscriptResp {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        })
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetTranscriptQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetTranscriptResp, LarkError> {
+        let path = format!(
+            "/open-apis/minutes/v1/minutes/{}/transcript",
+            query.minutes_token
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("need_speaker", query.need_speaker)
+        .query("need_timestamp", query.need_timestamp)
+        .query("file_format", query.file_format)
+        .send::<TranscriptData>()
+        .await?;
         Ok(GetTranscriptResp {
             api_resp,
             code_error: raw.code_error,
@@ -197,10 +358,15 @@ impl<'a> MinuteMediaResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMinuteMediaResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/media");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<MinuteMediaData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<MinuteMediaData>()
+        .await?;
         Ok(GetMinuteMediaResp {
             api_resp,
             code_error: raw.code_error,
@@ -220,14 +386,32 @@ impl<'a> MinuteStatisticsResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetMinuteStatisticsResp, LarkError> {
-        let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/statistics");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MinuteStatisticsData>(self.config, &api_req, option).await?;
+        self.get_by_query(
+            &GetMinuteStatisticsQuery::new(minutes_token).user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetMinuteStatisticsQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetMinuteStatisticsResp, LarkError> {
+        let path = format!(
+            "/open-apis/minutes/v1/minutes/{}/statistics",
+            query.minutes_token
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<MinuteStatisticsData>()
+        .await?;
         Ok(GetMinuteStatisticsResp {
             api_resp,
             code_error: raw.code_error,
