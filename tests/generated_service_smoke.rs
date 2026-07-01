@@ -70,6 +70,7 @@ use larksuite_oapi_sdk_rs::service::{
         ListParticipantQuery as ListMinutesParticipantQuery,
     },
     performance::v1::ListActivityQuery as ListPerformanceActivityQuery,
+    security_and_compliance::v1::ListOpenapiLogQuery,
     task::{CreateTaskReqBody, ListTaskQuery},
     vc::{
         GetMeetingListQuery, GetParticipantListQuery, GetParticipantQualityListQuery,
@@ -2884,6 +2885,77 @@ async fn performance_activity_list_by_query_smoke() {
     assert_eq!(data.items[0].activity_id.as_deref(), Some("act-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/performance/v1/activities?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+// ── Security and Compliance ──
+
+#[tokio::test]
+async fn security_openapi_log_list_positional_adapter_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"log-1","api_path":"/open-apis/im/v1/messages"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .security_and_compliance()
+        .openapi_log
+        .list(
+            Some("/open-apis/im/v1/messages"),
+            Some("1700000000"),
+            Some("1700000100"),
+            Some(1),
+            Some("ou-1"),
+            Some(20),
+            Some("next-page"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/security_and_compliance/v1/openapi_logs?"));
+    assert!(request.contains("api_path=%2Fopen-apis%2Fim%2Fv1%2Fmessages"));
+    assert!(request.contains("start_time=1700000000"));
+    assert!(request.contains("end_time=1700000100"));
+    assert!(request.contains("operator_type=1"));
+    assert!(request.contains("operator_value=ou-1"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn security_openapi_log_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"log-1","api_path":"/open-apis/im/v1/messages"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListOpenapiLogQuery::new()
+        .api_path("/open-apis/im/v1/messages")
+        .start_time("1700000000")
+        .end_time("1700000100")
+        .operator_type(1)
+        .operator_value("ou-1")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .security_and_compliance()
+        .openapi_log
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items.len(), 1);
+    assert_eq!(data.items[0].id.as_deref(), Some("log-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/security_and_compliance/v1/openapi_logs?"));
+    assert!(request.contains("api_path=%2Fopen-apis%2Fim%2Fv1%2Fmessages"));
+    assert!(request.contains("start_time=1700000000"));
+    assert!(request.contains("end_time=1700000100"));
+    assert!(request.contains("operator_type=1"));
+    assert!(request.contains("operator_value=ou-1"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }

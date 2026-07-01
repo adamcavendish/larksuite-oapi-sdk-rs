@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -45,6 +45,54 @@ pub struct OpenapiLogListData {
 impl_resp!(ListOpenapiLogResp, OpenapiLogListData);
 impl_resp!(ListDataOpenapiLogResp, OpenapiLogListData);
 
+// -- Query parameter types --
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListOpenapiLogQuery<'a> {
+    pub api_path: Option<&'a str>,
+    pub start_time: Option<&'a str>,
+    pub end_time: Option<&'a str>,
+    pub operator_type: Option<i32>,
+    pub operator_value: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListOpenapiLogQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn api_path(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.api_path = value.into();
+        self
+    }
+
+    pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_time = value.into();
+        self
+    }
+
+    pub fn end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_time = value.into();
+        self
+    }
+
+    pub fn operator_type(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.operator_type = value.into();
+        self
+    }
+
+    pub fn operator_value(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.operator_value = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct OpenapiLogResource<'a> {
@@ -64,34 +112,36 @@ impl<'a> OpenapiLogResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListOpenapiLogResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListOpenapiLogQuery::new()
+            .api_path(api_path)
+            .start_time(start_time)
+            .end_time(end_time)
+            .operator_type(operator_type)
+            .operator_value(operator_value)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListOpenapiLogQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListOpenapiLogResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/security_and_compliance/v1/openapi_logs",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = api_path {
-            api_req.query_params.set("api_path", v);
-        }
-        if let Some(v) = start_time {
-            api_req.query_params.set("start_time", v);
-        }
-        if let Some(v) = end_time {
-            api_req.query_params.set("end_time", v);
-        }
-        if let Some(v) = operator_type {
-            api_req.query_params.set("operator_type", v.to_string());
-        }
-        if let Some(v) = operator_value {
-            api_req.query_params.set("operator_value", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<OpenapiLogListData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("api_path", query.api_path)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .query("operator_type", query.operator_type)
+        .query("operator_value", query.operator_value)
+        .page_query(query.page)
+        .send::<OpenapiLogListData>()
+        .await?;
         Ok(ListOpenapiLogResp {
             api_resp,
             code_error: raw.code_error,
@@ -104,14 +154,16 @@ impl<'a> OpenapiLogResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<ListDataOpenapiLogResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/security_and_compliance/v1/openapi_logs/list_data",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<OpenapiLogListData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<OpenapiLogListData>()
+        .await?;
         Ok(ListDataOpenapiLogResp {
             api_resp,
             code_error: raw.code_error,
