@@ -10,7 +10,10 @@ use larksuite_oapi_sdk_rs::service::{
         ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
         ListShareEntityQuery,
     },
-    drive::{v1::ListFileQuery, v2::ListFileLikeQuery},
+    drive::{
+        v1::{ListFileQuery, ListFileVersionQuery, ListFileViewRecordQuery},
+        v2::ListFileLikeQuery,
+    },
     task::{CreateTaskReqBody, ListTaskQuery},
     vc::{
         GetMeetingListQuery, GetParticipantListQuery, GetParticipantQualityListQuery,
@@ -214,6 +217,65 @@ async fn drive_v2_file_like_positional_adapter_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/drive/v2/files/file-token-1/likes?"));
     assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn drive_file_version_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"name":"v1"}],"page_token":"next-version","has_more":true}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListFileVersionQuery::new("file-token-1", "doc")
+        .user_id_type("open_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .drive()
+        .file_version
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items.as_ref().unwrap().len(), 1);
+    assert_eq!(data.items.as_ref().unwrap()[0].name.as_deref(), Some("v1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v1/files/file-token-1/versions?"));
+    assert!(request.contains("obj_type=doc"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn drive_file_view_record_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"viewer_id":"u1"}],"page_token":"next-view","has_more":true}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListFileViewRecordQuery::new("file-token-1", "doc")
+        .viewer_id_type("open_id")
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .drive()
+        .file_view_record
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items.as_ref().unwrap().len(), 1);
+    assert_eq!(
+        data.items.as_ref().unwrap()[0].viewer_id.as_deref(),
+        Some("u1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/drive/v1/files/file-token-1/view_records?"));
+    assert!(request.contains("file_type=doc"));
+    assert!(request.contains("viewer_id_type=open_id"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }
