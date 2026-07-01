@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, parse_v2};
+use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
 use crate::transport;
 
 // ── Domain types ──
@@ -298,6 +298,273 @@ impl_resp_v2!(GetChatAnnouncementBlockChildrenResp, serde_json::Value);
 impl_resp_v2!(CreateDocumentBlockDescendantResp, serde_json::Value);
 impl_resp_v2!(ConvertDocumentResp, serde_json::Value);
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateDocumentQuery<'a> {
+    pub body: &'a CreateDocumentReqBody,
+}
+
+impl<'a> CreateDocumentQuery<'a> {
+    pub fn new(body: &'a CreateDocumentReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetDocumentQuery<'a> {
+    pub document_id: &'a str,
+}
+
+impl<'a> GetDocumentQuery<'a> {
+    pub fn new(document_id: &'a str) -> Self {
+        Self { document_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ConvertDocumentQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> ConvertDocumentQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetDocumentRawContentQuery<'a> {
+    pub document_id: &'a str,
+    pub lang: Option<i32>,
+}
+
+impl<'a> GetDocumentRawContentQuery<'a> {
+    pub fn new(document_id: &'a str) -> Self {
+        Self {
+            document_id,
+            lang: None,
+        }
+    }
+
+    pub fn lang(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.lang = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateDocumentBlockQuery<'a> {
+    pub document_id: &'a str,
+    pub block_id: &'a str,
+    pub body: &'a CreateBlockReqBody,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateDocumentBlockQuery<'a> {
+    pub fn new(document_id: &'a str, block_id: &'a str, body: &'a CreateBlockReqBody) -> Self {
+        Self {
+            document_id,
+            block_id,
+            body,
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetDocumentBlockQuery<'a> {
+    pub document_id: &'a str,
+    pub block_id: &'a str,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetDocumentBlockQuery<'a> {
+    pub fn new(document_id: &'a str, block_id: &'a str) -> Self {
+        Self {
+            document_id,
+            block_id,
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct UpdateDocumentBlockQuery<'a> {
+    pub document_id: &'a str,
+    pub block_id: &'a str,
+    pub body: &'a UpdateBlockReqBody,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UpdateDocumentBlockQuery<'a> {
+    pub fn new(document_id: &'a str, block_id: &'a str, body: &'a UpdateBlockReqBody) -> Self {
+        Self {
+            document_id,
+            block_id,
+            body,
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct BatchUpdateDocumentBlockQuery<'a> {
+    pub document_id: &'a str,
+    pub body: &'a BatchUpdateBlockReqBody,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> BatchUpdateDocumentBlockQuery<'a> {
+    pub fn new(document_id: &'a str, body: &'a BatchUpdateBlockReqBody) -> Self {
+        Self {
+            document_id,
+            body,
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteDocumentBlockChildrenQuery<'a> {
+    pub document_id: &'a str,
+    pub block_id: &'a str,
+    pub body: &'a DeleteBlocksReqBody,
+    pub document_revision_id: Option<i64>,
+}
+
+impl<'a> DeleteDocumentBlockChildrenQuery<'a> {
+    pub fn new(document_id: &'a str, block_id: &'a str, body: &'a DeleteBlocksReqBody) -> Self {
+        Self {
+            document_id,
+            block_id,
+            body,
+            document_revision_id: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListDocumentBlockQuery<'a> {
+    pub document_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListDocumentBlockQuery<'a> {
+    pub fn new(document_id: &'a str) -> Self {
+        Self {
+            document_id,
+            page: PageQuery::default(),
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListDocumentBlockChildrenQuery<'a> {
+    pub document_id: &'a str,
+    pub block_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListDocumentBlockChildrenQuery<'a> {
+    pub fn new(document_id: &'a str, block_id: &'a str) -> Self {
+        Self {
+            document_id,
+            block_id,
+            page: PageQuery::default(),
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct DocumentResource<'a> {
@@ -310,11 +577,25 @@ impl<'a> DocumentResource<'a> {
         body: &CreateDocumentReqBody,
         option: &RequestOption,
     ) -> Result<CreateDocumentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/docx/v1/documents");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<DocumentData>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateDocumentQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateDocumentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateDocumentResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/docx/v1/documents",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<DocumentData>()
+        .await?;
         Ok(CreateDocumentResp {
             api_resp,
             code_error: raw.code_error,
@@ -327,11 +608,25 @@ impl<'a> DocumentResource<'a> {
         document_id: &str,
         option: &RequestOption,
     ) -> Result<GetDocumentResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/documents/{document_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<DocumentData>(self.config, &api_req, option).await?;
+        self.get_by_query(&GetDocumentQuery::new(document_id), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetDocumentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetDocumentResp, LarkError> {
+        let path = format!("/open-apis/docx/v1/documents/{}", query.document_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<DocumentData>()
+        .await?;
         Ok(GetDocumentResp {
             api_resp,
             code_error: raw.code_error,
@@ -344,15 +639,25 @@ impl<'a> DocumentResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<ConvertDocumentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.convert_by_query(&ConvertDocumentQuery::new(body), option)
+            .await
+    }
+
+    pub async fn convert_by_query(
+        &self,
+        query: &ConvertDocumentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ConvertDocumentResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/docx/v1/documents/blocks/convert",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ConvertDocumentResp {
             api_resp,
             code_error,
@@ -366,14 +671,29 @@ impl<'a> DocumentResource<'a> {
         lang: Option<i32>,
         option: &RequestOption,
     ) -> Result<GetDocumentRawContentResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/documents/{document_id}/raw_content");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = lang {
-            api_req.query_params.set("lang", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = GetDocumentRawContentQuery::new(document_id).lang(lang);
+        self.raw_content_by_query(&query, option).await
+    }
+
+    pub async fn raw_content_by_query(
+        &self,
+        query: &GetDocumentRawContentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetDocumentRawContentResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/documents/{}/raw_content",
+            query.document_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("lang", query.lang)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(GetDocumentRawContentResp {
             api_resp,
             code_error: raw.code_error,
@@ -396,20 +716,33 @@ impl<'a> DocumentBlockResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}/children");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateBlockData>(self.config, &api_req, option).await?;
+        let query = CreateDocumentBlockQuery::new(document_id, block_id, body)
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateDocumentBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateBlockResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/documents/{}/blocks/{}/children",
+            query.document_id, query.block_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<CreateBlockData>()
+        .await?;
         Ok(CreateBlockResp {
             api_resp,
             code_error: raw.code_error,
@@ -425,19 +758,32 @@ impl<'a> DocumentBlockResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BlockData>(self.config, &api_req, option).await?;
+        let query = GetDocumentBlockQuery::new(document_id, block_id)
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetDocumentBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetBlockResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/documents/{}/blocks/{}",
+            query.document_id, query.block_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<BlockData>()
+        .await?;
         Ok(GetBlockResp {
             api_resp,
             code_error: raw.code_error,
@@ -454,20 +800,33 @@ impl<'a> DocumentBlockResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UpdateBlockData>(self.config, &api_req, option).await?;
+        let query = UpdateDocumentBlockQuery::new(document_id, block_id, body)
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateDocumentBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateBlockResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/documents/{}/blocks/{}",
+            query.document_id, query.block_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<UpdateBlockData>()
+        .await?;
         Ok(UpdateBlockResp {
             api_resp,
             code_error: raw.code_error,
@@ -483,20 +842,33 @@ impl<'a> DocumentBlockResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchUpdateBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/batch_update");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BatchUpdateBlockData>(self.config, &api_req, option).await?;
+        let query = BatchUpdateDocumentBlockQuery::new(document_id, body)
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.batch_update_by_query(&query, option).await
+    }
+
+    pub async fn batch_update_by_query(
+        &self,
+        query: &BatchUpdateDocumentBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateBlockResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/documents/{}/blocks/batch_update",
+            query.document_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<BatchUpdateBlockData>()
+        .await?;
         Ok(BatchUpdateBlockResp {
             api_resp,
             code_error: raw.code_error,
@@ -512,19 +884,31 @@ impl<'a> DocumentBlockResource<'a> {
         document_revision_id: Option<i64>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
+        let query = DeleteDocumentBlockChildrenQuery::new(document_id, block_id, body)
+            .document_revision_id(document_revision_id);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteDocumentBlockChildrenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
         let path = format!(
-            "/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}/children/batch_delete"
+            "/open-apis/docx/v1/documents/{}/blocks/{}/children/batch_delete",
+            query.document_id, query.block_id
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -540,25 +924,31 @@ impl<'a> DocumentBlockResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BlockListData>(self.config, &api_req, option).await?;
+        let query = ListDocumentBlockQuery::new(document_id)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListDocumentBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListBlockResp, LarkError> {
+        let path = format!("/open-apis/docx/v1/documents/{}/blocks", query.document_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<BlockListData>()
+        .await?;
         Ok(ListBlockResp {
             api_resp,
             code_error: raw.code_error,
@@ -577,25 +967,34 @@ impl<'a> DocumentBlockResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}/children");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BlockListData>(self.config, &api_req, option).await?;
+        let query = ListDocumentBlockChildrenQuery::new(document_id, block_id)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.list_children_by_query(&query, option).await
+    }
+
+    pub async fn list_children_by_query(
+        &self,
+        query: &ListDocumentBlockChildrenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListBlockResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/documents/{}/blocks/{}/children",
+            query.document_id, query.block_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<BlockListData>()
+        .await?;
         Ok(ListBlockResp {
             api_resp,
             code_error: raw.code_error,
