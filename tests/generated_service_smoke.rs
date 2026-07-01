@@ -18,9 +18,11 @@ use larksuite_oapi_sdk_rs::service::{
     },
     corehr::v1::{
         GetDepartmentQuery as GetCorehrDepartmentQuery, GetEmployeeQuery as GetCorehrEmployeeQuery,
-        ListCompanyQuery as ListCorehrCompanyQuery,
+        ListCompanyQuery as ListCorehrCompanyQuery, ListCurrencyQuery as ListCorehrCurrencyQuery,
         ListDepartmentQuery as ListCorehrDepartmentQuery,
         ListEmployeeQuery as ListCorehrEmployeeQuery, ListJobLevelQuery as ListCorehrJobLevelQuery,
+        ListLocationQuery as ListCorehrLocationQuery,
+        ListWorkingHoursTypeQuery as ListCorehrWorkingHoursTypeQuery,
     },
     directory::{
         ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
@@ -1605,6 +1607,100 @@ async fn corehr_company_list_by_query_smoke() {
     assert_eq!(data.items[0].id.as_deref(), Some("company-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/companies?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_location_get_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"location":{"id":"loc-1"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr()
+        .location
+        .get("loc-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data.unwrap().location.unwrap().id.as_deref(),
+        Some("loc-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/locations/loc-1"));
+}
+
+#[tokio::test]
+async fn corehr_location_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"loc-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListCorehrLocationQuery::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .location
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0].id.as_deref(), Some("loc-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/locations?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_currency_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"currency_id":"CNY"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query =
+        ListCorehrCurrencyQuery::new().page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .currency
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0].currency_id.as_deref(), Some("CNY"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/currencies?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_working_hours_type_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"hours-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let query = ListCorehrWorkingHoursTypeQuery::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"));
+    let resp = client
+        .corehr()
+        .working_hours_type
+        .list_by_query(&query, &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.items[0].id.as_deref(), Some("hours-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/working_hours_types?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }
