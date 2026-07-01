@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -69,6 +69,86 @@ pub struct BlockAccessListData {
 impl_resp!(GetWorkplaceAccessResp, WorkplaceAccessListData);
 impl_resp!(GetBlockAccessResp, BlockAccessListData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct WorkplaceAccessDataQuery<'a> {
+    pub from_date: &'a str,
+    pub to_date: &'a str,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> WorkplaceAccessDataQuery<'a> {
+    pub fn new(from_date: &'a str, to_date: &'a str) -> Self {
+        Self {
+            from_date,
+            to_date,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CustomWorkplaceAccessDataQuery<'a> {
+    pub from_date: &'a str,
+    pub to_date: &'a str,
+    pub workplace_id: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> CustomWorkplaceAccessDataQuery<'a> {
+    pub fn new(from_date: &'a str, to_date: &'a str) -> Self {
+        Self {
+            from_date,
+            to_date,
+            workplace_id: None,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn workplace_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.workplace_id = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct WorkplaceBlockAccessDataQuery<'a> {
+    pub from_date: &'a str,
+    pub to_date: &'a str,
+    pub block_id: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> WorkplaceBlockAccessDataQuery<'a> {
+    pub fn new(from_date: &'a str, to_date: &'a str) -> Self {
+        Self {
+            from_date,
+            to_date,
+            block_id: None,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn block_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.block_id = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct WorkplaceAccessDataResource<'a> {
@@ -84,22 +164,28 @@ impl<'a> WorkplaceAccessDataResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetWorkplaceAccessResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = WorkplaceAccessDataQuery::new(from_date, to_date)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &WorkplaceAccessDataQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetWorkplaceAccessResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/workplace/v1/workplace_access_data/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("from_date", from_date);
-        api_req.query_params.set("to_date", to_date);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<WorkplaceAccessListData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("from_date", query.from_date)
+        .query("to_date", query.to_date)
+        .page_query(query.page)
+        .send::<WorkplaceAccessListData>()
+        .await?;
         Ok(GetWorkplaceAccessResp {
             api_resp,
             code_error: raw.code_error,
@@ -115,22 +201,28 @@ impl<'a> WorkplaceAccessDataResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetWorkplaceAccessResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = WorkplaceAccessDataQuery::new(from_date, to_date)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &WorkplaceAccessDataQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetWorkplaceAccessResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/workplace/v1/workplace_access_data/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("from_date", from_date);
-        api_req.query_params.set("to_date", to_date);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<WorkplaceAccessListData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("from_date", query.from_date)
+        .query("to_date", query.to_date)
+        .page_query(query.page)
+        .send::<WorkplaceAccessListData>()
+        .await?;
         Ok(GetWorkplaceAccessResp {
             api_resp,
             code_error: raw.code_error,
@@ -153,24 +245,30 @@ impl<'a> CustomWorkplaceAccessDataResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetBlockAccessResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = CustomWorkplaceAccessDataQuery::new(from_date, to_date)
+            .workplace_id(workplace_id)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &CustomWorkplaceAccessDataQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetBlockAccessResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/workplace/v1/custom_workplace_access_data/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("from_date", from_date);
-        api_req.query_params.set("to_date", to_date);
-        if let Some(v) = workplace_id {
-            api_req.query_params.set("workplace_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BlockAccessListData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("from_date", query.from_date)
+        .query("to_date", query.to_date)
+        .query("workplace_id", query.workplace_id)
+        .page_query(query.page)
+        .send::<BlockAccessListData>()
+        .await?;
         Ok(GetBlockAccessResp {
             api_resp,
             code_error: raw.code_error,
@@ -187,24 +285,30 @@ impl<'a> CustomWorkplaceAccessDataResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetBlockAccessResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = CustomWorkplaceAccessDataQuery::new(from_date, to_date)
+            .workplace_id(workplace_id)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &CustomWorkplaceAccessDataQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetBlockAccessResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/workplace/v1/custom_workplace_access_data/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("from_date", from_date);
-        api_req.query_params.set("to_date", to_date);
-        if let Some(v) = workplace_id {
-            api_req.query_params.set("workplace_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BlockAccessListData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("from_date", query.from_date)
+        .query("to_date", query.to_date)
+        .query("workplace_id", query.workplace_id)
+        .page_query(query.page)
+        .send::<BlockAccessListData>()
+        .await?;
         Ok(GetBlockAccessResp {
             api_resp,
             code_error: raw.code_error,
@@ -229,24 +333,30 @@ impl<'a> WorkplaceBlockAccessDataResource<'a> {
         block_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetBlockAccessResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = WorkplaceBlockAccessDataQuery::new(from_date, to_date)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .block_id(block_id);
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &WorkplaceBlockAccessDataQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetBlockAccessResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/workplace/v1/workplace_block_access_data/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("from_date", from_date);
-        api_req.query_params.set("to_date", to_date);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = block_id {
-            api_req.query_params.set("block_id", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<BlockAccessListData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("from_date", query.from_date)
+        .query("to_date", query.to_date)
+        .query("block_id", query.block_id)
+        .page_query(query.page)
+        .send::<BlockAccessListData>()
+        .await?;
         Ok(GetBlockAccessResp {
             api_resp,
             code_error: raw.code_error,
