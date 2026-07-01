@@ -521,6 +521,155 @@ pub struct DepartmentResource<'a> {
     config: &'a Config,
 }
 
+macro_rules! impl_directory_role_setters {
+    () => {
+        pub fn employee_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+            self.employee_id_type = value.into();
+            self
+        }
+
+        pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+            self.department_id_type = value.into();
+            self
+        }
+
+        pub fn is_admin_role(mut self, value: impl Into<Option<bool>>) -> Self {
+            self.is_admin_role = value.into();
+            self
+        }
+    };
+}
+
+macro_rules! impl_directory_tenant_setter {
+    () => {
+        pub fn tenant_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+            self.tenant_id = value.into();
+            self
+        }
+    };
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateDepartmentQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+    pub tenant_id: Option<&'a str>,
+}
+
+impl<'a> CreateDepartmentQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+            tenant_id: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+    impl_directory_tenant_setter!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct FilterDepartmentQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+    pub tenant_id: Option<&'a str>,
+}
+
+impl<'a> FilterDepartmentQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+            tenant_id: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+    impl_directory_tenant_setter!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct MgetDepartmentQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+}
+
+impl<'a> MgetDepartmentQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchDepartmentQuery<'a> {
+    pub department_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+}
+
+impl<'a> PatchDepartmentQuery<'a> {
+    pub fn new(department_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            department_id,
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SearchDirectoryDepartmentQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+    pub tenant_id: Option<&'a str>,
+}
+
+impl<'a> SearchDirectoryDepartmentQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+            tenant_id: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+    impl_directory_tenant_setter!();
+}
+
 impl DepartmentResource<'_> {
     pub async fn create(
         &self,
@@ -531,24 +680,33 @@ impl DepartmentResource<'_> {
         tenant_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/directory/v1/departments");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateDepartmentQuery::new(body)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type)
+            .is_admin_role(is_admin_role)
+            .tenant_id(tenant_id);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateDepartmentResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/directory/v1/departments",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .query("tenant_id", query.tenant_id)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateDepartmentResp {
             api_resp,
             code_error,
@@ -590,27 +748,33 @@ impl DepartmentResource<'_> {
         tenant_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<FilterDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = FilterDepartmentQuery::new(body)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type)
+            .is_admin_role(is_admin_role)
+            .tenant_id(tenant_id);
+        self.filter_by_query(&query, option).await
+    }
+
+    pub async fn filter_by_query(
+        &self,
+        query: &FilterDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<FilterDepartmentResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/directory/v1/departments/filter",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .query("tenant_id", query.tenant_id)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(FilterDepartmentResp {
             api_resp,
             code_error,
@@ -626,24 +790,31 @@ impl DepartmentResource<'_> {
         is_admin_role: Option<bool>,
         option: &RequestOption,
     ) -> Result<MgetDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = MgetDepartmentQuery::new(body)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type)
+            .is_admin_role(is_admin_role);
+        self.mget_by_query(&query, option).await
+    }
+
+    pub async fn mget_by_query(
+        &self,
+        query: &MgetDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<MgetDepartmentResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/directory/v1/departments/mget",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(MgetDepartmentResp {
             api_resp,
             code_error,
@@ -660,22 +831,35 @@ impl DepartmentResource<'_> {
         is_admin_role: Option<bool>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/directory/v1/departments/{department_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        let query = PatchDepartmentQuery::new(department_id, body)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type)
+            .is_admin_role(is_admin_role);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/directory/v1/departments/{}",
+            query.department_id
+        );
+        let (api_resp, code_error, _) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error,
@@ -691,27 +875,33 @@ impl DepartmentResource<'_> {
         tenant_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = SearchDirectoryDepartmentQuery::new(body)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type)
+            .is_admin_role(is_admin_role)
+            .tenant_id(tenant_id);
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchDirectoryDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchDepartmentResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/directory/v1/departments/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .query("tenant_id", query.tenant_id)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SearchDepartmentResp {
             api_resp,
             code_error,
@@ -726,6 +916,127 @@ pub struct EmployeeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateDirectoryEmployeeQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+    pub tenant_id: Option<&'a str>,
+}
+
+impl<'a> CreateDirectoryEmployeeQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+            tenant_id: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+    impl_directory_tenant_setter!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct FilterEmployeeQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+    pub tenant_id: Option<&'a str>,
+}
+
+impl<'a> FilterEmployeeQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+            tenant_id: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+    impl_directory_tenant_setter!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct MgetEmployeeQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+}
+
+impl<'a> MgetEmployeeQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchEmployeeQuery<'a> {
+    pub employee_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+}
+
+impl<'a> PatchEmployeeQuery<'a> {
+    pub fn new(employee_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            employee_id,
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SearchDirectoryEmployeeQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+    pub tenant_id: Option<&'a str>,
+}
+
+impl<'a> SearchDirectoryEmployeeQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+            tenant_id: None,
+        }
+    }
+
+    impl_directory_role_setters!();
+    impl_directory_tenant_setter!();
+}
+
 impl EmployeeResource<'_> {
     pub async fn create(
         &self,
@@ -736,24 +1047,33 @@ impl EmployeeResource<'_> {
         tenant_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateEmployeeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/directory/v1/employees");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateDirectoryEmployeeQuery::new(body)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type)
+            .is_admin_role(is_admin_role)
+            .tenant_id(tenant_id);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateDirectoryEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateEmployeeResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/directory/v1/employees",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .query("tenant_id", query.tenant_id)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateEmployeeResp {
             api_resp,
             code_error,
@@ -803,27 +1123,33 @@ impl EmployeeResource<'_> {
         tenant_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<FilterEmployeeResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = FilterEmployeeQuery::new(body)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type)
+            .is_admin_role(is_admin_role)
+            .tenant_id(tenant_id);
+        self.filter_by_query(&query, option).await
+    }
+
+    pub async fn filter_by_query(
+        &self,
+        query: &FilterEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<FilterEmployeeResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/directory/v1/employees/filter",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .query("tenant_id", query.tenant_id)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(FilterEmployeeResp {
             api_resp,
             code_error,
@@ -839,21 +1165,31 @@ impl EmployeeResource<'_> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<MgetEmployeeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/directory/v1/employees/mget");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = MgetEmployeeQuery::new(body)
+            .is_admin_role(is_admin_role)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type);
+        self.mget_by_query(&query, option).await
+    }
+
+    pub async fn mget_by_query(
+        &self,
+        query: &MgetEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<MgetEmployeeResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/directory/v1/employees/mget",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("is_admin_role", query.is_admin_role)
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(MgetEmployeeResp {
             api_resp,
             code_error,
@@ -870,22 +1206,32 @@ impl EmployeeResource<'_> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/directory/v1/employees/{employee_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        let query = PatchEmployeeQuery::new(employee_id, body)
+            .employee_id_type(employee_id_type)
+            .is_admin_role(is_admin_role)
+            .department_id_type(department_id_type);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/directory/v1/employees/{}", query.employee_id);
+        let (api_resp, code_error, _) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error,
@@ -967,27 +1313,33 @@ impl EmployeeResource<'_> {
         tenant_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchEmployeeResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = SearchDirectoryEmployeeQuery::new(body)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type)
+            .is_admin_role(is_admin_role)
+            .tenant_id(tenant_id);
+        self.search_by_query(&query, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchDirectoryEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchEmployeeResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/directory/v1/employees/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .query("tenant_id", query.tenant_id)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SearchEmployeeResp {
             api_resp,
             code_error,

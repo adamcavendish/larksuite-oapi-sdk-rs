@@ -56,8 +56,10 @@ use larksuite_oapi_sdk_rs::service::{
         SearchSignatureTemplateV2Query as SearchCorehrSignatureTemplateV2Query,
     },
     directory::{
+        CreateDepartmentQuery as CreateDirectoryDepartmentQuery, CreateDirectoryEmployeeQuery,
         ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
-        ListShareEntityQuery,
+        ListShareEntityQuery, MgetEmployeeQuery as MgetDirectoryEmployeeQuery,
+        PatchEmployeeQuery as PatchDirectoryEmployeeQuery, SearchDirectoryDepartmentQuery,
     },
     docs::v1::GetContentQuery as GetDocsContentQuery,
     drive::{
@@ -2946,6 +2948,157 @@ async fn directory_share_entity_positional_adapter_smoke() {
     assert!(request.contains("tenant_id=tenant-1"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn directory_department_create_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"department_id":"od-1"}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = serde_json::json!({"name":"Engineering"});
+    let resp = client
+        .directory()
+        .department
+        .create_by_query(
+            &CreateDirectoryDepartmentQuery::new(&body)
+                .employee_id_type("open_id")
+                .department_id_type("department_id")
+                .is_admin_role(true)
+                .tenant_id("tenant-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/directory/v1/departments?"));
+    assert!(request.contains("employee_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("is_admin_role=true"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains(r#""name":"Engineering""#));
+}
+
+#[tokio::test]
+async fn directory_department_search_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"department_id":"od-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = serde_json::json!({"keyword":"Engineering"});
+    let resp = client
+        .directory()
+        .department
+        .search_by_query(
+            &SearchDirectoryDepartmentQuery::new(&body)
+                .employee_id_type("open_id")
+                .department_id_type("department_id")
+                .is_admin_role(true)
+                .tenant_id("tenant-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/directory/v1/departments/search?"));
+    assert!(request.contains("employee_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("is_admin_role=true"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains(r#""keyword":"Engineering""#));
+}
+
+#[tokio::test]
+async fn directory_employee_create_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"employee_id":"emp-1"}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = serde_json::json!({"name":"Alice"});
+    let resp = client
+        .directory()
+        .employee
+        .create_by_query(
+            &CreateDirectoryEmployeeQuery::new(&body)
+                .employee_id_type("open_id")
+                .department_id_type("department_id")
+                .is_admin_role(true)
+                .tenant_id("tenant-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/directory/v1/employees?"));
+    assert!(request.contains("employee_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("is_admin_role=true"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains(r#""name":"Alice""#));
+}
+
+#[tokio::test]
+async fn directory_employee_mget_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"employee_id":"emp-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = serde_json::json!({"employee_ids":["emp-1"]});
+    let resp = client
+        .directory()
+        .employee
+        .mget_by_query(
+            &MgetDirectoryEmployeeQuery::new(&body)
+                .employee_id_type("open_id")
+                .department_id_type("department_id")
+                .is_admin_role(true),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/directory/v1/employees/mget?"));
+    assert!(request.contains("employee_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("is_admin_role=true"));
+    assert!(request.contains(r#""employee_ids":["emp-1"]"#));
+}
+
+#[tokio::test]
+async fn directory_employee_patch_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = serde_json::json!({"name":"Alice Updated"});
+    let resp = client
+        .directory()
+        .employee
+        .patch_by_query(
+            &PatchDirectoryEmployeeQuery::new("emp-1", &body)
+                .employee_id_type("open_id")
+                .department_id_type("department_id")
+                .is_admin_role(true),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("PATCH /open-apis/directory/v1/employees/emp-1?"));
+    assert!(request.contains("employee_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("is_admin_role=true"));
+    assert!(request.contains(r#""name":"Alice Updated""#));
 }
 
 // ── Calendar ──
