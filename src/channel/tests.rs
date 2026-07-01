@@ -71,6 +71,57 @@ fn counting_json_server(
     (addr, calls, handle)
 }
 
+async fn mock_json_server_with_requests(
+    responses: Vec<&'static str>,
+) -> (
+    std::net::SocketAddr,
+    tokio::task::JoinHandle<()>,
+    Arc<Mutex<Vec<String>>>,
+) {
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let responses = Arc::new(responses);
+    let counter = Arc::new(AtomicUsize::new(0));
+    let requests = Arc::new(Mutex::new(Vec::new()));
+
+    let handle = tokio::spawn({
+        let requests = requests.clone();
+        async move {
+            loop {
+                let Ok((mut stream, _)) = listener.accept().await else {
+                    break;
+                };
+                let responses = responses.clone();
+                let counter = counter.clone();
+                let requests = requests.clone();
+                tokio::spawn(async move {
+                    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+                    let mut buf = vec![0u8; 131_072];
+                    let Ok(n) = stream.read(&mut buf).await else {
+                        return;
+                    };
+                    requests
+                        .lock()
+                        .unwrap()
+                        .push(String::from_utf8_lossy(&buf[..n]).to_string());
+                    let idx = counter.fetch_add(1, Ordering::SeqCst);
+                    let body = responses[idx.min(responses.len() - 1)];
+                    let response = format!(
+                        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+                        body.len(),
+                        body
+                    );
+                    let _ = stream.write_all(response.as_bytes()).await;
+                    let _ = stream.shutdown().await;
+                });
+            }
+        }
+    });
+
+    (addr, handle, requests)
+}
+
 fn message_event(message_id: &str, message_type: &str, content: &str) -> P2MessageReceiveV1 {
     P2MessageReceiveV1 {
         sender: MessageSender {
@@ -121,6 +172,185 @@ fn normalizes_text_message_content() {
     let event = message_event("om_1", MessageType::TEXT, r#"{"text":"hello"}"#);
     let message = NormalizedMessage::from_event(event);
     assert_eq!(message.text.as_deref(), Some("hello"));
+}
+
+#[test]
+fn normalizes_go_channel_content_cases() {
+    let cases = [
+        (
+            MessageType::TEXT,
+            r#"{"text":"hello"}"#,
+            "hello",
+            Vec::<ChannelResource>::new(),
+        ),
+        (
+            MessageType::IMAGE,
+            r#"{"image_key":"img_123"}"#,
+            "![image](img_123)",
+            vec![ChannelResource::new("image", "img_123")],
+        ),
+        (
+            MessageType::FILE,
+            r#"{"file_key":"file_123", "file_name":"test.txt"}"#,
+            r#"<file key="file_123" name="test.txt"/>"#,
+            vec![ChannelResource {
+                resource_type: "file".into(),
+                file_key: "file_123".into(),
+                file_name: "test.txt".into(),
+                duration_ms: None,
+                cover_image_key: String::new(),
+            }],
+        ),
+        (
+            "folder",
+            r#"{"file_key":"folder_123", "file_name":"my_folder"}"#,
+            r#"<folder key="folder_123" name="my_folder"/>"#,
+            Vec::new(),
+        ),
+        (
+            MessageType::AUDIO,
+            r#"{"file_key":"audio_123", "duration": 120000}"#,
+            r#"<audio key="audio_123" duration="2:00"/>"#,
+            vec![ChannelResource {
+                resource_type: "audio".into(),
+                file_key: "audio_123".into(),
+                duration_ms: Some(120000),
+                ..Default::default()
+            }],
+        ),
+        (
+            MessageType::MEDIA,
+            r#"{"file_key":"video_123", "file_name":"vid.mp4", "duration": 65000, "image_key":"cover_1"}"#,
+            r#"<video key="video_123" name="vid.mp4" duration="1:05"/>"#,
+            vec![ChannelResource {
+                resource_type: "video".into(),
+                file_key: "video_123".into(),
+                file_name: "vid.mp4".into(),
+                duration_ms: Some(65000),
+                cover_image_key: "cover_1".into(),
+            }],
+        ),
+        (
+            MessageType::STICKER,
+            r#"{"file_key":"sticker_123"}"#,
+            r#"<sticker key="sticker_123"/>"#,
+            vec![ChannelResource::new("sticker", "sticker_123")],
+        ),
+        (
+            "hongbao",
+            r#"{"text":"Happy New Year"}"#,
+            r#"<hongbao text="Happy New Year"/>"#,
+            Vec::new(),
+        ),
+        (
+            "location",
+            r#"{"name":"Beijing", "latitude":"39.9042", "longitude":"116.4074"}"#,
+            r#"<location name="Beijing" coords="lat:39.9042,lng:116.4074"/>"#,
+            Vec::new(),
+        ),
+        (
+            MessageType::SHARE_CHAT,
+            r#"{"chat_id":"chat_123"}"#,
+            r#"<group_card id="chat_123"/>"#,
+            Vec::new(),
+        ),
+        (
+            MessageType::SHARE_USER,
+            r#"{"user_id":"user_123"}"#,
+            r#"<contact_card id="user_123"/>"#,
+            Vec::new(),
+        ),
+        (
+            "system",
+            r#"{"template":"Hello {name}, welcome to {place}", "name":"Alice", "place":"Wonderland"}"#,
+            "Hello Alice, welcome to Wonderland",
+            Vec::new(),
+        ),
+        (
+            "vote",
+            r#"{"topic":"What's for lunch?", "options":["Pizza", "Burger"]}"#,
+            "<vote>\nWhat's for lunch?\n• Pizza\n• Burger\n</vote>",
+            Vec::new(),
+        ),
+        (
+            "video_chat",
+            r#"{"topic":"Daily Sync", "start_time":"1609459200000"}"#,
+            "<meeting>\n📹 Daily Sync\n🕙 2021-01-01 08:00:00\n</meeting>",
+            Vec::new(),
+        ),
+        (
+            "calendar",
+            r#"{"summary":"Meeting", "start_time":"1609459200000", "end_time":"1609462800000"}"#,
+            "<calendar_invite>\n📅 Meeting\n🕙 2021-01-01 08:00:00 ~ 2021-01-01 09:00:00\n</calendar_invite>",
+            Vec::new(),
+        ),
+        (
+            "todo",
+            r#"{"summary":{"title":"Buy milk", "content":[[{"tag":"text","text":"From the store"}]]}, "due_time":"1609459200000"}"#,
+            "<todo>\nBuy milk\nFrom the store\nDue: 2021-01-01 08:00:00\n</todo>",
+            Vec::new(),
+        ),
+        (
+            MessageType::INTERACTIVE,
+            r#"{"config":{"wide_screen_mode":true}}"#,
+            "[interactive card]",
+            Vec::new(),
+        ),
+    ];
+
+    for (message_type, content, expected_text, expected_resources) in cases {
+        let message =
+            NormalizedMessage::from_event(message_event("om_norm", message_type, content));
+        assert_eq!(
+            message.text.as_deref(),
+            Some(expected_text),
+            "{message_type}"
+        );
+        assert_eq!(message.resources, expected_resources, "{message_type}");
+        assert_eq!(message.content, content);
+    }
+}
+
+#[test]
+fn normalizes_post_content_v2_and_rich_text_fallback() {
+    let post = NormalizedMessage::from_event(message_event(
+        "om_post",
+        MessageType::POST,
+        r#"{"zh_cn": {"title":"Post Title", "content":[[{"tag":"text","text":"Hello "}, {"tag":"a", "text":"Link", "href":"https://example.com"}], [{"tag":"at", "user_id":"all"}], [{"tag":"img", "image_key":"img_abc"}]]}}"#,
+    ));
+    assert_eq!(
+        post.text.as_deref(),
+        Some("**Post Title**\n\nHello [Link](https://example.com)\n@all\n![image](img_abc)")
+    );
+    assert_eq!(
+        post.resources,
+        vec![ChannelResource::new("image", "img_abc")]
+    );
+
+    let content_v2 = NormalizedMessage::from_event(message_event(
+        "om_v2",
+        MessageType::POST,
+        r#"{"zh_cn":{"content_v2":[[{"tag":"md","text":"<at user_id=\"ou_123\">小明</at> hello ![image](img_key_123)"}]]}}"#,
+    ));
+    assert_eq!(
+        content_v2.text.as_deref(),
+        Some("@小明 hello ![image](img_key_123)")
+    );
+    assert_eq!(
+        content_v2.resources,
+        vec![ChannelResource::new("image", "img_key_123")]
+    );
+
+    let protected = NormalizedMessage::from_event(message_event(
+        "om_code",
+        MessageType::POST,
+        "{\"zh_cn\":{\"content_v2\":[[{\"tag\":\"md\",\"text\":\"Before\\n```go\\n<at user_id=\\\"ou_1\\\">name</at>\\n![image](k)\\n```\\nAfter\"}]]}}",
+    ));
+    assert_eq!(
+        protected.text.as_deref(),
+        Some("Before\n```go\n<at user_id=\"ou_1\">name</at>\n![image](k)\n```\nAfter")
+    );
+    assert!(protected.resources.is_empty());
 }
 
 #[test]
@@ -306,6 +536,294 @@ fn stream_throttle_blocks_immediate_flush() {
     assert!(!stream.should_flush());
     stream.force_due();
     assert!(stream.should_flush());
+}
+
+#[tokio::test]
+async fn channel_send_text_detects_receive_id_and_mentions() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_sent","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let result = channel
+        .send(
+            &SendInput {
+                receive_id: Some("ou_user".into()),
+                text: Some("hello".into()),
+                mentions: vec![ChannelMention {
+                    id: Some(UserId {
+                        user_id: Some("user_1".into()),
+                        ..Default::default()
+                    }),
+                    name: "Alice".into(),
+                    ..Default::default()
+                }],
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_sent");
+    let request_dump = requests.lock().unwrap().join("\n---\n");
+    assert!(request_dump.contains("POST /open-apis/im/v1/messages?receive_id_type=open_id"));
+    assert!(request_dump.contains(r#""receive_id":"ou_user""#));
+    assert!(request_dump.contains(r#""msg_type":"text""#));
+    assert!(request_dump.contains("user_1"));
+    assert!(request_dump.contains("Alice"));
+    assert!(request_dump.contains("hello"));
+}
+
+#[tokio::test]
+async fn channel_send_user_id_uses_user_id_receive_type() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_user","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let result = channel
+        .send(
+            &SendInput {
+                user_id: Some("user_123".into()),
+                text: Some("hello".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_user");
+    let request_dump = requests.lock().unwrap().join("\n---\n");
+    assert!(request_dump.contains("POST /open-apis/im/v1/messages?receive_id_type=user_id"));
+    assert!(request_dump.contains(r#""receive_id":"user_123""#));
+}
+
+#[tokio::test]
+async fn channel_send_markdown_uses_post_content() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_post","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let result = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                markdown: Some("**hello**".into()),
+                title: Some("Title".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_post");
+    let request_dump = requests.lock().unwrap().join("\n---\n");
+    assert!(request_dump.contains("receive_id_type=chat_id"));
+    assert!(request_dump.contains(r#""msg_type":"post""#));
+    assert!(request_dump.contains(r#"\"tag\":\"md\""#));
+    assert!(request_dump.contains("**hello**"));
+}
+
+#[tokio::test]
+async fn channel_send_direct_image_and_file_keys() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_image","chat_id":"oc_group"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_file","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let image = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                image_key: Some("img_direct".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let file = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                file_key: Some("file_direct".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(image.message_id, "om_image");
+    assert_eq!(file.message_id, "om_file");
+    let request_dump = requests.lock().unwrap().join("\n---\n");
+    assert!(request_dump.contains(r#""msg_type":"image""#));
+    assert!(request_dump.contains(r#"\"image_key\":\"img_direct\""#));
+    assert!(request_dump.contains(r#""msg_type":"file""#));
+    assert!(request_dump.contains(r#"\"file_key\":\"file_direct\""#));
+}
+
+#[tokio::test]
+async fn channel_send_image_path_uploads_then_sends_image_key() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"image_key":"img_uploaded"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_image","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let path = std::env::temp_dir().join(format!("lark-channel-{}.png", now_ms()));
+    std::fs::write(&path, b"image-bytes").unwrap();
+
+    let result = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                image_path: Some(path.to_string_lossy().to_string()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    std::fs::remove_file(&path).unwrap();
+
+    assert_eq!(result.message_id, "om_image");
+    let request_dump = requests.lock().unwrap().join("\n---\n");
+    assert!(request_dump.contains("POST /open-apis/im/v1/images"));
+    assert!(request_dump.contains("POST /open-apis/im/v1/messages?receive_id_type=chat_id"));
+    assert!(request_dump.contains(r#""msg_type":"image""#));
+    assert!(request_dump.contains(r#"\"image_key\":\"img_uploaded\""#));
+}
+
+#[tokio::test]
+async fn channel_send_file_path_uploads_then_sends_file_key() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"file_key":"file_uploaded"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_file","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let path = std::env::temp_dir().join(format!("lark-channel-{}.txt", now_ms()));
+    std::fs::write(&path, b"file-bytes").unwrap();
+
+    let result = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                file_path: Some(path.to_string_lossy().to_string()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    std::fs::remove_file(&path).unwrap();
+
+    assert_eq!(result.message_id, "om_file");
+    let request_dump = requests.lock().unwrap().join("\n---\n");
+    assert!(request_dump.contains("POST /open-apis/im/v1/files"));
+    assert!(request_dump.contains("POST /open-apis/im/v1/messages?receive_id_type=chat_id"));
+    assert!(request_dump.contains(r#""msg_type":"file""#));
+    assert!(request_dump.contains(r#"\"file_key\":\"file_uploaded\""#));
+}
+
+#[tokio::test]
+async fn channel_send_empty_input_is_rejected_without_request() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"unused"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let err = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap_err();
+
+    assert!(err.to_string().contains("no valid channel message content"));
+    assert!(requests.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn channel_send_text_chunks_long_messages() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_chunk_1","chat_id":"oc_group"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_chunk_2","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let text = format!("{}b", "a".repeat(20_000));
+
+    let result = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                text: Some(text),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_chunk_1");
+    assert_eq!(result.chunk_ids, vec!["om_chunk_1", "om_chunk_2"]);
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 2);
+    assert!(requests[0].contains(r#""msg_type":"text""#));
+    assert!(requests[1].contains(r#""text\":\"b\""#));
+}
+
+#[tokio::test]
+async fn channel_send_retries_format_error_as_text() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":230001,"msg":"format error"}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_text","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let result = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                markdown: Some("fallback **text**".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_text");
+    let request_dump = requests.lock().unwrap().join("\n---\n");
+    assert!(request_dump.contains(r#""msg_type":"post""#));
+    assert!(request_dump.contains(r#""msg_type":"text""#));
+    assert!(request_dump.contains("fallback **text**"));
 }
 
 #[tokio::test]

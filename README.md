@@ -62,6 +62,64 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+### Channel helpers
+
+The optional `channel` feature adds Go-SDK-style message normalization and
+higher-level send helpers on top of IM and WebSocket APIs.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::channel::{Channel, SendInput};
+use larksuite_oapi_sdk_rs::{Client, EventDispatcher, RequestOption};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = Client::builder("APP_ID", "APP_SECRET").build()?;
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let sent = channel.send(
+        &SendInput {
+            chat_id: Some("oc_xxx".into()),
+            markdown: Some("**hello**".into()),
+            title: Some("Rust SDK".into()),
+            ..Default::default()
+        },
+        &RequestOption::default(),
+    ).await?;
+
+    println!("message_id: {}", sent.message_id);
+    Ok(())
+}
+```
+
+Incoming channel messages keep the original Lark JSON in `content` and expose
+normalized user-facing text plus attached resources through `text` and
+`resources`.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::channel::{Channel, ChannelPolicy};
+use larksuite_oapi_sdk_rs::{Client, EventDispatcher, LarkError};
+
+fn channel_with_normalized_messages(client: &Client, dispatcher: EventDispatcher) -> Channel<'_> {
+    Channel::builder(client, dispatcher)
+        .policy(ChannelPolicy::default().require_mention(false))
+        .on_message(|message| async move {
+            println!("raw: {}", message.content);
+            println!("text: {}", message.text.unwrap_or_default());
+            for resource in message.resources {
+                println!("resource: {} {}", resource.resource_type, resource.file_key);
+            }
+            Ok::<(), LarkError>(())
+        })
+        .build()
+}
+```
+
+For uploads, `SendInput` accepts pre-uploaded image/file/audio/video keys,
+`image_path`/`file_path`, or `UploadInput` with `source_path`/`source_bytes`.
+URL uploads and automatic audio/video duration detection are intentionally
+deferred; pass an explicit key, local path, or byte buffer, and provide
+`duration` for audio/video uploads.
+
 ### OAuth authorization code
 
 ```rust,no_run
@@ -101,12 +159,20 @@ let card = Card::new()
 | Feature | Description |
 |---------|-------------|
 | `ws`    | WebSocket long-connection event client (protobuf framing) |
+| `channel` | Channel message normalization and send helpers; enables `ws` |
 | `axum`  | Axum HTTP adapter for event/card action handlers |
 
 ```toml
 [dependencies]
 larksuite-oapi-sdk-rs = { version = "0.1", features = ["ws", "axum"] }
 ```
+
+## Generated API coverage
+
+Dedicated service modules are the preferred API surface when a resource exists.
+For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
+resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
+requests with the same token handling as the rest of the SDK.
 
 ## Requirements
 

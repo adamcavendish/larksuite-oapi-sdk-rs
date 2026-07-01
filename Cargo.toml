@@ -50,3 +50,11 @@ tracing-subscriber = "0.3"
 [[example]]
 name = "ws_client"
 required-features = ["ws"]
+
+[[example]]
+name = "channel_send"
+required-features = ["channel"]
+
+[[example]]
+name = "channel_normalize"
+required-features = ["channel"]
