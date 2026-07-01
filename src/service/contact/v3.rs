@@ -2447,6 +2447,84 @@ pub struct UnitResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListUnitQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListUnitQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListDepartmentUnitQuery<'a> {
+    pub unit_id: &'a str,
+    pub department_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListDepartmentUnitQuery<'a> {
+    pub fn new(unit_id: &'a str) -> Self {
+        Self {
+            unit_id,
+            department_id_type: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl<'a> UnitResource<'a> {
     pub async fn create(
         &self,
@@ -2522,16 +2600,27 @@ impl<'a> UnitResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListUnitResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/unit");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListUnitRespData>(self.config, &api_req, option).await?;
+        let query = ListUnitQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListUnitQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListUnitResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/unit",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send::<ListUnitRespData>()
+        .await?;
         Ok(ListUnitResp {
             api_resp,
             code_error: raw.code_error,
@@ -2585,24 +2674,30 @@ impl<'a> UnitResource<'a> {
         page_size: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListDepartmentUnitResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ListDepartmentUnitQuery::new(unit_id)
+            .department_id_type(department_id_type)
+            .page_token(page_token)
+            .page_size(page_size);
+        self.list_department_by_query(&query, option).await
+    }
+
+    pub async fn list_department_by_query(
+        &self,
+        query: &ListDepartmentUnitQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListDepartmentUnitResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/contact/v3/unit/list_department",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("unit_id", unit_id);
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ListDepartmentUnitRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("unit_id", query.unit_id)
+        .query("department_id_type", query.department_id_type)
+        .page_query(query.page_query())
+        .send::<ListDepartmentUnitRespData>()
+        .await?;
         Ok(ListDepartmentUnitResp {
             api_resp,
             code_error: raw.code_error,
@@ -2613,6 +2708,125 @@ impl<'a> UnitResource<'a> {
 
 pub struct GroupResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetGroupQuery<'a> {
+    pub group_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> GetGroupQuery<'a> {
+    pub fn new(group_id: &'a str) -> Self {
+        Self {
+            group_id,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SimplelistGroupQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub group_type: Option<i32>,
+}
+
+impl<'a> SimplelistGroupQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn group_type(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.group_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct MemberBelongGroupQuery<'a> {
+    pub member_id: &'a str,
+    pub member_id_type: Option<&'a str>,
+    pub group_type: Option<i32>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> MemberBelongGroupQuery<'a> {
+    pub fn new(member_id: &'a str) -> Self {
+        Self {
+            member_id,
+            member_id_type: None,
+            group_type: None,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn member_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.member_id_type = value.into();
+        self
+    }
+
+    pub fn group_type(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.group_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> GroupResource<'a> {
@@ -2664,17 +2878,29 @@ impl<'a> GroupResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetGroupResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/group/{group_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetGroupRespData>(self.config, &api_req, option).await?;
+        let query = GetGroupQuery::new(group_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetGroupQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetGroupResp, LarkError> {
+        let path = format!("/open-apis/contact/v3/group/{}", query.group_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .send::<GetGroupRespData>()
+        .await?;
         Ok(GetGroupResp {
             api_resp,
             code_error: raw.code_error,
@@ -2715,20 +2941,29 @@ impl<'a> GroupResource<'a> {
         group_type: Option<i32>,
         option: &RequestOption,
     ) -> Result<SimplelistGroupResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/contact/v3/group/simplelist");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = group_type {
-            api_req.query_params.set("type", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<SimplelistGroupRespData>(self.config, &api_req, option)
-                .await?;
+        let query = SimplelistGroupQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .group_type(group_type);
+        self.simplelist_by_query(&query, option).await
+    }
+
+    pub async fn simplelist_by_query(
+        &self,
+        query: &SimplelistGroupQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SimplelistGroupResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/contact/v3/group/simplelist",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .query("type", query.group_type)
+        .send::<SimplelistGroupRespData>()
+        .await?;
         Ok(SimplelistGroupResp {
             api_resp,
             code_error: raw.code_error,
@@ -2745,27 +2980,32 @@ impl<'a> GroupResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<MemberBelongGroupResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = MemberBelongGroupQuery::new(member_id)
+            .member_id_type(member_id_type)
+            .group_type(group_type)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.member_belong_by_query(&query, option).await
+    }
+
+    pub async fn member_belong_by_query(
+        &self,
+        query: &MemberBelongGroupQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<MemberBelongGroupResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/contact/v3/group/member_belong",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("member_id", member_id);
-        if let Some(v) = member_id_type {
-            api_req.query_params.set("member_id_type", v);
-        }
-        if let Some(v) = group_type {
-            api_req.query_params.set("group_type", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MemberBelongGroupRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("member_id", query.member_id)
+        .query("member_id_type", query.member_id_type)
+        .query("group_type", query.group_type)
+        .page_query(query.page_query())
+        .send::<MemberBelongGroupRespData>()
+        .await?;
         Ok(MemberBelongGroupResp {
             api_resp,
             code_error: raw.code_error,
@@ -2776,6 +3016,58 @@ impl<'a> GroupResource<'a> {
 
 pub struct GroupMemberResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct SimplelistGroupMemberQuery<'a> {
+    pub group_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub member_id_type: Option<&'a str>,
+    pub member_type: Option<&'a str>,
+}
+
+impl<'a> SimplelistGroupMemberQuery<'a> {
+    pub fn new(group_id: &'a str) -> Self {
+        Self {
+            group_id,
+            page_size: None,
+            page_token: None,
+            member_id_type: None,
+            member_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn member_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.member_id_type = value.into();
+        self
+    }
+
+    pub fn member_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.member_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
 }
 
 impl<'a> GroupMemberResource<'a> {
@@ -2862,26 +3154,34 @@ impl<'a> GroupMemberResource<'a> {
         member_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SimplelistGroupMemberResp, LarkError> {
-        let path = format!("/open-apis/contact/v3/group/{group_id}/member/simplelist");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = member_id_type {
-            api_req.query_params.set("member_id_type", v);
-        }
-        if let Some(v) = member_type {
-            api_req.query_params.set("member_type", v);
-        }
-        let (api_resp, raw) = transport::request_typed::<SimplelistGroupMemberRespData>(
+        let query = SimplelistGroupMemberQuery::new(group_id)
+            .page_size(page_size)
+            .page_token(page_token)
+            .member_id_type(member_id_type)
+            .member_type(member_type);
+        self.simplelist_by_query(&query, option).await
+    }
+
+    pub async fn simplelist_by_query(
+        &self,
+        query: &SimplelistGroupMemberQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SimplelistGroupMemberResp, LarkError> {
+        let path = format!(
+            "/open-apis/contact/v3/group/{}/member/simplelist",
+            query.group_id
+        );
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("member_id_type", query.member_id_type)
+        .query("member_type", query.member_type)
+        .send::<SimplelistGroupMemberRespData>()
         .await?;
         Ok(SimplelistGroupMemberResp {
             api_resp,
