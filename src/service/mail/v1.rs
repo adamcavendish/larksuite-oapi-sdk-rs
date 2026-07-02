@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -730,10 +729,16 @@ impl<'a> MailgroupResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -895,10 +900,16 @@ impl<'a> MailgroupMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members/{member_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -968,7 +979,7 @@ impl<'a> MailgroupMemberResource<'a> {
             "/open-apis/mail/v1/mailgroups/{}/members/batch_create",
             query.mailgroup_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        let (api_resp, code_error, data) = RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -977,9 +988,8 @@ impl<'a> MailgroupMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
+        .send_v2::<serde_json::Value>()
         .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(BatchCreateMailgroupMemberResp {
             api_resp,
             code_error,
@@ -1139,10 +1149,16 @@ impl<'a> PublicMailboxResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1228,10 +1244,16 @@ impl<'a> PublicMailboxResource<'a> {
         let path = format!(
             "/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/remove_to_recycle_bin"
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1327,10 +1349,16 @@ impl<'a> PublicMailboxMemberResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/{member_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1400,7 +1428,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
             "/open-apis/mail/v1/public_mailboxes/{}/members/batch_create",
             query.public_mailbox_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        let (api_resp, code_error, data) = RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1409,9 +1437,8 @@ impl<'a> PublicMailboxMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
+        .send_v2::<serde_json::Value>()
         .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(BatchCreatePublicMailboxMemberResp {
             api_resp,
             code_error,
@@ -1462,10 +1489,16 @@ impl<'a> PublicMailboxMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/clear");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1755,11 +1788,16 @@ impl UserMailboxMessageResource<'_> {
     ) -> Result<GetUserMailboxMessageResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/{message_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(GetUserMailboxMessageResp {
             api_resp,
             code_error,
@@ -1778,20 +1816,19 @@ impl UserMailboxMessageResource<'_> {
     ) -> Result<GetByCardUserMailboxMessageResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/get_by_card");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = card_id {
-            api_req.query_params.set("card_id", v);
-        }
-        if let Some(v) = owner_id {
-            api_req.query_params.set("owner_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("card_id", card_id)
+        .query("owner_id", owner_id)
+        .query("user_id_type", user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(GetByCardUserMailboxMessageResp {
             api_resp,
             code_error,
@@ -1810,23 +1847,20 @@ impl UserMailboxMessageResource<'_> {
         option: &RequestOption,
     ) -> Result<ListUserMailboxMessageResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = folder_id {
-            api_req.query_params.set("folder_id", v);
-        }
-        if let Some(v) = only_unread {
-            api_req.query_params.set("only_unread", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .query("folder_id", folder_id)
+        .query("only_unread", only_unread)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListUserMailboxMessageResp {
             api_resp,
             code_error,
@@ -1842,12 +1876,17 @@ impl UserMailboxMessageResource<'_> {
         option: &RequestOption,
     ) -> Result<SendUserMailboxMessageResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/send");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(SendUserMailboxMessageResp {
             api_resp,
             code_error,
@@ -1874,14 +1913,16 @@ impl UserMailboxMessageAttachmentResource<'_> {
         let path = format!(
             "/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/messages/{message_id}/attachments/download_url"
         );
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        for id in attachment_ids {
-            api_req.query_params.add("attachment_ids", id.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query_values("attachment_ids", Some(attachment_ids.iter().copied()))
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(DownloadUrlUserMailboxMessageAttachmentResp {
             api_resp,
             code_error,
@@ -1905,12 +1946,17 @@ impl UserMailboxFolderResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateUserMailboxFolderResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateUserMailboxFolderResp {
             api_resp,
             code_error,
@@ -1927,10 +1973,16 @@ impl UserMailboxFolderResource<'_> {
     ) -> Result<DeleteUserMailboxFolderResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders/{folder_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
+
         Ok(DeleteUserMailboxFolderResp {
             api_resp,
             code_error,
@@ -1946,14 +1998,17 @@ impl UserMailboxFolderResource<'_> {
         option: &RequestOption,
     ) -> Result<ListUserMailboxFolderResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = folder_type {
-            api_req.query_params.set("folder_type", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("folder_type", folder_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListUserMailboxFolderResp {
             api_resp,
             code_error,
@@ -1971,12 +2026,17 @@ impl UserMailboxFolderResource<'_> {
     ) -> Result<PatchUserMailboxFolderResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/folders/{folder_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(PatchUserMailboxFolderResp {
             api_resp,
             code_error,
@@ -2000,12 +2060,17 @@ impl UserMailboxMailContactResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateUserMailboxMailContactResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateUserMailboxMailContactResp {
             api_resp,
             code_error,
@@ -2023,10 +2088,16 @@ impl UserMailboxMailContactResource<'_> {
         let path = format!(
             "/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts/{mail_contact_id}"
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
+
         Ok(DeleteUserMailboxMailContactResp {
             api_resp,
             code_error,
@@ -2043,17 +2114,18 @@ impl UserMailboxMailContactResource<'_> {
         option: &RequestOption,
     ) -> Result<ListUserMailboxMailContactResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListUserMailboxMailContactResp {
             api_resp,
             code_error,
@@ -2072,12 +2144,17 @@ impl UserMailboxMailContactResource<'_> {
         let path = format!(
             "/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/mail_contacts/{mail_contact_id}"
         );
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(PatchUserMailboxMailContactResp {
             api_resp,
             code_error,
@@ -2101,12 +2178,17 @@ impl UserMailboxRuleResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -2122,10 +2204,16 @@ impl UserMailboxRuleResource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules/{rule_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
+
         Ok(DeleteUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -2140,11 +2228,16 @@ impl UserMailboxRuleResource<'_> {
         option: &RequestOption,
     ) -> Result<ListUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -2160,11 +2253,17 @@ impl UserMailboxRuleResource<'_> {
         option: &RequestOption,
     ) -> Result<ReorderUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules/reorder");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<()>()
+        .await?;
+
         Ok(ReorderUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -2181,12 +2280,17 @@ impl UserMailboxRuleResource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateUserMailboxRuleResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/rules/{rule_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(UpdateUserMailboxRuleResp {
             api_resp,
             code_error,
@@ -2210,12 +2314,17 @@ impl MailgroupAliasResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateMailgroupAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateMailgroupAliasResp {
             api_resp,
             code_error,
@@ -2231,10 +2340,16 @@ impl MailgroupAliasResource<'_> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases/{alias_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2248,11 +2363,16 @@ impl MailgroupAliasResource<'_> {
         option: &RequestOption,
     ) -> Result<ListMailgroupAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListMailgroupAliasResp {
             api_resp,
             code_error,
@@ -2276,12 +2396,17 @@ impl MailgroupManagerResource<'_> {
         option: &RequestOption,
     ) -> Result<BatchCreateMailgroupManagerResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers/batch_create");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchCreateMailgroupManagerResp {
             api_resp,
             code_error,
@@ -2297,11 +2422,17 @@ impl MailgroupManagerResource<'_> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers/batch_delete");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2317,17 +2448,18 @@ impl MailgroupManagerResource<'_> {
         option: &RequestOption,
     ) -> Result<ListMailgroupManagerResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MailgroupManagerListData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_token", page_token)
+        .query("page_size", page_size)
+        .send::<MailgroupManagerListData>()
+        .await?;
+
         Ok(ListMailgroupManagerResp {
             api_resp,
             code_error: raw.code_error,
@@ -2352,15 +2484,18 @@ impl MailgroupPermissionMemberResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateMailgroupPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateMailgroupPermissionMemberResp {
             api_resp,
             code_error,
@@ -2378,10 +2513,16 @@ impl MailgroupPermissionMemberResource<'_> {
         let path = format!(
             "/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/{permission_member_id}"
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2399,16 +2540,15 @@ impl MailgroupPermissionMemberResource<'_> {
         let path = format!(
             "/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/{permission_member_id}"
         );
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) = transport::request_typed::<MailgroupPermissionMemberData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .query("user_id_type", user_id_type)
+        .send::<MailgroupPermissionMemberData>()
         .await?;
         Ok(GetMailgroupPermissionMemberResp {
             api_resp,
@@ -2427,22 +2567,17 @@ impl MailgroupPermissionMemberResource<'_> {
         option: &RequestOption,
     ) -> Result<ListMailgroupPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        let (api_resp, raw) = transport::request_typed::<MailgroupPermissionMemberListData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .query("user_id_type", user_id_type)
+        .query("page_token", page_token)
+        .query("page_size", page_size)
+        .send::<MailgroupPermissionMemberListData>()
         .await?;
         Ok(ListMailgroupPermissionMemberResp {
             api_resp,
@@ -2461,15 +2596,17 @@ impl MailgroupPermissionMemberResource<'_> {
     ) -> Result<BatchCreateMailgroupPermissionMemberResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/batch_create");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchCreateMailgroupPermissionMemberResp {
             api_resp,
             code_error,
@@ -2486,11 +2623,17 @@ impl MailgroupPermissionMemberResource<'_> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/batch_delete");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2513,12 +2656,17 @@ impl PublicMailboxAliasResource<'_> {
         option: &RequestOption,
     ) -> Result<CreatePublicMailboxAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreatePublicMailboxAliasResp {
             api_resp,
             code_error,
@@ -2535,10 +2683,16 @@ impl PublicMailboxAliasResource<'_> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases/{alias_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2552,11 +2706,16 @@ impl PublicMailboxAliasResource<'_> {
         option: &RequestOption,
     ) -> Result<ListPublicMailboxAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListPublicMailboxAliasResp {
             api_resp,
             code_error,
@@ -2578,12 +2737,17 @@ impl UserResource<'_> {
         body: &QueryUserReqBody,
         option: &RequestOption,
     ) -> Result<QueryUserResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/mail/v1/users/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/mail/v1/users/query",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserResp {
             api_resp,
             code_error,
@@ -2607,13 +2771,17 @@ impl UserMailboxResource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteUserMailboxResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = transfer_mailbox {
-            api_req.query_params.set("transfer_mailbox", v);
-        }
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("transfer_mailbox", transfer_mailbox)
+        .send_v2::<()>()
+        .await?;
+
         Ok(DeleteUserMailboxResp {
             api_resp,
             code_error,
@@ -2637,12 +2805,17 @@ impl UserMailboxAliasResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateUserMailboxAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/aliases");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateUserMailboxAliasResp {
             api_resp,
             code_error,
@@ -2659,10 +2832,16 @@ impl UserMailboxAliasResource<'_> {
     ) -> Result<DeleteUserMailboxAliasResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/aliases/{alias_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
+
         Ok(DeleteUserMailboxAliasResp {
             api_resp,
             code_error,
@@ -2677,11 +2856,16 @@ impl UserMailboxAliasResource<'_> {
         option: &RequestOption,
     ) -> Result<ListUserMailboxAliasResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/aliases");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListUserMailboxAliasResp {
             api_resp,
             code_error,
@@ -2704,11 +2888,16 @@ impl UserMailboxEventResource<'_> {
         option: &RequestOption,
     ) -> Result<SubscribeUserMailboxEventResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/event/subscribe");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(SubscribeUserMailboxEventResp {
             api_resp,
             code_error,
@@ -2724,11 +2913,16 @@ impl UserMailboxEventResource<'_> {
     ) -> Result<SubscriptionUserMailboxEventResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/event/subscription");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(SubscriptionUserMailboxEventResp {
             api_resp,
             code_error,
@@ -2743,10 +2937,16 @@ impl UserMailboxEventResource<'_> {
         option: &RequestOption,
     ) -> Result<UnsubscribeUserMailboxEventResp, LarkError> {
         let path = format!("/open-apis/mail/v1/user_mailboxes/{user_mailbox_id}/event/unsubscribe");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
+
         Ok(UnsubscribeUserMailboxEventResp {
             api_resp,
             code_error,
