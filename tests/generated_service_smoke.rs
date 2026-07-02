@@ -53,9 +53,10 @@ use larksuite_oapi_sdk_rs::service::{
         },
     },
     board::v1::{
-        CreateBoardReqBody, CreateWhiteboardQuery, DownloadAsImageWhiteboardQuery,
-        GetWhiteboardQuery, ThemeWhiteboardQuery, UpdateThemeWhiteboardQuery,
-        UpdateThemeWhiteboardReqBody,
+        CreateBoardReqBody, CreatePlantumlWhiteboardNodeQuery, CreatePlantumlWhiteboardNodeReqBody,
+        CreateWhiteboardNodeQuery, CreateWhiteboardQuery, DownloadAsImageWhiteboardQuery,
+        GetWhiteboardQuery, ListWhiteboardNodeQuery, ThemeWhiteboardQuery,
+        UpdateThemeWhiteboardQuery, UpdateThemeWhiteboardReqBody,
     },
     calendar::v4::{
         BatchFreeBusyQuery, BatchFreeBusyReqBody, GetCalendarQuery,
@@ -889,6 +890,61 @@ async fn board_whiteboard_by_query_smoke() {
     assert!(request.contains(r#""title":"Roadmap""#));
     assert!(request.contains(r#""folder_token":"folder-1""#));
     assert!(request.contains(r#""background":"grid""#));
+}
+
+#[tokio::test]
+async fn board_whiteboard_node_by_query_smoke() {
+    let node_body = r#"{"code":0,"msg":"ok","data":{"node":{"id":"node-1"}}}"#;
+    let list_body = r#"{"code":0,"msg":"ok","data":{"nodes":[{"id":"node-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, node_body),
+        http_response(200, node_body),
+        http_response(200, list_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let node_body = serde_json::json!({"shape":"rectangle"});
+    let plantuml_body = CreatePlantumlWhiteboardNodeReqBody {
+        content: Some("@startuml\nAlice -> Bob\n@enduml".into()),
+        position: Some(serde_json::json!({"x":1,"y":2})),
+    };
+
+    client
+        .board()
+        .whiteboard_node
+        .create_by_query(
+            &CreateWhiteboardNodeQuery::new("whiteboard-1", &node_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .board()
+        .whiteboard_node
+        .create_plantuml_by_query(
+            &CreatePlantumlWhiteboardNodeQuery::new("whiteboard-1", &plantuml_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .board()
+        .whiteboard_node
+        .list_by_query(
+            &ListWhiteboardNodeQuery::new("whiteboard-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/board/v1/whiteboards/whiteboard-1/nodes "));
+    assert!(request.contains("POST /open-apis/board/v1/whiteboards/whiteboard-1/nodes/plantuml "));
+    assert!(request.contains("GET /open-apis/board/v1/whiteboards/whiteboard-1/nodes "));
+    assert!(request.contains(r#""shape":"rectangle""#));
+    assert!(request.contains(r#""content":"@startuml\nAlice -> Bob\n@enduml""#));
+    assert!(request.contains(r#""x":1"#));
 }
 
 // ── EHR ──
