@@ -56,7 +56,7 @@ impl<'a> ImageResource<'a> {
         query: &BasicRecognizeImageQuery<'_>,
         option: &RequestOption,
     ) -> Result<BasicRecognizeResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/optical_char_recognition/v1/image/basic_recognize",
@@ -64,13 +64,8 @@ impl<'a> ImageResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<OcrData>()
-        .await?;
-        Ok(BasicRecognizeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OcrData, BasicRecognizeResp>()
+        .await
     }
 }
 

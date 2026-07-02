@@ -127,7 +127,7 @@ impl<'a> OpenapiLogResource<'a> {
         query: &ListOpenapiLogQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListOpenapiLogResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/security_and_compliance/v1/openapi_logs",
@@ -140,13 +140,8 @@ impl<'a> OpenapiLogResource<'a> {
         .query("operator_type", query.operator_type)
         .query("operator_value", query.operator_value)
         .page_query(query.page)
-        .send::<OpenapiLogListData>()
-        .await?;
-        Ok(ListOpenapiLogResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OpenapiLogListData, ListOpenapiLogResp>()
+        .await
     }
 
     pub async fn list_data(
@@ -154,7 +149,7 @@ impl<'a> OpenapiLogResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<ListDataOpenapiLogResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/security_and_compliance/v1/openapi_logs/list_data",
@@ -162,13 +157,8 @@ impl<'a> OpenapiLogResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<OpenapiLogListData>()
-        .await?;
-        Ok(ListDataOpenapiLogResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OpenapiLogListData, ListDataOpenapiLogResp>()
+        .await
     }
 }
 

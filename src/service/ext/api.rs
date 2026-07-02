@@ -146,7 +146,7 @@ impl AuthenExtResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<AuthenAccessTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/authen/v1/access_token",
@@ -154,13 +154,8 @@ impl AuthenExtResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send::<AuthenAccessTokenRespBody>()
-        .await?;
-        Ok(AuthenAccessTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AuthenAccessTokenRespBody, AuthenAccessTokenResp>()
+        .await
     }
 
     pub async fn refresh_access_token(
@@ -168,7 +163,7 @@ impl AuthenExtResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<RefreshAuthenAccessTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/authen/v1/refresh_access_token",
@@ -176,30 +171,20 @@ impl AuthenExtResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send::<RefreshAuthenAccessTokenRespBody>()
-        .await?;
-        Ok(RefreshAuthenAccessTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RefreshAuthenAccessTokenRespBody, RefreshAuthenAccessTokenResp>()
+        .await
     }
 
     pub async fn user_info(&self, option: &RequestOption) -> Result<AuthenUserInfoResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/authen/v1/user_info",
             vec![AccessTokenType::User],
             option,
         )
-        .send::<AuthenUserInfoRespBody>()
-        .await?;
-        Ok(AuthenUserInfoResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AuthenUserInfoRespBody, AuthenUserInfoResp>()
+        .await
     }
 }
 

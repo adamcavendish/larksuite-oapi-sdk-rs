@@ -331,7 +331,7 @@ impl<'a> BadgeResource<'a> {
         query: &CreateBadgeQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateBadgeResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/admin/v1/badges",
@@ -339,13 +339,8 @@ impl<'a> BadgeResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<BadgeData>()
-        .await?;
-        Ok(CreateBadgeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BadgeData, CreateBadgeResp>()
+        .await
     }
 
     pub async fn get(
@@ -363,20 +358,15 @@ impl<'a> BadgeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetBadgeResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{}", query.badge_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<BadgeData>()
-        .await?;
-        Ok(GetBadgeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BadgeData, GetBadgeResp>()
+        .await
     }
 
     pub async fn list(
@@ -398,7 +388,7 @@ impl<'a> BadgeResource<'a> {
         query: &ListBadgeQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListBadgeResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/admin/v1/badges",
@@ -407,13 +397,8 @@ impl<'a> BadgeResource<'a> {
         )
         .page_query(query.page)
         .query("name", query.name)
-        .send::<BadgeListData>()
-        .await?;
-        Ok(ListBadgeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BadgeListData, ListBadgeResp>()
+        .await
     }
 
     pub async fn update(
@@ -627,7 +612,7 @@ impl<'a> BadgeGrantResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateBadgeGrantResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{}/grants", query.badge_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -637,13 +622,8 @@ impl<'a> BadgeGrantResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send::<BadgeGrantData>()
-        .await?;
-        Ok(CreateBadgeGrantResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BadgeGrantData, CreateBadgeGrantResp>()
+        .await
     }
 
     pub async fn get(
@@ -669,7 +649,7 @@ impl<'a> BadgeGrantResource<'a> {
             "/open-apis/admin/v1/badges/{}/grants/{}",
             query.badge_id, query.grant_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -678,13 +658,8 @@ impl<'a> BadgeGrantResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
-        .send::<BadgeGrantData>()
-        .await?;
-        Ok(GetBadgeGrantResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BadgeGrantData, GetBadgeGrantResp>()
+        .await
     }
 
     pub async fn delete(
@@ -748,7 +723,7 @@ impl<'a> BadgeGrantResource<'a> {
         option: &RequestOption,
     ) -> Result<ListBadgeGrantResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{}/grants", query.badge_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -759,13 +734,8 @@ impl<'a> BadgeGrantResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .query("name", query.name)
-        .send::<BadgeGrantListData>()
-        .await?;
-        Ok(ListBadgeGrantResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BadgeGrantListData, ListBadgeGrantResp>()
+        .await
     }
 
     pub async fn update(
@@ -939,7 +909,7 @@ impl<'a> AdminDeptStatResource<'a> {
         query: &GetAdminDeptStatQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetDeptStatResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/admin/v1/dept_stats",
@@ -952,13 +922,8 @@ impl<'a> AdminDeptStatResource<'a> {
         .query("department_id", query.department_id)
         .query("contains_child_dept", query.contains_child_dept)
         .page_query(query.page)
-        .send::<DeptStatListData>()
-        .await?;
-        Ok(GetDeptStatResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DeptStatListData, GetDeptStatResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]

@@ -56,7 +56,7 @@ impl<'a> ImageResource<'a> {
         query: &DetectFaceAttributesQuery<'_>,
         option: &RequestOption,
     ) -> Result<DetectFaceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/face_detection/v1/image/detect_face_attributes",
@@ -64,13 +64,8 @@ impl<'a> ImageResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<FaceDetectData>()
-        .await?;
-        Ok(DetectFaceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FaceDetectData, DetectFaceResp>()
+        .await
     }
 }
 

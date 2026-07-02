@@ -174,7 +174,7 @@ impl<'a> WorkplaceAccessDataResource<'a> {
         query: &WorkplaceAccessDataQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetWorkplaceAccessResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/workplace/v1/workplace_access_data/search",
@@ -184,13 +184,8 @@ impl<'a> WorkplaceAccessDataResource<'a> {
         .query("from_date", query.from_date)
         .query("to_date", query.to_date)
         .page_query(query.page)
-        .send::<WorkplaceAccessListData>()
-        .await?;
-        Ok(GetWorkplaceAccessResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<WorkplaceAccessListData, GetWorkplaceAccessResp>()
+        .await
     }
 
     pub async fn get(
@@ -211,7 +206,7 @@ impl<'a> WorkplaceAccessDataResource<'a> {
         query: &WorkplaceAccessDataQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetWorkplaceAccessResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/workplace/v1/workplace_access_data/search",
@@ -221,13 +216,8 @@ impl<'a> WorkplaceAccessDataResource<'a> {
         .query("from_date", query.from_date)
         .query("to_date", query.to_date)
         .page_query(query.page)
-        .send::<WorkplaceAccessListData>()
-        .await?;
-        Ok(GetWorkplaceAccessResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<WorkplaceAccessListData, GetWorkplaceAccessResp>()
+        .await
     }
 }
 
@@ -256,7 +246,7 @@ impl<'a> CustomWorkplaceAccessDataResource<'a> {
         query: &CustomWorkplaceAccessDataQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetBlockAccessResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/workplace/v1/custom_workplace_access_data/search",
@@ -267,13 +257,8 @@ impl<'a> CustomWorkplaceAccessDataResource<'a> {
         .query("to_date", query.to_date)
         .query("workplace_id", query.workplace_id)
         .page_query(query.page)
-        .send::<BlockAccessListData>()
-        .await?;
-        Ok(GetBlockAccessResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BlockAccessListData, GetBlockAccessResp>()
+        .await
     }
 
     pub async fn get(
@@ -296,7 +281,7 @@ impl<'a> CustomWorkplaceAccessDataResource<'a> {
         query: &CustomWorkplaceAccessDataQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetBlockAccessResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/workplace/v1/custom_workplace_access_data/search",
@@ -307,13 +292,8 @@ impl<'a> CustomWorkplaceAccessDataResource<'a> {
         .query("to_date", query.to_date)
         .query("workplace_id", query.workplace_id)
         .page_query(query.page)
-        .send::<BlockAccessListData>()
-        .await?;
-        Ok(GetBlockAccessResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BlockAccessListData, GetBlockAccessResp>()
+        .await
     }
 }
 
@@ -344,7 +324,7 @@ impl<'a> WorkplaceBlockAccessDataResource<'a> {
         query: &WorkplaceBlockAccessDataQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetBlockAccessResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/workplace/v1/workplace_block_access_data/search",
@@ -355,13 +335,8 @@ impl<'a> WorkplaceBlockAccessDataResource<'a> {
         .query("to_date", query.to_date)
         .query("block_id", query.block_id)
         .page_query(query.page)
-        .send::<BlockAccessListData>()
-        .await?;
-        Ok(GetBlockAccessResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BlockAccessListData, GetBlockAccessResp>()
+        .await
     }
 }
 

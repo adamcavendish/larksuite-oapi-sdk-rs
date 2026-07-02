@@ -222,7 +222,7 @@ impl<'a> AccessTokenResource<'a> {
         query: &CreateAccessTokenQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateAccessTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/authen/v1/access_token",
@@ -230,13 +230,8 @@ impl<'a> AccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<UserAccessTokenInfo>()
-        .await?;
-        Ok(CreateAccessTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UserAccessTokenInfo, CreateAccessTokenResp>()
+        .await
     }
 }
 
@@ -260,7 +255,7 @@ impl<'a> OidcAccessTokenResource<'a> {
         query: &CreateOidcAccessTokenQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateOidcAccessTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/authen/v1/oidc/access_token",
@@ -268,13 +263,8 @@ impl<'a> OidcAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<TokenInfo>()
-        .await?;
-        Ok(CreateOidcAccessTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TokenInfo, CreateOidcAccessTokenResp>()
+        .await
     }
 }
 
@@ -298,7 +288,7 @@ impl<'a> OidcRefreshAccessTokenResource<'a> {
         query: &CreateOidcRefreshAccessTokenQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateOidcRefreshAccessTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/authen/v1/oidc/refresh_access_token",
@@ -306,13 +296,8 @@ impl<'a> OidcRefreshAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<TokenInfo>()
-        .await?;
-        Ok(CreateOidcRefreshAccessTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TokenInfo, CreateOidcRefreshAccessTokenResp>()
+        .await
     }
 }
 
@@ -336,7 +321,7 @@ impl<'a> RefreshAccessTokenResource<'a> {
         query: &CreateRefreshAccessTokenQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateRefreshAccessTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/authen/v1/refresh_access_token",
@@ -344,13 +329,8 @@ impl<'a> RefreshAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<UserAccessTokenInfo>()
-        .await?;
-        Ok(CreateRefreshAccessTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UserAccessTokenInfo, CreateRefreshAccessTokenResp>()
+        .await
     }
 }
 
@@ -650,20 +630,15 @@ impl<'a> UserInfoResource<'a> {
         _query: &GetUserInfoQuery,
         option: &RequestOption,
     ) -> Result<GetUserInfoResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/authen/v1/user_info",
             vec![AccessTokenType::User],
             option,
         )
-        .send::<UserInfo>()
-        .await?;
-        Ok(GetUserInfoResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UserInfo, GetUserInfoResp>()
+        .await
     }
 }
 

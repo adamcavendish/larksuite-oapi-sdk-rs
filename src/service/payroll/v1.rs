@@ -475,7 +475,7 @@ impl<'a> PayrollRecordResource<'a> {
         query: &ListPayrollRecordQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListPayrollRecordResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/payroll_records",
@@ -485,13 +485,8 @@ impl<'a> PayrollRecordResource<'a> {
         .query("period", query.period)
         .query("employee_id", query.employee_id)
         .page_query(query.page)
-        .send::<RecordListData>()
-        .await?;
-        Ok(ListPayrollRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RecordListData, ListPayrollRecordResp>()
+        .await
     }
 }
 
