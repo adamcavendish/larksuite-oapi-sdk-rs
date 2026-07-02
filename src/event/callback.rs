@@ -94,95 +94,40 @@ impl Toast {
     }
 
     pub fn i18n(mut self, i18n: ToastI18n) -> Self {
-        let mut map = HashMap::new();
-        if let Some(v) = i18n.zh_cn {
-            map.insert("zh_cn".to_string(), v);
-        }
-        if let Some(v) = i18n.en_us {
-            map.insert("en_us".to_string(), v);
-        }
-        if let Some(v) = i18n.ja_jp {
-            map.insert("ja_jp".to_string(), v);
-        }
-        if let Some(v) = i18n.zh_hk {
-            map.insert("zh_hk".to_string(), v);
-        }
-        if let Some(v) = i18n.zh_tw {
-            map.insert("zh_tw".to_string(), v);
-        }
-        if let Some(v) = i18n.id_id {
-            map.insert("id_id".to_string(), v);
-        }
-        if let Some(v) = i18n.vi_vn {
-            map.insert("vi_vn".to_string(), v);
-        }
-        if let Some(v) = i18n.th_th {
-            map.insert("th_th".to_string(), v);
-        }
-        if let Some(v) = i18n.pt_br {
-            map.insert("pt_br".to_string(), v);
-        }
-        if let Some(v) = i18n.es_es {
-            map.insert("es_es".to_string(), v);
-        }
-        if let Some(v) = i18n.ko_kr {
-            map.insert("ko_kr".to_string(), v);
-        }
-        if let Some(v) = i18n.de_de {
-            map.insert("de_de".to_string(), v);
-        }
-        if let Some(v) = i18n.fr_fr {
-            map.insert("fr_fr".to_string(), v);
-        }
-        if let Some(v) = i18n.it_it {
-            map.insert("it_it".to_string(), v);
-        }
-        if let Some(v) = i18n.ru_ru {
-            map.insert("ru_ru".to_string(), v);
-        }
-        if let Some(v) = i18n.ms_my {
-            map.insert("ms_my".to_string(), v);
-        }
-        self.i18n = Some(map);
+        self.i18n = Some(i18n.into_map());
         self
     }
 }
 
-/// Typed locale fields for toast I18n, matching Go SDK's `I18n` struct.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct ToastI18n {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub zh_cn: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub en_us: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ja_jp: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub zh_hk: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub zh_tw: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub vi_vn: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub th_th: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub pt_br: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub es_es: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ko_kr: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub de_de: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub fr_fr: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub it_it: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ru_ru: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ms_my: Option<String>,
+card_locale_struct!(
+    /// Typed locale fields for toast I18n, matching Go SDK's `I18n` struct.
+    ToastI18n, String
+);
+
+impl ToastI18n {
+    fn into_map(self) -> HashMap<String, String> {
+        [
+            ("zh_cn", self.zh_cn),
+            ("en_us", self.en_us),
+            ("ja_jp", self.ja_jp),
+            ("zh_hk", self.zh_hk),
+            ("zh_tw", self.zh_tw),
+            ("id_id", self.id_id),
+            ("vi_vn", self.vi_vn),
+            ("th_th", self.th_th),
+            ("pt_br", self.pt_br),
+            ("es_es", self.es_es),
+            ("ko_kr", self.ko_kr),
+            ("de_de", self.de_de),
+            ("fr_fr", self.fr_fr),
+            ("it_it", self.it_it),
+            ("ru_ru", self.ru_ru),
+            ("ms_my", self.ms_my),
+        ]
+        .into_iter()
+        .filter_map(|(locale, value)| value.map(|value| (locale.to_string(), value)))
+        .collect()
+    }
 }
 
 /// Card reference in callback responses (template or raw card JSON).
