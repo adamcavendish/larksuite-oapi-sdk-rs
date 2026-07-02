@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -46,6 +46,64 @@ pub struct PostGetData {
 
 impl_resp!(GetPostResp, PostGetData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct GetPostQuery<'a> {
+    pub post_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetPostQuery<'a> {
+    pub fn new(post_id: &'a str) -> Self {
+        Self {
+            post_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, user_id_type: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = user_id_type.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListPostQuery<'a> {
+    pub category_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListPostQuery<'a> {
+    pub fn new() -> Self {
+        Self {
+            category_id: None,
+            user_id_type: None,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn category_id(mut self, category_id: impl Into<Option<&'a str>>) -> Self {
+        self.category_id = category_id.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, user_id_type: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = user_id_type.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
+impl<'a> Default for ListPostQuery<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 // ── Resources ──
 
 pub struct PostResource<'a> {
@@ -59,14 +117,29 @@ impl<'a> PostResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetPostResp, LarkError> {
-        let path = format!("/open-apis/moments/v1/posts/{post_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<PostGetData>(self.config, &api_req, option).await?;
+        self.get_by_query(
+            &GetPostQuery::new(post_id).user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetPostQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetPostResp, LarkError> {
+        let path = format!("/open-apis/moments/v1/posts/{}", query.post_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send::<PostGetData>()
+        .await?;
         Ok(GetPostResp {
             api_resp,
             code_error: raw.code_error,
@@ -82,22 +155,30 @@ impl<'a> PostResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListPostResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/moments/v1/posts");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = category_id {
-            api_req.query_params.set("category_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<PostListData>(self.config, &api_req, option).await?;
+        let query = ListPostQuery::new()
+            .category_id(category_id)
+            .user_id_type(user_id_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListPostQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListPostResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/moments/v1/posts",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("category_id", query.category_id)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send::<PostListData>()
+        .await?;
         Ok(ListPostResp {
             api_resp,
             code_error: raw.code_error,
