@@ -5,9 +5,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Shared sub-types ──
 
@@ -972,12 +971,16 @@ impl<'a> CompanyResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateCompanyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/companies");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/companies",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateCompanyResp {
             api_resp,
             code_error,
@@ -991,10 +994,15 @@ impl<'a> CompanyResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteCompanyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/companies/{company_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteCompanyResp {
             api_resp,
             code_error,
@@ -1009,12 +1017,16 @@ impl<'a> CompanyResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchCompanyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/companies/{company_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchCompanyResp {
             api_resp,
             code_error,
@@ -1476,15 +1488,16 @@ impl<'a> AssignedUserResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchAssignedUserResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/assigned_users/search",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SearchAssignedUserResp {
             api_resp,
             code_error,
@@ -1503,15 +1516,16 @@ impl<'a> AuthorizationResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<AddRoleAssignAuthorizationResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/authorizations/add_role_assign",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(AddRoleAssignAuthorizationResp {
             api_resp,
             code_error,
@@ -1523,14 +1537,15 @@ impl<'a> AuthorizationResource<'a> {
         &self,
         option: &RequestOption,
     ) -> Result<GetByParamAuthorizationResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/authorizations/get_by_param",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetByParamAuthorizationResp {
             api_resp,
             code_error,
@@ -1539,14 +1554,15 @@ impl<'a> AuthorizationResource<'a> {
     }
 
     pub async fn query(&self, option: &RequestOption) -> Result<QueryAuthorizationResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/authorizations/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryAuthorizationResp {
             api_resp,
             code_error,
@@ -1559,15 +1575,16 @@ impl<'a> AuthorizationResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<RemoveRoleAssignAuthorizationResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/authorizations/remove_role_assign",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(RemoveRoleAssignAuthorizationResp {
             api_resp,
             code_error,
@@ -1580,15 +1597,16 @@ impl<'a> AuthorizationResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateRoleAssignAuthorizationResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/authorizations/update_role_assign",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UpdateRoleAssignAuthorizationResp {
             api_resp,
             code_error,
@@ -1607,15 +1625,16 @@ impl<'a> CommonDataIdResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ConvertCommonDataIdResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/common_data/id/convert",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ConvertCommonDataIdResp {
             api_resp,
             code_error,
@@ -1634,15 +1653,16 @@ impl<'a> CommonDataMetaDataResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<AddEnumOptionCommonDataMetaDataResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/common_data/meta_data/add_enum_option",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(AddEnumOptionCommonDataMetaDataResp {
             api_resp,
             code_error,
@@ -1655,15 +1675,16 @@ impl<'a> CommonDataMetaDataResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<EditEnumOptionCommonDataMetaDataResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/common_data/meta_data/edit_enum_option",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(EditEnumOptionCommonDataMetaDataResp {
             api_resp,
             code_error,
@@ -1681,14 +1702,15 @@ impl<'a> CompensationStandardResource<'a> {
         &self,
         option: &RequestOption,
     ) -> Result<MatchCompensationStandardResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/compensation_standards/match",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(MatchCompensationStandardResp {
             api_resp,
             code_error,
@@ -1740,12 +1762,16 @@ impl<'a> ContractResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateContractResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/contracts");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/contracts",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateContractResp {
             api_resp,
             code_error,
@@ -1759,10 +1785,15 @@ impl<'a> ContractResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteContractResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/contracts/{contract_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteContractResp {
             api_resp,
             code_error,
@@ -1833,12 +1864,16 @@ impl<'a> ContractResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchContractResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/contracts/{contract_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchContractResp {
             api_resp,
             code_error,
@@ -1951,14 +1986,15 @@ impl<'a> CustomFieldResource<'a> {
         &self,
         option: &RequestOption,
     ) -> Result<GetByParamCustomFieldResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/custom_fields/get_by_param",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetByParamCustomFieldResp {
             api_resp,
             code_error,
@@ -1970,14 +2006,15 @@ impl<'a> CustomFieldResource<'a> {
         &self,
         option: &RequestOption,
     ) -> Result<ListObjectApiNameCustomFieldResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/custom_fields/list_object_api_name",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListObjectApiNameCustomFieldResp {
             api_resp,
             code_error,
@@ -1986,14 +2023,15 @@ impl<'a> CustomFieldResource<'a> {
     }
 
     pub async fn query(&self, option: &RequestOption) -> Result<QueryCustomFieldResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/custom_fields/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryCustomFieldResp {
             api_resp,
             code_error,
@@ -2045,12 +2083,16 @@ impl<'a> EmployeeTypeResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateEmployeeTypeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/employee_types");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/employee_types",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateEmployeeTypeResp {
             api_resp,
             code_error,
@@ -2064,10 +2106,15 @@ impl<'a> EmployeeTypeResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteEmployeeTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employee_types/{employee_type_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteEmployeeTypeResp {
             api_resp,
             code_error,
@@ -2138,12 +2185,16 @@ impl<'a> EmployeeTypeResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchEmployeeTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employee_types/{employee_type_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchEmployeeTypeResp {
             api_resp,
             code_error,
@@ -2162,12 +2213,16 @@ impl<'a> EmploymentResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateEmploymentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/employments");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/employments",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateEmploymentResp {
             api_resp,
             code_error,
@@ -2181,10 +2236,15 @@ impl<'a> EmploymentResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteEmploymentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employments/{employment_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteEmploymentResp {
             api_resp,
             code_error,
@@ -2199,12 +2259,16 @@ impl<'a> EmploymentResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchEmploymentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employments/{employment_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchEmploymentResp {
             api_resp,
             code_error,
@@ -2220,11 +2284,15 @@ pub struct FileResource<'a> {
 impl<'a> FileResource<'a> {
     pub async fn get(&self, id: &str, option: &RequestOption) -> Result<GetFileResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/files/{id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetFileResp {
             api_resp,
             code_error,
@@ -2276,12 +2344,16 @@ impl<'a> JobResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateJobResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/jobs");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/jobs",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateJobResp {
             api_resp,
             code_error,
@@ -2295,10 +2367,15 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteJobResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/jobs/{job_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteJobResp {
             api_resp,
             code_error,
@@ -2365,12 +2442,16 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchJobResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/jobs/{job_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchJobResp {
             api_resp,
             code_error,
@@ -2389,12 +2470,16 @@ impl<'a> JobChangeResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateJobChangeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/job_changes");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/job_changes",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateJobChangeResp {
             api_resp,
             code_error,
@@ -2446,12 +2531,16 @@ impl<'a> JobDataResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateJobDataResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/job_datas");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/job_datas",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateJobDataResp {
             api_resp,
             code_error,
@@ -2465,10 +2554,15 @@ impl<'a> JobDataResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteJobDataResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_datas/{job_data_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteJobDataResp {
             api_resp,
             code_error,
@@ -2539,12 +2633,16 @@ impl<'a> JobDataResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchJobDataResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_datas/{job_data_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchJobDataResp {
             api_resp,
             code_error,
@@ -2596,12 +2694,16 @@ impl<'a> JobFamilyResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateJobFamilyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/job_families");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/job_families",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateJobFamilyResp {
             api_resp,
             code_error,
@@ -2615,10 +2717,15 @@ impl<'a> JobFamilyResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteJobFamilyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_families/{job_family_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteJobFamilyResp {
             api_resp,
             code_error,
@@ -2689,12 +2796,16 @@ impl<'a> JobFamilyResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchJobFamilyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_families/{job_family_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchJobFamilyResp {
             api_resp,
             code_error,
@@ -2712,14 +2823,15 @@ impl<'a> LeaveResource<'a> {
         &self,
         option: &RequestOption,
     ) -> Result<CalendarByScopeLeaveResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/leaves/calendar_by_scope",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CalendarByScopeLeaveResp {
             api_resp,
             code_error,
@@ -2733,20 +2845,17 @@ impl<'a> LeaveResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<LeaveBalancesLeaveResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/leaves/leave_balances",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(LeaveBalancesLeaveResp {
             api_resp,
             code_error,
@@ -2760,20 +2869,17 @@ impl<'a> LeaveResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<LeaveRequestHistoryLeaveResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/leaves/leave_request_history",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(LeaveRequestHistoryLeaveResp {
             api_resp,
             code_error,
@@ -2787,17 +2893,17 @@ impl<'a> LeaveResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<LeaveTypesLeaveResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/corehr/v1/leaves/leave_types");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/corehr/v1/leaves/leave_types",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(LeaveTypesLeaveResp {
             api_resp,
             code_error,
@@ -2810,15 +2916,16 @@ impl<'a> LeaveResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<WorkCalendarLeaveResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/leaves/work_calendar",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(WorkCalendarLeaveResp {
             api_resp,
             code_error,
@@ -2831,15 +2938,16 @@ impl<'a> LeaveResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<WorkCalendarDateLeaveResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/leaves/work_calendar_date",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(WorkCalendarDateLeaveResp {
             api_resp,
             code_error,
@@ -2858,15 +2966,16 @@ impl<'a> LeaveGrantingRecordResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateLeaveGrantingRecordResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/leave_granting_records",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateLeaveGrantingRecordResp {
             api_resp,
             code_error,
@@ -2881,10 +2990,15 @@ impl<'a> LeaveGrantingRecordResource<'a> {
     ) -> Result<DeleteLeaveGrantingRecordResp, LarkError> {
         let path =
             format!("/open-apis/corehr/v1/leave_granting_records/{leave_granting_record_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteLeaveGrantingRecordResp {
             api_resp,
             code_error,
@@ -2936,12 +3050,16 @@ impl<'a> NationalIdTypeResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateNationalIdTypeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/national_id_types");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/national_id_types",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateNationalIdTypeResp {
             api_resp,
             code_error,
@@ -2955,10 +3073,15 @@ impl<'a> NationalIdTypeResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteNationalIdTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/national_id_types/{national_id_type_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteNationalIdTypeResp {
             api_resp,
             code_error,
@@ -3029,12 +3152,16 @@ impl<'a> NationalIdTypeResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchNationalIdTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/national_id_types/{national_id_type_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchNationalIdTypeResp {
             api_resp,
             code_error,
@@ -3228,15 +3355,16 @@ impl<'a> OffboardingResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SubmitOffboardingResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/offboardings/submit",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SubmitOffboardingResp {
             api_resp,
             code_error,
@@ -3255,12 +3383,16 @@ impl<'a> PersonResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreatePersonResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/persons");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/persons",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreatePersonResp {
             api_resp,
             code_error,
@@ -3274,10 +3406,15 @@ impl<'a> PersonResource<'a> {
         option: &RequestOption,
     ) -> Result<DeletePersonResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/persons/{person_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeletePersonResp {
             api_resp,
             code_error,
@@ -3291,11 +3428,15 @@ impl<'a> PersonResource<'a> {
         option: &RequestOption,
     ) -> Result<GetPersonResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/persons/{person_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetPersonResp {
             api_resp,
             code_error,
@@ -3310,12 +3451,16 @@ impl<'a> PersonResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchPersonResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/persons/{person_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchPersonResp {
             api_resp,
             code_error,
@@ -3328,12 +3473,16 @@ impl<'a> PersonResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UploadPersonResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/persons/upload");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/persons/upload",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UploadPersonResp {
             api_resp,
             code_error,
@@ -3386,10 +3535,15 @@ impl<'a> PreHireResource<'a> {
         option: &RequestOption,
     ) -> Result<DeletePreHireResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/pre_hires/{pre_hire_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeletePreHireResp {
             api_resp,
             code_error,
@@ -3460,12 +3614,16 @@ impl<'a> PreHireResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchPreHireResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/pre_hires/{pre_hire_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchPreHireResp {
             api_resp,
             code_error,
@@ -3485,11 +3643,15 @@ impl<'a> ProcessFormVariableDataResource<'a> {
         option: &RequestOption,
     ) -> Result<GetProcessFormVariableDataResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/processes/{process_id}/form_variable_data");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetProcessFormVariableDataResp {
             api_resp,
             code_error,
@@ -3841,12 +4003,16 @@ impl<'a> JobLevelResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateJobLevelResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/job_levels");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/job_levels",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateJobLevelResp {
             api_resp,
             code_error,
@@ -3860,10 +4026,15 @@ impl<'a> JobLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteJobLevelResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_levels/{job_level_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteJobLevelResp {
             api_resp,
             code_error,
@@ -3878,12 +4049,16 @@ impl<'a> JobLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchJobLevelResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_levels/{job_level_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchJobLevelResp {
             api_resp,
             code_error,
@@ -3899,11 +4074,15 @@ impl<'a> CurrencyResource<'a> {
         option: &RequestOption,
     ) -> Result<GetCurrencyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/currencies/{currency_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetCurrencyResp {
             api_resp,
             code_error,
@@ -3918,12 +4097,16 @@ impl<'a> LocationResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateLocationResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/locations");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/locations",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateLocationResp {
             api_resp,
             code_error,
@@ -3937,10 +4120,15 @@ impl<'a> LocationResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteLocationResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/locations/{location_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteLocationResp {
             api_resp,
             code_error,
@@ -3955,12 +4143,16 @@ impl<'a> DepartmentResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateDepartmentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/corehr/v1/departments");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/corehr/v1/departments",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateDepartmentResp {
             api_resp,
             code_error,
@@ -3974,10 +4166,15 @@ impl<'a> DepartmentResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteDepartmentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/departments/{department_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteDepartmentResp {
             api_resp,
             code_error,
@@ -3992,12 +4189,16 @@ impl<'a> DepartmentResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchDepartmentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/departments/{department_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchDepartmentResp {
             api_resp,
             code_error,
@@ -4012,15 +4213,16 @@ impl<'a> WorkingHoursTypeResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateWorkingHoursTypeResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/working_hours_types",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateWorkingHoursTypeResp {
             api_resp,
             code_error,
@@ -4034,10 +4236,15 @@ impl<'a> WorkingHoursTypeResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteWorkingHoursTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/working_hours_types/{working_hours_type_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteWorkingHoursTypeResp {
             api_resp,
             code_error,
@@ -4051,11 +4258,15 @@ impl<'a> WorkingHoursTypeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetWorkingHoursTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/working_hours_types/{working_hours_type_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetWorkingHoursTypeResp {
             api_resp,
             code_error,
@@ -4070,12 +4281,16 @@ impl<'a> WorkingHoursTypeResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchWorkingHoursTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/working_hours_types/{working_hours_type_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchWorkingHoursTypeResp {
             api_resp,
             code_error,
