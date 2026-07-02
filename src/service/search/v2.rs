@@ -423,6 +423,57 @@ impl<'a> DeleteDataRecordQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateMessageSearchQuery<'a> {
+    pub body: &'a SearchMessageReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateMessageSearchQuery<'a> {
+    pub fn new(body: &'a SearchMessageReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, user_id_type: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = user_id_type.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateAppSearchQuery<'a> {
+    pub body: &'a SearchAppReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateAppSearchQuery<'a> {
+    pub fn new(body: &'a SearchAppReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, user_id_type: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = user_id_type.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct SearchDocWikiQuery<'a> {
+    pub body: &'a SearchDocWikiReqBody,
+}
+
+impl<'a> SearchDocWikiQuery<'a> {
+    pub fn new(body: &'a SearchDocWikiReqBody) -> Self {
+        Self { body }
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchDocWikiData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -728,14 +779,29 @@ impl<'a> MessageSearchResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchMessageResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/message");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SearchMessageData>(self.config, &api_req, option).await?;
+        self.create_by_query(
+            &CreateMessageSearchQuery::new(body).user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateMessageSearchQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchMessageResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/search/v2/message",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<SearchMessageData>()
+        .await?;
         Ok(SearchMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -755,14 +821,29 @@ impl<'a> AppSearchResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchAppResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/app");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SearchAppData>(self.config, &api_req, option).await?;
+        self.create_by_query(
+            &CreateAppSearchQuery::new(body).user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateAppSearchQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchAppResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/search/v2/app",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<SearchAppData>()
+        .await?;
         Ok(SearchAppResp {
             api_resp,
             code_error: raw.code_error,
@@ -941,11 +1022,25 @@ impl<'a> DocWikiResource<'a> {
         body: &SearchDocWikiReqBody,
         option: &RequestOption,
     ) -> Result<SearchDocWikiResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/doc_wiki/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SearchDocWikiData>(self.config, &api_req, option).await?;
+        self.search_by_query(&SearchDocWikiQuery::new(body), option)
+            .await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchDocWikiQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchDocWikiResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/search/v2/doc_wiki/search",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<SearchDocWikiData>()
+        .await?;
         Ok(SearchDocWikiResp {
             api_resp,
             code_error: raw.code_error,
