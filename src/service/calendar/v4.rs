@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::req::RequestOption;
 use crate::service::common::{EmptyResp, PageQuery, RestRequest};
-use crate::transport;
 
 // ── Domain types ──
 
@@ -910,11 +909,17 @@ impl<'a> CalendarResource<'a> {
         body: &CreateCalendarReqBody,
         option: &RequestOption,
     ) -> Result<CreateCalendarResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/calendars");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<Calendar>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/calendar/v4/calendars",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<Calendar>()
+        .await?;
+
         Ok(CreateCalendarResp {
             api_resp,
             code_error: raw.code_error,
@@ -960,11 +965,17 @@ impl<'a> CalendarResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchCalendarResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<Calendar>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<Calendar>()
+        .await?;
+
         Ok(PatchCalendarResp {
             api_resp,
             code_error: raw.code_error,
@@ -978,10 +989,16 @@ impl<'a> CalendarResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1030,16 +1047,17 @@ impl<'a> CalendarResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetCalendarResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/primary",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<Calendar>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .send::<Calendar>()
+        .await?;
+
         Ok(GetCalendarResp {
             api_resp,
             code_error: raw.code_error,
@@ -1052,11 +1070,17 @@ impl<'a> CalendarResource<'a> {
         body: &MgetCalendarReqBody,
         option: &RequestOption,
     ) -> Result<MgetCalendarResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/calendars/mget");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MgetCalendarData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/calendar/v4/calendars/mget",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<MgetCalendarData>()
+        .await?;
+
         Ok(MgetCalendarResp {
             api_resp,
             code_error: raw.code_error,
@@ -1070,17 +1094,18 @@ impl<'a> CalendarResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PrimarysCalendarResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/primarys",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<PrimarysCalendarData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<PrimarysCalendarData>()
+        .await?;
+
         Ok(PrimarysCalendarResp {
             api_resp,
             code_error: raw.code_error,
@@ -1130,11 +1155,15 @@ impl<'a> CalendarResource<'a> {
         option: &RequestOption,
     ) -> Result<SubscribeCalendarResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/subscribe");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<SubscribeCalendarData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<SubscribeCalendarData>()
+        .await?;
         Ok(SubscribeCalendarResp {
             api_resp,
             code_error: raw.code_error,
@@ -1143,13 +1172,15 @@ impl<'a> CalendarResource<'a> {
     }
 
     pub async fn subscription(&self, option: &RequestOption) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/subscription",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1162,10 +1193,16 @@ impl<'a> CalendarResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/unsubscribe");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1173,13 +1210,16 @@ impl<'a> CalendarResource<'a> {
     }
 
     pub async fn unsubscription(&self, option: &RequestOption) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/unsubscription",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1396,14 +1436,18 @@ impl<'a> CalendarEventResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateEventResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CalendarEventData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CalendarEventData>()
+        .await?;
+
         Ok(CreateEventResp {
             api_resp,
             code_error: raw.code_error,
@@ -1457,14 +1501,18 @@ impl<'a> CalendarEventResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchEventResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CalendarEventData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CalendarEventData>()
+        .await?;
+
         Ok(PatchEventResp {
             api_resp,
             code_error: raw.code_error,
@@ -1480,13 +1528,17 @@ impl<'a> CalendarEventResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = need_notification {
-            api_req.query_params.set("need_notification", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("need_notification", need_notification)
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1651,11 +1703,17 @@ impl<'a> CalendarEventResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/reply");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1714,10 +1772,16 @@ impl<'a> CalendarEventResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/subscription");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1730,10 +1794,16 @@ impl<'a> CalendarEventResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/unsubscription");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1791,14 +1861,18 @@ impl<'a> CalendarAttendeeResource<'a> {
     ) -> Result<CreateAttendeeResp, LarkError> {
         let path =
             format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<AttendeeListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<AttendeeListData>()
+        .await?;
+
         Ok(CreateAttendeeResp {
             api_resp,
             code_error: raw.code_error,
@@ -1817,14 +1891,18 @@ impl<'a> CalendarAttendeeResource<'a> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees/batch_delete"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1923,14 +2001,18 @@ impl<'a> CalendarAclResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateAclResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CalendarAcl>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CalendarAcl>()
+        .await?;
+
         Ok(CreateAclResp {
             api_resp,
             code_error: raw.code_error,
@@ -1945,10 +2027,16 @@ impl<'a> CalendarAclResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls/{acl_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2004,10 +2092,16 @@ impl<'a> CalendarAclResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls/subscription");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2020,10 +2114,16 @@ impl<'a> CalendarAclResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls/unsubscription");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2104,17 +2204,18 @@ impl<'a> ExchangeBindingResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateExchangeBindingResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/exchange_bindings",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ExchangeBinding>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<ExchangeBinding>()
+        .await?;
+
         Ok(CreateExchangeBindingResp {
             api_resp,
             code_error: raw.code_error,
@@ -2129,13 +2230,17 @@ impl<'a> ExchangeBindingResource<'a> {
         option: &RequestOption,
     ) -> Result<GetExchangeBindingResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/exchange_bindings/{exchange_binding_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ExchangeBinding>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .send::<ExchangeBinding>()
+        .await?;
+
         Ok(GetExchangeBindingResp {
             api_resp,
             code_error: raw.code_error,
@@ -2149,10 +2254,16 @@ impl<'a> ExchangeBindingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/exchange_bindings/{exchange_binding_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2166,10 +2277,16 @@ pub struct CalendarSettingResource<'a> {
 
 impl<'a> CalendarSettingResource<'a> {
     pub async fn get(&self, option: &RequestOption) -> Result<GetCalendarSettingResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/calendar/v4/settings");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<CalendarSetting>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/calendar/v4/settings",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<CalendarSetting>()
+        .await?;
+
         Ok(GetCalendarSettingResp {
             api_resp,
             code_error: raw.code_error,
@@ -2182,11 +2299,17 @@ impl<'a> CalendarSettingResource<'a> {
         body: &PatchCalendarSettingReqBody,
         option: &RequestOption,
     ) -> Result<PatchCalendarSettingResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::PATCH, "/open-apis/calendar/v4/settings");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CalendarSetting>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/calendar/v4/settings",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<CalendarSetting>()
+        .await?;
+
         Ok(PatchCalendarSettingResp {
             api_resp,
             code_error: raw.code_error,
@@ -2199,14 +2322,17 @@ impl<'a> CalendarSettingResource<'a> {
         body: &GenerateCaldavConfReqBody,
         option: &RequestOption,
     ) -> Result<GenerateCaldavConfResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/settings/generate_caldav_conf",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CaldavConfData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<CaldavConfData>()
+        .await?;
+
         Ok(GenerateCaldavConfResp {
             api_resp,
             code_error: raw.code_error,
@@ -2432,10 +2558,16 @@ impl<'a> CalendarEventMeetingChatResource<'a> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_chat"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<MeetingChatData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<MeetingChatData>()
+        .await?;
+
         Ok(CreateMeetingChatResp {
             api_resp,
             code_error: raw.code_error,
@@ -2453,13 +2585,17 @@ impl<'a> CalendarEventMeetingChatResource<'a> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_chat"
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = meeting_chat_id {
-            api_req.query_params.set("meeting_chat_id", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("meeting_chat_id", meeting_chat_id)
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2481,10 +2617,16 @@ impl<'a> CalendarEventMeetingMinuteResource<'a> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_minute"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<MeetingMinuteData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<MeetingMinuteData>()
+        .await?;
+
         Ok(CreateMeetingMinuteResp {
             api_resp,
             code_error: raw.code_error,
@@ -2504,14 +2646,18 @@ impl<'a> TimeoffEventResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateTimeoffEventResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/calendar/v4/timeoff_events");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TimeoffEventData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/calendar/v4/timeoff_events",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<TimeoffEventData>()
+        .await?;
+
         Ok(CreateTimeoffEventResp {
             api_resp,
             code_error: raw.code_error,
@@ -2525,10 +2671,16 @@ impl<'a> TimeoffEventResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/timeoff_events/{timeoff_event_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
