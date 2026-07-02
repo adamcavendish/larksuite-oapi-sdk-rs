@@ -54,8 +54,22 @@ mod approval_external;
 mod approval_instance;
 #[path = "generated_service_smoke/approval/task.rs"]
 mod approval_task;
-#[path = "generated_service_smoke/attendance.rs"]
-mod attendance;
+#[path = "generated_service_smoke/attendance/approval.rs"]
+mod attendance_approval;
+#[path = "generated_service_smoke/attendance/archive_rule.rs"]
+mod attendance_archive_rule;
+#[path = "generated_service_smoke/attendance/file.rs"]
+mod attendance_file;
+#[path = "generated_service_smoke/attendance/group.rs"]
+mod attendance_group;
+#[path = "generated_service_smoke/attendance/leave.rs"]
+mod attendance_leave;
+#[path = "generated_service_smoke/attendance/record.rs"]
+mod attendance_record;
+#[path = "generated_service_smoke/attendance/shift.rs"]
+mod attendance_shift;
+#[path = "generated_service_smoke/attendance/user_setting.rs"]
+mod attendance_user_setting;
 #[path = "generated_service_smoke/auth.rs"]
 mod auth;
 #[path = "generated_service_smoke/baike.rs"]
@@ -106,8 +120,18 @@ mod corehr_v2_job;
 mod corehr_v2_signature;
 #[path = "generated_service_smoke/corehr/v2_workflow.rs"]
 mod corehr_v2_workflow;
-#[path = "generated_service_smoke/directory.rs"]
-mod directory;
+#[path = "generated_service_smoke/directory/collaboration_rule.rs"]
+mod directory_collaboration_rule;
+#[path = "generated_service_smoke/directory/collaboration_tenant.rs"]
+mod directory_collaboration_tenant;
+#[path = "generated_service_smoke/directory/department.rs"]
+mod directory_department;
+#[path = "generated_service_smoke/directory/employee.rs"]
+mod directory_employee;
+#[path = "generated_service_smoke/directory/share_entity.rs"]
+mod directory_share_entity;
+#[path = "generated_service_smoke/directory/user.rs"]
+mod directory_user;
 #[path = "generated_service_smoke/docs.rs"]
 mod docs;
 #[path = "generated_service_smoke/docx.rs"]
@@ -130,8 +154,22 @@ mod drive_permission;
 mod ehr;
 #[path = "generated_service_smoke/helpdesk.rs"]
 mod helpdesk;
-#[path = "generated_service_smoke/hire.rs"]
-mod hire;
+#[path = "generated_service_smoke/hire/application.rs"]
+mod hire_application;
+#[path = "generated_service_smoke/hire/interview.rs"]
+mod hire_interview;
+#[path = "generated_service_smoke/hire/job.rs"]
+mod hire_job;
+#[path = "generated_service_smoke/hire/job_requirement.rs"]
+mod hire_job_requirement;
+#[path = "generated_service_smoke/hire/offer.rs"]
+mod hire_offer;
+#[path = "generated_service_smoke/hire/talent.rs"]
+mod hire_talent;
+#[path = "generated_service_smoke/hire/task.rs"]
+mod hire_task;
+#[path = "generated_service_smoke/hire/v2.rs"]
+mod hire_v2;
 #[path = "generated_service_smoke/human_authentication.rs"]
 mod human_authentication;
 #[path = "generated_service_smoke/im.rs"]
@@ -152,8 +190,16 @@ mod okr;
 mod passport;
 #[path = "generated_service_smoke/payroll.rs"]
 mod payroll;
-#[path = "generated_service_smoke/performance.rs"]
-mod performance;
+#[path = "generated_service_smoke/performance/activity.rs"]
+mod performance_activity;
+#[path = "generated_service_smoke/performance/additional_information.rs"]
+mod performance_additional_information;
+#[path = "generated_service_smoke/performance/metric.rs"]
+mod performance_metric;
+#[path = "generated_service_smoke/performance/metric_tag.rs"]
+mod performance_metric_tag;
+#[path = "generated_service_smoke/performance/review_user.rs"]
+mod performance_review_user;
 #[path = "generated_service_smoke/personal_settings.rs"]
 mod personal_settings;
 #[path = "generated_service_smoke/recognition_and_speech.rs"]
