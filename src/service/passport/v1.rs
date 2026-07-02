@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::EmptyResp;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, RestRequest};
 
 // ── Domain types ──
 
@@ -61,6 +60,46 @@ pub struct SessionListData {
 
 impl_resp!(QuerySessionResp, SessionListData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct QuerySessionQuery<'a> {
+    pub body: &'a QuerySessionReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> QuerySessionQuery<'a> {
+    pub fn new(body: &'a QuerySessionReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, user_id_type: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = user_id_type.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct LogoutSessionQuery<'a> {
+    pub body: &'a LogoutSessionReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> LogoutSessionQuery<'a> {
+    pub fn new(body: &'a LogoutSessionReqBody) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, user_id_type: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = user_id_type.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct SessionResource<'a> {
@@ -74,14 +113,29 @@ impl<'a> SessionResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<QuerySessionResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/passport/v1/sessions/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SessionListData>(self.config, &api_req, option).await?;
+        self.query_by_query(
+            &QuerySessionQuery::new(body).user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QuerySessionQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QuerySessionResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/passport/v1/sessions/query",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<SessionListData>()
+        .await?;
         Ok(QuerySessionResp {
             api_resp,
             code_error: raw.code_error,
@@ -95,14 +149,29 @@ impl<'a> SessionResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/passport/v1/sessions/logout");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        self.logout_by_query(
+            &LogoutSessionQuery::new(body).user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn logout_by_query(
+        &self,
+        query: &LogoutSessionQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/passport/v1/sessions/logout",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
