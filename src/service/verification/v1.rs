@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Domain types ──
 
@@ -49,6 +49,48 @@ pub struct VerificationData {
 
 impl_resp!(GetVerificationResp, VerificationData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateVerificationTaskQuery<'a> {
+    pub user_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub body: &'a CreateVerificationTaskReqBody,
+}
+
+impl<'a> CreateVerificationTaskQuery<'a> {
+    pub fn new(user_id: &'a str, body: &'a CreateVerificationTaskReqBody) -> Self {
+        Self {
+            user_id,
+            user_id_type: None,
+            body,
+        }
+    }
+
+    pub fn user_id_type(mut self, user_id_type: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = user_id_type.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetVerificationTaskQuery<'a> {
+    pub task_id: &'a str,
+}
+
+impl<'a> GetVerificationTaskQuery<'a> {
+    pub fn new(task_id: &'a str) -> Self {
+        Self { task_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct GetVerificationQuery;
+
+impl GetVerificationQuery {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
 // ── Resources ──
 
 pub struct VerificationTaskResource<'a> {
@@ -63,18 +105,30 @@ impl<'a> VerificationTaskResource<'a> {
         body: &CreateVerificationTaskReqBody,
         option: &RequestOption,
     ) -> Result<CreateVerificationTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.create_by_query(
+            &CreateVerificationTaskQuery::new(user_id, body).user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateVerificationTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateVerificationTaskResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/verification/v1/verification_tasks",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("user_id", user_id);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<VerificationTaskData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id", query.user_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<VerificationTaskData>()
+        .await?;
         Ok(CreateVerificationTaskResp {
             api_resp,
             code_error: raw.code_error,
@@ -87,11 +141,28 @@ impl<'a> VerificationTaskResource<'a> {
         task_id: &str,
         option: &RequestOption,
     ) -> Result<GetVerificationTaskResp, LarkError> {
-        let path = format!("/open-apis/verification/v1/verification_tasks/{task_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<VerificationTaskData>(self.config, &api_req, option).await?;
+        self.get_by_query(&GetVerificationTaskQuery::new(task_id), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetVerificationTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetVerificationTaskResp, LarkError> {
+        let path = format!(
+            "/open-apis/verification/v1/verification_tasks/{}",
+            query.task_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<VerificationTaskData>()
+        .await?;
         Ok(GetVerificationTaskResp {
             api_resp,
             code_error: raw.code_error,
@@ -108,10 +179,24 @@ pub struct VerificationResource<'a> {
 
 impl<'a> VerificationResource<'a> {
     pub async fn get(&self, option: &RequestOption) -> Result<GetVerificationResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/verification/v1/verification");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<VerificationData>(self.config, &api_req, option).await?;
+        self.get_by_query(&GetVerificationQuery::new(), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        _query: &GetVerificationQuery,
+        option: &RequestOption,
+    ) -> Result<GetVerificationResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/verification/v1/verification",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<VerificationData>()
+        .await?;
         Ok(GetVerificationResp {
             api_resp,
             code_error: raw.code_error,
