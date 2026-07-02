@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.2.0] - 2026-07-03
+
+### REST service coverage
+
+- Added named query-input structs and `*_by_query` methods across the generated
+  service surface, including ACS, Admin, Application, Approval, Attendance,
+  Auth/Authen, Baike, Bitable, Calendar, Contact, CoreHR, Directory, Docx,
+  Drive, Helpdesk, Hire, IM, Lingo, Mail, Search, Task, VC, and related
+  modules.
+- Preserved existing positional methods as compatibility adapters while routing
+  request construction through shared `RestRequest`, `PageQuery`, JSON,
+  download, and upload helpers.
+- Added a Go SDK v3.9.7 parity endpoint surface through `client.go_v397()` for
+  generated endpoints that are not yet promoted to dedicated Rust resources.
+- Added typed resources for bridge groups and expanded generated-service smoke
+  coverage for request paths, query parameters, bodies, downloads, and uploads.
+
+### Channel and event handling
+
+- Added channel parity helpers for Go-SDK-style message normalization, send
+  flows, upload inputs, runtime policy checks, bot identity caching, and stream
+  handling behind the `channel` feature.
+- Hardened typed callback decoding before handler dispatch and split callback
+  payload, response, card action, and dispatch code into smaller internal
+  modules.
+- Added typed auth, e-learning, and task event coverage and shared card locale
+  generation through the existing macro infrastructure.
+
+### Documentation and maintenance
+
+- Added curated runnable examples for OAuth, generated service calls, IM
+  messaging, uploads/downloads, WebSocket events, channel helpers, and Go parity
+  endpoints.
+- Split the generated smoke-test harness into service-area modules while
+  keeping the same request-shape coverage.
+- Removed the standalone IM topic and card migration note now that the README
+  and typed examples cover the supported channel and IM paths.
+
 ## [0.1.2] - 2026-06-15
 
 ### Event parity
@@ -123,6 +161,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.94.0+, edition 2024
 
+[0.2.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.0
 [0.1.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.2
 [0.1.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.1
 [0.1.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.0

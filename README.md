@@ -12,6 +12,8 @@ A Rust port of the official [Go SDK](https://github.com/larksuite/oapi-sdk-go).
 ## Features
 
 - **REST API client** with automatic token management, caching, and retry
+- **Named query helpers** across generated REST services, with compatibility
+  positional adapters for existing callers
 - **Client assertion (JWT bearer)** for secretless deployments
 - **OAuth flows** — authorization code exchange and refresh token rotation
 - **Event dispatching** with AES-256-CBC decryption and SHA-1/SHA-256
@@ -21,6 +23,8 @@ A Rust port of the official [Go SDK](https://github.com/larksuite/oapi-sdk-go).
   protobuf framing and fragment reassembly
 - **Axum adapter** (`axum` feature) for HTTP server integration
 - **Message Card builder** for constructing interactive Lark card messages
+- **Go SDK parity escape hatch** via `client.go_v397()` for newer generated
+  endpoints that are not yet promoted to dedicated Rust resources
 - **56+ service modules** covering IM, Calendar, Drive, Sheets, Docs,
   Contacts, Approval, VC, Wiki, and more
 
@@ -30,7 +34,7 @@ Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.1"
+larksuite-oapi-sdk-rs = "0.2"
 ```
 
 For runnable examples, see the curated [examples index](examples/README.md).
@@ -166,12 +170,16 @@ let card = Card::new()
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.1", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.2", features = ["ws", "axum"] }
 ```
 
 ## Generated API coverage
 
 Dedicated service modules are the preferred API surface when a resource exists.
+Generated services expose named query structs and `*_by_query` methods for
+request shapes that have path, query, body, or file inputs. Existing positional
+methods remain as compatibility adapters where they already existed.
+
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
 requests with the same token handling as the rest of the SDK.
