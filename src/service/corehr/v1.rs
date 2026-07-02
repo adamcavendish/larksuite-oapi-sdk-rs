@@ -1,12 +1,10 @@
-use std::collections::VecDeque;
-
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::service::common::{PageQuery, RestRequest};
+use crate::service::common::{PageIteratorState, PageQuery, RestRequest};
 
 // ── Shared sub-types ──
 
@@ -1309,96 +1307,6 @@ pub struct SearchOffboardingRespData {
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
-}
-
-#[derive(Debug, Clone)]
-struct PageIteratorState<T> {
-    next_page_token: Option<String>,
-    request_page_token: Option<String>,
-    items: VecDeque<T>,
-    started: bool,
-    exhausted: bool,
-    limit: Option<usize>,
-    emitted: usize,
-}
-
-impl<T> Default for PageIteratorState<T> {
-    fn default() -> Self {
-        Self {
-            next_page_token: None,
-            request_page_token: None,
-            items: VecDeque::new(),
-            started: false,
-            exhausted: false,
-            limit: None,
-            emitted: 0,
-        }
-    }
-}
-
-impl<T> PageIteratorState<T> {
-    fn limit(mut self, limit: usize) -> Self {
-        self.limit = (limit > 0).then_some(limit);
-        self
-    }
-
-    fn with_page_token(mut self, page_token: Option<String>) -> Self {
-        self.request_page_token = page_token;
-        self.started = self.request_page_token.is_some();
-        self.exhausted = false;
-        self
-    }
-
-    fn next_page_token(&self) -> Option<&str> {
-        self.next_page_token.as_deref()
-    }
-
-    fn page_token_for_request(&self) -> Option<&str> {
-        if self.started {
-            self.request_page_token
-                .as_deref()
-                .or(self.next_page_token.as_deref())
-        } else {
-            None
-        }
-    }
-
-    fn pop(&mut self) -> Option<T> {
-        if self.limit.is_some_and(|limit| self.emitted >= limit) {
-            return None;
-        }
-        let item = self.items.pop_front()?;
-        self.emitted += 1;
-        Some(item)
-    }
-
-    fn should_fetch(&self) -> bool {
-        self.limit.is_none_or(|limit| self.emitted < limit)
-            && self.items.is_empty()
-            && !self.exhausted
-            && (!self.started
-                || self.request_page_token.is_some()
-                || self.next_page_token.is_some())
-    }
-
-    fn accept_page(
-        &mut self,
-        items: Option<Vec<T>>,
-        page_token: Option<String>,
-        has_more: Option<bool>,
-    ) {
-        let prev_page_token = self.next_page_token.clone();
-        self.started = true;
-        self.request_page_token = None;
-        self.items = items.unwrap_or_default().into();
-        self.next_page_token = if self.items.is_empty() {
-            prev_page_token
-        } else {
-            page_token
-        };
-        self.exhausted =
-            self.items.is_empty() || !has_more.unwrap_or(false) || self.next_page_token.is_none();
-    }
 }
 
 // ── New Resource Structs ──
