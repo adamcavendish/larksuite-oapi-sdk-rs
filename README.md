@@ -248,10 +248,10 @@ fn channel_with_normalized_messages(client: &Client, dispatcher: EventDispatcher
 ```
 
 For uploads, `SendInput` accepts pre-uploaded image/file/audio/video keys,
-`image_path`/`file_path`, or `UploadInput` with `source_path`/`source_bytes`.
-URL uploads and automatic audio/video duration detection are intentionally
-deferred; pass an explicit key, local path, or byte buffer, and provide
-`duration` for audio/video uploads.
+`image_path`/`file_path`, or `UploadInput` with `source_path`, `source_bytes`,
+or `source_url`. URL uploads are fetched with a conservative SSRF guard and a
+bounded response size. Audio/video uploads may pass `duration` explicitly; when
+omitted, the channel helper infers duration for Opus/OGG audio and MP4 video.
 
 ### OAuth authorization code
 

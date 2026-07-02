@@ -743,6 +743,105 @@ async fn channel_send_file_path_uploads_then_sends_file_key() {
 }
 
 #[tokio::test]
+async fn channel_send_audio_source_bytes_infers_duration() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"file_key":"audio_uploaded"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_audio","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let result = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                media: Some(UploadInput {
+                    kind: Some(MediaKind::Audio),
+                    source_bytes: Some(ogg_duration_bytes(48_000)),
+                    file_name: Some("voice.opus".into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_audio");
+    let request_dump = requests.lock().unwrap().join("\n---\n");
+    assert!(request_dump.contains("POST /open-apis/im/v1/files"));
+    assert!(request_dump.contains(r#"name="duration""#));
+    assert!(request_dump.contains("\r\n\r\n1000\r\n"));
+    assert!(request_dump.contains(r#""msg_type":"audio""#));
+    assert!(request_dump.contains(r#"\"file_key\":\"audio_uploaded\""#));
+}
+
+#[tokio::test]
+async fn channel_send_audio_zero_duration_infers_duration() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"file_key":"audio_uploaded"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_audio","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let result = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                media: Some(UploadInput {
+                    kind: Some(MediaKind::Audio),
+                    source_bytes: Some(ogg_duration_bytes(48_000)),
+                    file_name: Some("voice.opus".into()),
+                    duration: Some(0),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_audio");
+    let request_dump = requests.lock().unwrap().join("\n---\n");
+    assert!(request_dump.contains(r#"name="duration""#));
+    assert!(request_dump.contains("\r\n\r\n1000\r\n"));
+}
+
+#[tokio::test]
+async fn channel_send_source_url_to_private_host_is_rejected() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"file_key":"unused"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let err = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                media: Some(UploadInput {
+                    kind: Some(MediaKind::File),
+                    source_url: Some(format!("http://{addr}/file.bin")),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap_err();
+
+    assert!(err.to_string().contains("blocked address"));
+    assert!(requests.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
 async fn channel_send_empty_input_is_rejected_without_request() {
     let (addr, _handle, requests) = mock_json_server_with_requests(vec![
         r#"{"code":0,"msg":"ok","data":{"message_id":"unused"}}"#,
@@ -1015,4 +1114,11 @@ fn now_ms() -> u128 {
         .duration_since(UNIX_EPOCH)
         .expect("system time")
         .as_millis()
+}
+
+fn ogg_duration_bytes(granule: i64) -> Vec<u8> {
+    let mut data = vec![0u8; 64];
+    data[10..14].copy_from_slice(b"OggS");
+    data[16..24].copy_from_slice(&granule.to_le_bytes());
+    data
 }
