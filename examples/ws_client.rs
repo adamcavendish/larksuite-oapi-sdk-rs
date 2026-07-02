@@ -23,7 +23,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let ws_client = client.ws_client(dispatcher);
     println!("starting ws client (Ctrl+C to stop)...");
-    ws_client.start().await.expect("ws client error");
+    ws_client.start().await?;
 
     Ok(())
 }

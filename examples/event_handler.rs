@@ -2,7 +2,7 @@ use larksuite_oapi_sdk_rs::event::{EventDispatcher, EventReq};
 use larksuite_oapi_sdk_rs::events::im::P2MessageReceiveV1;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dispatcher = EventDispatcher::new("verification_token", "").on_p2_im_message_receive_v1(
         |event: P2MessageReceiveV1| async move {
             println!(
@@ -41,10 +41,11 @@ async fn main() {
 
     let req = EventReq {
         headers: std::collections::HashMap::new(),
-        body: serde_json::to_vec(&payload).unwrap(),
+        body: serde_json::to_vec(&payload)?,
         request_uri: "/webhook/event".to_string(),
     };
 
     let resp = dispatcher.handle(req).await;
     println!("response status: {}", resp.status_code);
+    Ok(())
 }

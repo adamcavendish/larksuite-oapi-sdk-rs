@@ -1,5 +1,16 @@
 use larksuite_oapi_sdk_rs::{Client, RequestOption};
 
+fn print_token_summary(label: &str, token: Option<&str>, expires_in: Option<i64>) {
+    let token_len = token.map(str::len).unwrap_or(0);
+    println!("{label}: received={}", token_len > 0);
+    if token_len > 0 {
+        println!("{label}_length: {token_len}");
+    }
+    if let Some(expires_in) = expires_in {
+        println!("{label}_expires_in: {expires_in}");
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app_id = std::env::var("APP_ID").expect("APP_ID env var required");
@@ -17,12 +28,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .retrieve_by_authorization_code(&auth_code, redirect_uri.as_deref(), None, None, &option)
         .await?;
 
-    let access_token = token
-        .data
-        .as_ref()
+    let token_data = token.data.as_ref();
+    let access_token = token_data
         .and_then(|data| data.access_token.as_deref())
         .unwrap_or("");
-    println!("access_token: {access_token}");
+    print_token_summary(
+        "access_token",
+        token_data.and_then(|data| data.access_token.as_deref()),
+        token_data.and_then(|data| data.expires_in),
+    );
+    if let Some(scope) = token_data.and_then(|data| data.scope.as_deref()) {
+        println!("scope: {scope}");
+    }
 
     if let Some(refresh_token) = refresh_token {
         let refreshed = client
@@ -30,12 +47,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .oauth
             .refresh(&refresh_token, None, &option)
             .await?;
-        let refreshed_token = refreshed
-            .data
-            .as_ref()
-            .and_then(|data| data.access_token.as_deref())
-            .unwrap_or("");
-        println!("refreshed_access_token: {refreshed_token}");
+        let refreshed_data = refreshed.data.as_ref();
+        print_token_summary(
+            "refreshed_access_token",
+            refreshed_data.and_then(|data| data.access_token.as_deref()),
+            refreshed_data.and_then(|data| data.expires_in),
+        );
     }
 
     if !access_token.is_empty() {

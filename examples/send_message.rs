@@ -22,8 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .im()
         .message
         .create("chat_id", &body, &option)
-        .await
-        .expect("send message failed");
+        .await?;
 
     if resp.success() {
         println!(
