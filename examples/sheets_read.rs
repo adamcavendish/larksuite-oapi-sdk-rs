@@ -42,7 +42,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .await?;
     if values.success() {
-        println!("range data: {:?}", values.data);
+        let row_count = values
+            .data
+            .as_ref()
+            .and_then(|data| data.get("valueRange"))
+            .and_then(|value_range| value_range.get("values"))
+            .and_then(|values| values.as_array())
+            .map(Vec::len)
+            .unwrap_or(0);
+        println!("range: {range}");
+        println!("rows: {row_count}");
     } else {
         println!("range error: {}", values.code_error);
     }

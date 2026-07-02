@@ -8,6 +8,10 @@ Lark/Feishu OpenAPI SDK for Rust.
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 A Rust port of the official [Go SDK](https://github.com/larksuite/oapi-sdk-go).
+The SDK handles token acquisition and caching, request construction, event
+decryption, callback signature verification, and typed OpenAPI responses so
+application code can stay close to the Lark/Feishu domain operation it is
+performing.
 
 ## Features
 
@@ -39,20 +43,143 @@ larksuite-oapi-sdk-rs = "0.2"
 
 For runnable examples, see the curated [examples index](examples/README.md).
 
-### REST API
+### Client configuration
+
+`Client::builder` mirrors the Go SDK's `lark.NewClient(..., With...)` option
+style while keeping configuration immutable after build.
 
 ```rust
-use larksuite_oapi_sdk_rs::Client;
+use std::time::Duration;
+
+use larksuite_oapi_sdk_rs::{Client, LARK_BASE_URL};
+
+fn build_client() -> Result<Client, Box<dyn std::error::Error>> {
+    let client = Client::builder("APP_ID", "APP_SECRET")
+        .base_url(LARK_BASE_URL)
+        .timeout(Duration::from_secs(3))
+        .disable_token_cache()
+        .max_retries(3)
+        .log_req_at_debug()
+        .build()?;
+
+    Ok(client)
+}
+```
+
+Use `.marketplace()` for marketplace apps, `.helpdesk_credential(...)` for
+helpdesk APIs, `.default_headers(...)` for extra headers, and
+`.client_assertion_provider(...)` for JWT bearer deployments. See
+[`examples/client_config.rs`](examples/client_config.rs) for a runnable setup
+sample.
+
+### Typed REST API
+
+Prefer generated service resources when they exist. They provide typed request
+and response structs plus query helpers for endpoints with path, query, body,
+or file inputs.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::service::im::v1::CreateMessageReqBody;
+use larksuite_oapi_sdk_rs::{Client, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::builder("APP_ID", "APP_SECRET").build()?;
-    let option = larksuite_oapi_sdk_rs::RequestOption::default();
-    let resp = client.get("/open-apis/contact/v3/users/me", &option).await?;
-    println!("{resp:?}");
+    let option = RequestOption::default();
+
+    let body = CreateMessageReqBody {
+        receive_id: Some("CHAT_ID".to_string()),
+        msg_type: Some("text".to_string()),
+        content: Some(r#"{"text":"Hello from Rust"}"#.to_string()),
+        uuid: None,
+    };
+
+    let resp = client
+        .im()
+        .message
+        .create("chat_id", &body, &option)
+        .await?;
+
+    println!("success: {}", resp.success());
     Ok(())
 }
 ```
+
+### Raw API escape hatch
+
+Use raw requests for OpenAPI endpoints that do not have a generated Rust
+resource yet. The SDK still applies token handling, request IDs, retries, and
+response helpers.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::{
+    AccessTokenType, ApiReq, Client, HttpMethod, RequestOption,
+};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = Client::builder("APP_ID", "APP_SECRET").build()?;
+    let option = RequestOption {
+        user_access_token: Some("USER_ACCESS_TOKEN".to_string()),
+        ..Default::default()
+    };
+
+    let mut req = ApiReq::new(HttpMethod::GET, "/open-apis/contact/v3/users/:user_id");
+    req.path_params.set("user_id", "ou_xxx");
+    req.query_params.set("user_id_type", "open_id");
+
+    let (api_resp, raw) = client
+        .raw_request_typed_with_token::<serde_json::Value>(
+            req,
+            AccessTokenType::User,
+            &option,
+        )
+        .await?;
+
+    println!("request_id: {:?}", api_resp.request_id());
+    println!("data: {:?}", raw.data);
+    Ok(())
+}
+```
+
+See [`examples/raw_api.rs`](examples/raw_api.rs) for both user-token and
+tenant-token raw calls.
+
+### One-click app registration
+
+The `registration` module mirrors the Go SDK's `scene/registration` package.
+It uses the OAuth 2.0 device-code flow to create or update an app after the
+user opens the verification URL or scans it as a QR code.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::registration::{Options, register_app};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let result = register_app(Options {
+        source: "quickstart".to_string(),
+        domain: String::new(),
+        lark_domain: String::new(),
+        app_preset: None,
+        addons: None,
+        create_only: false,
+        app_id: String::new(),
+        on_qr_code: Box::new(|info| {
+            println!("open or scan this URL: {}", info.url);
+            println!("expires in {} seconds", info.expire_in);
+        }),
+        on_status_change: None,
+    })
+    .await?;
+
+    println!("App ID: {}", result.client_id);
+    println!("App Secret: {}", result.client_secret);
+    Ok(())
+}
+```
+
+See [`examples/app_registration.rs`](examples/app_registration.rs) for custom
+scopes, events, callbacks, app preset values, and existing-app update inputs.
 
 ### WebSocket events
 
@@ -160,6 +287,11 @@ let card = Card::new()
     .element(md("*This is markdown*"));
 ```
 
+For card callbacks, use `CardActionHandler` directly or pass it through
+`http_handler::card_action_handler`; the optional `axum` feature also exposes
+`axum_handler::card_action_handler`. See
+[`examples/card_action_handler.rs`](examples/card_action_handler.rs).
+
 ## Features (Cargo)
 
 | Feature | Description |
@@ -188,6 +320,24 @@ This crate keeps a curated set of examples instead of porting the Go SDK's full
 generated `sample/apiall` tree. Use the [examples index](examples/README.md)
 for representative generated-service calls, and the generated service smoke
 tests for request-shape coverage across the broader API surface.
+
+## Go SDK sample map
+
+The official Go SDK includes both hand-written samples and a generated
+`sample/apiall` tree. This crate mirrors the hand-written sample categories
+with focused Rust examples:
+
+| Go SDK sample | Rust entry point | Notes |
+| --- | --- | --- |
+| `sample/client/main.go` | [`examples/client_config.rs`](examples/client_config.rs) | Client builder options, timeouts, headers, retries, logging, token cache toggles |
+| `sample/callrawapi/api.go` | [`examples/raw_api.rs`](examples/raw_api.rs) | `ApiReq`, path/query params, user and tenant token raw calls |
+| `sample/api/im/im.go` | [`examples/send_message.rs`](examples/send_message.rs), [`examples/im_message_query.rs`](examples/im_message_query.rs), [`examples/im_upload_download.rs`](examples/im_upload_download.rs) | Typed IM send, list, upload, and download flows |
+| `sample/event/event.go` | [`examples/event_handler.rs`](examples/event_handler.rs) | Webhook event dispatcher and callback payload handling |
+| `sample/ws/sample.go` | [`examples/ws_client.rs`](examples/ws_client.rs) | Long-connection event stream; enable the `ws` feature |
+| `sample/card/card.go` | [`examples/card_action_handler.rs`](examples/card_action_handler.rs), card builder APIs | Card callback handling and interactive card JSON construction |
+| `sample/channel/main.go` | [`examples/channel_send.rs`](examples/channel_send.rs), [`examples/channel_normalize.rs`](examples/channel_normalize.rs) | Channel send helpers and normalized incoming messages; enable the `channel` feature |
+| `sample/api/bitable2.go`, `sheets.go`, `docx.go`, `application.go`, `calendar` samples | Generated service examples in [`examples/README.md`](examples/README.md) | Representative typed resources across common services |
+| `sample/apiall/...` | Generated service smoke tests and `client.go_v397()` | Broad request-shape coverage is kept in tests instead of hand-maintained examples |
 
 ## Requirements
 
