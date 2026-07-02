@@ -34,20 +34,60 @@ mod board;
 mod calendar;
 #[path = "generated_service_smoke/cardkit.rs"]
 mod cardkit;
-#[path = "generated_service_smoke/contact.rs"]
-mod contact;
 #[path = "generated_service_smoke/contact_basic.rs"]
 mod contact_basic;
-#[path = "generated_service_smoke/corehr.rs"]
-mod corehr;
+#[path = "generated_service_smoke/contact/department.rs"]
+mod contact_department;
+#[path = "generated_service_smoke/contact/employee_type.rs"]
+mod contact_employee_type;
+#[path = "generated_service_smoke/contact/functional_role_member.rs"]
+mod contact_functional_role_member;
+#[path = "generated_service_smoke/contact/group.rs"]
+mod contact_group;
+#[path = "generated_service_smoke/contact/job.rs"]
+mod contact_job;
+#[path = "generated_service_smoke/contact/scope.rs"]
+mod contact_scope;
+#[path = "generated_service_smoke/contact/unit.rs"]
+mod contact_unit;
+#[path = "generated_service_smoke/contact/user.rs"]
+mod contact_user;
+#[path = "generated_service_smoke/contact/workplace.rs"]
+mod contact_workplace;
+#[path = "generated_service_smoke/corehr/job.rs"]
+mod corehr_job;
+#[path = "generated_service_smoke/corehr/offboarding.rs"]
+mod corehr_offboarding;
+#[path = "generated_service_smoke/corehr/organization.rs"]
+mod corehr_organization;
+#[path = "generated_service_smoke/corehr/reference.rs"]
+mod corehr_reference;
+#[path = "generated_service_smoke/corehr/v2_job.rs"]
+mod corehr_v2_job;
+#[path = "generated_service_smoke/corehr/v2_signature.rs"]
+mod corehr_v2_signature;
+#[path = "generated_service_smoke/corehr/v2_workflow.rs"]
+mod corehr_v2_workflow;
 #[path = "generated_service_smoke/directory.rs"]
 mod directory;
 #[path = "generated_service_smoke/docs.rs"]
 mod docs;
 #[path = "generated_service_smoke/docx.rs"]
 mod docx;
-#[path = "generated_service_smoke/drive.rs"]
-mod drive;
+#[path = "generated_service_smoke/drive/comment.rs"]
+mod drive_comment;
+#[path = "generated_service_smoke/drive/event.rs"]
+mod drive_event;
+#[path = "generated_service_smoke/drive/export.rs"]
+mod drive_export;
+#[path = "generated_service_smoke/drive/file.rs"]
+mod drive_file;
+#[path = "generated_service_smoke/drive/like.rs"]
+mod drive_like;
+#[path = "generated_service_smoke/drive/media.rs"]
+mod drive_media;
+#[path = "generated_service_smoke/drive/permission.rs"]
+mod drive_permission;
 #[path = "generated_service_smoke/ehr.rs"]
 mod ehr;
 #[path = "generated_service_smoke/helpdesk.rs"]
@@ -92,16 +132,32 @@ mod sheets;
 mod spark;
 #[path = "generated_service_smoke/task.rs"]
 mod task;
-#[path = "generated_service_smoke/task_v2.rs"]
-mod task_v2;
+#[path = "generated_service_smoke/task_v2/attachment.rs"]
+mod task_v2_attachment;
+#[path = "generated_service_smoke/task_v2/comment.rs"]
+mod task_v2_comment;
+#[path = "generated_service_smoke/task_v2/custom_field.rs"]
+mod task_v2_custom_field;
+#[path = "generated_service_smoke/task_v2/section.rs"]
+mod task_v2_section;
+#[path = "generated_service_smoke/task_v2/task.rs"]
+mod task_v2_task;
+#[path = "generated_service_smoke/task_v2/tasklist.rs"]
+mod task_v2_tasklist;
 #[path = "generated_service_smoke/tenant.rs"]
 mod tenant;
 #[path = "generated_service_smoke/translation.rs"]
 mod translation;
 #[path = "generated_service_smoke/trust_party.rs"]
 mod trust_party;
-#[path = "generated_service_smoke/vc.rs"]
-mod vc;
+#[path = "generated_service_smoke/vc/meeting.rs"]
+mod vc_meeting;
+#[path = "generated_service_smoke/vc/reporting.rs"]
+mod vc_reporting;
+#[path = "generated_service_smoke/vc/reserve.rs"]
+mod vc_reserve;
+#[path = "generated_service_smoke/vc/room.rs"]
+mod vc_room;
 #[path = "generated_service_smoke/verification.rs"]
 mod verification;
 #[path = "generated_service_smoke/wiki.rs"]
