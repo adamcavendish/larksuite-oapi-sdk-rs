@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Request body types ──
 
@@ -202,14 +201,16 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVatInvoiceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/vat_invoice/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<VatInvoiceData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<VatInvoiceData>()
+        .await?;
         Ok(RecognizeVatInvoiceResp {
             api_resp,
             code_error: raw.code_error,
@@ -222,14 +223,16 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBusinessCardResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/business_card/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BusinessCardData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<BusinessCardData>()
+        .await?;
         Ok(RecognizeBusinessCardResp {
             api_resp,
             code_error: raw.code_error,
@@ -242,14 +245,16 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeIdCardResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/id_card/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<IdCardData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<IdCardData>()
+        .await?;
         Ok(RecognizeIdCardResp {
             api_resp,
             code_error: raw.code_error,
@@ -262,14 +267,16 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBankCardResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/bank_card/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BankCardData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<BankCardData>()
+        .await?;
         Ok(RecognizeBankCardResp {
             api_resp,
             code_error: raw.code_error,
@@ -282,14 +289,16 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVehicleLicenseResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/vehicle_license/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<VehicleLicenseData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<VehicleLicenseData>()
+        .await?;
         Ok(RecognizeVehicleLicenseResp {
             api_resp,
             code_error: raw.code_error,
@@ -302,14 +311,16 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeTrainInvoiceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/train_invoice/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TrainInvoiceData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<TrainInvoiceData>()
+        .await?;
         Ok(RecognizeTrainInvoiceResp {
             api_resp,
             code_error: raw.code_error,
@@ -322,14 +333,16 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeTaxiInvoiceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/taxi_invoice/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TaxiInvoiceData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<TaxiInvoiceData>()
+        .await?;
         Ok(RecognizeTaxiInvoiceResp {
             api_resp,
             code_error: raw.code_error,
@@ -342,14 +355,16 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeContractResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/contract/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ContractData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<ContractData>()
+        .await?;
         Ok(RecognizeContractResp {
             api_resp,
             code_error: raw.code_error,
@@ -370,15 +385,16 @@ impl<'a> ChinesePassportResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeChinesePassportRespV2, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/chinese_passport/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ChinesePassportData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<ChinesePassportData>()
+        .await?;
         Ok(RecognizeChinesePassportRespV2 {
             api_resp,
             code_error,
@@ -397,15 +413,16 @@ impl<'a> DrivingLicenseResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeDrivingLicenseRespV2, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/driving_license/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<DrivingLicenseData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<DrivingLicenseData>()
+        .await?;
         Ok(RecognizeDrivingLicenseRespV2 {
             api_resp,
             code_error,
@@ -424,16 +441,16 @@ impl<'a> FoodManageLicenseResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeFoodManageLicenseResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/food_manage_license/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FoodManageLicenseData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<FoodManageLicenseData>()
+        .await?;
         Ok(RecognizeFoodManageLicenseResp {
             api_resp,
             code_error,
@@ -452,16 +469,16 @@ impl<'a> FoodProduceLicenseResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeFoodProduceLicenseResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/food_produce_license/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FoodProduceLicenseData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<FoodProduceLicenseData>()
+        .await?;
         Ok(RecognizeFoodProduceLicenseResp {
             api_resp,
             code_error,
@@ -480,16 +497,16 @@ impl<'a> HealthCertificateResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeHealthCertificateRespV2, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/health_certificate/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<HealthCertificateData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<HealthCertificateData>()
+        .await?;
         Ok(RecognizeHealthCertificateRespV2 {
             api_resp,
             code_error,
@@ -508,16 +525,16 @@ impl<'a> HkmMainlandTravelPermitResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeHkmMainlandTravelPermitRespV2, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/hkm_mainland_travel_permit/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<HkmMainlandTravelPermitData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<HkmMainlandTravelPermitData>()
+        .await?;
         Ok(RecognizeHkmMainlandTravelPermitRespV2 {
             api_resp,
             code_error,
@@ -536,16 +553,16 @@ impl<'a> TwMainlandTravelPermitResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeTwMainlandTravelPermitRespV2, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/tw_mainland_travel_permit/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TwMainlandTravelPermitData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<TwMainlandTravelPermitData>()
+        .await?;
         Ok(RecognizeTwMainlandTravelPermitRespV2 {
             api_resp,
             code_error,
@@ -564,15 +581,16 @@ impl<'a> VehicleInvoiceResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVehicleInvoiceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/vehicle_invoice/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<VehicleInvoiceData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<VehicleInvoiceData>()
+        .await?;
         Ok(RecognizeVehicleInvoiceResp {
             api_resp,
             code_error,
@@ -591,12 +609,16 @@ impl<'a> ResumeResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<ParseResumeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/document_ai/v1/resume/parse");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ResumeData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/document_ai/v1/resume/parse",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<ResumeData>()
+        .await?;
         Ok(ParseResumeResp {
             api_resp,
             code_error,
@@ -615,15 +637,16 @@ impl<'a> VatInvoiceResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVatInvoiceRespV2, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/vat_invoice/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<VatInvoiceData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<VatInvoiceData>()
+        .await?;
         Ok(RecognizeVatInvoiceRespV2 {
             api_resp,
             code_error,
@@ -642,15 +665,16 @@ impl<'a> ContractResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<FieldExtractionContractResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/contract/field_extraction",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FieldExtractionContractData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<FieldExtractionContractData>()
+        .await?;
         Ok(FieldExtractionContractResp {
             api_resp,
             code_error: raw.code_error,
@@ -679,15 +703,16 @@ impl<'a> BusinessLicenseResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBusinessLicenseResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/business_license/recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BusinessLicenseData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<BusinessLicenseData>()
+        .await?;
         Ok(RecognizeBusinessLicenseResp {
             api_resp,
             code_error,

@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::EmptyResp;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, RestRequest};
 
 // ── Domain types ──
 
@@ -237,11 +236,16 @@ impl<'a> SpaceResource<'a> {
         body: &CreateSpaceReqBody,
         option: &RequestOption,
     ) -> Result<CreateSpaceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/wiki/v2/spaces");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SpaceData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/wiki/v2/spaces",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<SpaceData>()
+        .await?;
         Ok(CreateSpaceResp {
             api_resp,
             code_error: raw.code_error,
@@ -256,13 +260,16 @@ impl<'a> SpaceResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSpaceResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = lang {
-            api_req.query_params.set("lang", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<SpaceData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("lang", lang)
+        .send::<SpaceData>()
+        .await?;
         Ok(GetSpaceResp {
             api_resp,
             code_error: raw.code_error,
@@ -276,16 +283,17 @@ impl<'a> SpaceResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSpaceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/wiki/v2/spaces");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<SpaceListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/wiki/v2/spaces",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send::<SpaceListData>()
+        .await?;
         Ok(ListSpaceResp {
             api_resp,
             code_error: raw.code_error,
@@ -299,14 +307,17 @@ impl<'a> SpaceResource<'a> {
         obj_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetNodeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/wiki/v2/spaces/get_node");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("token", token);
-        if let Some(v) = obj_type {
-            api_req.query_params.set("obj_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<NodeData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/wiki/v2/spaces/get_node",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("token", token)
+        .query("obj_type", obj_type)
+        .send::<NodeData>()
+        .await?;
         Ok(GetNodeResp {
             api_resp,
             code_error: raw.code_error,
@@ -327,11 +338,16 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<NodeData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<NodeData>()
+        .await?;
         Ok(CreateNodeResp {
             api_resp,
             code_error: raw.code_error,
@@ -347,13 +363,16 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = obj_type {
-            api_req.query_params.set("obj_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<NodeData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("obj_type", obj_type)
+        .send::<NodeData>()
+        .await?;
         Ok(GetNodeResp {
             api_resp,
             code_error: raw.code_error,
@@ -368,10 +387,15 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -386,11 +410,16 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<MoveNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}/move");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<NodeData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<NodeData>()
+        .await?;
         Ok(MoveNodeResp {
             api_resp,
             code_error: raw.code_error,
@@ -406,11 +435,16 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}/update_title");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -425,11 +459,16 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<CopyNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}/copy");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<NodeData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<NodeData>()
+        .await?;
         Ok(CopyNodeResp {
             api_resp,
             code_error: raw.code_error,
@@ -446,19 +485,18 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<ListNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = parent_node_token {
-            api_req.query_params.set("parent_node_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<NodeListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("parent_node_token", parent_node_token)
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send::<NodeListData>()
+        .await?;
         Ok(ListNodeResp {
             api_resp,
             code_error: raw.code_error,
@@ -473,11 +511,16 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<MoveDocsToWikiResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/move_docs_to_wiki");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MoveDocsToWikiData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<MoveDocsToWikiData>()
+        .await?;
         Ok(MoveDocsToWikiResp {
             api_resp,
             code_error: raw.code_error,
@@ -499,14 +542,17 @@ impl<'a> SpaceMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -521,11 +567,16 @@ impl<'a> SpaceMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members/{member_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("member_type", member_type);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("member_type", member_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -541,19 +592,18 @@ impl<'a> SpaceMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<ListMemberResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MemberListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .query("user_id_type", user_id_type)
+        .send::<MemberListData>()
+        .await?;
         Ok(ListMemberResp {
             api_resp,
             code_error: raw.code_error,
@@ -574,11 +624,16 @@ impl<'a> SpaceSettingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/setting");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -598,11 +653,16 @@ impl<'a> TaskResource<'a> {
         option: &RequestOption,
     ) -> Result<GetTaskResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/tasks/{task_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("task_type", task_type);
-        let (api_resp, raw) =
-            transport::request_typed::<TaskData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("task_type", task_type)
+        .send::<TaskData>()
+        .await?;
         Ok(GetTaskResp {
             api_resp,
             code_error: raw.code_error,
