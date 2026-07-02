@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Domain types ──
 
@@ -57,6 +57,28 @@ pub struct BlockData {
 impl_resp!(CreateBlockResp, BlockData);
 impl_resp!(GetBlockResp, BlockData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateBlockQuery<'a> {
+    pub body: &'a CreateBlockReqBody,
+}
+
+impl<'a> CreateBlockQuery<'a> {
+    pub fn new(body: &'a CreateBlockReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetBlockQuery<'a> {
+    pub block_id: &'a str,
+}
+
+impl<'a> GetBlockQuery<'a> {
+    pub fn new(block_id: &'a str) -> Self {
+        Self { block_id }
+    }
+}
+
 // ── Resources ──
 
 pub struct BlockResource<'a> {
@@ -69,11 +91,25 @@ impl<'a> BlockResource<'a> {
         body: &CreateBlockReqBody,
         option: &RequestOption,
     ) -> Result<CreateBlockResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/block/v2/blocks");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BlockData>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateBlockQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateBlockResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/block/v2/blocks",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<BlockData>()
+        .await?;
         Ok(CreateBlockResp {
             api_resp,
             code_error: raw.code_error,
@@ -86,11 +122,25 @@ impl<'a> BlockResource<'a> {
         block_id: &str,
         option: &RequestOption,
     ) -> Result<GetBlockResp, LarkError> {
-        let path = format!("/open-apis/block/v2/blocks/{block_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<BlockData>(self.config, &api_req, option).await?;
+        self.get_by_query(&GetBlockQuery::new(block_id), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetBlockResp, LarkError> {
+        let path = format!("/open-apis/block/v2/blocks/{}", query.block_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<BlockData>()
+        .await?;
         Ok(GetBlockResp {
             api_resp,
             code_error: raw.code_error,
