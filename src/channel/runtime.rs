@@ -13,9 +13,11 @@ use crate::ws::WsClient;
 use crate::{Client, LarkError, RequestOption};
 
 use super::builder::ChannelBuilder;
+use super::duration::{infer_audio_duration_ms, infer_video_duration_ms};
 use super::identity::BotIdentity;
 use super::normalize::{compose_mentions_text_prefix, markdown_to_post};
 use super::policy::ChannelPolicy;
+use super::safety::{fetch_source_url, file_name_from_url};
 use super::state::ChannelState;
 use super::stream::{StreamUpdate, split_markdown, text_content};
 use super::types::{
@@ -357,15 +359,6 @@ impl<'a> Channel<'a> {
         input: &UploadInput,
         option: &RequestOption,
     ) -> Result<UploadResult, LarkError> {
-        if input
-            .source_url
-            .as_deref()
-            .is_some_and(|url| !url.is_empty())
-        {
-            return Err(LarkError::IllegalParam(
-                "channel media source_url upload is not supported yet; pass source_bytes, source_path, or a pre-uploaded key".into(),
-            ));
-        }
         let kind = input
             .kind
             .ok_or_else(|| LarkError::IllegalParam("media kind is required".into()))?;
@@ -375,9 +368,11 @@ impl<'a> Channel<'a> {
             std::fs::read(path).map_err(|e| {
                 LarkError::IllegalParam(format!("failed to read media source_path {path}: {e}"))
             })?
+        } else if let Some(url) = input.source_url.as_deref().filter(|url| !url.is_empty()) {
+            fetch_source_url(url).await?
         } else {
             return Err(LarkError::IllegalParam(
-                "media source_bytes or source_path is required".into(),
+                "media source_bytes, source_path, or source_url is required".into(),
             ));
         };
 
@@ -395,11 +390,15 @@ impl<'a> Channel<'a> {
             });
         }
 
-        if matches!(kind, MediaKind::Audio | MediaKind::Video) && input.duration.is_none() {
-            return Err(LarkError::IllegalParam(
-                "audio/video media upload requires explicit duration; automatic duration detection is not supported yet".into(),
-            ));
-        }
+        let duration = match kind {
+            MediaKind::Audio if input.duration.is_none_or(|duration| duration <= 0) => {
+                Some(infer_audio_duration_ms(&data)?)
+            }
+            MediaKind::Video if input.duration.is_none_or(|duration| duration <= 0) => {
+                Some(infer_video_duration_ms(&data)?)
+            }
+            _ => input.duration,
+        };
         let file_type = match kind {
             MediaKind::Audio => "opus",
             MediaKind::Video => "mp4",
@@ -409,13 +408,14 @@ impl<'a> Channel<'a> {
             .file_name
             .clone()
             .or_else(|| input.source_path.as_deref().map(file_name_from_path))
+            .or_else(|| input.source_url.as_deref().and_then(file_name_from_url))
             .unwrap_or_else(|| match kind {
                 MediaKind::Audio => "voice.opus".into(),
                 MediaKind::Video => "video.mp4".into(),
                 _ => "upload.bin".into(),
             });
         let resp = self
-            .upload_file(file_type, &file_name, input.duration, data, option)
+            .upload_file(file_type, &file_name, duration, data, option)
             .await?;
         if !resp.success() {
             return Err(LarkError::Api(Box::new(resp.code_error)));
@@ -426,7 +426,7 @@ impl<'a> Channel<'a> {
                 .data
                 .and_then(|data| data.file_key)
                 .ok_or_else(|| LarkError::IllegalParam("media upload returned no key".into()))?,
-            duration_ms: input.duration,
+            duration_ms: duration,
         })
     }
 
