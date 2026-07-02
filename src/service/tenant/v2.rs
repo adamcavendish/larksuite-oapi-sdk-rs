@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
+use crate::req::RequestOption;
 use crate::resp::{ApiResp, CodeError};
-use crate::transport;
+use crate::service::common::RestRequest;
 
 // ── Domain types ──
 
@@ -108,6 +108,24 @@ impl QueryTenantProductAssignInfoResp {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+pub struct QueryTenantQuery;
+
+impl QueryTenantQuery {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct QueryTenantProductAssignInfoQuery;
+
+impl QueryTenantProductAssignInfoQuery {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
 // ── Resources ──
 
 pub struct TenantResource<'a> {
@@ -116,12 +134,23 @@ pub struct TenantResource<'a> {
 
 impl<'a> TenantResource<'a> {
     pub async fn query(&self, option: &RequestOption) -> Result<QueryTenantResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/tenant/v2/tenant/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+        self.query_by_query(&QueryTenantQuery::new(), option).await
+    }
 
-        let (api_resp, raw) =
-            transport::request_typed::<QueryTenantRespData>(self.config, &api_req, option).await?;
-
+    pub async fn query_by_query(
+        &self,
+        _query: &QueryTenantQuery,
+        option: &RequestOption,
+    ) -> Result<QueryTenantResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/tenant/v2/tenant/query",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<QueryTenantRespData>()
+        .await?;
         Ok(QueryTenantResp {
             api_resp,
             code_error: raw.code_error,
@@ -139,19 +168,24 @@ impl<'a> TenantProductAssignInfoResource<'a> {
         &self,
         option: &RequestOption,
     ) -> Result<QueryTenantProductAssignInfoResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.query_by_query(&QueryTenantProductAssignInfoQuery::new(), option)
+            .await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        _query: &QueryTenantProductAssignInfoQuery,
+        option: &RequestOption,
+    ) -> Result<QueryTenantProductAssignInfoResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/tenant/v2/tenant/assign_info_list/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-
-        let (api_resp, raw) = transport::request_typed::<QueryTenantProductAssignInfoRespData>(
-            self.config,
-            &api_req,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .send::<QueryTenantProductAssignInfoRespData>()
         .await?;
-
         Ok(QueryTenantProductAssignInfoResp {
             api_resp,
             code_error: raw.code_error,
