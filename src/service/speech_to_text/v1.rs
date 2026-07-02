@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Request body types ──
 
@@ -45,6 +45,28 @@ pub struct StreamRecognizeData {
 impl_resp!(RecognizeBasicSpeechResp, RecognizeData);
 impl_resp!(RecognizeSpeechStreamResp, StreamRecognizeData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct FileRecognizeSpeechQuery<'a> {
+    pub body: &'a RecognizeBasicSpeechReqBody,
+}
+
+impl<'a> FileRecognizeSpeechQuery<'a> {
+    pub fn new(body: &'a RecognizeBasicSpeechReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct StreamRecognizeSpeechQuery<'a> {
+    pub body: &'a RecognizeSpeechStreamReqBody,
+}
+
+impl<'a> StreamRecognizeSpeechQuery<'a> {
+    pub fn new(body: &'a RecognizeSpeechStreamReqBody) -> Self {
+        Self { body }
+    }
+}
+
 // ── Resources ──
 
 pub struct SpeechResource<'a> {
@@ -57,14 +79,25 @@ impl<'a> SpeechResource<'a> {
         body: &RecognizeBasicSpeechReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBasicSpeechResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.file_recognize_by_query(&FileRecognizeSpeechQuery::new(body), option)
+            .await
+    }
+
+    pub async fn file_recognize_by_query(
+        &self,
+        query: &FileRecognizeSpeechQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<RecognizeBasicSpeechResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/speech_to_text/v1/speech/file_recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<RecognizeData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<RecognizeData>()
+        .await?;
         Ok(RecognizeBasicSpeechResp {
             api_resp,
             code_error: raw.code_error,
@@ -77,14 +110,25 @@ impl<'a> SpeechResource<'a> {
         body: &RecognizeSpeechStreamReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeSpeechStreamResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.stream_recognize_by_query(&StreamRecognizeSpeechQuery::new(body), option)
+            .await
+    }
+
+    pub async fn stream_recognize_by_query(
+        &self,
+        query: &StreamRecognizeSpeechQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<RecognizeSpeechStreamResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/speech_to_text/v1/speech/stream_recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<StreamRecognizeData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<StreamRecognizeData>()
+        .await?;
         Ok(RecognizeSpeechStreamResp {
             api_resp,
             code_error: raw.code_error,

@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Request body types ──
 
@@ -24,6 +24,17 @@ pub struct OcrData {
 
 impl_resp!(BasicRecognizeResp, OcrData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct BasicRecognizeImageQuery<'a> {
+    pub body: &'a RecognizeBasicImageReqBody,
+}
+
+impl<'a> BasicRecognizeImageQuery<'a> {
+    pub fn new(body: &'a RecognizeBasicImageReqBody) -> Self {
+        Self { body }
+    }
+}
+
 // ── Resources ──
 
 pub struct ImageResource<'a> {
@@ -36,14 +47,25 @@ impl<'a> ImageResource<'a> {
         body: &RecognizeBasicImageReqBody,
         option: &RequestOption,
     ) -> Result<BasicRecognizeResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.basic_recognize_by_query(&BasicRecognizeImageQuery::new(body), option)
+            .await
+    }
+
+    pub async fn basic_recognize_by_query(
+        &self,
+        query: &BasicRecognizeImageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BasicRecognizeResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/optical_char_recognition/v1/image/basic_recognize",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<OcrData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<OcrData>()
+        .await?;
         Ok(BasicRecognizeResp {
             api_resp,
             code_error: raw.code_error,
