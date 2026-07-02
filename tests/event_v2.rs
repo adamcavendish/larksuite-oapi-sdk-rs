@@ -1419,6 +1419,42 @@ fn toast_i18n_serde_roundtrip() {
     assert!(parsed.ko_kr.is_none());
 }
 
+#[test]
+fn toast_i18n_maps_all_supported_locales() {
+    use larksuite_oapi_sdk_rs::event::Toast;
+
+    let toast = Toast::new("localized").i18n(ToastI18n {
+        zh_cn: Some("zh_cn".to_string()),
+        en_us: Some("en_us".to_string()),
+        ja_jp: Some("ja_jp".to_string()),
+        zh_hk: Some("zh_hk".to_string()),
+        zh_tw: Some("zh_tw".to_string()),
+        id_id: Some("id_id".to_string()),
+        vi_vn: Some("vi_vn".to_string()),
+        th_th: Some("th_th".to_string()),
+        pt_br: Some("pt_br".to_string()),
+        es_es: Some("es_es".to_string()),
+        ko_kr: Some("ko_kr".to_string()),
+        de_de: Some("de_de".to_string()),
+        fr_fr: Some("fr_fr".to_string()),
+        it_it: Some("it_it".to_string()),
+        ru_ru: Some("ru_ru".to_string()),
+        ms_my: Some("ms_my".to_string()),
+    });
+
+    let json = serde_json::to_value(toast).unwrap();
+    let i18n = json["i18n"].as_object().unwrap();
+    let locales = [
+        "zh_cn", "en_us", "ja_jp", "zh_hk", "zh_tw", "id_id", "vi_vn", "th_th", "pt_br", "es_es",
+        "ko_kr", "de_de", "fr_fr", "it_it", "ru_ru", "ms_my",
+    ];
+
+    assert_eq!(i18n.len(), locales.len());
+    for locale in locales {
+        assert_eq!(i18n[locale], locale);
+    }
+}
+
 // ── AppTicketEvent typed handler ──
 
 #[tokio::test]
