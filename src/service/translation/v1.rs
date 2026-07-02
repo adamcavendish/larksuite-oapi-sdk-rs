@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Domain types ──
 
@@ -53,6 +53,28 @@ pub struct DetectData {
 impl_resp!(TranslateResp, TranslateData);
 impl_resp!(DetectLanguageResp, DetectData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct TranslateTextQuery<'a> {
+    pub body: &'a TranslateReqBody,
+}
+
+impl<'a> TranslateTextQuery<'a> {
+    pub fn new(body: &'a TranslateReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DetectLanguageQuery<'a> {
+    pub body: &'a DetectLanguageReqBody,
+}
+
+impl<'a> DetectLanguageQuery<'a> {
+    pub fn new(body: &'a DetectLanguageReqBody) -> Self {
+        Self { body }
+    }
+}
+
 // ── Resources ──
 
 pub struct TextResource<'a> {
@@ -65,14 +87,25 @@ impl<'a> TextResource<'a> {
         body: &TranslateReqBody,
         option: &RequestOption,
     ) -> Result<TranslateResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.translate_by_query(&TranslateTextQuery::new(body), option)
+            .await
+    }
+
+    pub async fn translate_by_query(
+        &self,
+        query: &TranslateTextQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<TranslateResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/translation/v1/text/translate",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TranslateData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<TranslateData>()
+        .await?;
         Ok(TranslateResp {
             api_resp,
             code_error: raw.code_error,
@@ -85,11 +118,25 @@ impl<'a> TextResource<'a> {
         body: &DetectLanguageReqBody,
         option: &RequestOption,
     ) -> Result<DetectLanguageResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/translation/v1/text/detect");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<DetectData>(self.config, &api_req, option).await?;
+        self.detect_language_by_query(&DetectLanguageQuery::new(body), option)
+            .await
+    }
+
+    pub async fn detect_language_by_query(
+        &self,
+        query: &DetectLanguageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DetectLanguageResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/translation/v1/text/detect",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<DetectData>()
+        .await?;
         Ok(DetectLanguageResp {
             api_resp,
             code_error: raw.code_error,
