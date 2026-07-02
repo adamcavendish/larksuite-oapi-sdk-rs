@@ -1,7 +1,10 @@
 mod common;
+#[path = "generated_service_smoke/harness.rs"]
+mod harness;
 
-use common::{http_response, http_response_with_headers, mock_server_with_requests};
+use harness::{client_for, http_response, http_response_with_headers, mock_server_with_requests};
 
+use larksuite_oapi_sdk_rs::FormDataBuilder;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::{
     acs::v1::{
@@ -423,15 +426,6 @@ use larksuite_oapi_sdk_rs::service::{
         CustomWorkplaceAccessDataQuery, WorkplaceAccessDataQuery, WorkplaceBlockAccessDataQuery,
     },
 };
-use larksuite_oapi_sdk_rs::{Client, FormDataBuilder};
-
-fn client_for(addr: std::net::SocketAddr) -> Client {
-    Client::builder("test_app_id", "test_secret")
-        .base_url(format!("http://{addr}"))
-        .disable_token_cache()
-        .build()
-        .unwrap()
-}
 
 #[path = "generated_service_smoke/acs.rs"]
 mod acs;
