@@ -5,9 +5,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::req::RequestOption;
 use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
-use crate::transport;
 
 // ── Domain types ──
 
@@ -1174,12 +1173,16 @@ impl<'a> ExportTaskResource<'a> {
         body: &ExportTask,
         option: &RequestOption,
     ) -> Result<CreateExportTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/export_tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateExportTaskRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/drive/v1/export_tasks",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<CreateExportTaskRespData>()
+        .await?;
         Ok(CreateExportTaskResp {
             api_resp,
             code_error: raw.code_error,
@@ -1194,12 +1197,16 @@ impl<'a> ExportTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<GetExportTaskResp, LarkError> {
         let path = format!("/open-apis/drive/v1/export_tasks/{ticket}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("token", token);
-        let (api_resp, raw) =
-            transport::request_typed::<GetExportTaskRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("token", token)
+        .send::<GetExportTaskRespData>()
+        .await?;
         Ok(GetExportTaskResp {
             api_resp,
             code_error: raw.code_error,
@@ -1295,14 +1302,17 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<CopyFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/copy");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CopyFileRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CopyFileRespData>()
+        .await?;
         Ok(CopyFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1315,15 +1325,16 @@ impl<'a> FileResource<'a> {
         body: &CreateFolderFileReqBody,
         option: &RequestOption,
     ) -> Result<CreateFolderFileResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/create_folder",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateFolderFileRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<CreateFolderFileRespData>()
+        .await?;
         Ok(CreateFolderFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1337,18 +1348,17 @@ impl<'a> FileResource<'a> {
         body: &CreateShortcutFileReqBody,
         option: &RequestOption,
     ) -> Result<CreateShortcutFileResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/create_shortcut",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateShortcutFileRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CreateShortcutFileRespData>()
+        .await?;
         Ok(CreateShortcutFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1363,11 +1373,16 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", file_type);
-        let (api_resp, raw) =
-            transport::request_typed::<DeleteFileRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("type", file_type)
+        .send::<DeleteFileRespData>()
+        .await?;
         Ok(DeleteFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1400,14 +1415,17 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/subscribe");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = event_type {
-            api_req.query_params.set("event_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("file_type", file_type)
+        .query("event_type", event_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1422,14 +1440,17 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/delete_subscribe");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = event_type {
-            api_req.query_params.set("event_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("file_type", file_type)
+        .query("event_type", event_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1444,15 +1465,17 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSubscribeFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/get_subscribe");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = event_type {
-            api_req.query_params.set("event_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetSubscribeFileRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("file_type", file_type)
+        .query("event_type", event_type)
+        .send::<GetSubscribeFileRespData>()
+        .await?;
         Ok(GetSubscribeFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1514,11 +1537,16 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<MoveFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/move");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MoveFileRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<MoveFileRespData>()
+        .await?;
         Ok(MoveFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1531,12 +1559,16 @@ impl<'a> FileResource<'a> {
         task_id: &str,
         option: &RequestOption,
     ) -> Result<TaskCheckFileResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/drive/v1/files/task_check");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("task_id", task_id);
-        let (api_resp, raw) =
-            transport::request_typed::<TaskCheckFileRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/drive/v1/files/task_check",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("task_id", task_id)
+        .send::<TaskCheckFileRespData>()
+        .await?;
         Ok(TaskCheckFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1549,15 +1581,16 @@ impl<'a> FileResource<'a> {
         body: &FileUploadInfo,
         option: &RequestOption,
     ) -> Result<UploadPrepareFileResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/upload_prepare",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UploadPrepareFileRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<UploadPrepareFileRespData>()
+        .await?;
         Ok(UploadPrepareFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1570,15 +1603,16 @@ impl<'a> FileResource<'a> {
         body: &UploadFinishFileReqBody,
         option: &RequestOption,
     ) -> Result<UploadFinishFileResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/upload_finish",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UploadFinishFileRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<UploadFinishFileRespData>()
+        .await?;
         Ok(UploadFinishFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1597,8 +1631,6 @@ impl<'a> FileResource<'a> {
         data: Vec<u8>,
         option: &RequestOption,
     ) -> Result<UploadAllFileResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/files/upload_all");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let fields = multipart_form::upload_all_fields(
             file_name,
             parent_type,
@@ -1608,10 +1640,16 @@ impl<'a> FileResource<'a> {
             None,
             data,
         );
-        api_req.body = Some(ReqBody::FormData(fields));
-        let (api_resp, raw) =
-            transport::request_typed::<UploadAllFileRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/drive/v1/files/upload_all",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .form_body(fields)
+        .send::<UploadAllFileRespData>()
+        .await?;
         Ok(UploadAllFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -1628,12 +1666,17 @@ impl<'a> FileResource<'a> {
         data: Vec<u8>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/files/upload_part");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let fields = multipart_form::upload_part_fields(upload_id, seq, size, checksum, data);
-        api_req.body = Some(ReqBody::FormData(fields));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/drive/v1/files/upload_part",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .form_body(fields)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1804,15 +1847,18 @@ impl<'a> FileCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFileCommentResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FileComment>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("file_type", file_type)
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<FileComment>()
+        .await?;
         Ok(CreateFileCommentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1937,12 +1983,17 @@ impl<'a> FileCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments/{comment_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("file_type", file_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("file_type", file_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2008,11 +2059,16 @@ impl<'a> FileCommentReplyResource<'a> {
         let path = format!(
             "/open-apis/drive/v1/files/{file_token}/comments/{comment_id}/replies/{reply_id}"
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("file_type", file_type);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("file_type", file_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2097,15 +2153,18 @@ impl<'a> FileCommentReplyResource<'a> {
         let path = format!(
             "/open-apis/drive/v1/files/{file_token}/comments/{comment_id}/replies/{reply_id}"
         );
-        let mut api_req = ApiReq::new(http::Method::PUT, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.query_params.set("file_type", file_type);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("file_type", file_type)
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2125,12 +2184,16 @@ impl<'a> FileStatisticsResource<'a> {
         option: &RequestOption,
     ) -> Result<GetFileStatisticsResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/statistics");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("file_type", file_type);
-        let (api_resp, raw) =
-            transport::request_typed::<GetFileStatisticsRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("file_type", file_type)
+        .send::<GetFileStatisticsRespData>()
+        .await?;
         Ok(GetFileStatisticsResp {
             api_resp,
             code_error: raw.code_error,
@@ -2151,12 +2214,16 @@ impl<'a> FileSubscriptionResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFileSubscriptionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/subscriptions");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FileSubscriptionRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<FileSubscriptionRespData>()
+        .await?;
         Ok(CreateFileSubscriptionResp {
             api_resp,
             code_error: raw.code_error,
@@ -2173,12 +2240,16 @@ impl<'a> FileSubscriptionResource<'a> {
     ) -> Result<GetFileSubscriptionResp, LarkError> {
         let path =
             format!("/open-apis/drive/v1/files/{file_token}/subscriptions/{subscription_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FileSubscriptionRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<FileSubscriptionRespData>()
+        .await?;
         Ok(GetFileSubscriptionResp {
             api_resp,
             code_error: raw.code_error,
@@ -2195,12 +2266,16 @@ impl<'a> FileSubscriptionResource<'a> {
     ) -> Result<PatchFileSubscriptionResp, LarkError> {
         let path =
             format!("/open-apis/drive/v1/files/{file_token}/subscriptions/{subscription_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FileSubscriptionRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<FileSubscriptionRespData>()
+        .await?;
         Ok(PatchFileSubscriptionResp {
             api_resp,
             code_error: raw.code_error,
@@ -2269,15 +2344,17 @@ impl<'a> FileVersionResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFileVersionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateFileVersionRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CreateFileVersionRespData>()
+        .await?;
         Ok(CreateFileVersionResp {
             api_resp,
             code_error: raw.code_error,
@@ -2294,14 +2371,17 @@ impl<'a> FileVersionResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions/{version_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("obj_type", obj_type);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("obj_type", obj_type)
+        .query("user_id_type", user_id_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2317,14 +2397,17 @@ impl<'a> FileVersionResource<'a> {
         option: &RequestOption,
     ) -> Result<GetFileVersionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions/{version_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("obj_type", obj_type);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<Version>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("obj_type", obj_type)
+        .query("user_id_type", user_id_type)
+        .send::<Version>()
+        .await?;
         Ok(GetFileVersionResp {
             api_resp,
             code_error: raw.code_error,
@@ -2515,12 +2598,16 @@ impl<'a> ImportTaskResource<'a> {
         body: &ImportTask,
         option: &RequestOption,
     ) -> Result<CreateImportTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/import_tasks");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateImportTaskRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/drive/v1/import_tasks",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<CreateImportTaskRespData>()
+        .await?;
         Ok(CreateImportTaskResp {
             api_resp,
             code_error: raw.code_error,
@@ -2534,11 +2621,15 @@ impl<'a> ImportTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<GetImportTaskResp, LarkError> {
         let path = format!("/open-apis/drive/v1/import_tasks/{ticket}");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<GetImportTaskRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<GetImportTaskRespData>()
+        .await?;
         Ok(GetImportTaskResp {
             api_resp,
             code_error: raw.code_error,
@@ -2558,22 +2649,16 @@ impl<'a> MediaResource<'a> {
         extra: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchGetTmpDownloadUrlMediaResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/drive/v1/medias/batch_get_tmp_download_url",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        for t in file_tokens {
-            api_req.query_params.add("file_tokens", *t);
-        }
-        if let Some(v) = extra {
-            api_req.query_params.set("extra", v);
-        }
-        let (api_resp, raw) = transport::request_typed::<BatchGetTmpDownloadUrlMediaRespData>(
-            self.config,
-            &api_req,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
+        .query_values("file_tokens", Some(file_tokens.iter().copied()))
+        .query("extra", extra)
+        .send::<BatchGetTmpDownloadUrlMediaRespData>()
         .await?;
         Ok(BatchGetTmpDownloadUrlMediaResp {
             api_resp,
@@ -2606,15 +2691,16 @@ impl<'a> MediaResource<'a> {
         body: &MediaUploadInfo,
         option: &RequestOption,
     ) -> Result<UploadPrepareMediaResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/drive/v1/medias/upload_prepare",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UploadPrepareMediaRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<UploadPrepareMediaRespData>()
+        .await?;
         Ok(UploadPrepareMediaResp {
             api_resp,
             code_error: raw.code_error,
@@ -2627,15 +2713,16 @@ impl<'a> MediaResource<'a> {
         body: &UploadFinishMediaReqBody,
         option: &RequestOption,
     ) -> Result<UploadFinishMediaResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/drive/v1/medias/upload_finish",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UploadFinishMediaRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<UploadFinishMediaRespData>()
+        .await?;
         Ok(UploadFinishMediaResp {
             api_resp,
             code_error: raw.code_error,
@@ -2655,8 +2742,6 @@ impl<'a> MediaResource<'a> {
         data: Vec<u8>,
         option: &RequestOption,
     ) -> Result<UploadAllMediaResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/medias/upload_all");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let fields = multipart_form::upload_all_fields(
             file_name,
             parent_type,
@@ -2666,10 +2751,16 @@ impl<'a> MediaResource<'a> {
             extra,
             data,
         );
-        api_req.body = Some(ReqBody::FormData(fields));
-        let (api_resp, raw) =
-            transport::request_typed::<UploadAllMediaRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/drive/v1/medias/upload_all",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .form_body(fields)
+        .send::<UploadAllMediaRespData>()
+        .await?;
         Ok(UploadAllMediaResp {
             api_resp,
             code_error: raw.code_error,
@@ -2686,12 +2777,17 @@ impl<'a> MediaResource<'a> {
         data: Vec<u8>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/medias/upload_part");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
         let fields = multipart_form::upload_part_fields(upload_id, seq, size, checksum, data);
-        api_req.body = Some(ReqBody::FormData(fields));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/drive/v1/medias/upload_part",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .form_body(fields)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2710,15 +2806,17 @@ impl<'a> MetaResource<'a> {
         body: &MetaRequest,
         option: &RequestOption,
     ) -> Result<BatchQueryMetaResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/drive/v1/metas/batch_query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BatchQueryMetaRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/drive/v1/metas/batch_query",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<BatchQueryMetaRespData>()
+        .await?;
         Ok(BatchQueryMetaResp {
             api_resp,
             code_error: raw.code_error,
@@ -2770,13 +2868,17 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<AuthPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/auth");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        api_req.query_params.set("action", action);
-        let (api_resp, raw) =
-            transport::request_typed::<AuthPermissionMemberRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("type", token_type)
+        .query("action", action)
+        .send::<AuthPermissionMemberRespData>()
+        .await?;
         Ok(AuthPermissionMemberResp {
             api_resp,
             code_error: raw.code_error,
@@ -2793,18 +2895,17 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<BatchCreatePermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/batch_create");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        if let Some(v) = need_notification {
-            api_req.query_params.set("need_notification", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<BatchCreatePermissionMemberRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
+        .query("type", token_type)
+        .query("need_notification", need_notification)
+        .json_body(body)?
+        .send::<BatchCreatePermissionMemberRespData>()
         .await?;
         Ok(BatchCreatePermissionMemberResp {
             api_resp,
@@ -2822,18 +2923,17 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<CreatePermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        if let Some(v) = need_notification {
-            api_req.query_params.set("need_notification", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<CreatePermissionMemberRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
+        .query("type", token_type)
+        .query("need_notification", need_notification)
+        .json_body(body)?
+        .send::<CreatePermissionMemberRespData>()
         .await?;
         Ok(CreatePermissionMemberResp {
             api_resp,
@@ -2852,13 +2952,18 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/{member_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        api_req.query_params.set("member_type", member_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("type", token_type)
+        .query("member_type", member_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2917,24 +3022,21 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/transfer_owner");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        if let Some(v) = need_notification {
-            api_req.query_params.set("need_notification", v.to_string());
-        }
-        if let Some(v) = remove_old_owner {
-            api_req.query_params.set("remove_old_owner", v.to_string());
-        }
-        if let Some(v) = stay_put {
-            api_req.query_params.set("stay_put", v.to_string());
-        }
-        if let Some(v) = old_owner_perm {
-            api_req.query_params.set("old_owner_perm", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("type", token_type)
+        .query("need_notification", need_notification)
+        .query("remove_old_owner", remove_old_owner)
+        .query("stay_put", stay_put)
+        .query("old_owner_perm", old_owner_perm)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2951,18 +3053,17 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdatePermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/{member_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        if let Some(v) = need_notification {
-            api_req.query_params.set("need_notification", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<UpdatePermissionMemberRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
+        .query("type", token_type)
+        .query("need_notification", need_notification)
+        .json_body(body)?
+        .send::<UpdatePermissionMemberRespData>()
         .await?;
         Ok(UpdatePermissionMemberResp {
             api_resp,
@@ -3031,15 +3132,16 @@ impl<'a> PermissionPublicResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchPermissionPublicV1Resp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<GetPermissionPublicV1RespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
+        .query("type", token_type)
+        .json_body(body)?
+        .send::<GetPermissionPublicV1RespData>()
         .await?;
         Ok(PatchPermissionPublicV1Resp {
             api_resp,
@@ -3061,14 +3163,15 @@ impl<'a> PermissionPublicPasswordResource<'a> {
         option: &RequestOption,
     ) -> Result<CreatePermissionPublicPasswordResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public/password");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        let (api_resp, raw) = transport::request_typed::<CreatePermissionPublicPasswordRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
+        .query("type", token_type)
+        .send::<CreatePermissionPublicPasswordRespData>()
         .await?;
         Ok(CreatePermissionPublicPasswordResp {
             api_resp,
@@ -3084,11 +3187,16 @@ impl<'a> PermissionPublicPasswordResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public/password");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("type", token_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -3102,14 +3210,15 @@ impl<'a> PermissionPublicPasswordResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdatePermissionPublicPasswordResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public/password");
-        let mut api_req = ApiReq::new(http::Method::PUT, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", token_type);
-        let (api_resp, raw) = transport::request_typed::<UpdatePermissionPublicPasswordRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
+        .query("type", token_type)
+        .send::<UpdatePermissionPublicPasswordRespData>()
         .await?;
         Ok(UpdatePermissionPublicPasswordResp {
             api_resp,

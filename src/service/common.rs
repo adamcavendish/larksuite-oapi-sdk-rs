@@ -130,6 +130,11 @@ impl<'a> RestRequest<'a> {
         Ok(self)
     }
 
+    pub(crate) fn form_body(mut self, fields: Vec<crate::req::FormDataField>) -> Self {
+        self.api_req.body = Some(ReqBody::FormData(fields));
+        self
+    }
+
     pub(crate) async fn send<T: for<'de> serde::Deserialize<'de>>(
         self,
     ) -> Result<(ApiResp, RawResponse<T>), LarkError> {
