@@ -82,8 +82,20 @@ mod bitable;
 mod block;
 #[path = "generated_service_smoke/board.rs"]
 mod board;
-#[path = "generated_service_smoke/calendar.rs"]
-mod calendar;
+#[path = "generated_service_smoke/calendar/acl.rs"]
+mod calendar_acl;
+#[path = "generated_service_smoke/calendar/attendee.rs"]
+mod calendar_attendee;
+#[path = "generated_service_smoke/calendar/calendar.rs"]
+mod calendar_calendar;
+#[path = "generated_service_smoke/calendar/chat_member.rs"]
+mod calendar_chat_member;
+#[path = "generated_service_smoke/calendar/event.rs"]
+mod calendar_event;
+#[path = "generated_service_smoke/calendar/freebusy.rs"]
+mod calendar_freebusy;
+#[path = "generated_service_smoke/calendar/timezone.rs"]
+mod calendar_timezone;
 #[path = "generated_service_smoke/cardkit.rs"]
 mod cardkit;
 #[path = "generated_service_smoke/contact_basic.rs"]
@@ -152,8 +164,16 @@ mod drive_media;
 mod drive_permission;
 #[path = "generated_service_smoke/ehr.rs"]
 mod ehr;
-#[path = "generated_service_smoke/helpdesk.rs"]
-mod helpdesk;
+#[path = "generated_service_smoke/helpdesk/agent.rs"]
+mod helpdesk_agent;
+#[path = "generated_service_smoke/helpdesk/category.rs"]
+mod helpdesk_category;
+#[path = "generated_service_smoke/helpdesk/download.rs"]
+mod helpdesk_download;
+#[path = "generated_service_smoke/helpdesk/faq.rs"]
+mod helpdesk_faq;
+#[path = "generated_service_smoke/helpdesk/ticket.rs"]
+mod helpdesk_ticket;
 #[path = "generated_service_smoke/hire/application.rs"]
 mod hire_application;
 #[path = "generated_service_smoke/hire/interview.rs"]
@@ -172,14 +192,32 @@ mod hire_task;
 mod hire_v2;
 #[path = "generated_service_smoke/human_authentication.rs"]
 mod human_authentication;
-#[path = "generated_service_smoke/im.rs"]
-mod im;
+#[path = "generated_service_smoke/im/announcement.rs"]
+mod im_announcement;
+#[path = "generated_service_smoke/im/chat.rs"]
+mod im_chat;
+#[path = "generated_service_smoke/im/download.rs"]
+mod im_download;
+#[path = "generated_service_smoke/im/message.rs"]
+mod im_message;
+#[path = "generated_service_smoke/im/moderation.rs"]
+mod im_moderation;
+#[path = "generated_service_smoke/im/pin.rs"]
+mod im_pin;
+#[path = "generated_service_smoke/im/reaction.rs"]
+mod im_reaction;
 #[path = "generated_service_smoke/im_v2.rs"]
 mod im_v2;
 #[path = "generated_service_smoke/lingo.rs"]
 mod lingo;
-#[path = "generated_service_smoke/mail.rs"]
-mod mail;
+#[path = "generated_service_smoke/mail/mailgroup.rs"]
+mod mail_mailgroup;
+#[path = "generated_service_smoke/mail/mailgroup_member.rs"]
+mod mail_mailgroup_member;
+#[path = "generated_service_smoke/mail/public_mailbox.rs"]
+mod mail_public_mailbox;
+#[path = "generated_service_smoke/mail/public_mailbox_member.rs"]
+mod mail_public_mailbox_member;
 #[path = "generated_service_smoke/mdm.rs"]
 mod mdm;
 #[path = "generated_service_smoke/minutes.rs"]
@@ -214,8 +252,16 @@ mod security_and_compliance;
 mod sheets;
 #[path = "generated_service_smoke/spark.rs"]
 mod spark;
-#[path = "generated_service_smoke/task.rs"]
-mod task;
+#[path = "generated_service_smoke/task/comment.rs"]
+mod task_comment;
+#[path = "generated_service_smoke/task/core.rs"]
+mod task_core;
+#[path = "generated_service_smoke/task/member.rs"]
+mod task_member;
+#[path = "generated_service_smoke/task/reminder.rs"]
+mod task_reminder;
+#[path = "generated_service_smoke/task/task.rs"]
+mod task_task;
 #[path = "generated_service_smoke/task_v2/attachment.rs"]
 mod task_v2_attachment;
 #[path = "generated_service_smoke/task_v2/comment.rs"]
