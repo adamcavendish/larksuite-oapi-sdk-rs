@@ -210,6 +210,7 @@ use larksuite_oapi_sdk_rs::service::{
         GetMinutesQuery as GetMinutesMinutesQuery, GetTranscriptQuery as GetMinutesTranscriptQuery,
         ListParticipantQuery as ListMinutesParticipantQuery,
     },
+    moments::v1::{GetPostQuery, ListPostQuery},
     passport::v1::{
         LogoutSessionQuery, LogoutSessionReqBody, QuerySessionQuery, QuerySessionReqBody,
     },
@@ -6580,6 +6581,48 @@ async fn minutes_transcript_get_by_query_smoke() {
     assert!(request.contains("need_speaker=true"));
     assert!(request.contains("need_timestamp=true"));
     assert!(request.contains("file_format=srt"));
+}
+
+#[tokio::test]
+async fn moments_post_by_query_smoke() {
+    let get_body = r#"{"code":0,"msg":"ok","data":{"post":{"post_id":"post-1","user_id":"ou-1","category_id":"cat-1"}}}"#;
+    let list_body = r#"{"code":0,"msg":"ok","data":{"items":[{"post_id":"post-1","user_id":"ou-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, get_body),
+        http_response(200, list_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    client
+        .moments()
+        .post
+        .get_by_query(
+            &GetPostQuery::new("post-1").user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .moments()
+        .post
+        .list_by_query(
+            &ListPostQuery::new()
+                .category_id("cat-1")
+                .user_id_type("open_id")
+                .page(PageQuery::new().page_size(20).page_token("next-page")),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/moments/v1/posts/post-1?"));
+    assert!(request.contains("GET /open-apis/moments/v1/posts?"));
+    assert!(request.contains("category_id=cat-1"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
 }
 
 // ── Passport ──
