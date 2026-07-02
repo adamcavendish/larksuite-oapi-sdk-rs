@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -551,10 +550,16 @@ impl<'a> RoomResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/rooms/{room_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -837,15 +842,17 @@ impl<'a> RoomConfigResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SetCheckboardAccessCodeRoomConfigResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/vc/v1/room_configs/set_checkboard_access_code",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(SetCheckboardAccessCodeRoomConfigResp {
             api_resp,
             code_error,
@@ -858,15 +865,17 @@ impl<'a> RoomConfigResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SetRoomAccessCodeRoomConfigResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/vc/v1/room_configs/set_room_access_code",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(SetRoomAccessCodeRoomConfigResp {
             api_resp,
             code_error,
@@ -986,13 +995,17 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMeetingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MeetingData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .send::<MeetingData>()
+        .await?;
+
         Ok(GetMeetingResp {
             api_resp,
             code_error: raw.code_error,
@@ -1008,14 +1021,18 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/invite");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(&body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1030,14 +1047,18 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/kickout");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(&body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1052,14 +1073,18 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/set_host");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(&body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1072,10 +1097,16 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/end");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1141,19 +1172,19 @@ impl<'a> ParticipantResource<'a> {
         option: &RequestOption,
     ) -> Result<ListParticipantResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/participants");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<ParticipantListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send::<ParticipantListData>()
+        .await?;
+
         Ok(ListParticipantResp {
             api_resp,
             code_error: raw.code_error,
@@ -1209,18 +1240,20 @@ impl<'a> ReportResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetMeetingReportResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/reports/get_daily");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("start_time", start_time);
-        api_req.query_params.set("end_time", end_time);
-        if let Some(v) = meeting_type {
-            api_req.query_params.set("meeting_type", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MeetingReportData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/reports/get_daily",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("start_time", start_time)
+        .query("end_time", end_time)
+        .query("meeting_type", meeting_type)
+        .query("user_id_type", user_id_type)
+        .send::<MeetingReportData>()
+        .await?;
+
         Ok(GetMeetingReportResp {
             api_resp,
             code_error: raw.code_error,
@@ -1467,12 +1500,17 @@ impl<'a> ExportResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ExportMeetingListResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/exports/meeting_list");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/exports/meeting_list",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ExportMeetingListResp {
             api_resp,
             code_error,
@@ -1486,15 +1524,17 @@ impl<'a> ExportResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ExportParticipantListResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/vc/v1/exports/participant_list",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ExportParticipantListResp {
             api_resp,
             code_error,
@@ -1508,15 +1548,17 @@ impl<'a> ExportResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ExportParticipantQualityListResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/vc/v1/exports/participant_quality_list",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ExportParticipantQualityListResp {
             api_resp,
             code_error,
@@ -1530,15 +1572,17 @@ impl<'a> ExportResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ExportResourceReservationListResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/vc/v1/exports/resource_reservation_list",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ExportResourceReservationListResp {
             api_resp,
             code_error,
@@ -1553,11 +1597,16 @@ impl<'a> ExportResource<'a> {
         option: &RequestOption,
     ) -> Result<GetExportResp, LarkError> {
         let path = format!("/open-apis/vc/v1/exports/{task_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(GetExportResp {
             api_resp,
             code_error,
@@ -1604,14 +1653,17 @@ impl<'a> MeetingRecordingResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMeetingRecordingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/recording");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(GetMeetingRecordingResp {
             api_resp,
             code_error,
@@ -1628,15 +1680,18 @@ impl<'a> MeetingRecordingResource<'a> {
         option: &RequestOption,
     ) -> Result<SetPermissionMeetingRecordingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/recording/set_permission");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(SetPermissionMeetingRecordingResp {
             api_resp,
             code_error,
@@ -1652,12 +1707,17 @@ impl<'a> MeetingRecordingResource<'a> {
         option: &RequestOption,
     ) -> Result<StartMeetingRecordingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/recording/start");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(StartMeetingRecordingResp {
             api_resp,
             code_error,
@@ -1672,11 +1732,16 @@ impl<'a> MeetingRecordingResource<'a> {
         option: &RequestOption,
     ) -> Result<StopMeetingRecordingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/recording/stop");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(StopMeetingRecordingResp {
             api_resp,
             code_error,
@@ -1819,10 +1884,16 @@ impl<'a> ReserveResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteReserveResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserves/{reserve_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
+
         Ok(DeleteReserveResp {
             api_resp,
             code_error,
@@ -1953,21 +2024,18 @@ impl<'a> ReserveConfigResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ReserveScopeReserveConfigResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/vc/v1/reserve_configs/reserve_scope",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("scope_type", scope_type.to_string());
-        api_req.query_params.set("scope_id", scope_id);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("scope_type", scope_type)
+        .query("scope_id", scope_id)
+        .query("user_id_type", user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ReserveScopeReserveConfigResp {
             api_resp,
             code_error,
@@ -1984,15 +2052,18 @@ impl<'a> ReserveConfigResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchReserveConfigResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(PatchReserveConfigResp {
             api_resp,
             code_error,
@@ -2017,17 +2088,17 @@ impl<'a> ReserveConfigAdminResource<'a> {
         option: &RequestOption,
     ) -> Result<GetReserveConfigAdminResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/admin");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("scope_type", scope_type.to_string());
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("scope_type", scope_type)
+        .query("user_id_type", user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetReserveConfigAdminResp {
             api_resp,
             code_error,
@@ -2044,15 +2115,18 @@ impl<'a> ReserveConfigAdminResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchReserveConfigAdminResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/admin");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(PatchReserveConfigAdminResp {
             api_resp,
             code_error,
@@ -2077,17 +2151,17 @@ impl<'a> ReserveConfigDisableInformResource<'a> {
         option: &RequestOption,
     ) -> Result<GetReserveConfigDisableInformResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/disable_inform");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("scope_type", scope_type.to_string());
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("scope_type", scope_type)
+        .query("user_id_type", user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetReserveConfigDisableInformResp {
             api_resp,
             code_error,
@@ -2104,15 +2178,18 @@ impl<'a> ReserveConfigDisableInformResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchReserveConfigDisableInformResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/disable_inform");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(PatchReserveConfigDisableInformResp {
             api_resp,
             code_error,
@@ -2137,17 +2214,17 @@ impl<'a> ReserveConfigFormResource<'a> {
         option: &RequestOption,
     ) -> Result<GetReserveConfigFormResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/form");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("scope_type", scope_type.to_string());
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("scope_type", scope_type)
+        .query("user_id_type", user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetReserveConfigFormResp {
             api_resp,
             code_error,
@@ -2164,15 +2241,18 @@ impl<'a> ReserveConfigFormResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchReserveConfigFormResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/form");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(PatchReserveConfigFormResp {
             api_resp,
             code_error,
@@ -2194,12 +2274,17 @@ impl<'a> RoomLevelResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateRoomLevelResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/room_levels");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/room_levels",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateRoomLevelResp {
             api_resp,
             code_error,
@@ -2213,12 +2298,17 @@ impl<'a> RoomLevelResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<DelRoomLevelResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/room_levels/del");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/room_levels/del",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(DelRoomLevelResp {
             api_resp,
             code_error,
@@ -2233,11 +2323,16 @@ impl<'a> RoomLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<GetRoomLevelResp, LarkError> {
         let path = format!("/open-apis/vc/v1/room_levels/{room_level_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(GetRoomLevelResp {
             api_resp,
             code_error,
@@ -2253,20 +2348,19 @@ impl<'a> RoomLevelResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListRoomLevelResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/room_levels");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = room_level_id {
-            api_req.query_params.set("room_level_id", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/room_levels",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("room_level_id", room_level_id)
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListRoomLevelResp {
             api_resp,
             code_error,
@@ -2280,12 +2374,17 @@ impl<'a> RoomLevelResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<MgetRoomLevelResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/room_levels/mget");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/room_levels/mget",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(MgetRoomLevelResp {
             api_resp,
             code_error,
@@ -2301,12 +2400,17 @@ impl<'a> RoomLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchRoomLevelResp, LarkError> {
         let path = format!("/open-apis/vc/v1/room_levels/{room_level_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(PatchRoomLevelResp {
             api_resp,
             code_error,
@@ -2320,14 +2424,16 @@ impl<'a> RoomLevelResource<'a> {
         custom_level_ids: &str,
         option: &RequestOption,
     ) -> Result<SearchRoomLevelResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/room_levels/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("custom_level_ids", custom_level_ids);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/room_levels/search",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("custom_level_ids", custom_level_ids)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SearchRoomLevelResp {
             api_resp,
             code_error,
@@ -2350,15 +2456,18 @@ impl<'a> ScopeConfigResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateScopeConfigResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/vc/v1/scope_config");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/scope_config",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateScopeConfigResp {
             api_resp,
             code_error,
@@ -2374,18 +2483,18 @@ impl<'a> ScopeConfigResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetScopeConfigResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/vc/v1/scope_config");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req
-            .query_params
-            .set("scope_type", scope_type.to_string());
-        api_req.query_params.set("scope_id", scope_id);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/scope_config",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("scope_type", scope_type)
+        .query("scope_id", scope_id)
+        .query("user_id_type", user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetScopeConfigResp {
             api_resp,
             code_error,
