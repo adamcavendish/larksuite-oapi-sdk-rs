@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -116,6 +115,92 @@ impl_resp_v2!(CreateDraftResp, serde_json::Value);
 impl_resp_v2!(UpdateDraftResp, serde_json::Value);
 impl_resp_v2!(UploadFileResp, serde_json::Value);
 impl_resp_v2!(ListRepoResp, serde_json::Value);
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct CreateEntityQuery<'a> {
+    pub body: &'a CreateLingoEntityReqBody,
+    pub repo_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateEntityQuery<'a> {
+    pub fn new(body: &'a CreateLingoEntityReqBody) -> Self {
+        Self {
+            body,
+            repo_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn repo_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.repo_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct UpdateEntityQuery<'a> {
+    pub entity_id: &'a str,
+    pub body: &'a CreateLingoEntityReqBody,
+    pub repo_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UpdateEntityQuery<'a> {
+    pub fn new(entity_id: &'a str, body: &'a CreateLingoEntityReqBody) -> Self {
+        Self {
+            entity_id,
+            body,
+            repo_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn repo_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.repo_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct DeleteEntityQuery<'a> {
+    pub entity_id: &'a str,
+    pub provider: Option<&'a str>,
+    pub outer_id: Option<&'a str>,
+}
+
+impl<'a> DeleteEntityQuery<'a> {
+    pub fn new(entity_id: &'a str) -> Self {
+        Self {
+            entity_id,
+            provider: None,
+            outer_id: None,
+        }
+    }
+
+    pub fn provider(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.provider = value.into();
+        self
+    }
+
+    pub fn outer_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.outer_id = value.into();
+        self
+    }
+}
 
 #[derive(Debug, Clone)]
 #[non_exhaustive]
@@ -239,6 +324,30 @@ impl<'a> ListClassificationQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct HighlightEntityQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> HighlightEntityQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct MatchEntityQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> MatchEntityQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
 // ── Resources ──
 
 pub struct EntityResource<'a> {
@@ -253,17 +362,29 @@ impl<'a> EntityResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateEntityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/entities");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = repo_id {
-            api_req.query_params.set("repo_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<EntityData>(self.config, &api_req, option).await?;
+        let query = CreateEntityQuery::new(body)
+            .repo_id(repo_id)
+            .user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateEntityResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/lingo/v1/entities",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("repo_id", query.repo_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<EntityData>()
+        .await?;
         Ok(CreateEntityResp {
             api_resp,
             code_error: raw.code_error,
@@ -279,18 +400,30 @@ impl<'a> EntityResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateEntityResp, LarkError> {
-        let path = format!("/open-apis/lingo/v1/entities/{entity_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = repo_id {
-            api_req.query_params.set("repo_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<EntityData>(self.config, &api_req, option).await?;
+        let query = UpdateEntityQuery::new(entity_id, body)
+            .repo_id(repo_id)
+            .user_id_type(user_id_type);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateEntityResp, LarkError> {
+        let path = format!("/open-apis/lingo/v1/entities/{}", query.entity_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("repo_id", query.repo_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<EntityData>()
+        .await?;
         Ok(UpdateEntityResp {
             api_resp,
             code_error: raw.code_error,
@@ -305,17 +438,29 @@ impl<'a> EntityResource<'a> {
         outer_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/lingo/v1/entities/{entity_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = provider {
-            api_req.query_params.set("provider", v);
-        }
-        if let Some(v) = outer_id {
-            api_req.query_params.set("outer_id", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = DeleteEntityQuery::new(entity_id)
+            .provider(provider)
+            .outer_id(outer_id);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/lingo/v1/entities/{}", query.entity_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("provider", query.provider)
+        .query("outer_id", query.outer_id)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -450,12 +595,25 @@ impl<'a> EntityResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<HighlightEntityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/entities/highlight");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = HighlightEntityQuery::new(&body);
+        self.highlight_by_query(&query, option).await
+    }
+
+    pub async fn highlight_by_query(
+        &self,
+        query: &HighlightEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<HighlightEntityResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/lingo/v1/entities/highlight",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(HighlightEntityResp {
             api_resp,
             code_error,
@@ -468,12 +626,25 @@ impl<'a> EntityResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<MatchEntityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/entities/match");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = MatchEntityQuery::new(&body);
+        self.match_by_query(&query, option).await
+    }
+
+    pub async fn match_by_query(
+        &self,
+        query: &MatchEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<MatchEntityResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/lingo/v1/entities/match",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(MatchEntityResp {
             api_resp,
             code_error,
@@ -525,6 +696,50 @@ pub struct DraftResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateDraftQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateDraftQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateDraftQuery<'a> {
+    pub draft_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UpdateDraftQuery<'a> {
+    pub fn new(draft_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            draft_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> DraftResource<'a> {
     pub async fn create(
         &self,
@@ -532,15 +747,26 @@ impl<'a> DraftResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateDraftResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/drafts");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateDraftQuery::new(&body).user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateDraftQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateDraftResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/lingo/v1/drafts",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateDraftResp {
             api_resp,
             code_error,
@@ -555,16 +781,27 @@ impl<'a> DraftResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateDraftResp, LarkError> {
-        let path = format!("/open-apis/lingo/v1/drafts/{draft_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UpdateDraftQuery::new(draft_id, &body).user_id_type(user_id_type);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateDraftQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateDraftResp, LarkError> {
+        let path = format!("/open-apis/lingo/v1/drafts/{}", query.draft_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UpdateDraftResp {
             api_resp,
             code_error,
@@ -575,6 +812,18 @@ impl<'a> DraftResource<'a> {
 
 pub struct FileResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UploadFileQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UploadFileQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
 }
 
 impl<'a> FileResource<'a> {
@@ -600,12 +849,25 @@ impl<'a> FileResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UploadFileResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/lingo/v1/files/upload");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UploadFileQuery::new(&body);
+        self.upload_by_query(&query, option).await
+    }
+
+    pub async fn upload_by_query(
+        &self,
+        query: &UploadFileQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UploadFileResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/lingo/v1/files/upload",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UploadFileResp {
             api_resp,
             code_error,
@@ -618,13 +880,36 @@ pub struct RepoResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListRepoQuery;
+
+impl ListRepoQuery {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
 impl<'a> RepoResource<'a> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListRepoResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/lingo/v1/repos");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListRepoQuery::new();
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        _query: &ListRepoQuery,
+        option: &RequestOption,
+    ) -> Result<ListRepoResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/lingo/v1/repos",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListRepoResp {
             api_resp,
             code_error,
