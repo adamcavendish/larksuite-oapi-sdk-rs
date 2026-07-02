@@ -162,7 +162,7 @@ impl DeviceApplyRecordV2Resource<'_> {
             "/open-apis/security_and_compliance/v2/device_apply_records/{}",
             query.device_apply_record_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -170,13 +170,8 @@ impl DeviceApplyRecordV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateDeviceApplyRecordV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateDeviceApplyRecordV2Resp>()
+        .await
     }
 }
 
@@ -199,7 +194,7 @@ impl DeviceRecordV2Resource<'_> {
         query: &CreateDeviceRecordV2Query<'_>,
         option: &RequestOption,
     ) -> Result<CreateDeviceRecordV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/security_and_compliance/v2/device_records",
@@ -207,13 +202,8 @@ impl DeviceRecordV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<DeviceRecordData>()
-        .await?;
-        Ok(CreateDeviceRecordV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<DeviceRecordData, CreateDeviceRecordV2Resp>()
+        .await
     }
 
     pub async fn delete(
@@ -234,20 +224,15 @@ impl DeviceRecordV2Resource<'_> {
             "/open-apis/security_and_compliance/v2/device_records/{}",
             query.device_record_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteDeviceRecordV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteDeviceRecordV2Resp>()
+        .await
     }
 
     pub async fn get(
@@ -268,20 +253,15 @@ impl DeviceRecordV2Resource<'_> {
             "/open-apis/security_and_compliance/v2/device_records/{}",
             query.device_record_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<DeviceRecordData>()
-        .await?;
-        Ok(GetDeviceRecordV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<DeviceRecordData, GetDeviceRecordV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -300,7 +280,7 @@ impl DeviceRecordV2Resource<'_> {
         query: &ListDeviceRecordV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListDeviceRecordV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/security_and_compliance/v2/device_records",
@@ -308,13 +288,8 @@ impl DeviceRecordV2Resource<'_> {
             option,
         )
         .page_query(query.page)
-        .send_v2::<DeviceRecordListData>()
-        .await?;
-        Ok(ListDeviceRecordV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<DeviceRecordListData, ListDeviceRecordV2Resp>()
+        .await
     }
 
     pub async fn mine(&self, option: &RequestOption) -> Result<MineDeviceRecordV2Resp, LarkError> {
@@ -327,20 +302,15 @@ impl DeviceRecordV2Resource<'_> {
         _query: &MineDeviceRecordV2Query,
         option: &RequestOption,
     ) -> Result<MineDeviceRecordV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/security_and_compliance/v2/device_records/mine",
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2::<DeviceRecordListData>()
-        .await?;
-        Ok(MineDeviceRecordV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<DeviceRecordListData, MineDeviceRecordV2Resp>()
+        .await
     }
 
     pub async fn update(
@@ -362,7 +332,7 @@ impl DeviceRecordV2Resource<'_> {
             "/open-apis/security_and_compliance/v2/device_records/{}",
             query.device_record_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -370,12 +340,7 @@ impl DeviceRecordV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<DeviceRecordData>()
-        .await?;
-        Ok(UpdateDeviceRecordV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<DeviceRecordData, UpdateDeviceRecordV2Resp>()
+        .await
     }
 }

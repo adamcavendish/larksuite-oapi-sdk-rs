@@ -5,7 +5,7 @@ use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
 use crate::resp::{ApiResp, CodeError};
-use crate::service::common::RestRequest;
+use crate::service::common::{FromV2Response, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct NodeV1ListData {
@@ -26,6 +26,20 @@ pub struct SearchNodeV1Resp {
 impl SearchNodeV1Resp {
     pub fn success(&self) -> bool {
         self.api_resp.status_code == 200 && self.code_error.as_ref().is_none_or(|e| e.code == 0)
+    }
+}
+
+impl FromV2Response<NodeV1ListData> for SearchNodeV1Resp {
+    fn from_v2_response(
+        api_resp: ApiResp,
+        code_error: Option<CodeError>,
+        data: Option<NodeV1ListData>,
+    ) -> Self {
+        Self {
+            api_resp,
+            code_error,
+            data,
+        }
     }
 }
 
@@ -70,7 +84,7 @@ impl NodeV1Resource<'_> {
         query: &SearchNodeV1Query<'_>,
         option: &RequestOption,
     ) -> Result<SearchNodeV1Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/wiki/v1/nodes/search",
@@ -78,12 +92,7 @@ impl NodeV1Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<NodeV1ListData>()
-        .await?;
-        Ok(SearchNodeV1Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<NodeV1ListData, SearchNodeV1Resp>()
+        .await
     }
 }

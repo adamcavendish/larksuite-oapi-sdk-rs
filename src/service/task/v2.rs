@@ -1186,7 +1186,7 @@ impl<'a> TaskV2Resource<'a> {
         query: &CreateTaskV2Query<'_>,
         option: &RequestOption,
     ) -> Result<CreateTaskV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/task/v2/tasks",
@@ -1195,13 +1195,8 @@ impl<'a> TaskV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(CreateTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, CreateTaskV2Resp>()
+        .await
     }
 
     pub async fn get(
@@ -1220,7 +1215,7 @@ impl<'a> TaskV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<GetTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{}", query.task_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1228,13 +1223,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(GetTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, GetTaskV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -1254,7 +1244,7 @@ impl<'a> TaskV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<PatchTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{}", query.task_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1263,13 +1253,8 @@ impl<'a> TaskV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(PatchTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, PatchTaskV2Resp>()
+        .await
     }
 
     pub async fn delete(
@@ -1287,20 +1272,15 @@ impl<'a> TaskV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{}", query.task_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteTaskV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -1321,7 +1301,7 @@ impl<'a> TaskV2Resource<'a> {
         query: &ListTaskV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListTaskV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/task/v2/tasks",
@@ -1333,13 +1313,8 @@ impl<'a> TaskV2Resource<'a> {
         .query("type", query.task_type)
         .query("agent_task_status", query.agent_task_status)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<TaskV2ListData>()
-        .await?;
-        Ok(ListTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2ListData, ListTaskV2Resp>()
+        .await
     }
 
     pub async fn add_members(
@@ -1358,7 +1333,7 @@ impl<'a> TaskV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<AddMembersTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{}/add_members", query.task_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1366,13 +1341,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(AddMembersTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, AddMembersTaskV2Resp>()
+        .await
     }
 
     pub async fn remove_members(
@@ -1394,7 +1364,7 @@ impl<'a> TaskV2Resource<'a> {
             "/open-apis/task/v2/tasks/{}/remove_members",
             query.task_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1402,13 +1372,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(RemoveMembersTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, RemoveMembersTaskV2Resp>()
+        .await
     }
 
     pub async fn add_reminders(
@@ -1427,7 +1392,7 @@ impl<'a> TaskV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<AddRemindersTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{}/add_reminders", query.task_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1435,13 +1400,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(AddRemindersTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, AddRemindersTaskV2Resp>()
+        .await
     }
 
     pub async fn remove_reminders(
@@ -1463,7 +1423,7 @@ impl<'a> TaskV2Resource<'a> {
             "/open-apis/task/v2/tasks/{}/remove_reminders",
             query.task_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1471,13 +1431,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(RemoveRemindersTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, RemoveRemindersTaskV2Resp>()
+        .await
     }
 
     pub async fn add_dependencies(
@@ -1499,7 +1454,7 @@ impl<'a> TaskV2Resource<'a> {
             "/open-apis/task/v2/tasks/{}/add_dependencies",
             query.task_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1507,13 +1462,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(AddDependenciesTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, AddDependenciesTaskV2Resp>()
+        .await
     }
 
     pub async fn remove_dependencies(
@@ -1535,7 +1485,7 @@ impl<'a> TaskV2Resource<'a> {
             "/open-apis/task/v2/tasks/{}/remove_dependencies",
             query.task_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1543,13 +1493,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(RemoveDependenciesTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, RemoveDependenciesTaskV2Resp>()
+        .await
     }
 
     pub async fn add_tasklist(
@@ -1568,7 +1513,7 @@ impl<'a> TaskV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<AddTasklistTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{}/add_tasklist", query.task_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1576,13 +1521,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(AddTasklistTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, AddTasklistTaskV2Resp>()
+        .await
     }
 
     pub async fn remove_tasklist(
@@ -1604,7 +1544,7 @@ impl<'a> TaskV2Resource<'a> {
             "/open-apis/task/v2/tasks/{}/remove_tasklist",
             query.task_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1612,13 +1552,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(RemoveTasklistTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, RemoveTasklistTaskV2Resp>()
+        .await
     }
 
     pub async fn tasklists(
@@ -1637,7 +1572,7 @@ impl<'a> TaskV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<TasklistsTaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{}/tasklists", query.task_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1645,13 +1580,8 @@ impl<'a> TaskV2Resource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<TasklistListData>()
-        .await?;
-        Ok(TasklistsTaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TasklistListData, TasklistsTaskV2Resp>()
+        .await
     }
 
     pub async fn create_subtask(
@@ -1671,7 +1601,7 @@ impl<'a> TaskV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<CreateTaskSubtaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{}/subtasks", query.task_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1680,13 +1610,8 @@ impl<'a> TaskV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<TaskV2Data>()
-        .await?;
-        Ok(CreateTaskSubtaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2Data, CreateTaskSubtaskV2Resp>()
+        .await
     }
 
     pub async fn list_subtasks(
@@ -1709,7 +1634,7 @@ impl<'a> TaskV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<ListTaskSubtaskV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasks/{}/subtasks", query.task_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1718,13 +1643,8 @@ impl<'a> TaskV2Resource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<TaskV2ListData>()
-        .await?;
-        Ok(ListTaskSubtaskV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2ListData, ListTaskSubtaskV2Resp>()
+        .await
     }
 }
 
@@ -1751,7 +1671,7 @@ impl<'a> AttachmentV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<GetAttachmentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/attachments/{}", query.attachment_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1759,13 +1679,8 @@ impl<'a> AttachmentV2Resource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<AttachmentData>()
-        .await?;
-        Ok(GetAttachmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AttachmentData, GetAttachmentV2Resp>()
+        .await
     }
 
     pub async fn delete(
@@ -1783,20 +1698,15 @@ impl<'a> AttachmentV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteAttachmentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/attachments/{}", query.attachment_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteAttachmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteAttachmentV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -1819,7 +1729,7 @@ impl<'a> AttachmentV2Resource<'a> {
         query: &ListAttachmentV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListAttachmentV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/task/v2/attachments",
@@ -1831,13 +1741,8 @@ impl<'a> AttachmentV2Resource<'a> {
         .query("updated_mesc", query.updated_mesc)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send_v2::<AttachmentListData>()
-        .await?;
-        Ok(ListAttachmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AttachmentListData, ListAttachmentV2Resp>()
+        .await
     }
 
     pub async fn upload(
@@ -1854,7 +1759,7 @@ impl<'a> AttachmentV2Resource<'a> {
         query: &UploadAttachmentV2Query<'_>,
         option: &RequestOption,
     ) -> Result<UploadAttachmentV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/task/v2/attachments/upload",
@@ -1862,13 +1767,8 @@ impl<'a> AttachmentV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<AttachmentData>()
-        .await?;
-        Ok(UploadAttachmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AttachmentData, UploadAttachmentV2Resp>()
+        .await
     }
 }
 
@@ -1894,7 +1794,7 @@ impl<'a> CommentV2Resource<'a> {
         query: &CreateCommentV2Query<'_>,
         option: &RequestOption,
     ) -> Result<CreateCommentV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/task/v2/comments",
@@ -1903,13 +1803,8 @@ impl<'a> CommentV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<CommentV2Data>()
-        .await?;
-        Ok(CreateCommentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CommentV2Data, CreateCommentV2Resp>()
+        .await
     }
 
     pub async fn get(
@@ -1928,7 +1823,7 @@ impl<'a> CommentV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<GetCommentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/comments/{}", query.comment_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1936,13 +1831,8 @@ impl<'a> CommentV2Resource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<CommentV2Data>()
-        .await?;
-        Ok(GetCommentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CommentV2Data, GetCommentV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -1962,7 +1852,7 @@ impl<'a> CommentV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<PatchCommentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/comments/{}", query.comment_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1971,13 +1861,8 @@ impl<'a> CommentV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<CommentV2Data>()
-        .await?;
-        Ok(PatchCommentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CommentV2Data, PatchCommentV2Resp>()
+        .await
     }
 
     pub async fn delete(
@@ -1995,20 +1880,15 @@ impl<'a> CommentV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteCommentV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/comments/{}", query.comment_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteCommentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteCommentV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -2033,7 +1913,7 @@ impl<'a> CommentV2Resource<'a> {
         query: &ListCommentV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListCommentV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/task/v2/comments",
@@ -2045,13 +1925,8 @@ impl<'a> CommentV2Resource<'a> {
         .query("direction", query.direction)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send_v2::<CommentV2ListData>()
-        .await?;
-        Ok(ListCommentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CommentV2ListData, ListCommentV2Resp>()
+        .await
     }
 }
 
@@ -2077,7 +1952,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         query: &CreateCustomFieldV2Query<'_>,
         option: &RequestOption,
     ) -> Result<CreateCustomFieldV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/task/v2/custom_fields",
@@ -2086,13 +1961,8 @@ impl<'a> CustomFieldV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<CustomFieldData>()
-        .await?;
-        Ok(CreateCustomFieldV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CustomFieldData, CreateCustomFieldV2Resp>()
+        .await
     }
 
     pub async fn get(
@@ -2114,7 +1984,7 @@ impl<'a> CustomFieldV2Resource<'a> {
             "/open-apis/task/v2/custom_fields/{}",
             query.custom_field_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2122,13 +1992,8 @@ impl<'a> CustomFieldV2Resource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<CustomFieldData>()
-        .await?;
-        Ok(GetCustomFieldV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CustomFieldData, GetCustomFieldV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -2152,7 +2017,7 @@ impl<'a> CustomFieldV2Resource<'a> {
             "/open-apis/task/v2/custom_fields/{}",
             query.custom_field_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2161,13 +2026,8 @@ impl<'a> CustomFieldV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<CustomFieldData>()
-        .await?;
-        Ok(PatchCustomFieldV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CustomFieldData, PatchCustomFieldV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -2192,7 +2052,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         query: &ListCustomFieldV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListCustomFieldV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/task/v2/custom_fields",
@@ -2204,13 +2064,8 @@ impl<'a> CustomFieldV2Resource<'a> {
         .query("update_msec", query.update_msec)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send_v2::<CustomFieldListData>()
-        .await?;
-        Ok(ListCustomFieldV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CustomFieldListData, ListCustomFieldV2Resp>()
+        .await
     }
 
     pub async fn add(
@@ -2232,7 +2087,7 @@ impl<'a> CustomFieldV2Resource<'a> {
             "/open-apis/task/v2/custom_fields/{}/add",
             query.custom_field_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2240,13 +2095,8 @@ impl<'a> CustomFieldV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<CustomFieldData>()
-        .await?;
-        Ok(AddCustomFieldV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CustomFieldData, AddCustomFieldV2Resp>()
+        .await
     }
 
     pub async fn remove(
@@ -2268,7 +2118,7 @@ impl<'a> CustomFieldV2Resource<'a> {
             "/open-apis/task/v2/custom_fields/{}/remove",
             query.custom_field_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2276,13 +2126,8 @@ impl<'a> CustomFieldV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<()>()
-        .await?;
-        Ok(RemoveCustomFieldV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), RemoveCustomFieldV2Resp>()
+        .await
     }
 
     pub async fn create_option(
@@ -2304,7 +2149,7 @@ impl<'a> CustomFieldV2Resource<'a> {
             "/open-apis/task/v2/custom_fields/{}/options",
             query.custom_field_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2312,13 +2157,8 @@ impl<'a> CustomFieldV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateCustomFieldOptionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateCustomFieldOptionV2Resp>()
+        .await
     }
 
     pub async fn patch_option(
@@ -2341,7 +2181,7 @@ impl<'a> CustomFieldV2Resource<'a> {
             "/open-apis/task/v2/custom_fields/{}/options/{}",
             query.custom_field_guid, query.option_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2349,13 +2189,8 @@ impl<'a> CustomFieldV2Resource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchCustomFieldOptionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchCustomFieldOptionV2Resp>()
+        .await
     }
 }
 
@@ -2381,7 +2216,7 @@ impl<'a> SectionV2Resource<'a> {
         query: &CreateSectionV2Query<'_>,
         option: &RequestOption,
     ) -> Result<CreateSectionV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/task/v2/sections",
@@ -2390,13 +2225,8 @@ impl<'a> SectionV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<SectionData>()
-        .await?;
-        Ok(CreateSectionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<SectionData, CreateSectionV2Resp>()
+        .await
     }
 
     pub async fn get(
@@ -2415,7 +2245,7 @@ impl<'a> SectionV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<GetSectionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/sections/{}", query.section_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2423,13 +2253,8 @@ impl<'a> SectionV2Resource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<SectionData>()
-        .await?;
-        Ok(GetSectionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<SectionData, GetSectionV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -2449,7 +2274,7 @@ impl<'a> SectionV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<PatchSectionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/sections/{}", query.section_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2458,13 +2283,8 @@ impl<'a> SectionV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<SectionData>()
-        .await?;
-        Ok(PatchSectionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<SectionData, PatchSectionV2Resp>()
+        .await
     }
 
     pub async fn delete(
@@ -2482,20 +2302,15 @@ impl<'a> SectionV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteSectionV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/sections/{}", query.section_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteSectionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteSectionV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -2520,7 +2335,7 @@ impl<'a> SectionV2Resource<'a> {
         query: &ListSectionV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListSectionV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/task/v2/sections",
@@ -2531,13 +2346,8 @@ impl<'a> SectionV2Resource<'a> {
         .query("resource_id", query.resource_id)
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<SectionListData>()
-        .await?;
-        Ok(ListSectionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<SectionListData, ListSectionV2Resp>()
+        .await
     }
 
     pub async fn tasks(
@@ -2558,7 +2368,7 @@ impl<'a> SectionV2Resource<'a> {
         let path = format!("/open-apis/task/v2/sections/{}/tasks", query.section_guid);
         let params = query.params;
         let page = PageQuery::from_parts(params.page_size, params.page_token);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2570,13 +2380,8 @@ impl<'a> SectionV2Resource<'a> {
         .query("created_from", params.created_from)
         .query("created_to", params.created_to)
         .query("user_id_type", params.user_id_type)
-        .send_v2::<TaskV2ListData>()
-        .await?;
-        Ok(TasksSectionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2ListData, TasksSectionV2Resp>()
+        .await
     }
 }
 
@@ -2602,7 +2407,7 @@ impl<'a> TasklistV2Resource<'a> {
         query: &CreateTasklistV2Query<'_>,
         option: &RequestOption,
     ) -> Result<CreateTasklistV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/task/v2/tasklists",
@@ -2611,13 +2416,8 @@ impl<'a> TasklistV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<TasklistData>()
-        .await?;
-        Ok(CreateTasklistV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TasklistData, CreateTasklistV2Resp>()
+        .await
     }
 
     pub async fn get(
@@ -2636,7 +2436,7 @@ impl<'a> TasklistV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<GetTasklistV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{}", query.tasklist_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2644,13 +2444,8 @@ impl<'a> TasklistV2Resource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<TasklistData>()
-        .await?;
-        Ok(GetTasklistV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TasklistData, GetTasklistV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -2670,7 +2465,7 @@ impl<'a> TasklistV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<PatchTasklistV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{}", query.tasklist_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2679,13 +2474,8 @@ impl<'a> TasklistV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<TasklistData>()
-        .await?;
-        Ok(PatchTasklistV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TasklistData, PatchTasklistV2Resp>()
+        .await
     }
 
     pub async fn delete(
@@ -2703,20 +2493,15 @@ impl<'a> TasklistV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteTasklistV2Resp, LarkError> {
         let path = format!("/open-apis/task/v2/tasklists/{}", query.tasklist_guid);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteTasklistV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteTasklistV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -2737,7 +2522,7 @@ impl<'a> TasklistV2Resource<'a> {
         query: &ListTasklistV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListTasklistV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/task/v2/tasklists",
@@ -2746,13 +2531,8 @@ impl<'a> TasklistV2Resource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<TasklistListData>()
-        .await?;
-        Ok(ListTasklistV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TasklistListData, ListTasklistV2Resp>()
+        .await
     }
 
     pub async fn add_members(
@@ -2775,7 +2555,7 @@ impl<'a> TasklistV2Resource<'a> {
             "/open-apis/task/v2/tasklists/{}/add_members",
             query.tasklist_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2784,13 +2564,8 @@ impl<'a> TasklistV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<TasklistData>()
-        .await?;
-        Ok(AddMembersTasklistV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TasklistData, AddMembersTasklistV2Resp>()
+        .await
     }
 
     pub async fn remove_members(
@@ -2814,7 +2589,7 @@ impl<'a> TasklistV2Resource<'a> {
             "/open-apis/task/v2/tasklists/{}/remove_members",
             query.tasklist_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2823,13 +2598,8 @@ impl<'a> TasklistV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<TasklistData>()
-        .await?;
-        Ok(RemoveMembersTasklistV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TasklistData, RemoveMembersTasklistV2Resp>()
+        .await
     }
 
     pub async fn tasks(
@@ -2850,7 +2620,7 @@ impl<'a> TasklistV2Resource<'a> {
         let path = format!("/open-apis/task/v2/tasklists/{}/tasks", query.tasklist_guid);
         let params = query.params;
         let page = PageQuery::from_parts(params.page_size, params.page_token);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2862,13 +2632,8 @@ impl<'a> TasklistV2Resource<'a> {
         .query("created_from", params.created_from)
         .query("created_to", params.created_to)
         .query("user_id_type", params.user_id_type)
-        .send_v2::<TaskV2ListData>()
-        .await?;
-        Ok(TasksTasklistV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TaskV2ListData, TasksTasklistV2Resp>()
+        .await
     }
 
     pub async fn create_activity_subscription(
@@ -2893,7 +2658,7 @@ impl<'a> TasklistV2Resource<'a> {
             "/open-apis/task/v2/tasklists/{}/activity_subscriptions",
             query.tasklist_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2902,13 +2667,8 @@ impl<'a> TasklistV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<ActivitySubscriptionData>()
-        .await?;
-        Ok(CreateActivitySubscriptionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ActivitySubscriptionData, CreateActivitySubscriptionV2Resp>()
+        .await
     }
 
     pub async fn get_activity_subscription(
@@ -2933,7 +2693,7 @@ impl<'a> TasklistV2Resource<'a> {
             "/open-apis/task/v2/tasklists/{}/activity_subscriptions/{}",
             query.tasklist_guid, query.activity_subscription_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2941,13 +2701,8 @@ impl<'a> TasklistV2Resource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<ActivitySubscriptionData>()
-        .await?;
-        Ok(GetActivitySubscriptionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ActivitySubscriptionData, GetActivitySubscriptionV2Resp>()
+        .await
     }
 
     pub async fn patch_activity_subscription(
@@ -2974,7 +2729,7 @@ impl<'a> TasklistV2Resource<'a> {
             "/open-apis/task/v2/tasklists/{}/activity_subscriptions/{}",
             query.tasklist_guid, query.activity_subscription_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2983,13 +2738,8 @@ impl<'a> TasklistV2Resource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<ActivitySubscriptionData>()
-        .await?;
-        Ok(PatchActivitySubscriptionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ActivitySubscriptionData, PatchActivitySubscriptionV2Resp>()
+        .await
     }
 
     pub async fn list_activity_subscriptions(
@@ -3015,7 +2765,7 @@ impl<'a> TasklistV2Resource<'a> {
             "/open-apis/task/v2/tasklists/{}/activity_subscriptions",
             query.tasklist_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3024,13 +2774,8 @@ impl<'a> TasklistV2Resource<'a> {
         )
         .query("limit", query.limit)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<ActivitySubscriptionListData>()
-        .await?;
-        Ok(ListActivitySubscriptionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ActivitySubscriptionListData, ListActivitySubscriptionV2Resp>()
+        .await
     }
 
     pub async fn delete_activity_subscription(
@@ -3055,19 +2800,14 @@ impl<'a> TasklistV2Resource<'a> {
             "/open-apis/task/v2/tasklists/{}/activity_subscriptions/{}",
             query.tasklist_guid, query.activity_subscription_guid
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteActivitySubscriptionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteActivitySubscriptionV2Resp>()
+        .await
     }
 }

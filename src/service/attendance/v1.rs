@@ -610,7 +610,7 @@ impl<'a> GroupResource<'a> {
             "/open-apis/attendance/v1/groups/{}/list_user",
             query.group_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -618,13 +618,8 @@ impl<'a> GroupResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListUserGroupResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListUserGroupResp>()
+        .await
     }
 
     pub async fn search(
@@ -632,7 +627,7 @@ impl<'a> GroupResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchGroupResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/groups/search",
@@ -640,14 +635,8 @@ impl<'a> GroupResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(SearchGroupResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchGroupResp>()
+        .await
     }
 }
 
@@ -757,7 +746,7 @@ impl<'a> ShiftResource<'a> {
         query: &ListShiftQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListShiftResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/attendance/v1/shifts",
@@ -765,13 +754,8 @@ impl<'a> ShiftResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListShiftResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListShiftResp>()
+        .await
     }
 
     pub async fn query(
@@ -779,7 +763,7 @@ impl<'a> ShiftResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryShiftResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/shifts/query",
@@ -787,14 +771,8 @@ impl<'a> ShiftResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryShiftResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryShiftResp>()
+        .await
     }
 }
 
@@ -1372,7 +1350,7 @@ impl<'a> ArchiveRuleResource<'a> {
         body: &UploadReportArchiveRuleReqBody,
         option: &RequestOption,
     ) -> Result<UploadReportArchiveRuleResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/upload_report",
@@ -1380,14 +1358,8 @@ impl<'a> ArchiveRuleResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(UploadReportArchiveRuleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UploadReportArchiveRuleResp>()
+        .await
     }
 
     pub async fn user_stats_fields_query(
@@ -1395,7 +1367,7 @@ impl<'a> ArchiveRuleResource<'a> {
         body: &UserStatsFieldsQueryArchiveRuleReqBody,
         option: &RequestOption,
     ) -> Result<UserStatsFieldsQueryArchiveRuleResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/user_stats_fields_query",
@@ -1403,14 +1375,8 @@ impl<'a> ArchiveRuleResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(UserStatsFieldsQueryArchiveRuleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UserStatsFieldsQueryArchiveRuleResp>()
+        .await
     }
 
     pub async fn del_report(
@@ -1418,7 +1384,7 @@ impl<'a> ArchiveRuleResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<DelReportArchiveRuleResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/del_report",
@@ -1426,14 +1392,8 @@ impl<'a> ArchiveRuleResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(DelReportArchiveRuleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, DelReportArchiveRuleResp>()
+        .await
     }
 
     pub async fn list(
@@ -1453,7 +1413,7 @@ impl<'a> ArchiveRuleResource<'a> {
         query: &ListArchiveRuleQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListArchiveRuleResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/attendance/v1/archive_rule",
@@ -1461,13 +1421,8 @@ impl<'a> ArchiveRuleResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListArchiveRuleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListArchiveRuleResp>()
+        .await
     }
 }
 
@@ -1519,7 +1474,7 @@ impl<'a> LeaveAccrualRecordResource<'a> {
             "/open-apis/attendance/v1/leave_accrual_record/{}",
             query.leave_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1528,13 +1483,8 @@ impl<'a> LeaveAccrualRecordResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchLeaveAccrualRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchLeaveAccrualRecordResp>()
+        .await
     }
 }
 
@@ -1550,7 +1500,7 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchLeaveEmployExpireRecordResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/leave_employ_expire_records/{leave_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1558,14 +1508,8 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(PatchLeaveEmployExpireRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchLeaveEmployExpireRecordResp>()
+        .await
     }
 
     pub async fn get(
@@ -1574,21 +1518,15 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
         option: &RequestOption,
     ) -> Result<GetLeaveEmployExpireRecordResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/leave_employ_expire_records/{leave_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(GetLeaveEmployExpireRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetLeaveEmployExpireRecordResp>()
+        .await
     }
 }
 
@@ -1602,7 +1540,7 @@ impl<'a> ApprovalInfoProcessResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<ProcessApprovalInfoResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/approval_infos/process",
@@ -1610,14 +1548,8 @@ impl<'a> ApprovalInfoProcessResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ProcessApprovalInfoResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ProcessApprovalInfoResp>()
+        .await
     }
 }
 
@@ -1648,7 +1580,7 @@ impl<'a> FileResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<UploadFileResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/files/upload",
@@ -1656,14 +1588,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(UploadFileResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UploadFileResp>()
+        .await
     }
 }
 
@@ -1678,7 +1604,7 @@ impl<'a> UserApprovalResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<CreateUserApprovalResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_approvals",
@@ -1687,14 +1613,8 @@ impl<'a> UserApprovalResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(CreateUserApprovalResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateUserApprovalResp>()
+        .await
     }
 
     pub async fn query(
@@ -1703,7 +1623,7 @@ impl<'a> UserApprovalResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserApprovalResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_approvals/query",
@@ -1712,14 +1632,8 @@ impl<'a> UserApprovalResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserApprovalResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserApprovalResp>()
+        .await
     }
 }
 
@@ -1734,7 +1648,7 @@ impl<'a> UserDailyShiftResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<BatchCreateUserDailyShiftResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_daily_shifts/batch_create",
@@ -1743,14 +1657,8 @@ impl<'a> UserDailyShiftResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchCreateUserDailyShiftResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchCreateUserDailyShiftResp>()
+        .await
     }
 
     pub async fn batch_create_temp(
@@ -1759,7 +1667,7 @@ impl<'a> UserDailyShiftResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<BatchCreateTempUserDailyShiftResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_daily_shifts/batch_create_temp",
@@ -1768,14 +1676,8 @@ impl<'a> UserDailyShiftResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchCreateTempUserDailyShiftResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchCreateTempUserDailyShiftResp>()
+        .await
     }
 
     pub async fn query(
@@ -1784,7 +1686,7 @@ impl<'a> UserDailyShiftResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserDailyShiftResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_daily_shifts/query",
@@ -1793,14 +1695,8 @@ impl<'a> UserDailyShiftResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserDailyShiftResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserDailyShiftResp>()
+        .await
     }
 }
 
@@ -1815,7 +1711,7 @@ impl<'a> UserFlowResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<BatchCreateUserFlowResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_flows/batch_create",
@@ -1824,14 +1720,8 @@ impl<'a> UserFlowResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchCreateUserFlowResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchCreateUserFlowResp>()
+        .await
     }
 
     pub async fn batch_del(
@@ -1839,7 +1729,7 @@ impl<'a> UserFlowResource<'a> {
         body: &BatchDelUserFlowReqBody,
         option: &RequestOption,
     ) -> Result<BatchDelUserFlowResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_flows/batch_del",
@@ -1847,14 +1737,8 @@ impl<'a> UserFlowResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchDelUserFlowResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchDelUserFlowResp>()
+        .await
     }
 
     pub async fn get(
@@ -1864,7 +1748,7 @@ impl<'a> UserFlowResource<'a> {
         option: &RequestOption,
     ) -> Result<GetUserFlowResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/user_flows/{user_flow_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1872,14 +1756,8 @@ impl<'a> UserFlowResource<'a> {
             option,
         )
         .query("employee_type", employee_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(GetUserFlowResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetUserFlowResp>()
+        .await
     }
 
     pub async fn query(
@@ -1888,7 +1766,7 @@ impl<'a> UserFlowResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserFlowResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_flows/query",
@@ -1897,14 +1775,8 @@ impl<'a> UserFlowResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserFlowResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserFlowResp>()
+        .await
     }
 }
 
@@ -1919,7 +1791,7 @@ impl<'a> UserSettingResource2<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<ModifyUserSettingResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_settings/modify",
@@ -1928,14 +1800,8 @@ impl<'a> UserSettingResource2<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ModifyUserSettingResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ModifyUserSettingResp>()
+        .await
     }
 
     pub async fn query(
@@ -1944,7 +1810,7 @@ impl<'a> UserSettingResource2<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserSettingResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/attendance/v1/user_settings/query",
@@ -1953,14 +1819,8 @@ impl<'a> UserSettingResource2<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserSettingResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserSettingResp>()
+        .await
     }
 }
 
@@ -1975,7 +1835,7 @@ impl<'a> UserStatsDataResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserStatsDataResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_stats_datas/query",
@@ -1984,14 +1844,8 @@ impl<'a> UserStatsDataResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserStatsDataResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserStatsDataResp>()
+        .await
     }
 }
 
@@ -2006,7 +1860,7 @@ impl<'a> UserStatsFieldResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserStatsFieldResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_stats_fields/query",
@@ -2015,14 +1869,8 @@ impl<'a> UserStatsFieldResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserStatsFieldResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserStatsFieldResp>()
+        .await
     }
 }
 
@@ -2037,7 +1885,7 @@ impl<'a> UserStatsViewResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserStatsViewResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_stats_views/query",
@@ -2046,14 +1894,8 @@ impl<'a> UserStatsViewResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserStatsViewResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserStatsViewResp>()
+        .await
     }
 
     pub async fn update(
@@ -2064,7 +1906,7 @@ impl<'a> UserStatsViewResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateUserStatsViewResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/user_stats_views/{user_stats_view_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2073,14 +1915,8 @@ impl<'a> UserStatsViewResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(UpdateUserStatsViewResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateUserStatsViewResp>()
+        .await
     }
 }
 
@@ -2095,7 +1931,7 @@ impl<'a> UserTaskResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserTaskResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_tasks/query",
@@ -2104,14 +1940,8 @@ impl<'a> UserTaskResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserTaskResp>()
+        .await
     }
 }
 
@@ -2126,7 +1956,7 @@ impl<'a> UserTaskRemedyResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<CreateUserTaskRemedyResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_task_remedys",
@@ -2135,14 +1965,8 @@ impl<'a> UserTaskRemedyResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(CreateUserTaskRemedyResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateUserTaskRemedyResp>()
+        .await
     }
 
     pub async fn query(
@@ -2151,7 +1975,7 @@ impl<'a> UserTaskRemedyResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserTaskRemedyResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_task_remedys/query",
@@ -2160,14 +1984,8 @@ impl<'a> UserTaskRemedyResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserTaskRemedyResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserTaskRemedyResp>()
+        .await
     }
 
     pub async fn query_user_allowed_remedys(
@@ -2176,7 +1994,7 @@ impl<'a> UserTaskRemedyResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserAllowedRemedysUserTaskRemedyResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_task_remedys/query_user_allowed_remedys",
@@ -2185,14 +2003,8 @@ impl<'a> UserTaskRemedyResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserAllowedRemedysUserTaskRemedyResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserAllowedRemedysUserTaskRemedyResp>()
+        .await
     }
 }
 

@@ -286,7 +286,7 @@ impl CollaborationRuleResource<'_> {
         query: &CreateCollaborationRuleQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateCollaborationRuleResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/directory/v1/collaboration_rules",
@@ -296,13 +296,8 @@ impl CollaborationRuleResource<'_> {
         .query("target_tenant_key", query.target_tenant_key)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateCollaborationRuleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateCollaborationRuleResp>()
+        .await
     }
 
     pub async fn delete(
@@ -327,7 +322,7 @@ impl CollaborationRuleResource<'_> {
             "/open-apis/directory/v1/collaboration_rules/{}",
             query.collaboration_rule_id
         );
-        let (api_resp, code_error, _) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -336,12 +331,8 @@ impl CollaborationRuleResource<'_> {
         )
         .query("target_tenant_key", query.target_tenant_key)
         .query("tenant_id", query.tenant_id)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .await
     }
 
     pub async fn list(
@@ -365,7 +356,7 @@ impl CollaborationRuleResource<'_> {
         query: &ListCollaborationRuleQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCollaborationRuleResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/directory/v1/collaboration_rules",
@@ -375,13 +366,8 @@ impl CollaborationRuleResource<'_> {
         .query("target_tenant_key", query.target_tenant_key)
         .query("tenant_id", query.tenant_id)
         .page_query(query.page_query())
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListCollaborationRuleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListCollaborationRuleResp>()
+        .await
     }
 
     pub async fn update(
@@ -407,7 +393,7 @@ impl CollaborationRuleResource<'_> {
             "/open-apis/directory/v1/collaboration_rules/{}",
             query.collaboration_rule_id
         );
-        let (api_resp, code_error, _) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -417,12 +403,8 @@ impl CollaborationRuleResource<'_> {
         .query("target_tenant_key", query.target_tenant_key)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .await
     }
 }
 
@@ -491,7 +473,7 @@ impl CollaborationTenantResource<'_> {
         query: &ListCollaborationTenantQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCollaborationTenantResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/directory/v1/collaboration_tenants",
@@ -500,13 +482,8 @@ impl CollaborationTenantResource<'_> {
         )
         .query("tenant_id", query.tenant_id)
         .page_query(query.page_query())
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListCollaborationTenantResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListCollaborationTenantResp>()
+        .await
     }
 }
 
@@ -608,7 +585,7 @@ impl ShareEntityResource<'_> {
         query: &ListShareEntityQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListShareEntityResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/directory/v1/share_entities",
@@ -621,13 +598,8 @@ impl ShareEntityResource<'_> {
         .query("is_select_subject", query.is_select_subject)
         .query("tenant_id", query.tenant_id)
         .page_query(query.page_query())
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListShareEntityResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListShareEntityResp>()
+        .await
     }
 }
 
@@ -837,7 +809,7 @@ impl DepartmentResource<'_> {
         query: &CreateDepartmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateDepartmentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/directory/v1/departments",
@@ -849,13 +821,8 @@ impl DepartmentResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateDepartmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateDepartmentResp>()
+        .await
     }
 
     pub async fn delete(
@@ -880,7 +847,7 @@ impl DepartmentResource<'_> {
             "/open-apis/directory/v1/departments/{}",
             query.department_id
         );
-        let (api_resp, code_error, _) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -889,12 +856,8 @@ impl DepartmentResource<'_> {
         )
         .query("is_admin_role", query.is_admin_role)
         .query("employee_id_type", query.employee_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .await
     }
 
     pub async fn filter(
@@ -919,7 +882,7 @@ impl DepartmentResource<'_> {
         query: &FilterDepartmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<FilterDepartmentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/directory/v1/departments/filter",
@@ -931,13 +894,8 @@ impl DepartmentResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(FilterDepartmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, FilterDepartmentResp>()
+        .await
     }
 
     pub async fn mget(
@@ -960,7 +918,7 @@ impl DepartmentResource<'_> {
         query: &MgetDepartmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<MgetDepartmentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/directory/v1/departments/mget",
@@ -971,13 +929,8 @@ impl DepartmentResource<'_> {
         .query("department_id_type", query.department_id_type)
         .query("is_admin_role", query.is_admin_role)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(MgetDepartmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, MgetDepartmentResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1005,7 +958,7 @@ impl DepartmentResource<'_> {
             "/open-apis/directory/v1/departments/{}",
             query.department_id
         );
-        let (api_resp, code_error, _) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1016,12 +969,8 @@ impl DepartmentResource<'_> {
         .query("department_id_type", query.department_id_type)
         .query("is_admin_role", query.is_admin_role)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .await
     }
 
     pub async fn search(
@@ -1046,7 +995,7 @@ impl DepartmentResource<'_> {
         query: &SearchDirectoryDepartmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchDepartmentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/directory/v1/departments/search",
@@ -1058,13 +1007,8 @@ impl DepartmentResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchDepartmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchDepartmentResp>()
+        .await
     }
 }
 
@@ -1329,7 +1273,7 @@ impl EmployeeResource<'_> {
         query: &CreateDirectoryEmployeeQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateEmployeeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/directory/v1/employees",
@@ -1341,13 +1285,8 @@ impl EmployeeResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateEmployeeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateEmployeeResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1388,11 +1327,9 @@ impl EmployeeResource<'_> {
         } else {
             request
         };
-        let (api_resp, code_error, _) = request.send_v2::<serde_json::Value>().await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        request
+            .send_v2_response::<serde_json::Value, EmptyResp>()
+            .await
     }
 
     pub async fn filter(
@@ -1417,7 +1354,7 @@ impl EmployeeResource<'_> {
         query: &FilterEmployeeQuery<'_>,
         option: &RequestOption,
     ) -> Result<FilterEmployeeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/directory/v1/employees/filter",
@@ -1429,13 +1366,8 @@ impl EmployeeResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(FilterEmployeeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, FilterEmployeeResp>()
+        .await
     }
 
     pub async fn mget(
@@ -1458,7 +1390,7 @@ impl EmployeeResource<'_> {
         query: &MgetEmployeeQuery<'_>,
         option: &RequestOption,
     ) -> Result<MgetEmployeeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/directory/v1/employees/mget",
@@ -1469,13 +1401,8 @@ impl EmployeeResource<'_> {
         .query("employee_id_type", query.employee_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(MgetEmployeeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, MgetEmployeeResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1500,7 +1427,7 @@ impl EmployeeResource<'_> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/directory/v1/employees/{}", query.employee_id);
-        let (api_resp, code_error, _) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1511,12 +1438,8 @@ impl EmployeeResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .await
     }
 
     pub async fn regular(
@@ -1560,11 +1483,9 @@ impl EmployeeResource<'_> {
         } else {
             request
         };
-        let (api_resp, code_error, _) = request.send_v2::<serde_json::Value>().await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        request
+            .send_v2_response::<serde_json::Value, EmptyResp>()
+            .await
     }
 
     pub async fn resurrect(
@@ -1608,11 +1529,9 @@ impl EmployeeResource<'_> {
         } else {
             request
         };
-        let (api_resp, code_error, _) = request.send_v2::<serde_json::Value>().await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        request
+            .send_v2_response::<serde_json::Value, EmptyResp>()
+            .await
     }
 
     pub async fn search(
@@ -1637,7 +1556,7 @@ impl EmployeeResource<'_> {
         query: &SearchDirectoryEmployeeQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchEmployeeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/directory/v1/employees/search",
@@ -1649,13 +1568,8 @@ impl EmployeeResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchEmployeeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchEmployeeResp>()
+        .await
     }
 
     pub async fn to_be_resigned(
@@ -1683,7 +1597,7 @@ impl EmployeeResource<'_> {
             "/open-apis/directory/v1/employees/{}/to_be_resigned",
             query.employee_id
         );
-        let (api_resp, code_error, _) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1694,12 +1608,8 @@ impl EmployeeResource<'_> {
         .query("employee_id_type", query.employee_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .await
     }
 }
 

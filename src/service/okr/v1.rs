@@ -415,7 +415,7 @@ impl<'a> PeriodResource<'a> {
         query: &CreatePeriodQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreatePeriodResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/okr/v1/periods",
@@ -423,13 +423,8 @@ impl<'a> PeriodResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreatePeriodResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreatePeriodResp>()
+        .await
     }
 
     pub async fn patch(
@@ -448,7 +443,7 @@ impl<'a> PeriodResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchPeriodResp, LarkError> {
         let path = format!("/open-apis/okr/v1/periods/{}", query.period_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -456,13 +451,8 @@ impl<'a> PeriodResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchPeriodResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchPeriodResp>()
+        .await
     }
 }
 
@@ -483,20 +473,15 @@ impl PeriodRuleResource<'_> {
         _query: &ListPeriodRuleQuery,
         option: &RequestOption,
     ) -> Result<ListPeriodRuleResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/okr/v1/period_rules",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListPeriodRuleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListPeriodRuleResp>()
+        .await
     }
 }
 
@@ -521,7 +506,7 @@ impl ImageResource<'_> {
         query: &UploadImageQuery<'_>,
         option: &RequestOption,
     ) -> Result<UploadImageResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/okr/v1/images/upload",
@@ -529,13 +514,8 @@ impl ImageResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UploadImageResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UploadImageResp>()
+        .await
     }
 }
 
@@ -564,7 +544,7 @@ impl OkrResource<'_> {
         query: &BatchGetOkrQuery<'_>,
         option: &RequestOption,
     ) -> Result<BatchGetOkrResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/okr/v1/okrs/batch_get",
@@ -574,13 +554,8 @@ impl OkrResource<'_> {
         .query_values("okr_ids", Some(query.okr_ids.iter().copied()))
         .query("user_id_type", query.user_id_type)
         .query("lang", query.lang)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchGetOkrResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchGetOkrResp>()
+        .await
     }
 }
 
@@ -606,7 +581,7 @@ impl ProgressRecordResource<'_> {
         query: &CreateProgressRecordQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateProgressRecordResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/okr/v1/progress_records",
@@ -615,13 +590,8 @@ impl ProgressRecordResource<'_> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateProgressRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateProgressRecordResp>()
+        .await
     }
 
     pub async fn delete(
@@ -639,19 +609,15 @@ impl ProgressRecordResource<'_> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/okr/v1/progress_records/{}", query.progress_id);
-        let (api_resp, code_error, _) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error,
-        })
+        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .await
     }
 
     pub async fn get(
@@ -670,7 +636,7 @@ impl ProgressRecordResource<'_> {
         option: &RequestOption,
     ) -> Result<GetProgressRecordResp, LarkError> {
         let path = format!("/open-apis/okr/v1/progress_records/{}", query.progress_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -678,13 +644,8 @@ impl ProgressRecordResource<'_> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetProgressRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetProgressRecordResp>()
+        .await
     }
 
     pub async fn update(
@@ -704,7 +665,7 @@ impl ProgressRecordResource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateProgressRecordResp, LarkError> {
         let path = format!("/open-apis/okr/v1/progress_records/{}", query.progress_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -713,13 +674,8 @@ impl ProgressRecordResource<'_> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateProgressRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateProgressRecordResp>()
+        .await
     }
 }
 
@@ -748,7 +704,7 @@ impl ReviewResource<'_> {
         query: &QueryReviewQuery<'_>,
         option: &RequestOption,
     ) -> Result<QueryReviewResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/okr/v1/reviews/query",
@@ -761,13 +717,8 @@ impl ReviewResource<'_> {
             query.period_ids.map(|ids| ids.iter().copied()),
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryReviewResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryReviewResp>()
+        .await
     }
 }
 

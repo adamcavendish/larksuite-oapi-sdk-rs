@@ -553,7 +553,7 @@ impl<'a> EntityResource<'a> {
         query: &ExtractEntityQuery<'_>,
         option: &RequestOption,
     ) -> Result<ExtractEntityResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/baike/v1/entities/extract",
@@ -561,13 +561,8 @@ impl<'a> EntityResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ExtractEntityResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ExtractEntityResp>()
+        .await
     }
 
     pub async fn match_(
@@ -584,7 +579,7 @@ impl<'a> EntityResource<'a> {
         query: &MatchEntityQuery<'_>,
         option: &RequestOption,
     ) -> Result<MatchEntityResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/baike/v1/entities/match",
@@ -592,13 +587,8 @@ impl<'a> EntityResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(MatchEntityResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, MatchEntityResp>()
+        .await
     }
 }
 
@@ -623,7 +613,7 @@ impl<'a> ClassificationResource<'a> {
         query: &ListClassificationQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListClassificationResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/baike/v1/classifications",
@@ -631,13 +621,8 @@ impl<'a> ClassificationResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListClassificationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListClassificationResp>()
+        .await
     }
 }
 
@@ -705,7 +690,7 @@ impl<'a> DraftResource<'a> {
         query: &CreateDraftQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateDraftResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/baike/v1/drafts",
@@ -714,13 +699,8 @@ impl<'a> DraftResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateDraftResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateDraftResp>()
+        .await
     }
 
     pub async fn update(
@@ -740,7 +720,7 @@ impl<'a> DraftResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateDraftResp, LarkError> {
         let path = format!("/open-apis/baike/v1/drafts/{}", query.draft_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -749,13 +729,8 @@ impl<'a> DraftResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateDraftResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateDraftResp>()
+        .await
     }
 }
 
@@ -807,7 +782,7 @@ impl<'a> FileResource<'a> {
         query: &UploadFileQuery<'_>,
         option: &RequestOption,
     ) -> Result<UploadFileResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/baike/v1/files/upload",
@@ -815,13 +790,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UploadFileResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UploadFileResp>()
+        .await
     }
 }
 

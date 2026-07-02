@@ -512,7 +512,7 @@ impl AcctItemResource<'_> {
         query: &ListAcctItemQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAcctItemResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/acct_items",
@@ -520,13 +520,8 @@ impl AcctItemResource<'_> {
             option,
         )
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListAcctItemResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListAcctItemResp>()
+        .await
     }
 }
 
@@ -560,7 +555,7 @@ impl CostAllocationDetailResource<'_> {
         query: &ListCostAllocationDetailQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCostAllocationDetailResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/cost_allocation_details",
@@ -571,13 +566,8 @@ impl CostAllocationDetailResource<'_> {
         .query("pay_period", query.pay_period)
         .query("report_type", query.report_type)
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListCostAllocationDetailResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListCostAllocationDetailResp>()
+        .await
     }
 }
 
@@ -606,7 +596,7 @@ impl CostAllocationPlanResource<'_> {
         query: &ListCostAllocationPlanQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCostAllocationPlanResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/cost_allocation_plans",
@@ -615,13 +605,8 @@ impl CostAllocationPlanResource<'_> {
         )
         .query("pay_period", query.pay_period)
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListCostAllocationPlanResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListCostAllocationPlanResp>()
+        .await
     }
 }
 
@@ -655,7 +640,7 @@ impl CostAllocationReportResource<'_> {
         query: &ListCostAllocationReportQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCostAllocationReportResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/cost_allocation_reports",
@@ -666,13 +651,8 @@ impl CostAllocationReportResource<'_> {
         .query("pay_period", query.pay_period)
         .query("report_type", query.report_type)
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListCostAllocationReportResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListCostAllocationReportResp>()
+        .await
     }
 }
 
@@ -698,7 +678,7 @@ impl DatasourceResource<'_> {
         query: &ListDatasourceQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListDatasourceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/datasources",
@@ -706,13 +686,8 @@ impl DatasourceResource<'_> {
             option,
         )
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListDatasourceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListDatasourceResp>()
+        .await
     }
 }
 
@@ -740,7 +715,7 @@ impl DatasourceRecordResource<'_> {
         query: &QueryDatasourceRecordQuery<'_>,
         option: &RequestOption,
     ) -> Result<QueryDatasourceRecordResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/payroll/v1/datasource_records/query",
@@ -749,13 +724,8 @@ impl DatasourceRecordResource<'_> {
         )
         .page_query(query.page)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryDatasourceRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryDatasourceRecordResp>()
+        .await
     }
 
     pub async fn save(
@@ -772,7 +742,7 @@ impl DatasourceRecordResource<'_> {
         query: &SaveDatasourceRecordQuery<'_>,
         option: &RequestOption,
     ) -> Result<SaveDatasourceRecordResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/payroll/v1/datasource_records/save",
@@ -780,13 +750,8 @@ impl DatasourceRecordResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SaveDatasourceRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SaveDatasourceRecordResp>()
+        .await
     }
 }
 
@@ -812,7 +777,7 @@ impl PaygroupResource<'_> {
         query: &ListPaygroupQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListPaygroupResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/paygroups",
@@ -820,13 +785,8 @@ impl PaygroupResource<'_> {
             option,
         )
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListPaygroupResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListPaygroupResp>()
+        .await
     }
 }
 
@@ -851,7 +811,7 @@ impl PaymentActivityResource<'_> {
         query: &ArchivePaymentActivityQuery<'_>,
         option: &RequestOption,
     ) -> Result<ArchivePaymentActivityResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/payroll/v1/payment_activitys/archive",
@@ -859,13 +819,8 @@ impl PaymentActivityResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ArchivePaymentActivityResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ArchivePaymentActivityResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -891,7 +846,7 @@ impl PaymentActivityResource<'_> {
         query: &ListPaymentActivityQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListPaymentActivityResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/payment_activitys",
@@ -902,13 +857,8 @@ impl PaymentActivityResource<'_> {
         .query("pay_period_end_date", query.pay_period_end_date)
         .query_values("statuses", query.statuses)
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListPaymentActivityResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListPaymentActivityResp>()
+        .await
     }
 }
 
@@ -942,7 +892,7 @@ impl PaymentActivityDetailResource<'_> {
         query: &ListPaymentActivityDetailQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListPaymentActivityDetailResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/payroll/v1/payment_activity_details",
@@ -954,13 +904,8 @@ impl PaymentActivityDetailResource<'_> {
         .query("page_size", query.page_size)
         .query("include_segment_data", query.include_segment_data)
         .query_values("acct_item_ids", query.acct_item_ids)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListPaymentActivityDetailResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListPaymentActivityDetailResp>()
+        .await
     }
 }
 
@@ -985,7 +930,7 @@ impl PaymentDetailResource<'_> {
         query: &QueryPaymentDetailQuery<'_>,
         option: &RequestOption,
     ) -> Result<QueryPaymentDetailResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/payroll/v1/payment_detail/query",
@@ -993,13 +938,8 @@ impl PaymentDetailResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryPaymentDetailResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryPaymentDetailResp>()
+        .await
     }
 }
 

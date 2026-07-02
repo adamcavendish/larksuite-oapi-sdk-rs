@@ -200,7 +200,7 @@ impl DriveExplorerExtResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateFileResp, LarkError> {
         let path = format!("/open-apis/drive/explorer/v2/file/{folder_token}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -208,12 +208,7 @@ impl DriveExplorerExtResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateFileResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateFileResp>()
+        .await
     }
 }
