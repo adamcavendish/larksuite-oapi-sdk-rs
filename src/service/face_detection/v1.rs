@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Request body types ──
 
@@ -24,6 +24,17 @@ pub struct FaceDetectData {
 
 impl_resp!(DetectFaceResp, FaceDetectData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct DetectFaceAttributesQuery<'a> {
+    pub body: &'a RecognizeReqBody,
+}
+
+impl<'a> DetectFaceAttributesQuery<'a> {
+    pub fn new(body: &'a RecognizeReqBody) -> Self {
+        Self { body }
+    }
+}
+
 // ── Resources ──
 
 pub struct ImageResource<'a> {
@@ -36,14 +47,25 @@ impl<'a> ImageResource<'a> {
         body: &RecognizeReqBody,
         option: &RequestOption,
     ) -> Result<DetectFaceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.detect_face_attributes_by_query(&DetectFaceAttributesQuery::new(body), option)
+            .await
+    }
+
+    pub async fn detect_face_attributes_by_query(
+        &self,
+        query: &DetectFaceAttributesQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DetectFaceResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/face_detection/v1/image/detect_face_attributes",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FaceDetectData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<FaceDetectData>()
+        .await?;
         Ok(DetectFaceResp {
             api_resp,
             code_error: raw.code_error,
