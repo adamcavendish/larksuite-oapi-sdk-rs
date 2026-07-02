@@ -474,6 +474,68 @@ impl<'a> SearchDocWikiQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateDataSourceSchemaQuery<'a> {
+    pub data_source_id: &'a str,
+    pub body: &'a CreateSchemaReqBody,
+}
+
+impl<'a> CreateDataSourceSchemaQuery<'a> {
+    pub fn new(data_source_id: &'a str, body: &'a CreateSchemaReqBody) -> Self {
+        Self {
+            data_source_id,
+            body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetDataSourceSchemaQuery<'a> {
+    pub data_source_id: &'a str,
+    pub schema_id: &'a str,
+}
+
+impl<'a> GetDataSourceSchemaQuery<'a> {
+    pub fn new(data_source_id: &'a str, schema_id: &'a str) -> Self {
+        Self {
+            data_source_id,
+            schema_id,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct PatchDataSourceSchemaQuery<'a> {
+    pub data_source_id: &'a str,
+    pub schema_id: &'a str,
+    pub body: &'a PatchSchemaReqBody,
+}
+
+impl<'a> PatchDataSourceSchemaQuery<'a> {
+    pub fn new(data_source_id: &'a str, schema_id: &'a str, body: &'a PatchSchemaReqBody) -> Self {
+        Self {
+            data_source_id,
+            schema_id,
+            body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteDataSourceSchemaQuery<'a> {
+    pub data_source_id: &'a str,
+    pub schema_id: &'a str,
+}
+
+impl<'a> DeleteDataSourceSchemaQuery<'a> {
+    pub fn new(data_source_id: &'a str, schema_id: &'a str) -> Self {
+        Self {
+            data_source_id,
+            schema_id,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchDocWikiData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -863,12 +925,32 @@ impl<'a> DataSourceSchemaResource<'a> {
         body: &CreateSchemaReqBody,
         option: &RequestOption,
     ) -> Result<CreateSchemaResp, LarkError> {
-        let path = format!("/open-apis/search/v2/data_sources/{data_source_id}/schemas");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SchemaData>(self.config, &api_req, option).await?;
+        self.create_by_query(
+            &CreateDataSourceSchemaQuery::new(data_source_id, body),
+            option,
+        )
+        .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateDataSourceSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateSchemaResp, LarkError> {
+        let path = format!(
+            "/open-apis/search/v2/data_sources/{}/schemas",
+            query.data_source_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<SchemaData>()
+        .await?;
         Ok(CreateSchemaResp {
             api_resp,
             code_error: raw.code_error,
@@ -882,12 +964,31 @@ impl<'a> DataSourceSchemaResource<'a> {
         schema_id: &str,
         option: &RequestOption,
     ) -> Result<GetSchemaResp, LarkError> {
-        let path =
-            format!("/open-apis/search/v2/data_sources/{data_source_id}/schemas/{schema_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<SchemaData>(self.config, &api_req, option).await?;
+        self.get_by_query(
+            &GetDataSourceSchemaQuery::new(data_source_id, schema_id),
+            option,
+        )
+        .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetDataSourceSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetSchemaResp, LarkError> {
+        let path = format!(
+            "/open-apis/search/v2/data_sources/{}/schemas/{}",
+            query.data_source_id, query.schema_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<SchemaData>()
+        .await?;
         Ok(GetSchemaResp {
             api_resp,
             code_error: raw.code_error,
@@ -902,13 +1003,32 @@ impl<'a> DataSourceSchemaResource<'a> {
         body: &PatchSchemaReqBody,
         option: &RequestOption,
     ) -> Result<PatchSchemaResp, LarkError> {
-        let path =
-            format!("/open-apis/search/v2/data_sources/{data_source_id}/schemas/{schema_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SchemaData>(self.config, &api_req, option).await?;
+        self.patch_by_query(
+            &PatchDataSourceSchemaQuery::new(data_source_id, schema_id, body),
+            option,
+        )
+        .await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchDataSourceSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchSchemaResp, LarkError> {
+        let path = format!(
+            "/open-apis/search/v2/data_sources/{}/schemas/{}",
+            query.data_source_id, query.schema_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<SchemaData>()
+        .await?;
         Ok(PatchSchemaResp {
             api_resp,
             code_error: raw.code_error,
@@ -922,12 +1042,31 @@ impl<'a> DataSourceSchemaResource<'a> {
         schema_id: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path =
-            format!("/open-apis/search/v2/data_sources/{data_source_id}/schemas/{schema_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        self.delete_by_query(
+            &DeleteDataSourceSchemaQuery::new(data_source_id, schema_id),
+            option,
+        )
+        .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteDataSourceSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/search/v2/data_sources/{}/schemas/{}",
+            query.data_source_id, query.schema_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
