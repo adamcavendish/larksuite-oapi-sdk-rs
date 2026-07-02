@@ -586,7 +586,7 @@ impl<'a> EmployeeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetEmployeeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employments/{}", query.employment_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -594,13 +594,8 @@ impl<'a> EmployeeResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<EmployeeData>()
-        .await?;
-        Ok(GetEmployeeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EmployeeData, GetEmployeeResp>()
+        .await
     }
 
     pub async fn list(
@@ -622,7 +617,7 @@ impl<'a> EmployeeResource<'a> {
         query: &ListEmployeeQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListEmployeeResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/employments",
@@ -631,13 +626,8 @@ impl<'a> EmployeeResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .page_query(query.page_query())
-        .send::<EmployeeListData>()
-        .await?;
-        Ok(ListEmployeeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EmployeeListData, ListEmployeeResp>()
+        .await
     }
 }
 
@@ -722,7 +712,7 @@ impl<'a> DepartmentResource<'a> {
         option: &RequestOption,
     ) -> Result<GetDepartmentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/departments/{}", query.department_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -730,13 +720,8 @@ impl<'a> DepartmentResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<DepartmentData>()
-        .await?;
-        Ok(GetDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DepartmentData, GetDepartmentResp>()
+        .await
     }
 
     pub async fn list(
@@ -758,7 +743,7 @@ impl<'a> DepartmentResource<'a> {
         query: &ListDepartmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListDepartmentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/departments",
@@ -767,13 +752,8 @@ impl<'a> DepartmentResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .page_query(query.page_query())
-        .send::<DepartmentListData>()
-        .await?;
-        Ok(ListDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DepartmentListData, ListDepartmentResp>()
+        .await
     }
 }
 
@@ -821,20 +801,15 @@ impl<'a> JobLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<GetJobLevelResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_levels/{job_level_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<JobLevelData>()
-        .await?;
-        Ok(GetJobLevelResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<JobLevelData, GetJobLevelResp>()
+        .await
     }
 
     pub async fn list(
@@ -854,7 +829,7 @@ impl<'a> JobLevelResource<'a> {
         query: &ListJobLevelQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListJobLevelResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/job_levels",
@@ -862,13 +837,8 @@ impl<'a> JobLevelResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<JobLevelListData>()
-        .await?;
-        Ok(ListJobLevelResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<JobLevelListData, ListJobLevelResp>()
+        .await
     }
 }
 
@@ -916,20 +886,15 @@ impl<'a> CompanyResource<'a> {
         option: &RequestOption,
     ) -> Result<GetCompanyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/companies/{company_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<CompanyData>()
-        .await?;
-        Ok(GetCompanyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CompanyData, GetCompanyResp>()
+        .await
     }
 
     pub async fn list(
@@ -949,7 +914,7 @@ impl<'a> CompanyResource<'a> {
         query: &ListCompanyQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCompanyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/companies",
@@ -957,13 +922,8 @@ impl<'a> CompanyResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<CompanyListData>()
-        .await?;
-        Ok(ListCompanyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CompanyListData, ListCompanyResp>()
+        .await
     }
 
     pub async fn create(
@@ -1079,20 +1039,15 @@ impl<'a> LocationResource<'a> {
         option: &RequestOption,
     ) -> Result<GetLocationResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/locations/{location_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<LocationData>()
-        .await?;
-        Ok(GetLocationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<LocationData, GetLocationResp>()
+        .await
     }
 
     pub async fn list(
@@ -1112,7 +1067,7 @@ impl<'a> LocationResource<'a> {
         query: &ListLocationQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListLocationResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/locations",
@@ -1120,13 +1075,8 @@ impl<'a> LocationResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<LocationListData>()
-        .await?;
-        Ok(ListLocationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<LocationListData, ListLocationResp>()
+        .await
     }
 }
 
@@ -1185,7 +1135,7 @@ impl<'a> CurrencyResource<'a> {
         query: &ListCurrencyQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCurrencyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/currencies",
@@ -1193,13 +1143,8 @@ impl<'a> CurrencyResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<CurrencyListData>()
-        .await?;
-        Ok(ListCurrencyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CurrencyListData, ListCurrencyResp>()
+        .await
     }
 }
 
@@ -1258,7 +1203,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
         query: &ListWorkingHoursTypeQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListWorkingHoursTypeResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/working_hours_types",
@@ -1266,13 +1211,8 @@ impl<'a> WorkingHoursTypeResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<WorkingHoursTypeListData>()
-        .await?;
-        Ok(ListWorkingHoursTypeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<WorkingHoursTypeListData, ListWorkingHoursTypeResp>()
+        .await
     }
 }
 

@@ -883,7 +883,7 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<GetJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{}", query.job_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -894,13 +894,8 @@ impl<'a> JobResource<'a> {
         .query("department_id_type", query.department_id_type)
         .query("job_level_id_type", query.job_level_id_type)
         .query("job_family_id_type", query.job_family_id_type)
-        .send::<JobData>()
-        .await?;
-        Ok(GetJobResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<JobData, GetJobResp>()
+        .await
     }
 
     pub async fn list(
@@ -926,7 +921,7 @@ impl<'a> JobResource<'a> {
         query: &ListJobQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListJobResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/jobs",
@@ -940,13 +935,8 @@ impl<'a> JobResource<'a> {
         .query("department_id_type", query.department_id_type)
         .query("job_level_id_type", query.job_level_id_type)
         .query("job_family_id_type", query.job_family_id_type)
-        .send::<JobListData>()
-        .await?;
-        Ok(ListJobResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<JobListData, ListJobResp>()
+        .await
     }
 
     pub async fn close(
@@ -1235,7 +1225,7 @@ impl<'a> TalentResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateTalentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/talents",
@@ -1244,13 +1234,8 @@ impl<'a> TalentResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<TalentData>()
-        .await?;
-        Ok(CreateTalentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TalentData, CreateTalentResp>()
+        .await
     }
 
     pub async fn get(
@@ -1269,7 +1254,7 @@ impl<'a> TalentResource<'a> {
         option: &RequestOption,
     ) -> Result<GetTalentResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talents/{}", query.talent_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1277,13 +1262,8 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<TalentData>()
-        .await?;
-        Ok(GetTalentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TalentData, GetTalentResp>()
+        .await
     }
 
     pub async fn list(
@@ -1305,7 +1285,7 @@ impl<'a> TalentResource<'a> {
         query: &ListTalentQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListTalentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/talents",
@@ -1319,13 +1299,8 @@ impl<'a> TalentResource<'a> {
         .query("update_end_time", query.update_end_time)
         .query("sort_by", query.sort_by)
         .query("query_option", query.query_option)
-        .send::<TalentListData>()
-        .await?;
-        Ok(ListTalentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TalentListData, ListTalentResp>()
+        .await
     }
 
     pub async fn add_to_folder(
@@ -1599,7 +1574,7 @@ impl<'a> ApplicationResource<'a> {
         body: &CreateApplicationReqBody,
         option: &RequestOption,
     ) -> Result<CreateApplicationResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/applications",
@@ -1607,13 +1582,8 @@ impl<'a> ApplicationResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ApplicationData>()
-        .await?;
-        Ok(CreateApplicationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ApplicationData, CreateApplicationResp>()
+        .await
     }
 
     pub async fn get(
@@ -1632,7 +1602,7 @@ impl<'a> ApplicationResource<'a> {
         option: &RequestOption,
     ) -> Result<GetApplicationResp, LarkError> {
         let path = format!("/open-apis/hire/v1/applications/{}", query.application_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1640,13 +1610,8 @@ impl<'a> ApplicationResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<ApplicationData>()
-        .await?;
-        Ok(GetApplicationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ApplicationData, GetApplicationResp>()
+        .await
     }
 
     pub async fn terminate(
@@ -1723,7 +1688,7 @@ impl<'a> ApplicationResource<'a> {
         query: &ListApplicationQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListApplicationResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/applications",
@@ -1739,13 +1704,8 @@ impl<'a> ApplicationResource<'a> {
         .query("process_id", query.process_id)
         .query("update_start_time", query.update_start_time)
         .query("update_end_time", query.update_end_time)
-        .send::<ApplicationListData>()
-        .await?;
-        Ok(ListApplicationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ApplicationListData, ListApplicationResp>()
+        .await
     }
 
     pub async fn cancel_onboard(
@@ -1967,7 +1927,7 @@ impl<'a> InterviewResource<'a> {
         query: &ListInterviewQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListInterviewResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interviews",
@@ -1981,13 +1941,8 @@ impl<'a> InterviewResource<'a> {
         .query("end_time", query.end_time)
         .query("user_id_type", query.user_id_type)
         .query("job_level_id_type", query.job_level_id_type)
-        .send::<InterviewListData>()
-        .await?;
-        Ok(ListInterviewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<InterviewListData, ListInterviewResp>()
+        .await
     }
 
     pub async fn get_by_talent(
@@ -2128,7 +2083,7 @@ impl<'a> OfferResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateOfferResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/offers",
@@ -2137,13 +2092,8 @@ impl<'a> OfferResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<OfferData>()
-        .await?;
-        Ok(CreateOfferResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OfferData, CreateOfferResp>()
+        .await
     }
 
     pub async fn update(
@@ -2154,7 +2104,7 @@ impl<'a> OfferResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateOfferResp, LarkError> {
         let path = format!("/open-apis/hire/v1/offers/{offer_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2163,13 +2113,8 @@ impl<'a> OfferResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<OfferData>()
-        .await?;
-        Ok(UpdateOfferResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OfferData, UpdateOfferResp>()
+        .await
     }
 
     pub async fn get(
@@ -2188,7 +2133,7 @@ impl<'a> OfferResource<'a> {
         option: &RequestOption,
     ) -> Result<GetOfferResp, LarkError> {
         let path = format!("/open-apis/hire/v1/offers/{}", query.offer_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2200,13 +2145,8 @@ impl<'a> OfferResource<'a> {
         .query("job_level_id_type", query.job_level_id_type)
         .query("job_family_id_type", query.job_family_id_type)
         .query("employee_type_id_type", query.employee_type_id_type)
-        .send::<GetOfferData>()
-        .await?;
-        Ok(GetOfferResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetOfferData, GetOfferResp>()
+        .await
     }
 
     pub async fn offer_status(
@@ -2253,7 +2193,7 @@ impl<'a> OfferResource<'a> {
         query: &ListOfferQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListOfferResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/offers",
@@ -2265,13 +2205,8 @@ impl<'a> OfferResource<'a> {
         .query("talent_id", query.talent_id)
         .query("user_id_type", query.user_id_type)
         .query("employee_type_id_type", query.employee_type_id_type)
-        .send::<OfferListData>()
-        .await?;
-        Ok(ListOfferResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OfferListData, ListOfferResp>()
+        .await
     }
 
     pub async fn intern_offer_status(
@@ -2503,7 +2438,7 @@ impl<'a> JobRequirementResource<'a> {
         query: &ListJobRequirementQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListJobRequirementResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/job_requirements",
@@ -2521,13 +2456,8 @@ impl<'a> JobRequirementResource<'a> {
         .query("job_level_id_type", query.job_level_id_type)
         .query("job_family_id_type", query.job_family_id_type)
         .query("employee_type_id_type", query.employee_type_id_type)
-        .send::<JobRequirementListData>()
-        .await?;
-        Ok(ListJobRequirementResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<JobRequirementListData, ListJobRequirementResp>()
+        .await
     }
 
     pub async fn list_by_id(
@@ -2564,20 +2494,15 @@ impl<'a> AttachmentResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAttachmentResp, LarkError> {
         let path = format!("/open-apis/hire/v1/attachments/{attachment_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<AttachmentData>()
-        .await?;
-        Ok(GetAttachmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AttachmentData, GetAttachmentResp>()
+        .await
     }
 
     pub async fn preview(
@@ -2635,20 +2560,15 @@ impl<'a> OfferSchemaResource<'a> {
         option: &RequestOption,
     ) -> Result<GetOfferSchemaResp, LarkError> {
         let path = format!("/open-apis/hire/v1/offer_schemas/{offer_schema_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<OfferSchemaData>()
-        .await?;
-        Ok(GetOfferSchemaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OfferSchemaData, GetOfferSchemaResp>()
+        .await
     }
 }
 
