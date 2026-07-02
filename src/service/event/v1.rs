@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Domain types ──
 
@@ -18,6 +18,15 @@ pub struct OutboundIp {
 
 impl_resp!(GetOutboundIpResp, OutboundIp);
 
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ListOutboundIpQuery;
+
+impl ListOutboundIpQuery {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
 // ── Resources ──
 
 pub struct OutboundIpResource<'a> {
@@ -26,10 +35,24 @@ pub struct OutboundIpResource<'a> {
 
 impl<'a> OutboundIpResource<'a> {
     pub async fn list(&self, option: &RequestOption) -> Result<GetOutboundIpResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/event/v1/outbound_ip");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<OutboundIp>(self.config, &api_req, option).await?;
+        self.list_by_query(&ListOutboundIpQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        _query: &ListOutboundIpQuery,
+        option: &RequestOption,
+    ) -> Result<GetOutboundIpResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/event/v1/outbound_ip",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<OutboundIp>()
+        .await?;
         Ok(GetOutboundIpResp {
             api_resp,
             code_error: raw.code_error,
