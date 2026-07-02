@@ -4,8 +4,8 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::resp::{ApiResp, CodeError};
-use crate::service::common::RestRequest;
+use crate::resp::{ApiResp, CodeError, RawResponse};
+use crate::service::common::{FromRawResponse, RestRequest};
 
 // ── Domain types ──
 
@@ -90,6 +90,16 @@ impl QueryTenantResp {
     }
 }
 
+impl FromRawResponse<QueryTenantRespData> for QueryTenantResp {
+    fn from_raw_response(api_resp: ApiResp, raw: RawResponse<QueryTenantRespData>) -> Self {
+        Self {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct QueryTenantProductAssignInfoRespData {
     pub assign_info_list: Option<Vec<TenantAssignInfo>>,
@@ -105,6 +115,19 @@ pub struct QueryTenantProductAssignInfoResp {
 impl QueryTenantProductAssignInfoResp {
     pub fn success(&self) -> bool {
         self.code_error.success()
+    }
+}
+
+impl FromRawResponse<QueryTenantProductAssignInfoRespData> for QueryTenantProductAssignInfoResp {
+    fn from_raw_response(
+        api_resp: ApiResp,
+        raw: RawResponse<QueryTenantProductAssignInfoRespData>,
+    ) -> Self {
+        Self {
+            api_resp,
+            code_error: raw.code_error,
+            data: raw.data,
+        }
     }
 }
 
@@ -142,20 +165,15 @@ impl<'a> TenantResource<'a> {
         _query: &QueryTenantQuery,
         option: &RequestOption,
     ) -> Result<QueryTenantResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/tenant/v2/tenant/query",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<QueryTenantRespData>()
-        .await?;
-        Ok(QueryTenantResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<QueryTenantRespData, QueryTenantResp>()
+        .await
     }
 }
 
@@ -177,20 +195,15 @@ impl<'a> TenantProductAssignInfoResource<'a> {
         _query: &QueryTenantProductAssignInfoQuery,
         option: &RequestOption,
     ) -> Result<QueryTenantProductAssignInfoResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/tenant/v2/tenant/assign_info_list/query",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<QueryTenantProductAssignInfoRespData>()
-        .await?;
-        Ok(QueryTenantProductAssignInfoResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<QueryTenantProductAssignInfoRespData, QueryTenantProductAssignInfoResp>()
+        .await
     }
 }
 

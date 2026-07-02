@@ -2160,12 +2160,9 @@ impl<'a> TicketCustomizedFieldResource<'a> {
         if let Some(b) = body {
             request = request.json_body(b)?;
         }
-        let (api_resp, raw) = request.send::<ListTicketCustomizedFieldRespData>().await?;
-        Ok(ListTicketCustomizedFieldResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        request
+            .send_response::<ListTicketCustomizedFieldRespData, ListTicketCustomizedFieldResp>()
+            .await
     }
 
     pub async fn patch(

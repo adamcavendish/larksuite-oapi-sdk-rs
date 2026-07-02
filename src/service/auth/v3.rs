@@ -3,8 +3,8 @@ use serde::Serialize;
 use crate::config::Config;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::resp::{ApiResp, CodeError};
-use crate::service::common::RestRequest;
+use crate::resp::{ApiResp, CodeError, RawResponse};
+use crate::service::common::{FromRawResponse, RestRequest};
 
 // ── Request body types ──
 
@@ -61,6 +61,15 @@ pub struct RawTokenResp {
 impl RawTokenResp {
     pub fn success(&self) -> bool {
         self.code_error.success()
+    }
+}
+
+impl<T> FromRawResponse<T> for RawTokenResp {
+    fn from_raw_response(api_resp: ApiResp, raw: RawResponse<T>) -> Self {
+        Self {
+            api_resp,
+            code_error: raw.code_error,
+        }
     }
 }
 
@@ -141,7 +150,7 @@ impl<'a> AppAccessTokenResource<'a> {
         query: &CreateAppAccessTokenQuery<'_>,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/auth/v3/app_access_token",
@@ -149,12 +158,8 @@ impl<'a> AppAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(RawTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_response::<serde_json::Value, RawTokenResp>()
+        .await
     }
 
     /// Get app_access_token for internal (self-built) apps.
@@ -172,7 +177,7 @@ impl<'a> AppAccessTokenResource<'a> {
         query: &InternalAppAccessTokenQuery<'_>,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/auth/v3/app_access_token/internal",
@@ -180,12 +185,8 @@ impl<'a> AppAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(RawTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_response::<serde_json::Value, RawTokenResp>()
+        .await
     }
 }
 
@@ -209,7 +210,7 @@ impl<'a> AppTicketResource<'a> {
         query: &ResendAppTicketQuery<'_>,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/auth/v3/app_ticket/resend",
@@ -217,12 +218,8 @@ impl<'a> AppTicketResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(RawTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_response::<serde_json::Value, RawTokenResp>()
+        .await
     }
 }
 
@@ -246,7 +243,7 @@ impl<'a> TenantAccessTokenResource<'a> {
         query: &CreateTenantAccessTokenQuery<'_>,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/auth/v3/tenant_access_token",
@@ -254,12 +251,8 @@ impl<'a> TenantAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(RawTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_response::<serde_json::Value, RawTokenResp>()
+        .await
     }
 
     /// Get tenant_access_token for internal (self-built) apps.
@@ -277,7 +270,7 @@ impl<'a> TenantAccessTokenResource<'a> {
         query: &InternalTenantAccessTokenQuery<'_>,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/auth/v3/tenant_access_token/internal",
@@ -285,12 +278,8 @@ impl<'a> TenantAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(RawTokenResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_response::<serde_json::Value, RawTokenResp>()
+        .await
     }
 }
 
