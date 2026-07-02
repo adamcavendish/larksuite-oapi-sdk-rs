@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -565,6 +564,246 @@ impl<'a> ListDocumentBlockChildrenQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct GetBuildingBlockQuery<'a> {
+    pub document_id: &'a str,
+    pub block_id: &'a str,
+}
+
+impl<'a> GetBuildingBlockQuery<'a> {
+    pub fn new(document_id: &'a str, block_id: &'a str) -> Self {
+        Self {
+            document_id,
+            block_id,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetChatAnnouncementQuery<'a> {
+    pub chat_id: &'a str,
+}
+
+impl<'a> GetChatAnnouncementQuery<'a> {
+    pub fn new(chat_id: &'a str) -> Self {
+        Self { chat_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct BatchUpdateChatAnnouncementBlockQuery<'a> {
+    pub chat_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> BatchUpdateChatAnnouncementBlockQuery<'a> {
+    pub fn new(chat_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            chat_id,
+            body,
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetChatAnnouncementBlockQuery<'a> {
+    pub chat_id: &'a str,
+    pub block_id: &'a str,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetChatAnnouncementBlockQuery<'a> {
+    pub fn new(chat_id: &'a str, block_id: &'a str) -> Self {
+        Self {
+            chat_id,
+            block_id,
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListChatAnnouncementBlockQuery<'a> {
+    pub chat_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListChatAnnouncementBlockQuery<'a> {
+    pub fn new(chat_id: &'a str) -> Self {
+        Self {
+            chat_id,
+            page: PageQuery::default(),
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct BatchDeleteChatAnnouncementBlockChildrenQuery<'a> {
+    pub chat_id: &'a str,
+    pub block_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub document_revision_id: Option<i64>,
+}
+
+impl<'a> BatchDeleteChatAnnouncementBlockChildrenQuery<'a> {
+    pub fn new(chat_id: &'a str, block_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            chat_id,
+            block_id,
+            body,
+            document_revision_id: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateChatAnnouncementBlockChildrenQuery<'a> {
+    pub chat_id: &'a str,
+    pub block_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateChatAnnouncementBlockChildrenQuery<'a> {
+    pub fn new(chat_id: &'a str, block_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            chat_id,
+            block_id,
+            body,
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetChatAnnouncementBlockChildrenQuery<'a> {
+    pub chat_id: &'a str,
+    pub block_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetChatAnnouncementBlockChildrenQuery<'a> {
+    pub fn new(chat_id: &'a str, block_id: &'a str) -> Self {
+        Self {
+            chat_id,
+            block_id,
+            page: PageQuery::default(),
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateDocumentBlockDescendantQuery<'a> {
+    pub document_id: &'a str,
+    pub block_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub document_revision_id: Option<i64>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateDocumentBlockDescendantQuery<'a> {
+    pub fn new(document_id: &'a str, block_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            document_id,
+            block_id,
+            body,
+            document_revision_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn document_revision_id(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.document_revision_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct DocumentResource<'a> {
@@ -1014,11 +1253,28 @@ impl<'a> BuildingBlockResource<'a> {
         block_id: &str,
         option: &RequestOption,
     ) -> Result<GetBuildingBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/documents/{document_id}/building_blocks/{block_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<BuildingBlockData>(self.config, &api_req, option).await?;
+        self.get_by_query(&GetBuildingBlockQuery::new(document_id, block_id), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetBuildingBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetBuildingBlockResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/documents/{}/building_blocks/{}",
+            query.document_id, query.block_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<BuildingBlockData>()
+        .await?;
         Ok(GetBuildingBlockResp {
             api_resp,
             code_error: raw.code_error,
@@ -1037,12 +1293,25 @@ impl ChatAnnouncementResource<'_> {
         chat_id: &str,
         option: &RequestOption,
     ) -> Result<GetChatAnnouncementResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.get_by_query(&GetChatAnnouncementQuery::new(chat_id), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetChatAnnouncementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetChatAnnouncementResp, LarkError> {
+        let path = format!("/open-apis/docx/v1/chats/{}/announcement", query.chat_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetChatAnnouncementResp {
             api_resp,
             code_error,
@@ -1064,21 +1333,33 @@ impl ChatAnnouncementBlockResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchUpdateChatAnnouncementBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/batch_update");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = BatchUpdateChatAnnouncementBlockQuery::new(chat_id, body)
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.batch_update_by_query(&query, option).await
+    }
+
+    pub async fn batch_update_by_query(
+        &self,
+        query: &BatchUpdateChatAnnouncementBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateChatAnnouncementBlockResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/chats/{}/announcement/blocks/batch_update",
+            query.chat_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchUpdateChatAnnouncementBlockResp {
             api_resp,
             code_error,
@@ -1094,20 +1375,32 @@ impl ChatAnnouncementBlockResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetChatAnnouncementBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetChatAnnouncementBlockQuery::new(chat_id, block_id)
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetChatAnnouncementBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetChatAnnouncementBlockResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/chats/{}/announcement/blocks/{}",
+            query.chat_id, query.block_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetChatAnnouncementBlockResp {
             api_resp,
             code_error,
@@ -1124,26 +1417,34 @@ impl ChatAnnouncementBlockResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListChatAnnouncementBlockResp, LarkError> {
-        let path = format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = ListChatAnnouncementBlockQuery::new(chat_id)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListChatAnnouncementBlockQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListChatAnnouncementBlockResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/chats/{}/announcement/blocks",
+            query.chat_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListChatAnnouncementBlockResp {
             api_resp,
             code_error,
@@ -1165,20 +1466,31 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         document_revision_id: Option<i64>,
         option: &RequestOption,
     ) -> Result<BatchDeleteChatAnnouncementBlockChildrenResp, LarkError> {
+        let query = BatchDeleteChatAnnouncementBlockChildrenQuery::new(chat_id, block_id, body)
+            .document_revision_id(document_revision_id);
+        self.batch_delete_by_query(&query, option).await
+    }
+
+    pub async fn batch_delete_by_query(
+        &self,
+        query: &BatchDeleteChatAnnouncementBlockChildrenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchDeleteChatAnnouncementBlockChildrenResp, LarkError> {
         let path = format!(
-            "/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}/children/batch_delete"
+            "/open-apis/docx/v1/chats/{}/announcement/blocks/{}/children/batch_delete",
+            query.chat_id, query.block_id
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchDeleteChatAnnouncementBlockChildrenResp {
             api_resp,
             code_error,
@@ -1195,22 +1507,33 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateChatAnnouncementBlockChildrenResp, LarkError> {
-        let path =
-            format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}/children");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateChatAnnouncementBlockChildrenQuery::new(chat_id, block_id, body)
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateChatAnnouncementBlockChildrenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateChatAnnouncementBlockChildrenResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/chats/{}/announcement/blocks/{}/children",
+            query.chat_id, query.block_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateChatAnnouncementBlockChildrenResp {
             api_resp,
             code_error,
@@ -1229,27 +1552,34 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetChatAnnouncementBlockChildrenResp, LarkError> {
-        let path =
-            format!("/open-apis/docx/v1/chats/{chat_id}/announcement/blocks/{block_id}/children");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetChatAnnouncementBlockChildrenQuery::new(chat_id, block_id)
+            .page(PageQuery::from_parts(page_size, page_token))
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetChatAnnouncementBlockChildrenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetChatAnnouncementBlockChildrenResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/chats/{}/announcement/blocks/{}/children",
+            query.chat_id, query.block_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .page_query(query.page)
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(GetChatAnnouncementBlockChildrenResp {
             api_resp,
             code_error,
@@ -1272,22 +1602,33 @@ impl DocumentBlockDescendantResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateDocumentBlockDescendantResp, LarkError> {
-        let path =
-            format!("/open-apis/docx/v1/documents/{document_id}/blocks/{block_id}/descendant");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = document_revision_id {
-            api_req
-                .query_params
-                .set("document_revision_id", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateDocumentBlockDescendantQuery::new(document_id, block_id, body)
+            .document_revision_id(document_revision_id)
+            .user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateDocumentBlockDescendantQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateDocumentBlockDescendantResp, LarkError> {
+        let path = format!(
+            "/open-apis/docx/v1/documents/{}/blocks/{}/descendant",
+            query.document_id, query.block_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("document_revision_id", query.document_revision_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateDocumentBlockDescendantResp {
             api_resp,
             code_error,
