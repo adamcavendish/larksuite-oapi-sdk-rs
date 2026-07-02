@@ -1677,7 +1677,7 @@ impl<'a> MessageResource<'a> {
         body: &CreateMessageReqBody,
         option: &RequestOption,
     ) -> Result<CreateMessageResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v1/messages",
@@ -1686,13 +1686,8 @@ impl<'a> MessageResource<'a> {
         )
         .query("receive_id_type", receive_id_type)
         .json_body(body)?
-        .send::<MessageRespData>()
-        .await?;
-        Ok(CreateMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MessageRespData, CreateMessageResp>()
+        .await
     }
 
     pub async fn reply(
@@ -1702,7 +1697,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<ReplyMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/reply");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1710,13 +1705,8 @@ impl<'a> MessageResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<MessageRespData>()
-        .await?;
-        Ok(ReplyMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MessageRespData, ReplyMessageResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1749,7 +1739,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1757,13 +1747,8 @@ impl<'a> MessageResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<MessageRespData>()
-        .await?;
-        Ok(UpdateMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MessageRespData, UpdateMessageResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1803,7 +1788,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{}", query.message_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1811,13 +1796,8 @@ impl<'a> MessageResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<GetMessageRespData>()
-        .await?;
-        Ok(GetMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetMessageRespData, GetMessageResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1849,7 +1829,7 @@ impl<'a> MessageResource<'a> {
         query: &ListMessageQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListMessageResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/im/v1/messages",
@@ -1863,13 +1843,8 @@ impl<'a> MessageResource<'a> {
         .query("sort_type", query.sort_type)
         .query("page_size", query.page_size)
         .query("page_token", query.page_token)
-        .send::<ListMessageRespData>()
-        .await?;
-        Ok(ListMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListMessageRespData, ListMessageResp>()
+        .await
     }
 
     pub fn list_by_iterator(
@@ -1902,7 +1877,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<ForwardMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/forward");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1912,13 +1887,8 @@ impl<'a> MessageResource<'a> {
         .query("receive_id_type", receive_id_type)
         .query("uuid", uuid)
         .json_body(body)?
-        .send::<MessageRespData>()
-        .await?;
-        Ok(ForwardMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MessageRespData, ForwardMessageResp>()
+        .await
     }
 
     pub async fn merge_forward(
@@ -1928,7 +1898,7 @@ impl<'a> MessageResource<'a> {
         body: &MergeForwardMessageReqBody,
         option: &RequestOption,
     ) -> Result<MergeForwardMessageResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v1/messages/merge_forward",
@@ -1938,13 +1908,8 @@ impl<'a> MessageResource<'a> {
         .query("receive_id_type", receive_id_type)
         .query("uuid", uuid)
         .json_body(body)?
-        .send::<MergeForwardMessageRespData>()
-        .await?;
-        Ok(MergeForwardMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MergeForwardMessageRespData, MergeForwardMessageResp>()
+        .await
     }
 
     pub async fn read_users(
@@ -1970,7 +1935,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<ReadUsersMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{}/read_users", query.message_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1980,13 +1945,8 @@ impl<'a> MessageResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("page_size", query.page_size)
         .query("page_token", query.page_token)
-        .send::<ReadUsersMessageRespData>()
-        .await?;
-        Ok(ReadUsersMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ReadUsersMessageRespData, ReadUsersMessageResp>()
+        .await
     }
 
     pub async fn push_follow_up(
@@ -2020,7 +1980,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<UrgentAppMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/urgent_app");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2029,13 +1989,8 @@ impl<'a> MessageResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<UrgentMessageRespData>()
-        .await?;
-        Ok(UrgentAppMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UrgentMessageRespData, UrgentAppMessageResp>()
+        .await
     }
 
     pub async fn urgent_phone(
@@ -2046,7 +2001,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<UrgentPhoneMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/urgent_phone");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2055,13 +2010,8 @@ impl<'a> MessageResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<UrgentMessageRespData>()
-        .await?;
-        Ok(UrgentPhoneMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UrgentMessageRespData, UrgentPhoneMessageResp>()
+        .await
     }
 
     pub async fn urgent_sms(
@@ -2072,7 +2022,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<UrgentSmsMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/urgent_sms");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2081,13 +2031,8 @@ impl<'a> MessageResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<UrgentMessageRespData>()
-        .await?;
-        Ok(UrgentSmsMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UrgentMessageRespData, UrgentSmsMessageResp>()
+        .await
     }
 }
 
@@ -2145,7 +2090,7 @@ impl<'a> MessageReactionResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateMessageReactionResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/reactions");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2153,13 +2098,8 @@ impl<'a> MessageReactionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateMessageReactionRespData>()
-        .await?;
-        Ok(CreateMessageReactionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateMessageReactionRespData, CreateMessageReactionResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2169,20 +2109,15 @@ impl<'a> MessageReactionResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteMessageReactionResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/reactions/{reaction_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<DeleteMessageReactionRespData>()
-        .await?;
-        Ok(DeleteMessageReactionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DeleteMessageReactionRespData, DeleteMessageReactionResp>()
+        .await
     }
 
     pub async fn list(
@@ -2210,7 +2145,7 @@ impl<'a> MessageReactionResource<'a> {
         option: &RequestOption,
     ) -> Result<ListMessageReactionResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{}/reactions", query.message_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2221,13 +2156,8 @@ impl<'a> MessageReactionResource<'a> {
         .query("page_token", query.page_token)
         .query("page_size", query.page_size)
         .query("user_id_type", query.user_id_type)
-        .send::<ListMessageReactionRespData>()
-        .await?;
-        Ok(ListMessageReactionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListMessageReactionRespData, ListMessageReactionResp>()
+        .await
     }
 
     pub fn list_by_iterator(
@@ -2306,20 +2236,15 @@ impl<'a> BatchMessageResource<'a> {
         option: &RequestOption,
     ) -> Result<GetProgressBatchMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/batch_messages/{batch_message_id}/get_progress");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<GetProgressBatchMessageRespData>()
-        .await?;
-        Ok(GetProgressBatchMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetProgressBatchMessageRespData, GetProgressBatchMessageResp>()
+        .await
     }
 
     pub async fn read_user(
@@ -2328,20 +2253,15 @@ impl<'a> BatchMessageResource<'a> {
         option: &RequestOption,
     ) -> Result<ReadUserBatchMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/batch_messages/{batch_message_id}/read_user");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<ReadUserBatchMessageRespData>()
-        .await?;
-        Ok(ReadUserBatchMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ReadUserBatchMessageRespData, ReadUserBatchMessageResp>()
+        .await
     }
 }
 
@@ -2397,7 +2317,7 @@ impl<'a> PinResource<'a> {
         body: &CreatePinReqBody,
         option: &RequestOption,
     ) -> Result<CreatePinResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v1/pins",
@@ -2405,13 +2325,8 @@ impl<'a> PinResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreatePinRespData>()
-        .await?;
-        Ok(CreatePinResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreatePinRespData, CreatePinResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2459,7 +2374,7 @@ impl<'a> PinResource<'a> {
         query: &ListPinQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListPinResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/im/v1/pins",
@@ -2471,13 +2386,8 @@ impl<'a> PinResource<'a> {
         .query("end_time", query.end_time)
         .query("page_token", query.page_token)
         .query("page_size", query.page_size)
-        .send::<ListPinRespData>()
-        .await?;
-        Ok(ListPinResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListPinRespData, ListPinResp>()
+        .await
     }
 
     pub fn list_by_iterator(
@@ -2535,7 +2445,7 @@ impl<'a> FileResource<'a> {
                 value: FormDataValue::Text(d.to_string()),
             });
         }
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v1/files",
@@ -2543,13 +2453,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .form_body(fields)
-        .send::<CreateFileRespData>()
-        .await?;
-        Ok(CreateFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateFileRespData, CreateFileResp>()
+        .await
     }
 
     pub async fn get(
@@ -2595,7 +2500,7 @@ impl<'a> ImageResource<'a> {
                 },
             },
         ];
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v1/images",
@@ -2603,13 +2508,8 @@ impl<'a> ImageResource<'a> {
             option,
         )
         .form_body(fields)
-        .send::<CreateImageRespData>()
-        .await?;
-        Ok(CreateImageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateImageRespData, CreateImageResp>()
+        .await
     }
 
     pub async fn get(
@@ -2732,7 +2632,7 @@ impl<'a> ChatResource<'a> {
         body: &CreateChatReqBody,
         option: &RequestOption,
     ) -> Result<CreateChatResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v1/chats",
@@ -2741,13 +2641,8 @@ impl<'a> ChatResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CreateChatRespData>()
-        .await?;
-        Ok(CreateChatResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateChatRespData, CreateChatResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2787,7 +2682,7 @@ impl<'a> ChatResource<'a> {
         option: &RequestOption,
     ) -> Result<GetChatResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{}", query.chat_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2795,13 +2690,8 @@ impl<'a> ChatResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<GetChatRespData>()
-        .await?;
-        Ok(GetChatResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetChatRespData, GetChatResp>()
+        .await
     }
 
     pub async fn update(
@@ -2836,7 +2726,7 @@ impl<'a> ChatResource<'a> {
         option: &RequestOption,
     ) -> Result<LinkChatResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/link");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2844,13 +2734,8 @@ impl<'a> ChatResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<LinkChatRespData>()
-        .await?;
-        Ok(LinkChatResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<LinkChatRespData, LinkChatResp>()
+        .await
     }
 
     pub async fn list(
@@ -2875,7 +2760,7 @@ impl<'a> ChatResource<'a> {
         query: &ListChatQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListChatResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/im/v1/chats",
@@ -2886,13 +2771,8 @@ impl<'a> ChatResource<'a> {
         .query("sort_type", query.sort_type)
         .query("page_token", query.page_token)
         .query("page_size", query.page_size)
-        .send::<ListChatRespData>()
-        .await?;
-        Ok(ListChatResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListChatRespData, ListChatResp>()
+        .await
     }
 
     pub async fn search(
@@ -2917,7 +2797,7 @@ impl<'a> ChatResource<'a> {
         query: &SearchChatQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListChatResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/im/v1/chats/search",
@@ -2928,13 +2808,8 @@ impl<'a> ChatResource<'a> {
         .query("query", query.query)
         .query("page_token", query.page_token)
         .query("page_size", query.page_size)
-        .send::<ListChatRespData>()
-        .await?;
-        Ok(ListChatResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListChatRespData, ListChatResp>()
+        .await
     }
 
     pub fn list_by_iterator(
@@ -3029,7 +2904,7 @@ impl<'a> ChatMembersResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateChatMembersResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/members");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3039,13 +2914,8 @@ impl<'a> ChatMembersResource<'a> {
         .query("member_id_type", member_id_type)
         .query("succeed_type", succeed_type)
         .json_body(body)?
-        .send::<CreateChatMembersRespData>()
-        .await?;
-        Ok(CreateChatMembersResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateChatMembersRespData, CreateChatMembersResp>()
+        .await
     }
 
     pub async fn delete(
@@ -3096,7 +2966,7 @@ impl<'a> ChatMembersResource<'a> {
         option: &RequestOption,
     ) -> Result<GetChatMembersResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{}/members", query.chat_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3106,13 +2976,8 @@ impl<'a> ChatMembersResource<'a> {
         .query("member_id_type", query.member_id_type)
         .query("page_token", query.page_token)
         .query("page_size", query.page_size)
-        .send::<GetChatMembersRespData>()
-        .await?;
-        Ok(GetChatMembersResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetChatMembersRespData, GetChatMembersResp>()
+        .await
     }
 
     pub fn get_by_iterator(
@@ -3148,20 +3013,15 @@ impl<'a> ChatMembersResource<'a> {
             "/open-apis/im/v1/chats/{}/members/is_in_chat",
             query.chat_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<IsInChatChatMembersRespData>()
-        .await?;
-        Ok(IsInChatChatMembersResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<IsInChatChatMembersRespData, IsInChatChatMembersResp>()
+        .await
     }
 
     pub async fn me_join(
@@ -3199,7 +3059,7 @@ impl<'a> ChatManagersResource<'a> {
         option: &RequestOption,
     ) -> Result<AddManagersChatManagersResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/managers/add_managers");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3208,13 +3068,8 @@ impl<'a> ChatManagersResource<'a> {
         )
         .query("member_id_type", member_id_type)
         .json_body(body)?
-        .send::<UpdateChatManagersRespData>()
-        .await?;
-        Ok(AddManagersChatManagersResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdateChatManagersRespData, AddManagersChatManagersResp>()
+        .await
     }
 
     pub async fn delete_managers(
@@ -3225,7 +3080,7 @@ impl<'a> ChatManagersResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteManagersChatManagersResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/managers/delete_managers");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3234,13 +3089,8 @@ impl<'a> ChatManagersResource<'a> {
         )
         .query("member_id_type", member_id_type)
         .json_body(body)?
-        .send::<UpdateChatManagersRespData>()
-        .await?;
-        Ok(DeleteManagersChatManagersResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdateChatManagersRespData, DeleteManagersChatManagersResp>()
+        .await
     }
 }
 
@@ -3286,7 +3136,7 @@ impl<'a> ChatAnnouncementResource<'a> {
         option: &RequestOption,
     ) -> Result<GetChatAnnouncementResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{}/announcement", query.chat_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3294,13 +3144,8 @@ impl<'a> ChatAnnouncementResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<GetChatAnnouncementRespData>()
-        .await?;
-        Ok(GetChatAnnouncementResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetChatAnnouncementRespData, GetChatAnnouncementResp>()
+        .await
     }
 
     pub async fn patch(
@@ -3390,7 +3235,7 @@ impl<'a> ChatModerationResource<'a> {
         option: &RequestOption,
     ) -> Result<GetChatModerationResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{}/moderation", query.chat_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3400,13 +3245,8 @@ impl<'a> ChatModerationResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("page_token", query.page_token)
         .query("page_size", query.page_size)
-        .send::<GetChatModerationRespData>()
-        .await?;
-        Ok(GetChatModerationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetChatModerationRespData, GetChatModerationResp>()
+        .await
     }
 
     pub fn get_by_iterator(
@@ -3462,7 +3302,7 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3470,13 +3310,8 @@ impl<'a> ChatTabResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ChatTabsRespData>()
-        .await?;
-        Ok(CreateChatTabResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatTabsRespData, CreateChatTabResp>()
+        .await
     }
 
     pub async fn delete_tabs(
@@ -3486,7 +3321,7 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteTabsChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs/delete_tabs");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -3494,13 +3329,8 @@ impl<'a> ChatTabResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ChatTabsRespData>()
-        .await?;
-        Ok(DeleteTabsChatTabResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatTabsRespData, DeleteTabsChatTabResp>()
+        .await
     }
 
     pub async fn list_tabs(
@@ -3509,20 +3339,15 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<ListTabsChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs/list_tabs");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<ChatTabsRespData>()
-        .await?;
-        Ok(ListTabsChatTabResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatTabsRespData, ListTabsChatTabResp>()
+        .await
     }
 
     pub async fn sort_tabs(
@@ -3532,7 +3357,7 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<SortTabsChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs/sort_tabs");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3540,13 +3365,8 @@ impl<'a> ChatTabResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ChatTabsRespData>()
-        .await?;
-        Ok(SortTabsChatTabResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatTabsRespData, SortTabsChatTabResp>()
+        .await
     }
 
     pub async fn update_tabs(
@@ -3556,7 +3376,7 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateTabsChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs/update_tabs");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3564,13 +3384,8 @@ impl<'a> ChatTabResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ChatTabsRespData>()
-        .await?;
-        Ok(UpdateTabsChatTabResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatTabsRespData, UpdateTabsChatTabResp>()
+        .await
     }
 }
 
@@ -3637,7 +3452,7 @@ impl<'a> ChatMenuItemResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchChatMenuItemResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_items/{menu_item_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -3645,13 +3460,8 @@ impl<'a> ChatMenuItemResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<PatchChatMenuItemRespData>()
-        .await?;
-        Ok(PatchChatMenuItemResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PatchChatMenuItemRespData, PatchChatMenuItemResp>()
+        .await
     }
 }
 
@@ -3667,7 +3477,7 @@ impl<'a> ChatMenuTreeResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateChatMenuTreeResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_tree");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3675,13 +3485,8 @@ impl<'a> ChatMenuTreeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ChatMenuTreeRespData>()
-        .await?;
-        Ok(CreateChatMenuTreeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatMenuTreeRespData, CreateChatMenuTreeResp>()
+        .await
     }
 
     pub async fn delete(
@@ -3691,7 +3496,7 @@ impl<'a> ChatMenuTreeResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteChatMenuTreeResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_tree");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -3699,13 +3504,8 @@ impl<'a> ChatMenuTreeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ChatMenuTreeRespData>()
-        .await?;
-        Ok(DeleteChatMenuTreeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatMenuTreeRespData, DeleteChatMenuTreeResp>()
+        .await
     }
 
     pub async fn get(
@@ -3714,20 +3514,15 @@ impl<'a> ChatMenuTreeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetChatMenuTreeResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_tree");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<ChatMenuTreeRespData>()
-        .await?;
-        Ok(GetChatMenuTreeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatMenuTreeRespData, GetChatMenuTreeResp>()
+        .await
     }
 
     pub async fn sort(
@@ -3737,7 +3532,7 @@ impl<'a> ChatMenuTreeResource<'a> {
         option: &RequestOption,
     ) -> Result<SortChatMenuTreeResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_tree/sort");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3745,13 +3540,8 @@ impl<'a> ChatMenuTreeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ChatMenuTreeRespData>()
-        .await?;
-        Ok(SortChatMenuTreeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatMenuTreeRespData, SortChatMenuTreeResp>()
+        .await
     }
 }
 
@@ -3769,7 +3559,7 @@ impl<'a> ThreadResource<'a> {
         option: &RequestOption,
     ) -> Result<ForwardThreadResp, LarkError> {
         let path = format!("/open-apis/im/v1/threads/{thread_id}/forward");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3779,13 +3569,8 @@ impl<'a> ThreadResource<'a> {
         .query("receive_id_type", receive_id_type)
         .query("uuid", uuid)
         .json_body(body)?
-        .send::<MessageRespData>()
-        .await?;
-        Ok(ForwardThreadResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MessageRespData, ForwardThreadResp>()
+        .await
     }
 }
 

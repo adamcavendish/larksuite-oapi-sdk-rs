@@ -909,7 +909,7 @@ impl<'a> CalendarResource<'a> {
         body: &CreateCalendarReqBody,
         option: &RequestOption,
     ) -> Result<CreateCalendarResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/calendars",
@@ -917,14 +917,8 @@ impl<'a> CalendarResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<Calendar>()
-        .await?;
-
-        Ok(CreateCalendarResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<Calendar, CreateCalendarResp>()
+        .await
     }
 
     pub async fn get(
@@ -942,20 +936,15 @@ impl<'a> CalendarResource<'a> {
         option: &RequestOption,
     ) -> Result<GetCalendarResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{}", query.calendar_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<Calendar>()
-        .await?;
-        Ok(GetCalendarResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<Calendar, GetCalendarResp>()
+        .await
     }
 
     pub async fn patch(
@@ -965,7 +954,7 @@ impl<'a> CalendarResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchCalendarResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -973,14 +962,8 @@ impl<'a> CalendarResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<Calendar>()
-        .await?;
-
-        Ok(PatchCalendarResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<Calendar, PatchCalendarResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1024,7 +1007,7 @@ impl<'a> CalendarResource<'a> {
         query: &ListCalendarQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCalendarResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/calendar/v4/calendars",
@@ -1033,13 +1016,8 @@ impl<'a> CalendarResource<'a> {
         )
         .page_query(query.page)
         .query("sync_token", query.sync_token)
-        .send::<CalendarListData>()
-        .await?;
-        Ok(ListCalendarResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CalendarListData, ListCalendarResp>()
+        .await
     }
 
     pub async fn primary(
@@ -1047,7 +1025,7 @@ impl<'a> CalendarResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetCalendarResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/primary",
@@ -1055,14 +1033,8 @@ impl<'a> CalendarResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send::<Calendar>()
-        .await?;
-
-        Ok(GetCalendarResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<Calendar, GetCalendarResp>()
+        .await
     }
 
     pub async fn mget(
@@ -1070,7 +1042,7 @@ impl<'a> CalendarResource<'a> {
         body: &MgetCalendarReqBody,
         option: &RequestOption,
     ) -> Result<MgetCalendarResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/mget",
@@ -1078,14 +1050,8 @@ impl<'a> CalendarResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<MgetCalendarData>()
-        .await?;
-
-        Ok(MgetCalendarResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MgetCalendarData, MgetCalendarResp>()
+        .await
     }
 
     pub async fn primarys(
@@ -1094,7 +1060,7 @@ impl<'a> CalendarResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PrimarysCalendarResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/calendars/primarys",
@@ -1103,14 +1069,8 @@ impl<'a> CalendarResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<PrimarysCalendarData>()
-        .await?;
-
-        Ok(PrimarysCalendarResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PrimarysCalendarData, PrimarysCalendarResp>()
+        .await
     }
 
     pub async fn search(
@@ -1155,20 +1115,15 @@ impl<'a> CalendarResource<'a> {
         option: &RequestOption,
     ) -> Result<SubscribeCalendarResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/subscribe");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<SubscribeCalendarData>()
-        .await?;
-        Ok(SubscribeCalendarResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SubscribeCalendarData, SubscribeCalendarResp>()
+        .await
     }
 
     pub async fn subscription(&self, option: &RequestOption) -> Result<EmptyResp, LarkError> {
@@ -1436,7 +1391,7 @@ impl<'a> CalendarEventResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateEventResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1445,14 +1400,8 @@ impl<'a> CalendarEventResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CalendarEventData>()
-        .await?;
-
-        Ok(CreateEventResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CalendarEventData, CreateEventResp>()
+        .await
     }
 
     pub async fn get(
@@ -1475,7 +1424,7 @@ impl<'a> CalendarEventResource<'a> {
             "/open-apis/calendar/v4/calendars/{}/events/{}",
             query.calendar_id, query.event_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1483,13 +1432,8 @@ impl<'a> CalendarEventResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<CalendarEventData>()
-        .await?;
-        Ok(GetEventResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CalendarEventData, GetEventResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1501,7 +1445,7 @@ impl<'a> CalendarEventResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchEventResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1510,14 +1454,8 @@ impl<'a> CalendarEventResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CalendarEventData>()
-        .await?;
-
-        Ok(PatchEventResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CalendarEventData, PatchEventResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1579,7 +1517,7 @@ impl<'a> CalendarEventResource<'a> {
             "/open-apis/calendar/v4/calendars/{}/events",
             query.calendar_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1592,13 +1530,8 @@ impl<'a> CalendarEventResource<'a> {
         .query("start_time", query.start_time)
         .query("end_time", query.end_time)
         .query("user_id_type", query.user_id_type)
-        .send::<CalendarEventListData>()
-        .await?;
-        Ok(ListEventResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CalendarEventListData, ListEventResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1626,7 +1559,7 @@ impl<'a> CalendarEventResource<'a> {
             "/open-apis/calendar/v4/calendars/{}/events/instance_view",
             query.calendar_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1636,13 +1569,8 @@ impl<'a> CalendarEventResource<'a> {
         .query("start_time", query.start_time)
         .query("end_time", query.end_time)
         .query("user_id_type", query.user_id_type)
-        .send::<InstanceViewData>()
-        .await?;
-        Ok(InstanceViewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<InstanceViewData, InstanceViewResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1675,7 +1603,7 @@ impl<'a> CalendarEventResource<'a> {
             "/open-apis/calendar/v4/calendars/{}/events/{}/instances",
             query.calendar_id, query.event_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1685,13 +1613,8 @@ impl<'a> CalendarEventResource<'a> {
         .query("start_time", query.start_time)
         .query("end_time", query.end_time)
         .page_query(query.page)
-        .send::<InstancesData>()
-        .await?;
-        Ok(InstancesResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<InstancesData, InstancesResp>()
+        .await
     }
 
     pub async fn reply(
@@ -1861,7 +1784,7 @@ impl<'a> CalendarAttendeeResource<'a> {
     ) -> Result<CreateAttendeeResp, LarkError> {
         let path =
             format!("/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/attendees");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1870,14 +1793,8 @@ impl<'a> CalendarAttendeeResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<AttendeeListData>()
-        .await?;
-
-        Ok(CreateAttendeeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AttendeeListData, CreateAttendeeResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1936,7 +1853,7 @@ impl<'a> CalendarAttendeeResource<'a> {
             "/open-apis/calendar/v4/calendars/{}/events/{}/attendees",
             query.calendar_id, query.event_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1945,13 +1862,8 @@ impl<'a> CalendarAttendeeResource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send::<AttendeeListData>()
-        .await?;
-        Ok(ListAttendeeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AttendeeListData, ListAttendeeResp>()
+        .await
     }
 }
 
@@ -2001,7 +1913,7 @@ impl<'a> CalendarAclResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateAclResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/calendars/{calendar_id}/acls");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2010,14 +1922,8 @@ impl<'a> CalendarAclResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CalendarAcl>()
-        .await?;
-
-        Ok(CreateAclResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CalendarAcl, CreateAclResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2068,7 +1974,7 @@ impl<'a> CalendarAclResource<'a> {
             "/open-apis/calendar/v4/calendars/{}/acls",
             query.calendar_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2077,13 +1983,8 @@ impl<'a> CalendarAclResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send::<AclListData>()
-        .await?;
-        Ok(ListAclResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AclListData, ListAclResp>()
+        .await
     }
 
     pub async fn subscription(
@@ -2175,7 +2076,7 @@ impl<'a> TimeZoneResource<'a> {
         query: &ListTimeZoneQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListTimeZoneResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/calendar/v4/timezones",
@@ -2183,13 +2084,8 @@ impl<'a> TimeZoneResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send::<TimeZoneListData>()
-        .await?;
-        Ok(ListTimeZoneResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TimeZoneListData, ListTimeZoneResp>()
+        .await
     }
 }
 
@@ -2204,7 +2100,7 @@ impl<'a> ExchangeBindingResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateExchangeBindingResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/exchange_bindings",
@@ -2213,14 +2109,8 @@ impl<'a> ExchangeBindingResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<ExchangeBinding>()
-        .await?;
-
-        Ok(CreateExchangeBindingResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ExchangeBinding, CreateExchangeBindingResp>()
+        .await
     }
 
     pub async fn get(
@@ -2230,7 +2120,7 @@ impl<'a> ExchangeBindingResource<'a> {
         option: &RequestOption,
     ) -> Result<GetExchangeBindingResp, LarkError> {
         let path = format!("/open-apis/calendar/v4/exchange_bindings/{exchange_binding_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2238,14 +2128,8 @@ impl<'a> ExchangeBindingResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send::<ExchangeBinding>()
-        .await?;
-
-        Ok(GetExchangeBindingResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ExchangeBinding, GetExchangeBindingResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2277,21 +2161,15 @@ pub struct CalendarSettingResource<'a> {
 
 impl<'a> CalendarSettingResource<'a> {
     pub async fn get(&self, option: &RequestOption) -> Result<GetCalendarSettingResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/calendar/v4/settings",
             vec![AccessTokenType::User],
             option,
         )
-        .send::<CalendarSetting>()
-        .await?;
-
-        Ok(GetCalendarSettingResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CalendarSetting, GetCalendarSettingResp>()
+        .await
     }
 
     pub async fn patch(
@@ -2299,7 +2177,7 @@ impl<'a> CalendarSettingResource<'a> {
         body: &PatchCalendarSettingReqBody,
         option: &RequestOption,
     ) -> Result<PatchCalendarSettingResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             "/open-apis/calendar/v4/settings",
@@ -2307,14 +2185,8 @@ impl<'a> CalendarSettingResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CalendarSetting>()
-        .await?;
-
-        Ok(PatchCalendarSettingResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CalendarSetting, PatchCalendarSettingResp>()
+        .await
     }
 
     pub async fn generate_caldav_conf(
@@ -2322,7 +2194,7 @@ impl<'a> CalendarSettingResource<'a> {
         body: &GenerateCaldavConfReqBody,
         option: &RequestOption,
     ) -> Result<GenerateCaldavConfResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/settings/generate_caldav_conf",
@@ -2330,14 +2202,8 @@ impl<'a> CalendarSettingResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CaldavConfData>()
-        .await?;
-
-        Ok(GenerateCaldavConfResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CaldavConfData, GenerateCaldavConfResp>()
+        .await
     }
 }
 
@@ -2525,7 +2391,7 @@ impl<'a> CalendarEventAttendeeChatMemberResource<'a> {
             "/open-apis/calendar/v4/calendars/{}/events/{}/attendees/{}/chat_members",
             query.calendar_id, query.event_id, query.attendee_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2534,13 +2400,8 @@ impl<'a> CalendarEventAttendeeChatMemberResource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send::<ChatMemberListData>()
-        .await?;
-        Ok(ListChatMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ChatMemberListData, ListChatMemberResp>()
+        .await
     }
 }
 
@@ -2558,21 +2419,15 @@ impl<'a> CalendarEventMeetingChatResource<'a> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_chat"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<MeetingChatData>()
-        .await?;
-
-        Ok(CreateMeetingChatResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MeetingChatData, CreateMeetingChatResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2617,21 +2472,15 @@ impl<'a> CalendarEventMeetingMinuteResource<'a> {
         let path = format!(
             "/open-apis/calendar/v4/calendars/{calendar_id}/events/{event_id}/meeting_minute"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<MeetingMinuteData>()
-        .await?;
-
-        Ok(CreateMeetingMinuteResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MeetingMinuteData, CreateMeetingMinuteResp>()
+        .await
     }
 }
 
@@ -2646,7 +2495,7 @@ impl<'a> TimeoffEventResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateTimeoffEventResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/calendar/v4/timeoff_events",
@@ -2655,14 +2504,8 @@ impl<'a> TimeoffEventResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<TimeoffEventData>()
-        .await?;
-
-        Ok(CreateTimeoffEventResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TimeoffEventData, CreateTimeoffEventResp>()
+        .await
     }
 
     pub async fn delete(

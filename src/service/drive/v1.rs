@@ -1173,7 +1173,7 @@ impl<'a> ExportTaskResource<'a> {
         body: &ExportTask,
         option: &RequestOption,
     ) -> Result<CreateExportTaskResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/export_tasks",
@@ -1181,13 +1181,8 @@ impl<'a> ExportTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateExportTaskRespData>()
-        .await?;
-        Ok(CreateExportTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateExportTaskRespData, CreateExportTaskResp>()
+        .await
     }
 
     pub async fn get(
@@ -1197,7 +1192,7 @@ impl<'a> ExportTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<GetExportTaskResp, LarkError> {
         let path = format!("/open-apis/drive/v1/export_tasks/{ticket}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1205,13 +1200,8 @@ impl<'a> ExportTaskResource<'a> {
             option,
         )
         .query("token", token)
-        .send::<GetExportTaskRespData>()
-        .await?;
-        Ok(GetExportTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetExportTaskRespData, GetExportTaskResp>()
+        .await
     }
 
     pub async fn download(
@@ -1302,7 +1292,7 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<CopyFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/copy");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1311,13 +1301,8 @@ impl<'a> FileResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CopyFileRespData>()
-        .await?;
-        Ok(CopyFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CopyFileRespData, CopyFileResp>()
+        .await
     }
 
     pub async fn create_folder(
@@ -1325,7 +1310,7 @@ impl<'a> FileResource<'a> {
         body: &CreateFolderFileReqBody,
         option: &RequestOption,
     ) -> Result<CreateFolderFileResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/create_folder",
@@ -1333,13 +1318,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateFolderFileRespData>()
-        .await?;
-        Ok(CreateFolderFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateFolderFileRespData, CreateFolderFileResp>()
+        .await
     }
 
     pub async fn create_shortcut(
@@ -1348,7 +1328,7 @@ impl<'a> FileResource<'a> {
         body: &CreateShortcutFileReqBody,
         option: &RequestOption,
     ) -> Result<CreateShortcutFileResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/create_shortcut",
@@ -1357,13 +1337,8 @@ impl<'a> FileResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CreateShortcutFileRespData>()
-        .await?;
-        Ok(CreateShortcutFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateShortcutFileRespData, CreateShortcutFileResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1373,7 +1348,7 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -1381,13 +1356,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .query("type", file_type)
-        .send::<DeleteFileRespData>()
-        .await?;
-        Ok(DeleteFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DeleteFileRespData, DeleteFileResp>()
+        .await
     }
 
     pub async fn download(
@@ -1465,7 +1435,7 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSubscribeFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/get_subscribe");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1474,13 +1444,8 @@ impl<'a> FileResource<'a> {
         )
         .query("file_type", file_type)
         .query("event_type", event_type)
-        .send::<GetSubscribeFileRespData>()
-        .await?;
-        Ok(GetSubscribeFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetSubscribeFileRespData, GetSubscribeFileResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1509,7 +1474,7 @@ impl<'a> FileResource<'a> {
         query: &ListFileQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListFileResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/drive/v1/files",
@@ -1521,13 +1486,8 @@ impl<'a> FileResource<'a> {
         .query("direction", query.direction)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page_query())
-        .send::<ListFileRespData>()
-        .await?;
-        Ok(ListFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListFileRespData, ListFileResp>()
+        .await
     }
 
     pub async fn move_file(
@@ -1537,7 +1497,7 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<MoveFileResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/move");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1545,13 +1505,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<MoveFileRespData>()
-        .await?;
-        Ok(MoveFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MoveFileRespData, MoveFileResp>()
+        .await
     }
 
     pub async fn task_check(
@@ -1559,7 +1514,7 @@ impl<'a> FileResource<'a> {
         task_id: &str,
         option: &RequestOption,
     ) -> Result<TaskCheckFileResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/drive/v1/files/task_check",
@@ -1567,13 +1522,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .query("task_id", task_id)
-        .send::<TaskCheckFileRespData>()
-        .await?;
-        Ok(TaskCheckFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TaskCheckFileRespData, TaskCheckFileResp>()
+        .await
     }
 
     pub async fn upload_prepare(
@@ -1581,7 +1531,7 @@ impl<'a> FileResource<'a> {
         body: &FileUploadInfo,
         option: &RequestOption,
     ) -> Result<UploadPrepareFileResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/upload_prepare",
@@ -1589,13 +1539,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<UploadPrepareFileRespData>()
-        .await?;
-        Ok(UploadPrepareFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UploadPrepareFileRespData, UploadPrepareFileResp>()
+        .await
     }
 
     pub async fn upload_finish(
@@ -1603,7 +1548,7 @@ impl<'a> FileResource<'a> {
         body: &UploadFinishFileReqBody,
         option: &RequestOption,
     ) -> Result<UploadFinishFileResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/upload_finish",
@@ -1611,13 +1556,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<UploadFinishFileRespData>()
-        .await?;
-        Ok(UploadFinishFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UploadFinishFileRespData, UploadFinishFileResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1640,7 +1580,7 @@ impl<'a> FileResource<'a> {
             None,
             data,
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/upload_all",
@@ -1648,13 +1588,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .form_body(fields)
-        .send::<UploadAllFileRespData>()
-        .await?;
-        Ok(UploadAllFileResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UploadAllFileRespData, UploadAllFileResp>()
+        .await
     }
 
     pub async fn upload_part(
@@ -1819,7 +1754,7 @@ impl<'a> FileCommentResource<'a> {
             "/open-apis/drive/v1/files/{}/comments/batch_query",
             query.file_token
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1829,13 +1764,8 @@ impl<'a> FileCommentResource<'a> {
         .query("file_type", query.file_type)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<BatchQueryFileCommentRespData>()
-        .await?;
-        Ok(BatchQueryFileCommentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchQueryFileCommentRespData, BatchQueryFileCommentResp>()
+        .await
     }
 
     pub async fn create(
@@ -1847,7 +1777,7 @@ impl<'a> FileCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFileCommentResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1857,13 +1787,8 @@ impl<'a> FileCommentResource<'a> {
         .query("file_type", file_type)
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<FileComment>()
-        .await?;
-        Ok(CreateFileCommentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FileComment, CreateFileCommentResp>()
+        .await
     }
 
     pub async fn get(
@@ -1888,7 +1813,7 @@ impl<'a> FileCommentResource<'a> {
             "/open-apis/drive/v1/files/{}/comments/{}",
             query.file_token, query.comment_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1897,13 +1822,8 @@ impl<'a> FileCommentResource<'a> {
         )
         .query("file_type", query.file_type)
         .query("user_id_type", query.user_id_type)
-        .send::<FileComment>()
-        .await?;
-        Ok(GetFileCommentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FileComment, GetFileCommentResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1932,7 +1852,7 @@ impl<'a> FileCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<ListFileCommentResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{}/comments", query.file_token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1944,13 +1864,8 @@ impl<'a> FileCommentResource<'a> {
         .query("is_solved", query.is_solved)
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send::<ListFileCommentRespData>()
-        .await?;
-        Ok(ListFileCommentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListFileCommentRespData, ListFileCommentResp>()
+        .await
     }
 
     pub fn list_by_iterator(
@@ -2101,7 +2016,7 @@ impl<'a> FileCommentReplyResource<'a> {
             "/open-apis/drive/v1/files/{}/comments/{}/replies",
             query.file_token, query.comment_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2111,13 +2026,8 @@ impl<'a> FileCommentReplyResource<'a> {
         .query("file_type", query.file_type)
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send::<ListFileCommentReplyRespData>()
-        .await?;
-        Ok(ListFileCommentReplyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListFileCommentReplyRespData, ListFileCommentReplyResp>()
+        .await
     }
 
     pub fn list_by_iterator(
@@ -2184,7 +2094,7 @@ impl<'a> FileStatisticsResource<'a> {
         option: &RequestOption,
     ) -> Result<GetFileStatisticsResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/statistics");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2192,13 +2102,8 @@ impl<'a> FileStatisticsResource<'a> {
             option,
         )
         .query("file_type", file_type)
-        .send::<GetFileStatisticsRespData>()
-        .await?;
-        Ok(GetFileStatisticsResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetFileStatisticsRespData, GetFileStatisticsResp>()
+        .await
     }
 }
 
@@ -2214,7 +2119,7 @@ impl<'a> FileSubscriptionResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFileSubscriptionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/subscriptions");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2222,13 +2127,8 @@ impl<'a> FileSubscriptionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FileSubscriptionRespData>()
-        .await?;
-        Ok(CreateFileSubscriptionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FileSubscriptionRespData, CreateFileSubscriptionResp>()
+        .await
     }
 
     pub async fn get(
@@ -2240,7 +2140,7 @@ impl<'a> FileSubscriptionResource<'a> {
     ) -> Result<GetFileSubscriptionResp, LarkError> {
         let path =
             format!("/open-apis/drive/v1/files/{file_token}/subscriptions/{subscription_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2248,13 +2148,8 @@ impl<'a> FileSubscriptionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FileSubscriptionRespData>()
-        .await?;
-        Ok(GetFileSubscriptionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FileSubscriptionRespData, GetFileSubscriptionResp>()
+        .await
     }
 
     pub async fn patch(
@@ -2266,7 +2161,7 @@ impl<'a> FileSubscriptionResource<'a> {
     ) -> Result<PatchFileSubscriptionResp, LarkError> {
         let path =
             format!("/open-apis/drive/v1/files/{file_token}/subscriptions/{subscription_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2274,13 +2169,8 @@ impl<'a> FileSubscriptionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FileSubscriptionRespData>()
-        .await?;
-        Ok(PatchFileSubscriptionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FileSubscriptionRespData, PatchFileSubscriptionResp>()
+        .await
     }
 }
 
@@ -2344,7 +2234,7 @@ impl<'a> FileVersionResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFileVersionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2353,13 +2243,8 @@ impl<'a> FileVersionResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CreateFileVersionRespData>()
-        .await?;
-        Ok(CreateFileVersionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateFileVersionRespData, CreateFileVersionResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2397,7 +2282,7 @@ impl<'a> FileVersionResource<'a> {
         option: &RequestOption,
     ) -> Result<GetFileVersionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions/{version_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2406,13 +2291,8 @@ impl<'a> FileVersionResource<'a> {
         )
         .query("obj_type", obj_type)
         .query("user_id_type", user_id_type)
-        .send::<Version>()
-        .await?;
-        Ok(GetFileVersionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<Version, GetFileVersionResp>()
+        .await
     }
 
     pub async fn list(
@@ -2437,7 +2317,7 @@ impl<'a> FileVersionResource<'a> {
         option: &RequestOption,
     ) -> Result<ListFileVersionResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{}/versions", query.file_token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2447,13 +2327,8 @@ impl<'a> FileVersionResource<'a> {
         .query("obj_type", query.obj_type)
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
-        .send::<ListFileVersionRespData>()
-        .await?;
-        Ok(ListFileVersionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListFileVersionRespData, ListFileVersionResp>()
+        .await
     }
 
     pub fn list_by_iterator(
@@ -2551,7 +2426,7 @@ impl<'a> FileViewRecordResource<'a> {
             "/open-apis/drive/v1/files/{}/view_records",
             query.file_token
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2561,13 +2436,8 @@ impl<'a> FileViewRecordResource<'a> {
         .query("file_type", query.file_type)
         .page_query(query.page_query())
         .query("viewer_id_type", query.viewer_id_type)
-        .send::<ListFileViewRecordRespData>()
-        .await?;
-        Ok(ListFileViewRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListFileViewRecordRespData, ListFileViewRecordResp>()
+        .await
     }
 
     pub fn list_by_iterator(
@@ -2598,7 +2468,7 @@ impl<'a> ImportTaskResource<'a> {
         body: &ImportTask,
         option: &RequestOption,
     ) -> Result<CreateImportTaskResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/import_tasks",
@@ -2606,13 +2476,8 @@ impl<'a> ImportTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateImportTaskRespData>()
-        .await?;
-        Ok(CreateImportTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateImportTaskRespData, CreateImportTaskResp>()
+        .await
     }
 
     pub async fn get(
@@ -2621,20 +2486,15 @@ impl<'a> ImportTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<GetImportTaskResp, LarkError> {
         let path = format!("/open-apis/drive/v1/import_tasks/{ticket}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<GetImportTaskRespData>()
-        .await?;
-        Ok(GetImportTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetImportTaskRespData, GetImportTaskResp>()
+        .await
     }
 }
 
@@ -2649,7 +2509,7 @@ impl<'a> MediaResource<'a> {
         extra: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchGetTmpDownloadUrlMediaResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/drive/v1/medias/batch_get_tmp_download_url",
@@ -2658,13 +2518,8 @@ impl<'a> MediaResource<'a> {
         )
         .query_values("file_tokens", Some(file_tokens.iter().copied()))
         .query("extra", extra)
-        .send::<BatchGetTmpDownloadUrlMediaRespData>()
-        .await?;
-        Ok(BatchGetTmpDownloadUrlMediaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchGetTmpDownloadUrlMediaRespData, BatchGetTmpDownloadUrlMediaResp>()
+        .await
     }
 
     pub async fn download(
@@ -2691,7 +2546,7 @@ impl<'a> MediaResource<'a> {
         body: &MediaUploadInfo,
         option: &RequestOption,
     ) -> Result<UploadPrepareMediaResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/medias/upload_prepare",
@@ -2699,13 +2554,8 @@ impl<'a> MediaResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<UploadPrepareMediaRespData>()
-        .await?;
-        Ok(UploadPrepareMediaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UploadPrepareMediaRespData, UploadPrepareMediaResp>()
+        .await
     }
 
     pub async fn upload_finish(
@@ -2713,7 +2563,7 @@ impl<'a> MediaResource<'a> {
         body: &UploadFinishMediaReqBody,
         option: &RequestOption,
     ) -> Result<UploadFinishMediaResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/medias/upload_finish",
@@ -2721,13 +2571,8 @@ impl<'a> MediaResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<UploadFinishMediaRespData>()
-        .await?;
-        Ok(UploadFinishMediaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UploadFinishMediaRespData, UploadFinishMediaResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -2751,7 +2596,7 @@ impl<'a> MediaResource<'a> {
             extra,
             data,
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/medias/upload_all",
@@ -2759,13 +2604,8 @@ impl<'a> MediaResource<'a> {
             option,
         )
         .form_body(fields)
-        .send::<UploadAllMediaRespData>()
-        .await?;
-        Ok(UploadAllMediaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UploadAllMediaRespData, UploadAllMediaResp>()
+        .await
     }
 
     pub async fn upload_part(
@@ -2806,7 +2646,7 @@ impl<'a> MetaResource<'a> {
         body: &MetaRequest,
         option: &RequestOption,
     ) -> Result<BatchQueryMetaResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/metas/batch_query",
@@ -2815,13 +2655,8 @@ impl<'a> MetaResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<BatchQueryMetaRespData>()
-        .await?;
-        Ok(BatchQueryMetaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchQueryMetaRespData, BatchQueryMetaResp>()
+        .await
     }
 }
 
@@ -2868,7 +2703,7 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<AuthPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/auth");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2877,13 +2712,8 @@ impl<'a> PermissionMemberResource<'a> {
         )
         .query("type", token_type)
         .query("action", action)
-        .send::<AuthPermissionMemberRespData>()
-        .await?;
-        Ok(AuthPermissionMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AuthPermissionMemberRespData, AuthPermissionMemberResp>()
+        .await
     }
 
     pub async fn batch_create(
@@ -2895,7 +2725,7 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<BatchCreatePermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/batch_create");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2905,13 +2735,8 @@ impl<'a> PermissionMemberResource<'a> {
         .query("type", token_type)
         .query("need_notification", need_notification)
         .json_body(body)?
-        .send::<BatchCreatePermissionMemberRespData>()
-        .await?;
-        Ok(BatchCreatePermissionMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchCreatePermissionMemberRespData, BatchCreatePermissionMemberResp>()
+        .await
     }
 
     pub async fn create(
@@ -2923,7 +2748,7 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<CreatePermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2933,13 +2758,8 @@ impl<'a> PermissionMemberResource<'a> {
         .query("type", token_type)
         .query("need_notification", need_notification)
         .json_body(body)?
-        .send::<CreatePermissionMemberRespData>()
-        .await?;
-        Ok(CreatePermissionMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreatePermissionMemberRespData, CreatePermissionMemberResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2990,7 +2810,7 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<ListPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{}/members", query.token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3000,13 +2820,8 @@ impl<'a> PermissionMemberResource<'a> {
         .query("type", query.token_type)
         .query("fields", query.fields)
         .query("perm_type", query.perm_type)
-        .send::<ListPermissionMemberRespData>()
-        .await?;
-        Ok(ListPermissionMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListPermissionMemberRespData, ListPermissionMemberResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -3053,7 +2868,7 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdatePermissionMemberResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/{member_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -3063,13 +2878,8 @@ impl<'a> PermissionMemberResource<'a> {
         .query("type", token_type)
         .query("need_notification", need_notification)
         .json_body(body)?
-        .send::<UpdatePermissionMemberRespData>()
-        .await?;
-        Ok(UpdatePermissionMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdatePermissionMemberRespData, UpdatePermissionMemberResp>()
+        .await
     }
 }
 
@@ -3107,7 +2917,7 @@ impl<'a> PermissionPublicResource<'a> {
         option: &RequestOption,
     ) -> Result<GetPermissionPublicV1Resp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{}/public", query.token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3115,13 +2925,8 @@ impl<'a> PermissionPublicResource<'a> {
             option,
         )
         .query("type", query.token_type)
-        .send::<GetPermissionPublicV1RespData>()
-        .await?;
-        Ok(GetPermissionPublicV1Resp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetPermissionPublicV1RespData, GetPermissionPublicV1Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -3132,7 +2937,7 @@ impl<'a> PermissionPublicResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchPermissionPublicV1Resp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -3141,13 +2946,8 @@ impl<'a> PermissionPublicResource<'a> {
         )
         .query("type", token_type)
         .json_body(body)?
-        .send::<GetPermissionPublicV1RespData>()
-        .await?;
-        Ok(PatchPermissionPublicV1Resp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetPermissionPublicV1RespData, PatchPermissionPublicV1Resp>()
+        .await
     }
 }
 
@@ -3163,7 +2963,7 @@ impl<'a> PermissionPublicPasswordResource<'a> {
         option: &RequestOption,
     ) -> Result<CreatePermissionPublicPasswordResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public/password");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3171,13 +2971,8 @@ impl<'a> PermissionPublicPasswordResource<'a> {
             option,
         )
         .query("type", token_type)
-        .send::<CreatePermissionPublicPasswordRespData>()
-        .await?;
-        Ok(CreatePermissionPublicPasswordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreatePermissionPublicPasswordRespData, CreatePermissionPublicPasswordResp>()
+        .await
     }
 
     pub async fn delete(
@@ -3210,7 +3005,7 @@ impl<'a> PermissionPublicPasswordResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdatePermissionPublicPasswordResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public/password");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -3218,13 +3013,8 @@ impl<'a> PermissionPublicPasswordResource<'a> {
             option,
         )
         .query("type", token_type)
-        .send::<UpdatePermissionPublicPasswordRespData>()
-        .await?;
-        Ok(UpdatePermissionPublicPasswordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdatePermissionPublicPasswordRespData, UpdatePermissionPublicPasswordResp>()
+        .await
     }
 }
 
