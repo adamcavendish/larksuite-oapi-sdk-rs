@@ -2,7 +2,6 @@ mod common;
 
 use common::{http_response, http_response_with_headers, mock_server_with_requests};
 
-use larksuite_oapi_sdk_rs::Client;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::{
     acs::v1::{
@@ -30,6 +29,7 @@ use larksuite_oapi_sdk_rs::service::{
         ListAppQuery as ListApplicationV1AppQuery,
         ListAppVersionQuery as ListApplicationV1AppVersionQuery, OverviewAppUsageQuery,
     },
+    application::v5::{FavouriteApplicationQuery, RecommendApplicationQuery},
     application::v6::{
         ApplicationContactsRangeConfigurationQuery, ApplyScopeQuery,
         CheckWhiteBlackListApplicationVisibilityQuery,
@@ -44,6 +44,11 @@ use larksuite_oapi_sdk_rs::service::{
         PatchApplicationVisibilityQuery, SetAppBadgeQuery, UnderauditlistApplicationQuery,
         UpdateApplicationCollaboratorsQuery, UpdateApplicationManagementQuery,
         UpdateApplicationOwnerQuery,
+    },
+    application::v7::{
+        CreateAppAvatarUploadQuery, CreateApplicationPublishQuery, CreateApplicationPublishReqBody,
+        PatchApplicationAbilityQuery, PatchApplicationAbilityReqBody, PatchApplicationBaseQuery,
+        PatchApplicationBaseReqBody, PatchApplicationConfigQuery, PatchApplicationConfigReqBody,
     },
     approval::v4::{
         CcSearch, GetApprovalQuery, GetExternalApprovalQuery, GetInstanceQuery, InstanceSearch,
@@ -352,6 +357,10 @@ use larksuite_oapi_sdk_rs::service::{
             UpdateDeviceRecordV2Query,
         },
     },
+    spark::v1::{
+        DownloadAppStorageQuery, SparkPageQuery, SparkRecordQuery, SparkTableMutationQuery,
+        SparkViewRecordQuery,
+    },
     speech_to_text::v1::{
         FileRecognizeSpeechQuery, RecognizeBasicSpeechReqBody, RecognizeSpeechStreamReqBody,
         StreamRecognizeSpeechQuery,
@@ -390,6 +399,12 @@ use larksuite_oapi_sdk_rs::service::{
     translation::v1::{
         DetectLanguageQuery, DetectLanguageReqBody, TranslateReqBody, TranslateTextQuery,
     },
+    trust_party::v1::{
+        GetCollaborationTenantCollaborationDepartmentQuery,
+        GetCollaborationTenantCollaborationUserQuery, GetCollaborationTenantQuery,
+        ListCollaborationTenantQuery as ListTrustPartyCollaborationTenantQuery,
+        VisibleOrganizationCollaborationTenantQuery,
+    },
     vc::{
         ApplyReserveQuery, CreateRoomQuery as CreateVcRoomQuery, CreateRoomReqBody,
         GetActiveMeetingReserveQuery, GetMeetingListQuery, GetParticipantListQuery,
@@ -408,6 +423,7 @@ use larksuite_oapi_sdk_rs::service::{
         CustomWorkplaceAccessDataQuery, WorkplaceAccessDataQuery, WorkplaceBlockAccessDataQuery,
     },
 };
+use larksuite_oapi_sdk_rs::{Client, FormDataBuilder};
 
 fn client_for(addr: std::net::SocketAddr) -> Client {
     Client::builder("test_app_id", "test_secret")
@@ -423,6 +439,8 @@ mod acs;
 mod admin_v1;
 #[path = "generated_service_smoke/application_v1.rs"]
 mod application_v1;
+#[path = "generated_service_smoke/application_v5_v7.rs"]
+mod application_v5_v7;
 #[path = "generated_service_smoke/application_v6.rs"]
 mod application_v6;
 #[path = "generated_service_smoke/approval.rs"]
@@ -499,6 +517,8 @@ mod search;
 mod security_and_compliance;
 #[path = "generated_service_smoke/sheets.rs"]
 mod sheets;
+#[path = "generated_service_smoke/spark.rs"]
+mod spark;
 #[path = "generated_service_smoke/task.rs"]
 mod task;
 #[path = "generated_service_smoke/task_v2.rs"]
@@ -507,6 +527,8 @@ mod task_v2;
 mod tenant;
 #[path = "generated_service_smoke/translation.rs"]
 mod translation;
+#[path = "generated_service_smoke/trust_party.rs"]
+mod trust_party;
 #[path = "generated_service_smoke/vc.rs"]
 mod vc;
 #[path = "generated_service_smoke/verification.rs"]
