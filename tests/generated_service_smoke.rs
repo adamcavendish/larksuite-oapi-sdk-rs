@@ -52,6 +52,11 @@ use larksuite_oapi_sdk_rs::service::{
             UpdateEntityQuery as UpdateBlockEntityQuery,
         },
     },
+    board::v1::{
+        CreateBoardReqBody, CreateWhiteboardQuery, DownloadAsImageWhiteboardQuery,
+        GetWhiteboardQuery, ThemeWhiteboardQuery, UpdateThemeWhiteboardQuery,
+        UpdateThemeWhiteboardReqBody,
+    },
     calendar::v4::{
         BatchFreeBusyQuery, BatchFreeBusyReqBody, GetCalendarQuery,
         GetEventQuery as GetCalendarEventQuery, InstanceViewEventQuery, InstancesEventQuery,
@@ -795,6 +800,95 @@ async fn board_whiteboard_download_as_image_smoke() {
     assert_eq!(resp.data, body.as_bytes());
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/board/v1/whiteboards/whiteboard-1/download_as_image"));
+}
+
+#[tokio::test]
+async fn board_whiteboard_by_query_smoke() {
+    let board_body = r#"{"code":0,"msg":"ok","data":{"whiteboard":{"whiteboard_id":"whiteboard-1","title":"Roadmap"}}}"#;
+    let theme_body = r#"{"code":0,"msg":"ok","data":{"theme":{"background":"grid"}}}"#;
+    let update_theme_body = r#"{"code":0,"msg":"ok","data":{"updated":true}}"#;
+    let download_body = "whiteboard-image-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, board_body),
+        http_response(200, board_body),
+        http_response_with_headers(
+            200,
+            "Content-Disposition: attachment; filename=\"whiteboard.png\"\r\nContent-Type: image/png\r\n",
+            download_body,
+        ),
+        http_response(200, theme_body),
+        http_response(200, update_theme_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let create_body = CreateBoardReqBody {
+        title: Some("Roadmap".into()),
+        folder_token: Some("folder-1".into()),
+    };
+    let update_theme_body = UpdateThemeWhiteboardReqBody {
+        theme: Some(serde_json::json!({"background":"grid"})),
+    };
+
+    client
+        .board()
+        .whiteboard
+        .create_by_query(
+            &CreateWhiteboardQuery::new(&create_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .board()
+        .whiteboard
+        .get_by_query(
+            &GetWhiteboardQuery::new("whiteboard-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let download = client
+        .board()
+        .whiteboard
+        .download_as_image_by_query(
+            &DownloadAsImageWhiteboardQuery::new("whiteboard-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .board()
+        .whiteboard
+        .theme_by_query(
+            &ThemeWhiteboardQuery::new("whiteboard-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .board()
+        .whiteboard
+        .update_theme_by_query(
+            &UpdateThemeWhiteboardQuery::new("whiteboard-1", &update_theme_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(download.file_name.as_deref(), Some("whiteboard.png"));
+    assert_eq!(download.data, download_body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/board/v1/whiteboards "));
+    assert!(request.contains("GET /open-apis/board/v1/whiteboards/whiteboard-1 "));
+    assert!(
+        request.contains("GET /open-apis/board/v1/whiteboards/whiteboard-1/download_as_image ")
+    );
+    assert!(request.contains("GET /open-apis/board/v1/whiteboards/whiteboard-1/theme "));
+    assert!(request.contains("POST /open-apis/board/v1/whiteboards/whiteboard-1/update_theme "));
+    assert!(request.contains(r#""title":"Roadmap""#));
+    assert!(request.contains(r#""folder_token":"folder-1""#));
+    assert!(request.contains(r#""background":"grid""#));
 }
 
 // ── EHR ──

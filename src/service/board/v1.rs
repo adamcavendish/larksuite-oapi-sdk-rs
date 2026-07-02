@@ -100,6 +100,65 @@ pub struct WhiteboardNodeListData {
 
 impl_resp!(ListWhiteboardNodeResp, WhiteboardNodeListData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateWhiteboardQuery<'a> {
+    pub body: &'a CreateBoardReqBody,
+}
+
+impl<'a> CreateWhiteboardQuery<'a> {
+    pub fn new(body: &'a CreateBoardReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetWhiteboardQuery<'a> {
+    pub whiteboard_id: &'a str,
+}
+
+impl<'a> GetWhiteboardQuery<'a> {
+    pub fn new(whiteboard_id: &'a str) -> Self {
+        Self { whiteboard_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DownloadAsImageWhiteboardQuery<'a> {
+    pub whiteboard_id: &'a str,
+}
+
+impl<'a> DownloadAsImageWhiteboardQuery<'a> {
+    pub fn new(whiteboard_id: &'a str) -> Self {
+        Self { whiteboard_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ThemeWhiteboardQuery<'a> {
+    pub whiteboard_id: &'a str,
+}
+
+impl<'a> ThemeWhiteboardQuery<'a> {
+    pub fn new(whiteboard_id: &'a str) -> Self {
+        Self { whiteboard_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct UpdateThemeWhiteboardQuery<'a> {
+    pub whiteboard_id: &'a str,
+    pub body: &'a UpdateThemeWhiteboardReqBody,
+}
+
+impl<'a> UpdateThemeWhiteboardQuery<'a> {
+    pub fn new(whiteboard_id: &'a str, body: &'a UpdateThemeWhiteboardReqBody) -> Self {
+        Self {
+            whiteboard_id,
+            body,
+        }
+    }
+}
+
 // ── Resources ──
 
 pub struct WhiteboardResource<'a> {
@@ -112,11 +171,25 @@ impl<'a> WhiteboardResource<'a> {
         body: &CreateBoardReqBody,
         option: &RequestOption,
     ) -> Result<CreateBoardResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/board/v1/whiteboards");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BoardData>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateWhiteboardQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateWhiteboardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateBoardResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/board/v1/whiteboards",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<BoardData>()
+        .await?;
         Ok(CreateBoardResp {
             api_resp,
             code_error: raw.code_error,
@@ -129,11 +202,25 @@ impl<'a> WhiteboardResource<'a> {
         whiteboard_id: &str,
         option: &RequestOption,
     ) -> Result<GetBoardResp, LarkError> {
-        let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<BoardData>(self.config, &api_req, option).await?;
+        self.get_by_query(&GetWhiteboardQuery::new(whiteboard_id), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetWhiteboardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetBoardResp, LarkError> {
+        let path = format!("/open-apis/board/v1/whiteboards/{}", query.whiteboard_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<BoardData>()
+        .await?;
         Ok(GetBoardResp {
             api_resp,
             code_error: raw.code_error,
@@ -146,7 +233,19 @@ impl<'a> WhiteboardResource<'a> {
         whiteboard_id: &str,
         option: &RequestOption,
     ) -> Result<DownloadAsImageWhiteboardResp, LarkError> {
-        let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/download_as_image");
+        self.download_as_image_by_query(&DownloadAsImageWhiteboardQuery::new(whiteboard_id), option)
+            .await
+    }
+
+    pub async fn download_as_image_by_query(
+        &self,
+        query: &DownloadAsImageWhiteboardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DownloadAsImageWhiteboardResp, LarkError> {
+        let path = format!(
+            "/open-apis/board/v1/whiteboards/{}/download_as_image",
+            query.whiteboard_id
+        );
         let download = RestRequest::new(
             self.config,
             http::Method::GET,
@@ -168,11 +267,28 @@ impl<'a> WhiteboardResource<'a> {
         whiteboard_id: &str,
         option: &RequestOption,
     ) -> Result<ThemeWhiteboardResp, LarkError> {
-        let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/theme");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<ThemeData>(self.config, &api_req, option).await?;
+        self.theme_by_query(&ThemeWhiteboardQuery::new(whiteboard_id), option)
+            .await
+    }
+
+    pub async fn theme_by_query(
+        &self,
+        query: &ThemeWhiteboardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ThemeWhiteboardResp, LarkError> {
+        let path = format!(
+            "/open-apis/board/v1/whiteboards/{}/theme",
+            query.whiteboard_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<ThemeData>()
+        .await?;
         Ok(ThemeWhiteboardResp {
             api_resp,
             code_error: raw.code_error,
@@ -186,12 +302,32 @@ impl<'a> WhiteboardResource<'a> {
         body: &UpdateThemeWhiteboardReqBody,
         option: &RequestOption,
     ) -> Result<UpdateThemeWhiteboardResp, LarkError> {
-        let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/update_theme");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        self.update_theme_by_query(
+            &UpdateThemeWhiteboardQuery::new(whiteboard_id, body),
+            option,
+        )
+        .await
+    }
+
+    pub async fn update_theme_by_query(
+        &self,
+        query: &UpdateThemeWhiteboardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateThemeWhiteboardResp, LarkError> {
+        let path = format!(
+            "/open-apis/board/v1/whiteboards/{}/update_theme",
+            query.whiteboard_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(UpdateThemeWhiteboardResp {
             api_resp,
             code_error: raw.code_error,
