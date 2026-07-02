@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::req::RequestOption;
 use crate::service::common::{EmptyResp, PageQuery, RestRequest};
-use crate::transport;
 
 // ── Domain types ──
 
@@ -533,6 +532,51 @@ impl<'a> DeleteDataSourceSchemaQuery<'a> {
             data_source_id,
             schema_id,
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateSchemaQuery<'a> {
+    pub body: &'a CreateSchemaReqBody,
+}
+
+impl<'a> CreateSchemaQuery<'a> {
+    pub fn new(body: &'a CreateSchemaReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteSchemaQuery<'a> {
+    pub schema_id: &'a str,
+}
+
+impl<'a> DeleteSchemaQuery<'a> {
+    pub fn new(schema_id: &'a str) -> Self {
+        Self { schema_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetSchemaQuery<'a> {
+    pub schema_id: &'a str,
+}
+
+impl<'a> GetSchemaQuery<'a> {
+    pub fn new(schema_id: &'a str) -> Self {
+        Self { schema_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct PatchSchemaQuery<'a> {
+    pub schema_id: &'a str,
+    pub body: &'a PatchSchemaReqBody,
+}
+
+impl<'a> PatchSchemaQuery<'a> {
+    pub fn new(schema_id: &'a str, body: &'a PatchSchemaReqBody) -> Self {
+        Self { schema_id, body }
     }
 }
 
@@ -1084,11 +1128,25 @@ impl<'a> SchemaResource<'a> {
         body: &CreateSchemaReqBody,
         option: &RequestOption,
     ) -> Result<CreateSchemaResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/search/v2/schemas");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SchemaData>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateSchemaQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateSchemaResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/search/v2/schemas",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<SchemaData>()
+        .await?;
         Ok(CreateSchemaResp {
             api_resp,
             code_error: raw.code_error,
@@ -1101,11 +1159,25 @@ impl<'a> SchemaResource<'a> {
         schema_id: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/search/v2/schemas/{schema_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        self.delete_by_query(&DeleteSchemaQuery::new(schema_id), option)
+            .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/search/v2/schemas/{}", query.schema_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1117,11 +1189,25 @@ impl<'a> SchemaResource<'a> {
         schema_id: &str,
         option: &RequestOption,
     ) -> Result<GetSchemaResp, LarkError> {
-        let path = format!("/open-apis/search/v2/schemas/{schema_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<SchemaData>(self.config, &api_req, option).await?;
+        self.get_by_query(&GetSchemaQuery::new(schema_id), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetSchemaResp, LarkError> {
+        let path = format!("/open-apis/search/v2/schemas/{}", query.schema_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<SchemaData>()
+        .await?;
         Ok(GetSchemaResp {
             api_resp,
             code_error: raw.code_error,
@@ -1135,12 +1221,26 @@ impl<'a> SchemaResource<'a> {
         body: &PatchSchemaReqBody,
         option: &RequestOption,
     ) -> Result<PatchSchemaResp, LarkError> {
-        let path = format!("/open-apis/search/v2/schemas/{schema_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SchemaData>(self.config, &api_req, option).await?;
+        self.patch_by_query(&PatchSchemaQuery::new(schema_id, body), option)
+            .await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchSchemaResp, LarkError> {
+        let path = format!("/open-apis/search/v2/schemas/{}", query.schema_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<SchemaData>()
+        .await?;
         Ok(PatchSchemaResp {
             api_resp,
             code_error: raw.code_error,
