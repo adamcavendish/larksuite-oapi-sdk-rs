@@ -719,20 +719,15 @@ impl<'a> MailgroupResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -870,20 +865,15 @@ impl<'a> MailgroupMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/members/{member_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -982,7 +972,7 @@ impl<'a> MailgroupMemberResource<'a> {
             "/open-apis/mail/v1/mailgroups/{}/members/batch_delete",
             query.mailgroup_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -990,12 +980,8 @@ impl<'a> MailgroupMemberResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/members/:member_id
@@ -1099,20 +1085,15 @@ impl<'a> PublicMailboxResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -1184,20 +1165,15 @@ impl<'a> PublicMailboxResource<'a> {
         let path = format!(
             "/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/remove_to_recycle_bin"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     /// PUT /open-apis/mail/v1/public_mailboxes/:public_mailbox_id
@@ -1259,7 +1235,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
             "/open-apis/mail/v1/public_mailboxes/{}/members",
             query.public_mailbox_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1268,12 +1244,8 @@ impl<'a> PublicMailboxMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn delete(
@@ -1284,20 +1256,15 @@ impl<'a> PublicMailboxMemberResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/{member_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -1396,7 +1363,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
             "/open-apis/mail/v1/public_mailboxes/{}/members/batch_delete",
             query.public_mailbox_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -1404,12 +1371,8 @@ impl<'a> PublicMailboxMemberResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     /// POST /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/members/clear
@@ -1419,20 +1382,15 @@ impl<'a> PublicMailboxMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/members/clear");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     /// GET /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/members/:member_id
@@ -2265,20 +2223,15 @@ impl MailgroupAliasResource<'_> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/aliases/{alias_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/aliases
@@ -2347,7 +2300,7 @@ impl MailgroupManagerResource<'_> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers/batch_delete");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2355,13 +2308,8 @@ impl MailgroupManagerResource<'_> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/managers
@@ -2432,20 +2380,15 @@ impl MailgroupPermissionMemberResource<'_> {
         let path = format!(
             "/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/{permission_member_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/permission_members/:permission_member_id
@@ -2532,7 +2475,7 @@ impl MailgroupPermissionMemberResource<'_> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/batch_delete");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -2540,13 +2483,8 @@ impl MailgroupPermissionMemberResource<'_> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -2592,20 +2530,15 @@ impl PublicMailboxAliasResource<'_> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/mail/v1/public_mailboxes/{public_mailbox_id}/aliases/{alias_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     /// GET /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/aliases

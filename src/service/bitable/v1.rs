@@ -926,20 +926,15 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn batch_delete(
@@ -950,7 +945,7 @@ impl<'a> AppTableResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/batch_delete");
         let body = serde_json::json!({ "table_ids": table_ids });
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -958,12 +953,8 @@ impl<'a> AppTableResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn patch(
@@ -974,7 +965,7 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -982,13 +973,8 @@ impl<'a> AppTableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -1146,20 +1132,15 @@ impl<'a> AppTableViewResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views/{view_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -1318,20 +1299,15 @@ impl<'a> AppTableFieldResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields/{field_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1591,20 +1567,15 @@ impl<'a> AppTableRecordResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]

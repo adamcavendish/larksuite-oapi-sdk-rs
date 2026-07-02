@@ -696,19 +696,15 @@ impl<'a> DataSourceResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{}", query.data_source_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -828,19 +824,15 @@ impl<'a> DataRecordResource<'a> {
             "/open-apis/search/v2/data_sources/{}/items/{}",
             query.data_source_id, query.item_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -1047,19 +1039,15 @@ impl<'a> DataSourceSchemaResource<'a> {
             "/open-apis/search/v2/data_sources/{}/schemas/{}",
             query.data_source_id, query.schema_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -1109,19 +1097,15 @@ impl<'a> SchemaResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/search/v2/schemas/{}", query.schema_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn get(

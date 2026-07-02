@@ -517,7 +517,7 @@ impl<'a> RoomResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/rooms/{}", query.room_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -526,12 +526,8 @@ impl<'a> RoomResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn delete(
@@ -540,20 +536,15 @@ impl<'a> RoomResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/rooms/{room_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -800,7 +791,7 @@ impl<'a> RoomConfigResource<'a> {
         query: &SetRoomConfigQuery<'_>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/room_configs/set",
@@ -809,12 +800,8 @@ impl<'a> RoomConfigResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn set_checkboard_access_code(
@@ -995,7 +982,7 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/invite");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1004,13 +991,8 @@ impl<'a> MeetingResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn kickout(
@@ -1021,7 +1003,7 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/kickout");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1030,13 +1012,8 @@ impl<'a> MeetingResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn set_host(
@@ -1047,7 +1024,7 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/set_host");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1056,13 +1033,8 @@ impl<'a> MeetingResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn end(
@@ -1071,20 +1043,15 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/end");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1240,7 +1207,7 @@ impl<'a> ReportResource<'a> {
         query: &GetTopUserReportQuery<'_>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/reports/get_top_user",
@@ -1253,12 +1220,8 @@ impl<'a> ReportResource<'a> {
         .query("order_by", query.order_by)
         .query("meeting_type", query.meeting_type)
         .query("user_id_type", query.user_id_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 

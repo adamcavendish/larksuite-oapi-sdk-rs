@@ -230,7 +230,7 @@ impl<'a> PasswordResource<'a> {
         query: &ResetPasswordQuery<'_>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/admin/v1/password/reset",
@@ -238,12 +238,8 @@ impl<'a> PasswordResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -681,19 +677,15 @@ impl<'a> BadgeGrantResource<'a> {
             "/open-apis/admin/v1/badges/{}/grants/{}",
             query.badge_id, query.grant_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]

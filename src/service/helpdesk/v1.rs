@@ -803,7 +803,7 @@ impl<'a> TicketResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/tickets/{ticket_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -811,13 +811,8 @@ impl<'a> TicketResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -881,7 +876,7 @@ impl<'a> TicketResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/tickets/{ticket_id}/answer_user_query");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -889,13 +884,8 @@ impl<'a> TicketResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn start_service(
@@ -1017,7 +1007,7 @@ impl<'a> TicketMessageResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/tickets/{ticket_id}/messages");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1025,13 +1015,8 @@ impl<'a> TicketMessageResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -1409,7 +1394,7 @@ impl<'a> CategoryResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/categories/{id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1417,31 +1402,21 @@ impl<'a> CategoryResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn delete(&self, id: &str, option: &RequestOption) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/categories/{id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -1602,7 +1577,7 @@ impl<'a> FaqResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/faqs/{id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1610,31 +1585,21 @@ impl<'a> FaqResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn delete(&self, id: &str, option: &RequestOption) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/faqs/{id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -1776,7 +1741,7 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/submit_approve");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1784,13 +1749,8 @@ impl<'a> NotificationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn execute(
@@ -1800,7 +1760,7 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/execute");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1808,13 +1768,8 @@ impl<'a> NotificationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn cancel(
@@ -1823,20 +1778,15 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn cancel_approve(
@@ -1845,20 +1795,15 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel_approve");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn cancel_send(
@@ -1868,7 +1813,7 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel_send");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1876,13 +1821,8 @@ impl<'a> NotificationResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn execute_send(
@@ -1892,7 +1832,7 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/execute_send");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1900,13 +1840,8 @@ impl<'a> NotificationResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn preview(
@@ -1915,20 +1850,15 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/preview");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn patch(
@@ -1939,7 +1869,7 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1948,13 +1878,8 @@ impl<'a> NotificationResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn submit_approve_v2(
@@ -2007,20 +1932,15 @@ impl<'a> AgentSkillResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn get(
@@ -2059,7 +1979,7 @@ impl<'a> AgentSkillResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2067,13 +1987,8 @@ impl<'a> AgentSkillResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -2136,7 +2051,7 @@ impl<'a> EventResource<'a> {
         body: &SubscribeEventReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/events/subscribe",
@@ -2144,13 +2059,8 @@ impl<'a> EventResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn unsubscribe(
@@ -2158,7 +2068,7 @@ impl<'a> EventResource<'a> {
         body: &UnsubscribeEventReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/events/unsubscribe",
@@ -2166,13 +2076,8 @@ impl<'a> EventResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -2188,7 +2093,7 @@ impl<'a> TicketCustomizedFieldResource<'a> {
         body: &TicketCustomizedField,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/ticket_customized_fields",
@@ -2196,13 +2101,8 @@ impl<'a> TicketCustomizedFieldResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn delete(
@@ -2212,20 +2112,15 @@ impl<'a> TicketCustomizedFieldResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn get(
@@ -2281,7 +2176,7 @@ impl<'a> TicketCustomizedFieldResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2289,12 +2184,8 @@ impl<'a> TicketCustomizedFieldResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
