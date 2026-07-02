@@ -197,7 +197,7 @@ impl<'a> UserDeviceResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/mdm/v1/user_devices/{}", query.device_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -205,12 +205,8 @@ impl<'a> UserDeviceResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -234,7 +230,7 @@ impl<'a> UserAuthDataRelationResource<'a> {
         query: &BindUserAuthDataRelationQuery<'_>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/mdm/v1/user_auth_data_relations/bind",
@@ -243,12 +239,8 @@ impl<'a> UserAuthDataRelationResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn unbind(
@@ -266,7 +258,7 @@ impl<'a> UserAuthDataRelationResource<'a> {
         query: &UnbindUserAuthDataRelationQuery<'_>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/mdm/v1/user_auth_data_relations/unbind",
@@ -275,12 +267,8 @@ impl<'a> UserAuthDataRelationResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 

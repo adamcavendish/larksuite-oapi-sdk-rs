@@ -357,19 +357,15 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn move_node(
@@ -400,7 +396,7 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}/update_title");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -408,12 +404,8 @@ impl<'a> NodeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn copy(
@@ -492,7 +484,7 @@ impl<'a> SpaceMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -501,12 +493,8 @@ impl<'a> SpaceMemberResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn delete(
@@ -517,7 +505,7 @@ impl<'a> SpaceMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members/{member_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -525,12 +513,8 @@ impl<'a> SpaceMemberResource<'a> {
             option,
         )
         .query("member_type", member_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -569,7 +553,7 @@ impl<'a> SpaceSettingResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/setting");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -577,12 +561,8 @@ impl<'a> SpaceSettingResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 

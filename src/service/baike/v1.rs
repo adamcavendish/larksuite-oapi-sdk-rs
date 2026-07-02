@@ -527,7 +527,7 @@ impl<'a> EntityResource<'a> {
         query: &HighlightEntityQuery<'_>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/baike/v1/entities/highlight",
@@ -535,12 +535,8 @@ impl<'a> EntityResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn extract(

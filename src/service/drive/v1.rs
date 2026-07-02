@@ -1385,7 +1385,7 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/subscribe");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1394,12 +1394,8 @@ impl<'a> FileResource<'a> {
         )
         .query("file_type", file_type)
         .query("event_type", event_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn delete_subscribe(
@@ -1410,7 +1406,7 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/delete_subscribe");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -1419,12 +1415,8 @@ impl<'a> FileResource<'a> {
         )
         .query("file_type", file_type)
         .query("event_type", event_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn get_subscribe(
@@ -1602,7 +1594,7 @@ impl<'a> FileResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let fields = multipart_form::upload_part_fields(upload_id, seq, size, checksum, data);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/files/upload_part",
@@ -1610,12 +1602,8 @@ impl<'a> FileResource<'a> {
             option,
         )
         .form_body(fields)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -1898,7 +1886,7 @@ impl<'a> FileCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/comments/{comment_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1907,12 +1895,8 @@ impl<'a> FileCommentResource<'a> {
         )
         .query("file_type", file_type)
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -1974,7 +1958,7 @@ impl<'a> FileCommentReplyResource<'a> {
         let path = format!(
             "/open-apis/drive/v1/files/{file_token}/comments/{comment_id}/replies/{reply_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -1982,12 +1966,8 @@ impl<'a> FileCommentReplyResource<'a> {
             option,
         )
         .query("file_type", file_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -2063,7 +2043,7 @@ impl<'a> FileCommentReplyResource<'a> {
         let path = format!(
             "/open-apis/drive/v1/files/{file_token}/comments/{comment_id}/replies/{reply_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2073,12 +2053,8 @@ impl<'a> FileCommentReplyResource<'a> {
         .query("file_type", file_type)
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -2256,7 +2232,7 @@ impl<'a> FileVersionResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/files/{file_token}/versions/{version_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -2265,12 +2241,8 @@ impl<'a> FileVersionResource<'a> {
         )
         .query("obj_type", obj_type)
         .query("user_id_type", user_id_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn get(
@@ -2618,7 +2590,7 @@ impl<'a> MediaResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let fields = multipart_form::upload_part_fields(upload_id, seq, size, checksum, data);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/drive/v1/medias/upload_part",
@@ -2626,12 +2598,8 @@ impl<'a> MediaResource<'a> {
             option,
         )
         .form_body(fields)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
@@ -2772,7 +2740,7 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/{member_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -2782,12 +2750,8 @@ impl<'a> PermissionMemberResource<'a> {
         .query("type", token_type)
         .query("member_type", member_type)
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(
@@ -2837,7 +2801,7 @@ impl<'a> PermissionMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/members/transfer_owner");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2850,12 +2814,8 @@ impl<'a> PermissionMemberResource<'a> {
         .query("stay_put", stay_put)
         .query("old_owner_perm", old_owner_perm)
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn update(
@@ -2982,7 +2942,7 @@ impl<'a> PermissionPublicPasswordResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/drive/v1/permissions/{token}/public/password");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -2990,12 +2950,8 @@ impl<'a> PermissionPublicPasswordResource<'a> {
             option,
         )
         .query("type", token_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn update(

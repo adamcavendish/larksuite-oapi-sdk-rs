@@ -1102,7 +1102,7 @@ impl<'a> DocumentBlockResource<'a> {
             "/open-apis/docx/v1/documents/{}/blocks/{}/children/batch_delete",
             query.document_id, query.block_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -1111,12 +1111,8 @@ impl<'a> DocumentBlockResource<'a> {
         )
         .query("document_revision_id", query.document_revision_id)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn list(

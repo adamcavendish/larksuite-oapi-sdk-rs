@@ -339,7 +339,7 @@ impl<'a> AppResource<'a> {
             "/open-apis/application/v6/applications/{}/management/check_admin",
             query.app_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -348,12 +348,8 @@ impl<'a> AppResource<'a> {
         )
         .query("user_id", query.user_id)
         .query("user_id_type", query.user_id_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 
     pub async fn check_user_in_blacklist(
