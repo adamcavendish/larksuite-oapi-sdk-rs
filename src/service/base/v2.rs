@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AppRoleData {
@@ -26,6 +25,55 @@ pub struct AppRoleListData {
 impl_resp_v2!(CreateAppRoleV2Resp, AppRoleData);
 impl_resp_v2!(ListAppRoleV2Resp, AppRoleListData);
 impl_resp_v2!(UpdateAppRoleV2Resp, AppRoleData);
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateAppRoleV2Query<'a> {
+    pub app_token: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateAppRoleV2Query<'a> {
+    pub fn new(app_token: &'a str, body: &'a serde_json::Value) -> Self {
+        Self { app_token, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListAppRoleV2Query<'a> {
+    pub app_token: &'a str,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListAppRoleV2Query<'a> {
+    pub fn new(app_token: &'a str) -> Self {
+        Self {
+            app_token,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct UpdateAppRoleV2Query<'a> {
+    pub app_token: &'a str,
+    pub role_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateAppRoleV2Query<'a> {
+    pub fn new(app_token: &'a str, role_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            app_token,
+            role_id,
+            body,
+        }
+    }
+}
 
 pub struct V2<'a> {
     pub app_role: AppRoleV2Resource<'a>,
@@ -50,13 +98,26 @@ impl AppRoleV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateAppRoleV2Resp, LarkError> {
-        let path = format!("/open-apis/base/v2/apps/{app_token}/roles");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<AppRoleData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.create_by_query(&CreateAppRoleV2Query::new(app_token, &body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateAppRoleV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateAppRoleV2Resp, LarkError> {
+        let path = format!("/open-apis/base/v2/apps/{}/roles", query.app_token);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<AppRoleData>()
+        .await?;
         Ok(CreateAppRoleV2Resp {
             api_resp,
             code_error,
@@ -71,18 +132,27 @@ impl AppRoleV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAppRoleV2Resp, LarkError> {
-        let path = format!("/open-apis/base/v2/apps/{app_token}/roles");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AppRoleListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query =
+            ListAppRoleV2Query::new(app_token).page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAppRoleV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAppRoleV2Resp, LarkError> {
+        let path = format!("/open-apis/base/v2/apps/{}/roles", query.app_token);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .send_v2::<AppRoleListData>()
+        .await?;
         Ok(ListAppRoleV2Resp {
             api_resp,
             code_error,
@@ -97,13 +167,32 @@ impl AppRoleV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateAppRoleV2Resp, LarkError> {
-        let path = format!("/open-apis/base/v2/apps/{app_token}/roles/{role_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<AppRoleData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.update_by_query(
+            &UpdateAppRoleV2Query::new(app_token, role_id, &body),
+            option,
+        )
+        .await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateAppRoleV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateAppRoleV2Resp, LarkError> {
+        let path = format!(
+            "/open-apis/base/v2/apps/{}/roles/{}",
+            query.app_token, query.role_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<AppRoleData>()
+        .await?;
         Ok(UpdateAppRoleV2Resp {
             api_resp,
             code_error,
