@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Request body types ──
 
@@ -28,6 +28,28 @@ pub struct IdentityData {
 
 impl_resp!(CreateIdentityResp, IdentityData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateIdentityQuery<'a> {
+    pub user_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub body: &'a CreateIdentityReqBody,
+}
+
+impl<'a> CreateIdentityQuery<'a> {
+    pub fn new(user_id: &'a str, body: &'a CreateIdentityReqBody) -> Self {
+        Self {
+            user_id,
+            user_id_type: None,
+            body,
+        }
+    }
+
+    pub fn user_id_type(mut self, user_id_type: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = user_id_type.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct IdentityResource<'a> {
@@ -42,18 +64,30 @@ impl<'a> IdentityResource<'a> {
         body: &CreateIdentityReqBody,
         option: &RequestOption,
     ) -> Result<CreateIdentityResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.create_by_query(
+            &CreateIdentityQuery::new(user_id, body).user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateIdentityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateIdentityResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/human_authentication/v1/identities",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("user_id", user_id);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<IdentityData>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id", query.user_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<IdentityData>()
+        .await?;
         Ok(CreateIdentityResp {
             api_resp,
             code_error: raw.code_error,
