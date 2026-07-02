@@ -388,6 +388,47 @@ impl EventDispatcher {
         self
     }
 
+    fn on_typed_callback<Req, Resp, F, Fut>(
+        mut self,
+        callback_type: impl Into<String>,
+        response_name: &'static str,
+        handler: F,
+    ) -> Self
+    where
+        Req: for<'de> Deserialize<'de> + Send + 'static,
+        Resp: Serialize + Send + 'static,
+        F: Fn(Req) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<Resp, LarkError>> + Send + 'static,
+    {
+        let callback_type = callback_type.into();
+        let handler =
+            Arc::new(
+                move |val: serde_json::Value| -> Pin<
+                    Box<dyn Future<Output = Result<serde_json::Value, LarkError>> + Send>,
+                > {
+                    let req = match serde_json::from_value::<Req>(val) {
+                        Ok(req) => req,
+                        Err(e) => {
+                            return Box::pin(async move {
+                                Err(LarkError::Event(format!(
+                                    "failed to deserialize callback payload: {e}"
+                                )))
+                            });
+                        }
+                    };
+                    let fut = handler(req);
+                    Box::pin(async move {
+                        let resp = fut.await?;
+                        serde_json::to_value(resp).map_err(|e| {
+                            LarkError::Event(format!("serialize {response_name} response: {e}"))
+                        })
+                    })
+                },
+            );
+        self.callback_handlers.insert(callback_type, handler);
+        self
+    }
+
     #[cfg(feature = "channel")]
     pub(crate) fn has_callback_handler(&self, callback_type: &str) -> bool {
         self.callback_handlers.contains_key(callback_type)
@@ -418,15 +459,7 @@ impl EventDispatcher {
         F: Fn(CardActionTriggerRequest) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<CardActionTriggerResponse, LarkError>> + Send + 'static,
     {
-        self.on_callback("card.action.trigger", move |val: serde_json::Value| {
-            let req: CardActionTriggerRequest = serde_json::from_value(val).unwrap_or_default();
-            let fut = handler(req);
-            async move {
-                let resp = fut.await?;
-                serde_json::to_value(resp)
-                    .map_err(|e| LarkError::Event(format!("serialize trigger response: {e}")))
-            }
-        })
+        self.on_typed_callback("card.action.trigger", "trigger", handler)
     }
 
     /// Register a typed handler for `url.preview.get` callbacks.
@@ -435,15 +468,7 @@ impl EventDispatcher {
         F: Fn(URLPreviewGetRequest) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<URLPreviewGetResponse, LarkError>> + Send + 'static,
     {
-        self.on_callback("url.preview.get", move |val: serde_json::Value| {
-            let req: URLPreviewGetRequest = serde_json::from_value(val).unwrap_or_default();
-            let fut = handler(req);
-            async move {
-                let resp = fut.await?;
-                serde_json::to_value(resp)
-                    .map_err(|e| LarkError::Event(format!("serialize preview response: {e}")))
-            }
-        })
+        self.on_typed_callback("url.preview.get", "preview", handler)
     }
 
     /// Extract the raw event payload from an [`EventReq`].

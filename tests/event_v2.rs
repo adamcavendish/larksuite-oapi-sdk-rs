@@ -1233,6 +1233,54 @@ async fn on_card_action_trigger_dispatches_typed() {
     assert_eq!(parsed["toast"]["content"], "Done!");
 }
 
+#[tokio::test]
+async fn on_card_action_trigger_rejects_malformed_payload() {
+    use larksuite_oapi_sdk_rs::event::CardActionTriggerResponse;
+
+    let called = Arc::new(Mutex::new(false));
+    let called_clone = Arc::clone(&called);
+    let dispatcher = EventDispatcher::new("", "")
+        .skip_sign_verify()
+        .on_card_action_trigger(move |_req| {
+            let called = Arc::clone(&called_clone);
+            async move {
+                *called.lock().unwrap() = true;
+                Ok(CardActionTriggerResponse::default())
+            }
+        });
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_trigger_bad",
+            "event_type": "card.action.trigger",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {
+            "action": 1,
+            "token": "tok"
+        }
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: String::new(),
+    };
+    let resp = dispatcher.handle(req).await;
+
+    assert_eq!(resp.status_code, 500);
+    assert!(!*called.lock().unwrap());
+    let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
+    assert!(
+        parsed["msg"]
+            .as_str()
+            .unwrap()
+            .contains("failed to deserialize callback payload")
+    );
+}
+
 // ── EventDispatcher: on_url_preview_get ──
 
 #[tokio::test]
@@ -1283,6 +1331,54 @@ async fn on_url_preview_get_dispatches_typed() {
     let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
     assert_eq!(parsed["inline"]["title"], "Example");
     assert_eq!(parsed["inline"]["image_key"], "img_key");
+}
+
+#[tokio::test]
+async fn on_url_preview_get_rejects_malformed_payload() {
+    use larksuite_oapi_sdk_rs::event::URLPreviewGetResponse;
+
+    let called = Arc::new(Mutex::new(false));
+    let called_clone = Arc::clone(&called);
+    let dispatcher = EventDispatcher::new("", "")
+        .skip_sign_verify()
+        .on_url_preview_get(move |_req| {
+            let called = Arc::clone(&called_clone);
+            async move {
+                *called.lock().unwrap() = true;
+                Ok(URLPreviewGetResponse::default())
+            }
+        });
+
+    let body = serde_json::json!({
+        "schema": "2.0",
+        "header": {
+            "event_id": "ev_preview_bad",
+            "event_type": "url.preview.get",
+            "app_id": "cli_test",
+            "tenant_key": "t1",
+            "create_time": "0"
+        },
+        "event": {
+            "host": "lark",
+            "context": 1
+        }
+    });
+    let req = EventReq {
+        headers: Default::default(),
+        body: serde_json::to_vec(&body).unwrap(),
+        request_uri: String::new(),
+    };
+    let resp = dispatcher.handle(req).await;
+
+    assert_eq!(resp.status_code, 500);
+    assert!(!*called.lock().unwrap());
+    let parsed: serde_json::Value = serde_json::from_slice(&resp.body).unwrap();
+    assert!(
+        parsed["msg"]
+            .as_str()
+            .unwrap()
+            .contains("failed to deserialize callback payload")
+    );
 }
 
 // ── Toast builder with ToastI18n ──
