@@ -38,8 +38,8 @@ use larksuite_oapi_sdk_rs::service::{
         ListAppRecommendRuleQuery, ListApplicationAppVersionQuery, ListApplicationFeedbackQuery,
         ListApplicationQuery as ListApplicationV6Query,
         ListScopeQuery as ListApplicationV6ScopeQuery, MessagePushOverviewApplicationAppUsageQuery,
-        OverviewApplicationAppUsageQuery, PatchApplicationQuery, SetAppBadgeQuery,
-        UnderauditlistApplicationQuery,
+        OverviewApplicationAppUsageQuery, PatchApplicationAppVersionQuery, PatchApplicationQuery,
+        SetAppBadgeQuery, UnderauditlistApplicationQuery,
     },
     approval::v4::{
         CcSearch, GetApprovalQuery, GetExternalApprovalQuery, GetInstanceQuery, InstanceSearch,
@@ -12740,6 +12740,37 @@ async fn application_v6_app_version_list_by_query_smoke() {
     assert!(request.contains("page_token=next-page"));
     assert!(request.contains("order=1"));
     assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_app_version_patch_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"app_version":{"version_id":"ver-1"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let patch_body = serde_json::json!({"status":2});
+    let resp = client
+        .application_v6()
+        .application_app_version
+        .patch_by_query(
+            &PatchApplicationAppVersionQuery::new("cli_a", "ver-1", &patch_body)
+                .user_id_type("open_id")
+                .operator_id("ou-1")
+                .reject_reason("missing scope"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(
+        request.contains("PATCH /open-apis/application/v6/applications/cli_a/app_versions/ver-1?")
+    );
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("operator_id=ou-1"));
+    assert!(request.contains("reject_reason=missing+scope"));
+    assert!(request.contains(r#""status":2"#));
 }
 
 #[tokio::test]

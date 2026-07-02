@@ -867,6 +867,45 @@ impl<'a> ListApplicationAppVersionQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchApplicationAppVersionQuery<'a> {
+    pub app_id: &'a str,
+    pub version_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+    pub operator_id: Option<&'a str>,
+    pub reject_reason: Option<&'a str>,
+}
+
+impl<'a> PatchApplicationAppVersionQuery<'a> {
+    pub fn new(app_id: &'a str, version_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            app_id,
+            version_id,
+            body,
+            user_id_type: None,
+            operator_id: None,
+            reject_reason: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn operator_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.operator_id = value.into();
+        self
+    }
+
+    pub fn reject_reason(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.reject_reason = value.into();
+        self
+    }
+}
+
 impl<'a> ApplicationAppVersionResource<'a> {
     /// ContactsRangeSuggest — GET /open-apis/application/v6/applications/:app_id/app_versions/:version_id/contacts_range_suggest
     pub async fn contacts_range_suggest(
@@ -1015,23 +1054,35 @@ impl<'a> ApplicationAppVersionResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<PatchApplicationAppVersionResp, LarkError> {
-        let path =
-            format!("/open-apis/application/v6/applications/{app_id}/app_versions/{version_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = operator_id {
-            api_req.query_params.set("operator_id", v);
-        }
-        if let Some(v) = reject_reason {
-            api_req.query_params.set("reject_reason", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = PatchApplicationAppVersionQuery::new(app_id, version_id, body)
+            .user_id_type(user_id_type)
+            .operator_id(operator_id)
+            .reject_reason(reject_reason);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchApplicationAppVersionQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchApplicationAppVersionResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/app_versions/{}",
+            query.app_id, query.version_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("operator_id", query.operator_id)
+        .query("reject_reason", query.reject_reason)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchApplicationAppVersionResp {
             api_resp,
             code_error,
