@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -204,17 +203,43 @@ pub struct PasswordResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ResetPasswordQuery<'a> {
+    pub body: &'a ResetPasswordReqBody,
+}
+
+impl<'a> ResetPasswordQuery<'a> {
+    pub fn new(body: &'a ResetPasswordReqBody) -> Self {
+        Self { body }
+    }
+}
+
 impl<'a> PasswordResource<'a> {
     pub async fn reset(
         &self,
         body: &ResetPasswordReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/admin/v1/password/reset");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = ResetPasswordQuery::new(body);
+        self.reset_by_query(&query, option).await
+    }
+
+    pub async fn reset_by_query(
+        &self,
+        query: &ResetPasswordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/admin/v1/password/reset",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -224,6 +249,18 @@ impl<'a> PasswordResource<'a> {
 
 pub struct BadgeResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateBadgeQuery<'a> {
+    pub body: &'a CreateBadgeReqBody,
+}
+
+impl<'a> CreateBadgeQuery<'a> {
+    pub fn new(body: &'a CreateBadgeReqBody) -> Self {
+        Self { body }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -266,17 +303,44 @@ impl<'a> ListBadgeQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateBadgeQuery<'a> {
+    pub badge_id: &'a str,
+    pub body: &'a CreateBadgeReqBody,
+}
+
+impl<'a> UpdateBadgeQuery<'a> {
+    pub fn new(badge_id: &'a str, body: &'a CreateBadgeReqBody) -> Self {
+        Self { badge_id, body }
+    }
+}
+
 impl<'a> BadgeResource<'a> {
     pub async fn create(
         &self,
         body: &CreateBadgeReqBody,
         option: &RequestOption,
     ) -> Result<CreateBadgeResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/admin/v1/badges");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BadgeData>(self.config, &api_req, option).await?;
+        let query = CreateBadgeQuery::new(body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateBadgeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateBadgeResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/admin/v1/badges",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<BadgeData>()
+        .await?;
         Ok(CreateBadgeResp {
             api_resp,
             code_error: raw.code_error,
@@ -358,13 +422,26 @@ impl<'a> BadgeResource<'a> {
         body: &CreateBadgeReqBody,
         option: &RequestOption,
     ) -> Result<UpdateBadgeResp, LarkError> {
-        let path = format!("/open-apis/admin/v1/badges/{badge_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BadgeData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UpdateBadgeQuery::new(badge_id, body);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateBadgeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateBadgeResp, LarkError> {
+        let path = format!("/open-apis/admin/v1/badges/{}", query.badge_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<BadgeData>()
+        .await?;
         Ok(UpdateBadgeResp {
             api_resp,
             code_error,
@@ -375,6 +452,36 @@ impl<'a> BadgeResource<'a> {
 
 pub struct BadgeGrantResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateBadgeGrantQuery<'a> {
+    pub badge_id: &'a str,
+    pub body: &'a CreateBadgeGrantReqBody,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateBadgeGrantQuery<'a> {
+    pub fn new(badge_id: &'a str, body: &'a CreateBadgeGrantReqBody) -> Self {
+        Self {
+            badge_id,
+            body,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -404,6 +511,19 @@ impl<'a> GetBadgeGrantQuery<'a> {
     pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.department_id_type = value.into();
         self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeleteBadgeGrantQuery<'a> {
+    pub badge_id: &'a str,
+    pub grant_id: &'a str,
+}
+
+impl<'a> DeleteBadgeGrantQuery<'a> {
+    pub fn new(badge_id: &'a str, grant_id: &'a str) -> Self {
+        Self { badge_id, grant_id }
     }
 }
 
@@ -454,6 +574,38 @@ impl<'a> ListBadgeGrantQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateBadgeGrantQuery<'a> {
+    pub badge_id: &'a str,
+    pub grant_id: &'a str,
+    pub body: &'a CreateBadgeGrantReqBody,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> UpdateBadgeGrantQuery<'a> {
+    pub fn new(badge_id: &'a str, grant_id: &'a str, body: &'a CreateBadgeGrantReqBody) -> Self {
+        Self {
+            badge_id,
+            grant_id,
+            body,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> BadgeGrantResource<'a> {
     pub async fn create(
         &self,
@@ -463,18 +615,30 @@ impl<'a> BadgeGrantResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateBadgeGrantResp, LarkError> {
-        let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BadgeGrantData>(self.config, &api_req, option).await?;
+        let query = CreateBadgeGrantQuery::new(badge_id, body)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateBadgeGrantQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateBadgeGrantResp, LarkError> {
+        let path = format!("/open-apis/admin/v1/badges/{}/grants", query.badge_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send::<BadgeGrantData>()
+        .await?;
         Ok(CreateBadgeGrantResp {
             api_resp,
             code_error: raw.code_error,
@@ -529,11 +693,28 @@ impl<'a> BadgeGrantResource<'a> {
         grant_id: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants/{grant_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = DeleteBadgeGrantQuery::new(badge_id, grant_id);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteBadgeGrantQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/admin/v1/badges/{}/grants/{}",
+            query.badge_id, query.grant_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -596,19 +777,33 @@ impl<'a> BadgeGrantResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateBadgeGrantResp, LarkError> {
-        let path = format!("/open-apis/admin/v1/badges/{badge_id}/grants/{grant_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BadgeGrantData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UpdateBadgeGrantQuery::new(badge_id, grant_id, body)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateBadgeGrantQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateBadgeGrantResp, LarkError> {
+        let path = format!(
+            "/open-apis/admin/v1/badges/{}/grants/{}",
+            query.badge_id, query.grant_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send_v2::<BadgeGrantData>()
+        .await?;
         Ok(UpdateBadgeGrantResp {
             api_resp,
             code_error,
@@ -1068,18 +1263,43 @@ pub struct BadgeImageResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateBadgeImageQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateBadgeImageQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
 impl<'a> BadgeImageResource<'a> {
     pub async fn create(
         &self,
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateBadgeImageResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/admin/v1/badge_images");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateBadgeImageQuery::new(&body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateBadgeImageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateBadgeImageResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/admin/v1/badge_images",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateBadgeImageResp {
             api_resp,
             code_error,
