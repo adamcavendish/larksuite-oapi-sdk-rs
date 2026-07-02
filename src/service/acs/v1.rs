@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -242,6 +241,29 @@ pub struct AcsUserResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchUserQuery<'a> {
+    pub user_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> PatchUserQuery<'a> {
+    pub fn new(user_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            user_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> AcsUserResource<'a> {
     pub async fn get(
         &self,
@@ -319,15 +341,27 @@ impl<'a> AcsUserResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/acs/v1/users/{user_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = PatchUserQuery::new(user_id, body).user_id_type(user_id_type);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchUserQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/acs/v1/users/{}", query.user_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -391,12 +425,36 @@ pub struct DeviceResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListDeviceQuery;
+
+impl ListDeviceQuery {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
 impl<'a> DeviceResource<'a> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListDeviceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/acs/v1/devices");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<DeviceListData>(self.config, &api_req, option).await?;
+        let query = ListDeviceQuery::new();
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        _query: &ListDeviceQuery,
+        option: &RequestOption,
+    ) -> Result<ListDeviceResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/acs/v1/devices",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<DeviceListData>()
+        .await?;
         Ok(ListDeviceResp {
             api_resp,
             code_error: raw.code_error,
@@ -411,6 +469,81 @@ pub struct RuleExternalResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateRuleExternalQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub rule_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateRuleExternalQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            rule_id: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn rule_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.rule_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeleteRuleExternalQuery<'a> {
+    pub rule_id: &'a str,
+}
+
+impl<'a> DeleteRuleExternalQuery<'a> {
+    pub fn new(rule_id: &'a str) -> Self {
+        Self { rule_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeviceBindRuleExternalQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> DeviceBindRuleExternalQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct GetRuleExternalQuery<'a> {
+    pub device_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetRuleExternalQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn device_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.device_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl RuleExternalResource<'_> {
     pub async fn create(
         &self,
@@ -419,18 +552,29 @@ impl RuleExternalResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateRuleExternalResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/acs/v1/rule_external");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = rule_id {
-            api_req.query_params.set("rule_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<RuleExternalData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateRuleExternalQuery::new(body)
+            .rule_id(rule_id)
+            .user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateRuleExternalQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateRuleExternalResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/acs/v1/rule_external",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("rule_id", query.rule_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<RuleExternalData>()
+        .await?;
         Ok(CreateRuleExternalResp {
             api_resp,
             code_error,
@@ -443,11 +587,25 @@ impl RuleExternalResource<'_> {
         rule_id: &str,
         option: &RequestOption,
     ) -> Result<DeleteRuleExternalResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::DELETE, "/open-apis/acs/v1/rule_external");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.query_params.set("rule_id", rule_id);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = DeleteRuleExternalQuery::new(rule_id);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteRuleExternalQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteRuleExternalResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            "/open-apis/acs/v1/rule_external",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("rule_id", query.rule_id)
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteRuleExternalResp {
             api_resp,
             code_error,
@@ -460,15 +618,25 @@ impl RuleExternalResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<DeviceBindRuleExternalResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = DeviceBindRuleExternalQuery::new(body);
+        self.device_bind_by_query(&query, option).await
+    }
+
+    pub async fn device_bind_by_query(
+        &self,
+        query: &DeviceBindRuleExternalQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DeviceBindRuleExternalResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/acs/v1/rule_external/device_bind",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(DeviceBindRuleExternalResp {
             api_resp,
             code_error,
@@ -482,17 +650,28 @@ impl RuleExternalResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetRuleExternalResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/acs/v1/rule_external");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = device_id {
-            api_req.query_params.set("device_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RuleExternalData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetRuleExternalQuery::new()
+            .device_id(device_id)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetRuleExternalQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetRuleExternalResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/acs/v1/rule_external",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("device_id", query.device_id)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<RuleExternalData>()
+        .await?;
         Ok(GetRuleExternalResp {
             api_resp,
             code_error,
@@ -507,19 +686,46 @@ pub struct AccessRecordAccessPhotoResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetAccessRecordAccessPhotoQuery<'a> {
+    pub access_record_id: &'a str,
+}
+
+impl<'a> GetAccessRecordAccessPhotoQuery<'a> {
+    pub fn new(access_record_id: &'a str) -> Self {
+        Self { access_record_id }
+    }
+}
+
 impl AccessRecordAccessPhotoResource<'_> {
     pub async fn get(
         &self,
         access_record_id: &str,
         option: &RequestOption,
     ) -> Result<GetAccessRecordAccessPhotoResp, LarkError> {
-        let path = format!("/open-apis/acs/v1/access_records/{access_record_id}/access_photo");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<AccessRecordAccessPhotoData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetAccessRecordAccessPhotoQuery::new(access_record_id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetAccessRecordAccessPhotoQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetAccessRecordAccessPhotoResp, LarkError> {
+        let path = format!(
+            "/open-apis/acs/v1/access_records/{}/access_photo",
+            query.access_record_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<AccessRecordAccessPhotoData>()
+        .await?;
         Ok(GetAccessRecordAccessPhotoResp {
             api_resp,
             code_error,
@@ -534,6 +740,57 @@ pub struct UserFaceResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetUserFaceQuery<'a> {
+    pub user_id: &'a str,
+    pub is_cropped: Option<bool>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetUserFaceQuery<'a> {
+    pub fn new(user_id: &'a str) -> Self {
+        Self {
+            user_id,
+            is_cropped: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn is_cropped(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.is_cropped = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateUserFaceQuery<'a> {
+    pub user_id: &'a str,
+    pub body: &'a UpdateUserFaceReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UpdateUserFaceQuery<'a> {
+    pub fn new(user_id: &'a str, body: &'a UpdateUserFaceReqBody) -> Self {
+        Self {
+            user_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl UserFaceResource<'_> {
     pub async fn get(
         &self,
@@ -542,18 +799,29 @@ impl UserFaceResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetUserFaceResp, LarkError> {
-        let path = format!("/open-apis/acs/v1/users/{user_id}/face");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = is_cropped {
-            api_req.query_params.set("is_cropped", v.to_string());
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<UserFaceData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetUserFaceQuery::new(user_id)
+            .is_cropped(is_cropped)
+            .user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetUserFaceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetUserFaceResp, LarkError> {
+        let path = format!("/open-apis/acs/v1/users/{}/face", query.user_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("is_cropped", query.is_cropped)
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<UserFaceData>()
+        .await?;
         Ok(GetUserFaceResp {
             api_resp,
             code_error,
@@ -568,16 +836,27 @@ impl UserFaceResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateUserFaceResp, LarkError> {
-        let path = format!("/open-apis/acs/v1/users/{user_id}/face");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UpdateUserFaceQuery::new(user_id, body).user_id_type(user_id_type);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateUserFaceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateUserFaceResp, LarkError> {
+        let path = format!("/open-apis/acs/v1/users/{}/face", query.user_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UpdateUserFaceResp {
             api_resp,
             code_error,
@@ -592,6 +871,48 @@ pub struct VisitorResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateVisitorQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CreateVisitorQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeleteVisitorQuery<'a> {
+    pub visitor_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> DeleteVisitorQuery<'a> {
+    pub fn new(visitor_id: &'a str) -> Self {
+        Self {
+            visitor_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl VisitorResource<'_> {
     pub async fn create(
         &self,
@@ -599,15 +920,26 @@ impl VisitorResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateVisitorResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/acs/v1/visitors");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<VisitorData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateVisitorQuery::new(body).user_id_type(user_id_type);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateVisitorQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateVisitorResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/acs/v1/visitors",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<VisitorData>()
+        .await?;
         Ok(CreateVisitorResp {
             api_resp,
             code_error,
@@ -621,14 +953,26 @@ impl VisitorResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<DeleteVisitorResp, LarkError> {
-        let path = format!("/open-apis/acs/v1/visitors/{visitor_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = DeleteVisitorQuery::new(visitor_id).user_id_type(user_id_type);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteVisitorQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteVisitorResp, LarkError> {
+        let path = format!("/open-apis/acs/v1/visitors/{}", query.visitor_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteVisitorResp {
             api_resp,
             code_error,
