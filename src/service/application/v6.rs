@@ -1362,6 +1362,43 @@ impl<'a> ListApplicationFeedbackQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchApplicationFeedbackQuery<'a> {
+    pub app_id: &'a str,
+    pub feedback_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub status: Option<i32>,
+    pub operator_id: Option<&'a str>,
+}
+
+impl<'a> PatchApplicationFeedbackQuery<'a> {
+    pub fn new(app_id: &'a str, feedback_id: &'a str) -> Self {
+        Self {
+            app_id,
+            feedback_id,
+            user_id_type: None,
+            status: None,
+            operator_id: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.status = value.into();
+        self
+    }
+
+    pub fn operator_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.operator_id = value.into();
+        self
+    }
+}
+
 impl<'a> ApplicationFeedbackResource<'a> {
     /// List feedbacks — GET /open-apis/application/v6/applications/:app_id/feedbacks
     #[allow(clippy::too_many_arguments)]
@@ -1431,22 +1468,34 @@ impl<'a> ApplicationFeedbackResource<'a> {
         operator_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchApplicationFeedbackResp, LarkError> {
-        let path =
-            format!("/open-apis/application/v6/applications/{app_id}/feedbacks/{feedback_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = status {
-            api_req.query_params.set("status", v.to_string());
-        }
-        if let Some(v) = operator_id {
-            api_req.query_params.set("operator_id", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = PatchApplicationFeedbackQuery::new(app_id, feedback_id)
+            .user_id_type(user_id_type)
+            .status(status)
+            .operator_id(operator_id);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchApplicationFeedbackQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchApplicationFeedbackResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/feedbacks/{}",
+            query.app_id, query.feedback_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("status", query.status)
+        .query("operator_id", query.operator_id)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchApplicationFeedbackResp {
             api_resp,
             code_error,
