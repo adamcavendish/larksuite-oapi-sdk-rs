@@ -72,12 +72,30 @@ mod attendance_shift;
 mod attendance_user_setting;
 #[path = "generated_service_smoke/auth.rs"]
 mod auth;
-#[path = "generated_service_smoke/baike.rs"]
-mod baike;
+#[path = "generated_service_smoke/baike/classification.rs"]
+mod baike_classification;
+#[path = "generated_service_smoke/baike/entity.rs"]
+mod baike_entity;
+#[path = "generated_service_smoke/baike/file.rs"]
+mod baike_file;
 #[path = "generated_service_smoke/base.rs"]
 mod base;
-#[path = "generated_service_smoke/bitable.rs"]
-mod bitable;
+#[path = "generated_service_smoke/bitable/dashboard.rs"]
+mod bitable_dashboard;
+#[path = "generated_service_smoke/bitable/field.rs"]
+mod bitable_field;
+#[path = "generated_service_smoke/bitable/form.rs"]
+mod bitable_form;
+#[path = "generated_service_smoke/bitable/record.rs"]
+mod bitable_record;
+#[path = "generated_service_smoke/bitable/role.rs"]
+mod bitable_role;
+#[path = "generated_service_smoke/bitable/table.rs"]
+mod bitable_table;
+#[path = "generated_service_smoke/bitable/view.rs"]
+mod bitable_view;
+#[path = "generated_service_smoke/bitable/workflow.rs"]
+mod bitable_workflow;
 #[path = "generated_service_smoke/block.rs"]
 mod block;
 #[path = "generated_service_smoke/board.rs"]
@@ -146,8 +164,14 @@ mod directory_share_entity;
 mod directory_user;
 #[path = "generated_service_smoke/docs.rs"]
 mod docs;
-#[path = "generated_service_smoke/docx.rs"]
-mod docx;
+#[path = "generated_service_smoke/docx/announcement.rs"]
+mod docx_announcement;
+#[path = "generated_service_smoke/docx/block.rs"]
+mod docx_block;
+#[path = "generated_service_smoke/docx/building_block.rs"]
+mod docx_building_block;
+#[path = "generated_service_smoke/docx/document.rs"]
+mod docx_document;
 #[path = "generated_service_smoke/drive/comment.rs"]
 mod drive_comment;
 #[path = "generated_service_smoke/drive/event.rs"]
@@ -208,8 +232,14 @@ mod im_pin;
 mod im_reaction;
 #[path = "generated_service_smoke/im_v2.rs"]
 mod im_v2;
-#[path = "generated_service_smoke/lingo.rs"]
-mod lingo;
+#[path = "generated_service_smoke/lingo/classification.rs"]
+mod lingo_classification;
+#[path = "generated_service_smoke/lingo/download.rs"]
+mod lingo_download;
+#[path = "generated_service_smoke/lingo/draft_file.rs"]
+mod lingo_draft_file;
+#[path = "generated_service_smoke/lingo/entity.rs"]
+mod lingo_entity;
 #[path = "generated_service_smoke/mail/mailgroup.rs"]
 mod mail_mailgroup;
 #[path = "generated_service_smoke/mail/mailgroup_member.rs"]
@@ -244,14 +274,28 @@ mod personal_settings;
 mod recognition_and_speech;
 #[path = "generated_service_smoke/report.rs"]
 mod report;
-#[path = "generated_service_smoke/search.rs"]
-mod search;
+#[path = "generated_service_smoke/search/data_record.rs"]
+mod search_data_record;
+#[path = "generated_service_smoke/search/data_source.rs"]
+mod search_data_source;
+#[path = "generated_service_smoke/search/message.rs"]
+mod search_message;
+#[path = "generated_service_smoke/search/schema.rs"]
+mod search_schema;
 #[path = "generated_service_smoke/security_and_compliance.rs"]
 mod security_and_compliance;
 #[path = "generated_service_smoke/sheets.rs"]
 mod sheets;
-#[path = "generated_service_smoke/spark.rs"]
-mod spark;
+#[path = "generated_service_smoke/spark/app.rs"]
+mod spark_app;
+#[path = "generated_service_smoke/spark/metadata.rs"]
+mod spark_metadata;
+#[path = "generated_service_smoke/spark/record.rs"]
+mod spark_record;
+#[path = "generated_service_smoke/spark/storage.rs"]
+mod spark_storage;
+#[path = "generated_service_smoke/spark/view.rs"]
+mod spark_view;
 #[path = "generated_service_smoke/task/comment.rs"]
 mod task_comment;
 #[path = "generated_service_smoke/task/core.rs"]

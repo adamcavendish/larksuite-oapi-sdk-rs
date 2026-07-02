@@ -3,30 +3,6 @@ use super::prelude::*;
 // ── Lingo ──
 
 #[tokio::test]
-async fn lingo_file_download_smoke() {
-    let body = "lingo-file-bytes";
-    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
-        200,
-        "Content-Disposition: attachment; filename=\"lingo-file.bin\"\r\nContent-Type: application/octet-stream\r\n",
-        body,
-    )])
-    .await;
-
-    let client = client_for(addr);
-    let resp = client
-        .lingo()
-        .file
-        .download("file-token-1", &RequestOption::default())
-        .await
-        .unwrap();
-
-    assert_eq!(resp.file_name.as_deref(), Some("lingo-file.bin"));
-    assert_eq!(resp.data, body.as_bytes());
-    let request = requests.lock().unwrap().join("\n");
-    assert!(request.contains("GET /open-apis/lingo/v1/files/file-token-1/download"));
-}
-
-#[tokio::test]
 async fn lingo_entity_get_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"entity":{"id":"entity-1","description":"term"}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
@@ -138,36 +114,6 @@ async fn lingo_entity_search_by_query_smoke() {
 }
 
 #[tokio::test]
-async fn lingo_classification_list_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"class-1"}],"has_more":false}}"#;
-    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
-
-    let client = client_for(addr);
-    let resp = client
-        .lingo()
-        .classification
-        .list_by_query(
-            &ListLingoClassificationQuery::new()
-                .page(PageQuery::new().page_size(20).page_token("next-page")),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-
-    assert!(resp.success());
-    assert!(
-        resp.data
-            .as_ref()
-            .and_then(|data| data.get("items"))
-            .is_some()
-    );
-    let request = requests.lock().unwrap().join("\n");
-    assert!(request.contains("GET /open-apis/lingo/v1/classifications?"));
-    assert!(request.contains("page_size=20"));
-    assert!(request.contains("page_token=next-page"));
-}
-
-#[tokio::test]
 async fn lingo_entity_write_by_query_smoke() {
     let entity_body = r#"{"code":0,"msg":"ok","data":{"entity":{"id":"entity-1"}}}"#;
     let empty_body = r#"{"code":0,"msg":"ok","data":{}}"#;
@@ -271,72 +217,4 @@ async fn lingo_entity_write_by_query_smoke() {
     assert!(request.contains(r#""key":"Term updated""#));
     assert!(request.contains(r#""text":"Term highlight""#));
     assert!(request.contains(r#""text":"Term match""#));
-}
-
-#[tokio::test]
-async fn lingo_draft_file_repo_by_query_smoke() {
-    let draft_body = r#"{"code":0,"msg":"ok","data":{"draft_id":"draft-1"}}"#;
-    let file_body = r#"{"code":0,"msg":"ok","data":{"file_token":"file-token-1"}}"#;
-    let repo_body = r#"{"code":0,"msg":"ok","data":{"items":[{"repo_id":"repo-1"}]}}"#;
-    let (addr, _handle, requests) = mock_server_with_requests(vec![
-        http_response(200, draft_body),
-        http_response(200, draft_body),
-        http_response(200, file_body),
-        http_response(200, repo_body),
-    ])
-    .await;
-
-    let client = client_for(addr);
-    let draft_create_body = serde_json::json!({"entity_id":"entity-1"});
-    let draft_update_body = serde_json::json!({"entity_id":"entity-1","status":"updated"});
-    let file_upload_body = serde_json::json!({"file_name":"term.png","file":"base64-file"});
-
-    let create_resp = client
-        .lingo()
-        .draft
-        .create_by_query(
-            &CreateLingoDraftQuery::new(&draft_create_body).user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let update_resp = client
-        .lingo()
-        .draft
-        .update_by_query(
-            &UpdateLingoDraftQuery::new("draft-1", &draft_update_body).user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let upload_resp = client
-        .lingo()
-        .file
-        .upload_by_query(
-            &UploadLingoFileQuery::new(&file_upload_body),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let repo_resp = client
-        .lingo()
-        .repo
-        .list_by_query(&ListLingoRepoQuery::new(), &RequestOption::default())
-        .await
-        .unwrap();
-
-    assert!(create_resp.success());
-    assert!(update_resp.success());
-    assert!(upload_resp.success());
-    assert!(repo_resp.success());
-    let request = requests.lock().unwrap().join("\n");
-    assert!(request.contains("POST /open-apis/lingo/v1/drafts?"));
-    assert!(request.contains("PUT /open-apis/lingo/v1/drafts/draft-1?"));
-    assert!(request.contains("POST /open-apis/lingo/v1/files/upload"));
-    assert!(request.contains("GET /open-apis/lingo/v1/repos"));
-    assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""entity_id":"entity-1""#));
-    assert!(request.contains(r#""status":"updated""#));
-    assert!(request.contains(r#""file_name":"term.png""#));
-    assert!(request.contains(r#""file":"base64-file""#));
 }
