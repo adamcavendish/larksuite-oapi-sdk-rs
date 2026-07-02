@@ -210,13 +210,9 @@ async fn spark_storage_methods_smoke() {
 }
 
 #[tokio::test]
-async fn spark_table_view_enum_and_directory_methods_smoke() {
+async fn spark_enum_and_table_metadata_methods_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"ok":true}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
-        http_response(200, body),
-        http_response(200, body),
-        http_response(200, body),
-        http_response(200, body),
         http_response(200, body),
         http_response(200, body),
         http_response(200, body),
@@ -226,29 +222,6 @@ async fn spark_table_view_enum_and_directory_methods_smoke() {
 
     let client = client_for(addr);
     let option = user_option();
-    let mutation_body = serde_json::json!({"records":"[{\"name\":\"Alice\"}]"});
-    let mutation = SparkTableMutationQuery::new("app-1", "table-1", &mutation_body)
-        .columns("name")
-        .on_conflict("name")
-        .filter("age=gt.10")
-        .env("online")
-        .user_identifier_type("open_id");
-    let records = SparkRecordQuery::new("app-1", "table-1")
-        .select("_id,name")
-        .filter("age=gt.10")
-        .order("age.desc")
-        .env("online")
-        .user_identifier_type("open_id")
-        .page_size(20)
-        .page_token("next");
-    let view_records = SparkViewRecordQuery::new("app-1", "view-1")
-        .select("_id,name")
-        .filter("age=gt.10")
-        .order("age.desc")
-        .env("online")
-        .user_identifier_type("open_id")
-        .page_size(20)
-        .page_token("next");
 
     client
         .spark()
@@ -274,6 +247,44 @@ async fn spark_table_view_enum_and_directory_methods_smoke() {
         .get_table_list("app-1", &option)
         .await
         .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/enums/status "));
+    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/enums "));
+    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/tables/table-1 "));
+    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/tables "));
+}
+
+#[tokio::test]
+async fn spark_table_record_methods_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"ok":true}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let option = user_option();
+    let mutation_body = serde_json::json!({"records":"[{\"name\":\"Alice\"}]"});
+    let mutation = SparkTableMutationQuery::new("app-1", "table-1", &mutation_body)
+        .columns("name")
+        .on_conflict("name")
+        .filter("age=gt.10")
+        .env("online")
+        .user_identifier_type("open_id");
+    let records = SparkRecordQuery::new("app-1", "table-1")
+        .select("_id,name")
+        .filter("age=gt.10")
+        .order("age.desc")
+        .env("online")
+        .user_identifier_type("open_id")
+        .page_size(20)
+        .page_token("next");
+
     client
         .spark()
         .app_table
@@ -304,6 +315,39 @@ async fn spark_table_view_enum_and_directory_methods_smoke() {
         .patch_table_records(&mutation, &option)
         .await
         .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/tables/table-1/records?"));
+    assert!(request.contains("select=_id%2Cname"));
+    assert!(request.contains("filter=age%3Dgt.10"));
+    assert!(request.contains("POST /open-apis/spark/v1/apps/app-1/tables/table-1/records?"));
+    assert!(
+        request
+            .contains("PATCH /open-apis/spark/v1/apps/app-1/tables/table-1/records_batch_update?")
+    );
+    assert!(request.contains("DELETE /open-apis/spark/v1/apps/app-1/tables/table-1/records?"));
+    assert!(request.contains("PATCH /open-apis/spark/v1/apps/app-1/tables/table-1/records?"));
+    assert!(request.contains("columns=name"));
+    assert!(request.contains("on_conflict=name"));
+}
+
+#[tokio::test]
+async fn spark_view_and_directory_methods_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"ok":true}}"#;
+    let (addr, _handle, requests) =
+        mock_server_with_requests(vec![http_response(200, body), http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let option = user_option();
+    let view_records = SparkViewRecordQuery::new("app-1", "view-1")
+        .select("_id,name")
+        .filter("age=gt.10")
+        .order("age.desc")
+        .env("online")
+        .user_identifier_type("open_id")
+        .page_size(20)
+        .page_token("next");
+
     client
         .spark()
         .app_view
@@ -321,22 +365,8 @@ async fn spark_table_view_enum_and_directory_methods_smoke() {
         .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
-    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/enums/status "));
-    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/enums "));
-    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/tables/table-1 "));
-    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/tables "));
-    assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/tables/table-1/records?"));
     assert!(request.contains("select=_id%2Cname"));
     assert!(request.contains("filter=age%3Dgt.10"));
-    assert!(request.contains("POST /open-apis/spark/v1/apps/app-1/tables/table-1/records?"));
-    assert!(
-        request
-            .contains("PATCH /open-apis/spark/v1/apps/app-1/tables/table-1/records_batch_update?")
-    );
-    assert!(request.contains("DELETE /open-apis/spark/v1/apps/app-1/tables/table-1/records?"));
-    assert!(request.contains("PATCH /open-apis/spark/v1/apps/app-1/tables/table-1/records?"));
-    assert!(request.contains("columns=name"));
-    assert!(request.contains("on_conflict=name"));
     assert!(request.contains("GET /open-apis/spark/v1/apps/app-1/views/view-1/records?"));
     assert!(request.contains("POST /open-apis/spark/v1/directory/user/id_convert "));
     assert!(request.contains(r#""id_convert_type":1"#));

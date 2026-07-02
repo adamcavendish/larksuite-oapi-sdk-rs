@@ -5,8 +5,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{JsonResp, parse_v2};
-use crate::transport;
+use crate::service::common::{JsonResp, RestRequest};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[non_exhaustive]
@@ -994,18 +993,13 @@ impl<'a> GoV397<'a> {
         let meta = endpoint.meta();
         let api_req = build_api_req(&meta, path_params, query_params, body);
 
-        let mut option = option.clone();
-        if meta.file_upload {
-            option.file_upload = true;
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, &option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
-        Ok(JsonResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        let request = RestRequest::from_api_req(self.config, api_req, option);
+        let request = if meta.file_upload {
+            request.file_upload()
+        } else {
+            request
+        };
+        request.send_json().await
     }
 
     pub async fn request_json<P, Q, PK, PV, QK, QV>(
