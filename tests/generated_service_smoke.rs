@@ -365,6 +365,8 @@ use larksuite_oapi_sdk_rs::service::{
             CreateActivitySubscriptionV2Query, CreateCommentV2Query,
             CreateCustomFieldOptionV2Query, CreateCustomFieldV2Query, CreateSectionV2Query,
             CreateTaskSubtaskV2Query, CreateTaskV2Query, CreateTasklistV2Query,
+            DeleteActivitySubscriptionV2Query, DeleteAttachmentV2Query, DeleteCommentV2Query,
+            DeleteSectionV2Query, DeleteTaskV2Query, DeleteTasklistV2Query,
             GetActivitySubscriptionV2Query, GetAttachmentV2Query, GetCommentV2Query,
             GetCustomFieldV2Query, GetSectionV2Query, GetTaskV2Query, GetTasklistV2Query,
             ListActivitySubscriptionV2Query, ListAttachmentV2Query, ListCommentV2Query,
@@ -10868,6 +10870,85 @@ async fn task_v2_task_write_by_query_smoke() {
     assert!(request.contains(r#""summary":"Fix bug updated""#));
     assert!(request.contains(r#""members":["u-1"]"#));
     assert!(request.contains(r#""summary":"Child task""#));
+}
+
+#[tokio::test]
+async fn task_v2_delete_by_query_smoke() {
+    let empty_body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    client
+        .task_v2()
+        .task
+        .delete_by_query(&DeleteTaskV2Query::new("task-1"), &RequestOption::default())
+        .await
+        .unwrap();
+    client
+        .task_v2()
+        .attachment
+        .delete_by_query(
+            &DeleteAttachmentV2Query::new("attachment-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .task_v2()
+        .comment
+        .delete_by_query(
+            &DeleteCommentV2Query::new("comment-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .task_v2()
+        .section
+        .delete_by_query(
+            &DeleteSectionV2Query::new("section-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .task_v2()
+        .tasklist
+        .delete_by_query(
+            &DeleteTasklistV2Query::new("tasklist-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .task_v2()
+        .tasklist
+        .delete_activity_subscription_by_query(
+            &DeleteActivitySubscriptionV2Query::new("tasklist-1", "sub-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("DELETE /open-apis/task/v2/tasks/task-1 "));
+    assert!(request.contains("DELETE /open-apis/task/v2/attachments/attachment-1 "));
+    assert!(request.contains("DELETE /open-apis/task/v2/comments/comment-1 "));
+    assert!(request.contains("DELETE /open-apis/task/v2/sections/section-1 "));
+    assert!(request.contains("DELETE /open-apis/task/v2/tasklists/tasklist-1 "));
+    assert!(
+        request.contains(
+            "DELETE /open-apis/task/v2/tasklists/tasklist-1/activity_subscriptions/sub-1 "
+        )
+    );
 }
 
 #[tokio::test]

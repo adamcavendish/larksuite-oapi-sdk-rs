@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
-use crate::service::common::{PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Generic response data types ───────────────────────────────────────────────
 
@@ -268,6 +267,17 @@ impl<'a> PatchTaskV2Query<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct DeleteTaskV2Query<'a> {
+    pub task_guid: &'a str,
+}
+
+impl<'a> DeleteTaskV2Query<'a> {
+    pub fn new(task_guid: &'a str) -> Self {
+        Self { task_guid }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct TaskBodyV2Query<'a> {
     pub task_guid: &'a str,
     pub body: &'a serde_json::Value,
@@ -388,6 +398,17 @@ impl<'a> GetAttachmentV2Query<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteAttachmentV2Query<'a> {
+    pub attachment_guid: &'a str,
+}
+
+impl<'a> DeleteAttachmentV2Query<'a> {
+    pub fn new(attachment_guid: &'a str) -> Self {
+        Self { attachment_guid }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ListAttachmentV2Query<'a> {
     pub resource_type: Option<&'a str>,
@@ -487,6 +508,17 @@ impl<'a> PatchCommentV2Query<'a> {
     pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.user_id_type = value.into();
         self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteCommentV2Query<'a> {
+    pub comment_id: &'a str,
+}
+
+impl<'a> DeleteCommentV2Query<'a> {
+    pub fn new(comment_id: &'a str) -> Self {
+        Self { comment_id }
     }
 }
 
@@ -734,6 +766,17 @@ impl<'a> PatchSectionV2Query<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteSectionV2Query<'a> {
+    pub section_guid: &'a str,
+}
+
+impl<'a> DeleteSectionV2Query<'a> {
+    pub fn new(section_guid: &'a str) -> Self {
+        Self { section_guid }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ListSectionV2Query<'a> {
     pub resource_type: Option<&'a str>,
@@ -847,6 +890,17 @@ impl<'a> PatchTasklistV2Query<'a> {
     pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.user_id_type = value.into();
         self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteTasklistV2Query<'a> {
+    pub tasklist_guid: &'a str,
+}
+
+impl<'a> DeleteTasklistV2Query<'a> {
+    pub fn new(tasklist_guid: &'a str) -> Self {
+        Self { tasklist_guid }
     }
 }
 
@@ -1013,6 +1067,21 @@ impl<'a> ListActivitySubscriptionV2Query<'a> {
     pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.user_id_type = value.into();
         self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteActivitySubscriptionV2Query<'a> {
+    pub tasklist_guid: &'a str,
+    pub activity_subscription_guid: &'a str,
+}
+
+impl<'a> DeleteActivitySubscriptionV2Query<'a> {
+    pub fn new(tasklist_guid: &'a str, activity_subscription_guid: &'a str) -> Self {
+        Self {
+            tasklist_guid,
+            activity_subscription_guid,
+        }
     }
 }
 
@@ -1208,11 +1277,25 @@ impl<'a> TaskV2Resource<'a> {
         task_guid: &str,
         option: &RequestOption,
     ) -> Result<DeleteTaskV2Resp, LarkError> {
-        let path = format!("/open-apis/task/v2/tasks/{task_guid}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.delete_by_query(&DeleteTaskV2Query::new(task_guid), option)
+            .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteTaskV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteTaskV2Resp, LarkError> {
+        let path = format!("/open-apis/task/v2/tasks/{}", query.task_guid);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteTaskV2Resp {
             api_resp,
             code_error,
@@ -1690,11 +1773,25 @@ impl<'a> AttachmentV2Resource<'a> {
         attachment_guid: &str,
         option: &RequestOption,
     ) -> Result<DeleteAttachmentV2Resp, LarkError> {
-        let path = format!("/open-apis/task/v2/attachments/{attachment_guid}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.delete_by_query(&DeleteAttachmentV2Query::new(attachment_guid), option)
+            .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteAttachmentV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteAttachmentV2Resp, LarkError> {
+        let path = format!("/open-apis/task/v2/attachments/{}", query.attachment_guid);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteAttachmentV2Resp {
             api_resp,
             code_error,
@@ -1888,11 +1985,25 @@ impl<'a> CommentV2Resource<'a> {
         comment_id: &str,
         option: &RequestOption,
     ) -> Result<DeleteCommentV2Resp, LarkError> {
-        let path = format!("/open-apis/task/v2/comments/{comment_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.delete_by_query(&DeleteCommentV2Query::new(comment_id), option)
+            .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteCommentV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteCommentV2Resp, LarkError> {
+        let path = format!("/open-apis/task/v2/comments/{}", query.comment_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteCommentV2Resp {
             api_resp,
             code_error,
@@ -2361,11 +2472,25 @@ impl<'a> SectionV2Resource<'a> {
         section_guid: &str,
         option: &RequestOption,
     ) -> Result<DeleteSectionV2Resp, LarkError> {
-        let path = format!("/open-apis/task/v2/sections/{section_guid}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.delete_by_query(&DeleteSectionV2Query::new(section_guid), option)
+            .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteSectionV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteSectionV2Resp, LarkError> {
+        let path = format!("/open-apis/task/v2/sections/{}", query.section_guid);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteSectionV2Resp {
             api_resp,
             code_error,
@@ -2568,11 +2693,25 @@ impl<'a> TasklistV2Resource<'a> {
         tasklist_guid: &str,
         option: &RequestOption,
     ) -> Result<DeleteTasklistV2Resp, LarkError> {
-        let path = format!("/open-apis/task/v2/tasklists/{tasklist_guid}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.delete_by_query(&DeleteTasklistV2Query::new(tasklist_guid), option)
+            .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteTasklistV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteTasklistV2Resp, LarkError> {
+        let path = format!("/open-apis/task/v2/tasklists/{}", query.tasklist_guid);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteTasklistV2Resp {
             api_resp,
             code_error,
@@ -2900,13 +3039,31 @@ impl<'a> TasklistV2Resource<'a> {
         activity_subscription_guid: &str,
         option: &RequestOption,
     ) -> Result<DeleteActivitySubscriptionV2Resp, LarkError> {
+        self.delete_activity_subscription_by_query(
+            &DeleteActivitySubscriptionV2Query::new(tasklist_guid, activity_subscription_guid),
+            option,
+        )
+        .await
+    }
+
+    pub async fn delete_activity_subscription_by_query(
+        &self,
+        query: &DeleteActivitySubscriptionV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteActivitySubscriptionV2Resp, LarkError> {
         let path = format!(
-            "/open-apis/task/v2/tasklists/{tasklist_guid}/activity_subscriptions/{activity_subscription_guid}"
+            "/open-apis/task/v2/tasklists/{}/activity_subscriptions/{}",
+            query.tasklist_guid, query.activity_subscription_guid
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteActivitySubscriptionV2Resp {
             api_resp,
             code_error,
