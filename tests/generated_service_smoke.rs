@@ -202,6 +202,7 @@ use larksuite_oapi_sdk_rs::service::{
         PatchPublicMailboxQuery, PublicMailboxMember, UpdateMailgroupQuery,
         UpdatePublicMailboxQuery,
     },
+    mdm::v3::{GetBatchCountryRegionV3Query, ListCountryRegionV3Query},
     meeting_room::v1::{
         ListBuildingQuery as ListMeetingRoomBuildingQuery, ListRoomQuery as ListMeetingRoomQuery,
     },
@@ -7418,6 +7419,44 @@ async fn search_schema_by_query_smoke() {
 }
 
 // ── Meeting Room ──
+
+#[tokio::test]
+async fn mdm_country_region_v3_by_query_smoke() {
+    let batch_body = r#"{"code":0,"msg":"ok","data":{"regions":[{"country_region_id":"CN"}]}}"#;
+    let list_body = r#"{"code":0,"msg":"ok","data":{"items":[{"country_region_id":"CN","name":"China"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, batch_body),
+        http_response(200, list_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    client
+        .mdm_v3()
+        .batch_country_region
+        .get_by_query(
+            &GetBatchCountryRegionV3Query::new(),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .mdm_v3()
+        .country_region
+        .list_by_query(
+            &ListCountryRegionV3Query::new()
+                .page(PageQuery::new().page_size(20).page_token("next-page")),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/mdm/v3/batch_country_region "));
+    assert!(request.contains("GET /open-apis/mdm/v3/country_regions?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
 
 #[tokio::test]
 async fn meeting_room_list_positional_adapter_smoke() {
