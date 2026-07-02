@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyRespV2 as EmptyResp, PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyRespV2 as EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -142,6 +141,62 @@ pub struct CollaborationRuleResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateCollaborationRuleQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub target_tenant_key: Option<&'a str>,
+    pub tenant_id: Option<&'a str>,
+}
+
+impl<'a> CreateCollaborationRuleQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            target_tenant_key: None,
+            tenant_id: None,
+        }
+    }
+
+    pub fn target_tenant_key(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.target_tenant_key = value.into();
+        self
+    }
+
+    pub fn tenant_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.tenant_id = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeleteCollaborationRuleQuery<'a> {
+    pub collaboration_rule_id: &'a str,
+    pub target_tenant_key: Option<&'a str>,
+    pub tenant_id: Option<&'a str>,
+}
+
+impl<'a> DeleteCollaborationRuleQuery<'a> {
+    pub fn new(collaboration_rule_id: &'a str) -> Self {
+        Self {
+            collaboration_rule_id,
+            target_tenant_key: None,
+            tenant_id: None,
+        }
+    }
+
+    pub fn target_tenant_key(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.target_tenant_key = value.into();
+        self
+    }
+
+    pub fn tenant_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.tenant_id = value.into();
+        self
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 #[non_exhaustive]
 pub struct ListCollaborationRuleQuery<'a> {
@@ -187,6 +242,36 @@ impl<'a> ListCollaborationRuleQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateCollaborationRuleQuery<'a> {
+    pub collaboration_rule_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub target_tenant_key: Option<&'a str>,
+    pub tenant_id: Option<&'a str>,
+}
+
+impl<'a> UpdateCollaborationRuleQuery<'a> {
+    pub fn new(collaboration_rule_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            collaboration_rule_id,
+            body,
+            target_tenant_key: None,
+            tenant_id: None,
+        }
+    }
+
+    pub fn target_tenant_key(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.target_tenant_key = value.into();
+        self
+    }
+
+    pub fn tenant_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.tenant_id = value.into();
+        self
+    }
+}
+
 impl CollaborationRuleResource<'_> {
     pub async fn create(
         &self,
@@ -195,21 +280,29 @@ impl CollaborationRuleResource<'_> {
         tenant_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateCollaborationRuleResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = CreateCollaborationRuleQuery::new(body)
+            .target_tenant_key(target_tenant_key)
+            .tenant_id(tenant_id);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateCollaborationRuleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateCollaborationRuleResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/directory/v1/collaboration_rules",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = target_tenant_key {
-            api_req.query_params.set("target_tenant_key", v);
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("target_tenant_key", query.target_tenant_key)
+        .query("tenant_id", query.tenant_id)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateCollaborationRuleResp {
             api_resp,
             code_error,
@@ -224,18 +317,32 @@ impl CollaborationRuleResource<'_> {
         tenant_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/directory/v1/collaboration_rules/{collaboration_rule_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = target_tenant_key {
-            api_req.query_params.set("target_tenant_key", v);
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        let query = DeleteCollaborationRuleQuery::new(collaboration_rule_id)
+            .target_tenant_key(target_tenant_key)
+            .tenant_id(tenant_id);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteCollaborationRuleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/directory/v1/collaboration_rules/{}",
+            query.collaboration_rule_id
+        );
+        let (api_resp, code_error, _) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("target_tenant_key", query.target_tenant_key)
+        .query("tenant_id", query.tenant_id)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error,
@@ -290,19 +397,33 @@ impl CollaborationRuleResource<'_> {
         tenant_id: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/directory/v1/collaboration_rules/{collaboration_rule_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = target_tenant_key {
-            api_req.query_params.set("target_tenant_key", v);
-        }
-        if let Some(v) = tenant_id {
-            api_req.query_params.set("tenant_id", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        let query = UpdateCollaborationRuleQuery::new(collaboration_rule_id, body)
+            .target_tenant_key(target_tenant_key)
+            .tenant_id(tenant_id);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateCollaborationRuleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/directory/v1/collaboration_rules/{}",
+            query.collaboration_rule_id
+        );
+        let (api_resp, code_error, _) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("target_tenant_key", query.target_tenant_key)
+        .query("tenant_id", query.tenant_id)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error,
@@ -576,6 +697,34 @@ impl<'a> CreateDepartmentQuery<'a> {
 
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
+pub struct DeleteDepartmentQuery<'a> {
+    pub department_id: &'a str,
+    pub is_admin_role: Option<bool>,
+    pub employee_id_type: Option<&'a str>,
+}
+
+impl<'a> DeleteDepartmentQuery<'a> {
+    pub fn new(department_id: &'a str) -> Self {
+        Self {
+            department_id,
+            is_admin_role: None,
+            employee_id_type: None,
+        }
+    }
+
+    pub fn is_admin_role(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.is_admin_role = value.into();
+        self
+    }
+
+    pub fn employee_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.employee_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
 pub struct FilterDepartmentQuery<'a> {
     pub body: &'a serde_json::Value,
     pub employee_id_type: Option<&'a str>,
@@ -721,18 +870,32 @@ impl DepartmentResource<'_> {
         employee_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/directory/v1/departments/{department_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        let query = DeleteDepartmentQuery::new(department_id)
+            .is_admin_role(is_admin_role)
+            .employee_id_type(employee_id_type);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteDepartmentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/directory/v1/departments/{}",
+            query.department_id
+        );
+        let (api_resp, code_error, _) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("is_admin_role", query.is_admin_role)
+        .query("employee_id_type", query.employee_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error,
@@ -943,6 +1106,35 @@ impl<'a> CreateDirectoryEmployeeQuery<'a> {
 
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
+pub struct DeleteDirectoryEmployeeQuery<'a> {
+    pub employee_id: &'a str,
+    pub body: Option<&'a serde_json::Value>,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+}
+
+impl<'a> DeleteDirectoryEmployeeQuery<'a> {
+    pub fn new(employee_id: &'a str) -> Self {
+        Self {
+            employee_id,
+            body: None,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+        }
+    }
+
+    pub fn body(mut self, value: impl Into<Option<&'a serde_json::Value>>) -> Self {
+        self.body = value.into();
+        self
+    }
+
+    impl_directory_role_setters!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
 pub struct FilterEmployeeQuery<'a> {
     pub body: &'a serde_json::Value,
     pub employee_id_type: Option<&'a str>,
@@ -1014,6 +1206,64 @@ impl<'a> PatchEmployeeQuery<'a> {
 
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
+pub struct RegularDirectoryEmployeeQuery<'a> {
+    pub employee_id: &'a str,
+    pub body: Option<&'a serde_json::Value>,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+}
+
+impl<'a> RegularDirectoryEmployeeQuery<'a> {
+    pub fn new(employee_id: &'a str) -> Self {
+        Self {
+            employee_id,
+            body: None,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+        }
+    }
+
+    pub fn body(mut self, value: impl Into<Option<&'a serde_json::Value>>) -> Self {
+        self.body = value.into();
+        self
+    }
+
+    impl_directory_role_setters!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ResurrectDirectoryEmployeeQuery<'a> {
+    pub employee_id: &'a str,
+    pub body: Option<&'a serde_json::Value>,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+}
+
+impl<'a> ResurrectDirectoryEmployeeQuery<'a> {
+    pub fn new(employee_id: &'a str) -> Self {
+        Self {
+            employee_id,
+            body: None,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+        }
+    }
+
+    pub fn body(mut self, value: impl Into<Option<&'a serde_json::Value>>) -> Self {
+        self.body = value.into();
+        self
+    }
+
+    impl_directory_role_setters!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
 pub struct SearchDirectoryEmployeeQuery<'a> {
     pub body: &'a serde_json::Value,
     pub employee_id_type: Option<&'a str>,
@@ -1035,6 +1285,30 @@ impl<'a> SearchDirectoryEmployeeQuery<'a> {
 
     impl_directory_role_setters!();
     impl_directory_tenant_setter!();
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ToBeResignedDirectoryEmployeeQuery<'a> {
+    pub employee_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub employee_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub is_admin_role: Option<bool>,
+}
+
+impl<'a> ToBeResignedDirectoryEmployeeQuery<'a> {
+    pub fn new(employee_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            employee_id,
+            body,
+            employee_id_type: None,
+            department_id_type: None,
+            is_admin_role: None,
+        }
+    }
+
+    impl_directory_role_setters!();
 }
 
 impl EmployeeResource<'_> {
@@ -1090,24 +1364,36 @@ impl EmployeeResource<'_> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/directory/v1/employees/{employee_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(b) = body {
-            api_req.body = Some(ReqBody::json(b)?);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        let query = DeleteDirectoryEmployeeQuery::new(employee_id)
+            .body(body)
+            .employee_id_type(employee_id_type)
+            .is_admin_role(is_admin_role)
+            .department_id_type(department_id_type);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteDirectoryEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/directory/v1/employees/{}", query.employee_id);
+        let request = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .query("department_id_type", query.department_id_type);
+        let request = if let Some(body) = query.body {
+            request.json_body(body)?
+        } else {
+            request
+        };
+        let (api_resp, code_error, _) = request.send_v2::<serde_json::Value>().await?;
         Ok(EmptyResp {
             api_resp,
             code_error,
@@ -1247,24 +1533,39 @@ impl EmployeeResource<'_> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/directory/v1/employees/{employee_id}/regular");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(b) = body {
-            api_req.body = Some(ReqBody::json(b)?);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        let query = RegularDirectoryEmployeeQuery::new(employee_id)
+            .body(body)
+            .is_admin_role(is_admin_role)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type);
+        self.regular_by_query(&query, option).await
+    }
+
+    pub async fn regular_by_query(
+        &self,
+        query: &RegularDirectoryEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/directory/v1/employees/{}/regular",
+            query.employee_id
+        );
+        let request = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("is_admin_role", query.is_admin_role)
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type);
+        let request = if let Some(body) = query.body {
+            request.json_body(body)?
+        } else {
+            request
+        };
+        let (api_resp, code_error, _) = request.send_v2::<serde_json::Value>().await?;
         Ok(EmptyResp {
             api_resp,
             code_error,
@@ -1280,24 +1581,39 @@ impl EmployeeResource<'_> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/directory/v1/employees/{employee_id}/resurrect");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(b) = body {
-            api_req.body = Some(ReqBody::json(b)?);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        let query = ResurrectDirectoryEmployeeQuery::new(employee_id)
+            .body(body)
+            .employee_id_type(employee_id_type)
+            .is_admin_role(is_admin_role)
+            .department_id_type(department_id_type);
+        self.resurrect_by_query(&query, option).await
+    }
+
+    pub async fn resurrect_by_query(
+        &self,
+        query: &ResurrectDirectoryEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/directory/v1/employees/{}/resurrect",
+            query.employee_id
+        );
+        let request = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_id_type", query.employee_id_type)
+        .query("is_admin_role", query.is_admin_role)
+        .query("department_id_type", query.department_id_type);
+        let request = if let Some(body) = query.body {
+            request.json_body(body)?
+        } else {
+            request
+        };
+        let (api_resp, code_error, _) = request.send_v2::<serde_json::Value>().await?;
         Ok(EmptyResp {
             api_resp,
             code_error,
@@ -1356,22 +1672,35 @@ impl EmployeeResource<'_> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/directory/v1/employees/{employee_id}/to_be_resigned");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = is_admin_role {
-            api_req.query_params.set("is_admin_role", v.to_string());
-        }
-        if let Some(v) = employee_id_type {
-            api_req.query_params.set("employee_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, _) = parse_v2(api_resp, raw);
+        let query = ToBeResignedDirectoryEmployeeQuery::new(employee_id, body)
+            .is_admin_role(is_admin_role)
+            .employee_id_type(employee_id_type)
+            .department_id_type(department_id_type);
+        self.to_be_resigned_by_query(&query, option).await
+    }
+
+    pub async fn to_be_resigned_by_query(
+        &self,
+        query: &ToBeResignedDirectoryEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/directory/v1/employees/{}/to_be_resigned",
+            query.employee_id
+        );
+        let (api_resp, code_error, _) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("is_admin_role", query.is_admin_role)
+        .query("employee_id_type", query.employee_id_type)
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error,

@@ -143,10 +143,14 @@ use larksuite_oapi_sdk_rs::service::{
         SearchSignatureTemplateV2Query as SearchCorehrSignatureTemplateV2Query,
     },
     directory::{
-        CreateDepartmentQuery as CreateDirectoryDepartmentQuery, CreateDirectoryEmployeeQuery,
-        ListCollaborationRuleQuery, ListCollaborationTenantQuery, ListDirectoryUserQuery,
-        ListShareEntityQuery, MgetEmployeeQuery as MgetDirectoryEmployeeQuery,
-        PatchEmployeeQuery as PatchDirectoryEmployeeQuery, SearchDirectoryDepartmentQuery,
+        CreateCollaborationRuleQuery, CreateDepartmentQuery as CreateDirectoryDepartmentQuery,
+        CreateDirectoryEmployeeQuery, DeleteCollaborationRuleQuery, DeleteDepartmentQuery,
+        DeleteDirectoryEmployeeQuery, ListCollaborationRuleQuery, ListCollaborationTenantQuery,
+        ListDirectoryUserQuery, ListShareEntityQuery,
+        MgetEmployeeQuery as MgetDirectoryEmployeeQuery,
+        PatchEmployeeQuery as PatchDirectoryEmployeeQuery, RegularDirectoryEmployeeQuery,
+        ResurrectDirectoryEmployeeQuery, SearchDirectoryDepartmentQuery,
+        ToBeResignedDirectoryEmployeeQuery, UpdateCollaborationRuleQuery,
     },
     docs::v1::{GetContentQuery as GetDocsContentQuery, GetDocumentQuery as GetDocsDocumentQuery},
     docx::v1::{
@@ -5588,6 +5592,67 @@ async fn directory_collaboration_rule_positional_adapter_smoke() {
 }
 
 #[tokio::test]
+async fn directory_collaboration_rule_write_by_query_smoke() {
+    let create_body = r#"{"code":0,"msg":"ok","data":{"collaboration_rule_id":"rule-1"}}"#;
+    let empty_body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, create_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let create_payload = serde_json::json!({"name":"Rule"});
+    let update_payload = serde_json::json!({"name":"Rule updated"});
+    let create_resp = client
+        .directory()
+        .collaboration_rule
+        .create_by_query(
+            &CreateCollaborationRuleQuery::new(&create_payload)
+                .target_tenant_key("target-tenant")
+                .tenant_id("tenant-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let delete_resp = client
+        .directory()
+        .collaboration_rule
+        .delete_by_query(
+            &DeleteCollaborationRuleQuery::new("rule-1")
+                .target_tenant_key("target-tenant")
+                .tenant_id("tenant-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let update_resp = client
+        .directory()
+        .collaboration_rule
+        .update_by_query(
+            &UpdateCollaborationRuleQuery::new("rule-1", &update_payload)
+                .target_tenant_key("target-tenant")
+                .tenant_id("tenant-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(create_resp.success());
+    assert!(delete_resp.success());
+    assert!(update_resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/directory/v1/collaboration_rules?"));
+    assert!(request.contains("DELETE /open-apis/directory/v1/collaboration_rules/rule-1?"));
+    assert!(request.contains("PUT /open-apis/directory/v1/collaboration_rules/rule-1?"));
+    assert!(request.contains("target_tenant_key=target-tenant"));
+    assert!(request.contains("tenant_id=tenant-1"));
+    assert!(request.contains(r#""name":"Rule""#));
+    assert!(request.contains(r#""name":"Rule updated""#));
+}
+
+#[tokio::test]
 async fn directory_collaboration_tenant_list_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
@@ -5766,6 +5831,31 @@ async fn directory_department_search_by_query_smoke() {
 }
 
 #[tokio::test]
+async fn directory_department_delete_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .directory()
+        .department
+        .delete_by_query(
+            &DeleteDepartmentQuery::new("od-1")
+                .is_admin_role(true)
+                .employee_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("DELETE /open-apis/directory/v1/departments/od-1?"));
+    assert!(request.contains("is_admin_role=true"));
+    assert!(request.contains("employee_id_type=open_id"));
+}
+
+#[tokio::test]
 async fn directory_employee_create_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"employee_id":"emp-1"}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
@@ -5852,6 +5942,92 @@ async fn directory_employee_patch_by_query_smoke() {
     assert!(request.contains("department_id_type=department_id"));
     assert!(request.contains("is_admin_role=true"));
     assert!(request.contains(r#""name":"Alice Updated""#));
+}
+
+#[tokio::test]
+async fn directory_employee_action_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let delete_body = serde_json::json!({"reason":"left"});
+    let regular_body = serde_json::json!({"effective_date":"2026-06-01"});
+    let resurrect_body = serde_json::json!({"reason":"return"});
+    let resigned_body = serde_json::json!({"resign_date":"2026-06-30"});
+    let delete_resp = client
+        .directory()
+        .employee
+        .delete_by_query(
+            &DeleteDirectoryEmployeeQuery::new("emp-1")
+                .body(&delete_body)
+                .employee_id_type("open_id")
+                .department_id_type("department_id")
+                .is_admin_role(true),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let regular_resp = client
+        .directory()
+        .employee
+        .regular_by_query(
+            &RegularDirectoryEmployeeQuery::new("emp-1")
+                .body(&regular_body)
+                .employee_id_type("open_id")
+                .department_id_type("department_id")
+                .is_admin_role(true),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let resurrect_resp = client
+        .directory()
+        .employee
+        .resurrect_by_query(
+            &ResurrectDirectoryEmployeeQuery::new("emp-1")
+                .body(&resurrect_body)
+                .employee_id_type("open_id")
+                .department_id_type("department_id")
+                .is_admin_role(true),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let resigned_resp = client
+        .directory()
+        .employee
+        .to_be_resigned_by_query(
+            &ToBeResignedDirectoryEmployeeQuery::new("emp-1", &resigned_body)
+                .employee_id_type("open_id")
+                .department_id_type("department_id")
+                .is_admin_role(true),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(delete_resp.success());
+    assert!(regular_resp.success());
+    assert!(resurrect_resp.success());
+    assert!(resigned_resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("DELETE /open-apis/directory/v1/employees/emp-1?"));
+    assert!(request.contains("PATCH /open-apis/directory/v1/employees/emp-1/regular?"));
+    assert!(request.contains("POST /open-apis/directory/v1/employees/emp-1/resurrect?"));
+    assert!(request.contains("PATCH /open-apis/directory/v1/employees/emp-1/to_be_resigned?"));
+    assert!(request.contains("employee_id_type=open_id"));
+    assert!(request.contains("department_id_type=department_id"));
+    assert!(request.contains("is_admin_role=true"));
+    assert!(request.contains(r#""reason":"left""#));
+    assert!(request.contains(r#""effective_date":"2026-06-01""#));
+    assert!(request.contains(r#""reason":"return""#));
+    assert!(request.contains(r#""resign_date":"2026-06-30""#));
 }
 
 // ── Calendar ──
