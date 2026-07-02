@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Response wrappers ──
 
@@ -24,6 +24,40 @@ impl_resp!(CreateEntityResp, EntityData);
 impl_resp!(UpdateEntityResp, EntityData);
 impl_resp!(CreateMessageResp, MessageData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateEntityQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateEntityQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct UpdateEntityQuery<'a> {
+    pub block_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateEntityQuery<'a> {
+    pub fn new(block_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self { block_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateMessageQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateMessageQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
 // ── Resources ──
 
 pub struct EntityResource<'a> {
@@ -36,11 +70,25 @@ impl<'a> EntityResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateEntityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/block/v2/entities");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<EntityData>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateEntityQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateEntityResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/block/v2/entities",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<EntityData>()
+        .await?;
         Ok(CreateEntityResp {
             api_resp,
             code_error: raw.code_error,
@@ -54,12 +102,26 @@ impl<'a> EntityResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateEntityResp, LarkError> {
-        let path = format!("/open-apis/block/v2/entities/{block_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<EntityData>(self.config, &api_req, option).await?;
+        self.update_by_query(&UpdateEntityQuery::new(block_id, body), option)
+            .await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateEntityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateEntityResp, LarkError> {
+        let path = format!("/open-apis/block/v2/entities/{}", query.block_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<EntityData>()
+        .await?;
         Ok(UpdateEntityResp {
             api_resp,
             code_error: raw.code_error,
@@ -78,11 +140,25 @@ impl<'a> MessageResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateMessageResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/block/v2/message");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MessageData>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateMessageQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateMessageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateMessageResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/block/v2/message",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<MessageData>()
+        .await?;
         Ok(CreateMessageResp {
             api_resp,
             code_error: raw.code_error,
