@@ -378,6 +378,51 @@ impl<'a> Default for ListDataSourceQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateDataRecordQuery<'a> {
+    pub data_source_id: &'a str,
+    pub body: &'a CreateDataRecordReqBody,
+}
+
+impl<'a> CreateDataRecordQuery<'a> {
+    pub fn new(data_source_id: &'a str, body: &'a CreateDataRecordReqBody) -> Self {
+        Self {
+            data_source_id,
+            body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GetDataRecordQuery<'a> {
+    pub data_source_id: &'a str,
+    pub item_id: &'a str,
+}
+
+impl<'a> GetDataRecordQuery<'a> {
+    pub fn new(data_source_id: &'a str, item_id: &'a str) -> Self {
+        Self {
+            data_source_id,
+            item_id,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteDataRecordQuery<'a> {
+    pub data_source_id: &'a str,
+    pub item_id: &'a str,
+}
+
+impl<'a> DeleteDataRecordQuery<'a> {
+    pub fn new(data_source_id: &'a str, item_id: &'a str) -> Self {
+        Self {
+            data_source_id,
+            item_id,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchDocWikiData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -572,12 +617,29 @@ impl<'a> DataRecordResource<'a> {
         body: &CreateDataRecordReqBody,
         option: &RequestOption,
     ) -> Result<CreateDataRecordResp, LarkError> {
-        let path = format!("/open-apis/search/v2/data_sources/{data_source_id}/items");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<DataRecordData>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateDataRecordQuery::new(data_source_id, body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateDataRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateDataRecordResp, LarkError> {
+        let path = format!(
+            "/open-apis/search/v2/data_sources/{}/items",
+            query.data_source_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<DataRecordData>()
+        .await?;
         Ok(CreateDataRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -591,11 +653,28 @@ impl<'a> DataRecordResource<'a> {
         item_id: &str,
         option: &RequestOption,
     ) -> Result<GetDataRecordResp, LarkError> {
-        let path = format!("/open-apis/search/v2/data_sources/{data_source_id}/items/{item_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<DataRecordData>(self.config, &api_req, option).await?;
+        self.get_by_query(&GetDataRecordQuery::new(data_source_id, item_id), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetDataRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetDataRecordResp, LarkError> {
+        let path = format!(
+            "/open-apis/search/v2/data_sources/{}/items/{}",
+            query.data_source_id, query.item_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<DataRecordData>()
+        .await?;
         Ok(GetDataRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -609,11 +688,28 @@ impl<'a> DataRecordResource<'a> {
         item_id: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/search/v2/data_sources/{data_source_id}/items/{item_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        self.delete_by_query(&DeleteDataRecordQuery::new(data_source_id, item_id), option)
+            .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteDataRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/search/v2/data_sources/{}/items/{}",
+            query.data_source_id, query.item_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
