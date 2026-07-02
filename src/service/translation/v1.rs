@@ -96,7 +96,7 @@ impl<'a> TextResource<'a> {
         query: &TranslateTextQuery<'_>,
         option: &RequestOption,
     ) -> Result<TranslateResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/translation/v1/text/translate",
@@ -104,13 +104,8 @@ impl<'a> TextResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<TranslateData>()
-        .await?;
-        Ok(TranslateResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TranslateData, TranslateResp>()
+        .await
     }
 
     pub async fn detect_language(
@@ -127,7 +122,7 @@ impl<'a> TextResource<'a> {
         query: &DetectLanguageQuery<'_>,
         option: &RequestOption,
     ) -> Result<DetectLanguageResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/translation/v1/text/detect",
@@ -135,13 +130,8 @@ impl<'a> TextResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<DetectData>()
-        .await?;
-        Ok(DetectLanguageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DetectData, DetectLanguageResp>()
+        .await
     }
 }
 

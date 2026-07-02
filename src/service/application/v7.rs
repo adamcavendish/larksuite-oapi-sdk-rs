@@ -293,7 +293,7 @@ impl<'a> AppAvatarUploadResource<'a> {
         query: &CreateAppAvatarUploadQuery,
         option: &RequestOption,
     ) -> Result<CreateAppAvatarUploadResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/application/v7/app_avatar/upload",
@@ -301,13 +301,8 @@ impl<'a> AppAvatarUploadResource<'a> {
             option,
         )
         .form_body(query.body.clone())
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateAppAvatarUploadResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateAppAvatarUploadResp>()
+        .await
     }
 }
 
@@ -336,7 +331,7 @@ impl<'a> ApplicationAbilityResource<'a> {
             "/open-apis/application/v7/applications/{}/ability",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -344,13 +339,8 @@ impl<'a> ApplicationAbilityResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchApplicationAbilityResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchApplicationAbilityResp>()
+        .await
     }
 }
 
@@ -379,7 +369,7 @@ impl<'a> ApplicationBaseResource<'a> {
             "/open-apis/application/v7/applications/{}/base",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -387,13 +377,8 @@ impl<'a> ApplicationBaseResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchApplicationBaseResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchApplicationBaseResp>()
+        .await
     }
 }
 
@@ -426,7 +411,7 @@ impl<'a> ApplicationConfigResource<'a> {
             "/open-apis/application/v7/applications/{}/config",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -436,13 +421,8 @@ impl<'a> ApplicationConfigResource<'a> {
         .query("department_id_type", query.department_id_type)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchApplicationConfigResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchApplicationConfigResp>()
+        .await
     }
 }
 
@@ -471,7 +451,7 @@ impl<'a> ApplicationPublishResource<'a> {
             "/open-apis/application/v7/applications/{}/publish",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -479,13 +459,8 @@ impl<'a> ApplicationPublishResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateApplicationPublishResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateApplicationPublishResp>()
+        .await
     }
 }
 

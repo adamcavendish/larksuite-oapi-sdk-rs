@@ -130,7 +130,7 @@ impl<'a> PostResource<'a> {
         option: &RequestOption,
     ) -> Result<GetPostResp, LarkError> {
         let path = format!("/open-apis/moments/v1/posts/{}", query.post_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -138,13 +138,8 @@ impl<'a> PostResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<PostGetData>()
-        .await?;
-        Ok(GetPostResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PostGetData, GetPostResp>()
+        .await
     }
 
     pub async fn list(
@@ -167,7 +162,7 @@ impl<'a> PostResource<'a> {
         query: &ListPostQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListPostResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/moments/v1/posts",
@@ -177,13 +172,8 @@ impl<'a> PostResource<'a> {
         .query("category_id", query.category_id)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send::<PostListData>()
-        .await?;
-        Ok(ListPostResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PostListData, ListPostResp>()
+        .await
     }
 }
 

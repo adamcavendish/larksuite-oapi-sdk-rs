@@ -9,6 +9,14 @@ pub(crate) trait QueryValue {
     fn set_query(self, req: &mut ApiReq, key: &str);
 }
 
+pub(crate) trait FromRawResponse<T> {
+    fn from_raw_response(api_resp: ApiResp, raw: RawResponse<T>) -> Self;
+}
+
+pub(crate) trait FromV2Response<T> {
+    fn from_v2_response(api_resp: ApiResp, code_error: Option<CodeError>, data: Option<T>) -> Self;
+}
+
 impl<T: QueryValue> QueryValue for Option<T> {
     fn set_query(self, req: &mut ApiReq, key: &str) {
         if let Some(value) = self {
@@ -141,11 +149,33 @@ impl<'a> RestRequest<'a> {
         transport::request_typed::<T>(self.config, &self.api_req, self.option).await
     }
 
+    pub(crate) async fn send_response<T, R>(self) -> Result<R, LarkError>
+    where
+        T: for<'de> serde::Deserialize<'de>,
+        R: FromRawResponse<T>,
+    {
+        let (api_resp, raw) = self.send::<T>().await?;
+        Ok(R::from_raw_response(api_resp, raw))
+    }
+
     pub(crate) async fn send_v2<T: for<'de> serde::Deserialize<'de>>(
         self,
     ) -> Result<(ApiResp, Option<CodeError>, Option<T>), LarkError> {
         let (api_resp, raw) = self.send::<T>().await?;
         Ok(parse_v2(api_resp, raw))
+    }
+
+    pub(crate) async fn send_v2_response<T, R>(self) -> Result<R, LarkError>
+    where
+        T: for<'de> serde::Deserialize<'de>,
+        R: FromV2Response<T>,
+    {
+        let (api_resp, code_error, data) = self.send_v2::<T>().await?;
+        Ok(R::from_v2_response(api_resp, code_error, data))
+    }
+
+    pub(crate) async fn send_empty(self) -> Result<EmptyResp, LarkError> {
+        self.send_response::<serde_json::Value, EmptyResp>().await
     }
 
     pub(crate) async fn download(self) -> Result<DownloadResp, LarkError> {
@@ -185,6 +215,15 @@ impl EmptyResp {
     }
 }
 
+impl<T> FromRawResponse<T> for EmptyResp {
+    fn from_raw_response(api_resp: ApiResp, raw: RawResponse<T>) -> Self {
+        Self {
+            api_resp,
+            code_error: raw.code_error,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct DownloadResp {
     pub api_resp: ApiResp,
@@ -204,6 +243,19 @@ impl EmptyRespV2 {
     }
 }
 
+impl<T> FromV2Response<T> for EmptyRespV2 {
+    fn from_v2_response(
+        api_resp: ApiResp,
+        code_error: Option<CodeError>,
+        _data: Option<T>,
+    ) -> Self {
+        Self {
+            api_resp,
+            code_error,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct JsonResp {
     pub api_resp: ApiResp,
@@ -214,6 +266,20 @@ pub struct JsonResp {
 impl JsonResp {
     pub fn success(&self) -> bool {
         self.code_error.as_ref().is_none_or(|e| e.code == 0)
+    }
+}
+
+impl FromV2Response<serde_json::Value> for JsonResp {
+    fn from_v2_response(
+        api_resp: ApiResp,
+        code_error: Option<CodeError>,
+        data: Option<serde_json::Value>,
+    ) -> Self {
+        Self {
+            api_resp,
+            code_error,
+            data,
+        }
     }
 }
 

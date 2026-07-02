@@ -100,7 +100,7 @@ impl<'a> BlockResource<'a> {
         query: &CreateBlockQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateBlockResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/block/v2/blocks",
@@ -108,13 +108,8 @@ impl<'a> BlockResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<BlockData>()
-        .await?;
-        Ok(CreateBlockResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BlockData, CreateBlockResp>()
+        .await
     }
 
     pub async fn get(
@@ -132,20 +127,15 @@ impl<'a> BlockResource<'a> {
         option: &RequestOption,
     ) -> Result<GetBlockResp, LarkError> {
         let path = format!("/open-apis/block/v2/blocks/{}", query.block_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<BlockData>()
-        .await?;
-        Ok(GetBlockResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BlockData, GetBlockResp>()
+        .await
     }
 }
 

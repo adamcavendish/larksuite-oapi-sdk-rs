@@ -125,7 +125,7 @@ impl<'a> SessionResource<'a> {
         query: &QuerySessionQuery<'_>,
         option: &RequestOption,
     ) -> Result<QuerySessionResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/passport/v1/sessions/query",
@@ -134,13 +134,8 @@ impl<'a> SessionResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<SessionListData>()
-        .await?;
-        Ok(QuerySessionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SessionListData, QuerySessionResp>()
+        .await
     }
 
     pub async fn logout(
@@ -161,7 +156,7 @@ impl<'a> SessionResource<'a> {
         query: &LogoutSessionQuery<'_>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/passport/v1/sessions/logout",
@@ -170,12 +165,8 @@ impl<'a> SessionResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(EmptyResp {
-            api_resp,
-            code_error: raw.code_error,
-        })
+        .send_empty()
+        .await
     }
 }
 
