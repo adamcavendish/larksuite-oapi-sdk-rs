@@ -275,16 +275,17 @@ use larksuite_oapi_sdk_rs::service::{
         StreamRecognizeSpeechQuery,
     },
     task::{
-        BatchDeleteCollaboratorQuery, BatchDeleteFollowerQuery, CreateCollaboratorQuery,
-        CreateCollaboratorReqBody, CreateCommentQuery as CreateTaskCommentQuery,
-        CreateCommentReqBody, CreateFollowerQuery, CreateFollowerReqBody, CreateReminderQuery,
-        CreateReminderReqBody, CreateTaskQuery as CreateTaskV1Query, CreateTaskReqBody,
-        DeleteCollaboratorQuery, DeleteFollowerQuery, GetCommentQuery as GetTaskCommentQuery,
-        GetReminderQuery, GetTaskQuery as GetTaskV1Query, ListCollaboratorQuery,
-        ListCommentQuery as ListTaskCommentQuery, ListFollowerQuery, ListReminderQuery,
-        ListTaskQuery, PatchTaskQuery as PatchTaskV1Query, PatchTaskReqBody,
-        UpdateCommentQuery as UpdateTaskCommentQuery, UpdateCommentReqBody, UpdateReminderQuery,
-        UpdateReminderReqBody,
+        BatchDeleteCollaboratorQuery, BatchDeleteFollowerQuery, CompleteTaskQuery,
+        CreateCollaboratorQuery, CreateCollaboratorReqBody,
+        CreateCommentQuery as CreateTaskCommentQuery, CreateCommentReqBody, CreateFollowerQuery,
+        CreateFollowerReqBody, CreateReminderQuery, CreateReminderReqBody,
+        CreateTaskQuery as CreateTaskV1Query, CreateTaskReqBody, DeleteCollaboratorQuery,
+        DeleteCommentQuery, DeleteFollowerQuery, DeleteReminderQuery, DeleteTaskQuery,
+        GetCommentQuery as GetTaskCommentQuery, GetReminderQuery, GetTaskQuery as GetTaskV1Query,
+        ListCollaboratorQuery, ListCommentQuery as ListTaskCommentQuery, ListFollowerQuery,
+        ListReminderQuery, ListTaskQuery, PatchTaskQuery as PatchTaskV1Query, PatchTaskReqBody,
+        UncompleteTaskQuery, UpdateCommentQuery as UpdateTaskCommentQuery, UpdateCommentReqBody,
+        UpdateReminderQuery, UpdateReminderReqBody,
         v2::{
             AddCustomFieldV2Query, AddMembersTaskV2Query, AddMembersTasklistV2Query,
             CreateActivitySubscriptionV2Query, CreateCommentV2Query,
@@ -8481,10 +8482,14 @@ async fn task_list_by_query_smoke() {
 async fn task_core_by_query_smoke() {
     let task_body = r#"{"code":0,"msg":"ok","data":{"task":{"id":"task-1","summary":"New task"}}}"#;
     let batch_body = r#"{"code":0,"msg":"ok","data":{"deleted":["u-1"]}}"#;
+    let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, task_body),
         http_response(200, task_body),
         http_response(200, task_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
         http_response(200, batch_body),
         http_response(200, batch_body),
     ])
@@ -8531,6 +8536,27 @@ async fn task_core_by_query_smoke() {
     client
         .task()
         .task
+        .delete_by_query(&DeleteTaskQuery::new("task-1"), &RequestOption::default())
+        .await
+        .unwrap();
+    client
+        .task()
+        .task
+        .complete_by_query(&CompleteTaskQuery::new("task-1"), &RequestOption::default())
+        .await
+        .unwrap();
+    client
+        .task()
+        .task
+        .uncomplete_by_query(
+            &UncompleteTaskQuery::new("task-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .task()
+        .task
         .batch_delete_collaborator_by_query(
             &BatchDeleteCollaboratorQuery::new("task-1", &batch_delete_body)
                 .user_id_type("open_id"),
@@ -8552,6 +8578,9 @@ async fn task_core_by_query_smoke() {
     assert!(request.contains("POST /open-apis/task/v1/tasks?"));
     assert!(request.contains("GET /open-apis/task/v1/tasks/task-1?"));
     assert!(request.contains("PATCH /open-apis/task/v1/tasks/task-1?"));
+    assert!(request.contains("DELETE /open-apis/task/v1/tasks/task-1 "));
+    assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/complete "));
+    assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/uncomplete "));
     assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/batch_delete_collaborator?"));
     assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/batch_delete_follower?"));
     assert!(request.contains("user_id_type=open_id"));
@@ -8566,10 +8595,12 @@ async fn task_comment_by_query_smoke() {
     let comment_body =
         r#"{"code":0,"msg":"ok","data":{"comment":{"id":"comment-1","content":"First"}}}"#;
     let comment_list_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"comment-1","content":"First"}],"has_more":false}}"#;
+    let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, comment_body),
         http_response(200, comment_body),
         http_response(200, comment_body),
+        http_response(200, empty_body),
         http_response(200, comment_list_body),
     ])
     .await;
@@ -8614,6 +8645,15 @@ async fn task_comment_by_query_smoke() {
     client
         .task()
         .comment
+        .delete_by_query(
+            &DeleteCommentQuery::new("task-1", "comment-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .task()
+        .comment
         .list_by_query(
             &ListTaskCommentQuery::new("task-1")
                 .page(PageQuery::new().page_size(20).page_token("next-page"))
@@ -8627,6 +8667,7 @@ async fn task_comment_by_query_smoke() {
     assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/comments?"));
     assert!(request.contains("GET /open-apis/task/v1/tasks/task-1/comments/comment-1?"));
     assert!(request.contains("PUT /open-apis/task/v1/tasks/task-1/comments/comment-1?"));
+    assert!(request.contains("DELETE /open-apis/task/v1/tasks/task-1/comments/comment-1 "));
     assert!(request.contains("GET /open-apis/task/v1/tasks/task-1/comments?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
@@ -8740,10 +8781,12 @@ async fn task_member_by_query_smoke() {
 async fn task_reminder_by_query_smoke() {
     let reminder_body = r#"{"code":0,"msg":"ok","data":{"reminder":{"id":"reminder-1","relative_fire_minute":30}}}"#;
     let reminder_list_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"reminder-1","relative_fire_minute":30}],"has_more":false}}"#;
+    let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, reminder_body),
         http_response(200, reminder_body),
         http_response(200, reminder_body),
+        http_response(200, empty_body),
         http_response(200, reminder_list_body),
     ])
     .await;
@@ -8790,6 +8833,15 @@ async fn task_reminder_by_query_smoke() {
     client
         .task()
         .reminder
+        .delete_by_query(
+            &DeleteReminderQuery::new("task-1", "reminder-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .task()
+        .reminder
         .list_by_query(
             &ListReminderQuery::new("task-1")
                 .page(PageQuery::new().page_size(20).page_token("next-page")),
@@ -8802,6 +8854,7 @@ async fn task_reminder_by_query_smoke() {
     assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/reminders "));
     assert!(request.contains("GET /open-apis/task/v1/tasks/task-1/reminders/reminder-1 "));
     assert!(request.contains("PUT /open-apis/task/v1/tasks/task-1/reminders/reminder-1 "));
+    assert!(request.contains("DELETE /open-apis/task/v1/tasks/task-1/reminders/reminder-1 "));
     assert!(request.contains("GET /open-apis/task/v1/tasks/task-1/reminders?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));

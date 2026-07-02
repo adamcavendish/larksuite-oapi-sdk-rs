@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
+use crate::req::RequestOption;
 use crate::service::common::{EmptyResp, PageQuery, RestRequest};
-use crate::transport;
 
 // ── Domain types ──
 
@@ -422,6 +421,39 @@ impl<'a> PatchTaskQuery<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct DeleteTaskQuery<'a> {
+    pub task_id: &'a str,
+}
+
+impl<'a> DeleteTaskQuery<'a> {
+    pub fn new(task_id: &'a str) -> Self {
+        Self { task_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CompleteTaskQuery<'a> {
+    pub task_id: &'a str,
+}
+
+impl<'a> CompleteTaskQuery<'a> {
+    pub fn new(task_id: &'a str) -> Self {
+        Self { task_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct UncompleteTaskQuery<'a> {
+    pub task_id: &'a str,
+}
+
+impl<'a> UncompleteTaskQuery<'a> {
+    pub fn new(task_id: &'a str) -> Self {
+        Self { task_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct BatchDeleteTaskMemberQuery<'a> {
     pub task_id: &'a str,
     pub body: &'a serde_json::Value,
@@ -511,6 +543,21 @@ impl<'a> UpdateCommentQuery<'a> {
     pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.user_id_type = value.into();
         self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DeleteCommentQuery<'a> {
+    pub task_id: &'a str,
+    pub comment_id: &'a str,
+}
+
+impl<'a> DeleteCommentQuery<'a> {
+    pub fn new(task_id: &'a str, comment_id: &'a str) -> Self {
+        Self {
+            task_id,
+            comment_id,
+        }
     }
 }
 
@@ -728,6 +775,21 @@ impl<'a> UpdateReminderQuery<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct DeleteReminderQuery<'a> {
+    pub task_id: &'a str,
+    pub reminder_id: &'a str,
+}
+
+impl<'a> DeleteReminderQuery<'a> {
+    pub fn new(task_id: &'a str, reminder_id: &'a str) -> Self {
+        Self {
+            task_id,
+            reminder_id,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct ListReminderQuery<'a> {
     pub task_id: &'a str,
     pub page: PageQuery<'a>,
@@ -854,11 +916,25 @@ impl<'a> TaskResource<'a> {
         task_id: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = DeleteTaskQuery::new(task_id);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -870,11 +946,25 @@ impl<'a> TaskResource<'a> {
         task_id: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/complete");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = CompleteTaskQuery::new(task_id);
+        self.complete_by_query(&query, option).await
+    }
+
+    pub async fn complete_by_query(
+        &self,
+        query: &CompleteTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/complete", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -886,11 +976,25 @@ impl<'a> TaskResource<'a> {
         task_id: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/uncomplete");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = UncompleteTaskQuery::new(task_id);
+        self.uncomplete_by_query(&query, option).await
+    }
+
+    pub async fn uncomplete_by_query(
+        &self,
+        query: &UncompleteTaskQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/task/v1/tasks/{}/uncomplete", query.task_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1144,11 +1248,28 @@ impl<'a> TaskCommentResource<'a> {
         comment_id: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/comments/{comment_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = DeleteCommentQuery::new(task_id, comment_id);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteCommentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/comments/{}",
+            query.task_id, query.comment_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1541,11 +1662,28 @@ impl<'a> TaskReminderResource<'a> {
         reminder_id: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/task/v1/tasks/{task_id}/reminders/{reminder_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = DeleteReminderQuery::new(task_id, reminder_id);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteReminderQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/task/v1/tasks/{}/reminders/{}",
+            query.task_id, query.reminder_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
