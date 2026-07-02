@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::req::RequestOption;
 use crate::service::common::{EmptyResp, RestRequest};
-use crate::transport;
 
 // ── Domain types ──
 
@@ -166,6 +165,28 @@ impl<'a> QueryTaskQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct RemoveRuleViewQuery<'a> {
+    pub rule_id: &'a str,
+    pub body: &'a RemoveRuleViewReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> RemoveRuleViewQuery<'a> {
+    pub fn new(rule_id: &'a str, body: &'a RemoveRuleViewReqBody) -> Self {
+        Self {
+            rule_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct RuleResource<'a> {
@@ -265,15 +286,27 @@ impl<'a> RuleViewResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/report/v1/rules/{rule_id}/views/remove");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = RemoveRuleViewQuery::new(rule_id, body).user_id_type(user_id_type);
+        self.remove_by_query(&query, option).await
+    }
+
+    pub async fn remove_by_query(
+        &self,
+        query: &RemoveRuleViewQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/report/v1/rules/{}/views/remove", query.rule_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,

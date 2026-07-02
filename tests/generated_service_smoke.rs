@@ -231,7 +231,7 @@ use larksuite_oapi_sdk_rs::service::{
     },
     report::v1::{
         QueryRuleQuery as QueryReportRuleQuery, QueryTaskQuery as QueryReportTaskQuery,
-        QueryTaskReqBody as QueryReportTaskReqBody,
+        QueryTaskReqBody as QueryReportTaskReqBody, RemoveRuleViewQuery, RemoveRuleViewReqBody,
     },
     search::v2::{
         CreateAppSearchQuery, CreateDataRecordQuery, CreateDataRecordReqBody,
@@ -7769,6 +7769,32 @@ async fn report_task_query_by_query_smoke() {
     assert!(request.contains(r#""user_id":"u-1""#));
     assert!(request.contains(r#""page_size":20"#));
     assert!(request.contains(r#""page_token":"next-page""#));
+}
+
+#[tokio::test]
+async fn report_rule_view_remove_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let req_body = RemoveRuleViewReqBody {
+        user_ids: Some(vec!["u-1".into(), "u-2".into()]),
+    };
+    let resp = client
+        .report()
+        .rule_view
+        .remove_by_query(
+            &RemoveRuleViewQuery::new("rule-1", &req_body).user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/report/v1/rules/rule-1/views/remove?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains(r#""user_ids":["u-1","u-2"]"#));
 }
 
 // ── Task ──
