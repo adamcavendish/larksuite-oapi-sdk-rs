@@ -4,6 +4,7 @@ use crate::config::Config;
 use crate::constants::{AccessTokenType, HEADER_X_TARGET_SERVICE};
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::service::common::RestRequest;
 use crate::token;
 use crate::transport;
 
@@ -141,6 +142,64 @@ impl_resp!(CreateOidcRefreshAccessTokenResp, TokenInfo);
 impl_resp!(CreateRefreshAccessTokenResp, UserAccessTokenInfo);
 impl_resp!(GetUserInfoResp, UserInfo);
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateAccessTokenQuery<'a> {
+    pub body: &'a CreateAccessTokenReqBody,
+}
+
+impl<'a> CreateAccessTokenQuery<'a> {
+    pub fn new(body: &'a CreateAccessTokenReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateOidcAccessTokenQuery<'a> {
+    pub body: &'a CreateOidcAccessTokenReqBody,
+}
+
+impl<'a> CreateOidcAccessTokenQuery<'a> {
+    pub fn new(body: &'a CreateOidcAccessTokenReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateOidcRefreshAccessTokenQuery<'a> {
+    pub body: &'a CreateOidcRefreshAccessTokenReqBody,
+}
+
+impl<'a> CreateOidcRefreshAccessTokenQuery<'a> {
+    pub fn new(body: &'a CreateOidcRefreshAccessTokenReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateRefreshAccessTokenQuery<'a> {
+    pub body: &'a CreateRefreshAccessTokenReqBody,
+}
+
+impl<'a> CreateRefreshAccessTokenQuery<'a> {
+    pub fn new(body: &'a CreateRefreshAccessTokenReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct GetUserInfoQuery;
+
+impl GetUserInfoQuery {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
 // ── Resources ──
 
 pub struct AccessTokenResource<'a> {
@@ -154,11 +213,25 @@ impl<'a> AccessTokenResource<'a> {
         body: &CreateAccessTokenReqBody,
         option: &RequestOption,
     ) -> Result<CreateAccessTokenResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/authen/v1/access_token");
-        api_req.supported_access_token_types = vec![AccessTokenType::App];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UserAccessTokenInfo>(self.config, &api_req, option).await?;
+        let query = CreateAccessTokenQuery::new(body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateAccessTokenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateAccessTokenResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/authen/v1/access_token",
+            vec![AccessTokenType::App],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<UserAccessTokenInfo>()
+        .await?;
         Ok(CreateAccessTokenResp {
             api_resp,
             code_error: raw.code_error,
@@ -178,11 +251,25 @@ impl<'a> OidcAccessTokenResource<'a> {
         body: &CreateOidcAccessTokenReqBody,
         option: &RequestOption,
     ) -> Result<CreateOidcAccessTokenResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/authen/v1/oidc/access_token");
-        api_req.supported_access_token_types = vec![AccessTokenType::App];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TokenInfo>(self.config, &api_req, option).await?;
+        let query = CreateOidcAccessTokenQuery::new(body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateOidcAccessTokenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateOidcAccessTokenResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/authen/v1/oidc/access_token",
+            vec![AccessTokenType::App],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<TokenInfo>()
+        .await?;
         Ok(CreateOidcAccessTokenResp {
             api_resp,
             code_error: raw.code_error,
@@ -202,14 +289,25 @@ impl<'a> OidcRefreshAccessTokenResource<'a> {
         body: &CreateOidcRefreshAccessTokenReqBody,
         option: &RequestOption,
     ) -> Result<CreateOidcRefreshAccessTokenResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = CreateOidcRefreshAccessTokenQuery::new(body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateOidcRefreshAccessTokenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateOidcRefreshAccessTokenResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/authen/v1/oidc/refresh_access_token",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::App];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TokenInfo>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::App],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<TokenInfo>()
+        .await?;
         Ok(CreateOidcRefreshAccessTokenResp {
             api_resp,
             code_error: raw.code_error,
@@ -229,14 +327,25 @@ impl<'a> RefreshAccessTokenResource<'a> {
         body: &CreateRefreshAccessTokenReqBody,
         option: &RequestOption,
     ) -> Result<CreateRefreshAccessTokenResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = CreateRefreshAccessTokenQuery::new(body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateRefreshAccessTokenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateRefreshAccessTokenResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/authen/v1/refresh_access_token",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::App];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UserAccessTokenInfo>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::App],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<UserAccessTokenInfo>()
+        .await?;
         Ok(CreateRefreshAccessTokenResp {
             api_resp,
             code_error: raw.code_error,
@@ -532,10 +641,24 @@ pub struct UserInfoResource<'a> {
 impl<'a> UserInfoResource<'a> {
     /// Get current user info (requires user_access_token).
     pub async fn get(&self, option: &RequestOption) -> Result<GetUserInfoResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/authen/v1/user_info");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<UserInfo>(self.config, &api_req, option).await?;
+        let query = GetUserInfoQuery::new();
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        _query: &GetUserInfoQuery,
+        option: &RequestOption,
+    ) -> Result<GetUserInfoResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/authen/v1/user_info",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<UserInfo>()
+        .await?;
         Ok(GetUserInfoResp {
             api_resp,
             code_error: raw.code_error,
