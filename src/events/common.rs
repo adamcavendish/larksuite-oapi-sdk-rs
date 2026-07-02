@@ -44,6 +44,14 @@ pub struct UserIdList {
     pub user_id_list: Vec<UserId>,
 }
 
+pub(crate) fn decode_payload<T>(val: serde_json::Value) -> Result<T, LarkError>
+where
+    T: for<'de> serde::Deserialize<'de>,
+{
+    serde_json::from_value(val)
+        .map_err(|e| LarkError::Event(format!("failed to deserialize event payload: {e}")))
+}
+
 /// Adapt a typed event handler into the raw `serde_json::Value` callback the
 /// dispatcher stores. Deserialization failures surface as [`LarkError::Event`].
 pub(crate) fn wrap_handler<T, F, Fut>(
@@ -57,16 +65,10 @@ where
     F: Fn(T) -> Fut + Send + Sync + 'static,
     Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
 {
-    move |val: serde_json::Value| {
-        let result: std::result::Result<T, _> = serde_json::from_value(val);
-        match result {
-            Ok(typed) => Box::pin(handler(typed))
-                as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>,
-            Err(e) => Box::pin(async move {
-                Err(LarkError::Event(format!(
-                    "failed to deserialize event payload: {e}"
-                )))
-            }),
+    move |val: serde_json::Value| match decode_payload(val) {
+        Ok(typed) => {
+            Box::pin(handler(typed)) as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
         }
+        Err(e) => Box::pin(async move { Err(e) }),
     }
 }

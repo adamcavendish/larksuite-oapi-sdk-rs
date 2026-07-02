@@ -93,6 +93,7 @@ pub(crate) struct RestRequest<'a> {
     config: &'a Config,
     api_req: ApiReq,
     option: &'a RequestOption,
+    file_upload: bool,
 }
 
 impl<'a> RestRequest<'a> {
@@ -109,7 +110,26 @@ impl<'a> RestRequest<'a> {
             config,
             api_req,
             option,
+            file_upload: false,
         }
+    }
+
+    pub(crate) fn from_api_req(
+        config: &'a Config,
+        api_req: ApiReq,
+        option: &'a RequestOption,
+    ) -> Self {
+        Self {
+            config,
+            api_req,
+            option,
+            file_upload: false,
+        }
+    }
+
+    pub(crate) fn file_upload(mut self) -> Self {
+        self.file_upload = true;
+        self
     }
 
     pub(crate) fn query<T: QueryValue>(mut self, key: &str, value: T) -> Self {
@@ -148,7 +168,15 @@ impl<'a> RestRequest<'a> {
     pub(crate) async fn send<T: for<'de> serde::Deserialize<'de>>(
         self,
     ) -> Result<(ApiResp, RawResponse<T>), LarkError> {
-        transport::request_typed::<T>(self.config, &self.api_req, self.option).await
+        let mut option;
+        let request_option = if self.file_upload {
+            option = self.option.clone();
+            option.file_upload = true;
+            &option
+        } else {
+            self.option
+        };
+        transport::request_typed::<T>(self.config, &self.api_req, request_option).await
     }
 
     pub(crate) async fn send_response<T, R>(self) -> Result<R, LarkError>
@@ -178,6 +206,15 @@ impl<'a> RestRequest<'a> {
 
     pub(crate) async fn send_empty(self) -> Result<EmptyResp, LarkError> {
         self.send_response::<serde_json::Value, EmptyResp>().await
+    }
+
+    pub(crate) async fn send_json(self) -> Result<JsonResp, LarkError> {
+        let (api_resp, code_error, data) = self.send_v2::<serde_json::Value>().await?;
+        Ok(JsonResp {
+            api_resp,
+            code_error,
+            data,
+        })
     }
 
     pub(crate) async fn download(self) -> Result<DownloadResp, LarkError> {
@@ -383,17 +420,11 @@ pub async fn request_json(
     body: Option<&serde_json::Value>,
     option: &RequestOption,
 ) -> Result<JsonResp, LarkError> {
-    let mut api_req = ApiReq::new(method, path);
-    api_req.supported_access_token_types = supported_access_token_types;
-    if let Some(body) = body {
-        api_req.body = Some(ReqBody::Json(body.clone()));
-    }
-    let (api_resp, raw) =
-        transport::request_typed::<serde_json::Value>(config, &api_req, option).await?;
-    let (api_resp, code_error, data) = parse_v2(api_resp, raw);
-    Ok(JsonResp {
-        api_resp,
-        code_error,
-        data,
-    })
+    let request = RestRequest::new(config, method, path, supported_access_token_types, option);
+    let request = if let Some(body) = body {
+        request.json_body(body)?
+    } else {
+        request
+    };
+    request.send_json().await
 }
