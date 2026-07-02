@@ -1,0 +1,115 @@
+use super::prelude::*;
+
+// ── Mail ──
+
+#[tokio::test]
+async fn mail_public_mailbox_member_list_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"member_id":"member-1","user_id":"ou-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .mail()
+        .public_mailbox_member
+        .list_by_query(
+            &ListMailPublicMailboxMemberQuery::new("pm-1")
+                .user_id_type("open_id")
+                .page(PageQuery::new().page_size(20).page_token("next-page")),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data
+            .as_ref()
+            .and_then(|data| data.items.first())
+            .and_then(|member| member.member_id.as_deref()),
+        Some("member-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/mail/v1/public_mailboxes/pm-1/members?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn mail_public_mailbox_member_by_query_smoke() {
+    let member_body = r#"{"code":0,"msg":"ok","data":{"member":{"member_id":"member-1","user_id":"ou-1","type_":"USER"}}}"#;
+    let batch_body = r#"{"code":0,"msg":"ok","data":{"items":[{"member_id":"member-1"}]}}"#;
+    let empty_body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, empty_body),
+        http_response(200, batch_body),
+        http_response(200, empty_body),
+        http_response(200, member_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let member = PublicMailboxMember {
+        member_id: Some("member-1".into()),
+        user_id: Some("ou-1".into()),
+        type_: Some("USER".into()),
+    };
+    let batch_create_body = BatchCreatePublicMailboxMemberReqBody {
+        items: Some(vec![member.clone()]),
+    };
+    let batch_delete_body = BatchDeletePublicMailboxMemberReqBody {
+        member_id_list: Some(vec!["member-1".to_string()]),
+    };
+
+    client
+        .mail()
+        .public_mailbox_member
+        .create_by_query(
+            &CreatePublicMailboxMemberQuery::new("pm-1", &member).user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .mail()
+        .public_mailbox_member
+        .batch_create_by_query(
+            &BatchCreatePublicMailboxMemberQuery::new("pm-1", &batch_create_body)
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .mail()
+        .public_mailbox_member
+        .batch_delete_by_query(
+            &BatchDeletePublicMailboxMemberQuery::new("pm-1", &batch_delete_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .mail()
+        .public_mailbox_member
+        .get_by_query(
+            &GetPublicMailboxMemberQuery::new("pm-1", "member-1").user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/mail/v1/public_mailboxes/pm-1/members?"));
+    assert!(
+        request.contains("POST /open-apis/mail/v1/public_mailboxes/pm-1/members/batch_create?")
+    );
+    assert!(
+        request.contains("DELETE /open-apis/mail/v1/public_mailboxes/pm-1/members/batch_delete ")
+    );
+    assert!(request.contains("GET /open-apis/mail/v1/public_mailboxes/pm-1/members/member-1?"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains(r#""member_id":"member-1""#));
+    assert!(request.contains(r#""user_id":"ou-1""#));
+    assert!(request.contains(r#""member_id_list":["member-1"]"#));
+}
