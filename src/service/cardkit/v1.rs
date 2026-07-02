@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, RestRequest};
 
 // ── Domain types ──
 
@@ -54,6 +53,177 @@ impl_resp_v2!(DeleteCardElementResp, ());
 impl_resp_v2!(PatchCardElementResp, serde_json::Value);
 impl_resp_v2!(ContentCardElementResp, serde_json::Value);
 
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct CreateCardInstanceQuery<'a> {
+    pub body: &'a CreateCardInstanceReqBody,
+}
+
+impl<'a> CreateCardInstanceQuery<'a> {
+    pub fn new(body: &'a CreateCardInstanceReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct UpdateCardInstanceQuery<'a> {
+    pub instance_id: &'a str,
+    pub body: &'a UpdateCardInstanceReqBody,
+}
+
+impl<'a> UpdateCardInstanceQuery<'a> {
+    pub fn new(instance_id: &'a str, body: &'a UpdateCardInstanceReqBody) -> Self {
+        Self { instance_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateCardQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateCardQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateCardQuery<'a> {
+    pub card_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateCardQuery<'a> {
+    pub fn new(card_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self { card_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct BatchUpdateCardQuery<'a> {
+    pub card_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> BatchUpdateCardQuery<'a> {
+    pub fn new(card_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self { card_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct IdConvertCardQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> IdConvertCardQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SettingsCardQuery<'a> {
+    pub card_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> SettingsCardQuery<'a> {
+    pub fn new(card_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self { card_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateCardElementQuery<'a> {
+    pub card_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateCardElementQuery<'a> {
+    pub fn new(card_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self { card_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateCardElementQuery<'a> {
+    pub card_id: &'a str,
+    pub element_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateCardElementQuery<'a> {
+    pub fn new(card_id: &'a str, element_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            card_id,
+            element_id,
+            body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeleteCardElementQuery<'a> {
+    pub card_id: &'a str,
+    pub element_id: &'a str,
+}
+
+impl<'a> DeleteCardElementQuery<'a> {
+    pub fn new(card_id: &'a str, element_id: &'a str) -> Self {
+        Self {
+            card_id,
+            element_id,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchCardElementQuery<'a> {
+    pub card_id: &'a str,
+    pub element_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> PatchCardElementQuery<'a> {
+    pub fn new(card_id: &'a str, element_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            card_id,
+            element_id,
+            body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ContentCardElementQuery<'a> {
+    pub card_id: &'a str,
+    pub element_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> ContentCardElementQuery<'a> {
+    pub fn new(card_id: &'a str, element_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            card_id,
+            element_id,
+            body,
+        }
+    }
+}
+
 // ── Resources ──
 
 pub struct CardInstanceResource<'a> {
@@ -66,11 +236,25 @@ impl<'a> CardInstanceResource<'a> {
         body: &CreateCardInstanceReqBody,
         option: &RequestOption,
     ) -> Result<CreateCardInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/cardkit/v1/card_instances");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CardInstanceData>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateCardInstanceQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateCardInstanceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateCardInstanceResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/cardkit/v1/card_instances",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<CardInstanceData>()
+        .await?;
         Ok(CreateCardInstanceResp {
             api_resp,
             code_error: raw.code_error,
@@ -84,12 +268,26 @@ impl<'a> CardInstanceResource<'a> {
         body: &UpdateCardInstanceReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/cardkit/v1/card_instances/{instance_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        self.update_by_query(&UpdateCardInstanceQuery::new(instance_id, body), option)
+            .await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateCardInstanceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/cardkit/v1/card_instances/{}", query.instance_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -107,12 +305,25 @@ impl CardResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateCardResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/cardkit/v1/cards");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.create_by_query(&CreateCardQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateCardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateCardResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/cardkit/v1/cards",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateCardResp {
             api_resp,
             code_error,
@@ -126,13 +337,26 @@ impl CardResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateCardResp, LarkError> {
-        let path = format!("/open-apis/cardkit/v1/cards/{card_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.update_by_query(&UpdateCardQuery::new(card_id, body), option)
+            .await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateCardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateCardResp, LarkError> {
+        let path = format!("/open-apis/cardkit/v1/cards/{}", query.card_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UpdateCardResp {
             api_resp,
             code_error,
@@ -146,13 +370,26 @@ impl CardResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateCardResp, LarkError> {
-        let path = format!("/open-apis/cardkit/v1/cards/{card_id}/batch_update");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.batch_update_by_query(&BatchUpdateCardQuery::new(card_id, body), option)
+            .await
+    }
+
+    pub async fn batch_update_by_query(
+        &self,
+        query: &BatchUpdateCardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateCardResp, LarkError> {
+        let path = format!("/open-apis/cardkit/v1/cards/{}/batch_update", query.card_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchUpdateCardResp {
             api_resp,
             code_error,
@@ -165,12 +402,25 @@ impl CardResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<IdConvertCardResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/cardkit/v1/cards/id_convert");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.id_convert_by_query(&IdConvertCardQuery::new(body), option)
+            .await
+    }
+
+    pub async fn id_convert_by_query(
+        &self,
+        query: &IdConvertCardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<IdConvertCardResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/cardkit/v1/cards/id_convert",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(IdConvertCardResp {
             api_resp,
             code_error,
@@ -184,13 +434,26 @@ impl CardResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<SettingsCardResp, LarkError> {
-        let path = format!("/open-apis/cardkit/v1/cards/{card_id}/settings");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.settings_by_query(&SettingsCardQuery::new(card_id, body), option)
+            .await
+    }
+
+    pub async fn settings_by_query(
+        &self,
+        query: &SettingsCardQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SettingsCardResp, LarkError> {
+        let path = format!("/open-apis/cardkit/v1/cards/{}/settings", query.card_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SettingsCardResp {
             api_resp,
             code_error,
@@ -210,13 +473,26 @@ impl CardElementResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateCardElementResp, LarkError> {
-        let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.create_by_query(&CreateCardElementQuery::new(card_id, body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateCardElementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateCardElementResp, LarkError> {
+        let path = format!("/open-apis/cardkit/v1/cards/{}/elements", query.card_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateCardElementResp {
             api_resp,
             code_error,
@@ -231,13 +507,32 @@ impl CardElementResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateCardElementResp, LarkError> {
-        let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements/{element_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.update_by_query(
+            &UpdateCardElementQuery::new(card_id, element_id, body),
+            option,
+        )
+        .await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateCardElementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateCardElementResp, LarkError> {
+        let path = format!(
+            "/open-apis/cardkit/v1/cards/{}/elements/{}",
+            query.card_id, query.element_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UpdateCardElementResp {
             api_resp,
             code_error,
@@ -251,11 +546,28 @@ impl CardElementResource<'_> {
         element_id: &str,
         option: &RequestOption,
     ) -> Result<DeleteCardElementResp, LarkError> {
-        let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements/{element_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.delete_by_query(&DeleteCardElementQuery::new(card_id, element_id), option)
+            .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteCardElementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteCardElementResp, LarkError> {
+        let path = format!(
+            "/open-apis/cardkit/v1/cards/{}/elements/{}",
+            query.card_id, query.element_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteCardElementResp {
             api_resp,
             code_error,
@@ -270,13 +582,32 @@ impl CardElementResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<PatchCardElementResp, LarkError> {
-        let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements/{element_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.patch_by_query(
+            &PatchCardElementQuery::new(card_id, element_id, body),
+            option,
+        )
+        .await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchCardElementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchCardElementResp, LarkError> {
+        let path = format!(
+            "/open-apis/cardkit/v1/cards/{}/elements/{}",
+            query.card_id, query.element_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchCardElementResp {
             api_resp,
             code_error,
@@ -291,13 +622,32 @@ impl CardElementResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<ContentCardElementResp, LarkError> {
-        let path = format!("/open-apis/cardkit/v1/cards/{card_id}/elements/{element_id}/content");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.content_by_query(
+            &ContentCardElementQuery::new(card_id, element_id, body),
+            option,
+        )
+        .await
+    }
+
+    pub async fn content_by_query(
+        &self,
+        query: &ContentCardElementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ContentCardElementResp, LarkError> {
+        let path = format!(
+            "/open-apis/cardkit/v1/cards/{}/elements/{}/content",
+            query.card_id, query.element_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ContentCardElementResp {
             api_resp,
             code_error,
