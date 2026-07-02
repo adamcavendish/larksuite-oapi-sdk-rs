@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::EmptyResp;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, RestRequest};
 
 // ── Domain types ──
 
@@ -322,11 +321,16 @@ impl<'a> SessionResource<'a> {
         body: &CreateSessionReqBody,
         option: &RequestOption,
     ) -> Result<CreateSessionResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/aily/v1/sessions");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SessionData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/aily/v1/sessions",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<SessionData>()
+        .await?;
         Ok(CreateSessionResp {
             api_resp,
             code_error: raw.code_error,
@@ -340,10 +344,15 @@ impl<'a> SessionResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -356,10 +365,15 @@ impl<'a> SessionResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSessionResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<SessionData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<SessionData>()
+        .await?;
         Ok(GetSessionResp {
             api_resp,
             code_error: raw.code_error,
@@ -374,11 +388,16 @@ impl<'a> SessionResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateSessionResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<SessionData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<SessionData>()
+        .await?;
         Ok(UpdateSessionResp {
             api_resp,
             code_error: raw.code_error,
@@ -399,11 +418,16 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateMessageResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/messages");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MessageData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<MessageData>()
+        .await?;
         Ok(CreateMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -419,10 +443,15 @@ impl<'a> MessageResource<'a> {
     ) -> Result<GetMessageResp, LarkError> {
         let path =
             format!("/open-apis/aily/v1/sessions/{aily_session_id}/messages/{aily_message_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<MessageData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<MessageData>()
+        .await?;
         Ok(GetMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -438,16 +467,17 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<ListMessageResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/messages");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<MessageListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send::<MessageListData>()
+        .await?;
         Ok(ListMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -468,10 +498,15 @@ impl<'a> RunResource<'a> {
         option: &RequestOption,
     ) -> Result<CancelRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs/{run_id}/cancel");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<RunData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<RunData>()
+        .await?;
         Ok(CancelRunResp {
             api_resp,
             code_error: raw.code_error,
@@ -486,11 +521,16 @@ impl<'a> RunResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<RunData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<RunData>()
+        .await?;
         Ok(CreateRunResp {
             api_resp,
             code_error: raw.code_error,
@@ -505,10 +545,15 @@ impl<'a> RunResource<'a> {
         option: &RequestOption,
     ) -> Result<GetRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs/{run_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<RunData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<RunData>()
+        .await?;
         Ok(GetRunResp {
             api_resp,
             code_error: raw.code_error,
@@ -524,16 +569,17 @@ impl<'a> RunResource<'a> {
         option: &RequestOption,
     ) -> Result<ListRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RunListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send::<RunListData>()
+        .await?;
         Ok(ListRunResp {
             api_resp,
             code_error: raw.code_error,
@@ -555,14 +601,17 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        if let Some(v) = tenant_type {
-            api_req.query_params.set("tenant_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DataAssetData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("tenant_type", tenant_type)
+        .json_body(body)?
+        .send::<DataAssetData>()
+        .await?;
         Ok(CreateDataAssetResp {
             api_resp,
             code_error: raw.code_error,
@@ -578,13 +627,16 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/{data_asset_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = tenant_type {
-            api_req.query_params.set("tenant_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DataAssetData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("tenant_type", tenant_type)
+        .send::<DataAssetData>()
+        .await?;
         Ok(DeleteDataAssetResp {
             api_resp,
             code_error: raw.code_error,
@@ -600,13 +652,16 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<GetDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/{data_asset_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = tenant_type {
-            api_req.query_params.set("tenant_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DataAssetData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("tenant_type", tenant_type)
+        .send::<DataAssetData>()
+        .await?;
         Ok(GetDataAssetResp {
             api_resp,
             code_error: raw.code_error,
@@ -624,19 +679,18 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<ListDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = tenant_type {
-            api_req.query_params.set("tenant_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DataAssetListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .query("tenant_type", tenant_type)
+        .send::<DataAssetListData>()
+        .await?;
         Ok(ListDataAssetResp {
             api_resp,
             code_error: raw.code_error,
@@ -652,14 +706,17 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<UploadFileDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/upload_file");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        if let Some(v) = tenant_type {
-            api_req.query_params.set("tenant_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<UploadFileData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("tenant_type", tenant_type)
+        .json_body(body)?
+        .send::<UploadFileData>()
+        .await?;
         Ok(UploadFileDataAssetResp {
             api_resp,
             code_error: raw.code_error,
@@ -683,19 +740,18 @@ impl<'a> DataAssetTagResource<'a> {
         option: &RequestOption,
     ) -> Result<ListDataAssetTagResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_asset_tags");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = tenant_type {
-            api_req.query_params.set("tenant_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DataAssetTagListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .query("tenant_type", tenant_type)
+        .send::<DataAssetTagListData>()
+        .await?;
         Ok(ListDataAssetTagResp {
             api_resp,
             code_error: raw.code_error,
@@ -716,11 +772,16 @@ impl<'a> KnowledgeResource<'a> {
         option: &RequestOption,
     ) -> Result<AskKnowledgeResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/knowledges/ask");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<AskKnowledgeData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<AskKnowledgeData>()
+        .await?;
         Ok(AskKnowledgeResp {
             api_resp,
             code_error: raw.code_error,
@@ -741,10 +802,15 @@ impl<'a> SkillResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSkillResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/skills/{skill_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<SkillData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<SkillData>()
+        .await?;
         Ok(GetSkillResp {
             api_resp,
             code_error: raw.code_error,
@@ -760,16 +826,17 @@ impl<'a> SkillResource<'a> {
         option: &RequestOption,
     ) -> Result<ListSkillResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/skills");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<SkillListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send::<SkillListData>()
+        .await?;
         Ok(ListSkillResp {
             api_resp,
             code_error: raw.code_error,
@@ -785,11 +852,16 @@ impl<'a> SkillResource<'a> {
         option: &RequestOption,
     ) -> Result<StartSkillResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/skills/{skill_id}/start");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<StartSkillData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<StartSkillData>()
+        .await?;
         Ok(StartSkillResp {
             api_resp,
             code_error: raw.code_error,
