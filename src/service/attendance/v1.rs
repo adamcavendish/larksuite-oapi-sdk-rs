@@ -3,10 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::resp::{ApiResp, CodeError};
+use crate::req::RequestOption;
 use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
-use crate::transport;
 
 // ── Domain types ──
 
@@ -560,10 +558,16 @@ impl<'a> GroupResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/groups/{group_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -648,12 +652,17 @@ impl<'a> GroupResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchGroupResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/groups/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/attendance/v1/groups/search",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(SearchGroupResp {
             api_resp,
             code_error,
@@ -705,11 +714,17 @@ impl<'a> ShiftResource<'a> {
         body: &CreateShiftReqBody,
         option: &RequestOption,
     ) -> Result<CreateShiftResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/shifts");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ShiftData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/attendance/v1/shifts",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<ShiftData>()
+        .await?;
+
         Ok(CreateShiftResp {
             api_resp,
             code_error: raw.code_error,
@@ -723,10 +738,16 @@ impl<'a> ShiftResource<'a> {
         option: &RequestOption,
     ) -> Result<GetShiftResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/shifts/{shift_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<ShiftData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<ShiftData>()
+        .await?;
+
         Ok(GetShiftResp {
             api_resp,
             code_error: raw.code_error,
@@ -740,10 +761,16 @@ impl<'a> ShiftResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/shifts/{shift_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -789,12 +816,17 @@ impl<'a> ShiftResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryShiftResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/shifts/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/attendance/v1/shifts/query",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryShiftResp {
             api_resp,
             code_error,
@@ -1076,19 +1108,6 @@ impl<'a> LeaveAccrualResource<'a> {
             code_error: raw.code_error,
             data: raw.data,
         })
-    }
-}
-
-// ── Helpers for v2 pattern (Option<CodeError>) ──
-
-fn parse_v2<T: for<'de> serde::Deserialize<'de>>(
-    api_resp: ApiResp,
-    raw: crate::resp::RawResponse<T>,
-) -> (ApiResp, Option<CodeError>, Option<T>) {
-    if raw.code_error.code != 0 {
-        (api_resp, Some(raw.code_error), None)
-    } else {
-        (api_resp, None, raw.data)
     }
 }
 
@@ -1410,15 +1429,17 @@ impl<'a> ArchiveRuleResource<'a> {
         body: &UploadReportArchiveRuleReqBody,
         option: &RequestOption,
     ) -> Result<UploadReportArchiveRuleResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/upload_report",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(UploadReportArchiveRuleResp {
             api_resp,
             code_error,
@@ -1431,15 +1452,17 @@ impl<'a> ArchiveRuleResource<'a> {
         body: &UserStatsFieldsQueryArchiveRuleReqBody,
         option: &RequestOption,
     ) -> Result<UserStatsFieldsQueryArchiveRuleResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/user_stats_fields_query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(UserStatsFieldsQueryArchiveRuleResp {
             api_resp,
             code_error,
@@ -1452,15 +1475,17 @@ impl<'a> ArchiveRuleResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<DelReportArchiveRuleResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/archive_rule/del_report",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(DelReportArchiveRuleResp {
             api_resp,
             code_error,
@@ -1582,12 +1607,17 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchLeaveEmployExpireRecordResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/leave_employ_expire_records/{leave_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(PatchLeaveEmployExpireRecordResp {
             api_resp,
             code_error,
@@ -1601,11 +1631,16 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
         option: &RequestOption,
     ) -> Result<GetLeaveEmployExpireRecordResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/leave_employ_expire_records/{leave_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(GetLeaveEmployExpireRecordResp {
             api_resp,
             code_error,
@@ -1624,15 +1659,17 @@ impl<'a> ApprovalInfoProcessResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<ProcessApprovalInfoResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/approval_infos/process",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ProcessApprovalInfoResp {
             api_resp,
             code_error,
@@ -1668,12 +1705,17 @@ impl<'a> FileResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<UploadFileResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/attendance/v1/files/upload");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/attendance/v1/files/upload",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(UploadFileResp {
             api_resp,
             code_error,
@@ -1693,16 +1735,18 @@ impl<'a> UserApprovalResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<CreateUserApprovalResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_approvals",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateUserApprovalResp {
             api_resp,
             code_error,
@@ -1716,16 +1760,18 @@ impl<'a> UserApprovalResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserApprovalResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_approvals/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserApprovalResp {
             api_resp,
             code_error,
@@ -1745,16 +1791,18 @@ impl<'a> UserDailyShiftResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<BatchCreateUserDailyShiftResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_daily_shifts/batch_create",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchCreateUserDailyShiftResp {
             api_resp,
             code_error,
@@ -1768,16 +1816,18 @@ impl<'a> UserDailyShiftResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<BatchCreateTempUserDailyShiftResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_daily_shifts/batch_create_temp",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchCreateTempUserDailyShiftResp {
             api_resp,
             code_error,
@@ -1791,16 +1841,18 @@ impl<'a> UserDailyShiftResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserDailyShiftResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_daily_shifts/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserDailyShiftResp {
             api_resp,
             code_error,
@@ -1820,16 +1872,18 @@ impl<'a> UserFlowResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<BatchCreateUserFlowResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_flows/batch_create",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchCreateUserFlowResp {
             api_resp,
             code_error,
@@ -1842,15 +1896,17 @@ impl<'a> UserFlowResource<'a> {
         body: &BatchDelUserFlowReqBody,
         option: &RequestOption,
     ) -> Result<BatchDelUserFlowResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_flows/batch_del",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchDelUserFlowResp {
             api_resp,
             code_error,
@@ -1865,12 +1921,17 @@ impl<'a> UserFlowResource<'a> {
         option: &RequestOption,
     ) -> Result<GetUserFlowResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/user_flows/{user_flow_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(GetUserFlowResp {
             api_resp,
             code_error,
@@ -1884,16 +1945,18 @@ impl<'a> UserFlowResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserFlowResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_flows/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserFlowResp {
             api_resp,
             code_error,
@@ -1913,16 +1976,18 @@ impl<'a> UserSettingResource2<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<ModifyUserSettingResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_settings/modify",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ModifyUserSettingResp {
             api_resp,
             code_error,
@@ -1936,16 +2001,18 @@ impl<'a> UserSettingResource2<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserSettingResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/attendance/v1/user_settings/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserSettingResp {
             api_resp,
             code_error,
@@ -1965,16 +2032,18 @@ impl<'a> UserStatsDataResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserStatsDataResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_stats_datas/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserStatsDataResp {
             api_resp,
             code_error,
@@ -1994,16 +2063,18 @@ impl<'a> UserStatsFieldResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserStatsFieldResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_stats_fields/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserStatsFieldResp {
             api_resp,
             code_error,
@@ -2023,16 +2094,18 @@ impl<'a> UserStatsViewResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserStatsViewResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_stats_views/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserStatsViewResp {
             api_resp,
             code_error,
@@ -2048,13 +2121,18 @@ impl<'a> UserStatsViewResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateUserStatsViewResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/user_stats_views/{user_stats_view_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(UpdateUserStatsViewResp {
             api_resp,
             code_error,
@@ -2074,16 +2152,18 @@ impl<'a> UserTaskResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_tasks/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserTaskResp {
             api_resp,
             code_error,
@@ -2103,16 +2183,18 @@ impl<'a> UserTaskRemedyResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<CreateUserTaskRemedyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_task_remedys",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateUserTaskRemedyResp {
             api_resp,
             code_error,
@@ -2126,16 +2208,18 @@ impl<'a> UserTaskRemedyResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserTaskRemedyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_task_remedys/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserTaskRemedyResp {
             api_resp,
             code_error,
@@ -2149,16 +2233,18 @@ impl<'a> UserTaskRemedyResource<'a> {
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<QueryUserAllowedRemedysUserTaskRemedyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_task_remedys/query_user_allowed_remedys",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("employee_type", employee_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("employee_type", employee_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserAllowedRemedysUserTaskRemedyResp {
             api_resp,
             code_error,
