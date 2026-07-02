@@ -5,9 +5,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
+use crate::req::{FormDataField, FormDataValue, RequestOption};
 use crate::service::common::{DownloadResp, EmptyResp, RestRequest};
-use crate::transport;
 
 // ── Domain types ──
 
@@ -1678,12 +1677,17 @@ impl<'a> MessageResource<'a> {
         body: &CreateMessageReqBody,
         option: &RequestOption,
     ) -> Result<CreateMessageResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v1/messages");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("receive_id_type", receive_id_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MessageRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/im/v1/messages",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("receive_id_type", receive_id_type)
+        .json_body(body)?
+        .send::<MessageRespData>()
+        .await?;
         Ok(CreateMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -1698,11 +1702,16 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<ReplyMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/reply");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MessageRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<MessageRespData>()
+        .await?;
         Ok(ReplyMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -1717,11 +1726,16 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1735,11 +1749,16 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MessageRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<MessageRespData>()
+        .await?;
         Ok(UpdateMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -1753,10 +1772,15 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1878,15 +1902,18 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<ForwardMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/forward");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("receive_id_type", receive_id_type);
-        if let Some(v) = uuid {
-            api_req.query_params.set("uuid", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MessageRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("receive_id_type", receive_id_type)
+        .query("uuid", uuid)
+        .json_body(body)?
+        .send::<MessageRespData>()
+        .await?;
         Ok(ForwardMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -1901,19 +1928,18 @@ impl<'a> MessageResource<'a> {
         body: &MergeForwardMessageReqBody,
         option: &RequestOption,
     ) -> Result<MergeForwardMessageResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/im/v1/messages/merge_forward",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("receive_id_type", receive_id_type);
-        if let Some(v) = uuid {
-            api_req.query_params.set("uuid", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MergeForwardMessageRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("receive_id_type", receive_id_type)
+        .query("uuid", uuid)
+        .json_body(body)?
+        .send::<MergeForwardMessageRespData>()
+        .await?;
         Ok(MergeForwardMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -1970,11 +1996,16 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/push_follow_up");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1989,13 +2020,17 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<UrgentAppMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/urgent_app");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("user_id_type", user_id_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UrgentMessageRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<UrgentMessageRespData>()
+        .await?;
         Ok(UrgentAppMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -2011,13 +2046,17 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<UrgentPhoneMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/urgent_phone");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("user_id_type", user_id_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UrgentMessageRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<UrgentMessageRespData>()
+        .await?;
         Ok(UrgentPhoneMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -2033,13 +2072,17 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<UrgentSmsMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/urgent_sms");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("user_id_type", user_id_type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UrgentMessageRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<UrgentMessageRespData>()
+        .await?;
         Ok(UrgentSmsMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -2102,14 +2145,15 @@ impl<'a> MessageReactionResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateMessageReactionResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/reactions");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<CreateMessageReactionRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
+        .json_body(body)?
+        .send::<CreateMessageReactionRespData>()
         .await?;
         Ok(CreateMessageReactionResp {
             api_resp,
@@ -2125,13 +2169,14 @@ impl<'a> MessageReactionResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteMessageReactionResp, LarkError> {
         let path = format!("/open-apis/im/v1/messages/{message_id}/reactions/{reaction_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<DeleteMessageReactionRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
+        .send::<DeleteMessageReactionRespData>()
         .await?;
         Ok(DeleteMessageReactionResp {
             api_resp,
@@ -2240,10 +2285,15 @@ impl<'a> BatchMessageResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/batch_messages/{batch_message_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2256,13 +2306,14 @@ impl<'a> BatchMessageResource<'a> {
         option: &RequestOption,
     ) -> Result<GetProgressBatchMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/batch_messages/{batch_message_id}/get_progress");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<GetProgressBatchMessageRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .send::<GetProgressBatchMessageRespData>()
         .await?;
         Ok(GetProgressBatchMessageResp {
             api_resp,
@@ -2277,11 +2328,15 @@ impl<'a> BatchMessageResource<'a> {
         option: &RequestOption,
     ) -> Result<ReadUserBatchMessageResp, LarkError> {
         let path = format!("/open-apis/im/v1/batch_messages/{batch_message_id}/read_user");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<ReadUserBatchMessageRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<ReadUserBatchMessageRespData>()
+        .await?;
         Ok(ReadUserBatchMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -2342,11 +2397,16 @@ impl<'a> PinResource<'a> {
         body: &CreatePinReqBody,
         option: &RequestOption,
     ) -> Result<CreatePinResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v1/pins");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreatePinRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/im/v1/pins",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<CreatePinRespData>()
+        .await?;
         Ok(CreatePinResp {
             api_resp,
             code_error: raw.code_error,
@@ -2360,10 +2420,15 @@ impl<'a> PinResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/pins/{message_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2446,8 +2511,6 @@ impl<'a> FileResource<'a> {
         data: Vec<u8>,
         option: &RequestOption,
     ) -> Result<CreateFileResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v1/files");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let mut fields = vec![
             FormDataField {
                 name: "file_type".into(),
@@ -2472,9 +2535,16 @@ impl<'a> FileResource<'a> {
                 value: FormDataValue::Text(d.to_string()),
             });
         }
-        api_req.body = Some(ReqBody::FormData(fields));
-        let (api_resp, raw) =
-            transport::request_typed::<CreateFileRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/im/v1/files",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .form_body(fields)
+        .send::<CreateFileRespData>()
+        .await?;
         Ok(CreateFileResp {
             api_resp,
             code_error: raw.code_error,
@@ -2511,8 +2581,6 @@ impl<'a> ImageResource<'a> {
         data: Vec<u8>,
         option: &RequestOption,
     ) -> Result<CreateImageResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v1/images");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
         let fields = vec![
             FormDataField {
                 name: "image_type".into(),
@@ -2527,9 +2595,16 @@ impl<'a> ImageResource<'a> {
                 },
             },
         ];
-        api_req.body = Some(ReqBody::FormData(fields));
-        let (api_resp, raw) =
-            transport::request_typed::<CreateImageRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/im/v1/images",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .form_body(fields)
+        .send::<CreateImageRespData>()
+        .await?;
         Ok(CreateImageResp {
             api_resp,
             code_error: raw.code_error,
@@ -2657,14 +2732,17 @@ impl<'a> ChatResource<'a> {
         body: &CreateChatReqBody,
         option: &RequestOption,
     ) -> Result<CreateChatResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v1/chats");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateChatRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/im/v1/chats",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CreateChatRespData>()
+        .await?;
         Ok(CreateChatResp {
             api_resp,
             code_error: raw.code_error,
@@ -2678,10 +2756,15 @@ impl<'a> ChatResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2729,14 +2812,17 @@ impl<'a> ChatResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2750,11 +2836,16 @@ impl<'a> ChatResource<'a> {
         option: &RequestOption,
     ) -> Result<LinkChatResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/link");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<LinkChatRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<LinkChatRespData>()
+        .await?;
         Ok(LinkChatResp {
             api_resp,
             code_error: raw.code_error,
@@ -2938,18 +3029,18 @@ impl<'a> ChatMembersResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateChatMembersResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/members");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = member_id_type {
-            api_req.query_params.set("member_id_type", v);
-        }
-        if let Some(v) = succeed_type {
-            api_req.query_params.set("succeed_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateChatMembersRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("member_id_type", member_id_type)
+        .query("succeed_type", succeed_type)
+        .json_body(body)?
+        .send::<CreateChatMembersRespData>()
+        .await?;
         Ok(CreateChatMembersResp {
             api_resp,
             code_error: raw.code_error,
@@ -2965,14 +3056,17 @@ impl<'a> ChatMembersResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/members");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = member_id_type {
-            api_req.query_params.set("member_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("member_id_type", member_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -3076,10 +3170,15 @@ impl<'a> ChatMembersResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/members/me_join");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -3100,15 +3199,17 @@ impl<'a> ChatManagersResource<'a> {
         option: &RequestOption,
     ) -> Result<AddManagersChatManagersResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/managers/add_managers");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = member_id_type {
-            api_req.query_params.set("member_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UpdateChatManagersRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("member_id_type", member_id_type)
+        .json_body(body)?
+        .send::<UpdateChatManagersRespData>()
+        .await?;
         Ok(AddManagersChatManagersResp {
             api_resp,
             code_error: raw.code_error,
@@ -3124,15 +3225,17 @@ impl<'a> ChatManagersResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteManagersChatManagersResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/managers/delete_managers");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = member_id_type {
-            api_req.query_params.set("member_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<UpdateChatManagersRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("member_id_type", member_id_type)
+        .json_body(body)?
+        .send::<UpdateChatManagersRespData>()
+        .await?;
         Ok(DeleteManagersChatManagersResp {
             api_resp,
             code_error: raw.code_error,
@@ -3207,11 +3310,16 @@ impl<'a> ChatAnnouncementResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/announcement");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -3324,14 +3432,17 @@ impl<'a> ChatModerationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/moderation");
-        let mut api_req = ApiReq::new(http::Method::PUT, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -3351,11 +3462,16 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ChatTabsRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<ChatTabsRespData>()
+        .await?;
         Ok(CreateChatTabResp {
             api_resp,
             code_error: raw.code_error,
@@ -3370,11 +3486,16 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteTabsChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs/delete_tabs");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ChatTabsRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<ChatTabsRespData>()
+        .await?;
         Ok(DeleteTabsChatTabResp {
             api_resp,
             code_error: raw.code_error,
@@ -3388,10 +3509,15 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<ListTabsChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs/list_tabs");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<ChatTabsRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<ChatTabsRespData>()
+        .await?;
         Ok(ListTabsChatTabResp {
             api_resp,
             code_error: raw.code_error,
@@ -3406,11 +3532,16 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<SortTabsChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs/sort_tabs");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ChatTabsRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<ChatTabsRespData>()
+        .await?;
         Ok(SortTabsChatTabResp {
             api_resp,
             code_error: raw.code_error,
@@ -3425,11 +3556,16 @@ impl<'a> ChatTabResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateTabsChatTabResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/chat_tabs/update_tabs");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ChatTabsRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<ChatTabsRespData>()
+        .await?;
         Ok(UpdateTabsChatTabResp {
             api_resp,
             code_error: raw.code_error,
@@ -3450,11 +3586,16 @@ impl<'a> ChatTopNoticeResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/top_notice/put_top_notice");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -3467,10 +3608,15 @@ impl<'a> ChatTopNoticeResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/top_notice/delete_top_notice");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -3491,12 +3637,16 @@ impl<'a> ChatMenuItemResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchChatMenuItemResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_items/{menu_item_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<PatchChatMenuItemRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<PatchChatMenuItemRespData>()
+        .await?;
         Ok(PatchChatMenuItemResp {
             api_resp,
             code_error: raw.code_error,
@@ -3517,11 +3667,16 @@ impl<'a> ChatMenuTreeResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateChatMenuTreeResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_tree");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ChatMenuTreeRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<ChatMenuTreeRespData>()
+        .await?;
         Ok(CreateChatMenuTreeResp {
             api_resp,
             code_error: raw.code_error,
@@ -3536,11 +3691,16 @@ impl<'a> ChatMenuTreeResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteChatMenuTreeResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_tree");
-        let mut api_req = ApiReq::new(http::Method::DELETE, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ChatMenuTreeRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<ChatMenuTreeRespData>()
+        .await?;
         Ok(DeleteChatMenuTreeResp {
             api_resp,
             code_error: raw.code_error,
@@ -3554,10 +3714,15 @@ impl<'a> ChatMenuTreeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetChatMenuTreeResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_tree");
-        let mut api_req = ApiReq::new(http::Method::GET, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<ChatMenuTreeRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<ChatMenuTreeRespData>()
+        .await?;
         Ok(GetChatMenuTreeResp {
             api_resp,
             code_error: raw.code_error,
@@ -3572,11 +3737,16 @@ impl<'a> ChatMenuTreeResource<'a> {
         option: &RequestOption,
     ) -> Result<SortChatMenuTreeResp, LarkError> {
         let path = format!("/open-apis/im/v1/chats/{chat_id}/menu_tree/sort");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ChatMenuTreeRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<ChatMenuTreeRespData>()
+        .await?;
         Ok(SortChatMenuTreeResp {
             api_resp,
             code_error: raw.code_error,
@@ -3599,15 +3769,18 @@ impl<'a> ThreadResource<'a> {
         option: &RequestOption,
     ) -> Result<ForwardThreadResp, LarkError> {
         let path = format!("/open-apis/im/v1/threads/{thread_id}/forward");
-        let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("receive_id_type", receive_id_type);
-        if let Some(v) = uuid {
-            api_req.query_params.set("uuid", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<MessageRespData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("receive_id_type", receive_id_type)
+        .query("uuid", uuid)
+        .json_body(body)?
+        .send::<MessageRespData>()
+        .await?;
         Ok(ForwardThreadResp {
             api_resp,
             code_error: raw.code_error,
