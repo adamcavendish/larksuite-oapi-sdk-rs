@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::EmptyResp;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -49,6 +48,99 @@ pub struct UpdateDeviceReqBody {
     pub status: Option<i32>,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListUserDeviceQuery<'a> {
+    pub user_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListUserDeviceQuery<'a> {
+    pub fn new(user_id: &'a str) -> Self {
+        Self {
+            user_id,
+            user_id_type: None,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page = page;
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateUserDeviceQuery<'a> {
+    pub device_id: &'a str,
+    pub body: &'a UpdateDeviceReqBody,
+}
+
+impl<'a> UpdateUserDeviceQuery<'a> {
+    pub fn new(device_id: &'a str, body: &'a UpdateDeviceReqBody) -> Self {
+        Self { device_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct BindUserAuthDataRelationQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> BindUserAuthDataRelationQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UnbindUserAuthDataRelationQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UnbindUserAuthDataRelationQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── Resources ──
 
 pub struct UserDeviceResource<'a> {
@@ -64,20 +156,29 @@ impl<'a> UserDeviceResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListDeviceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/mdm/v1/user_devices");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("user_id", user_id);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<DeviceListData>(self.config, &api_req, option).await?;
+        let query = ListUserDeviceQuery::new(user_id)
+            .user_id_type(user_id_type)
+            .page(PageQuery::from_parts(page_size, page_token));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListUserDeviceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListDeviceResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/mdm/v1/user_devices",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id", query.user_id)
+        .query("user_id_type", query.user_id_type)
+        .page_query(query.page)
+        .send::<DeviceListData>()
+        .await?;
         Ok(ListDeviceResp {
             api_resp,
             code_error: raw.code_error,
@@ -91,12 +192,26 @@ impl<'a> UserDeviceResource<'a> {
         body: &UpdateDeviceReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path = format!("/open-apis/mdm/v1/user_devices/{device_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = UpdateUserDeviceQuery::new(device_id, body);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateUserDeviceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!("/open-apis/mdm/v1/user_devices/{}", query.device_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -115,17 +230,26 @@ impl<'a> UserAuthDataRelationResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = BindUserAuthDataRelationQuery::new(body).user_id_type(user_id_type);
+        self.bind_by_query(&query, option).await
+    }
+
+    pub async fn bind_by_query(
+        &self,
+        query: &BindUserAuthDataRelationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/mdm/v1/user_auth_data_relations/bind",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -138,17 +262,26 @@ impl<'a> UserAuthDataRelationResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = UnbindUserAuthDataRelationQuery::new(body).user_id_type(user_id_type);
+        self.unbind_by_query(&query, option).await
+    }
+
+    pub async fn unbind_by_query(
+        &self,
+        query: &UnbindUserAuthDataRelationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/mdm/v1/user_auth_data_relations/unbind",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,

@@ -208,6 +208,10 @@ use larksuite_oapi_sdk_rs::service::{
         PatchPublicMailboxQuery, PublicMailboxMember, UpdateMailgroupQuery,
         UpdatePublicMailboxQuery,
     },
+    mdm::v1::{
+        BindUserAuthDataRelationQuery, ListUserDeviceQuery, UnbindUserAuthDataRelationQuery,
+        UpdateDeviceReqBody, UpdateUserDeviceQuery,
+    },
     mdm::v3::{GetBatchCountryRegionV3Query, ListCountryRegionV3Query},
     meeting_room::v1::{
         ListBuildingQuery as ListMeetingRoomBuildingQuery, ListRoomQuery as ListMeetingRoomQuery,
@@ -7558,7 +7562,77 @@ async fn search_schema_by_query_smoke() {
     assert!(request.contains(r#""name":"priority""#));
 }
 
-// ── Meeting Room ──
+// ── MDM ──
+
+#[tokio::test]
+async fn mdm_v1_user_device_and_auth_relation_by_query_smoke() {
+    let list_body = r#"{"code":0,"msg":"ok","data":{"items":[{"device_id":"device-1","user_id":"ou-1"}],"has_more":false}}"#;
+    let ok_body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, list_body),
+        http_response(200, ok_body),
+        http_response(200, ok_body),
+        http_response(200, ok_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let update_body = UpdateDeviceReqBody { status: Some(2) };
+    let bind_body = serde_json::json!({"user_id":"ou-1","device_id":"device-1"});
+    let unbind_body = serde_json::json!({"user_id":"ou-1","device_id":"device-1"});
+
+    let resp = client
+        .mdm()
+        .user_device
+        .list_by_query(
+            &ListUserDeviceQuery::new("ou-1")
+                .user_id_type("open_id")
+                .page(PageQuery::new().page_size(20).page_token("next-page")),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .mdm()
+        .user_device
+        .update_by_query(
+            &UpdateUserDeviceQuery::new("device-1", &update_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .mdm()
+        .user_auth_data_relation
+        .bind_by_query(
+            &BindUserAuthDataRelationQuery::new(&bind_body).user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .mdm()
+        .user_auth_data_relation
+        .unbind_by_query(
+            &UnbindUserAuthDataRelationQuery::new(&unbind_body).user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/mdm/v1/user_devices?"));
+    assert!(request.contains("PATCH /open-apis/mdm/v1/user_devices/device-1 "));
+    assert!(request.contains("POST /open-apis/mdm/v1/user_auth_data_relations/bind?"));
+    assert!(request.contains("POST /open-apis/mdm/v1/user_auth_data_relations/unbind?"));
+    assert!(request.contains("user_id=ou-1"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains(r#""status":2"#));
+    assert!(request.contains(r#""device_id":"device-1""#));
+}
 
 #[tokio::test]
 async fn mdm_country_region_v3_by_query_smoke() {
