@@ -1096,12 +1096,9 @@ impl<'a> CalendarResource<'a> {
         )
         .page_query(query.page)
         .json_body(query.body)?;
-        let (api_resp, raw) = request.send::<SearchCalendarData>().await?;
-        Ok(SearchCalendarResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        request
+            .send_response::<SearchCalendarData, SearchCalendarResp>()
+            .await
     }
 
     pub async fn subscribe(
@@ -1652,12 +1649,9 @@ impl<'a> CalendarEventResource<'a> {
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
         .json_body(query.body)?;
-        let (api_resp, raw) = request.send::<SearchEventData>().await?;
-        Ok(SearchEventResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        request
+            .send_response::<SearchEventData, SearchEventResp>()
+            .await
     }
 
     pub async fn subscription(
@@ -2214,12 +2208,9 @@ impl<'a> FreeBusyResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?;
-        let (api_resp, raw) = request.send::<FreeBusyData>().await?;
-        Ok(ListFreeBusyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        request
+            .send_response::<FreeBusyData, ListFreeBusyResp>()
+            .await
     }
 
     pub async fn batch(
@@ -2246,12 +2237,9 @@ impl<'a> FreeBusyResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?;
-        let (api_resp, raw) = request.send::<BatchFreeBusyData>().await?;
-        Ok(BatchFreeBusyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        request
+            .send_response::<BatchFreeBusyData, BatchFreeBusyResp>()
+            .await
     }
 }
 
