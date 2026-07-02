@@ -771,38 +771,17 @@ async fn task_v2_tasklist_by_query_smoke() {
         r#"{"code":0,"msg":"ok","data":{"tasklist":{"guid":"tasklist-1","name":"Roadmap"}}}"#;
     let tasklist_list_body =
         r#"{"code":0,"msg":"ok","data":{"items":[{"guid":"tasklist-1"}],"has_more":false}}"#;
-    let task_list_body =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"guid":"task-guid-1"}],"has_more":false}}"#;
-    let activity_body = r#"{"code":0,"msg":"ok","data":{"activity_subscription":{"guid":"activity-1","name":"Changes"}}}"#;
-    let activity_list_body =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"guid":"activity-1"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, tasklist_body),
         http_response(200, tasklist_body),
         http_response(200, tasklist_body),
         http_response(200, tasklist_list_body),
-        http_response(200, tasklist_body),
-        http_response(200, tasklist_body),
-        http_response(200, task_list_body),
-        http_response(200, activity_body),
-        http_response(200, activity_body),
-        http_response(200, activity_body),
-        http_response(200, activity_list_body),
     ])
     .await;
 
     let client = client_for(addr);
     let create_body = serde_json::json!({"name":"Roadmap"});
     let patch_body = serde_json::json!({"name":"Roadmap updated"});
-    let members_body = serde_json::json!({"members":["u-1"]});
-    let activity_body = serde_json::json!({"event":"task_changed"});
-    let activity_patch_body = serde_json::json!({"event":"comment_changed"});
-    let task_params = TaskListParams::new()
-        .page(PageQuery::new().page_size(20).page_token("next-page"))
-        .completed(false)
-        .created_from("2026-01-01")
-        .created_to("2026-01-31")
-        .user_id_type("open_id");
 
     client
         .task_v2()
@@ -842,6 +821,41 @@ async fn task_v2_tasklist_by_query_smoke() {
         )
         .await
         .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/task/v2/tasklists?"));
+    assert!(request.contains("GET /open-apis/task/v2/tasklists/tasklist-1?"));
+    assert!(request.contains("PATCH /open-apis/task/v2/tasklists/tasklist-1?"));
+    assert!(request.contains("GET /open-apis/task/v2/tasklists?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains(r#""name":"Roadmap""#));
+    assert!(request.contains(r#""name":"Roadmap updated""#));
+}
+
+#[tokio::test]
+async fn task_v2_tasklist_members_and_tasks_by_query_smoke() {
+    let tasklist_body =
+        r#"{"code":0,"msg":"ok","data":{"tasklist":{"guid":"tasklist-1","name":"Roadmap"}}}"#;
+    let task_list_body =
+        r#"{"code":0,"msg":"ok","data":{"items":[{"guid":"task-guid-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, tasklist_body),
+        http_response(200, tasklist_body),
+        http_response(200, task_list_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let members_body = serde_json::json!({"members":["u-1"]});
+    let task_params = TaskListParams::new()
+        .page(PageQuery::new().page_size(20).page_token("next-page"))
+        .completed(false)
+        .created_from("2026-01-01")
+        .created_to("2026-01-31")
+        .user_id_type("open_id");
+
     client
         .task_v2()
         .tasklist
@@ -869,6 +883,37 @@ async fn task_v2_tasklist_by_query_smoke() {
         )
         .await
         .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/task/v2/tasklists/tasklist-1/add_members?"));
+    assert!(request.contains("POST /open-apis/task/v2/tasklists/tasklist-1/remove_members?"));
+    assert!(request.contains("GET /open-apis/task/v2/tasklists/tasklist-1/tasks?"));
+    assert!(request.contains("page_size=20"));
+    assert!(request.contains("page_token=next-page"));
+    assert!(request.contains("completed=false"));
+    assert!(request.contains("created_from=2026-01-01"));
+    assert!(request.contains("created_to=2026-01-31"));
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains(r#""members":["u-1"]"#));
+}
+
+#[tokio::test]
+async fn task_v2_tasklist_activity_subscription_by_query_smoke() {
+    let activity_body = r#"{"code":0,"msg":"ok","data":{"activity_subscription":{"guid":"activity-1","name":"Changes"}}}"#;
+    let activity_list_body =
+        r#"{"code":0,"msg":"ok","data":{"items":[{"guid":"activity-1"}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, activity_body),
+        http_response(200, activity_body),
+        http_response(200, activity_body),
+        http_response(200, activity_list_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let activity_body = serde_json::json!({"event":"task_changed"});
+    let activity_patch_body = serde_json::json!({"event":"comment_changed"});
+
     client
         .task_v2()
         .tasklist
@@ -916,13 +961,6 @@ async fn task_v2_tasklist_by_query_smoke() {
         .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
-    assert!(request.contains("POST /open-apis/task/v2/tasklists?"));
-    assert!(request.contains("GET /open-apis/task/v2/tasklists/tasklist-1?"));
-    assert!(request.contains("PATCH /open-apis/task/v2/tasklists/tasklist-1?"));
-    assert!(request.contains("GET /open-apis/task/v2/tasklists?"));
-    assert!(request.contains("POST /open-apis/task/v2/tasklists/tasklist-1/add_members?"));
-    assert!(request.contains("POST /open-apis/task/v2/tasklists/tasklist-1/remove_members?"));
-    assert!(request.contains("GET /open-apis/task/v2/tasklists/tasklist-1/tasks?"));
     assert!(
         request.contains("POST /open-apis/task/v2/tasklists/tasklist-1/activity_subscriptions?")
     );
@@ -935,16 +973,8 @@ async fn task_v2_tasklist_by_query_smoke() {
     assert!(
         request.contains("GET /open-apis/task/v2/tasklists/tasklist-1/activity_subscriptions?")
     );
-    assert!(request.contains("page_size=20"));
-    assert!(request.contains("page_token=next-page"));
-    assert!(request.contains("completed=false"));
-    assert!(request.contains("created_from=2026-01-01"));
-    assert!(request.contains("created_to=2026-01-31"));
     assert!(request.contains("limit=50"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""name":"Roadmap""#));
-    assert!(request.contains(r#""name":"Roadmap updated""#));
-    assert!(request.contains(r#""members":["u-1"]"#));
     assert!(request.contains(r#""event":"task_changed""#));
     assert!(request.contains(r#""event":"comment_changed""#));
 }

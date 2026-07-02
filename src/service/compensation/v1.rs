@@ -96,7 +96,7 @@ impl ArchiveResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateArchiveResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/archives",
@@ -104,13 +104,8 @@ impl ArchiveResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateArchiveResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateArchiveResp>()
+        .await
     }
 
     pub async fn query(
@@ -118,7 +113,7 @@ impl ArchiveResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryArchiveResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/archives/query",
@@ -126,13 +121,8 @@ impl ArchiveResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryArchiveResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryArchiveResp>()
+        .await
     }
 }
 
@@ -149,7 +139,7 @@ impl ChangeReasonResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListChangeReasonResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/change_reasons",
@@ -158,13 +148,8 @@ impl ChangeReasonResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListChangeReasonResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListChangeReasonResp>()
+        .await
     }
 }
 
@@ -181,7 +166,7 @@ impl IndicatorResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListIndicatorResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/indicators",
@@ -190,13 +175,8 @@ impl IndicatorResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListIndicatorResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListIndicatorResp>()
+        .await
     }
 }
 
@@ -213,7 +193,7 @@ impl ItemResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListItemResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/items",
@@ -222,13 +202,8 @@ impl ItemResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListItemResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListItemResp>()
+        .await
     }
 }
 
@@ -245,7 +220,7 @@ impl ItemCategoryResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListItemCategoryResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/item_categories",
@@ -254,13 +229,8 @@ impl ItemCategoryResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListItemCategoryResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListItemCategoryResp>()
+        .await
     }
 }
 
@@ -276,7 +246,7 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchCreateLumpSumPaymentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/batch_create",
@@ -284,13 +254,8 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchCreateLumpSumPaymentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchCreateLumpSumPaymentResp>()
+        .await
     }
 
     pub async fn batch_remove(
@@ -298,7 +263,7 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchRemoveLumpSumPaymentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/batch_remove",
@@ -306,13 +271,8 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchRemoveLumpSumPaymentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchRemoveLumpSumPaymentResp>()
+        .await
     }
 
     pub async fn batch_update(
@@ -320,7 +280,7 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateLumpSumPaymentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/batch_update",
@@ -328,13 +288,8 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchUpdateLumpSumPaymentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateLumpSumPaymentResp>()
+        .await
     }
 
     pub async fn query(
@@ -342,7 +297,7 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryLumpSumPaymentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/query",
@@ -350,13 +305,8 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryLumpSumPaymentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryLumpSumPaymentResp>()
+        .await
     }
 
     pub async fn query_detail(
@@ -364,7 +314,7 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryDetailLumpSumPaymentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/query_detail",
@@ -372,13 +322,8 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryDetailLumpSumPaymentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryDetailLumpSumPaymentResp>()
+        .await
     }
 }
 
@@ -394,7 +339,7 @@ impl RecurringPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchCreateRecurringPaymentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/batch_create",
@@ -402,13 +347,8 @@ impl RecurringPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchCreateRecurringPaymentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchCreateRecurringPaymentResp>()
+        .await
     }
 
     pub async fn batch_remove(
@@ -416,7 +356,7 @@ impl RecurringPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchRemoveRecurringPaymentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/batch_remove",
@@ -424,13 +364,8 @@ impl RecurringPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchRemoveRecurringPaymentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchRemoveRecurringPaymentResp>()
+        .await
     }
 
     pub async fn batch_update(
@@ -438,7 +373,7 @@ impl RecurringPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateRecurringPaymentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/batch_update",
@@ -446,13 +381,8 @@ impl RecurringPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchUpdateRecurringPaymentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateRecurringPaymentResp>()
+        .await
     }
 
     pub async fn query(
@@ -460,7 +390,7 @@ impl RecurringPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryRecurringPaymentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/query",
@@ -468,13 +398,8 @@ impl RecurringPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryRecurringPaymentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryRecurringPaymentResp>()
+        .await
     }
 }
 
@@ -490,7 +415,7 @@ impl SocialArchiveResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QuerySocialArchiveResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/social_archive/query",
@@ -498,13 +423,8 @@ impl SocialArchiveResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QuerySocialArchiveResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QuerySocialArchiveResp>()
+        .await
     }
 }
 
@@ -520,7 +440,7 @@ impl SocialArchiveAdjustRecordResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QuerySocialArchiveAdjustRecordResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/social_archive_adjust_record/query",
@@ -528,13 +448,8 @@ impl SocialArchiveAdjustRecordResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QuerySocialArchiveAdjustRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QuerySocialArchiveAdjustRecordResp>()
+        .await
     }
 }
 
@@ -546,20 +461,15 @@ pub struct SocialInsuranceResource<'a> {
 
 impl SocialInsuranceResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListSocialInsuranceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/social_insurances",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListSocialInsuranceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListSocialInsuranceResp>()
+        .await
     }
 }
 
@@ -576,7 +486,7 @@ impl SocialPlanResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSocialPlanResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/social_plans",
@@ -585,13 +495,8 @@ impl SocialPlanResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListSocialPlanResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListSocialPlanResp>()
+        .await
     }
 
     pub async fn query(
@@ -599,7 +504,7 @@ impl SocialPlanResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QuerySocialPlanResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/social_plans/query",
@@ -607,13 +512,8 @@ impl SocialPlanResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QuerySocialPlanResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QuerySocialPlanResp>()
+        .await
     }
 }
 

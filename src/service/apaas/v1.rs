@@ -132,7 +132,7 @@ impl<'a> AppResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAppResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/apaas/v1/apps",
@@ -141,14 +141,8 @@ impl<'a> AppResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ListAppResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListAppResp>()
+        .await
     }
 }
 
@@ -178,12 +172,9 @@ impl<'a> ApplicationAuditLogResource<'a> {
         if let Some(b) = body {
             request = request.json_body(b)?;
         }
-        let (api_resp, code_error, data) = request.send_v2::<serde_json::Value>().await?;
-        Ok(AuditLogListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        request
+            .send_v2_response::<serde_json::Value, AuditLogListResp>()
+            .await
     }
 
     /// 获取数据变更日志详情
@@ -207,12 +198,9 @@ impl<'a> ApplicationAuditLogResource<'a> {
         if let Some(b) = body {
             request = request.json_body(b)?;
         }
-        let (api_resp, code_error, data) = request.send_v2::<serde_json::Value>().await?;
-        Ok(DataChangeLogDetailResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        request
+            .send_v2_response::<serde_json::Value, DataChangeLogDetailResp>()
+            .await
     }
 
     /// 获取数据变更日志列表
@@ -235,12 +223,9 @@ impl<'a> ApplicationAuditLogResource<'a> {
         if let Some(b) = body {
             request = request.json_body(b)?;
         }
-        let (api_resp, code_error, data) = request.send_v2::<serde_json::Value>().await?;
-        Ok(DataChangeLogsListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        request
+            .send_v2_response::<serde_json::Value, DataChangeLogsListResp>()
+            .await
     }
 
     /// 获取审计日志详情
@@ -262,12 +247,9 @@ impl<'a> ApplicationAuditLogResource<'a> {
         if let Some(b) = body {
             request = request.json_body(b)?;
         }
-        let (api_resp, code_error, data) = request.send_v2::<serde_json::Value>().await?;
-        Ok(GetAuditLogResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        request
+            .send_v2_response::<serde_json::Value, GetAuditLogResp>()
+            .await
     }
 }
 
@@ -289,21 +271,15 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/environment_variables/{environment_variable_api_name}"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(GetEnvironmentVariableResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetEnvironmentVariableResp>()
+        .await
     }
 
     /// 查询环境变量列表
@@ -316,7 +292,7 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
     ) -> Result<QueryEnvironmentVariableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/applications/{namespace}/environment_variables/query");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -324,14 +300,8 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryEnvironmentVariableResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryEnvironmentVariableResp>()
+        .await
     }
 }
 
@@ -352,7 +322,7 @@ impl<'a> ApplicationFlowResource<'a> {
         option: &RequestOption,
     ) -> Result<ExecuteFlowResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/flows/{flow_id}/execute");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -360,14 +330,8 @@ impl<'a> ApplicationFlowResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ExecuteFlowResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ExecuteFlowResp>()
+        .await
     }
 }
 
@@ -390,7 +354,7 @@ impl<'a> ApplicationFunctionResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/functions/{function_api_name}/invoke"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -398,14 +362,8 @@ impl<'a> ApplicationFunctionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(InvokeFunctionResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, InvokeFunctionResp>()
+        .await
     }
 }
 
@@ -425,7 +383,7 @@ impl<'a> ApplicationObjectResource<'a> {
         option: &RequestOption,
     ) -> Result<OqlQueryObjectResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/objects/oql_query");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -433,14 +391,8 @@ impl<'a> ApplicationObjectResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(OqlQueryObjectResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, OqlQueryObjectResp>()
+        .await
     }
 
     /// 搜索记录
@@ -452,7 +404,7 @@ impl<'a> ApplicationObjectResource<'a> {
         option: &RequestOption,
     ) -> Result<SearchObjectResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/objects/search");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -460,14 +412,8 @@ impl<'a> ApplicationObjectResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(SearchObjectResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchObjectResp>()
+        .await
     }
 }
 
@@ -490,7 +436,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_create"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -498,14 +444,8 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchCreateRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchCreateRecordResp>()
+        .await
     }
 
     /// 记录批量删除
@@ -520,7 +460,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_delete"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -528,14 +468,8 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<()>()
-        .await?;
-
-        Ok(BatchDeleteRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), BatchDeleteRecordResp>()
+        .await
     }
 
     /// 批量查询对象记录
@@ -550,7 +484,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_query"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -558,14 +492,8 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchQueryRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchQueryRecordResp>()
+        .await
     }
 
     /// 记录批量更新
@@ -580,7 +508,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_update"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -588,14 +516,8 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchUpdateRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateRecordResp>()
+        .await
     }
 
     /// 创建记录
@@ -610,7 +532,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -618,14 +540,8 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(CreateRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateRecordResp>()
+        .await
     }
 
     /// 删除记录
@@ -640,21 +556,15 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/{id}"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-
-        Ok(DeleteRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteRecordResp>()
+        .await
     }
 
     /// 更新记录
@@ -670,7 +580,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/{id}"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -678,14 +588,8 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(PatchRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchRecordResp>()
+        .await
     }
 
     /// 获取记录
@@ -701,7 +605,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/{id}/query"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -709,14 +613,8 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryRecordResp>()
+        .await
     }
 }
 
@@ -738,7 +636,7 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/record_permissions/{record_permission_api_name}/member/batch_create_authorization"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -746,14 +644,8 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchCreateAuthorizationRecordPermissionResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchCreateAuthorizationRecordPermissionResp>()
+        .await
     }
 
     /// POST /open-apis/apaas/v1/applications/:namespace/record_permissions/:record_permission_api_name/member/batch_remove_authorization
@@ -767,7 +659,7 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/record_permissions/{record_permission_api_name}/member/batch_remove_authorization"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -775,14 +667,8 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchRemoveAuthorizationRecordPermissionResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchRemoveAuthorizationRecordPermissionResp>()
+        .await
     }
 }
 
@@ -805,7 +691,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/roles/{role_api_name}/member/batch_create_authorization"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -813,14 +699,8 @@ impl<'a> ApplicationRoleMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchCreateAuthorizationRoleMemberResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchCreateAuthorizationRoleMemberResp>()
+        .await
     }
 
     /// 批量删除角色成员用户和部门
@@ -835,7 +715,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/roles/{role_api_name}/member/batch_remove_authorization"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -843,14 +723,8 @@ impl<'a> ApplicationRoleMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(BatchRemoveAuthorizationRoleMemberResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchRemoveAuthorizationRoleMemberResp>()
+        .await
     }
 
     /// GET /open-apis/apaas/v1/applications/:namespace/roles/:role_api_name/member
@@ -862,21 +736,15 @@ impl<'a> ApplicationRoleMemberResource<'a> {
     ) -> Result<GetRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/applications/{namespace}/roles/{role_api_name}/member");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(GetRoleMemberResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetRoleMemberResp>()
+        .await
     }
 }
 
@@ -895,7 +763,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         option: &RequestOption,
     ) -> Result<CancelApprovalInstanceResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_instances/{approval_instance_id}/cancel");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -903,14 +771,8 @@ impl<'a> ApprovalInstanceResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(CancelApprovalInstanceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CancelApprovalInstanceResp>()
+        .await
     }
 }
 
@@ -929,7 +791,7 @@ impl<'a> ApprovalTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<AddAssigneeApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/add_assignee");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -937,14 +799,8 @@ impl<'a> ApprovalTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(AddAssigneeApprovalTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, AddAssigneeApprovalTaskResp>()
+        .await
     }
 
     /// POST /open-apis/apaas/v1/approval_tasks/:approval_task_id/agree
@@ -955,7 +811,7 @@ impl<'a> ApprovalTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<AgreeApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/agree");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -963,14 +819,8 @@ impl<'a> ApprovalTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(AgreeApprovalTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, AgreeApprovalTaskResp>()
+        .await
     }
 
     /// POST /open-apis/apaas/v1/approval_tasks/:approval_task_id/reject
@@ -981,7 +831,7 @@ impl<'a> ApprovalTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<RejectApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/reject");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -989,14 +839,8 @@ impl<'a> ApprovalTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(RejectApprovalTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RejectApprovalTaskResp>()
+        .await
     }
 
     /// POST /open-apis/apaas/v1/approval_tasks/:approval_task_id/transfer
@@ -1007,7 +851,7 @@ impl<'a> ApprovalTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<TransferApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/transfer");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1015,14 +859,8 @@ impl<'a> ApprovalTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(TransferApprovalTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, TransferApprovalTaskResp>()
+        .await
     }
 }
 
@@ -1040,7 +878,7 @@ impl<'a> SeatActivityResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSeatActivityResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/apaas/v1/seat_activities",
@@ -1049,14 +887,8 @@ impl<'a> SeatActivityResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ListSeatActivityResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListSeatActivityResp>()
+        .await
     }
 }
 
@@ -1074,7 +906,7 @@ impl<'a> SeatAssignmentResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSeatAssignmentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/apaas/v1/seat_assignments",
@@ -1083,14 +915,8 @@ impl<'a> SeatAssignmentResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ListSeatAssignmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListSeatAssignmentResp>()
+        .await
     }
 }
 
@@ -1109,7 +935,7 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<CcUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/cc");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1117,14 +943,8 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(CcUserTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CcUserTaskResp>()
+        .await
     }
 
     /// POST /open-apis/apaas/v1/user_tasks/:task_id/chat_group
@@ -1135,7 +955,7 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<ChatGroupUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/chat_group");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1143,14 +963,8 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ChatGroupUserTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ChatGroupUserTaskResp>()
+        .await
     }
 
     /// POST /open-apis/apaas/v1/user_tasks/:task_id/expediting
@@ -1161,7 +975,7 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<ExpeditingUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/expediting");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1169,14 +983,8 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ExpeditingUserTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ExpeditingUserTaskResp>()
+        .await
     }
 
     /// 获取任务列表
@@ -1186,7 +994,7 @@ impl<'a> UserTaskResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryUserTaskResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/apaas/v1/user_task/query",
@@ -1194,14 +1002,8 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(QueryUserTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryUserTaskResp>()
+        .await
     }
 
     /// POST /open-apis/apaas/v1/user_tasks/:task_id/rollback
@@ -1212,7 +1014,7 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<RollbackUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/rollback");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1220,14 +1022,8 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(RollbackUserTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RollbackUserTaskResp>()
+        .await
     }
 
     /// POST /open-apis/apaas/v1/user_tasks/:task_id/rollback_points
@@ -1238,7 +1034,7 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<RollbackPointsUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/rollback_points");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1246,14 +1042,8 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(RollbackPointsUserTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RollbackPointsUserTaskResp>()
+        .await
     }
 }
 
@@ -1273,7 +1063,7 @@ impl<'a> WorkspaceResource<'a> {
         option: &RequestOption,
     ) -> Result<SqlCommandsWorkspaceResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/sql_commands");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1281,14 +1071,8 @@ impl<'a> WorkspaceResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(SqlCommandsWorkspaceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SqlCommandsWorkspaceResp>()
+        .await
     }
 }
 
@@ -1308,21 +1092,15 @@ impl<'a> WorkspaceEnumResource<'a> {
         option: &RequestOption,
     ) -> Result<EnumGetWorkspaceEnumResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/enums/{enum_name}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(EnumGetWorkspaceEnumResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, EnumGetWorkspaceEnumResp>()
+        .await
     }
 
     /// 获取工作空间下的自定义枚举列表
@@ -1335,7 +1113,7 @@ impl<'a> WorkspaceEnumResource<'a> {
         option: &RequestOption,
     ) -> Result<ListWorkspaceEnumResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/enums");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1344,14 +1122,8 @@ impl<'a> WorkspaceEnumResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ListWorkspaceEnumResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListWorkspaceEnumResp>()
+        .await
     }
 }
 
@@ -1372,7 +1144,7 @@ impl<'a> WorkspaceTableResource<'a> {
         option: &RequestOption,
     ) -> Result<ListWorkspaceTableResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1381,14 +1153,8 @@ impl<'a> WorkspaceTableResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ListWorkspaceTableResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListWorkspaceTableResp>()
+        .await
     }
 
     /// 批量更新数据表中的记录
@@ -1403,7 +1169,7 @@ impl<'a> WorkspaceTableResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records_batch_update"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1411,14 +1177,8 @@ impl<'a> WorkspaceTableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(RecordsBatchUpdateWorkspaceTableResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RecordsBatchUpdateWorkspaceTableResp>()
+        .await
     }
 
     /// 删除数据表中的记录
@@ -1432,7 +1192,7 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<RecordsDeleteWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -1440,14 +1200,8 @@ impl<'a> WorkspaceTableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<()>()
-        .await?;
-
-        Ok(RecordsDeleteWorkspaceTableResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), RecordsDeleteWorkspaceTableResp>()
+        .await
     }
 
     /// 查询数据表数据记录
@@ -1462,7 +1216,7 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<RecordsGetWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1471,14 +1225,8 @@ impl<'a> WorkspaceTableResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(RecordsGetWorkspaceTableResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RecordsGetWorkspaceTableResp>()
+        .await
     }
 
     /// 按条件更新数据表中的记录
@@ -1492,7 +1240,7 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<RecordsPatchWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1500,14 +1248,8 @@ impl<'a> WorkspaceTableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(RecordsPatchWorkspaceTableResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RecordsPatchWorkspaceTableResp>()
+        .await
     }
 
     /// 向数据表中添加或更新记录
@@ -1521,7 +1263,7 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<RecordsPostWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1529,14 +1271,8 @@ impl<'a> WorkspaceTableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(RecordsPostWorkspaceTableResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RecordsPostWorkspaceTableResp>()
+        .await
     }
 
     /// 获取数据表详细信息
@@ -1548,21 +1284,15 @@ impl<'a> WorkspaceTableResource<'a> {
         option: &RequestOption,
     ) -> Result<TableGetWorkspaceTableResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(TableGetWorkspaceTableResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, TableGetWorkspaceTableResp>()
+        .await
     }
 }
 
@@ -1584,7 +1314,7 @@ impl<'a> WorkspaceViewResource<'a> {
     ) -> Result<ViewsGetWorkspaceViewResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/views/{view_name}/records");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1593,14 +1323,8 @@ impl<'a> WorkspaceViewResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ViewsGetWorkspaceViewResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ViewsGetWorkspaceViewResp>()
+        .await
     }
 }
 

@@ -539,7 +539,7 @@ impl RuleExternalResource<'_> {
         query: &CreateRuleExternalQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateRuleExternalResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/acs/v1/rule_external",
@@ -549,13 +549,8 @@ impl RuleExternalResource<'_> {
         .query("rule_id", query.rule_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<RuleExternalData>()
-        .await?;
-        Ok(CreateRuleExternalResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<RuleExternalData, CreateRuleExternalResp>()
+        .await
     }
 
     pub async fn delete(
@@ -572,7 +567,7 @@ impl RuleExternalResource<'_> {
         query: &DeleteRuleExternalQuery<'_>,
         option: &RequestOption,
     ) -> Result<DeleteRuleExternalResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             "/open-apis/acs/v1/rule_external",
@@ -580,13 +575,8 @@ impl RuleExternalResource<'_> {
             option,
         )
         .query("rule_id", query.rule_id)
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteRuleExternalResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteRuleExternalResp>()
+        .await
     }
 
     pub async fn device_bind(
@@ -603,7 +593,7 @@ impl RuleExternalResource<'_> {
         query: &DeviceBindRuleExternalQuery<'_>,
         option: &RequestOption,
     ) -> Result<DeviceBindRuleExternalResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/acs/v1/rule_external/device_bind",
@@ -611,13 +601,8 @@ impl RuleExternalResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(DeviceBindRuleExternalResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, DeviceBindRuleExternalResp>()
+        .await
     }
 
     pub async fn get(
@@ -637,7 +622,7 @@ impl RuleExternalResource<'_> {
         query: &GetRuleExternalQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetRuleExternalResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/acs/v1/rule_external",
@@ -646,13 +631,8 @@ impl RuleExternalResource<'_> {
         )
         .query("device_id", query.device_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<RuleExternalData>()
-        .await?;
-        Ok(GetRuleExternalResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<RuleExternalData, GetRuleExternalResp>()
+        .await
     }
 }
 
@@ -693,20 +673,15 @@ impl AccessRecordAccessPhotoResource<'_> {
             "/open-apis/acs/v1/access_records/{}/access_photo",
             query.access_record_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<AccessRecordAccessPhotoData>()
-        .await?;
-        Ok(GetAccessRecordAccessPhotoResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AccessRecordAccessPhotoData, GetAccessRecordAccessPhotoResp>()
+        .await
     }
 }
 
@@ -787,7 +762,7 @@ impl UserFaceResource<'_> {
         option: &RequestOption,
     ) -> Result<GetUserFaceResp, LarkError> {
         let path = format!("/open-apis/acs/v1/users/{}/face", query.user_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -796,13 +771,8 @@ impl UserFaceResource<'_> {
         )
         .query("is_cropped", query.is_cropped)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<UserFaceData>()
-        .await?;
-        Ok(GetUserFaceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<UserFaceData, GetUserFaceResp>()
+        .await
     }
 
     pub async fn update(
@@ -822,7 +792,7 @@ impl UserFaceResource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateUserFaceResp, LarkError> {
         let path = format!("/open-apis/acs/v1/users/{}/face", query.user_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -831,13 +801,8 @@ impl UserFaceResource<'_> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateUserFaceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateUserFaceResp>()
+        .await
     }
 }
 
@@ -905,7 +870,7 @@ impl VisitorResource<'_> {
         query: &CreateVisitorQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateVisitorResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/acs/v1/visitors",
@@ -914,13 +879,8 @@ impl VisitorResource<'_> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<VisitorData>()
-        .await?;
-        Ok(CreateVisitorResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<VisitorData, CreateVisitorResp>()
+        .await
     }
 
     pub async fn delete(
@@ -939,7 +899,7 @@ impl VisitorResource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteVisitorResp, LarkError> {
         let path = format!("/open-apis/acs/v1/visitors/{}", query.visitor_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -947,13 +907,8 @@ impl VisitorResource<'_> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteVisitorResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteVisitorResp>()
+        .await
     }
 }
 

@@ -877,7 +877,7 @@ impl<'a> DocumentResource<'a> {
         query: &ConvertDocumentQuery<'_>,
         option: &RequestOption,
     ) -> Result<ConvertDocumentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/docx/v1/documents/blocks/convert",
@@ -885,13 +885,8 @@ impl<'a> DocumentResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ConvertDocumentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ConvertDocumentResp>()
+        .await
     }
 
     pub async fn raw_content(
@@ -1249,20 +1244,15 @@ impl ChatAnnouncementResource<'_> {
         option: &RequestOption,
     ) -> Result<GetChatAnnouncementResp, LarkError> {
         let path = format!("/open-apis/docx/v1/chats/{}/announcement", query.chat_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetChatAnnouncementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetChatAnnouncementResp>()
+        .await
     }
 }
 
@@ -1294,7 +1284,7 @@ impl ChatAnnouncementBlockResource<'_> {
             "/open-apis/docx/v1/chats/{}/announcement/blocks/batch_update",
             query.chat_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1304,13 +1294,8 @@ impl ChatAnnouncementBlockResource<'_> {
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchUpdateChatAnnouncementBlockResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateChatAnnouncementBlockResp>()
+        .await
     }
 
     pub async fn get(
@@ -1336,7 +1321,7 @@ impl ChatAnnouncementBlockResource<'_> {
             "/open-apis/docx/v1/chats/{}/announcement/blocks/{}",
             query.chat_id, query.block_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1345,13 +1330,8 @@ impl ChatAnnouncementBlockResource<'_> {
         )
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetChatAnnouncementBlockResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetChatAnnouncementBlockResp>()
+        .await
     }
 
     pub async fn list(
@@ -1379,7 +1359,7 @@ impl ChatAnnouncementBlockResource<'_> {
             "/open-apis/docx/v1/chats/{}/announcement/blocks",
             query.chat_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1389,13 +1369,8 @@ impl ChatAnnouncementBlockResource<'_> {
         .page_query(query.page)
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListChatAnnouncementBlockResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListChatAnnouncementBlockResp>()
+        .await
     }
 }
 
@@ -1426,7 +1401,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
             "/open-apis/docx/v1/chats/{}/announcement/blocks/{}/children/batch_delete",
             query.chat_id, query.block_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -1435,13 +1410,8 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         )
         .query("document_revision_id", query.document_revision_id)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchDeleteChatAnnouncementBlockChildrenResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchDeleteChatAnnouncementBlockChildrenResp>()
+        .await
     }
 
     pub async fn create(
@@ -1468,7 +1438,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
             "/open-apis/docx/v1/chats/{}/announcement/blocks/{}/children",
             query.chat_id, query.block_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1478,13 +1448,8 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateChatAnnouncementBlockChildrenResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateChatAnnouncementBlockChildrenResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1514,7 +1479,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
             "/open-apis/docx/v1/chats/{}/announcement/blocks/{}/children",
             query.chat_id, query.block_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1524,13 +1489,8 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         .page_query(query.page)
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetChatAnnouncementBlockChildrenResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetChatAnnouncementBlockChildrenResp>()
+        .await
     }
 }
 
@@ -1563,7 +1523,7 @@ impl DocumentBlockDescendantResource<'_> {
             "/open-apis/docx/v1/documents/{}/blocks/{}/descendant",
             query.document_id, query.block_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1573,13 +1533,8 @@ impl DocumentBlockDescendantResource<'_> {
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateDocumentBlockDescendantResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateDocumentBlockDescendantResp>()
+        .await
     }
 }
 

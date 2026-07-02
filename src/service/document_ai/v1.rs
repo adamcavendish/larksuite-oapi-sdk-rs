@@ -345,7 +345,7 @@ impl<'a> ChinesePassportResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeChinesePassportRespV2, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/chinese_passport/recognize",
@@ -353,13 +353,8 @@ impl<'a> ChinesePassportResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<ChinesePassportData>()
-        .await?;
-        Ok(RecognizeChinesePassportRespV2 {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ChinesePassportData, RecognizeChinesePassportRespV2>()
+        .await
     }
 }
 
@@ -373,7 +368,7 @@ impl<'a> DrivingLicenseResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeDrivingLicenseRespV2, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/driving_license/recognize",
@@ -381,13 +376,8 @@ impl<'a> DrivingLicenseResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<DrivingLicenseData>()
-        .await?;
-        Ok(RecognizeDrivingLicenseRespV2 {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<DrivingLicenseData, RecognizeDrivingLicenseRespV2>()
+        .await
     }
 }
 
@@ -401,7 +391,7 @@ impl<'a> FoodManageLicenseResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeFoodManageLicenseResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/food_manage_license/recognize",
@@ -409,13 +399,8 @@ impl<'a> FoodManageLicenseResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<FoodManageLicenseData>()
-        .await?;
-        Ok(RecognizeFoodManageLicenseResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<FoodManageLicenseData, RecognizeFoodManageLicenseResp>()
+        .await
     }
 }
 
@@ -429,7 +414,7 @@ impl<'a> FoodProduceLicenseResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeFoodProduceLicenseResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/food_produce_license/recognize",
@@ -437,13 +422,8 @@ impl<'a> FoodProduceLicenseResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<FoodProduceLicenseData>()
-        .await?;
-        Ok(RecognizeFoodProduceLicenseResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<FoodProduceLicenseData, RecognizeFoodProduceLicenseResp>()
+        .await
     }
 }
 
@@ -457,7 +437,7 @@ impl<'a> HealthCertificateResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeHealthCertificateRespV2, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/health_certificate/recognize",
@@ -465,13 +445,8 @@ impl<'a> HealthCertificateResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<HealthCertificateData>()
-        .await?;
-        Ok(RecognizeHealthCertificateRespV2 {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<HealthCertificateData, RecognizeHealthCertificateRespV2>()
+        .await
     }
 }
 
@@ -485,7 +460,7 @@ impl<'a> HkmMainlandTravelPermitResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeHkmMainlandTravelPermitRespV2, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/hkm_mainland_travel_permit/recognize",
@@ -493,13 +468,8 @@ impl<'a> HkmMainlandTravelPermitResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<HkmMainlandTravelPermitData>()
-        .await?;
-        Ok(RecognizeHkmMainlandTravelPermitRespV2 {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<HkmMainlandTravelPermitData, RecognizeHkmMainlandTravelPermitRespV2>()
+        .await
     }
 }
 
@@ -513,7 +483,7 @@ impl<'a> TwMainlandTravelPermitResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeTwMainlandTravelPermitRespV2, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/tw_mainland_travel_permit/recognize",
@@ -521,13 +491,8 @@ impl<'a> TwMainlandTravelPermitResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<TwMainlandTravelPermitData>()
-        .await?;
-        Ok(RecognizeTwMainlandTravelPermitRespV2 {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TwMainlandTravelPermitData, RecognizeTwMainlandTravelPermitRespV2>()
+        .await
     }
 }
 
@@ -541,7 +506,7 @@ impl<'a> VehicleInvoiceResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVehicleInvoiceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/vehicle_invoice/recognize",
@@ -549,13 +514,8 @@ impl<'a> VehicleInvoiceResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<VehicleInvoiceData>()
-        .await?;
-        Ok(RecognizeVehicleInvoiceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<VehicleInvoiceData, RecognizeVehicleInvoiceResp>()
+        .await
     }
 }
 
@@ -569,7 +529,7 @@ impl<'a> ResumeResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<ParseResumeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/resume/parse",
@@ -577,13 +537,8 @@ impl<'a> ResumeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<ResumeData>()
-        .await?;
-        Ok(ParseResumeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ResumeData, ParseResumeResp>()
+        .await
     }
 }
 
@@ -597,7 +552,7 @@ impl<'a> VatInvoiceResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVatInvoiceRespV2, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/vat_invoice/recognize",
@@ -605,13 +560,8 @@ impl<'a> VatInvoiceResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<VatInvoiceData>()
-        .await?;
-        Ok(RecognizeVatInvoiceRespV2 {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<VatInvoiceData, RecognizeVatInvoiceRespV2>()
+        .await
     }
 }
 
@@ -658,7 +608,7 @@ impl<'a> BusinessLicenseResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBusinessLicenseResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/business_license/recognize",
@@ -666,13 +616,8 @@ impl<'a> BusinessLicenseResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<BusinessLicenseData>()
-        .await?;
-        Ok(RecognizeBusinessLicenseResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<BusinessLicenseData, RecognizeBusinessLicenseResp>()
+        .await
     }
 }
 

@@ -96,7 +96,7 @@ impl<'a> ApplicationResource<'a> {
         query: &FavouriteApplicationQuery<'_>,
         option: &RequestOption,
     ) -> Result<FavouriteApplicationResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/application/v5/applications/favourite",
@@ -105,13 +105,8 @@ impl<'a> ApplicationResource<'a> {
         )
         .page_query(query.page)
         .query("language", query.language)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(FavouriteApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, FavouriteApplicationResp>()
+        .await
     }
 
     /// Recommended applications — GET /open-apis/application/v5/applications/recommend
@@ -136,7 +131,7 @@ impl<'a> ApplicationResource<'a> {
         query: &RecommendApplicationQuery<'_>,
         option: &RequestOption,
     ) -> Result<RecommendApplicationResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/application/v5/applications/recommend",
@@ -146,13 +141,8 @@ impl<'a> ApplicationResource<'a> {
         .page_query(query.page)
         .query("language", query.language)
         .query("recommend_type", query.recommend_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(RecommendApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RecommendApplicationResp>()
+        .await
     }
 }
 

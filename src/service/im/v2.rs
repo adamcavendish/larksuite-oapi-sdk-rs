@@ -232,7 +232,7 @@ impl AppFeedCardV2Resource<'_> {
         query: &CreateAppFeedCardV2Query<'_>,
         option: &RequestOption,
     ) -> Result<CreateAppFeedCardV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v2/app_feed_card",
@@ -240,13 +240,8 @@ impl AppFeedCardV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<AppFeedCardData>()
-        .await?;
-        Ok(CreateAppFeedCardV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AppFeedCardData, CreateAppFeedCardV2Resp>()
+        .await
     }
 }
 
@@ -271,7 +266,7 @@ impl AppFeedCardBatchV2Resource<'_> {
         query: &DeleteAppFeedCardBatchV2Query<'_>,
         option: &RequestOption,
     ) -> Result<DeleteAppFeedCardBatchV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             "/open-apis/im/v2/app_feed_card/batch",
@@ -279,13 +274,8 @@ impl AppFeedCardBatchV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteAppFeedCardBatchV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteAppFeedCardBatchV2Resp>()
+        .await
     }
 
     pub async fn update(
@@ -302,7 +292,7 @@ impl AppFeedCardBatchV2Resource<'_> {
         query: &UpdateAppFeedCardBatchV2Query<'_>,
         option: &RequestOption,
     ) -> Result<UpdateAppFeedCardBatchV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             "/open-apis/im/v2/app_feed_card/batch",
@@ -310,13 +300,8 @@ impl AppFeedCardBatchV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<()>()
-        .await?;
-        Ok(UpdateAppFeedCardBatchV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), UpdateAppFeedCardBatchV2Resp>()
+        .await
     }
 }
 
@@ -341,7 +326,7 @@ impl BizEntityTagRelationV2Resource<'_> {
         query: &CreateBizEntityTagRelationV2Query<'_>,
         option: &RequestOption,
     ) -> Result<CreateBizEntityTagRelationV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v2/biz_entity_tag_relation",
@@ -349,13 +334,8 @@ impl BizEntityTagRelationV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<BizEntityTagRelationData>()
-        .await?;
-        Ok(CreateBizEntityTagRelationV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<BizEntityTagRelationData, CreateBizEntityTagRelationV2Resp>()
+        .await
     }
 
     pub async fn get(
@@ -371,20 +351,15 @@ impl BizEntityTagRelationV2Resource<'_> {
         _query: &GetBizEntityTagRelationV2Query,
         option: &RequestOption,
     ) -> Result<GetBizEntityTagRelationV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/im/v2/biz_entity_tag_relation",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<BizEntityTagRelationData>()
-        .await?;
-        Ok(GetBizEntityTagRelationV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<BizEntityTagRelationData, GetBizEntityTagRelationV2Resp>()
+        .await
     }
 
     pub async fn update(
@@ -401,7 +376,7 @@ impl BizEntityTagRelationV2Resource<'_> {
         query: &UpdateBizEntityTagRelationV2Query<'_>,
         option: &RequestOption,
     ) -> Result<UpdateBizEntityTagRelationV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             "/open-apis/im/v2/biz_entity_tag_relation",
@@ -409,13 +384,8 @@ impl BizEntityTagRelationV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<BizEntityTagRelationData>()
-        .await?;
-        Ok(UpdateBizEntityTagRelationV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<BizEntityTagRelationData, UpdateBizEntityTagRelationV2Resp>()
+        .await
     }
 }
 
@@ -440,7 +410,7 @@ impl ChatButtonV2Resource<'_> {
         query: &UpdateChatButtonV2Query<'_>,
         option: &RequestOption,
     ) -> Result<UpdateChatButtonV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             "/open-apis/im/v2/chat_button",
@@ -448,13 +418,8 @@ impl ChatButtonV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<()>()
-        .await?;
-        Ok(UpdateChatButtonV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), UpdateChatButtonV2Resp>()
+        .await
     }
 }
 
@@ -479,7 +444,7 @@ impl FeedCardV2Resource<'_> {
         query: &BotTimeSensitiveFeedCardV2Query<'_>,
         option: &RequestOption,
     ) -> Result<BotTimeSensitiveFeedCardV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             "/open-apis/im/v2/feed_cards/bot_time_sentive",
@@ -487,13 +452,8 @@ impl FeedCardV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<()>()
-        .await?;
-        Ok(BotTimeSensitiveFeedCardV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), BotTimeSensitiveFeedCardV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -512,7 +472,7 @@ impl FeedCardV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchFeedCardV2Resp, LarkError> {
         let path = format!("/open-apis/im/v2/feed_cards/{}", query.feed_card_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -520,13 +480,8 @@ impl FeedCardV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<()>()
-        .await?;
-        Ok(PatchFeedCardV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), PatchFeedCardV2Resp>()
+        .await
     }
 }
 
@@ -551,7 +506,7 @@ impl TagV2Resource<'_> {
         query: &CreateTagV2Query<'_>,
         option: &RequestOption,
     ) -> Result<CreateTagV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v2/tags",
@@ -559,13 +514,8 @@ impl TagV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TagData>()
-        .await?;
-        Ok(CreateTagV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TagData, CreateTagV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -584,7 +534,7 @@ impl TagV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchTagV2Resp, LarkError> {
         let path = format!("/open-apis/im/v2/tags/{}", query.tag_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -592,13 +542,8 @@ impl TagV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<TagData>()
-        .await?;
-        Ok(PatchTagV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TagData, PatchTagV2Resp>()
+        .await
     }
 }
 
@@ -623,7 +568,7 @@ impl UrlPreviewV2Resource<'_> {
         query: &BatchUpdateUrlPreviewV2Query<'_>,
         option: &RequestOption,
     ) -> Result<BatchUpdateUrlPreviewV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/im/v2/url_previews/batch_update",
@@ -631,12 +576,7 @@ impl UrlPreviewV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<()>()
-        .await?;
-        Ok(BatchUpdateUrlPreviewV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), BatchUpdateUrlPreviewV2Resp>()
+        .await
     }
 }

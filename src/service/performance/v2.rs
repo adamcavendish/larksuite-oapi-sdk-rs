@@ -131,7 +131,7 @@ macro_rules! post_query {
                 query: &$query_name<'_>,
                 option: &RequestOption,
             ) -> Result<$resp, LarkError> {
-                let (api_resp, code_error, data) = RestRequest::new(
+                RestRequest::new(
                     self.config,
                     http::Method::POST,
                     $path,
@@ -139,13 +139,8 @@ macro_rules! post_query {
                     option,
                 )
                 .json_body(query.body)?
-                .send_v2::<serde_json::Value>()
-                .await?;
-                Ok($resp {
-                    api_resp,
-                    code_error,
-                    data,
-                })
+                .send_v2_response::<serde_json::Value, $resp>()
+                .await
             }
         }
     };
@@ -203,7 +198,7 @@ impl AdditionalInformationV2Resource<'_> {
         query: &ImportAdditionalInformationV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ImportAdditionalInformationV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/performance/v2/additional_informations/import",
@@ -211,13 +206,8 @@ impl AdditionalInformationV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ImportAdditionalInformationV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ImportAdditionalInformationV2Resp>()
+        .await
     }
 
     pub async fn query(
@@ -234,7 +224,7 @@ impl AdditionalInformationV2Resource<'_> {
         query: &QueryAdditionalInformationV2Query<'_>,
         option: &RequestOption,
     ) -> Result<QueryAdditionalInformationV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/performance/v2/additional_informations/query",
@@ -242,13 +232,8 @@ impl AdditionalInformationV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryAdditionalInformationV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryAdditionalInformationV2Resp>()
+        .await
     }
 }
 
@@ -283,7 +268,7 @@ impl AdditionalInformationsBatchV2Resource<'_> {
         query: &DeleteAdditionalInformationsBatchV2Query<'_>,
         option: &RequestOption,
     ) -> Result<DeleteAdditionalInformationsBatchV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             "/open-apis/performance/v2/additional_informations/batch",
@@ -291,13 +276,8 @@ impl AdditionalInformationsBatchV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteAdditionalInformationsBatchV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteAdditionalInformationsBatchV2Resp>()
+        .await
     }
 }
 
@@ -353,7 +333,7 @@ impl MetricDetailV2Resource<'_> {
         query: &ImportMetricDetailV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ImportMetricDetailV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/performance/v2/metric_details/import",
@@ -361,13 +341,8 @@ impl MetricDetailV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ImportMetricDetailV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ImportMetricDetailV2Resp>()
+        .await
     }
 
     pub async fn query(
@@ -384,7 +359,7 @@ impl MetricDetailV2Resource<'_> {
         query: &QueryMetricDetailV2Query<'_>,
         option: &RequestOption,
     ) -> Result<QueryMetricDetailV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/performance/v2/metric_details/query",
@@ -392,13 +367,8 @@ impl MetricDetailV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryMetricDetailV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryMetricDetailV2Resp>()
+        .await
     }
 }
 
@@ -439,7 +409,7 @@ impl MetricTagV2Resource<'_> {
         query: &ListMetricTagV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListMetricTagV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/performance/v2/metric_tags",
@@ -448,13 +418,8 @@ impl MetricTagV2Resource<'_> {
         )
         .page_query(query.page)
         .query_values("tag_ids", query.tag_ids)
-        .send_v2::<MetricTagListData>()
-        .await?;
-        Ok(ListMetricTagV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<MetricTagListData, ListMetricTagV2Resp>()
+        .await
     }
 }
 

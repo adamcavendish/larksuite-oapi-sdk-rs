@@ -182,20 +182,15 @@ impl<'a> CollaborationTenantResource<'a> {
             "/open-apis/trust_party/v1/collaboration_tenants/{}",
             query.target_tenant_key
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetCollaborationTenantResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetCollaborationTenantResp>()
+        .await
     }
 
     /// List collaboration tenants — GET /open-apis/trust_party/v1/collaboration_tenants
@@ -216,7 +211,7 @@ impl<'a> CollaborationTenantResource<'a> {
         query: &ListCollaborationTenantQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCollaborationTenantResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/trust_party/v1/collaboration_tenants",
@@ -224,13 +219,8 @@ impl<'a> CollaborationTenantResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListCollaborationTenantResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListCollaborationTenantResp>()
+        .await
     }
 
     /// Visible organization — GET /open-apis/trust_party/v1/collaboration_tenants/{target_tenant_key}/visible_organization
@@ -243,7 +233,7 @@ impl<'a> CollaborationTenantResource<'a> {
             "/open-apis/trust_party/v1/collaboration_tenants/{}/visible_organization",
             query.target_tenant_key
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -255,13 +245,8 @@ impl<'a> CollaborationTenantResource<'a> {
         .query("target_department_id", query.target_department_id)
         .query("group_id_type", query.group_id_type)
         .query("target_group_id", query.target_group_id)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(VisibleOrganizationCollaborationTenantResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, VisibleOrganizationCollaborationTenantResp>()
+        .await
     }
 }
 
@@ -280,7 +265,7 @@ impl<'a> CollaborationTenantCollaborationDepartmentResource<'a> {
             "/open-apis/trust_party/v1/collaboration_tenants/{}/collaboration_departments/{}",
             query.target_tenant_key, query.target_department_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -288,13 +273,8 @@ impl<'a> CollaborationTenantCollaborationDepartmentResource<'a> {
             option,
         )
         .query("target_department_id_type", query.target_department_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetCollaborationTenantCollaborationDepartmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetCollaborationTenantCollaborationDepartmentResp>()
+        .await
     }
 }
 
@@ -313,7 +293,7 @@ impl<'a> CollaborationTenantCollaborationUserResource<'a> {
             "/open-apis/trust_party/v1/collaboration_tenants/{}/collaboration_users/{}",
             query.target_tenant_key, query.target_user_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -321,13 +301,8 @@ impl<'a> CollaborationTenantCollaborationUserResource<'a> {
             option,
         )
         .query("target_user_id_type", query.target_user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetCollaborationTenantCollaborationUserResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetCollaborationTenantCollaborationUserResp>()
+        .await
     }
 }
 

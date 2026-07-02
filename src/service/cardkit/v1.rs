@@ -305,7 +305,7 @@ impl CardResource<'_> {
         query: &CreateCardQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateCardResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/cardkit/v1/cards",
@@ -313,13 +313,8 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateCardResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateCardResp>()
+        .await
     }
 
     pub async fn update(
@@ -338,7 +333,7 @@ impl CardResource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateCardResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{}", query.card_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -346,13 +341,8 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateCardResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateCardResp>()
+        .await
     }
 
     pub async fn batch_update(
@@ -371,7 +361,7 @@ impl CardResource<'_> {
         option: &RequestOption,
     ) -> Result<BatchUpdateCardResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{}/batch_update", query.card_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -379,13 +369,8 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchUpdateCardResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateCardResp>()
+        .await
     }
 
     pub async fn id_convert(
@@ -402,7 +387,7 @@ impl CardResource<'_> {
         query: &IdConvertCardQuery<'_>,
         option: &RequestOption,
     ) -> Result<IdConvertCardResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/cardkit/v1/cards/id_convert",
@@ -410,13 +395,8 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(IdConvertCardResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, IdConvertCardResp>()
+        .await
     }
 
     pub async fn settings(
@@ -435,7 +415,7 @@ impl CardResource<'_> {
         option: &RequestOption,
     ) -> Result<SettingsCardResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{}/settings", query.card_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -443,13 +423,8 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SettingsCardResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SettingsCardResp>()
+        .await
     }
 }
 
@@ -474,7 +449,7 @@ impl CardElementResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateCardElementResp, LarkError> {
         let path = format!("/open-apis/cardkit/v1/cards/{}/elements", query.card_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -482,13 +457,8 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateCardElementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateCardElementResp>()
+        .await
     }
 
     pub async fn update(
@@ -514,7 +484,7 @@ impl CardElementResource<'_> {
             "/open-apis/cardkit/v1/cards/{}/elements/{}",
             query.card_id, query.element_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -522,13 +492,8 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateCardElementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateCardElementResp>()
+        .await
     }
 
     pub async fn delete(
@@ -550,20 +515,15 @@ impl CardElementResource<'_> {
             "/open-apis/cardkit/v1/cards/{}/elements/{}",
             query.card_id, query.element_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteCardElementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteCardElementResp>()
+        .await
     }
 
     pub async fn patch(
@@ -589,7 +549,7 @@ impl CardElementResource<'_> {
             "/open-apis/cardkit/v1/cards/{}/elements/{}",
             query.card_id, query.element_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -597,13 +557,8 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchCardElementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchCardElementResp>()
+        .await
     }
 
     pub async fn content(
@@ -629,7 +584,7 @@ impl CardElementResource<'_> {
             "/open-apis/cardkit/v1/cards/{}/elements/{}/content",
             query.card_id, query.element_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -637,13 +592,8 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ContentCardElementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ContentCardElementResp>()
+        .await
     }
 }
 

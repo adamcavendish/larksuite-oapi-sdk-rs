@@ -159,7 +159,7 @@ impl InterviewRecordV2Resource<'_> {
             "/open-apis/hire/v2/interview_records/{}",
             query.interview_record_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -167,13 +167,8 @@ impl InterviewRecordV2Resource<'_> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<InterviewRecordData>()
-        .await?;
-        Ok(GetInterviewRecordV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<InterviewRecordData, GetInterviewRecordV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -196,7 +191,7 @@ impl InterviewRecordV2Resource<'_> {
         query: &ListInterviewRecordV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListInterviewRecordV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v2/interview_records",
@@ -206,13 +201,8 @@ impl InterviewRecordV2Resource<'_> {
         .query("interview_id", query.interview_id)
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<InterviewRecordListData>()
-        .await?;
-        Ok(ListInterviewRecordV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<InterviewRecordListData, ListInterviewRecordV2Resp>()
+        .await
     }
 }
 
@@ -242,7 +232,7 @@ impl TalentV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<GetTalentV2Resp, LarkError> {
         let path = format!("/open-apis/hire/v2/talents/{}", query.talent_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -250,12 +240,7 @@ impl TalentV2Resource<'_> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<TalentV2Data>()
-        .await?;
-        Ok(GetTalentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<TalentV2Data, GetTalentV2Resp>()
+        .await
     }
 }

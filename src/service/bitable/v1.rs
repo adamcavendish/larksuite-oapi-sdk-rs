@@ -756,7 +756,7 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<CopyAppResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/copy");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -764,14 +764,8 @@ impl<'a> AppResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(CopyAppResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CopyAppResp>()
+        .await
     }
 
     /// Create a new bitable app.
@@ -781,7 +775,7 @@ impl<'a> AppResource<'a> {
         body: &CreateAppReqBody,
         option: &RequestOption,
     ) -> Result<CreateAppResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/bitable/v1/apps",
@@ -789,14 +783,8 @@ impl<'a> AppResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(CreateAppResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateAppResp>()
+        .await
     }
 
     pub async fn get(
@@ -1921,7 +1909,7 @@ impl<'a> AppRoleResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1929,14 +1917,8 @@ impl<'a> AppRoleResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<AppRoleData>()
-        .await?;
-
-        Ok(CreateAppRoleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AppRoleData, CreateAppRoleResp>()
+        .await
     }
 
     /// Delete a custom role.
@@ -1948,21 +1930,15 @@ impl<'a> AppRoleResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-
-        Ok(DeleteAppRoleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteAppRoleResp>()
+        .await
     }
 
     /// List custom roles.
@@ -1986,7 +1962,7 @@ impl<'a> AppRoleResource<'a> {
         option: &RequestOption,
     ) -> Result<ListAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{}/roles", query.app_token);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1994,13 +1970,8 @@ impl<'a> AppRoleResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<AppRoleListData>()
-        .await?;
-        Ok(ListAppRoleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AppRoleListData, ListAppRoleResp>()
+        .await
     }
 
     /// Update a custom role (full replacement).
@@ -2013,7 +1984,7 @@ impl<'a> AppRoleResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2021,14 +1992,8 @@ impl<'a> AppRoleResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<AppRoleData>()
-        .await?;
-
-        Ok(UpdateAppRoleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AppRoleData, UpdateAppRoleResp>()
+        .await
     }
 }
 
@@ -2090,7 +2055,7 @@ impl<'a> AppRoleMemberResource<'a> {
     ) -> Result<BatchCreateAppRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/batch_create");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2098,14 +2063,8 @@ impl<'a> AppRoleMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<()>()
-        .await?;
-
-        Ok(BatchCreateAppRoleMemberResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), BatchCreateAppRoleMemberResp>()
+        .await
     }
 
     /// Batch-delete members from a custom role.
@@ -2119,7 +2078,7 @@ impl<'a> AppRoleMemberResource<'a> {
     ) -> Result<BatchDeleteAppRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/batch_delete");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2127,14 +2086,8 @@ impl<'a> AppRoleMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<()>()
-        .await?;
-
-        Ok(BatchDeleteAppRoleMemberResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), BatchDeleteAppRoleMemberResp>()
+        .await
     }
 
     /// Add a single member to a custom role.
@@ -2148,7 +2101,7 @@ impl<'a> AppRoleMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateAppRoleMemberResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2157,14 +2110,8 @@ impl<'a> AppRoleMemberResource<'a> {
         )
         .query("member_id_type", member_id_type)
         .json_body(body)?
-        .send_v2::<()>()
-        .await?;
-
-        Ok(CreateAppRoleMemberResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), CreateAppRoleMemberResp>()
+        .await
     }
 
     /// Remove a single member from a custom role.
@@ -2179,7 +2126,7 @@ impl<'a> AppRoleMemberResource<'a> {
     ) -> Result<DeleteAppRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/{member_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -2187,14 +2134,8 @@ impl<'a> AppRoleMemberResource<'a> {
             option,
         )
         .query("member_id_type", member_id_type)
-        .send_v2::<()>()
-        .await?;
-
-        Ok(DeleteAppRoleMemberResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteAppRoleMemberResp>()
+        .await
     }
 
     /// List members of a custom role.
@@ -2222,7 +2163,7 @@ impl<'a> AppRoleMemberResource<'a> {
             "/open-apis/bitable/v1/apps/{}/roles/{}/members",
             query.app_token, query.role_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2230,13 +2171,8 @@ impl<'a> AppRoleMemberResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<AppRoleMemberListData>()
-        .await?;
-        Ok(ListAppRoleMemberResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AppRoleMemberListData, ListAppRoleMemberResp>()
+        .await
     }
 }
 
@@ -2306,7 +2242,7 @@ impl<'a> AppWorkflowResource<'a> {
         option: &RequestOption,
     ) -> Result<ListAppWorkflowResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{}/workflows", query.app_token);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2314,13 +2250,8 @@ impl<'a> AppWorkflowResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<WorkflowListData>()
-        .await?;
-        Ok(ListAppWorkflowResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<WorkflowListData, ListAppWorkflowResp>()
+        .await
     }
 
     /// Update the enabled/disabled status of an automation workflow.
@@ -2333,7 +2264,7 @@ impl<'a> AppWorkflowResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateAppWorkflowResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/workflows/{workflow_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2341,14 +2272,8 @@ impl<'a> AppWorkflowResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2::<()>()
-        .await?;
-
-        Ok(UpdateAppWorkflowResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), UpdateAppWorkflowResp>()
+        .await
     }
 }
 

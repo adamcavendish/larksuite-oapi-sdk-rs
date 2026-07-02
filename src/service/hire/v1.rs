@@ -946,7 +946,7 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<CloseJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/close");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -954,13 +954,8 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CloseJobResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CloseJobResp>()
+        .await
     }
 
     pub async fn combined_create(
@@ -968,7 +963,7 @@ impl<'a> JobResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CombinedCreateJobResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/jobs/combined_create",
@@ -976,13 +971,8 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CombinedCreateJobResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CombinedCreateJobResp>()
+        .await
     }
 
     pub async fn combined_update(
@@ -992,7 +982,7 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<CombinedUpdateJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/combined_update");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1000,13 +990,8 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CombinedUpdateJobResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CombinedUpdateJobResp>()
+        .await
     }
 
     pub async fn config(
@@ -1015,20 +1000,15 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<ConfigJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/config");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ConfigJobResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ConfigJobResp>()
+        .await
     }
 
     pub async fn get_detail(
@@ -1037,20 +1017,15 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<GetDetailJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/get_detail");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetDetailJobResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetDetailJobResp>()
+        .await
     }
 
     pub async fn open(
@@ -1060,7 +1035,7 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<OpenJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/open");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1068,13 +1043,8 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(OpenJobResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, OpenJobResp>()
+        .await
     }
 
     pub async fn recruiter(
@@ -1083,20 +1053,15 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<RecruiterJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/recruiter");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(RecruiterJobResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RecruiterJobResp>()
+        .await
     }
 
     pub async fn update_config(
@@ -1106,7 +1071,7 @@ impl<'a> JobResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateConfigJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/update_config");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1114,13 +1079,8 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateConfigJobResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateConfigJobResp>()
+        .await
     }
 }
 
@@ -1308,7 +1268,7 @@ impl<'a> TalentResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<AddToFolderTalentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/talents/add_to_folder",
@@ -1316,13 +1276,8 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(AddToFolderTalentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, AddToFolderTalentResp>()
+        .await
     }
 
     pub async fn batch_get_id(
@@ -1330,7 +1285,7 @@ impl<'a> TalentResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchGetIdTalentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/talents/batch_get_id",
@@ -1338,13 +1293,8 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchGetIdTalentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchGetIdTalentResp>()
+        .await
     }
 
     pub async fn combined_create(
@@ -1352,7 +1302,7 @@ impl<'a> TalentResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CombinedCreateTalentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/talents/combined_create",
@@ -1360,13 +1310,8 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CombinedCreateTalentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CombinedCreateTalentResp>()
+        .await
     }
 
     pub async fn combined_update(
@@ -1374,7 +1319,7 @@ impl<'a> TalentResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CombinedUpdateTalentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/talents/combined_update",
@@ -1382,13 +1327,8 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CombinedUpdateTalentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CombinedUpdateTalentResp>()
+        .await
     }
 
     pub async fn onboard_status(
@@ -1398,7 +1338,7 @@ impl<'a> TalentResource<'a> {
         option: &RequestOption,
     ) -> Result<OnboardStatusTalentResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talents/{talent_id}/onboard_status");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1406,13 +1346,8 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(OnboardStatusTalentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, OnboardStatusTalentResp>()
+        .await
     }
 
     pub async fn remove_to_folder(
@@ -1420,7 +1355,7 @@ impl<'a> TalentResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<RemoveToFolderTalentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/talents/remove_to_folder",
@@ -1428,13 +1363,8 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(RemoveToFolderTalentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RemoveToFolderTalentResp>()
+        .await
     }
 
     pub async fn tag(
@@ -1444,7 +1374,7 @@ impl<'a> TalentResource<'a> {
         option: &RequestOption,
     ) -> Result<TagTalentResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talents/{talent_id}/tag");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1452,13 +1382,8 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(TagTalentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, TagTalentResp>()
+        .await
     }
 }
 
@@ -1707,7 +1632,7 @@ impl<'a> ApplicationResource<'a> {
         option: &RequestOption,
     ) -> Result<CancelOnboardApplicationResp, LarkError> {
         let path = format!("/open-apis/hire/v1/applications/{application_id}/cancel_onboard");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1715,13 +1640,8 @@ impl<'a> ApplicationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CancelOnboardApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CancelOnboardApplicationResp>()
+        .await
     }
 
     pub async fn get_detail(
@@ -1730,20 +1650,15 @@ impl<'a> ApplicationResource<'a> {
         option: &RequestOption,
     ) -> Result<GetDetailApplicationResp, LarkError> {
         let path = format!("/open-apis/hire/v1/applications/{application_id}/get_detail");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetDetailApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetDetailApplicationResp>()
+        .await
     }
 
     pub async fn recover(
@@ -1752,20 +1667,15 @@ impl<'a> ApplicationResource<'a> {
         option: &RequestOption,
     ) -> Result<RecoverApplicationResp, LarkError> {
         let path = format!("/open-apis/hire/v1/applications/{application_id}/recover");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(RecoverApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RecoverApplicationResp>()
+        .await
     }
 
     pub async fn transfer_onboard(
@@ -1775,7 +1685,7 @@ impl<'a> ApplicationResource<'a> {
         option: &RequestOption,
     ) -> Result<TransferOnboardApplicationResp, LarkError> {
         let path = format!("/open-apis/hire/v1/applications/{application_id}/transfer_onboard");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1783,13 +1693,8 @@ impl<'a> ApplicationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(TransferOnboardApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, TransferOnboardApplicationResp>()
+        .await
     }
 
     pub async fn offer(
@@ -1799,7 +1704,7 @@ impl<'a> ApplicationResource<'a> {
         option: &RequestOption,
     ) -> Result<OfferApplicationResp, LarkError> {
         let path = format!("/open-apis/hire/v1/applications/{application_id}/offer");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1807,13 +1712,8 @@ impl<'a> ApplicationResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(OfferApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, OfferApplicationResp>()
+        .await
     }
 }
 
@@ -1941,20 +1841,15 @@ impl<'a> InterviewResource<'a> {
         &self,
         option: &RequestOption,
     ) -> Result<GetByTalentInterviewResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interviews/get_by_talent",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetByTalentInterviewResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetByTalentInterviewResp>()
+        .await
     }
 }
 
@@ -2204,7 +2099,7 @@ impl<'a> OfferResource<'a> {
         option: &RequestOption,
     ) -> Result<InternOfferStatusResp, LarkError> {
         let path = format!("/open-apis/hire/v1/offers/{offer_id}/intern_offer_status");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2212,13 +2107,8 @@ impl<'a> OfferResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(InternOfferStatusResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, InternOfferStatusResp>()
+        .await
     }
 }
 
@@ -2327,7 +2217,7 @@ impl<'a> JobRequirementResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateJobRequirementResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/job_requirements",
@@ -2337,13 +2227,8 @@ impl<'a> JobRequirementResource<'a> {
         .query("user_id_type", user_id_type)
         .query("department_id_type", department_id_type)
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateJobRequirementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateJobRequirementResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2352,20 +2237,15 @@ impl<'a> JobRequirementResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteJobRequirementResp, LarkError> {
         let path = format!("/open-apis/hire/v1/job_requirements/{job_requirement_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteJobRequirementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteJobRequirementResp>()
+        .await
     }
 
     pub async fn update(
@@ -2377,7 +2257,7 @@ impl<'a> JobRequirementResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateJobRequirementResp, LarkError> {
         let path = format!("/open-apis/hire/v1/job_requirements/{job_requirement_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2387,13 +2267,8 @@ impl<'a> JobRequirementResource<'a> {
         .query("user_id_type", user_id_type)
         .query("department_id_type", department_id_type)
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateJobRequirementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateJobRequirementResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -2453,7 +2328,7 @@ impl<'a> JobRequirementResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ListByIdJobRequirementResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/job_requirements/search",
@@ -2461,13 +2336,8 @@ impl<'a> JobRequirementResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListByIdJobRequirementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListByIdJobRequirementResp>()
+        .await
     }
 }
 
@@ -2515,7 +2385,7 @@ impl<'a> AttachmentResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateAttachmentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/attachments",
@@ -2523,13 +2393,8 @@ impl<'a> AttachmentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateAttachmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateAttachmentResp>()
+        .await
     }
 }
 
@@ -2747,20 +2612,15 @@ impl EmployeeResource<'_> {
         option: &RequestOption,
     ) -> Result<GetEmployeeResp, LarkError> {
         let path = format!("/open-apis/hire/v1/employees/{employee_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetEmployeeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetEmployeeResp>()
+        .await
     }
 
     pub async fn patch(
@@ -2770,7 +2630,7 @@ impl EmployeeResource<'_> {
         option: &RequestOption,
     ) -> Result<PatchEmployeeResp, LarkError> {
         let path = format!("/open-apis/hire/v1/employees/{employee_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2778,33 +2638,23 @@ impl EmployeeResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchEmployeeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchEmployeeResp>()
+        .await
     }
 
     pub async fn get_by_application(
         &self,
         option: &RequestOption,
     ) -> Result<GetByApplicationEmployeeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/employees/get_by_application",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetByApplicationEmployeeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetByApplicationEmployeeResp>()
+        .await
     }
 }
 
@@ -2816,20 +2666,15 @@ pub struct EvaluationResource<'a> {
 
 impl EvaluationResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListEvaluationResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/evaluations",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListEvaluationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListEvaluationResp>()
+        .await
     }
 }
 
@@ -2845,7 +2690,7 @@ impl NoteResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateNoteResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/notes",
@@ -2853,13 +2698,8 @@ impl NoteResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateNoteResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateNoteResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2868,20 +2708,15 @@ impl NoteResource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteNoteResp, LarkError> {
         let path = format!("/open-apis/hire/v1/notes/{note_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteNoteResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteNoteResp>()
+        .await
     }
 
     pub async fn get(
@@ -2890,37 +2725,27 @@ impl NoteResource<'_> {
         option: &RequestOption,
     ) -> Result<GetNoteResp, LarkError> {
         let path = format!("/open-apis/hire/v1/notes/{note_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetNoteResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetNoteResp>()
+        .await
     }
 
     pub async fn list(&self, option: &RequestOption) -> Result<ListNoteResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/notes",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListNoteResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListNoteResp>()
+        .await
     }
 
     pub async fn patch(
@@ -2930,7 +2755,7 @@ impl NoteResource<'_> {
         option: &RequestOption,
     ) -> Result<PatchNoteResp, LarkError> {
         let path = format!("/open-apis/hire/v1/notes/{note_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2938,13 +2763,8 @@ impl NoteResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchNoteResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchNoteResp>()
+        .await
     }
 }
 
@@ -2956,20 +2776,15 @@ pub struct QuestionnaireResource<'a> {
 
 impl QuestionnaireResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListQuestionnaireResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/questionnaires",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListQuestionnaireResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListQuestionnaireResp>()
+        .await
     }
 }
 
@@ -2984,20 +2799,15 @@ impl ReferralResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<GetReferralResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/referrals/get_by_application",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetReferralResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetReferralResp>()
+        .await
     }
 
     pub async fn search(
@@ -3005,7 +2815,7 @@ impl ReferralResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchReferralResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/referrals/search",
@@ -3013,13 +2823,8 @@ impl ReferralResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchReferralResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchReferralResp>()
+        .await
     }
 }
 
@@ -3032,20 +2837,15 @@ impl RegistrationSchemaResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<ListRegistrationSchemaResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/registration_schemas",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListRegistrationSchemaResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListRegistrationSchemaResp>()
+        .await
     }
 }
 
@@ -3057,20 +2857,15 @@ pub struct ResumeSourceResource<'a> {
 
 impl ResumeSourceResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListResumeSourceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/resume_sources",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListResumeSourceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListResumeSourceResp>()
+        .await
     }
 }
 
@@ -3083,20 +2878,15 @@ macro_rules! simple_list_resource {
         }
         impl $struct_name<'_> {
             pub async fn list(&self, option: &RequestOption) -> Result<$resp, LarkError> {
-                let (api_resp, code_error, data) = RestRequest::new(
+                RestRequest::new(
                     self.config,
                     http::Method::GET,
                     $path,
                     vec![AccessTokenType::Tenant],
                     option,
                 )
-                .send_v2::<serde_json::Value>()
-                .await?;
-                Ok($resp {
-                    api_resp,
-                    code_error,
-                    data,
-                })
+                .send_v2_response::<serde_json::Value, $resp>()
+                .await
             }
         }
     };
@@ -3123,20 +2913,15 @@ pub struct LocationResource<'a> {
 
 impl LocationResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListLocationResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/locations",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListLocationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListLocationResp>()
+        .await
     }
 
     pub async fn query(
@@ -3144,7 +2929,7 @@ impl LocationResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryLocationResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/locations/query",
@@ -3152,13 +2937,8 @@ impl LocationResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryLocationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryLocationResp>()
+        .await
     }
 }
 pub struct RoleResource<'a> {
@@ -3167,20 +2947,15 @@ pub struct RoleResource<'a> {
 
 impl RoleResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListRoleResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/roles",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListRoleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListRoleResp>()
+        .await
     }
 
     pub async fn get(
@@ -3189,20 +2964,15 @@ impl RoleResource<'_> {
         option: &RequestOption,
     ) -> Result<GetRoleResp, LarkError> {
         let path = format!("/open-apis/hire/v1/roles/{role_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetRoleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetRoleResp>()
+        .await
     }
 }
 simple_list_resource!(
@@ -3245,20 +3015,15 @@ impl WebsiteJobPostResource<'_> {
         option: &RequestOption,
     ) -> Result<GetWebsiteJobPostResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/job_posts/{job_post_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetWebsiteJobPostResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetWebsiteJobPostResp>()
+        .await
     }
 
     pub async fn list(
@@ -3267,20 +3032,15 @@ impl WebsiteJobPostResource<'_> {
         option: &RequestOption,
     ) -> Result<ListWebsiteJobPostResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/job_posts");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListWebsiteJobPostResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListWebsiteJobPostResp>()
+        .await
     }
 
     pub async fn search(
@@ -3290,7 +3050,7 @@ impl WebsiteJobPostResource<'_> {
         option: &RequestOption,
     ) -> Result<SearchWebsiteJobPostResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/job_posts/search");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3298,13 +3058,8 @@ impl WebsiteJobPostResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchWebsiteJobPostResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchWebsiteJobPostResp>()
+        .await
     }
 }
 
@@ -3321,37 +3076,27 @@ impl InterviewRecordResource<'_> {
         option: &RequestOption,
     ) -> Result<GetInterviewRecordResp, LarkError> {
         let path = format!("/open-apis/hire/v1/interview_records/{interview_record_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetInterviewRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetInterviewRecordResp>()
+        .await
     }
 
     pub async fn list(&self, option: &RequestOption) -> Result<ListInterviewRecordResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interview_records",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListInterviewRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListInterviewRecordResp>()
+        .await
     }
 }
 
@@ -3363,20 +3108,15 @@ pub struct InterviewerResource<'a> {
 
 impl InterviewerResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListInterviewerResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interviewers",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListInterviewerResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListInterviewerResp>()
+        .await
     }
 
     pub async fn patch(
@@ -3386,7 +3126,7 @@ impl InterviewerResource<'_> {
         option: &RequestOption,
     ) -> Result<PatchInterviewerResp, LarkError> {
         let path = format!("/open-apis/hire/v1/interviewers/{interviewer_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -3394,13 +3134,8 @@ impl InterviewerResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchInterviewerResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchInterviewerResp>()
+        .await
     }
 }
 
@@ -3418,7 +3153,7 @@ macro_rules! external_crud_resource {
                 body: serde_json::Value,
                 option: &RequestOption,
             ) -> Result<$create_resp, LarkError> {
-                let (api_resp, code_error, data) = RestRequest::new(
+                RestRequest::new(
                     self.config,
                     http::Method::POST,
                     $base_path,
@@ -3426,13 +3161,8 @@ macro_rules! external_crud_resource {
                     option,
                 )
                 .json_body(&body)?
-                .send_v2::<serde_json::Value>()
-                .await?;
-                Ok($create_resp {
-                    api_resp,
-                    code_error,
-                    data,
-                })
+                .send_v2_response::<serde_json::Value, $create_resp>()
+                .await
             }
 
             pub async fn update(
@@ -3442,7 +3172,7 @@ macro_rules! external_crud_resource {
                 option: &RequestOption,
             ) -> Result<$update_resp, LarkError> {
                 let path = format!("{}/{}", $base_path, $id_param);
-                let (api_resp, code_error, data) = RestRequest::new(
+                RestRequest::new(
                     self.config,
                     http::Method::PUT,
                     path,
@@ -3450,13 +3180,8 @@ macro_rules! external_crud_resource {
                     option,
                 )
                 .json_body(&body)?
-                .send_v2::<serde_json::Value>()
-                .await?;
-                Ok($update_resp {
-                    api_resp,
-                    code_error,
-                    data,
-                })
+                .send_v2_response::<serde_json::Value, $update_resp>()
+                .await
             }
 
             pub async fn delete(
@@ -3465,20 +3190,15 @@ macro_rules! external_crud_resource {
                 option: &RequestOption,
             ) -> Result<$delete_resp, LarkError> {
                 let path = format!("{}/{}", $base_path, $id_param);
-                let (api_resp, code_error, data) = RestRequest::new(
+                RestRequest::new(
                     self.config,
                     http::Method::DELETE,
                     path,
                     vec![AccessTokenType::Tenant],
                     option,
                 )
-                .send_v2::<()>()
-                .await?;
-                Ok($delete_resp {
-                    api_resp,
-                    code_error,
-                    data,
-                })
+                .send_v2_response::<(), $delete_resp>()
+                .await
             }
         }
     };
@@ -3498,20 +3218,15 @@ impl ExternalApplicationResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<ListExternalApplicationResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/external_applications",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListExternalApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListExternalApplicationResp>()
+        .await
     }
 }
 
@@ -3530,7 +3245,7 @@ impl ExternalOfferResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalOfferResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/external_offers/batch_query",
@@ -3538,13 +3253,8 @@ impl ExternalOfferResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchQueryExternalOfferResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchQueryExternalOfferResp>()
+        .await
     }
 }
 
@@ -3563,7 +3273,7 @@ impl ExternalInterviewResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalInterviewResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/external_interviews/batch_query",
@@ -3571,13 +3281,8 @@ impl ExternalInterviewResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchQueryExternalInterviewResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchQueryExternalInterviewResp>()
+        .await
     }
 }
 
@@ -3596,7 +3301,7 @@ impl ExternalBackgroundCheckResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalBackgroundCheckResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/external_background_checks/batch_query",
@@ -3604,13 +3309,8 @@ impl ExternalBackgroundCheckResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchQueryExternalBackgroundCheckResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchQueryExternalBackgroundCheckResp>()
+        .await
     }
 }
 
@@ -3622,20 +3322,15 @@ pub struct TodoResource<'a> {
 
 impl TodoResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListTodoResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/todos",
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListTodoResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListTodoResp>()
+        .await
     }
 }
 
@@ -3651,7 +3346,7 @@ impl TripartiteAgreementResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateTripartiteAgreementResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/tripartite_agreements",
@@ -3659,13 +3354,8 @@ impl TripartiteAgreementResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateTripartiteAgreementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateTripartiteAgreementResp>()
+        .await
     }
 
     pub async fn delete(
@@ -3674,40 +3364,30 @@ impl TripartiteAgreementResource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteTripartiteAgreementResp, LarkError> {
         let path = format!("/open-apis/hire/v1/tripartite_agreements/{tripartite_agreement_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteTripartiteAgreementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteTripartiteAgreementResp>()
+        .await
     }
 
     pub async fn list(
         &self,
         option: &RequestOption,
     ) -> Result<ListTripartiteAgreementResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/tripartite_agreements",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListTripartiteAgreementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListTripartiteAgreementResp>()
+        .await
     }
 
     pub async fn update(
@@ -3717,7 +3397,7 @@ impl TripartiteAgreementResource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateTripartiteAgreementResp, LarkError> {
         let path = format!("/open-apis/hire/v1/tripartite_agreements/{tripartite_agreement_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -3725,13 +3405,8 @@ impl TripartiteAgreementResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateTripartiteAgreementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateTripartiteAgreementResp>()
+        .await
     }
 }
 
@@ -3749,7 +3424,7 @@ impl AdvertisementResource<'_> {
         option: &RequestOption,
     ) -> Result<PublishAdvertisementResp, LarkError> {
         let path = format!("/open-apis/hire/v1/advertisements/{advertisement_id}/publish");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3757,13 +3432,8 @@ impl AdvertisementResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PublishAdvertisementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PublishAdvertisementResp>()
+        .await
     }
 }
 
@@ -3779,7 +3449,7 @@ impl AgencyResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchQueryAgencyResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/agencies/batch_query",
@@ -3787,13 +3457,8 @@ impl AgencyResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchQueryAgencyResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchQueryAgencyResp>()
+        .await
     }
 
     pub async fn get_agency_account(
@@ -3801,7 +3466,7 @@ impl AgencyResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<GetAgencyAccountResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/agencies/get_agency_account",
@@ -3809,13 +3474,8 @@ impl AgencyResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetAgencyAccountResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetAgencyAccountResp>()
+        .await
     }
 
     pub async fn operate_agency_account(
@@ -3823,7 +3483,7 @@ impl AgencyResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<OperateAgencyAccountResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/agencies/operate_agency_account",
@@ -3831,13 +3491,8 @@ impl AgencyResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(OperateAgencyAccountResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, OperateAgencyAccountResp>()
+        .await
     }
 
     pub async fn protect(
@@ -3845,7 +3500,7 @@ impl AgencyResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ProtectAgencyResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/agencies/protect",
@@ -3853,13 +3508,8 @@ impl AgencyResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ProtectAgencyResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ProtectAgencyResp>()
+        .await
     }
 
     pub async fn protect_search(
@@ -3867,7 +3517,7 @@ impl AgencyResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ProtectSearchAgencyResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/agencies/protection_period/search",
@@ -3875,30 +3525,20 @@ impl AgencyResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ProtectSearchAgencyResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ProtectSearchAgencyResp>()
+        .await
     }
 
     pub async fn query(&self, option: &RequestOption) -> Result<QueryAgencyResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/agencies/query",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryAgencyResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryAgencyResp>()
+        .await
     }
 
     pub async fn get(
@@ -3908,7 +3548,7 @@ impl AgencyResource<'_> {
         option: &RequestOption,
     ) -> Result<GetAgencyResp, LarkError> {
         let path = format!("/open-apis/hire/v1/agencies/{agency_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3916,13 +3556,8 @@ impl AgencyResource<'_> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetAgencyResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetAgencyResp>()
+        .await
     }
 }
 
@@ -3938,7 +3573,7 @@ impl BackgroundCheckOrderResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchQueryBackgroundCheckOrderResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/background_check_orders/batch_query",
@@ -3946,33 +3581,23 @@ impl BackgroundCheckOrderResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchQueryBackgroundCheckOrderResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchQueryBackgroundCheckOrderResp>()
+        .await
     }
 
     pub async fn list(
         &self,
         option: &RequestOption,
     ) -> Result<ListBackgroundCheckOrderResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/background_check_orders",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListBackgroundCheckOrderResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListBackgroundCheckOrderResp>()
+        .await
     }
 }
 
@@ -3988,7 +3613,7 @@ impl DiversityInclusionResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchDiversityInclusionResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/applications/diversity_inclusions/search",
@@ -3996,13 +3621,8 @@ impl DiversityInclusionResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchDiversityInclusionResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchDiversityInclusionResp>()
+        .await
     }
 }
 
@@ -4018,7 +3638,7 @@ impl EcoAccountCustomFieldResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateEcoAccountCustomFieldResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_account_custom_fields",
@@ -4026,13 +3646,8 @@ impl EcoAccountCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateEcoAccountCustomFieldResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateEcoAccountCustomFieldResp>()
+        .await
     }
 
     pub async fn batch_delete(
@@ -4040,7 +3655,7 @@ impl EcoAccountCustomFieldResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchDeleteEcoAccountCustomFieldResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_account_custom_fields/batch_delete",
@@ -4048,13 +3663,8 @@ impl EcoAccountCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchDeleteEcoAccountCustomFieldResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchDeleteEcoAccountCustomFieldResp>()
+        .await
     }
 
     pub async fn batch_update(
@@ -4062,7 +3672,7 @@ impl EcoAccountCustomFieldResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateEcoAccountCustomFieldResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             "/open-apis/hire/v1/eco_account_custom_fields/batch_update",
@@ -4070,13 +3680,8 @@ impl EcoAccountCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchUpdateEcoAccountCustomFieldResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateEcoAccountCustomFieldResp>()
+        .await
     }
 }
 
@@ -4092,7 +3697,7 @@ impl EcoBackgroundCheckResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CancelEcoBackgroundCheckResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_background_checks/cancel",
@@ -4100,13 +3705,8 @@ impl EcoBackgroundCheckResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CancelEcoBackgroundCheckResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CancelEcoBackgroundCheckResp>()
+        .await
     }
 
     pub async fn update_progress(
@@ -4114,7 +3714,7 @@ impl EcoBackgroundCheckResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateProgressEcoBackgroundCheckResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_background_checks/update_progress",
@@ -4122,13 +3722,8 @@ impl EcoBackgroundCheckResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateProgressEcoBackgroundCheckResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateProgressEcoBackgroundCheckResp>()
+        .await
     }
 
     pub async fn update_result(
@@ -4136,7 +3731,7 @@ impl EcoBackgroundCheckResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateResultEcoBackgroundCheckResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_background_checks/update_result",
@@ -4144,13 +3739,8 @@ impl EcoBackgroundCheckResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateResultEcoBackgroundCheckResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateResultEcoBackgroundCheckResp>()
+        .await
     }
 }
 
@@ -4166,7 +3756,7 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateEcoBackgroundCheckCustomFieldResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_background_check_custom_fields",
@@ -4174,13 +3764,8 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateEcoBackgroundCheckCustomFieldResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateEcoBackgroundCheckCustomFieldResp>()
+        .await
     }
 
     pub async fn batch_delete(
@@ -4188,7 +3773,7 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchDeleteEcoBackgroundCheckCustomFieldResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_background_check_custom_fields/batch_delete",
@@ -4196,13 +3781,8 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchDeleteEcoBackgroundCheckCustomFieldResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchDeleteEcoBackgroundCheckCustomFieldResp>()
+        .await
     }
 
     pub async fn batch_update(
@@ -4210,7 +3790,7 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateEcoBackgroundCheckCustomFieldResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             "/open-apis/hire/v1/eco_background_check_custom_fields/batch_update",
@@ -4218,13 +3798,8 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchUpdateEcoBackgroundCheckCustomFieldResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateEcoBackgroundCheckCustomFieldResp>()
+        .await
     }
 }
 
@@ -4240,7 +3815,7 @@ impl EcoBackgroundCheckPackageResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateEcoBackgroundCheckPackageResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_background_check_packages",
@@ -4248,13 +3823,8 @@ impl EcoBackgroundCheckPackageResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateEcoBackgroundCheckPackageResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateEcoBackgroundCheckPackageResp>()
+        .await
     }
 
     pub async fn batch_delete(
@@ -4262,7 +3832,7 @@ impl EcoBackgroundCheckPackageResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchDeleteEcoBackgroundCheckPackageResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_background_check_packages/batch_delete",
@@ -4270,13 +3840,8 @@ impl EcoBackgroundCheckPackageResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchDeleteEcoBackgroundCheckPackageResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchDeleteEcoBackgroundCheckPackageResp>()
+        .await
     }
 
     pub async fn batch_update(
@@ -4284,7 +3849,7 @@ impl EcoBackgroundCheckPackageResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateEcoBackgroundCheckPackageResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             "/open-apis/hire/v1/eco_background_check_packages/batch_update",
@@ -4292,13 +3857,8 @@ impl EcoBackgroundCheckPackageResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchUpdateEcoBackgroundCheckPackageResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateEcoBackgroundCheckPackageResp>()
+        .await
     }
 }
 
@@ -4316,7 +3876,7 @@ impl EcoExamResource<'_> {
         option: &RequestOption,
     ) -> Result<LoginInfoEcoExamResp, LarkError> {
         let path = format!("/open-apis/hire/v1/eco_exams/{exam_id}/login_info");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -4324,13 +3884,8 @@ impl EcoExamResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(LoginInfoEcoExamResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, LoginInfoEcoExamResp>()
+        .await
     }
 
     pub async fn update_result(
@@ -4340,7 +3895,7 @@ impl EcoExamResource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateResultEcoExamResp, LarkError> {
         let path = format!("/open-apis/hire/v1/eco_exams/{exam_id}/update_result");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -4348,13 +3903,8 @@ impl EcoExamResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateResultEcoExamResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateResultEcoExamResp>()
+        .await
     }
 }
 
@@ -4370,7 +3920,7 @@ impl EcoExamPaperResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateEcoExamPaperResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_exam_papers",
@@ -4378,13 +3928,8 @@ impl EcoExamPaperResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateEcoExamPaperResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateEcoExamPaperResp>()
+        .await
     }
 
     pub async fn batch_delete(
@@ -4392,7 +3937,7 @@ impl EcoExamPaperResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchDeleteEcoExamPaperResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/eco_exam_papers/batch_delete",
@@ -4400,13 +3945,8 @@ impl EcoExamPaperResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchDeleteEcoExamPaperResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchDeleteEcoExamPaperResp>()
+        .await
     }
 
     pub async fn batch_update(
@@ -4414,7 +3954,7 @@ impl EcoExamPaperResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateEcoExamPaperResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             "/open-apis/hire/v1/eco_exam_papers/batch_update",
@@ -4422,13 +3962,8 @@ impl EcoExamPaperResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchUpdateEcoExamPaperResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateEcoExamPaperResp>()
+        .await
     }
 }
 
@@ -4446,7 +3981,7 @@ impl JobManagerResource<'_> {
         option: &RequestOption,
     ) -> Result<BatchUpdateJobManagerResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/managers/batch_update");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -4454,13 +3989,8 @@ impl JobManagerResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchUpdateJobManagerResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchUpdateJobManagerResp>()
+        .await
     }
 
     pub async fn get(
@@ -4471,7 +4001,7 @@ impl JobManagerResource<'_> {
         option: &RequestOption,
     ) -> Result<GetJobManagerResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/managers/{manager_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -4479,13 +4009,8 @@ impl JobManagerResource<'_> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetJobManagerResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetJobManagerResp>()
+        .await
     }
 }
 
@@ -4501,7 +4026,7 @@ impl JobPublishRecordResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchJobPublishRecordResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/job_publish_records/search",
@@ -4509,13 +4034,8 @@ impl JobPublishRecordResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchJobPublishRecordResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchJobPublishRecordResp>()
+        .await
     }
 }
 
@@ -4531,7 +4051,7 @@ impl ReferralAccountResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateReferralAccountResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/referral_account",
@@ -4539,13 +4059,8 @@ impl ReferralAccountResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateReferralAccountResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateReferralAccountResp>()
+        .await
     }
 
     pub async fn deactivate(
@@ -4554,20 +4069,15 @@ impl ReferralAccountResource<'_> {
         option: &RequestOption,
     ) -> Result<DeactivateReferralAccountResp, LarkError> {
         let path = format!("/open-apis/hire/v1/referral_account/{referral_account_id}/deactivate");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(DeactivateReferralAccountResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, DeactivateReferralAccountResp>()
+        .await
     }
 
     pub async fn enable(
@@ -4575,7 +4085,7 @@ impl ReferralAccountResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<EnableReferralAccountResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/referral_account/enable",
@@ -4583,33 +4093,23 @@ impl ReferralAccountResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(EnableReferralAccountResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, EnableReferralAccountResp>()
+        .await
     }
 
     pub async fn get_account_assets(
         &self,
         option: &RequestOption,
     ) -> Result<GetAccountAssetsReferralAccountResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/referral_account/get_account_assets",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetAccountAssetsReferralAccountResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetAccountAssetsReferralAccountResp>()
+        .await
     }
 
     pub async fn reconciliation(
@@ -4617,7 +4117,7 @@ impl ReferralAccountResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ReconciliationReferralAccountResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/referral_account/reconciliation",
@@ -4625,13 +4125,8 @@ impl ReferralAccountResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ReconciliationReferralAccountResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ReconciliationReferralAccountResp>()
+        .await
     }
 
     pub async fn withdraw(
@@ -4641,7 +4136,7 @@ impl ReferralAccountResource<'_> {
         option: &RequestOption,
     ) -> Result<WithdrawReferralAccountResp, LarkError> {
         let path = format!("/open-apis/hire/v1/referral_account/{referral_account_id}/withdraw");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -4649,13 +4144,8 @@ impl ReferralAccountResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(WithdrawReferralAccountResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, WithdrawReferralAccountResp>()
+        .await
     }
 }
 
@@ -4671,7 +4161,7 @@ impl TalentBlocklistResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ChangeTalentBlockResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/talent_blocklist/change_talent_block",
@@ -4679,13 +4169,8 @@ impl TalentBlocklistResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ChangeTalentBlockResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ChangeTalentBlockResp>()
+        .await
     }
 }
 
@@ -4697,20 +4182,15 @@ pub struct TalentObjectResource<'a> {
 
 impl TalentObjectResource<'_> {
     pub async fn query(&self, option: &RequestOption) -> Result<QueryTalentObjectResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/talent_objects/query",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryTalentObjectResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryTalentObjectResp>()
+        .await
     }
 }
 
@@ -4726,7 +4206,7 @@ impl TalentOperationLogResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchTalentOperationLogResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/talent_operation_logs/search",
@@ -4734,13 +4214,8 @@ impl TalentOperationLogResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchTalentOperationLogResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchTalentOperationLogResp>()
+        .await
     }
 }
 
@@ -4759,7 +4234,7 @@ impl TalentPoolResource<'_> {
     ) -> Result<BatchChangeTalentPoolResp, LarkError> {
         let path =
             format!("/open-apis/hire/v1/talent_pools/{talent_pool_id}/batch_change_talent_pool");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -4767,13 +4242,8 @@ impl TalentPoolResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(BatchChangeTalentPoolResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, BatchChangeTalentPoolResp>()
+        .await
     }
 
     pub async fn move_talent(
@@ -4783,7 +4253,7 @@ impl TalentPoolResource<'_> {
         option: &RequestOption,
     ) -> Result<MoveTalentTalentPoolResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talent_pools/{talent_pool_id}/talent_relationship");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -4791,30 +4261,20 @@ impl TalentPoolResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(MoveTalentTalentPoolResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, MoveTalentTalentPoolResp>()
+        .await
     }
 
     pub async fn search(&self, option: &RequestOption) -> Result<SearchTalentPoolResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/talent_pools",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchTalentPoolResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchTalentPoolResp>()
+        .await
     }
 }
 
@@ -4830,7 +4290,7 @@ impl TestResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchTestResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/tests/search",
@@ -4838,13 +4298,8 @@ impl TestResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchTestResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchTestResp>()
+        .await
     }
 }
 
@@ -4863,7 +4318,7 @@ impl WebsiteDeliveryResource<'_> {
     ) -> Result<CreateByAttachmentWebsiteDeliveryResp, LarkError> {
         let path =
             format!("/open-apis/hire/v1/websites/{website_id}/deliveries/create_by_attachment");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -4871,13 +4326,8 @@ impl WebsiteDeliveryResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateByAttachmentWebsiteDeliveryResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateByAttachmentWebsiteDeliveryResp>()
+        .await
     }
 
     pub async fn create_by_resume(
@@ -4887,7 +4337,7 @@ impl WebsiteDeliveryResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateByResumeWebsiteDeliveryResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/deliveries/create_by_resume");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -4895,13 +4345,8 @@ impl WebsiteDeliveryResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateByResumeWebsiteDeliveryResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateByResumeWebsiteDeliveryResp>()
+        .await
     }
 }
 
@@ -4988,7 +4433,7 @@ impl ApplicationInterviewResource<'_> {
             "/open-apis/hire/v1/applications/{}/interviews",
             query.application_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -4998,13 +4443,8 @@ impl ApplicationInterviewResource<'_> {
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
         .query("job_level_id_type", query.job_level_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListApplicationInterviewResp2 {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListApplicationInterviewResp2>()
+        .await
     }
 }
 
@@ -5022,7 +4462,7 @@ impl EhrImportTaskResource<'_> {
         option: &RequestOption,
     ) -> Result<PatchEhrImportTaskResp, LarkError> {
         let path = format!("/open-apis/hire/v1/ehr_import_tasks/{ehr_import_task_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -5030,13 +4470,8 @@ impl EhrImportTaskResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchEhrImportTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchEhrImportTaskResp>()
+        .await
     }
 }
 
@@ -5117,7 +4552,7 @@ impl EvaluationTaskResource<'_> {
         query: &ListEvaluationTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListEvaluationTaskResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/evaluation_tasks",
@@ -5128,13 +4563,8 @@ impl EvaluationTaskResource<'_> {
         .query("user_id", query.user_id)
         .query("activity_status", query.activity_status)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListEvaluationTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListEvaluationTaskResp>()
+        .await
     }
 }
 
@@ -5150,7 +4580,7 @@ impl ExamResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateExamResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/exams",
@@ -5158,13 +4588,8 @@ impl ExamResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateExamResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateExamResp>()
+        .await
     }
 }
 
@@ -5245,7 +4670,7 @@ impl ExamMarkingTaskResource<'_> {
         query: &ListExamMarkingTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListExamMarkingTaskResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/exam_marking_tasks",
@@ -5256,13 +4681,8 @@ impl ExamMarkingTaskResource<'_> {
         .query("user_id", query.user_id)
         .query("activity_status", query.activity_status)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListExamMarkingTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListExamMarkingTaskResp>()
+        .await
     }
 }
 
@@ -5278,7 +4698,7 @@ impl ExternalInterviewAssessmentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateExternalInterviewAssessmentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/external_interview_assessments",
@@ -5286,13 +4706,8 @@ impl ExternalInterviewAssessmentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateExternalInterviewAssessmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateExternalInterviewAssessmentResp>()
+        .await
     }
 
     pub async fn patch(
@@ -5304,7 +4719,7 @@ impl ExternalInterviewAssessmentResource<'_> {
         let path = format!(
             "/open-apis/hire/v1/external_interview_assessments/{external_interview_assessment_id}"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -5312,13 +4727,8 @@ impl ExternalInterviewAssessmentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchExternalInterviewAssessmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchExternalInterviewAssessmentResp>()
+        .await
     }
 }
 
@@ -5334,7 +4744,7 @@ impl ExternalReferralRewardResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateExternalReferralRewardResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/external_referral_rewards",
@@ -5342,13 +4752,8 @@ impl ExternalReferralRewardResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateExternalReferralRewardResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateExternalReferralRewardResp>()
+        .await
     }
 
     pub async fn delete(
@@ -5358,20 +4763,15 @@ impl ExternalReferralRewardResource<'_> {
     ) -> Result<DeleteExternalReferralRewardResp, LarkError> {
         let path =
             format!("/open-apis/hire/v1/external_referral_rewards/{external_referral_reward_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteExternalReferralRewardResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteExternalReferralRewardResp>()
+        .await
     }
 }
 
@@ -5389,7 +4789,7 @@ impl InterviewFeedbackFormResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListInterviewFeedbackFormResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interview_feedback_forms",
@@ -5399,13 +4799,8 @@ impl InterviewFeedbackFormResource<'_> {
         .query("page_size", page_size)
         .query("page_token", page_token)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListInterviewFeedbackFormResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListInterviewFeedbackFormResp>()
+        .await
     }
 }
 
@@ -5420,20 +4815,15 @@ impl InterviewRecordAttachmentResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<GetInterviewRecordAttachmentResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interview_records/attachments",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetInterviewRecordAttachmentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetInterviewRecordAttachmentResp>()
+        .await
     }
 }
 
@@ -5451,7 +4841,7 @@ impl InterviewRegistrationSchemaResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListInterviewRegistrationSchemaResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interview_registration_schemas",
@@ -5461,13 +4851,8 @@ impl InterviewRegistrationSchemaResource<'_> {
         .query("page_size", page_size)
         .query("page_token", page_token)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListInterviewRegistrationSchemaResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListInterviewRegistrationSchemaResp>()
+        .await
     }
 }
 
@@ -5484,7 +4869,7 @@ impl InterviewRoundTypeResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListInterviewRoundTypeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interview_round_types",
@@ -5493,13 +4878,8 @@ impl InterviewRoundTypeResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListInterviewRoundTypeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListInterviewRoundTypeResp>()
+        .await
     }
 }
 
@@ -5580,7 +4960,7 @@ impl InterviewTaskResource<'_> {
         query: &ListInterviewTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListInterviewTaskResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interview_tasks",
@@ -5591,13 +4971,8 @@ impl InterviewTaskResource<'_> {
         .query("user_id", query.user_id)
         .query("activity_status", query.activity_status)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListInterviewTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListInterviewTaskResp>()
+        .await
     }
 }
 
@@ -5614,7 +4989,7 @@ impl JobRequirementSchemaResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobRequirementSchemaResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/job_requirement_schemas",
@@ -5623,13 +4998,8 @@ impl JobRequirementSchemaResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListJobRequirementSchemaResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListJobRequirementSchemaResp>()
+        .await
     }
 }
 
@@ -5646,7 +5016,7 @@ impl JobSchemaResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobSchemaResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/job_schemas",
@@ -5655,13 +5025,8 @@ impl JobSchemaResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListJobSchemaResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListJobSchemaResp>()
+        .await
     }
 }
 
@@ -5673,20 +5038,15 @@ pub struct MinutesResource<'a> {
 
 impl MinutesResource<'_> {
     pub async fn get(&self, option: &RequestOption) -> Result<GetMinutesResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/minutes",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetMinutesResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetMinutesResp>()
+        .await
     }
 }
 
@@ -5704,20 +5064,15 @@ impl OfferApplicationFormResource<'_> {
     ) -> Result<GetOfferApplicationFormResp, LarkError> {
         let path =
             format!("/open-apis/hire/v1/offer_application_forms/{offer_application_form_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetOfferApplicationFormResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetOfferApplicationFormResp>()
+        .await
     }
 
     pub async fn list(
@@ -5726,7 +5081,7 @@ impl OfferApplicationFormResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListOfferApplicationFormResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/offer_application_forms",
@@ -5735,13 +5090,8 @@ impl OfferApplicationFormResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListOfferApplicationFormResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListOfferApplicationFormResp>()
+        .await
     }
 }
 
@@ -5758,7 +5108,7 @@ impl OfferApprovalTemplateResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListOfferApprovalTemplateResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/offer_approval_templates",
@@ -5767,13 +5117,8 @@ impl OfferApprovalTemplateResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListOfferApprovalTemplateResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListOfferApprovalTemplateResp>()
+        .await
     }
 }
 
@@ -5791,7 +5136,7 @@ impl OfferCustomFieldResource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateOfferCustomFieldResp, LarkError> {
         let path = format!("/open-apis/hire/v1/offer_custom_fields/{offer_custom_field_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -5799,13 +5144,8 @@ impl OfferCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateOfferCustomFieldResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateOfferCustomFieldResp>()
+        .await
     }
 }
 
@@ -5822,7 +5162,7 @@ impl PortalApplySchemaResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListPortalApplySchemaResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/portal_apply_schemas",
@@ -5831,13 +5171,8 @@ impl PortalApplySchemaResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListPortalApplySchemaResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListPortalApplySchemaResp>()
+        .await
     }
 }
 
@@ -5855,7 +5190,7 @@ impl ReferralWebsiteJobPostResource<'_> {
         option: &RequestOption,
     ) -> Result<GetReferralWebsiteJobPostResp, LarkError> {
         let path = format!("/open-apis/hire/v1/referral_websites/job_posts/{job_post_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -5863,13 +5198,8 @@ impl ReferralWebsiteJobPostResource<'_> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetReferralWebsiteJobPostResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetReferralWebsiteJobPostResp>()
+        .await
     }
 
     pub async fn list(
@@ -5879,7 +5209,7 @@ impl ReferralWebsiteJobPostResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListReferralWebsiteJobPostResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/referral_websites/job_posts",
@@ -5889,13 +5219,8 @@ impl ReferralWebsiteJobPostResource<'_> {
         .query("page_size", page_size)
         .query("page_token", page_token)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListReferralWebsiteJobPostResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListReferralWebsiteJobPostResp>()
+        .await
     }
 }
 
@@ -5913,7 +5238,7 @@ impl TalentExternalInfoResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateTalentExternalInfoResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talents/{talent_id}/external_info");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -5921,13 +5246,8 @@ impl TalentExternalInfoResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateTalentExternalInfoResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateTalentExternalInfoResp>()
+        .await
     }
 
     pub async fn update(
@@ -5937,7 +5257,7 @@ impl TalentExternalInfoResource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateTalentExternalInfoResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talents/{talent_id}/external_info");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -5945,13 +5265,8 @@ impl TalentExternalInfoResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateTalentExternalInfoResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateTalentExternalInfoResp>()
+        .await
     }
 }
 
@@ -5968,7 +5283,7 @@ impl TalentTagResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListTalentTagResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/talent_tags",
@@ -5977,13 +5292,8 @@ impl TalentTagResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListTalentTagResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListTalentTagResp>()
+        .await
     }
 }
 
@@ -6001,7 +5311,7 @@ impl WebsiteChannelResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateWebsiteChannelResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/channels");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -6009,13 +5319,8 @@ impl WebsiteChannelResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateWebsiteChannelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateWebsiteChannelResp>()
+        .await
     }
 
     pub async fn delete(
@@ -6025,20 +5330,15 @@ impl WebsiteChannelResource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteWebsiteChannelResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/channels/{channel_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteWebsiteChannelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteWebsiteChannelResp>()
+        .await
     }
 
     pub async fn list(
@@ -6049,7 +5349,7 @@ impl WebsiteChannelResource<'_> {
         option: &RequestOption,
     ) -> Result<ListWebsiteChannelResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/channels");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -6058,13 +5358,8 @@ impl WebsiteChannelResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListWebsiteChannelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListWebsiteChannelResp>()
+        .await
     }
 
     pub async fn update(
@@ -6075,7 +5370,7 @@ impl WebsiteChannelResource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateWebsiteChannelResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/channels/{channel_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -6083,13 +5378,8 @@ impl WebsiteChannelResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateWebsiteChannelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateWebsiteChannelResp>()
+        .await
     }
 }
 
@@ -6108,20 +5398,15 @@ impl WebsiteDeliveryTaskResource<'_> {
     ) -> Result<GetWebsiteDeliveryTaskResp, LarkError> {
         let path =
             format!("/open-apis/hire/v1/websites/{website_id}/delivery_tasks/{delivery_task_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetWebsiteDeliveryTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetWebsiteDeliveryTaskResp>()
+        .await
     }
 }
 
@@ -6139,7 +5424,7 @@ impl WebsiteSiteUserResource<'_> {
         option: &RequestOption,
     ) -> Result<CreateWebsiteSiteUserResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/site_users");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -6147,13 +5432,8 @@ impl WebsiteSiteUserResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateWebsiteSiteUserResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateWebsiteSiteUserResp>()
+        .await
     }
 }
 

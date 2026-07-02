@@ -108,7 +108,7 @@ impl AppRoleV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<CreateAppRoleV2Resp, LarkError> {
         let path = format!("/open-apis/base/v2/apps/{}/roles", query.app_token);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -116,13 +116,8 @@ impl AppRoleV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<AppRoleData>()
-        .await?;
-        Ok(CreateAppRoleV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AppRoleData, CreateAppRoleV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -143,7 +138,7 @@ impl AppRoleV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<ListAppRoleV2Resp, LarkError> {
         let path = format!("/open-apis/base/v2/apps/{}/roles", query.app_token);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -151,13 +146,8 @@ impl AppRoleV2Resource<'_> {
             option,
         )
         .page_query(query.page)
-        .send_v2::<AppRoleListData>()
-        .await?;
-        Ok(ListAppRoleV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AppRoleListData, ListAppRoleV2Resp>()
+        .await
     }
 
     pub async fn update(
@@ -183,7 +173,7 @@ impl AppRoleV2Resource<'_> {
             "/open-apis/base/v2/apps/{}/roles/{}",
             query.app_token, query.role_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -191,12 +181,7 @@ impl AppRoleV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<AppRoleData>()
-        .await?;
-        Ok(UpdateAppRoleV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<AppRoleData, UpdateAppRoleV2Resp>()
+        .await
     }
 }

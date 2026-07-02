@@ -111,7 +111,7 @@ impl<'a> AppBadgeResource<'a> {
         query: &SetAppBadgeQuery<'_>,
         option: &RequestOption,
     ) -> Result<SetAppBadgeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/application/v6/app_badge/set",
@@ -120,13 +120,8 @@ impl<'a> AppBadgeResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SetAppBadgeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SetAppBadgeResp>()
+        .await
     }
 }
 
@@ -183,7 +178,7 @@ impl<'a> AppRecommendRuleResource<'a> {
         query: &ListAppRecommendRuleQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAppRecommendRuleResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/application/v6/app_recommend_rules",
@@ -192,13 +187,8 @@ impl<'a> AppRecommendRuleResource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListAppRecommendRuleResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListAppRecommendRuleResp>()
+        .await
     }
 }
 
@@ -414,7 +404,7 @@ impl<'a> ApplicationResource<'a> {
             "/open-apis/application/v6/applications/{}/contacts_range_configuration",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -424,13 +414,8 @@ impl<'a> ApplicationResource<'a> {
         .page_query(query.page)
         .query("department_id_type", query.department_id_type)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ContactsRangeConfigurationApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ContactsRangeConfigurationApplicationResp>()
+        .await
     }
 
     /// Get application info — GET /open-apis/application/v6/applications/:app_id
@@ -453,7 +438,7 @@ impl<'a> ApplicationResource<'a> {
         option: &RequestOption,
     ) -> Result<GetApplicationResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{}", query.app_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -462,13 +447,8 @@ impl<'a> ApplicationResource<'a> {
         )
         .query("lang", query.lang)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetApplicationResp>()
+        .await
     }
 
     /// List installed applications — GET /open-apis/application/v6/applications
@@ -500,7 +480,7 @@ impl<'a> ApplicationResource<'a> {
         query: &ListApplicationQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListApplicationResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/application/v6/applications",
@@ -513,13 +493,8 @@ impl<'a> ApplicationResource<'a> {
         .query("status", query.status)
         .query("payment_type", query.payment_type)
         .query("owner_type", query.owner_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListApplicationResp>()
+        .await
     }
 
     /// Patch application group info — PATCH /open-apis/application/v6/applications/:app_id
@@ -540,7 +515,7 @@ impl<'a> ApplicationResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchApplicationResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{}", query.app_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -549,13 +524,8 @@ impl<'a> ApplicationResource<'a> {
         )
         .query("lang", query.lang)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchApplicationResp>()
+        .await
     }
 
     /// Underauditlist — GET /open-apis/application/v6/applications/underauditlist
@@ -581,7 +551,7 @@ impl<'a> ApplicationResource<'a> {
         query: &UnderauditlistApplicationQuery<'_>,
         option: &RequestOption,
     ) -> Result<UnderauditlistApplicationResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/application/v6/applications/underauditlist",
@@ -591,13 +561,8 @@ impl<'a> ApplicationResource<'a> {
         .query("lang", query.lang)
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UnderauditlistApplicationResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UnderauditlistApplicationResp>()
+        .await
     }
 }
 
@@ -656,7 +621,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
             "/open-apis/application/v6/applications/{}/app_usage/department_overview",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -665,13 +630,8 @@ impl<'a> ApplicationAppUsageResource<'a> {
         )
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(DepartmentOverviewApplicationAppUsageResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, DepartmentOverviewApplicationAppUsageResp>()
+        .await
     }
 
     /// MessagePushOverview — POST /open-apis/application/v6/applications/:app_id/app_usage/message_push_overview
@@ -696,7 +656,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
             "/open-apis/application/v6/applications/{}/app_usage/message_push_overview",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -705,13 +665,8 @@ impl<'a> ApplicationAppUsageResource<'a> {
         )
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(MessagePushOverviewApplicationAppUsageResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, MessagePushOverviewApplicationAppUsageResp>()
+        .await
     }
 
     /// Overview — POST /open-apis/application/v6/applications/:app_id/app_usage/overview
@@ -736,7 +691,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
             "/open-apis/application/v6/applications/{}/app_usage/overview",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -745,13 +700,8 @@ impl<'a> ApplicationAppUsageResource<'a> {
         )
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(OverviewApplicationAppUsageResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, OverviewApplicationAppUsageResp>()
+        .await
     }
 }
 
@@ -930,7 +880,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
             "/open-apis/application/v6/applications/{}/app_versions/{}/contacts_range_suggest",
             query.app_id, query.version_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -939,13 +889,8 @@ impl<'a> ApplicationAppVersionResource<'a> {
         )
         .query("department_id_type", query.department_id_type)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ContactsRangeSuggestApplicationAppVersionResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ContactsRangeSuggestApplicationAppVersionResp>()
+        .await
     }
 
     /// Get app version — GET /open-apis/application/v6/applications/:app_id/app_versions/:version_id
@@ -972,7 +917,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
             "/open-apis/application/v6/applications/{}/app_versions/{}",
             query.app_id, query.version_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -981,13 +926,8 @@ impl<'a> ApplicationAppVersionResource<'a> {
         )
         .query("lang", query.lang)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetApplicationAppVersionResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetApplicationAppVersionResp>()
+        .await
     }
 
     /// List app versions — GET /open-apis/application/v6/applications/:app_id/app_versions
@@ -1021,7 +961,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
             "/open-apis/application/v6/applications/{}/app_versions",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1032,13 +972,8 @@ impl<'a> ApplicationAppVersionResource<'a> {
         .page_query(query.page)
         .query("order", query.order)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListApplicationAppVersionResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListApplicationAppVersionResp>()
+        .await
     }
 
     /// Patch app version audit status — PATCH /open-apis/application/v6/applications/:app_id/app_versions/:version_id
@@ -1069,7 +1004,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
             "/open-apis/application/v6/applications/{}/app_versions/{}",
             query.app_id, query.version_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1080,13 +1015,8 @@ impl<'a> ApplicationAppVersionResource<'a> {
         .query("operator_id", query.operator_id)
         .query("reject_reason", query.reject_reason)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchApplicationAppVersionResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchApplicationAppVersionResp>()
+        .await
     }
 }
 
@@ -1159,7 +1089,7 @@ impl<'a> ApplicationCollaboratorsResource<'a> {
             "/open-apis/application/v6/applications/{}/collaborators",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1167,13 +1097,8 @@ impl<'a> ApplicationCollaboratorsResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetApplicationCollaboratorsResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetApplicationCollaboratorsResp>()
+        .await
     }
 
     /// Update collaborators — PUT /open-apis/application/v6/applications/:app_id/collaborators
@@ -1198,7 +1123,7 @@ impl<'a> ApplicationCollaboratorsResource<'a> {
             "/open-apis/application/v6/applications/{}/collaborators",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1207,13 +1132,8 @@ impl<'a> ApplicationCollaboratorsResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateApplicationCollaboratorsResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateApplicationCollaboratorsResp>()
+        .await
     }
 }
 
@@ -1276,7 +1196,7 @@ impl<'a> ApplicationContactsRangeResource<'a> {
             "/open-apis/application/v6/applications/{}/contacts_range",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1286,13 +1206,8 @@ impl<'a> ApplicationContactsRangeResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchApplicationContactsRangeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchApplicationContactsRangeResp>()
+        .await
     }
 }
 
@@ -1434,7 +1349,7 @@ impl<'a> ApplicationFeedbackResource<'a> {
             "/open-apis/application/v6/applications/{}/feedbacks",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1447,13 +1362,8 @@ impl<'a> ApplicationFeedbackResource<'a> {
         .query("status", query.status)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListApplicationFeedbackResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListApplicationFeedbackResp>()
+        .await
     }
 
     /// Patch feedback — PATCH /open-apis/application/v6/applications/:app_id/feedbacks/:feedback_id
@@ -1483,7 +1393,7 @@ impl<'a> ApplicationFeedbackResource<'a> {
             "/open-apis/application/v6/applications/{}/feedbacks/{}",
             query.app_id, query.feedback_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1493,13 +1403,8 @@ impl<'a> ApplicationFeedbackResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("status", query.status)
         .query("operator_id", query.operator_id)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchApplicationFeedbackResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchApplicationFeedbackResp>()
+        .await
     }
 }
 
@@ -1541,7 +1446,7 @@ impl<'a> ApplicationManagementResource<'a> {
             "/open-apis/application/v6/applications/{}/management",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1549,13 +1454,8 @@ impl<'a> ApplicationManagementResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateApplicationManagementResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateApplicationManagementResp>()
+        .await
     }
 }
 
@@ -1608,7 +1508,7 @@ impl<'a> ApplicationOwnerResource<'a> {
             "/open-apis/application/v6/applications/{}/owner",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1617,13 +1517,8 @@ impl<'a> ApplicationOwnerResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateApplicationOwnerResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateApplicationOwnerResp>()
+        .await
     }
 }
 
@@ -1716,7 +1611,7 @@ impl<'a> ApplicationVisibilityResource<'a> {
             "/open-apis/application/v6/applications/{}/visibility/check_white_black_list",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1726,13 +1621,8 @@ impl<'a> ApplicationVisibilityResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CheckWhiteBlackListApplicationVisibilityResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CheckWhiteBlackListApplicationVisibilityResp>()
+        .await
     }
 
     /// Patch visibility — PATCH /open-apis/application/v6/applications/:app_id/visibility
@@ -1759,7 +1649,7 @@ impl<'a> ApplicationVisibilityResource<'a> {
             "/open-apis/application/v6/applications/{}/visibility",
             query.app_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1769,13 +1659,8 @@ impl<'a> ApplicationVisibilityResource<'a> {
         .query("department_id_type", query.department_id_type)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchApplicationVisibilityResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchApplicationVisibilityResp>()
+        .await
     }
 }
 
@@ -1814,20 +1699,15 @@ impl<'a> ScopeResource<'a> {
         _query: &ApplyScopeQuery,
         option: &RequestOption,
     ) -> Result<ApplyScopeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/application/v6/scopes/apply",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ApplyScopeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ApplyScopeResp>()
+        .await
     }
 
     /// List scopes — GET /open-apis/application/v6/scopes
@@ -1840,20 +1720,15 @@ impl<'a> ScopeResource<'a> {
         _query: &ListScopeQuery,
         option: &RequestOption,
     ) -> Result<ListScopeResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/application/v6/scopes",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListScopeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListScopeResp>()
+        .await
     }
 }
 

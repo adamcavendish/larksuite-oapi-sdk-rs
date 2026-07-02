@@ -90,20 +90,15 @@ impl BatchCountryRegionV3Resource<'_> {
         _query: &GetBatchCountryRegionV3Query,
         option: &RequestOption,
     ) -> Result<GetBatchCountryRegionV3Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/mdm/v3/batch_country_region",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<BatchCountryRegionData>()
-        .await?;
-        Ok(GetBatchCountryRegionV3Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<BatchCountryRegionData, GetBatchCountryRegionV3Resp>()
+        .await
     }
 }
 
@@ -128,7 +123,7 @@ impl CountryRegionV3Resource<'_> {
         query: &ListCountryRegionV3Query<'_>,
         option: &RequestOption,
     ) -> Result<ListCountryRegionV3Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/mdm/v3/country_regions",
@@ -136,12 +131,7 @@ impl CountryRegionV3Resource<'_> {
             option,
         )
         .page_query(query.page)
-        .send_v2::<CountryRegionListData>()
-        .await?;
-        Ok(ListCountryRegionV3Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<CountryRegionListData, ListCountryRegionV3Resp>()
+        .await
     }
 }

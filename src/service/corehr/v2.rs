@@ -345,7 +345,7 @@ macro_rules! post_method {
             body: serde_json::Value,
             option: &RequestOption,
         ) -> Result<$resp, LarkError> {
-            let (api_resp, code_error, data) = RestRequest::new(
+            RestRequest::new(
                 self.config,
                 http::Method::POST,
                 $path,
@@ -353,13 +353,8 @@ macro_rules! post_method {
                 option,
             )
             .json_body(&body)?
-            .send_v2::<$data>()
-            .await?;
-            Ok($resp {
-                api_resp,
-                code_error,
-                data,
-            })
+            .send_v2_response::<$data, $resp>()
+            .await
         }
     };
 }
@@ -367,20 +362,15 @@ macro_rules! post_method {
 macro_rules! get_method {
     ($fn_name:ident, $resp:ident, $data:ty, $path:expr) => {
         pub async fn $fn_name(&self, option: &RequestOption) -> Result<$resp, LarkError> {
-            let (api_resp, code_error, data) = RestRequest::new(
+            RestRequest::new(
                 self.config,
                 http::Method::GET,
                 $path,
                 vec![AccessTokenType::Tenant],
                 option,
             )
-            .send_v2::<$data>()
-            .await?;
-            Ok($resp {
-                api_resp,
-                code_error,
-                data,
-            })
+            .send_v2_response::<$data, $resp>()
+            .await
         }
     };
 }
@@ -398,20 +388,15 @@ impl ApprovalGroupsV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<GetApprovalGroupsV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/approval_groups/{process_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetApprovalGroupsV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetApprovalGroupsV2Resp>()
+        .await
     }
 
     post_method!(
@@ -491,7 +476,7 @@ impl ApproverV2Resource<'_> {
         query: &ListApproverV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListApproverV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/approvers",
@@ -499,13 +484,8 @@ impl ApproverV2Resource<'_> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListApproverV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListApproverV2Resp>()
+        .await
     }
 }
 
@@ -642,7 +622,7 @@ impl BpV2Resource<'_> {
         query: &ListBpV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListBpV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/bps",
@@ -650,13 +630,8 @@ impl BpV2Resource<'_> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListBpV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListBpV2Resp>()
+        .await
     }
 }
 
@@ -755,20 +730,15 @@ impl CostCenterV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteCostCenterV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteCostCenterV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteCostCenterV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -778,7 +748,7 @@ impl CostCenterV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchCostCenterV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -786,13 +756,8 @@ impl CostCenterV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchCostCenterV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchCostCenterV2Resp>()
+        .await
     }
 
     get_method!(
@@ -823,7 +788,7 @@ impl CostCenterVersionV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<CreateCostCenterVersionV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}/versions");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -831,13 +796,8 @@ impl CostCenterVersionV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateCostCenterVersionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateCostCenterVersionV2Resp>()
+        .await
     }
 
     pub async fn delete(
@@ -848,20 +808,15 @@ impl CostCenterVersionV2Resource<'_> {
     ) -> Result<DeleteCostCenterVersionV2Resp, LarkError> {
         let path =
             format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}/versions/{version_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteCostCenterVersionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteCostCenterVersionV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -873,7 +828,7 @@ impl CostCenterVersionV2Resource<'_> {
     ) -> Result<PatchCostCenterVersionV2Resp, LarkError> {
         let path =
             format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}/versions/{version_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -881,13 +836,8 @@ impl CostCenterVersionV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchCostCenterVersionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchCostCenterVersionV2Resp>()
+        .await
     }
 }
 
@@ -924,7 +874,7 @@ impl CustomOrgV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchCustomOrgV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/custom_orgs/{org_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -932,13 +882,8 @@ impl CustomOrgV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchCustomOrgV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchCustomOrgV2Resp>()
+        .await
     }
 
     post_method!(
@@ -1014,20 +959,15 @@ impl DepartmentV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteDepartmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/departments/{department_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteDepartmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteDepartmentV2Resp>()
+        .await
     }
 
     post_method!(
@@ -1044,7 +984,7 @@ impl DepartmentV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchDepartmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/departments/{department_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1052,13 +992,8 @@ impl DepartmentV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchDepartmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchDepartmentV2Resp>()
+        .await
     }
 
     post_method!(
@@ -1112,20 +1047,15 @@ impl DraftV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<GetDraftV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/drafts/{draft_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetDraftV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetDraftV2Resp>()
+        .await
     }
 }
 
@@ -1182,20 +1112,15 @@ impl EmployeesAdditionalJobV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteEmployeesAdditionalJobV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/employees/additional_jobs/{additional_job_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteEmployeesAdditionalJobV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteEmployeesAdditionalJobV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -1205,7 +1130,7 @@ impl EmployeesAdditionalJobV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchEmployeesAdditionalJobV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/employees/additional_jobs/{additional_job_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1213,13 +1138,8 @@ impl EmployeesAdditionalJobV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchEmployeesAdditionalJobV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchEmployeesAdditionalJobV2Resp>()
+        .await
     }
 }
 
@@ -1260,20 +1180,15 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
         let path = format!(
             "/open-apis/corehr/v2/employees/international_assignments/{international_assignment_id}"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteEmployeesIntlAssignmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteEmployeesIntlAssignmentV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -1282,7 +1197,7 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListEmployeesIntlAssignmentV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/employees/international_assignments",
@@ -1291,13 +1206,8 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListEmployeesIntlAssignmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListEmployeesIntlAssignmentV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -1309,7 +1219,7 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
         let path = format!(
             "/open-apis/corehr/v2/employees/international_assignments/{international_assignment_id}"
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1317,13 +1227,8 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchEmployeesIntlAssignmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchEmployeesIntlAssignmentV2Resp>()
+        .await
     }
 }
 
@@ -1416,20 +1321,15 @@ impl JobV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<GetJobV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/jobs/{job_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetJobV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetJobV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -1449,7 +1349,7 @@ impl JobV2Resource<'_> {
         query: &ListJobV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListJobV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/jobs",
@@ -1457,13 +1357,8 @@ impl JobV2Resource<'_> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListJobV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListJobV2Resp>()
+        .await
     }
 
     post_method!(
@@ -1501,7 +1396,7 @@ impl JobChangeV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<RevokeJobChangeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/job_changes/{job_change_id}/revoke");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1509,13 +1404,8 @@ impl JobChangeV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(RevokeJobChangeV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RevokeJobChangeV2Resp>()
+        .await
     }
 
     post_method!(
@@ -1573,20 +1463,15 @@ impl JobGradeV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteJobGradeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/job_grades/{job_grade_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteJobGradeV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteJobGradeV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -1596,7 +1481,7 @@ impl JobGradeV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchJobGradeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/job_grades/{job_grade_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1604,13 +1489,8 @@ impl JobGradeV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchJobGradeV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchJobGradeV2Resp>()
+        .await
     }
 
     post_method!(
@@ -1675,7 +1555,7 @@ impl LocationV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchLocationV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1683,13 +1563,8 @@ impl LocationV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchLocationV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchLocationV2Resp>()
+        .await
     }
 
     get_method!(
@@ -1714,7 +1589,7 @@ impl LocationAddressV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<CreateLocationAddressV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}/addresses");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1722,13 +1597,8 @@ impl LocationAddressV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateLocationAddressV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateLocationAddressV2Resp>()
+        .await
     }
 
     pub async fn delete(
@@ -1738,20 +1608,15 @@ impl LocationAddressV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteLocationAddressV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}/addresses/{address_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteLocationAddressV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteLocationAddressV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -1762,7 +1627,7 @@ impl LocationAddressV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchLocationAddressV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}/addresses/{address_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1770,13 +1635,8 @@ impl LocationAddressV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchLocationAddressV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchLocationAddressV2Resp>()
+        .await
     }
 }
 
@@ -1839,20 +1699,15 @@ impl PathwayV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<DeletePathwayV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pathways/{pathway_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeletePathwayV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeletePathwayV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -1862,7 +1717,7 @@ impl PathwayV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchPathwayV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pathways/{pathway_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1870,13 +1725,8 @@ impl PathwayV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchPathwayV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchPathwayV2Resp>()
+        .await
     }
 }
 
@@ -1901,7 +1751,7 @@ impl PersonV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchPersonV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/persons/{person_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1909,13 +1759,8 @@ impl PersonV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchPersonV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchPersonV2Resp>()
+        .await
     }
 }
 
@@ -1952,7 +1797,7 @@ impl PositionV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchPositionV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/positions/{position_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1960,13 +1805,8 @@ impl PositionV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchPositionV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchPositionV2Resp>()
+        .await
     }
 
     post_method!(
@@ -1997,7 +1837,7 @@ impl PreHireV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<CompletePreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}/complete");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2005,13 +1845,8 @@ impl PreHireV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CompletePreHireV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CompletePreHireV2Resp>()
+        .await
     }
 
     post_method!(
@@ -2027,20 +1862,15 @@ impl PreHireV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<DeletePreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeletePreHireV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeletePreHireV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -2050,7 +1880,7 @@ impl PreHireV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchPreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2058,13 +1888,8 @@ impl PreHireV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchPreHireV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchPreHireV2Resp>()
+        .await
     }
 
     post_method!(
@@ -2099,7 +1924,7 @@ impl PreHireV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<TransitTaskPreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}/transit_task");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2107,13 +1932,8 @@ impl PreHireV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(TransitTaskPreHireV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, TransitTaskPreHireV2Resp>()
+        .await
     }
 
     post_method!(
@@ -2177,20 +1997,15 @@ impl ProbationAssessmentV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<DeleteProbationAssessmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/probation/assessments/{assessment_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-        Ok(DeleteProbationAssessmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteProbationAssessmentV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -2200,7 +2015,7 @@ impl ProbationAssessmentV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<PatchProbationAssessmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/probation/assessments/{assessment_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2208,13 +2023,8 @@ impl ProbationAssessmentV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PatchProbationAssessmentV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchProbationAssessmentV2Resp>()
+        .await
     }
 }
 
@@ -2264,20 +2074,15 @@ impl ProcessV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<FlowVariableDataProcessV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/flow_variable_data");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(FlowVariableDataProcessV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, FlowVariableDataProcessV2Resp>()
+        .await
     }
 
     pub async fn get(
@@ -2286,20 +2091,15 @@ impl ProcessV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<GetProcessV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetProcessV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetProcessV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -2319,7 +2119,7 @@ impl ProcessV2Resource<'_> {
         query: &ListProcessV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListProcessV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/processes",
@@ -2327,13 +2127,8 @@ impl ProcessV2Resource<'_> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListProcessV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListProcessV2Resp>()
+        .await
     }
 }
 
@@ -2352,7 +2147,7 @@ impl ProcessApproverV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateProcessApproverV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/approvers/{approver_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2360,13 +2155,8 @@ impl ProcessApproverV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateProcessApproverV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateProcessApproverV2Resp>()
+        .await
     }
 }
 
@@ -2384,7 +2174,7 @@ impl ProcessExtraV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateProcessExtraV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/extra");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2392,13 +2182,8 @@ impl ProcessExtraV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateProcessExtraV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateProcessExtraV2Resp>()
+        .await
     }
 }
 
@@ -2415,20 +2200,15 @@ impl ProcessFormVariableDataV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<GetProcessFormVariableDataV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/form_variable_data");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetProcessFormVariableDataV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetProcessFormVariableDataV2Resp>()
+        .await
     }
 }
 
@@ -2446,7 +2226,7 @@ impl ProcessTransferV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateProcessTransferV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/transfer");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2454,13 +2234,8 @@ impl ProcessTransferV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateProcessTransferV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateProcessTransferV2Resp>()
+        .await
     }
 }
 
@@ -2514,7 +2289,7 @@ impl ProcessRevokeV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateProcessRevokeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/process_revoke/{process_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2522,13 +2297,8 @@ impl ProcessRevokeV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateProcessRevokeV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateProcessRevokeV2Resp>()
+        .await
     }
 }
 
@@ -2546,7 +2316,7 @@ impl ProcessWithdrawV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<UpdateProcessWithdrawV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/process_withdraw/{process_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2554,13 +2324,8 @@ impl ProcessWithdrawV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateProcessWithdrawV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateProcessWithdrawV2Resp>()
+        .await
     }
 }
 
@@ -2731,7 +2496,7 @@ impl SignatureFileV2Resource<'_> {
         option: &RequestOption,
     ) -> Result<DownloadSignatureFileV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/signature_files/{signature_file_id}/download");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2739,13 +2504,8 @@ impl SignatureFileV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(DownloadSignatureFileV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, DownloadSignatureFileV2Resp>()
+        .await
     }
 
     pub async fn list(
@@ -2765,7 +2525,7 @@ impl SignatureFileV2Resource<'_> {
         query: &ListSignatureFileV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListSignatureFileV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/signature_files",
@@ -2780,13 +2540,8 @@ impl SignatureFileV2Resource<'_> {
         .query("user_id_type", query.user_id_type)
         .query("template_ids", query.template_ids)
         .query("select_sign_url", query.select_sign_url)
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListSignatureFileV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListSignatureFileV2Resp>()
+        .await
     }
 
     pub async fn list_by_biz_id(
@@ -2806,7 +2561,7 @@ impl SignatureFileV2Resource<'_> {
         query: &ListByBizIdSignatureFileV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListByBizIdSignatureFileV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/signature_files/list_by_biz_id",
@@ -2818,13 +2573,8 @@ impl SignatureFileV2Resource<'_> {
         .query("biz_type", query.biz_type)
         .query("user_id_type", query.user_id_type)
         .query("select_sign_url", query.select_sign_url)
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListByBizIdSignatureFileV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListByBizIdSignatureFileV2Resp>()
+        .await
     }
 
     post_method!(
@@ -2910,7 +2660,7 @@ impl SignatureNodeV2Resource<'_> {
         query: &ListByFileIdSignatureNodeV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListByFileIdSignatureNodeV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/signature_nodes/list_by_file_id",
@@ -2920,13 +2670,8 @@ impl SignatureNodeV2Resource<'_> {
         .page_query(query.page_query())
         .query("file_id", query.file_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListByFileIdSignatureNodeV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListByFileIdSignatureNodeV2Resp>()
+        .await
     }
 }
 
@@ -2999,7 +2744,7 @@ impl SignatureTemplateV2Resource<'_> {
         query: &SearchSignatureTemplateV2Query<'_>,
         option: &RequestOption,
     ) -> Result<SearchSignatureTemplateV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/signature_templates/search",
@@ -3009,13 +2754,8 @@ impl SignatureTemplateV2Resource<'_> {
         .page_query(query.page_query())
         .query("template_ids", query.template_ids)
         .query("select_custom_field", query.select_custom_field)
-        .send_v2::<ListData>()
-        .await?;
-        Ok(SearchSignatureTemplateV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, SearchSignatureTemplateV2Resp>()
+        .await
     }
 }
 
@@ -3112,7 +2852,7 @@ impl SignatureTemplateInfoWithThumbnailV2Resource<'_> {
         query: &ListSignatureTemplateInfoWithThumbnailV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListSignatureTemplateInfoWithThumbnailV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/signature_template_info_with_thumbnails",
@@ -3126,13 +2866,8 @@ impl SignatureTemplateInfoWithThumbnailV2Resource<'_> {
         .query("active", query.active)
         .query("need_region_info", query.need_region_info)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListSignatureTemplateInfoWithThumbnailV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListSignatureTemplateInfoWithThumbnailV2Resp>()
+        .await
     }
 }
 
@@ -3229,7 +2964,7 @@ impl WorkforcePlanV2Resource<'_> {
         query: &ListWorkforcePlanV2Query<'_>,
         option: &RequestOption,
     ) -> Result<ListWorkforcePlanV2Resp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v2/workforce_plans",
@@ -3243,13 +2978,8 @@ impl WorkforcePlanV2Resource<'_> {
         .query("active", query.active)
         .query("start_date", query.start_date)
         .query("end_date", query.end_date)
-        .send_v2::<ListData>()
-        .await?;
-        Ok(ListWorkforcePlanV2Resp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<ListData, ListWorkforcePlanV2Resp>()
+        .await
     }
 }
 

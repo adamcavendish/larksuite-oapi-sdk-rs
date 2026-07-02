@@ -1350,7 +1350,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<AddSignInstanceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/add_sign",
@@ -1359,13 +1359,8 @@ impl<'a> ApprovalInstanceResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(AddSignInstanceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, AddSignInstanceResp>()
+        .await
     }
 
     pub async fn cc(
@@ -1374,7 +1369,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CcInstanceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/cc",
@@ -1383,13 +1378,8 @@ impl<'a> ApprovalInstanceResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CcInstanceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CcInstanceResp>()
+        .await
     }
 
     pub async fn preview(
@@ -1398,7 +1388,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PreviewInstanceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/preview",
@@ -1407,13 +1397,8 @@ impl<'a> ApprovalInstanceResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(PreviewInstanceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PreviewInstanceResp>()
+        .await
     }
 
     pub async fn query(
@@ -1435,7 +1420,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         query: &QueryInstanceQuery<'_>,
         option: &RequestOption,
     ) -> Result<QueryInstanceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/query",
@@ -1445,13 +1430,8 @@ impl<'a> ApprovalInstanceResource<'a> {
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryInstanceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryInstanceResp>()
+        .await
     }
 
     pub async fn search_cc(
@@ -1473,7 +1453,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         query: &SearchCcInstanceQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchCcInstanceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/search_cc",
@@ -1483,13 +1463,8 @@ impl<'a> ApprovalInstanceResource<'a> {
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchCcInstanceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchCcInstanceResp>()
+        .await
     }
 
     pub async fn specified_rollback(
@@ -1498,7 +1473,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SpecifiedRollbackInstanceResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/specified_rollback",
@@ -1507,13 +1482,8 @@ impl<'a> ApprovalInstanceResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SpecifiedRollbackInstanceResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SpecifiedRollbackInstanceResp>()
+        .await
     }
 }
 
@@ -1601,7 +1571,7 @@ impl<'a> ApprovalTaskResource<'a> {
         query: &QueryTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<QueryTaskResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/approval/v4/tasks/query",
@@ -1612,13 +1582,8 @@ impl<'a> ApprovalTaskResource<'a> {
         .query("topic", query.topic)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryTaskResp>()
+        .await
     }
 
     pub async fn resubmit(
@@ -1627,7 +1592,7 @@ impl<'a> ApprovalTaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ResubmitTaskResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/tasks/resubmit",
@@ -1636,13 +1601,8 @@ impl<'a> ApprovalTaskResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ResubmitTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ResubmitTaskResp>()
+        .await
     }
 
     pub async fn search(
@@ -1664,7 +1624,7 @@ impl<'a> ApprovalTaskResource<'a> {
         query: &SearchTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchTaskResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/tasks/search",
@@ -1674,13 +1634,8 @@ impl<'a> ApprovalTaskResource<'a> {
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchTaskResp>()
+        .await
     }
 }
 
@@ -1842,7 +1797,7 @@ impl<'a> InstanceCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1852,13 +1807,8 @@ impl<'a> InstanceCommentResource<'a> {
         .query("user_id", user_id)
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateInstanceCommentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateInstanceCommentResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1870,7 +1820,7 @@ impl<'a> InstanceCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments/{comment_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -1879,13 +1829,8 @@ impl<'a> InstanceCommentResource<'a> {
         )
         .query("user_id", user_id)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(DeleteInstanceCommentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, DeleteInstanceCommentResp>()
+        .await
     }
 
     pub async fn list(
@@ -1913,7 +1858,7 @@ impl<'a> InstanceCommentResource<'a> {
             "/open-apis/approval/v4/instances/{}/comments",
             query.instance_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1923,13 +1868,8 @@ impl<'a> InstanceCommentResource<'a> {
         .query("user_id", query.user_id)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListInstanceCommentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListInstanceCommentResp>()
+        .await
     }
 
     pub async fn remove(
@@ -1940,7 +1880,7 @@ impl<'a> InstanceCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<RemoveInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments/remove");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1949,13 +1889,8 @@ impl<'a> InstanceCommentResource<'a> {
         )
         .query("user_id", user_id)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(RemoveInstanceCommentResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, RemoveInstanceCommentResp>()
+        .await
     }
 }
 
@@ -1983,7 +1918,7 @@ impl<'a> ExternalTaskResource<'a> {
         query: &ListExternalTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListExternalTaskResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/approval/v4/external_tasks",
@@ -1992,13 +1927,8 @@ impl<'a> ExternalTaskResource<'a> {
         )
         .page_query(query.page)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListExternalTaskResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListExternalTaskResp>()
+        .await
     }
 }
 

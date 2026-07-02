@@ -597,7 +597,7 @@ impl<'a> RoomResource<'a> {
         query: &MgetRoomQuery<'_>,
         option: &RequestOption,
     ) -> Result<MgetRoomResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/rooms/mget",
@@ -606,13 +606,8 @@ impl<'a> RoomResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(MgetRoomResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, MgetRoomResp>()
+        .await
     }
 
     pub async fn search(
@@ -630,7 +625,7 @@ impl<'a> RoomResource<'a> {
         query: &SearchRoomQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchRoomResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/rooms/search",
@@ -639,13 +634,8 @@ impl<'a> RoomResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchRoomResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchRoomResp>()
+        .await
     }
 }
 
@@ -809,7 +799,7 @@ impl<'a> RoomConfigResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SetCheckboardAccessCodeRoomConfigResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/room_configs/set_checkboard_access_code",
@@ -817,14 +807,8 @@ impl<'a> RoomConfigResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(SetCheckboardAccessCodeRoomConfigResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SetCheckboardAccessCodeRoomConfigResp>()
+        .await
     }
 
     pub async fn set_room_access_code(
@@ -832,7 +816,7 @@ impl<'a> RoomConfigResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SetRoomAccessCodeRoomConfigResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/room_configs/set_room_access_code",
@@ -840,14 +824,8 @@ impl<'a> RoomConfigResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(SetRoomAccessCodeRoomConfigResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SetRoomAccessCodeRoomConfigResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -877,7 +855,7 @@ impl<'a> RoomConfigResource<'a> {
         query: &RoomConfigQuery<'_>,
         option: &RequestOption,
     ) -> Result<QueryRoomConfigResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/room_configs/query",
@@ -891,13 +869,8 @@ impl<'a> RoomConfigResource<'a> {
         .query("floor_name", query.floor_name)
         .query("room_id", query.room_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(QueryRoomConfigResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, QueryRoomConfigResp>()
+        .await
     }
 }
 
@@ -1364,7 +1337,7 @@ impl<'a> AlertResource<'a> {
         query: &ListAlertQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAlertResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/alerts",
@@ -1376,13 +1349,8 @@ impl<'a> AlertResource<'a> {
         .query("end_time", query.end_time)
         .query("query_type", query.query_type)
         .query("query_value", query.query_value)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListAlertResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListAlertResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1420,7 +1388,7 @@ impl<'a> ExportResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ExportMeetingListResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/exports/meeting_list",
@@ -1428,14 +1396,8 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ExportMeetingListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ExportMeetingListResp>()
+        .await
     }
 
     /// POST /open-apis/vc/v1/exports/participant_list — 导出参会人明细
@@ -1444,7 +1406,7 @@ impl<'a> ExportResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ExportParticipantListResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/exports/participant_list",
@@ -1452,14 +1414,8 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ExportParticipantListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ExportParticipantListResp>()
+        .await
     }
 
     /// POST /open-apis/vc/v1/exports/participant_quality_list — 导出参会人会议质量数据
@@ -1468,7 +1424,7 @@ impl<'a> ExportResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ExportParticipantQualityListResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/exports/participant_quality_list",
@@ -1476,14 +1432,8 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ExportParticipantQualityListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ExportParticipantQualityListResp>()
+        .await
     }
 
     /// POST /open-apis/vc/v1/exports/resource_reservation_list — 导出会议室预定数据
@@ -1492,7 +1442,7 @@ impl<'a> ExportResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ExportResourceReservationListResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/exports/resource_reservation_list",
@@ -1500,14 +1450,8 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ExportResourceReservationListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ExportResourceReservationListResp>()
+        .await
     }
 
     /// GET /open-apis/vc/v1/exports/:task_id — 查询导出任务结果
@@ -1517,21 +1461,15 @@ impl<'a> ExportResource<'a> {
         option: &RequestOption,
     ) -> Result<GetExportResp, LarkError> {
         let path = format!("/open-apis/vc/v1/exports/{task_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(GetExportResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetExportResp>()
+        .await
     }
 
     /// GET /open-apis/vc/v1/exports/download — 下载导出文件
@@ -1540,7 +1478,7 @@ impl<'a> ExportResource<'a> {
         file_token: &str,
         option: &RequestOption,
     ) -> Result<DownloadExportResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/exports/download",
@@ -1548,13 +1486,8 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .query("file_token", file_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(DownloadExportResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, DownloadExportResp>()
+        .await
     }
 }
 
@@ -1573,7 +1506,7 @@ impl<'a> MeetingRecordingResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMeetingRecordingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/recording");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1581,14 +1514,8 @@ impl<'a> MeetingRecordingResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(GetMeetingRecordingResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetMeetingRecordingResp>()
+        .await
     }
 
     /// PATCH /open-apis/vc/v1/meetings/:meeting_id/recording/set_permission — 授权录制文件
@@ -1600,7 +1527,7 @@ impl<'a> MeetingRecordingResource<'a> {
         option: &RequestOption,
     ) -> Result<SetPermissionMeetingRecordingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/recording/set_permission");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1609,14 +1536,8 @@ impl<'a> MeetingRecordingResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(SetPermissionMeetingRecordingResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SetPermissionMeetingRecordingResp>()
+        .await
     }
 
     /// PATCH /open-apis/vc/v1/meetings/:meeting_id/recording/start — 开始录制
@@ -1627,7 +1548,7 @@ impl<'a> MeetingRecordingResource<'a> {
         option: &RequestOption,
     ) -> Result<StartMeetingRecordingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/recording/start");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1635,14 +1556,8 @@ impl<'a> MeetingRecordingResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(StartMeetingRecordingResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, StartMeetingRecordingResp>()
+        .await
     }
 
     /// PATCH /open-apis/vc/v1/meetings/:meeting_id/recording/stop — 停止录制
@@ -1652,21 +1567,15 @@ impl<'a> MeetingRecordingResource<'a> {
         option: &RequestOption,
     ) -> Result<StopMeetingRecordingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/recording/stop");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(StopMeetingRecordingResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, StopMeetingRecordingResp>()
+        .await
     }
 }
 
@@ -1779,7 +1688,7 @@ impl<'a> ReserveResource<'a> {
         query: &ApplyReserveQuery<'_>,
         option: &RequestOption,
     ) -> Result<ApplyReserveResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/reserves/apply",
@@ -1788,13 +1697,8 @@ impl<'a> ReserveResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ApplyReserveResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ApplyReserveResp>()
+        .await
     }
 
     /// DELETE /open-apis/vc/v1/reserves/:reserve_id — 删除预约
@@ -1804,21 +1708,15 @@ impl<'a> ReserveResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteReserveResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserves/{reserve_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2::<()>()
-        .await?;
-
-        Ok(DeleteReserveResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<(), DeleteReserveResp>()
+        .await
     }
 
     /// GET /open-apis/vc/v1/reserves/:reserve_id — 获取预约
@@ -1838,7 +1736,7 @@ impl<'a> ReserveResource<'a> {
         option: &RequestOption,
     ) -> Result<GetReserveResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserves/{}", query.reserve_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1846,13 +1744,8 @@ impl<'a> ReserveResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetReserveResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetReserveResp>()
+        .await
     }
 
     /// GET /open-apis/vc/v1/reserves/:reserve_id/get_active_meeting — 获取活跃会议
@@ -1875,7 +1768,7 @@ impl<'a> ReserveResource<'a> {
             "/open-apis/vc/v1/reserves/{}/get_active_meeting",
             query.reserve_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1883,13 +1776,8 @@ impl<'a> ReserveResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetActiveMeetingReserveResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetActiveMeetingReserveResp>()
+        .await
     }
 
     /// PUT /open-apis/vc/v1/reserves/:reserve_id — 更新预约
@@ -1910,7 +1798,7 @@ impl<'a> ReserveResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateReserveResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserves/{}", query.reserve_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1919,13 +1807,8 @@ impl<'a> ReserveResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(UpdateReserveResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, UpdateReserveResp>()
+        .await
     }
 }
 
@@ -1944,7 +1827,7 @@ impl<'a> ReserveConfigResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ReserveScopeReserveConfigResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/reserve_configs/reserve_scope",
@@ -1954,13 +1837,8 @@ impl<'a> ReserveConfigResource<'a> {
         .query("scope_type", scope_type)
         .query("scope_id", scope_id)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ReserveScopeReserveConfigResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ReserveScopeReserveConfigResp>()
+        .await
     }
 
     /// PATCH /open-apis/vc/v1/reserve_configs/:reserve_config_id — 更新会议室预定范围
@@ -1972,7 +1850,7 @@ impl<'a> ReserveConfigResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchReserveConfigResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1981,14 +1859,8 @@ impl<'a> ReserveConfigResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(PatchReserveConfigResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchReserveConfigResp>()
+        .await
     }
 }
 
@@ -2008,7 +1880,7 @@ impl<'a> ReserveConfigAdminResource<'a> {
         option: &RequestOption,
     ) -> Result<GetReserveConfigAdminResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/admin");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2017,13 +1889,8 @@ impl<'a> ReserveConfigAdminResource<'a> {
         )
         .query("scope_type", scope_type)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetReserveConfigAdminResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetReserveConfigAdminResp>()
+        .await
     }
 
     /// PATCH /open-apis/vc/v1/reserve_configs/:reserve_config_id/admin
@@ -2035,7 +1902,7 @@ impl<'a> ReserveConfigAdminResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchReserveConfigAdminResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/admin");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2044,14 +1911,8 @@ impl<'a> ReserveConfigAdminResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(PatchReserveConfigAdminResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchReserveConfigAdminResp>()
+        .await
     }
 }
 
@@ -2071,7 +1932,7 @@ impl<'a> ReserveConfigDisableInformResource<'a> {
         option: &RequestOption,
     ) -> Result<GetReserveConfigDisableInformResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/disable_inform");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2080,13 +1941,8 @@ impl<'a> ReserveConfigDisableInformResource<'a> {
         )
         .query("scope_type", scope_type)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetReserveConfigDisableInformResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetReserveConfigDisableInformResp>()
+        .await
     }
 
     /// PATCH /open-apis/vc/v1/reserve_configs/:reserve_config_id/disable_inform
@@ -2098,7 +1954,7 @@ impl<'a> ReserveConfigDisableInformResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchReserveConfigDisableInformResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/disable_inform");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2107,14 +1963,8 @@ impl<'a> ReserveConfigDisableInformResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(PatchReserveConfigDisableInformResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchReserveConfigDisableInformResp>()
+        .await
     }
 }
 
@@ -2134,7 +1984,7 @@ impl<'a> ReserveConfigFormResource<'a> {
         option: &RequestOption,
     ) -> Result<GetReserveConfigFormResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/form");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2143,13 +1993,8 @@ impl<'a> ReserveConfigFormResource<'a> {
         )
         .query("scope_type", scope_type)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetReserveConfigFormResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetReserveConfigFormResp>()
+        .await
     }
 
     /// PATCH /open-apis/vc/v1/reserve_configs/:reserve_config_id/form
@@ -2161,7 +2006,7 @@ impl<'a> ReserveConfigFormResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchReserveConfigFormResp, LarkError> {
         let path = format!("/open-apis/vc/v1/reserve_configs/{reserve_config_id}/form");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2170,14 +2015,8 @@ impl<'a> ReserveConfigFormResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(PatchReserveConfigFormResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchReserveConfigFormResp>()
+        .await
     }
 }
 
@@ -2194,7 +2033,7 @@ impl<'a> RoomLevelResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateRoomLevelResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/room_levels",
@@ -2202,14 +2041,8 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(CreateRoomLevelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateRoomLevelResp>()
+        .await
     }
 
     /// POST /open-apis/vc/v1/room_levels/del — 删除会议室层级
@@ -2218,7 +2051,7 @@ impl<'a> RoomLevelResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<DelRoomLevelResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/room_levels/del",
@@ -2226,14 +2059,8 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(DelRoomLevelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, DelRoomLevelResp>()
+        .await
     }
 
     /// GET /open-apis/vc/v1/room_levels/:room_level_id — 查询会议室层级详情
@@ -2243,21 +2070,15 @@ impl<'a> RoomLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<GetRoomLevelResp, LarkError> {
         let path = format!("/open-apis/vc/v1/room_levels/{room_level_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(GetRoomLevelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetRoomLevelResp>()
+        .await
     }
 
     /// GET /open-apis/vc/v1/room_levels — 查询会议室层级列表
@@ -2268,7 +2089,7 @@ impl<'a> RoomLevelResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListRoomLevelResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/room_levels",
@@ -2278,14 +2099,8 @@ impl<'a> RoomLevelResource<'a> {
         .query("room_level_id", room_level_id)
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(ListRoomLevelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListRoomLevelResp>()
+        .await
     }
 
     /// POST /open-apis/vc/v1/room_levels/mget — 批量查询会议室层级详情
@@ -2294,7 +2109,7 @@ impl<'a> RoomLevelResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<MgetRoomLevelResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/room_levels/mget",
@@ -2302,14 +2117,8 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(MgetRoomLevelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, MgetRoomLevelResp>()
+        .await
     }
 
     /// PATCH /open-apis/vc/v1/room_levels/:room_level_id — 更新会议室层级
@@ -2320,7 +2129,7 @@ impl<'a> RoomLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchRoomLevelResp, LarkError> {
         let path = format!("/open-apis/vc/v1/room_levels/{room_level_id}");
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2328,14 +2137,8 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(PatchRoomLevelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, PatchRoomLevelResp>()
+        .await
     }
 
     /// GET /open-apis/vc/v1/room_levels/search — 搜索会议室层级
@@ -2344,7 +2147,7 @@ impl<'a> RoomLevelResource<'a> {
         custom_level_ids: &str,
         option: &RequestOption,
     ) -> Result<SearchRoomLevelResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/room_levels/search",
@@ -2352,13 +2155,8 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .query("custom_level_ids", custom_level_ids)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(SearchRoomLevelResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, SearchRoomLevelResp>()
+        .await
     }
 }
 
@@ -2376,7 +2174,7 @@ impl<'a> ScopeConfigResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateScopeConfigResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/scope_config",
@@ -2385,14 +2183,8 @@ impl<'a> ScopeConfigResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-
-        Ok(CreateScopeConfigResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateScopeConfigResp>()
+        .await
     }
 
     /// GET /open-apis/vc/v1/scope_config — 查询会议室配置
@@ -2403,7 +2195,7 @@ impl<'a> ScopeConfigResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetScopeConfigResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/scope_config",
@@ -2413,13 +2205,8 @@ impl<'a> ScopeConfigResource<'a> {
         .query("scope_type", scope_type)
         .query("scope_id", scope_id)
         .query("user_id_type", user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetScopeConfigResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetScopeConfigResp>()
+        .await
     }
 }
 
@@ -2511,7 +2298,7 @@ impl<'a> MeetingListResource<'a> {
         query: &GetMeetingListQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetMeetingListResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/meeting_list",
@@ -2526,13 +2313,8 @@ impl<'a> MeetingListResource<'a> {
         .query("room_id", query.room_id)
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetMeetingListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetMeetingListResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -2648,7 +2430,7 @@ impl<'a> ParticipantListResource<'a> {
         query: &GetParticipantListQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetParticipantListResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/participant_list",
@@ -2663,13 +2445,8 @@ impl<'a> ParticipantListResource<'a> {
         .query("room_id", query.room_id)
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetParticipantListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetParticipantListResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -2780,7 +2557,7 @@ impl<'a> ParticipantQualityListResource<'a> {
         query: &GetParticipantQualityListQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetParticipantQualityListResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/participant_quality_list",
@@ -2795,13 +2572,8 @@ impl<'a> ParticipantQualityListResource<'a> {
         .query("room_id", query.room_id)
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetParticipantQualityListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetParticipantQualityListResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -2909,7 +2681,7 @@ impl<'a> ResourceReservationListResource<'a> {
         query: &GetResourceReservationListQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetResourceReservationListResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/resource_reservation_list",
@@ -2923,13 +2695,8 @@ impl<'a> ResourceReservationListResource<'a> {
         .query("room_ids", query.room_ids)
         .query("is_exclude", query.is_exclude)
         .page_query(query.page_query())
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(GetResourceReservationListResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, GetResourceReservationListResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]

@@ -413,7 +413,7 @@ impl<'a> BadgeResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateBadgeResp, LarkError> {
         let path = format!("/open-apis/admin/v1/badges/{}", query.badge_id);
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -421,13 +421,8 @@ impl<'a> BadgeResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<BadgeData>()
-        .await?;
-        Ok(UpdateBadgeResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<BadgeData, UpdateBadgeResp>()
+        .await
     }
 }
 
@@ -754,7 +749,7 @@ impl<'a> BadgeGrantResource<'a> {
             "/open-apis/admin/v1/badges/{}/grants/{}",
             query.badge_id, query.grant_id
         );
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -764,13 +759,8 @@ impl<'a> BadgeGrantResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2::<BadgeGrantData>()
-        .await?;
-        Ok(UpdateBadgeGrantResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<BadgeGrantData, UpdateBadgeGrantResp>()
+        .await
     }
 }
 
@@ -950,7 +940,7 @@ impl<'a> AdminDeptStatResource<'a> {
         query: &ListAdminDeptStatQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAdminDeptStatResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/admin/v1/admin_dept_stats",
@@ -965,13 +955,8 @@ impl<'a> AdminDeptStatResource<'a> {
         .page_query(query.page)
         .query("target_geo", query.target_geo)
         .query("with_product_version", query.with_product_version)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListAdminDeptStatResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListAdminDeptStatResp>()
+        .await
     }
 }
 
@@ -1066,7 +1051,7 @@ impl<'a> AdminUserStatResource<'a> {
         query: &ListAdminUserStatQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAdminUserStatResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/admin/v1/admin_user_stats",
@@ -1080,13 +1065,8 @@ impl<'a> AdminUserStatResource<'a> {
         .query("department_id", query.department_id)
         .query("user_id", query.user_id)
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListAdminUserStatResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListAdminUserStatResp>()
+        .await
     }
 }
 
@@ -1191,7 +1171,7 @@ impl<'a> AuditInfoResource<'a> {
         query: &ListAuditInfoQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAuditInfoResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/admin/v1/audit_infos",
@@ -1206,13 +1186,8 @@ impl<'a> AuditInfoResource<'a> {
         .query("operator_value", query.operator_value)
         .query("event_module", query.event_module)
         .page_query(query.page)
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(ListAuditInfoResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, ListAuditInfoResp>()
+        .await
     }
 }
 
@@ -1247,7 +1222,7 @@ impl<'a> BadgeImageResource<'a> {
         query: &CreateBadgeImageQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateBadgeImageResp, LarkError> {
-        let (api_resp, code_error, data) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/admin/v1/badge_images",
@@ -1255,13 +1230,8 @@ impl<'a> BadgeImageResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2::<serde_json::Value>()
-        .await?;
-        Ok(CreateBadgeImageResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        .send_v2_response::<serde_json::Value, CreateBadgeImageResp>()
+        .await
     }
 }
 
