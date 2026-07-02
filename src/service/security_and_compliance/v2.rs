@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DeviceRecordData {
@@ -47,6 +46,84 @@ impl<'a> ListDeviceRecordV2Query<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateDeviceApplyRecordV2Query<'a> {
+    pub device_apply_record_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateDeviceApplyRecordV2Query<'a> {
+    pub fn new(device_apply_record_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            device_apply_record_id,
+            body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateDeviceRecordV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateDeviceRecordV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeleteDeviceRecordV2Query<'a> {
+    pub device_record_id: &'a str,
+}
+
+impl<'a> DeleteDeviceRecordV2Query<'a> {
+    pub fn new(device_record_id: &'a str) -> Self {
+        Self { device_record_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetDeviceRecordV2Query<'a> {
+    pub device_record_id: &'a str,
+}
+
+impl<'a> GetDeviceRecordV2Query<'a> {
+    pub fn new(device_record_id: &'a str) -> Self {
+        Self { device_record_id }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct MineDeviceRecordV2Query;
+
+impl MineDeviceRecordV2Query {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateDeviceRecordV2Query<'a> {
+    pub device_record_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateDeviceRecordV2Query<'a> {
+    pub fn new(device_record_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            device_record_id,
+            body,
+        }
+    }
+}
+
 pub struct V2<'a> {
     pub device_apply_record: DeviceApplyRecordV2Resource<'a>,
     pub device_record: DeviceRecordV2Resource<'a>,
@@ -72,15 +149,29 @@ impl DeviceApplyRecordV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateDeviceApplyRecordV2Resp, LarkError> {
+        let query = UpdateDeviceApplyRecordV2Query::new(device_apply_record_id, &body);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateDeviceApplyRecordV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateDeviceApplyRecordV2Resp, LarkError> {
         let path = format!(
-            "/open-apis/security_and_compliance/v2/device_apply_records/{device_apply_record_id}"
+            "/open-apis/security_and_compliance/v2/device_apply_records/{}",
+            query.device_apply_record_id
         );
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UpdateDeviceApplyRecordV2Resp {
             api_resp,
             code_error,
@@ -99,15 +190,25 @@ impl DeviceRecordV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateDeviceRecordV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = CreateDeviceRecordV2Query::new(&body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateDeviceRecordV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateDeviceRecordV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/security_and_compliance/v2/device_records",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<DeviceRecordData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<DeviceRecordData>()
+        .await?;
         Ok(CreateDeviceRecordV2Resp {
             api_resp,
             code_error,
@@ -120,12 +221,28 @@ impl DeviceRecordV2Resource<'_> {
         device_record_id: &str,
         option: &RequestOption,
     ) -> Result<DeleteDeviceRecordV2Resp, LarkError> {
-        let path =
-            format!("/open-apis/security_and_compliance/v2/device_records/{device_record_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = DeleteDeviceRecordV2Query::new(device_record_id);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteDeviceRecordV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteDeviceRecordV2Resp, LarkError> {
+        let path = format!(
+            "/open-apis/security_and_compliance/v2/device_records/{}",
+            query.device_record_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteDeviceRecordV2Resp {
             api_resp,
             code_error,
@@ -138,13 +255,28 @@ impl DeviceRecordV2Resource<'_> {
         device_record_id: &str,
         option: &RequestOption,
     ) -> Result<GetDeviceRecordV2Resp, LarkError> {
-        let path =
-            format!("/open-apis/security_and_compliance/v2/device_records/{device_record_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<DeviceRecordData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = GetDeviceRecordV2Query::new(device_record_id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetDeviceRecordV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<GetDeviceRecordV2Resp, LarkError> {
+        let path = format!(
+            "/open-apis/security_and_compliance/v2/device_records/{}",
+            query.device_record_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<DeviceRecordData>()
+        .await?;
         Ok(GetDeviceRecordV2Resp {
             api_resp,
             code_error,
@@ -186,14 +318,24 @@ impl DeviceRecordV2Resource<'_> {
     }
 
     pub async fn mine(&self, option: &RequestOption) -> Result<MineDeviceRecordV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = MineDeviceRecordV2Query::new();
+        self.mine_by_query(&query, option).await
+    }
+
+    pub async fn mine_by_query(
+        &self,
+        _query: &MineDeviceRecordV2Query,
+        option: &RequestOption,
+    ) -> Result<MineDeviceRecordV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/security_and_compliance/v2/device_records/mine",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<DeviceRecordListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send_v2::<DeviceRecordListData>()
+        .await?;
         Ok(MineDeviceRecordV2Resp {
             api_resp,
             code_error,
@@ -207,14 +349,29 @@ impl DeviceRecordV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateDeviceRecordV2Resp, LarkError> {
-        let path =
-            format!("/open-apis/security_and_compliance/v2/device_records/{device_record_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<DeviceRecordData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UpdateDeviceRecordV2Query::new(device_record_id, &body);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateDeviceRecordV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateDeviceRecordV2Resp, LarkError> {
+        let path = format!(
+            "/open-apis/security_and_compliance/v2/device_records/{}",
+            query.device_record_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<DeviceRecordData>()
+        .await?;
         Ok(UpdateDeviceRecordV2Resp {
             api_resp,
             code_error,
