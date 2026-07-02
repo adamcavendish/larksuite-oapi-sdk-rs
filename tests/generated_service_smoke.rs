@@ -4,18 +4,56 @@ mod harness;
 #[path = "generated_service_smoke/prelude.rs"]
 mod prelude;
 
-#[path = "generated_service_smoke/acs.rs"]
-mod acs;
-#[path = "generated_service_smoke/admin_v1.rs"]
-mod admin_v1;
+#[path = "generated_service_smoke/acs/access_record.rs"]
+mod acs_access_record;
+#[path = "generated_service_smoke/acs/device.rs"]
+mod acs_device;
+#[path = "generated_service_smoke/acs/face_visitor.rs"]
+mod acs_face_visitor;
+#[path = "generated_service_smoke/acs/rule.rs"]
+mod acs_rule;
+#[path = "generated_service_smoke/acs/user.rs"]
+mod acs_user;
+#[path = "generated_service_smoke/admin_v1/audit.rs"]
+mod admin_v1_audit;
+#[path = "generated_service_smoke/admin_v1/badge.rs"]
+mod admin_v1_badge;
+#[path = "generated_service_smoke/admin_v1/badge_grant.rs"]
+mod admin_v1_badge_grant;
+#[path = "generated_service_smoke/admin_v1/stat.rs"]
+mod admin_v1_stat;
+#[path = "generated_service_smoke/admin_v1/write.rs"]
+mod admin_v1_write;
 #[path = "generated_service_smoke/application_v1.rs"]
 mod application_v1;
 #[path = "generated_service_smoke/application_v5_v7.rs"]
 mod application_v5_v7;
-#[path = "generated_service_smoke/application_v6.rs"]
-mod application_v6;
-#[path = "generated_service_smoke/approval.rs"]
-mod approval;
+#[path = "generated_service_smoke/application_v6/app_version.rs"]
+mod application_v6_app_version;
+#[path = "generated_service_smoke/application_v6/application.rs"]
+mod application_v6_application;
+#[path = "generated_service_smoke/application_v6/collaboration.rs"]
+mod application_v6_collaboration;
+#[path = "generated_service_smoke/application_v6/feedback.rs"]
+mod application_v6_feedback;
+#[path = "generated_service_smoke/application_v6/management.rs"]
+mod application_v6_management;
+#[path = "generated_service_smoke/application_v6/recommend_rule.rs"]
+mod application_v6_recommend_rule;
+#[path = "generated_service_smoke/application_v6/utility.rs"]
+mod application_v6_utility;
+#[path = "generated_service_smoke/application_v6/visibility.rs"]
+mod application_v6_visibility;
+#[path = "generated_service_smoke/approval/comment.rs"]
+mod approval_comment;
+#[path = "generated_service_smoke/approval/definition.rs"]
+mod approval_definition;
+#[path = "generated_service_smoke/approval/external.rs"]
+mod approval_external;
+#[path = "generated_service_smoke/approval/instance.rs"]
+mod approval_instance;
+#[path = "generated_service_smoke/approval/task.rs"]
+mod approval_task;
 #[path = "generated_service_smoke/attendance.rs"]
 mod attendance;
 #[path = "generated_service_smoke/auth.rs"]

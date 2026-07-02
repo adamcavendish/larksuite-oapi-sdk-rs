@@ -63,6 +63,7 @@ doc:
 # Generate LCOV output for CI
 coverage-lcov:
     cargo llvm-cov clean --workspace
+    mkdir -p coverage
     cargo llvm-cov nextest --workspace --all-features --lcov --output-path coverage/lcov.info
 
 # ---------- Publish ----------
