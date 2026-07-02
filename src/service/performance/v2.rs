@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MetricTagListData {
@@ -100,23 +99,48 @@ impl<'a> V2<'a> {
 }
 
 macro_rules! post_query {
-    ($struct_name:ident, $method:ident, $resp:ident, $path:literal) => {
+    ($struct_name:ident, $query_name:ident, $method:ident, $by_query_method:ident, $resp:ident, $path:literal) => {
+        #[derive(Debug, Clone, Copy)]
+        #[non_exhaustive]
+        pub struct $query_name<'a> {
+            pub body: &'a serde_json::Value,
+        }
+
+        impl<'a> $query_name<'a> {
+            pub fn new(body: &'a serde_json::Value) -> Self {
+                Self { body }
+            }
+        }
+
         pub struct $struct_name<'a> {
             config: &'a Config,
         }
+
         impl $struct_name<'_> {
             pub async fn $method(
                 &self,
                 body: serde_json::Value,
                 option: &RequestOption,
             ) -> Result<$resp, LarkError> {
-                let mut api_req = ApiReq::new(http::Method::POST, $path);
-                api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-                api_req.body = Some(ReqBody::json(&body)?);
-                let (api_resp, raw) =
-                    transport::request_typed::<serde_json::Value>(self.config, &api_req, option)
-                        .await?;
-                let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+                let query = $query_name::new(&body);
+                self.$by_query_method(&query, option).await
+            }
+
+            pub async fn $by_query_method(
+                &self,
+                query: &$query_name<'_>,
+                option: &RequestOption,
+            ) -> Result<$resp, LarkError> {
+                let (api_resp, code_error, data) = RestRequest::new(
+                    self.config,
+                    http::Method::POST,
+                    $path,
+                    vec![AccessTokenType::Tenant],
+                    option,
+                )
+                .json_body(query.body)?
+                .send_v2::<serde_json::Value>()
+                .await?;
                 Ok($resp {
                     api_resp,
                     code_error,
@@ -129,10 +153,36 @@ macro_rules! post_query {
 
 post_query!(
     ActivityV2Resource,
+    QueryActivityV2Query,
     query,
+    query_by_query,
     QueryActivityV2Resp,
     "/open-apis/performance/v2/activity/query"
 );
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ImportAdditionalInformationV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> ImportAdditionalInformationV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct QueryAdditionalInformationV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> QueryAdditionalInformationV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
 
 pub struct AdditionalInformationV2Resource<'a> {
     config: &'a Config,
@@ -144,15 +194,25 @@ impl AdditionalInformationV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ImportAdditionalInformationV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ImportAdditionalInformationV2Query::new(&body);
+        self.import_by_query(&query, option).await
+    }
+
+    pub async fn import_by_query(
+        &self,
+        query: &ImportAdditionalInformationV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ImportAdditionalInformationV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/performance/v2/additional_informations/import",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ImportAdditionalInformationV2Resp {
             api_resp,
             code_error,
@@ -165,20 +225,42 @@ impl AdditionalInformationV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryAdditionalInformationV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = QueryAdditionalInformationV2Query::new(&body);
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryAdditionalInformationV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryAdditionalInformationV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/performance/v2/additional_informations/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryAdditionalInformationV2Resp {
             api_resp,
             code_error,
             data,
         })
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeleteAdditionalInformationsBatchV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> DeleteAdditionalInformationsBatchV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
     }
 }
 
@@ -192,14 +274,25 @@ impl AdditionalInformationsBatchV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<DeleteAdditionalInformationsBatchV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = DeleteAdditionalInformationsBatchV2Query::new(&body);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteAdditionalInformationsBatchV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteAdditionalInformationsBatchV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::DELETE,
             "/open-apis/performance/v2/additional_informations/batch",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteAdditionalInformationsBatchV2Resp {
             api_resp,
             code_error,
@@ -210,10 +303,36 @@ impl AdditionalInformationsBatchV2Resource<'_> {
 
 post_query!(
     IndicatorV2Resource,
+    QueryIndicatorV2Query,
     query,
+    query_by_query,
     QueryIndicatorV2Resp,
     "/open-apis/performance/v2/indicators/query"
 );
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ImportMetricDetailV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> ImportMetricDetailV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct QueryMetricDetailV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> QueryMetricDetailV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
 
 pub struct MetricDetailV2Resource<'a> {
     config: &'a Config,
@@ -225,15 +344,25 @@ impl MetricDetailV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ImportMetricDetailV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ImportMetricDetailV2Query::new(&body);
+        self.import_by_query(&query, option).await
+    }
+
+    pub async fn import_by_query(
+        &self,
+        query: &ImportMetricDetailV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<ImportMetricDetailV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/performance/v2/metric_details/import",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ImportMetricDetailV2Resp {
             api_resp,
             code_error,
@@ -246,15 +375,25 @@ impl MetricDetailV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryMetricDetailV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = QueryMetricDetailV2Query::new(&body);
+        self.query_by_query(&query, option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryMetricDetailV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryMetricDetailV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/performance/v2/metric_details/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryMetricDetailV2Resp {
             api_resp,
             code_error,
@@ -265,13 +404,17 @@ impl MetricDetailV2Resource<'_> {
 
 post_query!(
     MetricFieldV2Resource,
+    QueryMetricFieldV2Query,
     query,
+    query_by_query,
     QueryMetricFieldV2Resp,
     "/open-apis/performance/v2/metric_fields/query"
 );
 post_query!(
     MetricLibV2Resource,
+    QueryMetricLibV2Query,
     query,
+    query_by_query,
     QueryMetricLibV2Resp,
     "/open-apis/performance/v2/metric_libs/query"
 );
@@ -317,43 +460,57 @@ impl MetricTagV2Resource<'_> {
 
 post_query!(
     MetricTemplateV2Resource,
+    QueryMetricTemplateV2Query,
     query,
+    query_by_query,
     QueryMetricTemplateV2Resp,
     "/open-apis/performance/v2/metric_templates/query"
 );
 post_query!(
     QuestionV2Resource,
+    QueryQuestionV2Query,
     query,
+    query_by_query,
     QueryQuestionV2Resp,
     "/open-apis/performance/v2/questions/query"
 );
 post_query!(
     ReviewDataV2Resource,
+    QueryReviewDataV2Query,
     query,
+    query_by_query,
     QueryReviewDataV2Resp,
     "/open-apis/performance/v2/review_datas/query"
 );
 post_query!(
     ReviewTemplateV2Resource,
+    QueryReviewTemplateV2Query,
     query,
+    query_by_query,
     QueryReviewTemplateV2Resp,
     "/open-apis/performance/v2/review_templates/query"
 );
 post_query!(
     RevieweeV2Resource,
+    QueryRevieweeV2Query,
     query,
+    query_by_query,
     QueryRevieweeV2Resp,
     "/open-apis/performance/v2/reviewees/query"
 );
 post_query!(
     UserGroupUserRelV2Resource,
+    WriteUserGroupUserRelV2Query,
     write,
+    write_by_query,
     WriteUserGroupUserRelV2Resp,
     "/open-apis/performance/v2/user_group_user_rels/write"
 );
 post_query!(
     UserInfoV2Resource,
+    QueryUserInfoV2Query,
     query,
+    query_by_query,
     QueryUserInfoV2Resp,
     "/open-apis/performance/v2/user_info/query"
 );
