@@ -79,7 +79,7 @@ impl<'a> EntityResource<'a> {
         query: &CreateEntityQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateEntityResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/block/v2/entities",
@@ -87,13 +87,8 @@ impl<'a> EntityResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<EntityData>()
-        .await?;
-        Ok(CreateEntityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EntityData, CreateEntityResp>()
+        .await
     }
 
     pub async fn update(
@@ -112,7 +107,7 @@ impl<'a> EntityResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateEntityResp, LarkError> {
         let path = format!("/open-apis/block/v2/entities/{}", query.block_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -120,13 +115,8 @@ impl<'a> EntityResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<EntityData>()
-        .await?;
-        Ok(UpdateEntityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EntityData, UpdateEntityResp>()
+        .await
     }
 }
 
@@ -149,7 +139,7 @@ impl<'a> MessageResource<'a> {
         query: &CreateMessageQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateMessageResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/block/v2/message",
@@ -157,13 +147,8 @@ impl<'a> MessageResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<MessageData>()
-        .await?;
-        Ok(CreateMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MessageData, CreateMessageResp>()
+        .await
     }
 }
 

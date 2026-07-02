@@ -76,7 +76,7 @@ impl<'a> IdentityResource<'a> {
         query: &CreateIdentityQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateIdentityResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/human_authentication/v1/identities",
@@ -86,13 +86,8 @@ impl<'a> IdentityResource<'a> {
         .query("user_id", query.user_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<IdentityData>()
-        .await?;
-        Ok(CreateIdentityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<IdentityData, CreateIdentityResp>()
+        .await
     }
 }
 

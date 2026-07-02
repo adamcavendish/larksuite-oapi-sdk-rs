@@ -115,6 +115,18 @@ macro_rules! impl_resp {
                 self.code_error.success()
             }
         }
+        impl $crate::service::common::FromRawResponse<$data> for $name {
+            fn from_raw_response(
+                api_resp: $crate::resp::ApiResp,
+                raw: $crate::resp::RawResponse<$data>,
+            ) -> Self {
+                Self {
+                    api_resp,
+                    code_error: raw.code_error,
+                    data: raw.data,
+                }
+            }
+        }
     };
     ($name:ident) => {
         #[derive(Debug, Clone)]
@@ -127,6 +139,19 @@ macro_rules! impl_resp {
             pub fn success(&self) -> bool {
                 self.api_resp.status_code == 200
                     && self.code_error.as_ref().is_none_or(|e| e.code == 0)
+            }
+        }
+        impl $crate::service::common::FromV2Response<serde_json::Value> for $name {
+            fn from_v2_response(
+                api_resp: $crate::resp::ApiResp,
+                code_error: Option<$crate::resp::CodeError>,
+                data: Option<serde_json::Value>,
+            ) -> Self {
+                Self {
+                    api_resp,
+                    code_error,
+                    data,
+                }
             }
         }
     };
@@ -143,6 +168,19 @@ macro_rules! impl_resp_v2 {
         impl $name {
             pub fn success(&self) -> bool {
                 self.code_error.as_ref().is_none_or(|e| e.code == 0)
+            }
+        }
+        impl $crate::service::common::FromV2Response<$data> for $name {
+            fn from_v2_response(
+                api_resp: $crate::resp::ApiResp,
+                code_error: Option<$crate::resp::CodeError>,
+                data: Option<$data>,
+            ) -> Self {
+                Self {
+                    api_resp,
+                    code_error,
+                    data,
+                }
             }
         }
     };
