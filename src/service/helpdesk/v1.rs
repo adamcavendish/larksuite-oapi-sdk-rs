@@ -785,20 +785,15 @@ impl<'a> TicketResource<'a> {
         option: &RequestOption,
     ) -> Result<GetTicketResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/tickets/{}", query.ticket_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<TicketData>()
-        .await?;
-        Ok(GetTicketResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TicketData, GetTicketResp>()
+        .await
     }
 
     pub async fn update(
@@ -859,7 +854,7 @@ impl<'a> TicketResource<'a> {
         query: &ListTicketQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListTicketResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/tickets",
@@ -875,13 +870,8 @@ impl<'a> TicketResource<'a> {
         .query("create_time_start", query.create_time_start)
         .query("create_time_end", query.create_time_end)
         .page_query(query.page)
-        .send::<TicketListData>()
-        .await?;
-        Ok(ListTicketResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TicketListData, ListTicketResp>()
+        .await
     }
 
     pub async fn answer_user_query(
@@ -913,7 +903,7 @@ impl<'a> TicketResource<'a> {
         body: &StartServiceTicketReqBody,
         option: &RequestOption,
     ) -> Result<StartServiceTicketResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/start_service",
@@ -921,14 +911,8 @@ impl<'a> TicketResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<StartServiceTicketRespData>()
-        .await?;
-
-        Ok(StartServiceTicketResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<StartServiceTicketRespData, StartServiceTicketResp>()
+        .await
     }
 
     pub async fn customized_fields(
@@ -945,7 +929,7 @@ impl<'a> TicketResource<'a> {
         query: &CustomizedFieldsTicketQuery,
         option: &RequestOption,
     ) -> Result<CustomizedFieldsTicketResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/customized_fields",
@@ -953,13 +937,8 @@ impl<'a> TicketResource<'a> {
             option,
         )
         .query("visible_only", query.visible_only)
-        .send::<CustomizedFieldsTicketRespData>()
-        .await?;
-        Ok(CustomizedFieldsTicketResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CustomizedFieldsTicketRespData, CustomizedFieldsTicketResp>()
+        .await
     }
 
     pub async fn ticket_image(
@@ -1083,7 +1062,7 @@ impl<'a> TicketMessageResource<'a> {
             "/open-apis/helpdesk/v1/tickets/{}/messages",
             query.ticket_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1094,13 +1073,8 @@ impl<'a> TicketMessageResource<'a> {
         .query("time_end", query.time_end)
         .query("page_token", query.page_token)
         .query("page_size", query.page_size)
-        .send::<TicketMessageListData>()
-        .await?;
-        Ok(ListTicketMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TicketMessageListData, ListTicketMessageResp>()
+        .await
     }
 
     pub async fn image(
@@ -1161,7 +1135,7 @@ impl<'a> AgentResource<'a> {
         query: &ListAgentQuery,
         option: &RequestOption,
     ) -> Result<ListAgentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/agents",
@@ -1169,31 +1143,20 @@ impl<'a> AgentResource<'a> {
             option,
         )
         .query("status", query.status)
-        .send::<AgentListData>()
-        .await?;
-        Ok(ListAgentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AgentListData, ListAgentResp>()
+        .await
     }
 
     pub async fn agent_email(&self, option: &RequestOption) -> Result<AgentEmailResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/agent_emails",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(AgentEmailResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, AgentEmailResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1203,7 +1166,7 @@ impl<'a> AgentResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchAgentResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1211,14 +1174,8 @@ impl<'a> AgentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(PatchAgentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, PatchAgentResp>()
+        .await
     }
 }
 
@@ -1245,21 +1202,15 @@ impl<'a> AgentSchedulesResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteAgentSchedulesResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}/schedules");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::User],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(DeleteAgentSchedulesResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, DeleteAgentSchedulesResp>()
+        .await
     }
 
     pub async fn get(
@@ -1277,20 +1228,15 @@ impl<'a> AgentSchedulesResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAgentSchedulesResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agents/{}/schedules", query.agent_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(GetAgentSchedulesResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, GetAgentSchedulesResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1300,7 +1246,7 @@ impl<'a> AgentSchedulesResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchAgentSchedulesResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}/schedules");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1308,14 +1254,8 @@ impl<'a> AgentSchedulesResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(PatchAgentSchedulesResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, PatchAgentSchedulesResp>()
+        .await
     }
 }
 
@@ -1346,7 +1286,7 @@ impl<'a> AgentScheduleResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateAgentScheduleResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/agent_schedules",
@@ -1354,14 +1294,8 @@ impl<'a> AgentScheduleResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send::<serde_json::Value>()
-        .await?;
-
-        Ok(CreateAgentScheduleResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, CreateAgentScheduleResp>()
+        .await
     }
 
     pub async fn list(
@@ -1378,7 +1312,7 @@ impl<'a> AgentScheduleResource<'a> {
         query: &ListAgentScheduleQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAgentScheduleResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/agent_schedules",
@@ -1386,13 +1320,8 @@ impl<'a> AgentScheduleResource<'a> {
             option,
         )
         .query_values("status", query.status)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(ListAgentScheduleResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, ListAgentScheduleResp>()
+        .await
     }
 }
 
@@ -1435,7 +1364,7 @@ impl<'a> CategoryResource<'a> {
         body: &CreateCategoryReqBody,
         option: &RequestOption,
     ) -> Result<CreateCategoryResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/categories",
@@ -1443,14 +1372,8 @@ impl<'a> CategoryResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CategoryData>()
-        .await?;
-
-        Ok(CreateCategoryResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CategoryData, CreateCategoryResp>()
+        .await
     }
 
     pub async fn get(
@@ -1468,20 +1391,15 @@ impl<'a> CategoryResource<'a> {
         option: &RequestOption,
     ) -> Result<GetCategoryResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/categories/{}", query.id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<CategoryData>()
-        .await?;
-        Ok(GetCategoryResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CategoryData, GetCategoryResp>()
+        .await
     }
 
     pub async fn update(
@@ -1540,7 +1458,7 @@ impl<'a> CategoryResource<'a> {
         query: &ListCategoryQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCategoryResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/categories",
@@ -1548,13 +1466,8 @@ impl<'a> CategoryResource<'a> {
             option,
         )
         .query("language", query.language)
-        .send::<CategoryListData>()
-        .await?;
-        Ok(ListCategoryResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CategoryListData, ListCategoryResp>()
+        .await
     }
 }
 
@@ -1648,7 +1561,7 @@ impl<'a> FaqResource<'a> {
         body: &CreateFaqReqBody,
         option: &RequestOption,
     ) -> Result<CreateFaqResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/faqs",
@@ -1656,14 +1569,8 @@ impl<'a> FaqResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FaqData>()
-        .await?;
-
-        Ok(CreateFaqResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FaqData, CreateFaqResp>()
+        .await
     }
 
     pub async fn get(&self, id: &str, option: &RequestOption) -> Result<GetFaqResp, LarkError> {
@@ -1677,20 +1584,15 @@ impl<'a> FaqResource<'a> {
         option: &RequestOption,
     ) -> Result<GetFaqResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/faqs/{}", query.id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<FaqData>()
-        .await?;
-        Ok(GetFaqResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FaqData, GetFaqResp>()
+        .await
     }
 
     pub async fn update(
@@ -1756,7 +1658,7 @@ impl<'a> FaqResource<'a> {
         query: &ListFaqQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListFaqResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/faqs",
@@ -1766,13 +1668,8 @@ impl<'a> FaqResource<'a> {
         .page_query(query.page)
         .query("category_id", query.category_id)
         .query("keyword", query.keyword)
-        .send::<FaqListData>()
-        .await?;
-        Ok(ListFaqResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FaqListData, ListFaqResp>()
+        .await
     }
 
     pub async fn image(
@@ -1814,7 +1711,7 @@ impl<'a> FaqResource<'a> {
         query: &SearchFaqQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchFaqResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/faqs/search",
@@ -1824,13 +1721,8 @@ impl<'a> FaqResource<'a> {
         .query("query", query.query)
         .query("base64", query.base64)
         .page_query(query.page)
-        .send::<SearchFaqRespData>()
-        .await?;
-        Ok(SearchFaqResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SearchFaqRespData, SearchFaqResp>()
+        .await
     }
 }
 
@@ -1845,7 +1737,7 @@ impl<'a> NotificationResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateNotificationResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/notifications",
@@ -1854,14 +1746,8 @@ impl<'a> NotificationResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<NotificationData>()
-        .await?;
-
-        Ok(CreateNotificationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<NotificationData, CreateNotificationResp>()
+        .await
     }
 
     pub async fn get(
@@ -1871,7 +1757,7 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<GetNotificationResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1879,14 +1765,8 @@ impl<'a> NotificationResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send::<GetNotificationData>()
-        .await?;
-
-        Ok(GetNotificationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetNotificationData, GetNotificationResp>()
+        .await
     }
 
     pub async fn submit_approve(
@@ -2084,7 +1964,7 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<SubmitApproveNotificationResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/submit_approve");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -2092,13 +1972,8 @@ impl<'a> NotificationResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<SubmitApproveNotificationRespData>()
-        .await?;
-        Ok(SubmitApproveNotificationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SubmitApproveNotificationRespData, SubmitApproveNotificationResp>()
+        .await
     }
 }
 
@@ -2114,7 +1989,7 @@ impl<'a> AgentSkillResource<'a> {
         body: &CreateAgentSkillReqBody,
         option: &RequestOption,
     ) -> Result<CreateAgentSkillResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/agent_skills",
@@ -2122,13 +1997,8 @@ impl<'a> AgentSkillResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateAgentSkillRespData>()
-        .await?;
-        Ok(CreateAgentSkillResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateAgentSkillRespData, CreateAgentSkillResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2159,39 +2029,27 @@ impl<'a> AgentSkillResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAgentSkillResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<GetAgentSkillRespData>()
-        .await?;
-
-        Ok(GetAgentSkillResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetAgentSkillRespData, GetAgentSkillResp>()
+        .await
     }
 
     pub async fn list(&self, option: &RequestOption) -> Result<ListAgentSkillResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/agent_skills",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<ListAgentSkillRespData>()
-        .await?;
-
-        Ok(ListAgentSkillResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListAgentSkillRespData, ListAgentSkillResp>()
+        .await
     }
 
     pub async fn patch(
@@ -2227,21 +2085,15 @@ pub struct AgentSkillRuleResource<'a> {
 
 impl<'a> AgentSkillRuleResource<'a> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListAgentSkillRuleResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/agent_skill_rules",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<ListAgentSkillRuleRespData>()
-        .await?;
-
-        Ok(ListAgentSkillRuleResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListAgentSkillRuleRespData, ListAgentSkillRuleResp>()
+        .await
     }
 }
 
@@ -2258,7 +2110,7 @@ impl<'a> BotMessageResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateBotMessageResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/message",
@@ -2267,14 +2119,8 @@ impl<'a> BotMessageResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CreateBotMessageRespData>()
-        .await?;
-
-        Ok(CreateBotMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateBotMessageRespData, CreateBotMessageResp>()
+        .await
     }
 }
 
@@ -2389,20 +2235,15 @@ impl<'a> TicketCustomizedFieldResource<'a> {
     ) -> Result<GetTicketCustomizedFieldResp, LarkError> {
         let path =
             format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<GetTicketCustomizedFieldRespData>()
-        .await?;
-        Ok(GetTicketCustomizedFieldResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetTicketCustomizedFieldRespData, GetTicketCustomizedFieldResp>()
+        .await
     }
 
     pub async fn list(

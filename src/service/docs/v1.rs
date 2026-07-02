@@ -133,20 +133,15 @@ impl<'a> DocumentResource<'a> {
         option: &RequestOption,
     ) -> Result<GetDocumentResp, LarkError> {
         let path = format!("/open-apis/docs/v1/documents/{}", query.document_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<DocumentData>()
-        .await?;
-        Ok(GetDocumentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DocumentData, GetDocumentResp>()
+        .await
     }
 }
 
@@ -175,7 +170,7 @@ impl<'a> ContentResource<'a> {
         query: &GetContentQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetContentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/docs/v1/content",
@@ -186,13 +181,8 @@ impl<'a> ContentResource<'a> {
         .query("doc_type", query.doc_type)
         .query("content_type", query.content_type)
         .query("lang", query.lang)
-        .send::<ContentData>()
-        .await?;
-        Ok(GetContentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ContentData, GetContentResp>()
+        .await
     }
 }
 

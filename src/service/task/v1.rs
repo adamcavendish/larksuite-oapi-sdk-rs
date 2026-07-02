@@ -825,7 +825,7 @@ impl<'a> TaskResource<'a> {
         query: &CreateTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateTaskResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/task/v1/tasks",
@@ -834,13 +834,8 @@ impl<'a> TaskResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<TaskData>()
-        .await?;
-        Ok(CreateTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TaskData, CreateTaskResp>()
+        .await
     }
 
     pub async fn get(
@@ -859,7 +854,7 @@ impl<'a> TaskResource<'a> {
         option: &RequestOption,
     ) -> Result<GetTaskResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -867,13 +862,8 @@ impl<'a> TaskResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<TaskData>()
-        .await?;
-        Ok(GetTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TaskData, GetTaskResp>()
+        .await
     }
 
     pub async fn patch(
@@ -893,7 +883,7 @@ impl<'a> TaskResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchTaskResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -902,13 +892,8 @@ impl<'a> TaskResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<TaskData>()
-        .await?;
-        Ok(PatchTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TaskData, PatchTaskResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1027,7 +1012,7 @@ impl<'a> TaskResource<'a> {
         query: &ListTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListTaskResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/task/v1/tasks",
@@ -1039,13 +1024,8 @@ impl<'a> TaskResource<'a> {
         .query("end_create_time", query.end_create_time)
         .query("task_completed", query.task_completed)
         .query("user_id_type", query.user_id_type)
-        .send::<TaskListData>()
-        .await?;
-        Ok(ListTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TaskListData, ListTaskResp>()
+        .await
     }
 
     pub async fn batch_delete_collaborator(
@@ -1069,7 +1049,7 @@ impl<'a> TaskResource<'a> {
             "/open-apis/task/v1/tasks/{}/batch_delete_collaborator",
             query.task_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1078,13 +1058,8 @@ impl<'a> TaskResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(BatchDeleteCollaboratorResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, BatchDeleteCollaboratorResp>()
+        .await
     }
 
     pub async fn batch_delete_follower(
@@ -1107,7 +1082,7 @@ impl<'a> TaskResource<'a> {
             "/open-apis/task/v1/tasks/{}/batch_delete_follower",
             query.task_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1116,13 +1091,8 @@ impl<'a> TaskResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(BatchDeleteFollowerResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, BatchDeleteFollowerResp>()
+        .await
     }
 }
 
@@ -1148,7 +1118,7 @@ impl<'a> TaskCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateCommentResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}/comments", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1157,13 +1127,8 @@ impl<'a> TaskCommentResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<CommentData>()
-        .await?;
-        Ok(CreateCommentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CommentData, CreateCommentResp>()
+        .await
     }
 
     pub async fn get(
@@ -1186,7 +1151,7 @@ impl<'a> TaskCommentResource<'a> {
             "/open-apis/task/v1/tasks/{}/comments/{}",
             query.task_id, query.comment_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1194,13 +1159,8 @@ impl<'a> TaskCommentResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<CommentData>()
-        .await?;
-        Ok(GetCommentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CommentData, GetCommentResp>()
+        .await
     }
 
     pub async fn update(
@@ -1224,7 +1184,7 @@ impl<'a> TaskCommentResource<'a> {
             "/open-apis/task/v1/tasks/{}/comments/{}",
             query.task_id, query.comment_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1233,13 +1193,8 @@ impl<'a> TaskCommentResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<CommentData>()
-        .await?;
-        Ok(UpdateCommentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CommentData, UpdateCommentResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1296,7 +1251,7 @@ impl<'a> TaskCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<ListCommentResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}/comments", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1305,13 +1260,8 @@ impl<'a> TaskCommentResource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send::<CommentListData>()
-        .await?;
-        Ok(ListCommentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CommentListData, ListCommentResp>()
+        .await
     }
 }
 
@@ -1337,7 +1287,7 @@ impl<'a> TaskFollowerResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFollowerResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}/followers", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1346,13 +1296,8 @@ impl<'a> TaskFollowerResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<FollowerData>()
-        .await?;
-        Ok(CreateFollowerResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FollowerData, CreateFollowerResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1411,7 +1356,7 @@ impl<'a> TaskFollowerResource<'a> {
         option: &RequestOption,
     ) -> Result<ListFollowerResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}/followers", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1420,13 +1365,8 @@ impl<'a> TaskFollowerResource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send::<MemberListData>()
-        .await?;
-        Ok(ListFollowerResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MemberListData, ListFollowerResp>()
+        .await
     }
 }
 
@@ -1452,7 +1392,7 @@ impl<'a> TaskCollaboratorResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateCollaboratorResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}/collaborators", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1461,13 +1401,8 @@ impl<'a> TaskCollaboratorResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<CollaboratorData>()
-        .await?;
-        Ok(CreateCollaboratorResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CollaboratorData, CreateCollaboratorResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1527,7 +1462,7 @@ impl<'a> TaskCollaboratorResource<'a> {
         option: &RequestOption,
     ) -> Result<ListCollaboratorResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}/collaborators", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1536,13 +1471,8 @@ impl<'a> TaskCollaboratorResource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send::<MemberListData>()
-        .await?;
-        Ok(ListCollaboratorResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MemberListData, ListCollaboratorResp>()
+        .await
     }
 }
 
@@ -1567,7 +1497,7 @@ impl<'a> TaskReminderResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateReminderResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}/reminders", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1575,13 +1505,8 @@ impl<'a> TaskReminderResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<ReminderData>()
-        .await?;
-        Ok(CreateReminderResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ReminderData, CreateReminderResp>()
+        .await
     }
 
     pub async fn get(
@@ -1603,20 +1528,15 @@ impl<'a> TaskReminderResource<'a> {
             "/open-apis/task/v1/tasks/{}/reminders/{}",
             query.task_id, query.reminder_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<ReminderData>()
-        .await?;
-        Ok(GetReminderResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ReminderData, GetReminderResp>()
+        .await
     }
 
     pub async fn update(
@@ -1639,7 +1559,7 @@ impl<'a> TaskReminderResource<'a> {
             "/open-apis/task/v1/tasks/{}/reminders/{}",
             query.task_id, query.reminder_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1647,13 +1567,8 @@ impl<'a> TaskReminderResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<ReminderData>()
-        .await?;
-        Ok(UpdateReminderResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ReminderData, UpdateReminderResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1708,7 +1623,7 @@ impl<'a> TaskReminderResource<'a> {
         option: &RequestOption,
     ) -> Result<ListReminderResp, LarkError> {
         let path = format!("/open-apis/task/v1/tasks/{}/reminders", query.task_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1716,13 +1631,8 @@ impl<'a> TaskReminderResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send::<ReminderListData>()
-        .await?;
-        Ok(ListReminderResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ReminderListData, ListReminderResp>()
+        .await
     }
 }
 

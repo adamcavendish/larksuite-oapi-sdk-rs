@@ -675,7 +675,7 @@ impl<'a> MailgroupResource<'a> {
         query: &CreateMailgroupQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateMailgroupResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/mail/v1/mailgroups",
@@ -683,13 +683,8 @@ impl<'a> MailgroupResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<MailgroupData>()
-        .await?;
-        Ok(CreateMailgroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupData, CreateMailgroupResp>()
+        .await
     }
 
     pub async fn get(
@@ -707,20 +702,15 @@ impl<'a> MailgroupResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMailgroupResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{}", query.mailgroup_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<MailgroupData>()
-        .await?;
-        Ok(GetMailgroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupData, GetMailgroupResp>()
+        .await
     }
 
     pub async fn delete(
@@ -763,7 +753,7 @@ impl<'a> MailgroupResource<'a> {
         query: &ListMailgroupQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListMailgroupResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/mail/v1/mailgroups",
@@ -772,13 +762,8 @@ impl<'a> MailgroupResource<'a> {
         )
         .query("manager_user_id", query.manager_user_id)
         .page_query(query.page)
-        .send::<MailgroupListData>()
-        .await?;
-        Ok(ListMailgroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupListData, ListMailgroupResp>()
+        .await
     }
 
     /// PATCH /open-apis/mail/v1/mailgroups/:mailgroup_id
@@ -798,7 +783,7 @@ impl<'a> MailgroupResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMailgroupResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{}", query.mailgroup_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -806,13 +791,8 @@ impl<'a> MailgroupResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<MailgroupData>()
-        .await?;
-        Ok(GetMailgroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupData, GetMailgroupResp>()
+        .await
     }
 
     /// PUT /open-apis/mail/v1/mailgroups/:mailgroup_id
@@ -832,7 +812,7 @@ impl<'a> MailgroupResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMailgroupResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{}", query.mailgroup_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -840,13 +820,8 @@ impl<'a> MailgroupResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<MailgroupData>()
-        .await?;
-        Ok(GetMailgroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupData, GetMailgroupResp>()
+        .await
     }
 }
 
@@ -875,7 +850,7 @@ impl<'a> MailgroupMemberResource<'a> {
             "/open-apis/mail/v1/mailgroups/{}/members",
             query.mailgroup_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -884,13 +859,8 @@ impl<'a> MailgroupMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<MailgroupMemberData>()
-        .await?;
-        Ok(GetMailgroupMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupMemberData, GetMailgroupMemberResp>()
+        .await
     }
 
     pub async fn delete(
@@ -939,7 +909,7 @@ impl<'a> MailgroupMemberResource<'a> {
             "/open-apis/mail/v1/mailgroups/{}/members",
             query.mailgroup_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -948,13 +918,8 @@ impl<'a> MailgroupMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send::<MailgroupMemberListData>()
-        .await?;
-        Ok(ListMailgroupMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupMemberListData, ListMailgroupMemberResp>()
+        .await
     }
 
     /// POST /open-apis/mail/v1/mailgroups/:mailgroup_id/members/batch_create
@@ -1055,7 +1020,7 @@ impl<'a> MailgroupMemberResource<'a> {
             "/open-apis/mail/v1/mailgroups/{}/members/{}",
             query.mailgroup_id, query.member_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1063,13 +1028,8 @@ impl<'a> MailgroupMemberResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<MailgroupMemberData>()
-        .await?;
-        Ok(GetMailgroupMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupMemberData, GetMailgroupMemberResp>()
+        .await
     }
 }
 
@@ -1092,7 +1052,7 @@ impl<'a> PublicMailboxResource<'a> {
         query: &CreatePublicMailboxQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreatePublicMailboxResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/mail/v1/public_mailboxes",
@@ -1100,13 +1060,8 @@ impl<'a> PublicMailboxResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<PublicMailboxData>()
-        .await?;
-        Ok(CreatePublicMailboxResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PublicMailboxData, CreatePublicMailboxResp>()
+        .await
     }
 
     pub async fn get(
@@ -1127,20 +1082,15 @@ impl<'a> PublicMailboxResource<'a> {
             "/open-apis/mail/v1/public_mailboxes/{}",
             query.public_mailbox_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<PublicMailboxData>()
-        .await?;
-        Ok(GetPublicMailboxResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PublicMailboxData, GetPublicMailboxResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1181,7 +1131,7 @@ impl<'a> PublicMailboxResource<'a> {
         query: &ListPublicMailboxQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListPublicMailboxResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/mail/v1/public_mailboxes",
@@ -1189,13 +1139,8 @@ impl<'a> PublicMailboxResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send::<PublicMailboxListData>()
-        .await?;
-        Ok(ListPublicMailboxResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PublicMailboxListData, ListPublicMailboxResp>()
+        .await
     }
 
     /// PATCH /open-apis/mail/v1/public_mailboxes/:public_mailbox_id
@@ -1218,7 +1163,7 @@ impl<'a> PublicMailboxResource<'a> {
             "/open-apis/mail/v1/public_mailboxes/{}",
             query.public_mailbox_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1226,13 +1171,8 @@ impl<'a> PublicMailboxResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<PublicMailboxData>()
-        .await?;
-        Ok(GetPublicMailboxResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PublicMailboxData, GetPublicMailboxResp>()
+        .await
     }
 
     /// DELETE /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/remove_to_recycle_bin
@@ -1280,7 +1220,7 @@ impl<'a> PublicMailboxResource<'a> {
             "/open-apis/mail/v1/public_mailboxes/{}",
             query.public_mailbox_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1288,13 +1228,8 @@ impl<'a> PublicMailboxResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<PublicMailboxData>()
-        .await?;
-        Ok(GetPublicMailboxResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PublicMailboxData, GetPublicMailboxResp>()
+        .await
     }
 }
 
@@ -1388,7 +1323,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
             "/open-apis/mail/v1/public_mailboxes/{}/members",
             query.public_mailbox_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1397,13 +1332,8 @@ impl<'a> PublicMailboxMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send::<PublicMailboxMemberListData>()
-        .await?;
-        Ok(ListPublicMailboxMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PublicMailboxMemberListData, ListPublicMailboxMemberResp>()
+        .await
     }
 
     /// POST /open-apis/mail/v1/public_mailboxes/:public_mailbox_id/members/batch_create
@@ -1527,7 +1457,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
             "/open-apis/mail/v1/public_mailboxes/{}/members/{}",
             query.public_mailbox_id, query.member_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1535,13 +1465,8 @@ impl<'a> PublicMailboxMemberResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<PublicMailboxMemberData>()
-        .await?;
-        Ok(GetPublicMailboxMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PublicMailboxMemberData, GetPublicMailboxMemberResp>()
+        .await
     }
 }
 
@@ -2448,7 +2373,7 @@ impl MailgroupManagerResource<'_> {
         option: &RequestOption,
     ) -> Result<ListMailgroupManagerResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/managers");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2457,14 +2382,8 @@ impl MailgroupManagerResource<'_> {
         )
         .query("page_token", page_token)
         .query("page_size", page_size)
-        .send::<MailgroupManagerListData>()
-        .await?;
-
-        Ok(ListMailgroupManagerResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupManagerListData, ListMailgroupManagerResp>()
+        .await
     }
 }
 
@@ -2540,7 +2459,7 @@ impl MailgroupPermissionMemberResource<'_> {
         let path = format!(
             "/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members/{permission_member_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2548,13 +2467,8 @@ impl MailgroupPermissionMemberResource<'_> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send::<MailgroupPermissionMemberData>()
-        .await?;
-        Ok(GetMailgroupPermissionMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupPermissionMemberData, GetMailgroupPermissionMemberResp>()
+        .await
     }
 
     /// GET /open-apis/mail/v1/mailgroups/:mailgroup_id/permission_members
@@ -2567,7 +2481,7 @@ impl MailgroupPermissionMemberResource<'_> {
         option: &RequestOption,
     ) -> Result<ListMailgroupPermissionMemberResp, LarkError> {
         let path = format!("/open-apis/mail/v1/mailgroups/{mailgroup_id}/permission_members");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2577,13 +2491,8 @@ impl MailgroupPermissionMemberResource<'_> {
         .query("user_id_type", user_id_type)
         .query("page_token", page_token)
         .query("page_size", page_size)
-        .send::<MailgroupPermissionMemberListData>()
-        .await?;
-        Ok(ListMailgroupPermissionMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MailgroupPermissionMemberListData, ListMailgroupPermissionMemberResp>()
+        .await
     }
 
     /// POST /open-apis/mail/v1/mailgroups/:mailgroup_id/permission_members/batch_create
