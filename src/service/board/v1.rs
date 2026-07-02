@@ -220,7 +220,7 @@ impl<'a> WhiteboardResource<'a> {
         query: &CreateWhiteboardQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateBoardResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/board/v1/whiteboards",
@@ -228,13 +228,8 @@ impl<'a> WhiteboardResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<BoardData>()
-        .await?;
-        Ok(CreateBoardResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BoardData, CreateBoardResp>()
+        .await
     }
 
     pub async fn get(
@@ -252,20 +247,15 @@ impl<'a> WhiteboardResource<'a> {
         option: &RequestOption,
     ) -> Result<GetBoardResp, LarkError> {
         let path = format!("/open-apis/board/v1/whiteboards/{}", query.whiteboard_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<BoardData>()
-        .await?;
-        Ok(GetBoardResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BoardData, GetBoardResp>()
+        .await
     }
 
     pub async fn download_as_image(
@@ -320,20 +310,15 @@ impl<'a> WhiteboardResource<'a> {
             "/open-apis/board/v1/whiteboards/{}/theme",
             query.whiteboard_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<ThemeData>()
-        .await?;
-        Ok(ThemeWhiteboardResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ThemeData, ThemeWhiteboardResp>()
+        .await
     }
 
     pub async fn update_theme(
@@ -358,7 +343,7 @@ impl<'a> WhiteboardResource<'a> {
             "/open-apis/board/v1/whiteboards/{}/update_theme",
             query.whiteboard_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -366,13 +351,8 @@ impl<'a> WhiteboardResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(UpdateThemeWhiteboardResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, UpdateThemeWhiteboardResp>()
+        .await
     }
 }
 
@@ -403,7 +383,7 @@ impl<'a> WhiteboardNodeResource<'a> {
             "/open-apis/board/v1/whiteboards/{}/nodes",
             query.whiteboard_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -411,13 +391,8 @@ impl<'a> WhiteboardNodeResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<WhiteboardNodeData>()
-        .await?;
-        Ok(CreateWhiteboardNodeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<WhiteboardNodeData, CreateWhiteboardNodeResp>()
+        .await
     }
 
     pub async fn create_plantuml(
@@ -442,7 +417,7 @@ impl<'a> WhiteboardNodeResource<'a> {
             "/open-apis/board/v1/whiteboards/{}/nodes/plantuml",
             query.whiteboard_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -450,13 +425,8 @@ impl<'a> WhiteboardNodeResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<WhiteboardNodeData>()
-        .await?;
-        Ok(CreatePlantumlWhiteboardNodeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<WhiteboardNodeData, CreatePlantumlWhiteboardNodeResp>()
+        .await
     }
 
     pub async fn list(
@@ -477,20 +447,15 @@ impl<'a> WhiteboardNodeResource<'a> {
             "/open-apis/board/v1/whiteboards/{}/nodes",
             query.whiteboard_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<WhiteboardNodeListData>()
-        .await?;
-        Ok(ListWhiteboardNodeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<WhiteboardNodeListData, ListWhiteboardNodeResp>()
+        .await
     }
 }
 

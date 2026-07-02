@@ -805,21 +805,15 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAppResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<AppData>()
-        .await?;
-
-        Ok(GetAppResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AppData, GetAppResp>()
+        .await
     }
 
     pub async fn update(
@@ -829,7 +823,7 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateAppResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -837,14 +831,8 @@ impl<'a> AppResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<AppData>()
-        .await?;
-
-        Ok(UpdateAppResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AppData, UpdateAppResp>()
+        .await
     }
 }
 
@@ -898,7 +886,7 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateTableResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -906,14 +894,8 @@ impl<'a> AppTableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<TableData>()
-        .await?;
-
-        Ok(CreateTableResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TableData, CreateTableResp>()
+        .await
     }
 
     pub async fn batch_create(
@@ -924,7 +906,7 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<BatchCreateTableResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/batch_create");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -933,14 +915,8 @@ impl<'a> AppTableResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<BatchCreateTableData>()
-        .await?;
-
-        Ok(BatchCreateTableResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchCreateTableData, BatchCreateTableResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1034,7 +1010,7 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<ListTableResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{}/tables", query.app_token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1042,13 +1018,8 @@ impl<'a> AppTableResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<TableListData>()
-        .await?;
-        Ok(ListTableResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TableListData, ListTableResp>()
+        .await
     }
 }
 
@@ -1112,7 +1083,7 @@ impl<'a> AppTableViewResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateViewResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1120,14 +1091,8 @@ impl<'a> AppTableViewResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ViewData>()
-        .await?;
-
-        Ok(CreateViewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ViewData, CreateViewResp>()
+        .await
     }
 
     pub async fn get(
@@ -1139,21 +1104,15 @@ impl<'a> AppTableViewResource<'a> {
     ) -> Result<GetViewResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views/{view_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<ViewData>()
-        .await?;
-
-        Ok(GetViewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ViewData, GetViewResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1166,7 +1125,7 @@ impl<'a> AppTableViewResource<'a> {
     ) -> Result<PatchViewResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views/{view_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1174,14 +1133,8 @@ impl<'a> AppTableViewResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ViewData>()
-        .await?;
-
-        Ok(PatchViewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ViewData, PatchViewResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1234,7 +1187,7 @@ impl<'a> AppTableViewResource<'a> {
             "/open-apis/bitable/v1/apps/{}/tables/{}/views",
             query.app_token, query.table_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1243,13 +1196,8 @@ impl<'a> AppTableViewResource<'a> {
         )
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
-        .send::<ViewListData>()
-        .await?;
-        Ok(ListViewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ViewListData, ListViewResp>()
+        .await
     }
 }
 
@@ -1327,7 +1275,7 @@ impl<'a> AppTableFieldResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFieldResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1335,14 +1283,8 @@ impl<'a> AppTableFieldResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FieldData>()
-        .await?;
-
-        Ok(CreateFieldResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FieldData, CreateFieldResp>()
+        .await
     }
 
     pub async fn update(
@@ -1355,7 +1297,7 @@ impl<'a> AppTableFieldResource<'a> {
     ) -> Result<UpdateFieldResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields/{field_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1363,14 +1305,8 @@ impl<'a> AppTableFieldResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FieldData>()
-        .await?;
-
-        Ok(UpdateFieldResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FieldData, UpdateFieldResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1428,7 +1364,7 @@ impl<'a> AppTableFieldResource<'a> {
             "/open-apis/bitable/v1/apps/{}/tables/{}/fields",
             query.app_token, query.table_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1439,13 +1375,8 @@ impl<'a> AppTableFieldResource<'a> {
         .query("text_field_as_array", query.text_field_as_array)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page_query())
-        .send::<FieldListData>()
-        .await?;
-        Ok(ListFieldResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FieldListData, ListFieldResp>()
+        .await
     }
 }
 
@@ -1592,7 +1523,7 @@ impl<'a> AppTableRecordResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateRecordResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1601,14 +1532,8 @@ impl<'a> AppTableRecordResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<RecordData>()
-        .await?;
-
-        Ok(CreateRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RecordData, CreateRecordResp>()
+        .await
     }
 
     pub async fn update(
@@ -1622,7 +1547,7 @@ impl<'a> AppTableRecordResource<'a> {
     ) -> Result<UpdateRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1631,14 +1556,8 @@ impl<'a> AppTableRecordResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<RecordData>()
-        .await?;
-
-        Ok(UpdateRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RecordData, UpdateRecordResp>()
+        .await
     }
 
     pub async fn get(
@@ -1651,7 +1570,7 @@ impl<'a> AppTableRecordResource<'a> {
     ) -> Result<GetRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1659,14 +1578,8 @@ impl<'a> AppTableRecordResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send::<RecordData>()
-        .await?;
-
-        Ok(GetRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RecordData, GetRecordResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1730,7 +1643,7 @@ impl<'a> AppTableRecordResource<'a> {
             "/open-apis/bitable/v1/apps/{}/tables/{}/records",
             query.app_token, query.table_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1744,13 +1657,8 @@ impl<'a> AppTableRecordResource<'a> {
         .query("text_field_as_array", query.text_field_as_array)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page_query())
-        .send::<RecordListData>()
-        .await?;
-        Ok(ListRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RecordListData, ListRecordResp>()
+        .await
     }
 
     pub async fn batch_create(
@@ -1764,7 +1672,7 @@ impl<'a> AppTableRecordResource<'a> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_create"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1773,14 +1681,8 @@ impl<'a> AppTableRecordResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<BatchCreateRecordData>()
-        .await?;
-
-        Ok(BatchCreateRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchCreateRecordData, BatchCreateRecordResp>()
+        .await
     }
 
     pub async fn batch_update(
@@ -1794,7 +1696,7 @@ impl<'a> AppTableRecordResource<'a> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_update"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1803,14 +1705,8 @@ impl<'a> AppTableRecordResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<BatchUpdateRecordData>()
-        .await?;
-
-        Ok(BatchUpdateRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchUpdateRecordData, BatchUpdateRecordResp>()
+        .await
     }
 
     pub async fn batch_delete(
@@ -1823,7 +1719,7 @@ impl<'a> AppTableRecordResource<'a> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_delete"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1831,14 +1727,8 @@ impl<'a> AppTableRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<BatchDeleteRecordData>()
-        .await?;
-
-        Ok(BatchDeleteRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchDeleteRecordData, BatchDeleteRecordResp>()
+        .await
     }
 
     /// Batch-get records.
@@ -1852,7 +1742,7 @@ impl<'a> AppTableRecordResource<'a> {
     ) -> Result<BatchGetRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_get");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1860,14 +1750,8 @@ impl<'a> AppTableRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<BatchGetRecordData>()
-        .await?;
-
-        Ok(BatchGetRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchGetRecordData, BatchGetRecordResp>()
+        .await
     }
 
     /// Search records.
@@ -1900,7 +1784,7 @@ impl<'a> AppTableRecordResource<'a> {
             "/open-apis/bitable/v1/apps/{}/tables/{}/records/search",
             query.app_token, query.table_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1910,13 +1794,8 @@ impl<'a> AppTableRecordResource<'a> {
         .query("user_id_type", query.user_id_type)
         .page_query(query.page_query())
         .json_body(body)?
-        .send::<SearchRecordData>()
-        .await?;
-        Ok(SearchRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SearchRecordData, SearchRecordResp>()
+        .await
     }
 }
 
@@ -1973,7 +1852,7 @@ impl<'a> AppDashboardResource<'a> {
         option: &RequestOption,
     ) -> Result<CopyAppDashboardResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/dashboards/{block_id}/copy");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1981,14 +1860,8 @@ impl<'a> AppDashboardResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CopyAppDashboardData>()
-        .await?;
-
-        Ok(CopyAppDashboardResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CopyAppDashboardData, CopyAppDashboardResp>()
+        .await
     }
 
     pub async fn list(
@@ -2010,7 +1883,7 @@ impl<'a> AppDashboardResource<'a> {
         option: &RequestOption,
     ) -> Result<ListDashboardResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{}/dashboards", query.app_token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2018,13 +1891,8 @@ impl<'a> AppDashboardResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<DashboardListData>()
-        .await?;
-        Ok(ListDashboardResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DashboardListData, ListDashboardResp>()
+        .await
     }
 }
 
@@ -2531,21 +2399,15 @@ impl<'a> AppTableFormResource<'a> {
     ) -> Result<GetFormResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<FormData>()
-        .await?;
-
-        Ok(GetFormResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FormData, GetFormResp>()
+        .await
     }
 
     /// Patch form metadata.
@@ -2560,7 +2422,7 @@ impl<'a> AppTableFormResource<'a> {
     ) -> Result<PatchFormResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2568,14 +2430,8 @@ impl<'a> AppTableFormResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FormData>()
-        .await?;
-
-        Ok(PatchFormResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FormData, PatchFormResp>()
+        .await
     }
 }
 
@@ -2654,7 +2510,7 @@ impl<'a> AppTableFormFieldResource<'a> {
             "/open-apis/bitable/v1/apps/{}/tables/{}/forms/{}/fields",
             query.app_token, query.table_id, query.form_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2662,13 +2518,8 @@ impl<'a> AppTableFormFieldResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<FormFieldListData>()
-        .await?;
-        Ok(ListFormFieldResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FormFieldListData, ListFormFieldResp>()
+        .await
     }
 
     /// Patch a form field.
@@ -2685,7 +2536,7 @@ impl<'a> AppTableFormFieldResource<'a> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}/fields/{field_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -2693,14 +2544,8 @@ impl<'a> AppTableFormFieldResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FormFieldPatchData>()
-        .await?;
-
-        Ok(PatchFormFieldResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FormFieldPatchData, PatchFormFieldResp>()
+        .await
     }
 }
 

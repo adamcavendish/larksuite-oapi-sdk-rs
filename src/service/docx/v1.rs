@@ -825,7 +825,7 @@ impl<'a> DocumentResource<'a> {
         query: &CreateDocumentQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateDocumentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/docx/v1/documents",
@@ -833,13 +833,8 @@ impl<'a> DocumentResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<DocumentData>()
-        .await?;
-        Ok(CreateDocumentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DocumentData, CreateDocumentResp>()
+        .await
     }
 
     pub async fn get(
@@ -857,20 +852,15 @@ impl<'a> DocumentResource<'a> {
         option: &RequestOption,
     ) -> Result<GetDocumentResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{}", query.document_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<DocumentData>()
-        .await?;
-        Ok(GetDocumentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DocumentData, GetDocumentResp>()
+        .await
     }
 
     pub async fn convert(
@@ -923,7 +913,7 @@ impl<'a> DocumentResource<'a> {
             "/open-apis/docx/v1/documents/{}/raw_content",
             query.document_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -931,13 +921,8 @@ impl<'a> DocumentResource<'a> {
             option,
         )
         .query("lang", query.lang)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(GetDocumentRawContentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, GetDocumentRawContentResp>()
+        .await
     }
 }
 
@@ -970,7 +955,7 @@ impl<'a> DocumentBlockResource<'a> {
             "/open-apis/docx/v1/documents/{}/blocks/{}/children",
             query.document_id, query.block_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -980,13 +965,8 @@ impl<'a> DocumentBlockResource<'a> {
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<CreateBlockData>()
-        .await?;
-        Ok(CreateBlockResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateBlockData, CreateBlockResp>()
+        .await
     }
 
     pub async fn get(
@@ -1012,7 +992,7 @@ impl<'a> DocumentBlockResource<'a> {
             "/open-apis/docx/v1/documents/{}/blocks/{}",
             query.document_id, query.block_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1021,13 +1001,8 @@ impl<'a> DocumentBlockResource<'a> {
         )
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
-        .send::<BlockData>()
-        .await?;
-        Ok(GetBlockResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BlockData, GetBlockResp>()
+        .await
     }
 
     pub async fn update(
@@ -1054,7 +1029,7 @@ impl<'a> DocumentBlockResource<'a> {
             "/open-apis/docx/v1/documents/{}/blocks/{}",
             query.document_id, query.block_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1064,13 +1039,8 @@ impl<'a> DocumentBlockResource<'a> {
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<UpdateBlockData>()
-        .await?;
-        Ok(UpdateBlockResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdateBlockData, UpdateBlockResp>()
+        .await
     }
 
     pub async fn batch_update(
@@ -1096,7 +1066,7 @@ impl<'a> DocumentBlockResource<'a> {
             "/open-apis/docx/v1/documents/{}/blocks/batch_update",
             query.document_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1106,13 +1076,8 @@ impl<'a> DocumentBlockResource<'a> {
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<BatchUpdateBlockData>()
-        .await?;
-        Ok(BatchUpdateBlockResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchUpdateBlockData, BatchUpdateBlockResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1176,7 +1141,7 @@ impl<'a> DocumentBlockResource<'a> {
         option: &RequestOption,
     ) -> Result<ListBlockResp, LarkError> {
         let path = format!("/open-apis/docx/v1/documents/{}/blocks", query.document_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1186,13 +1151,8 @@ impl<'a> DocumentBlockResource<'a> {
         .page_query(query.page)
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
-        .send::<BlockListData>()
-        .await?;
-        Ok(ListBlockResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BlockListData, ListBlockResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1222,7 +1182,7 @@ impl<'a> DocumentBlockResource<'a> {
             "/open-apis/docx/v1/documents/{}/blocks/{}/children",
             query.document_id, query.block_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1232,13 +1192,8 @@ impl<'a> DocumentBlockResource<'a> {
         .page_query(query.page)
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
-        .send::<BlockListData>()
-        .await?;
-        Ok(ListBlockResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BlockListData, ListBlockResp>()
+        .await
     }
 }
 
@@ -1266,20 +1221,15 @@ impl<'a> BuildingBlockResource<'a> {
             "/open-apis/docx/v1/documents/{}/building_blocks/{}",
             query.document_id, query.block_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<BuildingBlockData>()
-        .await?;
-        Ok(GetBuildingBlockResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BuildingBlockData, GetBuildingBlockResp>()
+        .await
     }
 }
 

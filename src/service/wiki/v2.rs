@@ -236,7 +236,7 @@ impl<'a> SpaceResource<'a> {
         body: &CreateSpaceReqBody,
         option: &RequestOption,
     ) -> Result<CreateSpaceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/wiki/v2/spaces",
@@ -244,13 +244,8 @@ impl<'a> SpaceResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<SpaceData>()
-        .await?;
-        Ok(CreateSpaceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SpaceData, CreateSpaceResp>()
+        .await
     }
 
     pub async fn get(
@@ -260,7 +255,7 @@ impl<'a> SpaceResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSpaceResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -268,13 +263,8 @@ impl<'a> SpaceResource<'a> {
             option,
         )
         .query("lang", lang)
-        .send::<SpaceData>()
-        .await?;
-        Ok(GetSpaceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SpaceData, GetSpaceResp>()
+        .await
     }
 
     pub async fn list(
@@ -283,7 +273,7 @@ impl<'a> SpaceResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSpaceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/wiki/v2/spaces",
@@ -292,13 +282,8 @@ impl<'a> SpaceResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send::<SpaceListData>()
-        .await?;
-        Ok(ListSpaceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SpaceListData, ListSpaceResp>()
+        .await
     }
 
     pub async fn get_node(
@@ -307,7 +292,7 @@ impl<'a> SpaceResource<'a> {
         obj_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetNodeResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/wiki/v2/spaces/get_node",
@@ -316,13 +301,8 @@ impl<'a> SpaceResource<'a> {
         )
         .query("token", token)
         .query("obj_type", obj_type)
-        .send::<NodeData>()
-        .await?;
-        Ok(GetNodeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<NodeData, GetNodeResp>()
+        .await
     }
 }
 
@@ -338,7 +318,7 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -346,13 +326,8 @@ impl<'a> NodeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<NodeData>()
-        .await?;
-        Ok(CreateNodeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<NodeData, CreateNodeResp>()
+        .await
     }
 
     pub async fn get(
@@ -363,7 +338,7 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -371,13 +346,8 @@ impl<'a> NodeResource<'a> {
             option,
         )
         .query("obj_type", obj_type)
-        .send::<NodeData>()
-        .await?;
-        Ok(GetNodeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<NodeData, GetNodeResp>()
+        .await
     }
 
     pub async fn delete(
@@ -410,7 +380,7 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<MoveNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}/move");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -418,13 +388,8 @@ impl<'a> NodeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<NodeData>()
-        .await?;
-        Ok(MoveNodeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<NodeData, MoveNodeResp>()
+        .await
     }
 
     pub async fn update_title(
@@ -459,7 +424,7 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<CopyNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/{node_token}/copy");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -467,13 +432,8 @@ impl<'a> NodeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<NodeData>()
-        .await?;
-        Ok(CopyNodeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<NodeData, CopyNodeResp>()
+        .await
     }
 
     pub async fn list(
@@ -485,7 +445,7 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<ListNodeResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -495,13 +455,8 @@ impl<'a> NodeResource<'a> {
         .query("parent_node_token", parent_node_token)
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send::<NodeListData>()
-        .await?;
-        Ok(ListNodeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<NodeListData, ListNodeResp>()
+        .await
     }
 
     pub async fn move_docs_to_wiki(
@@ -511,7 +466,7 @@ impl<'a> NodeResource<'a> {
         option: &RequestOption,
     ) -> Result<MoveDocsToWikiResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/nodes/move_docs_to_wiki");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -519,13 +474,8 @@ impl<'a> NodeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<MoveDocsToWikiData>()
-        .await?;
-        Ok(MoveDocsToWikiResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MoveDocsToWikiData, MoveDocsToWikiResp>()
+        .await
     }
 }
 
@@ -592,7 +542,7 @@ impl<'a> SpaceMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<ListMemberResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/members");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -602,13 +552,8 @@ impl<'a> SpaceMemberResource<'a> {
         .query("page_size", page_size)
         .query("page_token", page_token)
         .query("user_id_type", user_id_type)
-        .send::<MemberListData>()
-        .await?;
-        Ok(ListMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MemberListData, ListMemberResp>()
+        .await
     }
 }
 
@@ -653,7 +598,7 @@ impl<'a> TaskResource<'a> {
         option: &RequestOption,
     ) -> Result<GetTaskResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/tasks/{task_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -661,13 +606,8 @@ impl<'a> TaskResource<'a> {
             option,
         )
         .query("task_type", task_type)
-        .send::<TaskData>()
-        .await?;
-        Ok(GetTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TaskData, GetTaskResp>()
+        .await
     }
 }
 

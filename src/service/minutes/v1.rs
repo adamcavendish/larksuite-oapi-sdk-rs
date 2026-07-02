@@ -224,7 +224,7 @@ impl<'a> MinutesResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMinutesResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{}", query.minutes_token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -232,13 +232,8 @@ impl<'a> MinutesResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<MinutesInfoData>()
-        .await?;
-        Ok(GetMinutesResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MinutesInfoData, GetMinutesResp>()
+        .await
     }
 }
 
@@ -270,7 +265,7 @@ impl<'a> ParticipantResource<'a> {
             "/open-apis/minutes/v1/minutes/{}/participants",
             query.minutes_token
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -279,13 +274,8 @@ impl<'a> ParticipantResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send::<ParticipantListData>()
-        .await?;
-        Ok(ListParticipantResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ParticipantListData, ListParticipantResp>()
+        .await
     }
 }
 
@@ -301,7 +291,7 @@ impl<'a> TranscriptResource<'a> {
         option: &RequestOption,
     ) -> Result<GetTranscriptResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/transcript");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -309,13 +299,8 @@ impl<'a> TranscriptResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send::<TranscriptData>()
-        .await?;
-        Ok(GetTranscriptResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TranscriptData, GetTranscriptResp>()
+        .await
     }
 
     pub async fn get_by_query(
@@ -327,7 +312,7 @@ impl<'a> TranscriptResource<'a> {
             "/open-apis/minutes/v1/minutes/{}/transcript",
             query.minutes_token
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -337,13 +322,8 @@ impl<'a> TranscriptResource<'a> {
         .query("need_speaker", query.need_speaker)
         .query("need_timestamp", query.need_timestamp)
         .query("file_format", query.file_format)
-        .send::<TranscriptData>()
-        .await?;
-        Ok(GetTranscriptResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TranscriptData, GetTranscriptResp>()
+        .await
     }
 }
 
@@ -358,20 +338,15 @@ impl<'a> MinuteMediaResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMinuteMediaResp, LarkError> {
         let path = format!("/open-apis/minutes/v1/minutes/{minutes_token}/media");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<MinuteMediaData>()
-        .await?;
-        Ok(GetMinuteMediaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MinuteMediaData, GetMinuteMediaResp>()
+        .await
     }
 }
 
@@ -402,7 +377,7 @@ impl<'a> MinuteStatisticsResource<'a> {
             "/open-apis/minutes/v1/minutes/{}/statistics",
             query.minutes_token
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -410,13 +385,8 @@ impl<'a> MinuteStatisticsResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<MinuteStatisticsData>()
-        .await?;
-        Ok(GetMinuteStatisticsResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MinuteStatisticsData, GetMinuteStatisticsResp>()
+        .await
     }
 }
 

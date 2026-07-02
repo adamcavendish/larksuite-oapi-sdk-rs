@@ -380,7 +380,7 @@ impl<'a> SpreadsheetResource<'a> {
         body: &CreateSpreadsheetReqBody,
         option: &RequestOption,
     ) -> Result<CreateSpreadsheetResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/sheets/v3/spreadsheets",
@@ -388,13 +388,8 @@ impl<'a> SpreadsheetResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<SpreadsheetData>()
-        .await?;
-        Ok(CreateSpreadsheetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SpreadsheetData, CreateSpreadsheetResp>()
+        .await
     }
 
     pub async fn get(
@@ -404,7 +399,7 @@ impl<'a> SpreadsheetResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSpreadsheetResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -412,13 +407,8 @@ impl<'a> SpreadsheetResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send::<SpreadsheetData>()
-        .await?;
-        Ok(GetSpreadsheetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SpreadsheetData, GetSpreadsheetResp>()
+        .await
     }
 
     pub async fn patch(
@@ -428,7 +418,7 @@ impl<'a> SpreadsheetResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchSpreadsheetResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -436,13 +426,8 @@ impl<'a> SpreadsheetResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<SpreadsheetData>()
-        .await?;
-        Ok(PatchSpreadsheetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SpreadsheetData, PatchSpreadsheetResp>()
+        .await
     }
 }
 
@@ -459,20 +444,15 @@ impl<'a> SheetResource<'a> {
     ) -> Result<GetSheetResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<Sheet>()
-        .await?;
-        Ok(GetSheetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<Sheet, GetSheetResp>()
+        .await
     }
 
     pub async fn query(
@@ -481,20 +461,15 @@ impl<'a> SheetResource<'a> {
         option: &RequestOption,
     ) -> Result<QuerySheetResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/query");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<SheetListData>()
-        .await?;
-        Ok(QuerySheetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SheetListData, QuerySheetResp>()
+        .await
     }
 
     pub async fn patch(
@@ -530,7 +505,7 @@ impl<'a> SheetResource<'a> {
     ) -> Result<OperateSheetsResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets_batch_update");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -538,13 +513,8 @@ impl<'a> SheetResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<OperateSheetsData>()
-        .await?;
-        Ok(OperateSheetsResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OperateSheetsData, OperateSheetsResp>()
+        .await
     }
 
     pub async fn find(
@@ -556,7 +526,7 @@ impl<'a> SheetResource<'a> {
     ) -> Result<FindSheetResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/find");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -564,13 +534,8 @@ impl<'a> SheetResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(FindSheetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, FindSheetResp>()
+        .await
     }
 
     pub async fn move_dimension(
@@ -583,7 +548,7 @@ impl<'a> SheetResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/move_dimension"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -591,13 +556,8 @@ impl<'a> SheetResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(MoveDimensionSheetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, MoveDimensionSheetResp>()
+        .await
     }
 
     pub async fn replace(
@@ -610,7 +570,7 @@ impl<'a> SheetResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/replace"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -618,13 +578,8 @@ impl<'a> SheetResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(ReplaceSheetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, ReplaceSheetResp>()
+        .await
     }
 }
 
@@ -643,7 +598,7 @@ impl<'a> RangeResource<'a> {
         option: &RequestOption,
     ) -> Result<GetRangeValueResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values/{range}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -653,13 +608,8 @@ impl<'a> RangeResource<'a> {
         .query("valueRenderOption", value_render_option)
         .query("dateTimeRenderOption", date_time_render_option)
         .query("user_id_type", user_id_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(GetRangeValueResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, GetRangeValueResp>()
+        .await
     }
 
     pub async fn set(
@@ -670,7 +620,7 @@ impl<'a> RangeResource<'a> {
         option: &RequestOption,
     ) -> Result<SetRangeValueResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values/{range}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -678,13 +628,8 @@ impl<'a> RangeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(SetRangeValueResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, SetRangeValueResp>()
+        .await
     }
 
     pub async fn batch_get(
@@ -698,7 +643,7 @@ impl<'a> RangeResource<'a> {
     ) -> Result<BatchGetRangeValueResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values_batch_get");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -709,13 +654,8 @@ impl<'a> RangeResource<'a> {
         .query("valueRenderOption", value_render_option)
         .query("dateTimeRenderOption", date_time_render_option)
         .query("user_id_type", user_id_type)
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(BatchGetRangeValueResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, BatchGetRangeValueResp>()
+        .await
     }
 
     pub async fn batch_set(
@@ -726,7 +666,7 @@ impl<'a> RangeResource<'a> {
     ) -> Result<BatchSetRangeValueResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values_batch_update");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -734,13 +674,8 @@ impl<'a> RangeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(BatchSetRangeValueResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, BatchSetRangeValueResp>()
+        .await
     }
 
     pub async fn append(
@@ -752,7 +687,7 @@ impl<'a> RangeResource<'a> {
         option: &RequestOption,
     ) -> Result<AppendValueResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values_append");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -762,13 +697,8 @@ impl<'a> RangeResource<'a> {
         .query("range", range)
         .query("insertDataOption", insert_data_option)
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(AppendValueResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, AppendValueResp>()
+        .await
     }
 
     pub async fn prepend(
@@ -779,7 +709,7 @@ impl<'a> RangeResource<'a> {
         option: &RequestOption,
     ) -> Result<PrependValueResp, LarkError> {
         let path = format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/values_prepend");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -788,13 +718,8 @@ impl<'a> RangeResource<'a> {
         )
         .query("range", range)
         .json_body(body)?
-        .send::<serde_json::Value>()
-        .await?;
-        Ok(PrependValueResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<serde_json::Value, PrependValueResp>()
+        .await
     }
 
     pub async fn clear(
@@ -835,7 +760,7 @@ impl<'a> FilterViewResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -843,13 +768,8 @@ impl<'a> FilterViewResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FilterViewData>()
-        .await?;
-        Ok(CreateFilterViewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FilterViewData, CreateFilterViewResp>()
+        .await
     }
 
     pub async fn get(
@@ -862,20 +782,15 @@ impl<'a> FilterViewResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<FilterViewData>()
-        .await?;
-        Ok(GetFilterViewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FilterViewData, GetFilterViewResp>()
+        .await
     }
 
     pub async fn patch(
@@ -889,7 +804,7 @@ impl<'a> FilterViewResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -897,13 +812,8 @@ impl<'a> FilterViewResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FilterViewData>()
-        .await?;
-        Ok(PatchFilterViewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FilterViewData, PatchFilterViewResp>()
+        .await
     }
 
     pub async fn delete(
@@ -940,20 +850,15 @@ impl<'a> FilterViewResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/query"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<FilterViewListData>()
-        .await?;
-        Ok(QueryFilterViewResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FilterViewListData, QueryFilterViewResp>()
+        .await
     }
 }
 
@@ -973,7 +878,7 @@ impl<'a> FilterViewConditionResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}/conditions"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -981,13 +886,8 @@ impl<'a> FilterViewConditionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FilterViewConditionData>()
-        .await?;
-        Ok(CreateFilterViewConditionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FilterViewConditionData, CreateFilterViewConditionResp>()
+        .await
     }
 
     pub async fn get(
@@ -1001,20 +901,15 @@ impl<'a> FilterViewConditionResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}/conditions/{condition_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<FilterViewConditionData>()
-        .await?;
-        Ok(GetFilterViewConditionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FilterViewConditionData, GetFilterViewConditionResp>()
+        .await
     }
 
     pub async fn update(
@@ -1029,7 +924,7 @@ impl<'a> FilterViewConditionResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}/conditions/{condition_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1037,13 +932,8 @@ impl<'a> FilterViewConditionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FilterViewConditionData>()
-        .await?;
-        Ok(UpdateFilterViewConditionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FilterViewConditionData, UpdateFilterViewConditionResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1082,20 +972,15 @@ impl<'a> FilterViewConditionResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter_views/{filter_view_id}/conditions/query"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<FilterViewConditionListData>()
-        .await?;
-        Ok(QueryFilterViewConditionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FilterViewConditionListData, QueryFilterViewConditionResp>()
+        .await
     }
 }
 
@@ -1193,7 +1078,7 @@ impl<'a> ConditionalFormatResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/conditional_formats/query"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1202,13 +1087,8 @@ impl<'a> ConditionalFormatResource<'a> {
         )
         .query("page_token", page_token)
         .query("page_size", page_size)
-        .send::<ConditionalFormatListData>()
-        .await?;
-        Ok(QueryConditionalFormatResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ConditionalFormatListData, QueryConditionalFormatResp>()
+        .await
     }
 }
 
@@ -1250,7 +1130,7 @@ impl<'a> DataValidationResource<'a> {
     ) -> Result<QueryDataValidationResp, LarkError> {
         let path =
             format!("/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/data_validations");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1258,13 +1138,8 @@ impl<'a> DataValidationResource<'a> {
             option,
         )
         .query("range", range)
-        .send::<DataValidationListData>()
-        .await?;
-        Ok(QueryDataValidationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataValidationListData, QueryDataValidationResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1308,7 +1183,7 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -1316,13 +1191,8 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FloatImageData>()
-        .await?;
-        Ok(CreateFloatImageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FloatImageData, CreateFloatImageResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1360,20 +1230,15 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/{float_image_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<FloatImageData>()
-        .await?;
-        Ok(GetFloatImageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FloatImageData, GetFloatImageResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1387,7 +1252,7 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/{float_image_id}"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1395,13 +1260,8 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FloatImageData>()
-        .await?;
-        Ok(PatchFloatImageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FloatImageData, PatchFloatImageResp>()
+        .await
     }
 
     pub async fn query(
@@ -1413,20 +1273,15 @@ impl<'a> SpreadsheetSheetFloatImageResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/float_images/query"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<FloatImageQueryData>()
-        .await?;
-        Ok(QueryFloatImageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FloatImageQueryData, QueryFloatImageResp>()
+        .await
     }
 }
 
@@ -1494,20 +1349,15 @@ impl<'a> SheetFilterResource<'a> {
         let path = format!(
             "/open-apis/sheets/v3/spreadsheets/{spreadsheet_token}/sheets/{sheet_id}/filter"
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<SheetFilterData>()
-        .await?;
-        Ok(GetSheetFilterResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SheetFilterData, GetSheetFilterResp>()
+        .await
     }
 
     pub async fn update(

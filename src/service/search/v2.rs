@@ -615,7 +615,7 @@ impl<'a> DataSourceResource<'a> {
         query: &CreateDataSourceQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateDataSourceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/search/v2/data_sources",
@@ -623,13 +623,8 @@ impl<'a> DataSourceResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<DataSourceData>()
-        .await?;
-        Ok(CreateDataSourceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataSourceData, CreateDataSourceResp>()
+        .await
     }
 
     pub async fn get(
@@ -647,20 +642,15 @@ impl<'a> DataSourceResource<'a> {
         option: &RequestOption,
     ) -> Result<GetDataSourceResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{}", query.data_source_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<DataSourceData>()
-        .await?;
-        Ok(GetDataSourceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataSourceData, GetDataSourceResp>()
+        .await
     }
 
     pub async fn patch(
@@ -679,7 +669,7 @@ impl<'a> DataSourceResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchDataSourceResp, LarkError> {
         let path = format!("/open-apis/search/v2/data_sources/{}", query.data_source_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -687,13 +677,8 @@ impl<'a> DataSourceResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<DataSourceData>()
-        .await?;
-        Ok(PatchDataSourceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataSourceData, PatchDataSourceResp>()
+        .await
     }
 
     pub async fn delete(
@@ -744,7 +729,7 @@ impl<'a> DataSourceResource<'a> {
         query: &ListDataSourceQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListDataSourceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/search/v2/data_sources",
@@ -753,13 +738,8 @@ impl<'a> DataSourceResource<'a> {
         )
         .query("view", query.view)
         .page_query(query.page)
-        .send::<DataSourceListData>()
-        .await?;
-        Ok(ListDataSourceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataSourceListData, ListDataSourceResp>()
+        .await
     }
 }
 
@@ -787,7 +767,7 @@ impl<'a> DataRecordResource<'a> {
             "/open-apis/search/v2/data_sources/{}/items",
             query.data_source_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -795,13 +775,8 @@ impl<'a> DataRecordResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<DataRecordData>()
-        .await?;
-        Ok(CreateDataRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataRecordData, CreateDataRecordResp>()
+        .await
     }
 
     pub async fn get(
@@ -823,20 +798,15 @@ impl<'a> DataRecordResource<'a> {
             "/open-apis/search/v2/data_sources/{}/items/{}",
             query.data_source_id, query.item_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<DataRecordData>()
-        .await?;
-        Ok(GetDataRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataRecordData, GetDataRecordResp>()
+        .await
     }
 
     pub async fn delete(
@@ -897,7 +867,7 @@ impl<'a> MessageSearchResource<'a> {
         query: &CreateMessageSearchQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchMessageResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/search/v2/message",
@@ -906,13 +876,8 @@ impl<'a> MessageSearchResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<SearchMessageData>()
-        .await?;
-        Ok(SearchMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SearchMessageData, SearchMessageResp>()
+        .await
     }
 }
 
@@ -939,7 +904,7 @@ impl<'a> AppSearchResource<'a> {
         query: &CreateAppSearchQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchAppResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/search/v2/app",
@@ -948,13 +913,8 @@ impl<'a> AppSearchResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<SearchAppData>()
-        .await?;
-        Ok(SearchAppResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SearchAppData, SearchAppResp>()
+        .await
     }
 }
 
@@ -985,7 +945,7 @@ impl<'a> DataSourceSchemaResource<'a> {
             "/open-apis/search/v2/data_sources/{}/schemas",
             query.data_source_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -993,13 +953,8 @@ impl<'a> DataSourceSchemaResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<SchemaData>()
-        .await?;
-        Ok(CreateSchemaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SchemaData, CreateSchemaResp>()
+        .await
     }
 
     pub async fn get(
@@ -1024,20 +979,15 @@ impl<'a> DataSourceSchemaResource<'a> {
             "/open-apis/search/v2/data_sources/{}/schemas/{}",
             query.data_source_id, query.schema_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<SchemaData>()
-        .await?;
-        Ok(GetSchemaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SchemaData, GetSchemaResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1063,7 +1013,7 @@ impl<'a> DataSourceSchemaResource<'a> {
             "/open-apis/search/v2/data_sources/{}/schemas/{}",
             query.data_source_id, query.schema_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1071,13 +1021,8 @@ impl<'a> DataSourceSchemaResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<SchemaData>()
-        .await?;
-        Ok(PatchSchemaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SchemaData, PatchSchemaResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1137,7 +1082,7 @@ impl<'a> SchemaResource<'a> {
         query: &CreateSchemaQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateSchemaResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/search/v2/schemas",
@@ -1145,13 +1090,8 @@ impl<'a> SchemaResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<SchemaData>()
-        .await?;
-        Ok(CreateSchemaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SchemaData, CreateSchemaResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1199,20 +1139,15 @@ impl<'a> SchemaResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSchemaResp, LarkError> {
         let path = format!("/open-apis/search/v2/schemas/{}", query.schema_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<SchemaData>()
-        .await?;
-        Ok(GetSchemaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SchemaData, GetSchemaResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1231,7 +1166,7 @@ impl<'a> SchemaResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchSchemaResp, LarkError> {
         let path = format!("/open-apis/search/v2/schemas/{}", query.schema_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1239,13 +1174,8 @@ impl<'a> SchemaResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<SchemaData>()
-        .await?;
-        Ok(PatchSchemaResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SchemaData, PatchSchemaResp>()
+        .await
     }
 }
 
@@ -1270,7 +1200,7 @@ impl<'a> DocWikiResource<'a> {
         query: &SearchDocWikiQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchDocWikiResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/search/v2/doc_wiki/search",
@@ -1278,13 +1208,8 @@ impl<'a> DocWikiResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<SearchDocWikiData>()
-        .await?;
-        Ok(SearchDocWikiResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SearchDocWikiData, SearchDocWikiResp>()
+        .await
     }
 }
 
