@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Domain types ──
 
@@ -113,11 +112,17 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<InvokeOpenApiResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/apps/{namespace}/open_api/invoke");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<InvokeData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<InvokeData>()
+        .await?;
+
         Ok(InvokeOpenApiResp {
             api_resp,
             code_error: raw.code_error,
@@ -133,17 +138,18 @@ impl<'a> AppResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAppResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/apaas/v1/apps");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/apaas/v1/apps",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListAppResp {
             api_resp,
             code_error,
@@ -168,14 +174,17 @@ impl<'a> ApplicationAuditLogResource<'a> {
         option: &RequestOption,
     ) -> Result<AuditLogListResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/audit_log/audit_log_list");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let mut request = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        );
         if let Some(b) = body {
-            api_req.body = Some(ReqBody::json(b)?);
+            request = request.json_body(b)?;
         }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = request.send_v2::<serde_json::Value>().await?;
         Ok(AuditLogListResp {
             api_resp,
             code_error,
@@ -194,14 +203,17 @@ impl<'a> ApplicationAuditLogResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/audit_log/data_change_log_detail"
         );
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let mut request = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        );
         if let Some(b) = body {
-            api_req.body = Some(ReqBody::json(b)?);
+            request = request.json_body(b)?;
         }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = request.send_v2::<serde_json::Value>().await?;
         Ok(DataChangeLogDetailResp {
             api_resp,
             code_error,
@@ -219,14 +231,17 @@ impl<'a> ApplicationAuditLogResource<'a> {
     ) -> Result<DataChangeLogsListResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/applications/{namespace}/audit_log/data_change_logs_list");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let mut request = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        );
         if let Some(b) = body {
-            api_req.body = Some(ReqBody::json(b)?);
+            request = request.json_body(b)?;
         }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = request.send_v2::<serde_json::Value>().await?;
         Ok(DataChangeLogsListResp {
             api_resp,
             code_error,
@@ -243,14 +258,17 @@ impl<'a> ApplicationAuditLogResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAuditLogResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/audit_log");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
+        let mut request = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        );
         if let Some(b) = body {
-            api_req.body = Some(ReqBody::json(b)?);
+            request = request.json_body(b)?;
         }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = request.send_v2::<serde_json::Value>().await?;
         Ok(GetAuditLogResp {
             api_resp,
             code_error,
@@ -277,11 +295,16 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/environment_variables/{environment_variable_api_name}"
         );
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(GetEnvironmentVariableResp {
             api_resp,
             code_error,
@@ -299,12 +322,17 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
     ) -> Result<QueryEnvironmentVariableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/applications/{namespace}/environment_variables/query");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryEnvironmentVariableResp {
             api_resp,
             code_error,
@@ -330,12 +358,17 @@ impl<'a> ApplicationFlowResource<'a> {
         option: &RequestOption,
     ) -> Result<ExecuteFlowResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/flows/{flow_id}/execute");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ExecuteFlowResp {
             api_resp,
             code_error,
@@ -363,12 +396,17 @@ impl<'a> ApplicationFunctionResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/functions/{function_api_name}/invoke"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(InvokeFunctionResp {
             api_resp,
             code_error,
@@ -393,12 +431,17 @@ impl<'a> ApplicationObjectResource<'a> {
         option: &RequestOption,
     ) -> Result<OqlQueryObjectResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/objects/oql_query");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(OqlQueryObjectResp {
             api_resp,
             code_error,
@@ -415,12 +458,17 @@ impl<'a> ApplicationObjectResource<'a> {
         option: &RequestOption,
     ) -> Result<SearchObjectResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/objects/search");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(SearchObjectResp {
             api_resp,
             code_error,
@@ -448,12 +496,17 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_create"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchCreateRecordResp {
             api_resp,
             code_error,
@@ -473,11 +526,17 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_delete"
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<()>()
+        .await?;
+
         Ok(BatchDeleteRecordResp {
             api_resp,
             code_error,
@@ -497,12 +556,17 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_query"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchQueryRecordResp {
             api_resp,
             code_error,
@@ -522,12 +586,17 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/batch_update"
         );
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchUpdateRecordResp {
             api_resp,
             code_error,
@@ -547,12 +616,17 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateRecordResp {
             api_resp,
             code_error,
@@ -572,10 +646,16 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/{id}"
         );
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
+
         Ok(DeleteRecordResp {
             api_resp,
             code_error,
@@ -596,12 +676,17 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/{id}"
         );
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(PatchRecordResp {
             api_resp,
             code_error,
@@ -622,12 +707,17 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/objects/{object_api_name}/records/{id}/query"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryRecordResp {
             api_resp,
             code_error,
@@ -654,12 +744,17 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/record_permissions/{record_permission_api_name}/member/batch_create_authorization"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchCreateAuthorizationRecordPermissionResp {
             api_resp,
             code_error,
@@ -678,12 +773,17 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/record_permissions/{record_permission_api_name}/member/batch_remove_authorization"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchRemoveAuthorizationRecordPermissionResp {
             api_resp,
             code_error,
@@ -711,12 +811,17 @@ impl<'a> ApplicationRoleMemberResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/roles/{role_api_name}/member/batch_create_authorization"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchCreateAuthorizationRoleMemberResp {
             api_resp,
             code_error,
@@ -736,12 +841,17 @@ impl<'a> ApplicationRoleMemberResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/applications/{namespace}/roles/{role_api_name}/member/batch_remove_authorization"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(BatchRemoveAuthorizationRoleMemberResp {
             api_resp,
             code_error,
@@ -758,11 +868,16 @@ impl<'a> ApplicationRoleMemberResource<'a> {
     ) -> Result<GetRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/applications/{namespace}/roles/{role_api_name}/member");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(GetRoleMemberResp {
             api_resp,
             code_error,
@@ -786,12 +901,17 @@ impl<'a> ApprovalInstanceResource<'a> {
         option: &RequestOption,
     ) -> Result<CancelApprovalInstanceResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_instances/{approval_instance_id}/cancel");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CancelApprovalInstanceResp {
             api_resp,
             code_error,
@@ -815,12 +935,17 @@ impl<'a> ApprovalTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<AddAssigneeApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/add_assignee");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(AddAssigneeApprovalTaskResp {
             api_resp,
             code_error,
@@ -836,12 +961,17 @@ impl<'a> ApprovalTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<AgreeApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/agree");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(AgreeApprovalTaskResp {
             api_resp,
             code_error,
@@ -857,12 +987,17 @@ impl<'a> ApprovalTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<RejectApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/reject");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(RejectApprovalTaskResp {
             api_resp,
             code_error,
@@ -878,12 +1013,17 @@ impl<'a> ApprovalTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<TransferApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/transfer");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(TransferApprovalTaskResp {
             api_resp,
             code_error,
@@ -906,17 +1046,18 @@ impl<'a> SeatActivityResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSeatActivityResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/apaas/v1/seat_activities");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/apaas/v1/seat_activities",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListSeatActivityResp {
             api_resp,
             code_error,
@@ -939,17 +1080,18 @@ impl<'a> SeatAssignmentResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSeatAssignmentResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/apaas/v1/seat_assignments");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/apaas/v1/seat_assignments",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListSeatAssignmentResp {
             api_resp,
             code_error,
@@ -973,12 +1115,17 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<CcUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/cc");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CcUserTaskResp {
             api_resp,
             code_error,
@@ -994,12 +1141,17 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<ChatGroupUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/chat_group");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ChatGroupUserTaskResp {
             api_resp,
             code_error,
@@ -1015,12 +1167,17 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<ExpeditingUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/expediting");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ExpeditingUserTaskResp {
             api_resp,
             code_error,
@@ -1035,12 +1192,17 @@ impl<'a> UserTaskResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryUserTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/apaas/v1/user_task/query");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/apaas/v1/user_task/query",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(QueryUserTaskResp {
             api_resp,
             code_error,
@@ -1056,12 +1218,17 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<RollbackUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/rollback");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(RollbackUserTaskResp {
             api_resp,
             code_error,
@@ -1077,12 +1244,17 @@ impl<'a> UserTaskResource<'a> {
         option: &RequestOption,
     ) -> Result<RollbackPointsUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/rollback_points");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(RollbackPointsUserTaskResp {
             api_resp,
             code_error,
@@ -1107,12 +1279,17 @@ impl<'a> WorkspaceResource<'a> {
         option: &RequestOption,
     ) -> Result<SqlCommandsWorkspaceResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/sql_commands");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(SqlCommandsWorkspaceResp {
             api_resp,
             code_error,
@@ -1137,11 +1314,16 @@ impl<'a> WorkspaceEnumResource<'a> {
         option: &RequestOption,
     ) -> Result<EnumGetWorkspaceEnumResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/enums/{enum_name}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(EnumGetWorkspaceEnumResp {
             api_resp,
             code_error,
@@ -1159,17 +1341,18 @@ impl<'a> WorkspaceEnumResource<'a> {
         option: &RequestOption,
     ) -> Result<ListWorkspaceEnumResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/enums");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListWorkspaceEnumResp {
             api_resp,
             code_error,
@@ -1195,17 +1378,18 @@ impl<'a> WorkspaceTableResource<'a> {
         option: &RequestOption,
     ) -> Result<ListWorkspaceTableResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ListWorkspaceTableResp {
             api_resp,
             code_error,
@@ -1225,12 +1409,17 @@ impl<'a> WorkspaceTableResource<'a> {
         let path = format!(
             "/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records_batch_update"
         );
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(RecordsBatchUpdateWorkspaceTableResp {
             api_resp,
             code_error,
@@ -1249,11 +1438,17 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<RecordsDeleteWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<()>()
+        .await?;
+
         Ok(RecordsDeleteWorkspaceTableResp {
             api_resp,
             code_error,
@@ -1273,17 +1468,18 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<RecordsGetWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(RecordsGetWorkspaceTableResp {
             api_resp,
             code_error,
@@ -1302,12 +1498,17 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<RecordsPatchWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(RecordsPatchWorkspaceTableResp {
             api_resp,
             code_error,
@@ -1326,12 +1527,17 @@ impl<'a> WorkspaceTableResource<'a> {
     ) -> Result<RecordsPostWorkspaceTableResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}/records");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(RecordsPostWorkspaceTableResp {
             api_resp,
             code_error,
@@ -1348,11 +1554,16 @@ impl<'a> WorkspaceTableResource<'a> {
         option: &RequestOption,
     ) -> Result<TableGetWorkspaceTableResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/tables/{table_name}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(TableGetWorkspaceTableResp {
             api_resp,
             code_error,
@@ -1379,17 +1590,18 @@ impl<'a> WorkspaceViewResource<'a> {
     ) -> Result<ViewsGetWorkspaceViewResp, LarkError> {
         let path =
             format!("/open-apis/apaas/v1/workspaces/{workspace_id}/views/{view_name}/records");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(ViewsGetWorkspaceViewResp {
             api_resp,
             code_error,
