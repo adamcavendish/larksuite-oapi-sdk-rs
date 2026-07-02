@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -1183,17 +1182,18 @@ impl<'a> ApprovalDefinitionResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateApprovalResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/approvals");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateApprovalData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/approval/v4/approvals",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("department_id_type", department_id_type)
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CreateApprovalData>()
+        .await?;
         Ok(CreateApprovalResp {
             api_resp,
             code_error: raw.code_error,
@@ -1253,14 +1253,17 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/instances");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateInstanceData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/approval/v4/instances",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CreateInstanceData>()
+        .await?;
         Ok(CreateInstanceResp {
             api_resp,
             code_error: raw.code_error,
@@ -1314,17 +1317,17 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/cancel",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1376,18 +1379,17 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<AddSignInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/add_sign",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(AddSignInstanceResp {
             api_resp,
             code_error,
@@ -1401,15 +1403,17 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CcInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/instances/cc");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/approval/v4/instances/cc",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CcInstanceResp {
             api_resp,
             code_error,
@@ -1423,18 +1427,17 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PreviewInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/preview",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PreviewInstanceResp {
             api_resp,
             code_error,
@@ -1524,18 +1527,17 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SpecifiedRollbackInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances/specified_rollback",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SpecifiedRollbackInstanceResp {
             api_resp,
             code_error,
@@ -1555,14 +1557,17 @@ impl<'a> ApprovalTaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/approve");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/approval/v4/tasks/approve",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1575,14 +1580,17 @@ impl<'a> ApprovalTaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/reject");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/approval/v4/tasks/reject",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1595,14 +1603,17 @@ impl<'a> ApprovalTaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/transfer");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/approval/v4/tasks/transfer",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1657,15 +1668,17 @@ impl<'a> ApprovalTaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ResubmitTaskResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/approval/v4/tasks/resubmit");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/approval/v4/tasks/resubmit",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ResubmitTaskResp {
             api_resp,
             code_error,
@@ -1724,11 +1737,16 @@ impl<'a> ApprovalSubscribeResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/approval/v4/approvals/{approval_code}/subscribe");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1742,11 +1760,16 @@ impl<'a> ApprovalSubscribeResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/approval/v4/approvals/{approval_code}/unsubscribe");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1766,20 +1789,18 @@ impl<'a> ExternalApprovalResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateExternalApprovalResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/approval/v4/external_approvals",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ExternalApproval>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("department_id_type", department_id_type)
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<ExternalApproval>()
+        .await?;
         Ok(CreateExternalApprovalResp {
             api_resp,
             code_error: raw.code_error,
@@ -1834,14 +1855,16 @@ impl<'a> ExternalInstanceResource<'a> {
         body: &CreateExternalInstanceReqBody,
         option: &RequestOption,
     ) -> Result<CreateExternalInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/approval/v4/external_instances",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ExternalInstance>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<ExternalInstance>()
+        .await?;
         Ok(CreateExternalInstanceResp {
             api_resp,
             code_error: raw.code_error,
@@ -1854,15 +1877,16 @@ impl<'a> ExternalInstanceResource<'a> {
         instances: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<CheckExternalInstanceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/approval/v4/external_instances/check",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(instances)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CheckExternalInstanceData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(instances)?
+        .send::<CheckExternalInstanceData>()
+        .await?;
         Ok(CheckExternalInstanceResp {
             api_resp,
             code_error: raw.code_error,
@@ -1887,18 +1911,18 @@ impl<'a> InstanceCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id", user_id)
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateInstanceCommentResp {
             api_resp,
             code_error,
@@ -1915,17 +1939,17 @@ impl<'a> InstanceCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments/{comment_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id", user_id)
+        .query("user_id_type", user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(DeleteInstanceCommentResp {
             api_resp,
             code_error,
@@ -1985,17 +2009,17 @@ impl<'a> InstanceCommentResource<'a> {
         option: &RequestOption,
     ) -> Result<RemoveInstanceCommentResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{instance_id}/comments/remove");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id {
-            api_req.query_params.set("user_id", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id", user_id)
+        .query("user_id_type", user_id_type)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(RemoveInstanceCommentResp {
             api_resp,
             code_error,
