@@ -275,6 +275,29 @@ impl<'a> GetApplicationQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchApplicationQuery<'a> {
+    pub app_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub lang: Option<&'a str>,
+}
+
+impl<'a> PatchApplicationQuery<'a> {
+    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            app_id,
+            body,
+            lang: None,
+        }
+    }
+
+    pub fn lang(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.lang = value.into();
+        self
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default)]
 #[non_exhaustive]
 pub struct ListApplicationQuery<'a> {
@@ -508,16 +531,27 @@ impl<'a> ApplicationResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<PatchApplicationResp, LarkError> {
-        let path = format!("/open-apis/application/v6/applications/{app_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = lang {
-            api_req.query_params.set("lang", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = PatchApplicationQuery::new(app_id, body).lang(lang);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchApplicationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchApplicationResp, LarkError> {
+        let path = format!("/open-apis/application/v6/applications/{}", query.app_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("lang", query.lang)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchApplicationResp {
             api_resp,
             code_error,
