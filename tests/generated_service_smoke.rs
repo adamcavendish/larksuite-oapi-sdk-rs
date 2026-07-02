@@ -38,7 +38,8 @@ use larksuite_oapi_sdk_rs::service::{
         ListAppRecommendRuleQuery, ListApplicationAppVersionQuery, ListApplicationFeedbackQuery,
         ListApplicationQuery as ListApplicationV6Query,
         ListScopeQuery as ListApplicationV6ScopeQuery, MessagePushOverviewApplicationAppUsageQuery,
-        OverviewApplicationAppUsageQuery, SetAppBadgeQuery, UnderauditlistApplicationQuery,
+        OverviewApplicationAppUsageQuery, PatchApplicationQuery, SetAppBadgeQuery,
+        UnderauditlistApplicationQuery,
     },
     approval::v4::{
         CcSearch, GetApprovalQuery, GetExternalApprovalQuery, GetInstanceQuery, InstanceSearch,
@@ -12544,6 +12545,30 @@ async fn application_v6_list_by_query_smoke() {
     assert!(request.contains("status=1"));
     assert!(request.contains("payment_type=2"));
     assert!(request.contains("owner_type=3"));
+}
+
+#[tokio::test]
+async fn application_v6_patch_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"app":{"app_id":"cli_a"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let patch_body = serde_json::json!({"name":"Updated App"});
+    let resp = client
+        .application_v6()
+        .application
+        .patch_by_query(
+            &PatchApplicationQuery::new("cli_a", &patch_body).lang("zh_cn"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("PATCH /open-apis/application/v6/applications/cli_a?"));
+    assert!(request.contains("lang=zh_cn"));
+    assert!(request.contains(r#""name":"Updated App""#));
 }
 
 #[tokio::test]
