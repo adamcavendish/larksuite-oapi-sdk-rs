@@ -146,7 +146,11 @@ use larksuite_oapi_sdk_rs::service::{
             ListFileCommentReplyQuery, ListFileQuery, ListFileVersionQuery,
             ListFileViewRecordQuery, ListPermissionMemberQuery,
         },
-        v2::{GetPermissionPublicV2Query as GetDrivePermissionPublicV2Query, ListFileLikeQuery},
+        v2::{
+            GetPermissionPublicV2Query as GetDrivePermissionPublicV2Query, ListFileLikeQuery,
+            PatchPermissionPublicV2Query as PatchDrivePermissionPublicV2Query,
+            PatchPermissionPublicV2ReqBody,
+        },
     },
     ehr::v1::ListEmployeeQuery as ListEhrEmployeeQuery,
     event::v1::ListOutboundIpQuery,
@@ -4044,7 +4048,13 @@ async fn drive_permission_public_get_by_query_smoke() {
 #[tokio::test]
 async fn drive_v2_permission_public_get_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"external_access_entity":"anyone","share_entity":"tenant_readable"}}"#;
-    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+    let patch_body =
+        r#"{"code":0,"msg":"ok","data":{"external_access_entity":"tenant","lock_switch":true}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, body),
+        http_response(200, patch_body),
+    ])
+    .await;
 
     let client = client_for(addr);
     let resp = client
@@ -4064,9 +4074,35 @@ async fn drive_v2_permission_public_get_by_query_smoke() {
             .and_then(|permission| permission.external_access_entity.as_deref()),
         Some("anyone")
     );
+    let update_body = PatchPermissionPublicV2ReqBody {
+        external_access_entity: Some("tenant".into()),
+        lock_switch: Some(true),
+        ..Default::default()
+    };
+    let patch_resp = client
+        .drive_v2()
+        .permission_public
+        .patch_by_query(
+            &PatchDrivePermissionPublicV2Query::new("file-token-1", "doc", &update_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(patch_resp.success());
+    assert_eq!(
+        patch_resp
+            .data
+            .as_ref()
+            .and_then(|permission| permission.lock_switch),
+        Some(true)
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/drive/v2/permissions/file-token-1/public?"));
+    assert!(request.contains("PATCH /open-apis/drive/v2/permissions/file-token-1/public?"));
     assert!(request.contains("type=doc"));
+    assert!(request.contains(r#""external_access_entity":"tenant""#));
+    assert!(request.contains(r#""lock_switch":true"#));
 }
 
 #[tokio::test]

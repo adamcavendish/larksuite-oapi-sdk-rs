@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
+use crate::req::RequestOption;
 use crate::service::common::{PageQuery, RestRequest};
-use crate::transport;
 
 // ── Domain types ──
 
@@ -188,6 +187,28 @@ impl<'a> GetPermissionPublicV2Query<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchPermissionPublicV2Query<'a> {
+    pub token: &'a str,
+    pub token_type: &'a str,
+    pub body: &'a PatchPermissionPublicV2ReqBody,
+}
+
+impl<'a> PatchPermissionPublicV2Query<'a> {
+    pub fn new(
+        token: &'a str,
+        token_type: &'a str,
+        body: &'a PatchPermissionPublicV2ReqBody,
+    ) -> Self {
+        Self {
+            token,
+            token_type,
+            body,
+        }
+    }
+}
+
 impl<'a> PermissionPublicV2Resource<'a> {
     pub async fn get(
         &self,
@@ -229,14 +250,27 @@ impl<'a> PermissionPublicV2Resource<'a> {
         body: &PatchPermissionPublicV2ReqBody,
         option: &RequestOption,
     ) -> Result<PatchPermissionPublicV2Resp, LarkError> {
-        use crate::req::ReqBody;
-        let path = format!("/open-apis/drive/v2/permissions/{token}/public");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.query_params.set("type", r#type);
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<PermissionPublicV2>(self.config, &api_req, option).await?;
+        let query = PatchPermissionPublicV2Query::new(token, r#type, body);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchPermissionPublicV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchPermissionPublicV2Resp, LarkError> {
+        let path = format!("/open-apis/drive/v2/permissions/{}/public", query.token);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("type", query.token_type)
+        .json_body(query.body)?
+        .send::<PermissionPublicV2>()
+        .await?;
         Ok(PatchPermissionPublicV2Resp {
             api_resp,
             code_error: raw.code_error,
