@@ -2,9 +2,9 @@ use serde::Serialize;
 
 use crate::config::Config;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::req::RequestOption;
 use crate::resp::{ApiResp, CodeError};
-use crate::transport;
+use crate::service::common::RestRequest;
 
 // ── Request body types ──
 
@@ -64,6 +64,61 @@ impl RawTokenResp {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct CreateAppAccessTokenQuery<'a> {
+    pub body: &'a CreateAppAccessTokenReqBody,
+}
+
+impl<'a> CreateAppAccessTokenQuery<'a> {
+    pub fn new(body: &'a CreateAppAccessTokenReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct InternalAppAccessTokenQuery<'a> {
+    pub body: &'a InternalAppAccessTokenReqBody,
+}
+
+impl<'a> InternalAppAccessTokenQuery<'a> {
+    pub fn new(body: &'a InternalAppAccessTokenReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ResendAppTicketQuery<'a> {
+    pub body: &'a ResendAppTicketReqBody,
+}
+
+impl<'a> ResendAppTicketQuery<'a> {
+    pub fn new(body: &'a ResendAppTicketReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateTenantAccessTokenQuery<'a> {
+    pub body: &'a CreateTenantAccessTokenReqBody,
+}
+
+impl<'a> CreateTenantAccessTokenQuery<'a> {
+    pub fn new(body: &'a CreateTenantAccessTokenReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct InternalTenantAccessTokenQuery<'a> {
+    pub body: &'a InternalTenantAccessTokenReqBody,
+}
+
+impl<'a> InternalTenantAccessTokenQuery<'a> {
+    pub fn new(body: &'a InternalTenantAccessTokenReqBody) -> Self {
+        Self { body }
+    }
+}
+
 // ── Resources ──
 
 pub struct AppAccessTokenResource<'a> {
@@ -77,11 +132,25 @@ impl<'a> AppAccessTokenResource<'a> {
         body: &CreateAppAccessTokenReqBody,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/auth/v3/app_access_token");
-        api_req.supported_access_token_types = vec![];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateAppAccessTokenQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateAppAccessTokenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<RawTokenResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/auth/v3/app_access_token",
+            vec![],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(RawTokenResp {
             api_resp,
             code_error: raw.code_error,
@@ -94,14 +163,25 @@ impl<'a> AppAccessTokenResource<'a> {
         body: &InternalAppAccessTokenReqBody,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.internal_by_query(&InternalAppAccessTokenQuery::new(body), option)
+            .await
+    }
+
+    pub async fn internal_by_query(
+        &self,
+        query: &InternalAppAccessTokenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<RawTokenResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/auth/v3/app_access_token/internal",
-        );
-        api_req.supported_access_token_types = vec![];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(RawTokenResp {
             api_resp,
             code_error: raw.code_error,
@@ -120,11 +200,25 @@ impl<'a> AppTicketResource<'a> {
         body: &ResendAppTicketReqBody,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/auth/v3/app_ticket/resend");
-        api_req.supported_access_token_types = vec![];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        self.resend_by_query(&ResendAppTicketQuery::new(body), option)
+            .await
+    }
+
+    pub async fn resend_by_query(
+        &self,
+        query: &ResendAppTicketQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<RawTokenResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/auth/v3/app_ticket/resend",
+            vec![],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(RawTokenResp {
             api_resp,
             code_error: raw.code_error,
@@ -143,11 +237,25 @@ impl<'a> TenantAccessTokenResource<'a> {
         body: &CreateTenantAccessTokenReqBody,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/auth/v3/tenant_access_token");
-        api_req.supported_access_token_types = vec![];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        self.create_by_query(&CreateTenantAccessTokenQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateTenantAccessTokenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<RawTokenResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/auth/v3/tenant_access_token",
+            vec![],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(RawTokenResp {
             api_resp,
             code_error: raw.code_error,
@@ -160,14 +268,25 @@ impl<'a> TenantAccessTokenResource<'a> {
         body: &InternalTenantAccessTokenReqBody,
         option: &RequestOption,
     ) -> Result<RawTokenResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.internal_by_query(&InternalTenantAccessTokenQuery::new(body), option)
+            .await
+    }
+
+    pub async fn internal_by_query(
+        &self,
+        query: &InternalTenantAccessTokenQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<RawTokenResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/auth/v3/tenant_access_token/internal",
-        );
-        api_req.supported_access_token_types = vec![];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(RawTokenResp {
             api_resp,
             code_error: raw.code_error,

@@ -36,6 +36,12 @@ use larksuite_oapi_sdk_rs::service::{
         PatchLeaveAccrualRecordQuery, PatchLeaveAccrualRecordReqBody,
         QueryRecordQuery as QueryAttendanceRecordQuery, QueryRecordReqBody,
     },
+    auth::v3::{
+        CreateAppAccessTokenQuery, CreateAppAccessTokenReqBody, CreateTenantAccessTokenQuery,
+        CreateTenantAccessTokenReqBody, InternalAppAccessTokenQuery, InternalAppAccessTokenReqBody,
+        InternalTenantAccessTokenQuery, InternalTenantAccessTokenReqBody, ResendAppTicketQuery,
+        ResendAppTicketReqBody,
+    },
     base::v2::{CreateAppRoleV2Query, ListAppRoleV2Query, UpdateAppRoleV2Query},
     bitable::v1::{
         ListAppRoleMemberQuery, ListAppRoleQuery, ListAppWorkflowQuery, ListDashboardQuery,
@@ -280,6 +286,100 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
         .disable_token_cache()
         .build()
         .unwrap()
+}
+
+// ── Auth ──
+
+#[tokio::test]
+async fn auth_v3_token_by_query_smoke() {
+    let token_body = r#"{"code":0,"msg":"ok","app_access_token":"app-token","tenant_access_token":"tenant-token","expire":7200}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, token_body),
+        http_response(200, token_body),
+        http_response(200, token_body),
+        http_response(200, token_body),
+        http_response(200, token_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let app_token_body = CreateAppAccessTokenReqBody {
+        app_id: Some("cli_a".into()),
+        app_secret: Some("secret".into()),
+        app_ticket: Some("ticket-1".into()),
+    };
+    let internal_app_body = InternalAppAccessTokenReqBody {
+        app_id: Some("cli_a".into()),
+        app_secret: Some("secret".into()),
+    };
+    let resend_body = ResendAppTicketReqBody {
+        app_id: Some("cli_a".into()),
+        app_secret: Some("secret".into()),
+    };
+    let tenant_body = CreateTenantAccessTokenReqBody {
+        app_access_token: Some("app-token".into()),
+        tenant_key: Some("tenant-1".into()),
+    };
+    let internal_tenant_body = InternalTenantAccessTokenReqBody {
+        app_id: Some("cli_a".into()),
+        app_secret: Some("secret".into()),
+    };
+
+    client
+        .auth()
+        .app_access_token
+        .create_by_query(
+            &CreateAppAccessTokenQuery::new(&app_token_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .auth()
+        .app_access_token
+        .internal_by_query(
+            &InternalAppAccessTokenQuery::new(&internal_app_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .auth()
+        .app_ticket
+        .resend_by_query(
+            &ResendAppTicketQuery::new(&resend_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .auth()
+        .tenant_access_token
+        .create_by_query(
+            &CreateTenantAccessTokenQuery::new(&tenant_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .auth()
+        .tenant_access_token
+        .internal_by_query(
+            &InternalTenantAccessTokenQuery::new(&internal_tenant_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/auth/v3/app_access_token "));
+    assert!(request.contains("POST /open-apis/auth/v3/app_access_token/internal "));
+    assert!(request.contains("POST /open-apis/auth/v3/app_ticket/resend "));
+    assert!(request.contains("POST /open-apis/auth/v3/tenant_access_token "));
+    assert!(request.contains("POST /open-apis/auth/v3/tenant_access_token/internal "));
+    assert!(request.contains(r#""app_ticket":"ticket-1""#));
+    assert!(request.contains(r#""app_access_token":"app-token""#));
+    assert!(request.contains(r#""tenant_key":"tenant-1""#));
 }
 
 // ── Attendance ──
