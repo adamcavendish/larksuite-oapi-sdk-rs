@@ -44,20 +44,15 @@ impl<'a> OutboundIpResource<'a> {
         _query: &ListOutboundIpQuery,
         option: &RequestOption,
     ) -> Result<GetOutboundIpResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/event/v1/outbound_ip",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<OutboundIp>()
-        .await?;
-        Ok(GetOutboundIpResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OutboundIp, GetOutboundIpResp>()
+        .await
     }
 }
 

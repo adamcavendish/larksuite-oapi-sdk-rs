@@ -321,7 +321,7 @@ impl<'a> SessionResource<'a> {
         body: &CreateSessionReqBody,
         option: &RequestOption,
     ) -> Result<CreateSessionResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/aily/v1/sessions",
@@ -329,13 +329,8 @@ impl<'a> SessionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<SessionData>()
-        .await?;
-        Ok(CreateSessionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SessionData, CreateSessionResp>()
+        .await
     }
 
     pub async fn delete(
@@ -365,20 +360,15 @@ impl<'a> SessionResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSessionResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<SessionData>()
-        .await?;
-        Ok(GetSessionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SessionData, GetSessionResp>()
+        .await
     }
 
     pub async fn update(
@@ -388,7 +378,7 @@ impl<'a> SessionResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateSessionResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -396,13 +386,8 @@ impl<'a> SessionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<SessionData>()
-        .await?;
-        Ok(UpdateSessionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SessionData, UpdateSessionResp>()
+        .await
     }
 }
 
@@ -418,7 +403,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateMessageResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/messages");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -426,13 +411,8 @@ impl<'a> MessageResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<MessageData>()
-        .await?;
-        Ok(CreateMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MessageData, CreateMessageResp>()
+        .await
     }
 
     pub async fn get(
@@ -443,20 +423,15 @@ impl<'a> MessageResource<'a> {
     ) -> Result<GetMessageResp, LarkError> {
         let path =
             format!("/open-apis/aily/v1/sessions/{aily_session_id}/messages/{aily_message_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<MessageData>()
-        .await?;
-        Ok(GetMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MessageData, GetMessageResp>()
+        .await
     }
 
     pub async fn list(
@@ -467,7 +442,7 @@ impl<'a> MessageResource<'a> {
         option: &RequestOption,
     ) -> Result<ListMessageResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/messages");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -476,13 +451,8 @@ impl<'a> MessageResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send::<MessageListData>()
-        .await?;
-        Ok(ListMessageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MessageListData, ListMessageResp>()
+        .await
     }
 }
 
@@ -498,20 +468,15 @@ impl<'a> RunResource<'a> {
         option: &RequestOption,
     ) -> Result<CancelRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs/{run_id}/cancel");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<RunData>()
-        .await?;
-        Ok(CancelRunResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RunData, CancelRunResp>()
+        .await
     }
 
     pub async fn create(
@@ -521,7 +486,7 @@ impl<'a> RunResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -529,13 +494,8 @@ impl<'a> RunResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<RunData>()
-        .await?;
-        Ok(CreateRunResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RunData, CreateRunResp>()
+        .await
     }
 
     pub async fn get(
@@ -545,20 +505,15 @@ impl<'a> RunResource<'a> {
         option: &RequestOption,
     ) -> Result<GetRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs/{run_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<RunData>()
-        .await?;
-        Ok(GetRunResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RunData, GetRunResp>()
+        .await
     }
 
     pub async fn list(
@@ -569,7 +524,7 @@ impl<'a> RunResource<'a> {
         option: &RequestOption,
     ) -> Result<ListRunResp, LarkError> {
         let path = format!("/open-apis/aily/v1/sessions/{aily_session_id}/runs");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -578,13 +533,8 @@ impl<'a> RunResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send::<RunListData>()
-        .await?;
-        Ok(ListRunResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RunListData, ListRunResp>()
+        .await
     }
 }
 
@@ -601,7 +551,7 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -610,13 +560,8 @@ impl<'a> DataAssetResource<'a> {
         )
         .query("tenant_type", tenant_type)
         .json_body(body)?
-        .send::<DataAssetData>()
-        .await?;
-        Ok(CreateDataAssetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataAssetData, CreateDataAssetResp>()
+        .await
     }
 
     pub async fn delete(
@@ -627,7 +572,7 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/{data_asset_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
@@ -635,13 +580,8 @@ impl<'a> DataAssetResource<'a> {
             option,
         )
         .query("tenant_type", tenant_type)
-        .send::<DataAssetData>()
-        .await?;
-        Ok(DeleteDataAssetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataAssetData, DeleteDataAssetResp>()
+        .await
     }
 
     pub async fn get(
@@ -652,7 +592,7 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<GetDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/{data_asset_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -660,13 +600,8 @@ impl<'a> DataAssetResource<'a> {
             option,
         )
         .query("tenant_type", tenant_type)
-        .send::<DataAssetData>()
-        .await?;
-        Ok(GetDataAssetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataAssetData, GetDataAssetResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -679,7 +614,7 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<ListDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -689,13 +624,8 @@ impl<'a> DataAssetResource<'a> {
         .query("page_size", page_size)
         .query("page_token", page_token)
         .query("tenant_type", tenant_type)
-        .send::<DataAssetListData>()
-        .await?;
-        Ok(ListDataAssetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataAssetListData, ListDataAssetResp>()
+        .await
     }
 
     pub async fn upload_file(
@@ -706,7 +636,7 @@ impl<'a> DataAssetResource<'a> {
         option: &RequestOption,
     ) -> Result<UploadFileDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/upload_file");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -715,13 +645,8 @@ impl<'a> DataAssetResource<'a> {
         )
         .query("tenant_type", tenant_type)
         .json_body(body)?
-        .send::<UploadFileData>()
-        .await?;
-        Ok(UploadFileDataAssetResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UploadFileData, UploadFileDataAssetResp>()
+        .await
     }
 }
 
@@ -740,7 +665,7 @@ impl<'a> DataAssetTagResource<'a> {
         option: &RequestOption,
     ) -> Result<ListDataAssetTagResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_asset_tags");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -750,13 +675,8 @@ impl<'a> DataAssetTagResource<'a> {
         .query("page_size", page_size)
         .query("page_token", page_token)
         .query("tenant_type", tenant_type)
-        .send::<DataAssetTagListData>()
-        .await?;
-        Ok(ListDataAssetTagResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DataAssetTagListData, ListDataAssetTagResp>()
+        .await
     }
 }
 
@@ -772,7 +692,7 @@ impl<'a> KnowledgeResource<'a> {
         option: &RequestOption,
     ) -> Result<AskKnowledgeResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/knowledges/ask");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -780,13 +700,8 @@ impl<'a> KnowledgeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<AskKnowledgeData>()
-        .await?;
-        Ok(AskKnowledgeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AskKnowledgeData, AskKnowledgeResp>()
+        .await
     }
 }
 
@@ -802,20 +717,15 @@ impl<'a> SkillResource<'a> {
         option: &RequestOption,
     ) -> Result<GetSkillResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/skills/{skill_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send::<SkillData>()
-        .await?;
-        Ok(GetSkillResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SkillData, GetSkillResp>()
+        .await
     }
 
     pub async fn list(
@@ -826,7 +736,7 @@ impl<'a> SkillResource<'a> {
         option: &RequestOption,
     ) -> Result<ListSkillResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/skills");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -835,13 +745,8 @@ impl<'a> SkillResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send::<SkillListData>()
-        .await?;
-        Ok(ListSkillResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SkillListData, ListSkillResp>()
+        .await
     }
 
     pub async fn start(
@@ -852,7 +757,7 @@ impl<'a> SkillResource<'a> {
         option: &RequestOption,
     ) -> Result<StartSkillResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/skills/{skill_id}/start");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -860,13 +765,8 @@ impl<'a> SkillResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<StartSkillData>()
-        .await?;
-        Ok(StartSkillResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<StartSkillData, StartSkillResp>()
+        .await
     }
 }
 

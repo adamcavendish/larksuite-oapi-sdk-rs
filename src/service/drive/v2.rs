@@ -151,7 +151,7 @@ impl<'a> FileLikeResource<'a> {
         option: &RequestOption,
     ) -> Result<FileLikeListResp, LarkError> {
         let path = format!("/open-apis/drive/v2/files/{}/likes", query.file_token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -160,13 +160,8 @@ impl<'a> FileLikeResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .page_query(query.page_query())
-        .send::<FileLikeListData>()
-        .await?;
-        Ok(FileLikeListResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FileLikeListData, FileLikeListResp>()
+        .await
     }
 }
 
@@ -226,7 +221,7 @@ impl<'a> PermissionPublicV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<GetPermissionPublicV2Resp, LarkError> {
         let path = format!("/open-apis/drive/v2/permissions/{}/public", query.token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -234,13 +229,8 @@ impl<'a> PermissionPublicV2Resource<'a> {
             option,
         )
         .query("type", query.token_type)
-        .send::<PermissionPublicV2>()
-        .await?;
-        Ok(GetPermissionPublicV2Resp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PermissionPublicV2, GetPermissionPublicV2Resp>()
+        .await
     }
 
     pub async fn patch(
@@ -260,7 +250,7 @@ impl<'a> PermissionPublicV2Resource<'a> {
         option: &RequestOption,
     ) -> Result<PatchPermissionPublicV2Resp, LarkError> {
         let path = format!("/open-apis/drive/v2/permissions/{}/public", query.token);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -269,13 +259,8 @@ impl<'a> PermissionPublicV2Resource<'a> {
         )
         .query("type", query.token_type)
         .json_body(query.body)?
-        .send::<PermissionPublicV2>()
-        .await?;
-        Ok(PatchPermissionPublicV2Resp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PermissionPublicV2, PatchPermissionPublicV2Resp>()
+        .await
     }
 }
 

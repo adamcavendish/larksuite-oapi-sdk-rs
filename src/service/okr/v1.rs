@@ -389,7 +389,7 @@ impl<'a> PeriodResource<'a> {
         query: &ListPeriodQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListPeriodResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/okr/v1/periods",
@@ -397,13 +397,8 @@ impl<'a> PeriodResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send::<PeriodListData>()
-        .await?;
-        Ok(ListPeriodResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PeriodListData, ListPeriodResp>()
+        .await
     }
 
     pub async fn create(
@@ -807,7 +802,7 @@ impl<'a> UserOkrResource<'a> {
         option: &RequestOption,
     ) -> Result<GetUserOkrResp, LarkError> {
         let path = format!("/open-apis/okr/v1/users/{}/okrs", query.user_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -822,13 +817,8 @@ impl<'a> UserOkrResource<'a> {
         .query("offset", query.offset)
         .query("limit", query.limit)
         .query("lang", query.lang)
-        .send::<OkrListData>()
-        .await?;
-        Ok(GetUserOkrResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<OkrListData, GetUserOkrResp>()
+        .await
     }
 }
 

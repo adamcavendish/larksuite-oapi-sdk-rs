@@ -116,7 +116,7 @@ impl<'a> UserResource<'a> {
         query: &ListDirectoryUserQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListUserResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/directory/v1/users",
@@ -125,13 +125,8 @@ impl<'a> UserResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .page_query(query.page_query())
-        .send::<UserListData>()
-        .await?;
-        Ok(ListUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UserListData, ListUserResp>()
+        .await
     }
 }
 

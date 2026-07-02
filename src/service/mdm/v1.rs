@@ -167,7 +167,7 @@ impl<'a> UserDeviceResource<'a> {
         query: &ListUserDeviceQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListDeviceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/mdm/v1/user_devices",
@@ -177,13 +177,8 @@ impl<'a> UserDeviceResource<'a> {
         .query("user_id", query.user_id)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send::<DeviceListData>()
-        .await?;
-        Ok(ListDeviceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DeviceListData, ListDeviceResp>()
+        .await
     }
 
     pub async fn update(

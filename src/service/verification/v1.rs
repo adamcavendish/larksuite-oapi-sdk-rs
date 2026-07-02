@@ -117,7 +117,7 @@ impl<'a> VerificationTaskResource<'a> {
         query: &CreateVerificationTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateVerificationTaskResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/verification/v1/verification_tasks",
@@ -127,13 +127,8 @@ impl<'a> VerificationTaskResource<'a> {
         .query("user_id", query.user_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<VerificationTaskData>()
-        .await?;
-        Ok(CreateVerificationTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<VerificationTaskData, CreateVerificationTaskResp>()
+        .await
     }
 
     pub async fn get(
@@ -154,20 +149,15 @@ impl<'a> VerificationTaskResource<'a> {
             "/open-apis/verification/v1/verification_tasks/{}",
             query.task_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<VerificationTaskData>()
-        .await?;
-        Ok(GetVerificationTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<VerificationTaskData, GetVerificationTaskResp>()
+        .await
     }
 }
 
@@ -188,20 +178,15 @@ impl<'a> VerificationResource<'a> {
         _query: &GetVerificationQuery,
         option: &RequestOption,
     ) -> Result<GetVerificationResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/verification/v1/verification",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<VerificationData>()
-        .await?;
-        Ok(GetVerificationResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<VerificationData, GetVerificationResp>()
+        .await
     }
 }
 

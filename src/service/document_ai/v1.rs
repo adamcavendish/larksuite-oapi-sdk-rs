@@ -201,7 +201,7 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVatInvoiceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/vat_invoice/recognize",
@@ -209,13 +209,8 @@ impl<'a> AiResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<VatInvoiceData>()
-        .await?;
-        Ok(RecognizeVatInvoiceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<VatInvoiceData, RecognizeVatInvoiceResp>()
+        .await
     }
 
     pub async fn recognize_business_card(
@@ -223,7 +218,7 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBusinessCardResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/business_card/recognize",
@@ -231,13 +226,8 @@ impl<'a> AiResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<BusinessCardData>()
-        .await?;
-        Ok(RecognizeBusinessCardResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BusinessCardData, RecognizeBusinessCardResp>()
+        .await
     }
 
     pub async fn recognize_id_card(
@@ -245,7 +235,7 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeIdCardResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/id_card/recognize",
@@ -253,13 +243,8 @@ impl<'a> AiResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<IdCardData>()
-        .await?;
-        Ok(RecognizeIdCardResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<IdCardData, RecognizeIdCardResp>()
+        .await
     }
 
     pub async fn recognize_bank_card(
@@ -267,7 +252,7 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBankCardResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/bank_card/recognize",
@@ -275,13 +260,8 @@ impl<'a> AiResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<BankCardData>()
-        .await?;
-        Ok(RecognizeBankCardResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BankCardData, RecognizeBankCardResp>()
+        .await
     }
 
     pub async fn recognize_vehicle_license(
@@ -289,7 +269,7 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVehicleLicenseResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/vehicle_license/recognize",
@@ -297,13 +277,8 @@ impl<'a> AiResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<VehicleLicenseData>()
-        .await?;
-        Ok(RecognizeVehicleLicenseResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<VehicleLicenseData, RecognizeVehicleLicenseResp>()
+        .await
     }
 
     pub async fn recognize_train_invoice(
@@ -311,7 +286,7 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeTrainInvoiceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/train_invoice/recognize",
@@ -319,13 +294,8 @@ impl<'a> AiResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<TrainInvoiceData>()
-        .await?;
-        Ok(RecognizeTrainInvoiceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TrainInvoiceData, RecognizeTrainInvoiceResp>()
+        .await
     }
 
     pub async fn recognize_taxi_invoice(
@@ -333,7 +303,7 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeTaxiInvoiceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/taxi_invoice/recognize",
@@ -341,13 +311,8 @@ impl<'a> AiResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<TaxiInvoiceData>()
-        .await?;
-        Ok(RecognizeTaxiInvoiceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TaxiInvoiceData, RecognizeTaxiInvoiceResp>()
+        .await
     }
 
     pub async fn recognize_contract(
@@ -355,7 +320,7 @@ impl<'a> AiResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeContractResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/contract/recognize",
@@ -363,13 +328,8 @@ impl<'a> AiResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ContractData>()
-        .await?;
-        Ok(RecognizeContractResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ContractData, RecognizeContractResp>()
+        .await
     }
 }
 
@@ -665,7 +625,7 @@ impl<'a> ContractResource<'a> {
         body: &RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<FieldExtractionContractResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/document_ai/v1/contract/field_extraction",
@@ -673,13 +633,8 @@ impl<'a> ContractResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<FieldExtractionContractData>()
-        .await?;
-        Ok(FieldExtractionContractResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<FieldExtractionContractData, FieldExtractionContractResp>()
+        .await
     }
 }
 

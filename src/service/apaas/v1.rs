@@ -112,7 +112,7 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<InvokeOpenApiResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/apps/{namespace}/open_api/invoke");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -120,14 +120,8 @@ impl<'a> AppResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<InvokeData>()
-        .await?;
-
-        Ok(InvokeOpenApiResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<InvokeData, InvokeOpenApiResp>()
+        .await
     }
 
     /// List apps

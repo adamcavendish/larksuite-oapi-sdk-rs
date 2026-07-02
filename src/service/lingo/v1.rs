@@ -373,7 +373,7 @@ impl<'a> EntityResource<'a> {
         query: &CreateEntityQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateEntityResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/lingo/v1/entities",
@@ -383,13 +383,8 @@ impl<'a> EntityResource<'a> {
         .query("repo_id", query.repo_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<EntityData>()
-        .await?;
-        Ok(CreateEntityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EntityData, CreateEntityResp>()
+        .await
     }
 
     pub async fn update(
@@ -412,7 +407,7 @@ impl<'a> EntityResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateEntityResp, LarkError> {
         let path = format!("/open-apis/lingo/v1/entities/{}", query.entity_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -422,13 +417,8 @@ impl<'a> EntityResource<'a> {
         .query("repo_id", query.repo_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<EntityData>()
-        .await?;
-        Ok(UpdateEntityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EntityData, UpdateEntityResp>()
+        .await
     }
 
     pub async fn delete(
@@ -488,7 +478,7 @@ impl<'a> EntityResource<'a> {
         option: &RequestOption,
     ) -> Result<GetEntityResp, LarkError> {
         let path = format!("/open-apis/lingo/v1/entities/{}", query.entity_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -498,13 +488,8 @@ impl<'a> EntityResource<'a> {
         .query("provider", query.provider)
         .query("outer_id", query.outer_id)
         .query("user_id_type", query.user_id_type)
-        .send::<EntityData>()
-        .await?;
-        Ok(GetEntityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EntityData, GetEntityResp>()
+        .await
     }
 
     pub async fn list(
@@ -529,7 +514,7 @@ impl<'a> EntityResource<'a> {
         query: &ListEntityQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListEntityResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/lingo/v1/entities",
@@ -540,13 +525,8 @@ impl<'a> EntityResource<'a> {
         .query("repo_id", query.repo_id)
         .query("provider", query.provider)
         .query("user_id_type", query.user_id_type)
-        .send::<EntityListData>()
-        .await?;
-        Ok(ListEntityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EntityListData, ListEntityResp>()
+        .await
     }
 
     pub async fn search(
@@ -570,7 +550,7 @@ impl<'a> EntityResource<'a> {
         query: &SearchEntityQuery<'_>,
         option: &RequestOption,
     ) -> Result<SearchEntityResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/lingo/v1/entities/search",
@@ -581,13 +561,8 @@ impl<'a> EntityResource<'a> {
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<EntityListData>()
-        .await?;
-        Ok(SearchEntityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EntityListData, SearchEntityResp>()
+        .await
     }
 
     pub async fn highlight(

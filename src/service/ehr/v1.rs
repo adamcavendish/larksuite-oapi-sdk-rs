@@ -132,7 +132,7 @@ impl<'a> EmployeeResource<'a> {
         query: &ListEmployeeQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListEhrEmployeeResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/ehr/v1/employees",
@@ -143,13 +143,8 @@ impl<'a> EmployeeResource<'a> {
         .query("view", query.view)
         .query_values("status", query.status)
         .page_query(query.page)
-        .send::<EmployeeListData>()
-        .await?;
-        Ok(ListEhrEmployeeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<EmployeeListData, ListEhrEmployeeResp>()
+        .await
     }
 }
 

@@ -213,7 +213,7 @@ impl<'a> RuleResource<'a> {
         query: &QueryRuleQuery<'_>,
         option: &RequestOption,
     ) -> Result<QueryRuleResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/report/v1/rules/query",
@@ -223,13 +223,8 @@ impl<'a> RuleResource<'a> {
         .query("rule_name", query.rule_name)
         .query("include_deleted", query.include_deleted)
         .query("user_id_type", query.user_id_type)
-        .send::<RuleListData>()
-        .await?;
-        Ok(QueryRuleResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RuleListData, QueryRuleResp>()
+        .await
     }
 }
 
@@ -253,7 +248,7 @@ impl<'a> TaskResource<'a> {
         query: &QueryTaskQuery<'_>,
         option: &RequestOption,
     ) -> Result<QueryTaskResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/report/v1/tasks/query",
@@ -262,13 +257,8 @@ impl<'a> TaskResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<TaskListData>()
-        .await?;
-        Ok(QueryTaskResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<TaskListData, QueryTaskResp>()
+        .await
     }
 }
 

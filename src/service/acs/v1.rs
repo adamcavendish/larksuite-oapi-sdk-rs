@@ -281,7 +281,7 @@ impl<'a> AcsUserResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAcsUserResp, LarkError> {
         let path = format!("/open-apis/acs/v1/users/{}", query.user_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -289,13 +289,8 @@ impl<'a> AcsUserResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<AcsUserData>()
-        .await?;
-        Ok(GetAcsUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AcsUserData, GetAcsUserResp>()
+        .await
     }
 
     pub async fn list(
@@ -316,7 +311,7 @@ impl<'a> AcsUserResource<'a> {
         query: &ListUserQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAcsUserResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/acs/v1/users",
@@ -325,13 +320,8 @@ impl<'a> AcsUserResource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send::<AcsUserListData>()
-        .await?;
-        Ok(ListAcsUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AcsUserListData, ListAcsUserResp>()
+        .await
     }
 
     pub async fn patch(
@@ -399,7 +389,7 @@ impl<'a> AccessRecordResource<'a> {
         query: &ListAccessRecordQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAccessRecordResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/acs/v1/access_records",
@@ -411,13 +401,8 @@ impl<'a> AccessRecordResource<'a> {
         .query("to", query.to)
         .query("device_id", query.device_id)
         .query("user_id_type", query.user_id_type)
-        .send::<AccessRecordListData>()
-        .await?;
-        Ok(ListAccessRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AccessRecordListData, ListAccessRecordResp>()
+        .await
     }
 }
 
@@ -446,20 +431,15 @@ impl<'a> DeviceResource<'a> {
         _query: &ListDeviceQuery,
         option: &RequestOption,
     ) -> Result<ListDeviceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/acs/v1/devices",
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<DeviceListData>()
-        .await?;
-        Ok(ListDeviceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<DeviceListData, ListDeviceResp>()
+        .await
     }
 }
 

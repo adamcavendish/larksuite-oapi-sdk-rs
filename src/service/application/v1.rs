@@ -275,7 +275,7 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAppResp, LarkError> {
         let path = format!("/open-apis/application/v6/applications/{}", query.app_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -283,13 +283,8 @@ impl<'a> AppResource<'a> {
             option,
         )
         .query("lang", query.lang)
-        .send::<AppData>()
-        .await?;
-        Ok(GetAppResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AppData, GetAppResp>()
+        .await
     }
 
     pub async fn list(
@@ -311,7 +306,7 @@ impl<'a> AppResource<'a> {
         query: &ListAppQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAppResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/application/v6/applications",
@@ -320,13 +315,8 @@ impl<'a> AppResource<'a> {
         )
         .page_query(query.page)
         .query("lang", query.lang)
-        .send::<AppListData>()
-        .await?;
-        Ok(ListAppResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AppListData, ListAppResp>()
+        .await
     }
 
     pub async fn check_user_admin(
@@ -389,7 +379,7 @@ impl<'a> AppResource<'a> {
             "/open-apis/application/v6/applications/{}/visibility/check_white_black_list",
             query.app_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -399,13 +389,8 @@ impl<'a> AppResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send::<CheckBlacklistData>()
-        .await?;
-        Ok(CheckBlacklistResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CheckBlacklistData, CheckBlacklistResp>()
+        .await
     }
 }
 
@@ -487,7 +472,7 @@ impl<'a> AppVersionResource<'a> {
             "/open-apis/application/v6/applications/{}/app_versions/{}",
             query.app_id, query.version_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -495,13 +480,8 @@ impl<'a> AppVersionResource<'a> {
             option,
         )
         .query("lang", query.lang)
-        .send::<AppVersionData>()
-        .await?;
-        Ok(GetAppVersionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AppVersionData, GetAppVersionResp>()
+        .await
     }
 
     pub async fn list(
@@ -531,7 +511,7 @@ impl<'a> AppVersionResource<'a> {
             "/open-apis/application/v6/applications/{}/app_versions",
             query.app_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -541,13 +521,8 @@ impl<'a> AppVersionResource<'a> {
         .query("lang", query.lang)
         .page_query(query.page)
         .query("order", query.order)
-        .send::<AppVersionListData>()
-        .await?;
-        Ok(ListAppVersionResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AppVersionListData, ListAppVersionResp>()
+        .await
     }
 }
 
@@ -650,7 +625,7 @@ impl<'a> AppUsageResource<'a> {
             "/open-apis/application/v6/applications/{}/app_usage/department_overview",
             query.app_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -662,13 +637,8 @@ impl<'a> AppUsageResource<'a> {
         .query("department_id", query.department_id)
         .query("recursion", query.recursion)
         .page_query(query.page)
-        .send::<AppUsageData>()
-        .await?;
-        Ok(GetAppUsageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AppUsageData, GetAppUsageResp>()
+        .await
     }
 
     pub async fn overview(
@@ -691,7 +661,7 @@ impl<'a> AppUsageResource<'a> {
             "/open-apis/application/v6/applications/{}/app_usage/overview",
             query.app_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -700,13 +670,8 @@ impl<'a> AppUsageResource<'a> {
         )
         .query("date", query.date)
         .query("cycle_type", query.cycle_type)
-        .send::<AppUsageData>()
-        .await?;
-        Ok(GetAppUsageResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<AppUsageData, GetAppUsageResp>()
+        .await
     }
 }
 

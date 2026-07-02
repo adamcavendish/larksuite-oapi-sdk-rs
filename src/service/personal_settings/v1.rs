@@ -203,7 +203,7 @@ impl<'a> SystemStatusResource<'a> {
         query: &CreateSystemStatusQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateSystemStatusResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/personal_settings/v1/system_statuses",
@@ -211,13 +211,8 @@ impl<'a> SystemStatusResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<SystemStatusData>()
-        .await?;
-        Ok(CreateSystemStatusResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SystemStatusData, CreateSystemStatusResp>()
+        .await
     }
 
     pub async fn delete(
@@ -268,7 +263,7 @@ impl<'a> SystemStatusResource<'a> {
         query: &ListSystemStatusQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListSystemStatusResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/personal_settings/v1/system_statuses",
@@ -276,13 +271,8 @@ impl<'a> SystemStatusResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send::<SystemStatusListData>()
-        .await?;
-        Ok(ListSystemStatusResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SystemStatusListData, ListSystemStatusResp>()
+        .await
     }
 
     pub async fn batch_open(
@@ -306,7 +296,7 @@ impl<'a> SystemStatusResource<'a> {
             "/open-apis/personal_settings/v1/system_statuses/{}/batch_open",
             query.system_status_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -315,13 +305,8 @@ impl<'a> SystemStatusResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<BatchOpenData>()
-        .await?;
-        Ok(BatchOpenSystemStatusResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchOpenData, BatchOpenSystemStatusResp>()
+        .await
     }
 
     pub async fn batch_close(
@@ -345,7 +330,7 @@ impl<'a> SystemStatusResource<'a> {
             "/open-apis/personal_settings/v1/system_statuses/{}/batch_close",
             query.system_status_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -354,13 +339,8 @@ impl<'a> SystemStatusResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<BatchOpenData>()
-        .await?;
-        Ok(BatchOpenSystemStatusResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchOpenData, BatchOpenSystemStatusResp>()
+        .await
     }
 
     pub async fn patch(
@@ -382,7 +362,7 @@ impl<'a> SystemStatusResource<'a> {
             "/open-apis/personal_settings/v1/system_statuses/{}",
             query.system_status_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -390,13 +370,8 @@ impl<'a> SystemStatusResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<SystemStatusData>()
-        .await?;
-        Ok(PatchSystemStatusResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SystemStatusData, PatchSystemStatusResp>()
+        .await
     }
 }
 

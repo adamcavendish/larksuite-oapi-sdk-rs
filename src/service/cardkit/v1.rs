@@ -245,7 +245,7 @@ impl<'a> CardInstanceResource<'a> {
         query: &CreateCardInstanceQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateCardInstanceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/cardkit/v1/card_instances",
@@ -253,13 +253,8 @@ impl<'a> CardInstanceResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<CardInstanceData>()
-        .await?;
-        Ok(CreateCardInstanceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CardInstanceData, CreateCardInstanceResp>()
+        .await
     }
 
     pub async fn update(

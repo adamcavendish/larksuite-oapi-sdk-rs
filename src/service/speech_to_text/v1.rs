@@ -88,7 +88,7 @@ impl<'a> SpeechResource<'a> {
         query: &FileRecognizeSpeechQuery<'_>,
         option: &RequestOption,
     ) -> Result<RecognizeBasicSpeechResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/speech_to_text/v1/speech/file_recognize",
@@ -96,13 +96,8 @@ impl<'a> SpeechResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<RecognizeData>()
-        .await?;
-        Ok(RecognizeBasicSpeechResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RecognizeData, RecognizeBasicSpeechResp>()
+        .await
     }
 
     pub async fn stream_recognize(
@@ -119,7 +114,7 @@ impl<'a> SpeechResource<'a> {
         query: &StreamRecognizeSpeechQuery<'_>,
         option: &RequestOption,
     ) -> Result<RecognizeSpeechStreamResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/speech_to_text/v1/speech/stream_recognize",
@@ -127,13 +122,8 @@ impl<'a> SpeechResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send::<StreamRecognizeData>()
-        .await?;
-        Ok(RecognizeSpeechStreamResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<StreamRecognizeData, RecognizeSpeechStreamResp>()
+        .await
     }
 }
 

@@ -131,20 +131,15 @@ impl<'a> RoomResource<'a> {
         option: &RequestOption,
     ) -> Result<GetRoomResp, LarkError> {
         let path = format!("/open-apis/meeting_room/v1/rooms/{room_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<RoomData>()
-        .await?;
-        Ok(GetRoomResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RoomData, GetRoomResp>()
+        .await
     }
 
     pub async fn list(
@@ -165,7 +160,7 @@ impl<'a> RoomResource<'a> {
         query: &ListRoomQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListRoomResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/meeting_room/v1/rooms",
@@ -174,13 +169,8 @@ impl<'a> RoomResource<'a> {
         )
         .query("building_id", query.building_id)
         .page_query(query.page)
-        .send::<RoomListData>()
-        .await?;
-        Ok(ListRoomResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RoomListData, ListRoomResp>()
+        .await
     }
 }
 
@@ -204,7 +194,7 @@ impl<'a> BuildingResource<'a> {
         query: &ListBuildingQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListBuildingResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/meeting_room/v1/buildings",
@@ -212,13 +202,8 @@ impl<'a> BuildingResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send::<BuildingListData>()
-        .await?;
-        Ok(ListBuildingResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BuildingListData, ListBuildingResp>()
+        .await
     }
 }
 
