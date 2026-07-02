@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -299,6 +298,18 @@ impl<'a> QueryDatasourceRecordQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SaveDatasourceRecordQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> SaveDatasourceRecordQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default)]
 #[non_exhaustive]
 pub struct ListPaygroupQuery<'a> {
@@ -368,6 +379,18 @@ impl<'a> ListPaymentActivityQuery<'a> {
     pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.page.page_token = value.into();
         self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ArchivePaymentActivityQuery<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> ArchivePaymentActivityQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
     }
 }
 
@@ -745,15 +768,25 @@ impl DatasourceRecordResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<SaveDatasourceRecordResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = SaveDatasourceRecordQuery::new(body);
+        self.save_by_query(&query, option).await
+    }
+
+    pub async fn save_by_query(
+        &self,
+        query: &SaveDatasourceRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SaveDatasourceRecordResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/payroll/v1/datasource_records/save",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SaveDatasourceRecordResp {
             api_resp,
             code_error,
@@ -814,15 +847,25 @@ impl PaymentActivityResource<'_> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<ArchivePaymentActivityResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = ArchivePaymentActivityQuery::new(body);
+        self.archive_by_query(&query, option).await
+    }
+
+    pub async fn archive_by_query(
+        &self,
+        query: &ArchivePaymentActivityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ArchivePaymentActivityResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/payroll/v1/payment_activitys/archive",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ArchivePaymentActivityResp {
             api_resp,
             code_error,
