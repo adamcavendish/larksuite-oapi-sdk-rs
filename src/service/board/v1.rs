@@ -3,10 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::req::RequestOption;
 use crate::resp::ApiResp;
 use crate::service::common::RestRequest;
-use crate::transport;
 
 // ── Domain types ──
 
@@ -156,6 +155,47 @@ impl<'a> UpdateThemeWhiteboardQuery<'a> {
             whiteboard_id,
             body,
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreateWhiteboardNodeQuery<'a> {
+    pub whiteboard_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateWhiteboardNodeQuery<'a> {
+    pub fn new(whiteboard_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            whiteboard_id,
+            body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CreatePlantumlWhiteboardNodeQuery<'a> {
+    pub whiteboard_id: &'a str,
+    pub body: &'a CreatePlantumlWhiteboardNodeReqBody,
+}
+
+impl<'a> CreatePlantumlWhiteboardNodeQuery<'a> {
+    pub fn new(whiteboard_id: &'a str, body: &'a CreatePlantumlWhiteboardNodeReqBody) -> Self {
+        Self {
+            whiteboard_id,
+            body,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ListWhiteboardNodeQuery<'a> {
+    pub whiteboard_id: &'a str,
+}
+
+impl<'a> ListWhiteboardNodeQuery<'a> {
+    pub fn new(whiteboard_id: &'a str) -> Self {
+        Self { whiteboard_id }
     }
 }
 
@@ -347,12 +387,32 @@ impl<'a> WhiteboardNodeResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateWhiteboardNodeResp, LarkError> {
-        let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/nodes");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<WhiteboardNodeData>(self.config, &api_req, option).await?;
+        self.create_by_query(
+            &CreateWhiteboardNodeQuery::new(whiteboard_id, &body),
+            option,
+        )
+        .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateWhiteboardNodeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateWhiteboardNodeResp, LarkError> {
+        let path = format!(
+            "/open-apis/board/v1/whiteboards/{}/nodes",
+            query.whiteboard_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<WhiteboardNodeData>()
+        .await?;
         Ok(CreateWhiteboardNodeResp {
             api_resp,
             code_error: raw.code_error,
@@ -366,12 +426,32 @@ impl<'a> WhiteboardNodeResource<'a> {
         body: &CreatePlantumlWhiteboardNodeReqBody,
         option: &RequestOption,
     ) -> Result<CreatePlantumlWhiteboardNodeResp, LarkError> {
-        let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/nodes/plantuml");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<WhiteboardNodeData>(self.config, &api_req, option).await?;
+        self.create_plantuml_by_query(
+            &CreatePlantumlWhiteboardNodeQuery::new(whiteboard_id, body),
+            option,
+        )
+        .await
+    }
+
+    pub async fn create_plantuml_by_query(
+        &self,
+        query: &CreatePlantumlWhiteboardNodeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreatePlantumlWhiteboardNodeResp, LarkError> {
+        let path = format!(
+            "/open-apis/board/v1/whiteboards/{}/nodes/plantuml",
+            query.whiteboard_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send::<WhiteboardNodeData>()
+        .await?;
         Ok(CreatePlantumlWhiteboardNodeResp {
             api_resp,
             code_error: raw.code_error,
@@ -384,12 +464,28 @@ impl<'a> WhiteboardNodeResource<'a> {
         whiteboard_id: &str,
         option: &RequestOption,
     ) -> Result<ListWhiteboardNodeResp, LarkError> {
-        let path = format!("/open-apis/board/v1/whiteboards/{whiteboard_id}/nodes");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<WhiteboardNodeListData>(self.config, &api_req, option)
-                .await?;
+        self.list_by_query(&ListWhiteboardNodeQuery::new(whiteboard_id), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListWhiteboardNodeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListWhiteboardNodeResp, LarkError> {
+        let path = format!(
+            "/open-apis/board/v1/whiteboards/{}/nodes",
+            query.whiteboard_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<WhiteboardNodeListData>()
+        .await?;
         Ok(ListWhiteboardNodeResp {
             api_resp,
             code_error: raw.code_error,
