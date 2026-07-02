@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, RequestOption};
+use crate::req::RequestOption;
 use crate::service::common::RestRequest;
-use crate::transport;
 
 // ── Domain types ──
 
@@ -66,6 +65,17 @@ pub struct ContentData {
 
 impl_resp!(GetContentResp, ContentData);
 
+#[derive(Debug, Clone, Copy)]
+pub struct GetDocumentQuery<'a> {
+    pub document_id: &'a str,
+}
+
+impl<'a> GetDocumentQuery<'a> {
+    pub fn new(document_id: &'a str) -> Self {
+        Self { document_id }
+    }
+}
+
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct GetContentQuery<'a> {
@@ -113,11 +123,25 @@ impl<'a> DocumentResource<'a> {
         document_id: &str,
         option: &RequestOption,
     ) -> Result<GetDocumentResp, LarkError> {
-        let path = format!("/open-apis/docs/v1/documents/{document_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<DocumentData>(self.config, &api_req, option).await?;
+        self.get_by_query(&GetDocumentQuery::new(document_id), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetDocumentQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetDocumentResp, LarkError> {
+        let path = format!("/open-apis/docs/v1/documents/{}", query.document_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<DocumentData>()
+        .await?;
         Ok(GetDocumentResp {
             api_resp,
             code_error: raw.code_error,

@@ -124,7 +124,7 @@ use larksuite_oapi_sdk_rs::service::{
         ListShareEntityQuery, MgetEmployeeQuery as MgetDirectoryEmployeeQuery,
         PatchEmployeeQuery as PatchDirectoryEmployeeQuery, SearchDirectoryDepartmentQuery,
     },
-    docs::v1::GetContentQuery as GetDocsContentQuery,
+    docs::v1::{GetContentQuery as GetDocsContentQuery, GetDocumentQuery as GetDocsDocumentQuery},
     docx::v1::{
         BatchUpdateBlockReqBody, BatchUpdateDocumentBlockQuery, Block as DocxBlock,
         ConvertDocumentQuery, CreateBlockReqBody, CreateDocumentBlockQuery, CreateDocumentQuery,
@@ -5989,7 +5989,32 @@ async fn contact_list_department_smoke() {
     assert!(request.contains("GET /open-apis/contact/v3/departments"));
 }
 
-// ── Docx ──
+// ── Docs ──
+
+#[tokio::test]
+async fn docs_document_get_by_query_smoke() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"document":{"document_id":"doc-1","title":"My Doc"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .docs()
+        .document
+        .get_by_query(
+            &GetDocsDocumentQuery::new("doc-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let doc = resp.data.unwrap().document.unwrap();
+    assert_eq!(doc.document_id.as_deref(), Some("doc-1"));
+    assert_eq!(doc.title.as_deref(), Some("My Doc"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/docs/v1/documents/doc-1 "));
+}
 
 #[tokio::test]
 async fn docs_content_get_by_query_smoke() {
@@ -6022,6 +6047,8 @@ async fn docs_content_get_by_query_smoke() {
     assert!(request.contains("content_type=markdown"));
     assert!(request.contains("lang=en"));
 }
+
+// ── Docx ──
 
 #[tokio::test]
 async fn docx_get_document_smoke() {
