@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::req::RequestOption;
 use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
-use crate::transport;
 
 // ── Domain types ──
 
@@ -809,11 +808,17 @@ impl<'a> TicketResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/tickets/{ticket_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -886,11 +891,17 @@ impl<'a> TicketResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/tickets/{ticket_id}/answer_user_query");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -902,12 +913,17 @@ impl<'a> TicketResource<'a> {
         body: &StartServiceTicketReqBody,
         option: &RequestOption,
     ) -> Result<StartServiceTicketResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/start_service");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<StartServiceTicketRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/start_service",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<StartServiceTicketRespData>()
+        .await?;
+
         Ok(StartServiceTicketResp {
             api_resp,
             code_error: raw.code_error,
@@ -1022,11 +1038,17 @@ impl<'a> TicketMessageResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/tickets/{ticket_id}/messages");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1157,10 +1179,16 @@ impl<'a> AgentResource<'a> {
     }
 
     pub async fn agent_email(&self, option: &RequestOption) -> Result<AgentEmailResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/agent_emails");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/agent_emails",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(AgentEmailResp {
             api_resp,
             code_error: raw.code_error,
@@ -1175,11 +1203,17 @@ impl<'a> AgentResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchAgentResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(PatchAgentResp {
             api_resp,
             code_error: raw.code_error,
@@ -1211,10 +1245,16 @@ impl<'a> AgentSchedulesResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteAgentSchedulesResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}/schedules");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(DeleteAgentSchedulesResp {
             api_resp,
             code_error: raw.code_error,
@@ -1260,11 +1300,17 @@ impl<'a> AgentSchedulesResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchAgentSchedulesResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}/schedules");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(PatchAgentSchedulesResp {
             api_resp,
             code_error: raw.code_error,
@@ -1300,11 +1346,17 @@ impl<'a> AgentScheduleResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateAgentScheduleResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/agent_schedules");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/agent_schedules",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(CreateAgentScheduleResp {
             api_resp,
             code_error: raw.code_error,
@@ -1383,11 +1435,17 @@ impl<'a> CategoryResource<'a> {
         body: &CreateCategoryReqBody,
         option: &RequestOption,
     ) -> Result<CreateCategoryResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/categories");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CategoryData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/categories",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<CategoryData>()
+        .await?;
+
         Ok(CreateCategoryResp {
             api_resp,
             code_error: raw.code_error,
@@ -1433,11 +1491,17 @@ impl<'a> CategoryResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/categories/{id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1446,10 +1510,16 @@ impl<'a> CategoryResource<'a> {
 
     pub async fn delete(&self, id: &str, option: &RequestOption) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/categories/{id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1578,11 +1648,17 @@ impl<'a> FaqResource<'a> {
         body: &CreateFaqReqBody,
         option: &RequestOption,
     ) -> Result<CreateFaqResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/faqs");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FaqData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/faqs",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<FaqData>()
+        .await?;
+
         Ok(CreateFaqResp {
             api_resp,
             code_error: raw.code_error,
@@ -1624,11 +1700,17 @@ impl<'a> FaqResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/faqs/{id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1637,10 +1719,16 @@ impl<'a> FaqResource<'a> {
 
     pub async fn delete(&self, id: &str, option: &RequestOption) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/faqs/{id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1757,14 +1845,18 @@ impl<'a> NotificationResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateNotificationResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/notifications");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<NotificationData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/notifications",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<NotificationData>()
+        .await?;
+
         Ok(CreateNotificationResp {
             api_resp,
             code_error: raw.code_error,
@@ -1779,13 +1871,17 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<GetNotificationResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<GetNotificationData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .send::<GetNotificationData>()
+        .await?;
+
         Ok(GetNotificationResp {
             api_resp,
             code_error: raw.code_error,
@@ -1800,11 +1896,17 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/submit_approve");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1818,11 +1920,17 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/execute");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1835,10 +1943,16 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1851,10 +1965,16 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel_approve");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1868,11 +1988,17 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/cancel_send");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1886,11 +2012,17 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/execute_send");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1903,10 +2035,16 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/preview");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1921,14 +2059,18 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1942,14 +2084,15 @@ impl<'a> NotificationResource<'a> {
         option: &RequestOption,
     ) -> Result<SubmitApproveNotificationResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/submit_approve");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<SubmitApproveNotificationRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::User],
             option,
         )
+        .json_body(body)?
+        .send::<SubmitApproveNotificationRespData>()
         .await?;
         Ok(SubmitApproveNotificationResp {
             api_resp,
@@ -1971,12 +2114,16 @@ impl<'a> AgentSkillResource<'a> {
         body: &CreateAgentSkillReqBody,
         option: &RequestOption,
     ) -> Result<CreateAgentSkillResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/agent_skills");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateAgentSkillRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/agent_skills",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<CreateAgentSkillRespData>()
+        .await?;
         Ok(CreateAgentSkillResp {
             api_resp,
             code_error: raw.code_error,
@@ -1990,10 +2137,16 @@ impl<'a> AgentSkillResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2006,11 +2159,16 @@ impl<'a> AgentSkillResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAgentSkillResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<GetAgentSkillRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<GetAgentSkillRespData>()
+        .await?;
+
         Ok(GetAgentSkillResp {
             api_resp,
             code_error: raw.code_error,
@@ -2019,11 +2177,16 @@ impl<'a> AgentSkillResource<'a> {
     }
 
     pub async fn list(&self, option: &RequestOption) -> Result<ListAgentSkillResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/helpdesk/v1/agent_skills");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<ListAgentSkillRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/helpdesk/v1/agent_skills",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<ListAgentSkillRespData>()
+        .await?;
+
         Ok(ListAgentSkillResp {
             api_resp,
             code_error: raw.code_error,
@@ -2038,11 +2201,17 @@ impl<'a> AgentSkillResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agent_skills/{agent_skill_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2058,14 +2227,16 @@ pub struct AgentSkillRuleResource<'a> {
 
 impl<'a> AgentSkillRuleResource<'a> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListAgentSkillRuleResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/agent_skill_rules",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<ListAgentSkillRuleRespData>(self.config, &api_req, option)
-                .await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send::<ListAgentSkillRuleRespData>()
+        .await?;
+
         Ok(ListAgentSkillRuleResp {
             api_resp,
             code_error: raw.code_error,
@@ -2087,15 +2258,18 @@ impl<'a> BotMessageResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateBotMessageResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/helpdesk/v1/message");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CreateBotMessageRespData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/helpdesk/v1/message",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<CreateBotMessageRespData>()
+        .await?;
+
         Ok(CreateBotMessageResp {
             api_resp,
             code_error: raw.code_error,
@@ -2116,14 +2290,17 @@ impl<'a> EventResource<'a> {
         body: &SubscribeEventReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/events/subscribe",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2135,14 +2312,17 @@ impl<'a> EventResource<'a> {
         body: &UnsubscribeEventReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/events/unsubscribe",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2162,14 +2342,17 @@ impl<'a> TicketCustomizedFieldResource<'a> {
         body: &TicketCustomizedField,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/helpdesk/v1/ticket_customized_fields",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2183,10 +2366,16 @@ impl<'a> TicketCustomizedFieldResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -2200,13 +2389,14 @@ impl<'a> TicketCustomizedFieldResource<'a> {
     ) -> Result<GetTicketCustomizedFieldResp, LarkError> {
         let path =
             format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) = transport::request_typed::<GetTicketCustomizedFieldRespData>(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
-            &api_req,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
             option,
         )
+        .send::<GetTicketCustomizedFieldRespData>()
         .await?;
         Ok(GetTicketCustomizedFieldResp {
             api_resp,
@@ -2222,26 +2412,19 @@ impl<'a> TicketCustomizedFieldResource<'a> {
         body: Option<&ListTicketCustomizedFieldReqBody>,
         option: &RequestOption,
     ) -> Result<ListTicketCustomizedFieldResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let mut request = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/helpdesk/v1/ticket_customized_fields",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(b) = body {
-            api_req.body = Some(ReqBody::json(b)?);
-        }
-        let (api_resp, raw) = transport::request_typed::<ListTicketCustomizedFieldRespData>(
-            self.config,
-            &api_req,
+            vec![AccessTokenType::Tenant],
             option,
         )
-        .await?;
+        .query("page_token", page_token)
+        .query("page_size", page_size);
+        if let Some(b) = body {
+            request = request.json_body(b)?;
+        }
+        let (api_resp, raw) = request.send::<ListTicketCustomizedFieldRespData>().await?;
         Ok(ListTicketCustomizedFieldResp {
             api_resp,
             code_error: raw.code_error,
@@ -2257,11 +2440,16 @@ impl<'a> TicketCustomizedFieldResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/helpdesk/v1/ticket_customized_fields/{ticket_customized_field_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
