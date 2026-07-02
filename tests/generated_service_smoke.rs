@@ -254,7 +254,14 @@ use larksuite_oapi_sdk_rs::service::{
         SchemaProperty, SearchAppReqBody, SearchDocWikiQuery, SearchDocWikiReqBody,
         SearchMessageReqBody,
     },
-    security_and_compliance::{v1::ListOpenapiLogQuery, v2::ListDeviceRecordV2Query},
+    security_and_compliance::{
+        v1::ListOpenapiLogQuery,
+        v2::{
+            CreateDeviceRecordV2Query, DeleteDeviceRecordV2Query, GetDeviceRecordV2Query,
+            ListDeviceRecordV2Query, MineDeviceRecordV2Query, UpdateDeviceApplyRecordV2Query,
+            UpdateDeviceRecordV2Query,
+        },
+    },
     speech_to_text::v1::{
         FileRecognizeSpeechQuery, RecognizeBasicSpeechReqBody, RecognizeSpeechStreamReqBody,
         StreamRecognizeSpeechQuery,
@@ -7292,6 +7299,96 @@ async fn security_device_record_list_by_query_smoke() {
     assert!(request.contains("GET /open-apis/security_and_compliance/v2/device_records?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn security_device_records_write_by_query_smoke() {
+    let record_body = r#"{"code":0,"msg":"ok","data":{"device_record":{"device_id":"device-1"}}}"#;
+    let list_body =
+        r#"{"code":0,"msg":"ok","data":{"items":[{"device_id":"device-1"}],"has_more":false}}"#;
+    let apply_body = r#"{"code":0,"msg":"ok","data":{"updated":true}}"#;
+    let ok_body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, record_body),
+        http_response(200, record_body),
+        http_response(200, list_body),
+        http_response(200, record_body),
+        http_response(200, ok_body),
+        http_response(200, apply_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let create_body = serde_json::json!({"device_id":"device-1","status":"active"});
+    let update_body = serde_json::json!({"device_id":"device-1","status":"disabled"});
+    let apply_update_body = serde_json::json!({"status":"approved"});
+
+    client
+        .security_and_compliance_v2()
+        .device_record
+        .create_by_query(
+            &CreateDeviceRecordV2Query::new(&create_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .security_and_compliance_v2()
+        .device_record
+        .get_by_query(
+            &GetDeviceRecordV2Query::new("device-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .security_and_compliance_v2()
+        .device_record
+        .mine_by_query(&MineDeviceRecordV2Query::new(), &RequestOption::default())
+        .await
+        .unwrap();
+    client
+        .security_and_compliance_v2()
+        .device_record
+        .update_by_query(
+            &UpdateDeviceRecordV2Query::new("device-1", &update_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .security_and_compliance_v2()
+        .device_record
+        .delete_by_query(
+            &DeleteDeviceRecordV2Query::new("device-1"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .security_and_compliance_v2()
+        .device_apply_record
+        .update_by_query(
+            &UpdateDeviceApplyRecordV2Query::new("apply-1", &apply_update_body),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/security_and_compliance/v2/device_records "));
+    assert!(request.contains("GET /open-apis/security_and_compliance/v2/device_records/device-1 "));
+    assert!(request.contains("GET /open-apis/security_and_compliance/v2/device_records/mine "));
+    assert!(request.contains("PUT /open-apis/security_and_compliance/v2/device_records/device-1 "));
+    assert!(
+        request.contains("DELETE /open-apis/security_and_compliance/v2/device_records/device-1 ")
+    );
+    assert!(
+        request.contains("PUT /open-apis/security_and_compliance/v2/device_apply_records/apply-1 ")
+    );
+    assert!(request.contains(r#""status":"active""#));
+    assert!(request.contains(r#""status":"disabled""#));
+    assert!(request.contains(r#""status":"approved""#));
 }
 
 // ── Search ──
