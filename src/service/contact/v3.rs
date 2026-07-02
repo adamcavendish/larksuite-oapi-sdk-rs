@@ -1237,7 +1237,7 @@ impl<'a> DepartmentResource<'a> {
         body: &Department,
         option: &RequestOption,
     ) -> Result<CreateDepartmentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/departments",
@@ -1248,14 +1248,8 @@ impl<'a> DepartmentResource<'a> {
         .query("department_id_type", department_id_type)
         .query("client_token", client_token)
         .json_body(body)?
-        .send::<CreateDepartmentRespData>()
-        .await?;
-
-        Ok(CreateDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateDepartmentRespData, CreateDepartmentResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1301,7 +1295,7 @@ impl<'a> DepartmentResource<'a> {
         option: &RequestOption,
     ) -> Result<GetDepartmentResp, LarkError> {
         let path = format!("/open-apis/contact/v3/departments/{}", query.department_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1310,13 +1304,8 @@ impl<'a> DepartmentResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
-        .send::<GetDepartmentRespData>()
-        .await?;
-        Ok(GetDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetDepartmentRespData, GetDepartmentResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1328,7 +1317,7 @@ impl<'a> DepartmentResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchDepartmentResp, LarkError> {
         let path = format!("/open-apis/contact/v3/departments/{department_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1338,14 +1327,8 @@ impl<'a> DepartmentResource<'a> {
         .query("user_id_type", user_id_type)
         .query("department_id_type", department_id_type)
         .json_body(body)?
-        .send::<PatchDepartmentRespData>()
-        .await?;
-
-        Ok(PatchDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PatchDepartmentRespData, PatchDepartmentResp>()
+        .await
     }
 
     pub async fn update(
@@ -1357,7 +1340,7 @@ impl<'a> DepartmentResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateDepartmentResp, LarkError> {
         let path = format!("/open-apis/contact/v3/departments/{department_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -1367,14 +1350,8 @@ impl<'a> DepartmentResource<'a> {
         .query("user_id_type", user_id_type)
         .query("department_id_type", department_id_type)
         .json_body(body)?
-        .send::<UpdateDepartmentRespData>()
-        .await?;
-
-        Ok(UpdateDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdateDepartmentRespData, UpdateDepartmentResp>()
+        .await
     }
 
     pub async fn update_department_id(
@@ -1430,7 +1407,7 @@ impl<'a> DepartmentResource<'a> {
         query: &ListDepartmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListDepartmentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/departments",
@@ -1442,13 +1419,8 @@ impl<'a> DepartmentResource<'a> {
         .query("parent_department_id", query.parent_department_id)
         .query("fetch_child", query.fetch_child)
         .page_query(query.page_query())
-        .send::<ListDepartmentRespData>()
-        .await?;
-        Ok(ListDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListDepartmentRespData, ListDepartmentResp>()
+        .await
     }
 
     pub async fn batch(
@@ -1469,7 +1441,7 @@ impl<'a> DepartmentResource<'a> {
         query: &BatchDepartmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<BatchDepartmentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/departments/batch",
@@ -1479,13 +1451,8 @@ impl<'a> DepartmentResource<'a> {
         .query_values("department_ids", Some(query.department_ids.iter().copied()))
         .query("department_id_type", query.department_id_type)
         .query("user_id_type", query.user_id_type)
-        .send::<BatchDepartmentRespData>()
-        .await?;
-        Ok(BatchDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchDepartmentRespData, BatchDepartmentResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1517,7 +1484,7 @@ impl<'a> DepartmentResource<'a> {
             "/open-apis/contact/v3/departments/{}/children",
             query.department_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1528,13 +1495,8 @@ impl<'a> DepartmentResource<'a> {
         .query("department_id_type", query.department_id_type)
         .query("fetch_child", query.fetch_child)
         .page_query(query.page_query())
-        .send::<ListDepartmentRespData>()
-        .await?;
-        Ok(ChildrenDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListDepartmentRespData, ChildrenDepartmentResp>()
+        .await
     }
 
     pub async fn parent(
@@ -1559,7 +1521,7 @@ impl<'a> DepartmentResource<'a> {
         query: &ParentDepartmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<ParentDepartmentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/departments/parent",
@@ -1570,13 +1532,8 @@ impl<'a> DepartmentResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .page_query(query.page_query())
-        .send::<ListDepartmentRespData>()
-        .await?;
-        Ok(ParentDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListDepartmentRespData, ParentDepartmentResp>()
+        .await
     }
 
     pub async fn search(
@@ -1602,7 +1559,7 @@ impl<'a> DepartmentResource<'a> {
         body: &SearchDepartmentReqBody,
         option: &RequestOption,
     ) -> Result<SearchDepartmentResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/departments/search",
@@ -1613,13 +1570,8 @@ impl<'a> DepartmentResource<'a> {
         .query("department_id_type", query.department_id_type)
         .page_query(query.page_query())
         .json_body(body)?
-        .send::<SearchDepartmentRespData>()
-        .await?;
-        Ok(SearchDepartmentResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SearchDepartmentRespData, SearchDepartmentResp>()
+        .await
     }
 
     pub async fn unbind_department_chat(
@@ -1878,7 +1830,7 @@ impl<'a> UserResource<'a> {
         body: &User,
         option: &RequestOption,
     ) -> Result<CreateUserResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/users",
@@ -1889,14 +1841,8 @@ impl<'a> UserResource<'a> {
         .query("department_id_type", department_id_type)
         .query("client_token", client_token)
         .json_body(body)?
-        .send::<CreateUserRespData>()
-        .await?;
-
-        Ok(CreateUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateUserRespData, CreateUserResp>()
+        .await
     }
 
     pub async fn delete(
@@ -1944,7 +1890,7 @@ impl<'a> UserResource<'a> {
         option: &RequestOption,
     ) -> Result<GetUserResp, LarkError> {
         let path = format!("/open-apis/contact/v3/users/{}", query.user_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1953,13 +1899,8 @@ impl<'a> UserResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
-        .send::<GetUserRespData>()
-        .await?;
-        Ok(GetUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetUserRespData, GetUserResp>()
+        .await
     }
 
     pub async fn patch(
@@ -1971,7 +1912,7 @@ impl<'a> UserResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchUserResp, LarkError> {
         let path = format!("/open-apis/contact/v3/users/{user_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -1981,14 +1922,8 @@ impl<'a> UserResource<'a> {
         .query("user_id_type", user_id_type)
         .query("department_id_type", department_id_type)
         .json_body(body)?
-        .send::<PatchUserRespData>()
-        .await?;
-
-        Ok(PatchUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PatchUserRespData, PatchUserResp>()
+        .await
     }
 
     pub async fn update(
@@ -2000,7 +1935,7 @@ impl<'a> UserResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateUserResp, LarkError> {
         let path = format!("/open-apis/contact/v3/users/{user_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2010,14 +1945,8 @@ impl<'a> UserResource<'a> {
         .query("user_id_type", user_id_type)
         .query("department_id_type", department_id_type)
         .json_body(body)?
-        .send::<UpdateUserRespData>()
-        .await?;
-
-        Ok(UpdateUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdateUserRespData, UpdateUserResp>()
+        .await
     }
 
     pub async fn list(
@@ -2043,7 +1972,7 @@ impl<'a> UserResource<'a> {
         query: &ListUserQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListUserResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/users",
@@ -2054,13 +1983,8 @@ impl<'a> UserResource<'a> {
         .query("department_id_type", query.department_id_type)
         .query("department_id", query.department_id)
         .page_query(query.page_query())
-        .send::<ListUserRespData>()
-        .await?;
-        Ok(ListUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListUserRespData, ListUserResp>()
+        .await
     }
 
     pub async fn batch(
@@ -2081,7 +2005,7 @@ impl<'a> UserResource<'a> {
         query: &BatchUserQuery<'_>,
         option: &RequestOption,
     ) -> Result<BatchUserResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/users/batch",
@@ -2091,13 +2015,8 @@ impl<'a> UserResource<'a> {
         .query_values("user_ids", Some(query.user_ids.iter().copied()))
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
-        .send::<BatchUserRespData>()
-        .await?;
-        Ok(BatchUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchUserRespData, BatchUserResp>()
+        .await
     }
 
     pub async fn batch_get_id(
@@ -2115,7 +2034,7 @@ impl<'a> UserResource<'a> {
         query: &BatchGetIdUserQuery<'_>,
         option: &RequestOption,
     ) -> Result<BatchGetIdUserResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/users/batch_get_id",
@@ -2124,13 +2043,8 @@ impl<'a> UserResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<BatchGetIdUserRespData>()
-        .await?;
-        Ok(BatchGetIdUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchGetIdUserRespData, BatchGetIdUserResp>()
+        .await
     }
 
     pub async fn find_by_department(
@@ -2155,7 +2069,7 @@ impl<'a> UserResource<'a> {
         query: &FindUserByDepartmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<FindByDepartmentUserResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/users/find_by_department",
@@ -2166,13 +2080,8 @@ impl<'a> UserResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .page_query(query.page_query())
-        .send::<ListUserRespData>()
-        .await?;
-        Ok(FindByDepartmentUserResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListUserRespData, FindByDepartmentUserResp>()
+        .await
     }
 
     pub async fn resurrect(
@@ -2309,7 +2218,7 @@ impl<'a> ScopeResource<'a> {
         query: &ListScopeQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListScopeResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/scopes",
@@ -2319,13 +2228,8 @@ impl<'a> ScopeResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .page_query(query.page_query())
-        .send::<ListScopeRespData>()
-        .await?;
-        Ok(ListScopeResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListScopeRespData, ListScopeResp>()
+        .await
     }
 }
 
@@ -2372,7 +2276,7 @@ impl<'a> EmployeeTypeEnumResource<'a> {
         body: &EmployeeTypeEnum,
         option: &RequestOption,
     ) -> Result<CreateEmployeeTypeEnumResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/employee_type_enums",
@@ -2380,13 +2284,8 @@ impl<'a> EmployeeTypeEnumResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateEmployeeTypeEnumRespData>()
-        .await?;
-        Ok(CreateEmployeeTypeEnumResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateEmployeeTypeEnumRespData, CreateEmployeeTypeEnumResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2417,7 +2316,7 @@ impl<'a> EmployeeTypeEnumResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateEmployeeTypeEnumResp, LarkError> {
         let path = format!("/open-apis/contact/v3/employee_type_enums/{enum_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -2425,13 +2324,8 @@ impl<'a> EmployeeTypeEnumResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<UpdateEmployeeTypeEnumRespData>()
-        .await?;
-        Ok(UpdateEmployeeTypeEnumResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdateEmployeeTypeEnumRespData, UpdateEmployeeTypeEnumResp>()
+        .await
     }
 
     pub async fn list(
@@ -2451,7 +2345,7 @@ impl<'a> EmployeeTypeEnumResource<'a> {
         query: &ListEmployeeTypeEnumQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListEmployeeTypeEnumResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/employee_type_enums",
@@ -2459,13 +2353,8 @@ impl<'a> EmployeeTypeEnumResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<ListEmployeeTypeEnumRespData>()
-        .await?;
-        Ok(ListEmployeeTypeEnumResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListEmployeeTypeEnumRespData, ListEmployeeTypeEnumResp>()
+        .await
     }
 }
 
@@ -2557,7 +2446,7 @@ impl<'a> UnitResource<'a> {
         body: &CreateUnitReqBody,
         option: &RequestOption,
     ) -> Result<CreateUnitResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/unit",
@@ -2565,13 +2454,8 @@ impl<'a> UnitResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateUnitRespData>()
-        .await?;
-        Ok(CreateUnitResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateUnitRespData, CreateUnitResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2602,21 +2486,15 @@ impl<'a> UnitResource<'a> {
         option: &RequestOption,
     ) -> Result<GetUnitResp, LarkError> {
         let path = format!("/open-apis/contact/v3/unit/{unit_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<GetUnitRespData>()
-        .await?;
-
-        Ok(GetUnitResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetUnitRespData, GetUnitResp>()
+        .await
     }
 
     pub async fn patch(
@@ -2660,7 +2538,7 @@ impl<'a> UnitResource<'a> {
         query: &ListUnitQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListUnitResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/unit",
@@ -2668,13 +2546,8 @@ impl<'a> UnitResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<ListUnitRespData>()
-        .await?;
-        Ok(ListUnitResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListUnitRespData, ListUnitResp>()
+        .await
     }
 
     pub async fn bind_department(
@@ -2741,7 +2614,7 @@ impl<'a> UnitResource<'a> {
         query: &ListDepartmentUnitQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListDepartmentUnitResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/unit/list_department",
@@ -2751,13 +2624,8 @@ impl<'a> UnitResource<'a> {
         .query("unit_id", query.unit_id)
         .query("department_id_type", query.department_id_type)
         .page_query(query.page_query())
-        .send::<ListDepartmentUnitRespData>()
-        .await?;
-        Ok(ListDepartmentUnitResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListDepartmentUnitRespData, ListDepartmentUnitResp>()
+        .await
     }
 }
 
@@ -2892,7 +2760,7 @@ impl<'a> GroupResource<'a> {
         body: &Group,
         option: &RequestOption,
     ) -> Result<CreateGroupResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/group",
@@ -2902,14 +2770,8 @@ impl<'a> GroupResource<'a> {
         .query("user_id_type", user_id_type)
         .query("department_id_type", department_id_type)
         .json_body(body)?
-        .send::<CreateGroupRespData>()
-        .await?;
-
-        Ok(CreateGroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateGroupRespData, CreateGroupResp>()
+        .await
     }
 
     pub async fn delete(
@@ -2953,7 +2815,7 @@ impl<'a> GroupResource<'a> {
         option: &RequestOption,
     ) -> Result<GetGroupResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{}", query.group_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -2962,13 +2824,8 @@ impl<'a> GroupResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
-        .send::<GetGroupRespData>()
-        .await?;
-        Ok(GetGroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetGroupRespData, GetGroupResp>()
+        .await
     }
 
     pub async fn patch(
@@ -3018,7 +2875,7 @@ impl<'a> GroupResource<'a> {
         query: &SimplelistGroupQuery<'_>,
         option: &RequestOption,
     ) -> Result<SimplelistGroupResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/group/simplelist",
@@ -3027,13 +2884,8 @@ impl<'a> GroupResource<'a> {
         )
         .page_query(query.page_query())
         .query("type", query.group_type)
-        .send::<SimplelistGroupRespData>()
-        .await?;
-        Ok(SimplelistGroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SimplelistGroupRespData, SimplelistGroupResp>()
+        .await
     }
 
     pub async fn member_belong(
@@ -3058,7 +2910,7 @@ impl<'a> GroupResource<'a> {
         query: &MemberBelongGroupQuery<'_>,
         option: &RequestOption,
     ) -> Result<MemberBelongGroupResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/group/member_belong",
@@ -3069,13 +2921,8 @@ impl<'a> GroupResource<'a> {
         .query("member_id_type", query.member_id_type)
         .query("group_type", query.group_type)
         .page_query(query.page_query())
-        .send::<MemberBelongGroupRespData>()
-        .await?;
-        Ok(MemberBelongGroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MemberBelongGroupRespData, MemberBelongGroupResp>()
+        .await
     }
 }
 
@@ -3167,7 +3014,7 @@ impl<'a> GroupMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<BatchAddGroupMemberResp, LarkError> {
         let path = format!("/open-apis/contact/v3/group/{group_id}/member/batch_add");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3175,14 +3022,8 @@ impl<'a> GroupMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<BatchAddGroupMemberRespData>()
-        .await?;
-
-        Ok(BatchAddGroupMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchAddGroupMemberRespData, BatchAddGroupMemberResp>()
+        .await
     }
 
     pub async fn batch_remove(
@@ -3259,7 +3100,7 @@ impl<'a> GroupMemberResource<'a> {
             "/open-apis/contact/v3/group/{}/member/simplelist",
             query.group_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3269,13 +3110,8 @@ impl<'a> GroupMemberResource<'a> {
         .page_query(query.page_query())
         .query("member_id_type", query.member_id_type)
         .query("member_type", query.member_type)
-        .send::<SimplelistGroupMemberRespData>()
-        .await?;
-        Ok(SimplelistGroupMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<SimplelistGroupMemberRespData, SimplelistGroupMemberResp>()
+        .await
     }
 }
 
@@ -3289,7 +3125,7 @@ impl<'a> FunctionalRoleResource<'a> {
         body: &CreateFunctionalRoleReqBody,
         option: &RequestOption,
     ) -> Result<CreateFunctionalRoleResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/functional_roles",
@@ -3297,14 +3133,8 @@ impl<'a> FunctionalRoleResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateFunctionalRoleRespData>()
-        .await?;
-
-        Ok(CreateFunctionalRoleResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateFunctionalRoleRespData, CreateFunctionalRoleResp>()
+        .await
     }
 
     pub async fn delete(
@@ -3538,7 +3368,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
             "/open-apis/contact/v3/functional_roles/{}/members/batch_create",
             query.role_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             path,
@@ -3547,13 +3377,8 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<BatchCreateFunctionalRoleMemberRespData>()
-        .await?;
-        Ok(BatchCreateFunctionalRoleMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchCreateFunctionalRoleMemberRespData, BatchCreateFunctionalRoleMemberResp>()
+        .await
     }
 
     pub async fn batch_delete(
@@ -3577,7 +3402,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
             "/open-apis/contact/v3/functional_roles/{}/members/batch_delete",
             query.role_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -3586,13 +3411,8 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<BatchDeleteFunctionalRoleMemberRespData>()
-        .await?;
-        Ok(BatchDeleteFunctionalRoleMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<BatchDeleteFunctionalRoleMemberRespData, BatchDeleteFunctionalRoleMemberResp>()
+        .await
     }
 
     pub async fn get(
@@ -3618,7 +3438,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
             "/open-apis/contact/v3/functional_roles/{}/members/{}",
             query.role_id, query.member_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3627,13 +3447,8 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
-        .send::<GetFunctionalRoleMemberRespData>()
-        .await?;
-        Ok(GetFunctionalRoleMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetFunctionalRoleMemberRespData, GetFunctionalRoleMemberResp>()
+        .await
     }
 
     pub async fn list(
@@ -3662,7 +3477,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
             "/open-apis/contact/v3/functional_roles/{}/members",
             query.role_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -3672,13 +3487,8 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
-        .send::<ListFunctionalRoleMemberRespData>()
-        .await?;
-        Ok(ListFunctionalRoleMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListFunctionalRoleMemberRespData, ListFunctionalRoleMemberResp>()
+        .await
     }
 
     pub async fn scopes(
@@ -3704,7 +3514,7 @@ impl<'a> FunctionalRoleMemberResource<'a> {
             "/open-apis/contact/v3/functional_roles/{}/members/scopes",
             query.role_id
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PATCH,
             path,
@@ -3714,13 +3524,8 @@ impl<'a> FunctionalRoleMemberResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send::<ScopesFunctionalRoleMemberRespData>()
-        .await?;
-        Ok(ScopesFunctionalRoleMemberResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ScopesFunctionalRoleMemberRespData, ScopesFunctionalRoleMemberResp>()
+        .await
     }
 }
 
@@ -3773,7 +3578,7 @@ impl<'a> JobLevelResource<'a> {
         body: &JobLevel,
         option: &RequestOption,
     ) -> Result<CreateJobLevelResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/job_levels",
@@ -3781,14 +3586,8 @@ impl<'a> JobLevelResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateJobLevelRespData>()
-        .await?;
-
-        Ok(CreateJobLevelResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateJobLevelRespData, CreateJobLevelResp>()
+        .await
     }
 
     pub async fn delete(
@@ -3819,21 +3618,15 @@ impl<'a> JobLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<GetJobLevelResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_levels/{job_level_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<GetJobLevelRespData>()
-        .await?;
-
-        Ok(GetJobLevelResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetJobLevelRespData, GetJobLevelResp>()
+        .await
     }
 
     pub async fn update(
@@ -3843,7 +3636,7 @@ impl<'a> JobLevelResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateJobLevelResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_levels/{job_level_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -3851,14 +3644,8 @@ impl<'a> JobLevelResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<UpdateJobLevelRespData>()
-        .await?;
-
-        Ok(UpdateJobLevelResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdateJobLevelRespData, UpdateJobLevelResp>()
+        .await
     }
 
     pub async fn list(
@@ -3880,7 +3667,7 @@ impl<'a> JobLevelResource<'a> {
         query: &ListJobLevelQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListJobLevelResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/job_levels",
@@ -3889,13 +3676,8 @@ impl<'a> JobLevelResource<'a> {
         )
         .page_query(query.page_query())
         .query("name", query.name)
-        .send::<ListJobLevelRespData>()
-        .await?;
-        Ok(ListJobLevelResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListJobLevelRespData, ListJobLevelResp>()
+        .await
     }
 }
 
@@ -3948,7 +3730,7 @@ impl<'a> JobFamilyResource<'a> {
         body: &JobFamily,
         option: &RequestOption,
     ) -> Result<CreateJobFamilyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/contact/v3/job_families",
@@ -3956,14 +3738,8 @@ impl<'a> JobFamilyResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<CreateJobFamilyRespData>()
-        .await?;
-
-        Ok(CreateJobFamilyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateJobFamilyRespData, CreateJobFamilyResp>()
+        .await
     }
 
     pub async fn delete(
@@ -3994,21 +3770,15 @@ impl<'a> JobFamilyResource<'a> {
         option: &RequestOption,
     ) -> Result<GetJobFamilyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_families/{job_family_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<GetJobFamilyRespData>()
-        .await?;
-
-        Ok(GetJobFamilyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetJobFamilyRespData, GetJobFamilyResp>()
+        .await
     }
 
     pub async fn update(
@@ -4018,7 +3788,7 @@ impl<'a> JobFamilyResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateJobFamilyResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_families/{job_family_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::PUT,
             path,
@@ -4026,14 +3796,8 @@ impl<'a> JobFamilyResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<UpdateJobFamilyRespData>()
-        .await?;
-
-        Ok(UpdateJobFamilyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UpdateJobFamilyRespData, UpdateJobFamilyResp>()
+        .await
     }
 
     pub async fn list(
@@ -4055,7 +3819,7 @@ impl<'a> JobFamilyResource<'a> {
         query: &ListJobFamilyQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListJobFamilyResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/job_families",
@@ -4064,13 +3828,8 @@ impl<'a> JobFamilyResource<'a> {
         )
         .page_query(query.page_query())
         .query("name", query.name)
-        .send::<ListJobFamilyRespData>()
-        .await?;
-        Ok(ListJobFamilyResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListJobFamilyRespData, ListJobFamilyResp>()
+        .await
     }
 }
 
@@ -4118,21 +3877,15 @@ impl<'a> JobTitleResource<'a> {
         option: &RequestOption,
     ) -> Result<GetJobTitleResp, LarkError> {
         let path = format!("/open-apis/contact/v3/job_titles/{job_title_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<GetJobTitleRespData>()
-        .await?;
-
-        Ok(GetJobTitleResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetJobTitleRespData, GetJobTitleResp>()
+        .await
     }
 
     pub async fn list(
@@ -4152,7 +3905,7 @@ impl<'a> JobTitleResource<'a> {
         query: &ListJobTitleQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListJobTitleResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/job_titles",
@@ -4160,13 +3913,8 @@ impl<'a> JobTitleResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<ListJobTitleRespData>()
-        .await?;
-        Ok(ListJobTitleResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListJobTitleRespData, ListJobTitleResp>()
+        .await
     }
 }
 
@@ -4214,21 +3962,15 @@ impl<'a> WorkCityResource<'a> {
         option: &RequestOption,
     ) -> Result<GetWorkCityResp, LarkError> {
         let path = format!("/open-apis/contact/v3/work_cities/{work_city_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send::<GetWorkCityRespData>()
-        .await?;
-
-        Ok(GetWorkCityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GetWorkCityRespData, GetWorkCityResp>()
+        .await
     }
 
     pub async fn list(
@@ -4248,7 +3990,7 @@ impl<'a> WorkCityResource<'a> {
         query: &ListWorkCityQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListWorkCityResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/work_cities",
@@ -4256,13 +3998,8 @@ impl<'a> WorkCityResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<ListWorkCityRespData>()
-        .await?;
-        Ok(ListWorkCityResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ListWorkCityRespData, ListWorkCityResp>()
+        .await
     }
 }
 
@@ -4321,7 +4058,7 @@ impl<'a> CustomAttrResource<'a> {
         query: &ListCustomAttrQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListCustomAttrResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/contact/v3/custom_attrs",
@@ -4329,13 +4066,8 @@ impl<'a> CustomAttrResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<CustomAttrListData>()
-        .await?;
-        Ok(ListCustomAttrResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CustomAttrListData, ListCustomAttrResp>()
+        .await
     }
 }
 

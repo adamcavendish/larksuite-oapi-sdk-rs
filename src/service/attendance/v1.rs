@@ -498,7 +498,7 @@ impl<'a> GroupResource<'a> {
         query: &CreateGroupQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateGroupResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/groups",
@@ -508,13 +508,8 @@ impl<'a> GroupResource<'a> {
         .query("employee_type", query.employee_type)
         .query("dept_type", query.dept_type)
         .json_body(query.body)?
-        .send::<GroupData>()
-        .await?;
-        Ok(CreateGroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GroupData, CreateGroupResp>()
+        .await
     }
 
     pub async fn get(
@@ -534,7 +529,7 @@ impl<'a> GroupResource<'a> {
         option: &RequestOption,
     ) -> Result<GetGroupResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/groups/{}", query.group_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -543,13 +538,8 @@ impl<'a> GroupResource<'a> {
         )
         .query("employee_type", query.employee_type)
         .query("dept_type", query.dept_type)
-        .send::<GroupData>()
-        .await?;
-        Ok(GetGroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GroupData, GetGroupResp>()
+        .await
     }
 
     pub async fn delete(
@@ -591,7 +581,7 @@ impl<'a> GroupResource<'a> {
         query: &ListGroupQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListGroupResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/attendance/v1/groups",
@@ -599,13 +589,8 @@ impl<'a> GroupResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send::<GroupListData>()
-        .await?;
-        Ok(ListGroupResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<GroupListData, ListGroupResp>()
+        .await
     }
 
     pub async fn list_user(
@@ -714,7 +699,7 @@ impl<'a> ShiftResource<'a> {
         body: &CreateShiftReqBody,
         option: &RequestOption,
     ) -> Result<CreateShiftResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/shifts",
@@ -722,14 +707,8 @@ impl<'a> ShiftResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ShiftData>()
-        .await?;
-
-        Ok(CreateShiftResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ShiftData, CreateShiftResp>()
+        .await
     }
 
     pub async fn get(
@@ -738,21 +717,15 @@ impl<'a> ShiftResource<'a> {
         option: &RequestOption,
     ) -> Result<GetShiftResp, LarkError> {
         let path = format!("/open-apis/attendance/v1/shifts/{shift_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send::<ShiftData>()
-        .await?;
-
-        Ok(GetShiftResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ShiftData, GetShiftResp>()
+        .await
     }
 
     pub async fn delete(
@@ -871,7 +844,7 @@ impl<'a> UserSettingResource<'a> {
         query: &BatchGetUserSettingQuery<'_>,
         option: &RequestOption,
     ) -> Result<BatchGetUserSettingResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/attendance/v1/user_settings/query",
@@ -880,13 +853,8 @@ impl<'a> UserSettingResource<'a> {
         )
         .query("employee_type", query.employee_type)
         .json_body(query.body)?
-        .send::<UserSettingListData>()
-        .await?;
-        Ok(BatchGetUserSettingResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<UserSettingListData, BatchGetUserSettingResp>()
+        .await
     }
 }
 
@@ -926,7 +894,7 @@ impl<'a> RecordResource<'a> {
         query: &QueryRecordQuery<'_>,
         option: &RequestOption,
     ) -> Result<QueryRecordResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_tasks/query",
@@ -935,13 +903,8 @@ impl<'a> RecordResource<'a> {
         )
         .query("employee_type", query.employee_type)
         .json_body(query.body)?
-        .send::<RecordListData>()
-        .await?;
-        Ok(QueryRecordResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RecordListData, QueryRecordResp>()
+        .await
     }
 }
 
@@ -981,7 +944,7 @@ impl<'a> ApprovalInfoResource<'a> {
         query: &GetApprovalInfoQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetApprovalInfoResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_approvals/query",
@@ -990,13 +953,8 @@ impl<'a> ApprovalInfoResource<'a> {
         )
         .query("employee_type", query.employee_type)
         .json_body(query.body)?
-        .send::<ApprovalInfoListData>()
-        .await?;
-        Ok(GetApprovalInfoResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ApprovalInfoListData, GetApprovalInfoResp>()
+        .await
     }
 }
 
@@ -1089,7 +1047,7 @@ impl<'a> LeaveAccrualResource<'a> {
         query: &ListLeaveAccrualQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListLeaveAccrualResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/attendance/v1/leave_accrual_record",
@@ -1101,13 +1059,8 @@ impl<'a> LeaveAccrualResource<'a> {
         .query("accrual_date_from", query.accrual_date_from)
         .query("accrual_date_to", query.accrual_date_to)
         .page_query(query.page_query())
-        .send::<LeaveAccrualListData>()
-        .await?;
-        Ok(ListLeaveAccrualResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<LeaveAccrualListData, ListLeaveAccrualResp>()
+        .await
     }
 }
 

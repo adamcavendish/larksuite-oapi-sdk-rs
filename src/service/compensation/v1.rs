@@ -70,7 +70,7 @@ impl<'a> PlanResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListPlanResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/plans",
@@ -79,13 +79,8 @@ impl<'a> PlanResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send::<PlanListData>()
-        .await?;
-        Ok(ListPlanResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<PlanListData, ListPlanResp>()
+        .await
     }
 }
 
