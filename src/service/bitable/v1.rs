@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{EmptyResp, PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -757,12 +756,17 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<CopyAppResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/copy");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CopyAppResp {
             api_resp,
             code_error,
@@ -777,12 +781,17 @@ impl<'a> AppResource<'a> {
         body: &CreateAppReqBody,
         option: &RequestOption,
     ) -> Result<CreateAppResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/bitable/v1/apps");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/bitable/v1/apps",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
+
         Ok(CreateAppResp {
             api_resp,
             code_error,
@@ -796,10 +805,16 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<GetAppResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<AppData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<AppData>()
+        .await?;
+
         Ok(GetAppResp {
             api_resp,
             code_error: raw.code_error,
@@ -814,11 +829,17 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateAppResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<AppData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<AppData>()
+        .await?;
+
         Ok(UpdateAppResp {
             api_resp,
             code_error: raw.code_error,
@@ -877,11 +898,17 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateTableResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TableData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<TableData>()
+        .await?;
+
         Ok(CreateTableResp {
             api_resp,
             code_error: raw.code_error,
@@ -897,14 +924,18 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<BatchCreateTableResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/batch_create");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BatchCreateTableData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<BatchCreateTableData>()
+        .await?;
+
         Ok(BatchCreateTableResp {
             api_resp,
             code_error: raw.code_error,
@@ -919,10 +950,16 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -936,12 +973,17 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/batch_delete");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
         let body = serde_json::json!({ "table_ids": table_ids });
-        api_req.body = Some(ReqBody::Json(body));
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -956,11 +998,17 @@ impl<'a> AppTableResource<'a> {
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1064,11 +1112,17 @@ impl<'a> AppTableViewResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateViewResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ViewData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<ViewData>()
+        .await?;
+
         Ok(CreateViewResp {
             api_resp,
             code_error: raw.code_error,
@@ -1085,10 +1139,16 @@ impl<'a> AppTableViewResource<'a> {
     ) -> Result<GetViewResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views/{view_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<ViewData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<ViewData>()
+        .await?;
+
         Ok(GetViewResp {
             api_resp,
             code_error: raw.code_error,
@@ -1106,11 +1166,17 @@ impl<'a> AppTableViewResource<'a> {
     ) -> Result<PatchViewResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views/{view_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<ViewData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<ViewData>()
+        .await?;
+
         Ok(PatchViewResp {
             api_resp,
             code_error: raw.code_error,
@@ -1127,10 +1193,16 @@ impl<'a> AppTableViewResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/views/{view_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1255,11 +1327,17 @@ impl<'a> AppTableFieldResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateFieldResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FieldData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<FieldData>()
+        .await?;
+
         Ok(CreateFieldResp {
             api_resp,
             code_error: raw.code_error,
@@ -1277,11 +1355,17 @@ impl<'a> AppTableFieldResource<'a> {
     ) -> Result<UpdateFieldResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields/{field_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FieldData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<FieldData>()
+        .await?;
+
         Ok(UpdateFieldResp {
             api_resp,
             code_error: raw.code_error,
@@ -1298,10 +1382,16 @@ impl<'a> AppTableFieldResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields/{field_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1502,14 +1592,18 @@ impl<'a> AppTableRecordResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateRecordResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<RecordData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<RecordData>()
+        .await?;
+
         Ok(CreateRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -1528,14 +1622,18 @@ impl<'a> AppTableRecordResource<'a> {
     ) -> Result<UpdateRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<RecordData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<RecordData>()
+        .await?;
+
         Ok(UpdateRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -1553,13 +1651,17 @@ impl<'a> AppTableRecordResource<'a> {
     ) -> Result<GetRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<RecordData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .send::<RecordData>()
+        .await?;
+
         Ok(GetRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -1576,10 +1678,16 @@ impl<'a> AppTableRecordResource<'a> {
     ) -> Result<EmptyResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<serde_json::Value>()
+        .await?;
+
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -1656,15 +1764,18 @@ impl<'a> AppTableRecordResource<'a> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_create"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BatchCreateRecordData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<BatchCreateRecordData>()
+        .await?;
+
         Ok(BatchCreateRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -1683,15 +1794,18 @@ impl<'a> AppTableRecordResource<'a> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_update"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BatchUpdateRecordData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", user_id_type)
+        .json_body(body)?
+        .send::<BatchUpdateRecordData>()
+        .await?;
+
         Ok(BatchUpdateRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -1709,12 +1823,17 @@ impl<'a> AppTableRecordResource<'a> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_delete"
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BatchDeleteRecordData>(self.config, &api_req, option)
-                .await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<BatchDeleteRecordData>()
+        .await?;
+
         Ok(BatchDeleteRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -1733,11 +1852,17 @@ impl<'a> AppTableRecordResource<'a> {
     ) -> Result<BatchGetRecordResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_get");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BatchGetRecordData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<BatchGetRecordData>()
+        .await?;
+
         Ok(BatchGetRecordResp {
             api_resp,
             code_error: raw.code_error,
@@ -1848,11 +1973,17 @@ impl<'a> AppDashboardResource<'a> {
         option: &RequestOption,
     ) -> Result<CopyAppDashboardResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/dashboards/{block_id}/copy");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CopyAppDashboardData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<CopyAppDashboardData>()
+        .await?;
+
         Ok(CopyAppDashboardResp {
             api_resp,
             code_error: raw.code_error,
@@ -1951,12 +2082,17 @@ impl<'a> AppRoleResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<AppRoleData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<AppRoleData>()
+        .await?;
+
         Ok(CreateAppRoleResp {
             api_resp,
             code_error,
@@ -1973,10 +2109,16 @@ impl<'a> AppRoleResource<'a> {
         option: &RequestOption,
     ) -> Result<DeleteAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send_v2::<()>()
+        .await?;
+
         Ok(DeleteAppRoleResp {
             api_resp,
             code_error,
@@ -2032,12 +2174,17 @@ impl<'a> AppRoleResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateAppRoleResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<AppRoleData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<AppRoleData>()
+        .await?;
+
         Ok(UpdateAppRoleResp {
             api_resp,
             code_error,
@@ -2104,11 +2251,17 @@ impl<'a> AppRoleMemberResource<'a> {
     ) -> Result<BatchCreateAppRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/batch_create");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<()>()
+        .await?;
+
         Ok(BatchCreateAppRoleMemberResp {
             api_resp,
             code_error,
@@ -2127,11 +2280,17 @@ impl<'a> AppRoleMemberResource<'a> {
     ) -> Result<BatchDeleteAppRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/batch_delete");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<()>()
+        .await?;
+
         Ok(BatchDeleteAppRoleMemberResp {
             api_resp,
             code_error,
@@ -2150,14 +2309,18 @@ impl<'a> AppRoleMemberResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateAppRoleMemberResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = member_id_type {
-            api_req.query_params.set("member_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("member_id_type", member_id_type)
+        .json_body(body)?
+        .send_v2::<()>()
+        .await?;
+
         Ok(CreateAppRoleMemberResp {
             api_resp,
             code_error,
@@ -2177,13 +2340,17 @@ impl<'a> AppRoleMemberResource<'a> {
     ) -> Result<DeleteAppRoleMemberResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/roles/{role_id}/members/{member_id}");
-        let mut api_req = ApiReq::new(http::Method::DELETE, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = member_id_type {
-            api_req.query_params.set("member_id_type", v);
-        }
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("member_id_type", member_id_type)
+        .send_v2::<()>()
+        .await?;
+
         Ok(DeleteAppRoleMemberResp {
             api_resp,
             code_error,
@@ -2327,11 +2494,17 @@ impl<'a> AppWorkflowResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateAppWorkflowResp, LarkError> {
         let path = format!("/open-apis/bitable/v1/apps/{app_token}/workflows/{workflow_id}");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_v2::<()>()
+        .await?;
+
         Ok(UpdateAppWorkflowResp {
             api_resp,
             code_error,
@@ -2358,10 +2531,16 @@ impl<'a> AppTableFormResource<'a> {
     ) -> Result<GetFormResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        let (api_resp, raw) =
-            transport::request_typed::<FormData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .send::<FormData>()
+        .await?;
+
         Ok(GetFormResp {
             api_resp,
             code_error: raw.code_error,
@@ -2381,11 +2560,17 @@ impl<'a> AppTableFormResource<'a> {
     ) -> Result<PatchFormResp, LarkError> {
         let path =
             format!("/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FormData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<FormData>()
+        .await?;
+
         Ok(PatchFormResp {
             api_resp,
             code_error: raw.code_error,
@@ -2500,11 +2685,17 @@ impl<'a> AppTableFormFieldResource<'a> {
         let path = format!(
             "/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/forms/{form_id}/fields/{field_id}"
         );
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<FormFieldPatchData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send::<FormFieldPatchData>()
+        .await?;
+
         Ok(PatchFormFieldResp {
             api_resp,
             code_error: raw.code_error,
