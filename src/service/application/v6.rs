@@ -74,6 +74,27 @@ pub struct AppBadgeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SetAppBadgeQuery<'a> {
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> SetAppBadgeQuery<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self {
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> AppBadgeResource<'a> {
     /// Set app badge — POST /open-apis/application/v6/app_badge/set
     pub async fn set(
@@ -82,18 +103,26 @@ impl<'a> AppBadgeResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SetAppBadgeResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = SetAppBadgeQuery::new(body).user_id_type(user_id_type);
+        self.set_by_query(&query, option).await
+    }
+
+    pub async fn set_by_query(
+        &self,
+        query: &SetAppBadgeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SetAppBadgeResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/application/v6/app_badge/set",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(SetAppBadgeResp {
             api_resp,
             code_error,
@@ -1319,15 +1348,46 @@ pub struct ScopeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ApplyScopeQuery;
+
+impl ApplyScopeQuery {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListScopeQuery;
+
+impl ListScopeQuery {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
 impl<'a> ScopeResource<'a> {
     /// Apply scope — POST /open-apis/application/v6/scopes/apply
     pub async fn apply(&self, option: &RequestOption) -> Result<ApplyScopeResp, LarkError> {
-        let api_req = ApiReq::new(http::Method::POST, "/open-apis/application/v6/scopes/apply");
-        let mut api_req = api_req;
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.apply_by_query(&ApplyScopeQuery::new(), option).await
+    }
+
+    pub async fn apply_by_query(
+        &self,
+        _query: &ApplyScopeQuery,
+        option: &RequestOption,
+    ) -> Result<ApplyScopeResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/application/v6/scopes/apply",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ApplyScopeResp {
             api_resp,
             code_error,
@@ -1337,12 +1397,23 @@ impl<'a> ScopeResource<'a> {
 
     /// List scopes — GET /open-apis/application/v6/scopes
     pub async fn list(&self, option: &RequestOption) -> Result<ListScopeResp, LarkError> {
-        let api_req = ApiReq::new(http::Method::GET, "/open-apis/application/v6/scopes");
-        let mut api_req = api_req;
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.list_by_query(&ListScopeQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        _query: &ListScopeQuery,
+        option: &RequestOption,
+    ) -> Result<ListScopeResp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/application/v6/scopes",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListScopeResp {
             api_resp,
             code_error,
