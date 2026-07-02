@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::EmptyResp;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
 
@@ -160,6 +159,105 @@ pub struct AppResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetAppQuery<'a> {
+    pub app_id: &'a str,
+    pub lang: Option<&'a str>,
+}
+
+impl<'a> GetAppQuery<'a> {
+    pub fn new(app_id: &'a str) -> Self {
+        Self { app_id, lang: None }
+    }
+
+    pub fn lang(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.lang = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListAppQuery<'a> {
+    pub page: PageQuery<'a>,
+    pub lang: Option<&'a str>,
+}
+
+impl<'a> ListAppQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn lang(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.lang = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CheckUserAdminQuery<'a> {
+    pub app_id: &'a str,
+    pub user_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> CheckUserAdminQuery<'a> {
+    pub fn new(app_id: &'a str, user_id: &'a str) -> Self {
+        Self {
+            app_id,
+            user_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CheckUserInAppBlacklistQuery<'a> {
+    pub app_id: &'a str,
+    pub body: &'a CheckUserIsInAppBlacklistReqBody,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> CheckUserInAppBlacklistQuery<'a> {
+    pub fn new(app_id: &'a str, body: &'a CheckUserIsInAppBlacklistReqBody) -> Self {
+        Self {
+            app_id,
+            body,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> AppResource<'a> {
     pub async fn get(
         &self,
@@ -167,14 +265,26 @@ impl<'a> AppResource<'a> {
         lang: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetAppResp, LarkError> {
-        let path = format!("/open-apis/application/v6/applications/{app_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = lang {
-            api_req.query_params.set("lang", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AppData>(self.config, &api_req, option).await?;
+        let query = GetAppQuery::new(app_id).lang(lang);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetAppQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetAppResp, LarkError> {
+        let path = format!("/open-apis/application/v6/applications/{}", query.app_id);
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("lang", query.lang)
+        .send::<AppData>()
+        .await?;
         Ok(GetAppResp {
             api_resp,
             code_error: raw.code_error,
@@ -189,19 +299,29 @@ impl<'a> AppResource<'a> {
         lang: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListAppResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/application/v6/applications");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = lang {
-            api_req.query_params.set("lang", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AppListData>(self.config, &api_req, option).await?;
+        let query = ListAppQuery {
+            page: PageQuery::from_parts(page_size, page_token),
+            lang,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAppQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAppResp, LarkError> {
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/application/v6/applications",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page)
+        .query("lang", query.lang)
+        .send::<AppListData>()
+        .await?;
         Ok(ListAppResp {
             api_resp,
             code_error: raw.code_error,
@@ -216,16 +336,30 @@ impl<'a> AppResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let path =
-            format!("/open-apis/application/v6/applications/{app_id}/management/check_admin");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("user_id", user_id);
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
+        let query = CheckUserAdminQuery::new(app_id, user_id).user_id_type(user_id_type);
+        self.check_user_admin_by_query(&query, option).await
+    }
+
+    pub async fn check_user_admin_by_query(
+        &self,
+        query: &CheckUserAdminQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/management/check_admin",
+            query.app_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id", query.user_id)
+        .query("user_id_type", query.user_id_type)
+        .send::<serde_json::Value>()
+        .await?;
         Ok(EmptyResp {
             api_resp,
             code_error: raw.code_error,
@@ -240,20 +374,33 @@ impl<'a> AppResource<'a> {
         department_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CheckBlacklistResp, LarkError> {
+        let query = CheckUserInAppBlacklistQuery::new(app_id, body)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.check_user_in_blacklist_by_query(&query, option).await
+    }
+
+    pub async fn check_user_in_blacklist_by_query(
+        &self,
+        query: &CheckUserInAppBlacklistQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CheckBlacklistResp, LarkError> {
         let path = format!(
-            "/open-apis/application/v6/applications/{app_id}/visibility/check_white_black_list"
+            "/open-apis/application/v6/applications/{}/visibility/check_white_black_list",
+            query.app_id
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<CheckBlacklistData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send::<CheckBlacklistData>()
+        .await?;
         Ok(CheckBlacklistResp {
             api_resp,
             code_error: raw.code_error,
@@ -266,6 +413,59 @@ pub struct AppVersionResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetAppVersionQuery<'a> {
+    pub app_id: &'a str,
+    pub version_id: &'a str,
+    pub lang: &'a str,
+}
+
+impl<'a> GetAppVersionQuery<'a> {
+    pub fn new(app_id: &'a str, version_id: &'a str, lang: &'a str) -> Self {
+        Self {
+            app_id,
+            version_id,
+            lang,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListAppVersionQuery<'a> {
+    pub app_id: &'a str,
+    pub lang: &'a str,
+    pub page: PageQuery<'a>,
+    pub order: Option<i32>,
+}
+
+impl<'a> ListAppVersionQuery<'a> {
+    pub fn new(app_id: &'a str, lang: &'a str) -> Self {
+        Self {
+            app_id,
+            lang,
+            page: PageQuery::new(),
+            order: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn order(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.order = value.into();
+        self
+    }
+}
+
 impl<'a> AppVersionResource<'a> {
     pub async fn get(
         &self,
@@ -274,13 +474,29 @@ impl<'a> AppVersionResource<'a> {
         lang: &str,
         option: &RequestOption,
     ) -> Result<GetAppVersionResp, LarkError> {
-        let path =
-            format!("/open-apis/application/v6/applications/{app_id}/app_versions/{version_id}");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("lang", lang);
-        let (api_resp, raw) =
-            transport::request_typed::<AppVersionData>(self.config, &api_req, option).await?;
+        let query = GetAppVersionQuery::new(app_id, version_id, lang);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetAppVersionQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetAppVersionResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/app_versions/{}",
+            query.app_id, query.version_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("lang", query.lang)
+        .send::<AppVersionData>()
+        .await?;
         Ok(GetAppVersionResp {
             api_resp,
             code_error: raw.code_error,
@@ -297,21 +513,36 @@ impl<'a> AppVersionResource<'a> {
         order: Option<i32>,
         option: &RequestOption,
     ) -> Result<ListAppVersionResp, LarkError> {
-        let path = format!("/open-apis/application/v6/applications/{app_id}/app_versions");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("lang", lang);
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        if let Some(v) = order {
-            api_req.query_params.set("order", v.to_string());
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AppVersionListData>(self.config, &api_req, option).await?;
+        let query = ListAppVersionQuery {
+            app_id,
+            lang,
+            page: PageQuery::from_parts(page_size, page_token),
+            order,
+        };
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListAppVersionQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAppVersionResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/app_versions",
+            query.app_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("lang", query.lang)
+        .page_query(query.page)
+        .query("order", query.order)
+        .send::<AppVersionListData>()
+        .await?;
         Ok(ListAppVersionResp {
             api_resp,
             code_error: raw.code_error,
@@ -322,6 +553,68 @@ impl<'a> AppVersionResource<'a> {
 
 pub struct AppUsageResource<'a> {
     config: &'a Config,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DepartmentOverviewAppUsageQuery<'a> {
+    pub app_id: &'a str,
+    pub date: &'a str,
+    pub cycle_type: i32,
+    pub department_id: Option<&'a str>,
+    pub recursion: Option<i32>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> DepartmentOverviewAppUsageQuery<'a> {
+    pub fn new(app_id: &'a str, date: &'a str, cycle_type: i32) -> Self {
+        Self {
+            app_id,
+            date,
+            cycle_type,
+            department_id: None,
+            recursion: None,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn department_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id = value.into();
+        self
+    }
+
+    pub fn recursion(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.recursion = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct OverviewAppUsageQuery<'a> {
+    pub app_id: &'a str,
+    pub date: &'a str,
+    pub cycle_type: i32,
+}
+
+impl<'a> OverviewAppUsageQuery<'a> {
+    pub fn new(app_id: &'a str, date: &'a str, cycle_type: i32) -> Self {
+        Self {
+            app_id,
+            date,
+            cycle_type,
+        }
+    }
 }
 
 impl<'a> AppUsageResource<'a> {
@@ -337,29 +630,40 @@ impl<'a> AppUsageResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetAppUsageResp, LarkError> {
+        let query = DepartmentOverviewAppUsageQuery {
+            app_id,
+            date,
+            cycle_type,
+            department_id,
+            recursion,
+            page: PageQuery::from_parts(page_size, page_token),
+        };
+        self.department_overview_by_query(&query, option).await
+    }
+
+    pub async fn department_overview_by_query(
+        &self,
+        query: &DepartmentOverviewAppUsageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetAppUsageResp, LarkError> {
         let path = format!(
-            "/open-apis/application/v6/applications/{app_id}/app_usage/department_overview"
+            "/open-apis/application/v6/applications/{}/app_usage/department_overview",
+            query.app_id
         );
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("date", date);
-        api_req
-            .query_params
-            .set("cycle_type", cycle_type.to_string());
-        if let Some(v) = department_id {
-            api_req.query_params.set("department_id", v);
-        }
-        if let Some(v) = recursion {
-            api_req.query_params.set("recursion", v.to_string());
-        }
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<AppUsageData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("date", query.date)
+        .query("cycle_type", query.cycle_type)
+        .query("department_id", query.department_id)
+        .query("recursion", query.recursion)
+        .page_query(query.page)
+        .send::<AppUsageData>()
+        .await?;
         Ok(GetAppUsageResp {
             api_resp,
             code_error: raw.code_error,
@@ -374,15 +678,30 @@ impl<'a> AppUsageResource<'a> {
         cycle_type: i32,
         option: &RequestOption,
     ) -> Result<GetAppUsageResp, LarkError> {
-        let path = format!("/open-apis/application/v6/applications/{app_id}/app_usage/overview");
-        let mut api_req = ApiReq::new(http::Method::GET, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.query_params.set("date", date);
-        api_req
-            .query_params
-            .set("cycle_type", cycle_type.to_string());
-        let (api_resp, raw) =
-            transport::request_typed::<AppUsageData>(self.config, &api_req, option).await?;
+        let query = OverviewAppUsageQuery::new(app_id, date, cycle_type);
+        self.overview_by_query(&query, option).await
+    }
+
+    pub async fn overview_by_query(
+        &self,
+        query: &OverviewAppUsageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetAppUsageResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/app_usage/overview",
+            query.app_id
+        );
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("date", query.date)
+        .query("cycle_type", query.cycle_type)
+        .send::<AppUsageData>()
+        .await?;
         Ok(GetAppUsageResp {
             api_resp,
             code_error: raw.code_error,
