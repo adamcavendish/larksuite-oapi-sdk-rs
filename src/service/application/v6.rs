@@ -572,6 +572,33 @@ pub struct ApplicationAppUsageResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ApplicationAppUsageQuery<'a> {
+    pub app_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> ApplicationAppUsageQuery<'a> {
+    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            app_id,
+            body,
+            department_id_type: None,
+        }
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
+pub type DepartmentOverviewApplicationAppUsageQuery<'a> = ApplicationAppUsageQuery<'a>;
+pub type MessagePushOverviewApplicationAppUsageQuery<'a> = ApplicationAppUsageQuery<'a>;
+pub type OverviewApplicationAppUsageQuery<'a> = ApplicationAppUsageQuery<'a>;
+
 impl<'a> ApplicationAppUsageResource<'a> {
     /// DepartmentOverview — POST /open-apis/application/v6/applications/:app_id/app_usage/department_overview
     #[allow(clippy::too_many_arguments)]
@@ -582,18 +609,31 @@ impl<'a> ApplicationAppUsageResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<DepartmentOverviewApplicationAppUsageResp, LarkError> {
+        let query = DepartmentOverviewApplicationAppUsageQuery::new(app_id, body)
+            .department_id_type(department_id_type);
+        self.department_overview_by_query(&query, option).await
+    }
+
+    pub async fn department_overview_by_query(
+        &self,
+        query: &DepartmentOverviewApplicationAppUsageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DepartmentOverviewApplicationAppUsageResp, LarkError> {
         let path = format!(
-            "/open-apis/application/v6/applications/{app_id}/app_usage/department_overview"
+            "/open-apis/application/v6/applications/{}/app_usage/department_overview",
+            query.app_id
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(DepartmentOverviewApplicationAppUsageResp {
             api_resp,
             code_error,
@@ -609,18 +649,31 @@ impl<'a> ApplicationAppUsageResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<MessagePushOverviewApplicationAppUsageResp, LarkError> {
+        let query = MessagePushOverviewApplicationAppUsageQuery::new(app_id, body)
+            .department_id_type(department_id_type);
+        self.message_push_overview_by_query(&query, option).await
+    }
+
+    pub async fn message_push_overview_by_query(
+        &self,
+        query: &MessagePushOverviewApplicationAppUsageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<MessagePushOverviewApplicationAppUsageResp, LarkError> {
         let path = format!(
-            "/open-apis/application/v6/applications/{app_id}/app_usage/message_push_overview"
+            "/open-apis/application/v6/applications/{}/app_usage/message_push_overview",
+            query.app_id
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(MessagePushOverviewApplicationAppUsageResp {
             api_resp,
             code_error,
@@ -636,16 +689,31 @@ impl<'a> ApplicationAppUsageResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<OverviewApplicationAppUsageResp, LarkError> {
-        let path = format!("/open-apis/application/v6/applications/{app_id}/app_usage/overview");
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = OverviewApplicationAppUsageQuery::new(app_id, body)
+            .department_id_type(department_id_type);
+        self.overview_by_query(&query, option).await
+    }
+
+    pub async fn overview_by_query(
+        &self,
+        query: &OverviewApplicationAppUsageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<OverviewApplicationAppUsageResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/app_usage/overview",
+            query.app_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(OverviewApplicationAppUsageResp {
             api_resp,
             code_error,

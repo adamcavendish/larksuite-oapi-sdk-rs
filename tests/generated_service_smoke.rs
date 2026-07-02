@@ -32,13 +32,13 @@ use larksuite_oapi_sdk_rs::service::{
     },
     application::v6::{
         ApplicationContactsRangeConfigurationQuery, ApplyScopeQuery,
-        ContactsRangeSuggestApplicationAppVersionQuery,
+        ContactsRangeSuggestApplicationAppVersionQuery, DepartmentOverviewApplicationAppUsageQuery,
         GetApplicationAppVersionQuery as GetApplicationV6AppVersionQuery,
         GetApplicationCollaboratorsQuery, GetApplicationQuery as GetApplicationV6Query,
         ListAppRecommendRuleQuery, ListApplicationAppVersionQuery, ListApplicationFeedbackQuery,
         ListApplicationQuery as ListApplicationV6Query,
-        ListScopeQuery as ListApplicationV6ScopeQuery, SetAppBadgeQuery,
-        UnderauditlistApplicationQuery,
+        ListScopeQuery as ListApplicationV6ScopeQuery, MessagePushOverviewApplicationAppUsageQuery,
+        OverviewApplicationAppUsageQuery, SetAppBadgeQuery, UnderauditlistApplicationQuery,
     },
     approval::v4::{
         CcSearch, GetApprovalQuery, GetExternalApprovalQuery, GetInstanceQuery, InstanceSearch,
@@ -12573,6 +12573,63 @@ async fn application_v6_underauditlist_by_query_smoke() {
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
     assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
+async fn application_v6_app_usage_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"department_id":"od-1"}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let usage_body = serde_json::json!({"date":"2026-06-01"});
+    client
+        .application_v6()
+        .application_app_usage
+        .department_overview_by_query(
+            &DepartmentOverviewApplicationAppUsageQuery::new("cli_a", &usage_body)
+                .department_id_type("open_department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .application_v6()
+        .application_app_usage
+        .message_push_overview_by_query(
+            &MessagePushOverviewApplicationAppUsageQuery::new("cli_a", &usage_body)
+                .department_id_type("open_department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    client
+        .application_v6()
+        .application_app_usage
+        .overview_by_query(
+            &OverviewApplicationAppUsageQuery::new("cli_a", &usage_body)
+                .department_id_type("open_department_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains(
+        "POST /open-apis/application/v6/applications/cli_a/app_usage/department_overview?"
+    ));
+    assert!(request.contains(
+        "POST /open-apis/application/v6/applications/cli_a/app_usage/message_push_overview?"
+    ));
+    assert!(
+        request.contains("POST /open-apis/application/v6/applications/cli_a/app_usage/overview?")
+    );
+    assert!(request.contains("department_id_type=open_department_id"));
+    assert!(request.contains(r#""date":"2026-06-01""#));
 }
 
 #[tokio::test]
