@@ -33,6 +33,8 @@ Add to `Cargo.toml`:
 larksuite-oapi-sdk-rs = "0.1"
 ```
 
+For runnable examples, see the curated [examples index](examples/README.md).
+
 ### REST API
 
 ```rust
@@ -173,6 +175,11 @@ Dedicated service modules are the preferred API surface when a resource exists.
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
 requests with the same token handling as the rest of the SDK.
+
+This crate keeps a curated set of examples instead of porting the Go SDK's full
+generated `sample/apiall` tree. Use the [examples index](examples/README.md)
+for representative generated-service calls, and the generated service smoke
+tests for request-shape coverage across the broader API surface.
 
 ## Requirements
 
