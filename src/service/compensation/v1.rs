@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Domain types ──
 
@@ -71,16 +70,17 @@ impl<'a> PlanResource<'a> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListPlanResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/compensation/v1/plans");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<PlanListData>(self.config, &api_req, option).await?;
+        let (api_resp, raw) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/compensation/v1/plans",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send::<PlanListData>()
+        .await?;
         Ok(ListPlanResp {
             api_resp,
             code_error: raw.code_error,
@@ -101,12 +101,16 @@ impl ArchiveResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateArchiveResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/compensation/v1/archives");
-        api_req.supported_access_token_types = vec![AccessTokenType::User, AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/compensation/v1/archives",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CreateArchiveResp {
             api_resp,
             code_error,
@@ -119,15 +123,16 @@ impl ArchiveResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryArchiveResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/archives/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryArchiveResp {
             api_resp,
             code_error,
@@ -149,20 +154,17 @@ impl ChangeReasonResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListChangeReasonResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/change_reasons",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListChangeReasonResp {
             api_resp,
             code_error,
@@ -184,17 +186,17 @@ impl IndicatorResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListIndicatorResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/compensation/v1/indicators");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/compensation/v1/indicators",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListIndicatorResp {
             api_resp,
             code_error,
@@ -216,17 +218,17 @@ impl ItemResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListItemResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/compensation/v1/items");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/compensation/v1/items",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListItemResp {
             api_resp,
             code_error,
@@ -248,20 +250,17 @@ impl ItemCategoryResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListItemCategoryResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/item_categories",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListItemCategoryResp {
             api_resp,
             code_error,
@@ -282,15 +281,16 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchCreateLumpSumPaymentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/batch_create",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchCreateLumpSumPaymentResp {
             api_resp,
             code_error,
@@ -303,15 +303,16 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchRemoveLumpSumPaymentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/batch_remove",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchRemoveLumpSumPaymentResp {
             api_resp,
             code_error,
@@ -324,15 +325,16 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateLumpSumPaymentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/batch_update",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchUpdateLumpSumPaymentResp {
             api_resp,
             code_error,
@@ -345,15 +347,16 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryLumpSumPaymentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryLumpSumPaymentResp {
             api_resp,
             code_error,
@@ -366,15 +369,16 @@ impl LumpSumPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryDetailLumpSumPaymentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/lump_sum_payment/query_detail",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryDetailLumpSumPaymentResp {
             api_resp,
             code_error,
@@ -395,15 +399,16 @@ impl RecurringPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchCreateRecurringPaymentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/batch_create",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchCreateRecurringPaymentResp {
             api_resp,
             code_error,
@@ -416,15 +421,16 @@ impl RecurringPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchRemoveRecurringPaymentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/batch_remove",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchRemoveRecurringPaymentResp {
             api_resp,
             code_error,
@@ -437,15 +443,16 @@ impl RecurringPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateRecurringPaymentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/batch_update",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(BatchUpdateRecurringPaymentResp {
             api_resp,
             code_error,
@@ -458,15 +465,16 @@ impl RecurringPaymentResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryRecurringPaymentResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/recurring_payment/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QueryRecurringPaymentResp {
             api_resp,
             code_error,
@@ -487,15 +495,16 @@ impl SocialArchiveResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QuerySocialArchiveResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/social_archive/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QuerySocialArchiveResp {
             api_resp,
             code_error,
@@ -516,15 +525,16 @@ impl SocialArchiveAdjustRecordResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QuerySocialArchiveAdjustRecordResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/social_archive_adjust_record/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QuerySocialArchiveAdjustRecordResp {
             api_resp,
             code_error,
@@ -541,14 +551,15 @@ pub struct SocialInsuranceResource<'a> {
 
 impl SocialInsuranceResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListSocialInsuranceResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/compensation/v1/social_insurances",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListSocialInsuranceResp {
             api_resp,
             code_error,
@@ -570,17 +581,17 @@ impl SocialPlanResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListSocialPlanResp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/compensation/v1/social_plans");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = page_size {
-            api_req.query_params.set("page_size", v.to_string());
-        }
-        if let Some(v) = page_token {
-            api_req.query_params.set("page_token", v);
-        }
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/compensation/v1/social_plans",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("page_size", page_size)
+        .query("page_token", page_token)
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(ListSocialPlanResp {
             api_resp,
             code_error,
@@ -593,15 +604,16 @@ impl SocialPlanResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QuerySocialPlanResp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/compensation/v1/social_plans/query",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(QuerySocialPlanResp {
             api_resp,
             code_error,
