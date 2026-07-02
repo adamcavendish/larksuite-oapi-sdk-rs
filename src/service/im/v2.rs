@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::parse_v2;
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::RestRequest;
 
 // ── Response data types ───────────────────────────────────────────────────────
 
@@ -41,6 +40,150 @@ impl_resp_v2!(PatchFeedCardV2Resp, ());
 impl_resp_v2!(CreateTagV2Resp, TagData);
 impl_resp_v2!(PatchTagV2Resp, TagData);
 impl_resp_v2!(BatchUpdateUrlPreviewV2Resp, ());
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateAppFeedCardV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateAppFeedCardV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeleteAppFeedCardBatchV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> DeleteAppFeedCardBatchV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateAppFeedCardBatchV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateAppFeedCardBatchV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateBizEntityTagRelationV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateBizEntityTagRelationV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct GetBizEntityTagRelationV2Query;
+
+impl GetBizEntityTagRelationV2Query {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateBizEntityTagRelationV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateBizEntityTagRelationV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateChatButtonV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateChatButtonV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct BotTimeSensitiveFeedCardV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> BotTimeSensitiveFeedCardV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchFeedCardV2Query<'a> {
+    pub feed_card_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> PatchFeedCardV2Query<'a> {
+    pub fn new(feed_card_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self { feed_card_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateTagV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> CreateTagV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchTagV2Query<'a> {
+    pub tag_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> PatchTagV2Query<'a> {
+    pub fn new(tag_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self { tag_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct BatchUpdateUrlPreviewV2Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> BatchUpdateUrlPreviewV2Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
+    }
+}
 
 // ── V2 service entry ──────────────────────────────────────────────────────────
 
@@ -80,12 +223,25 @@ impl AppFeedCardV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateAppFeedCardV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v2/app_feed_card");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<AppFeedCardData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateAppFeedCardV2Query::new(&body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateAppFeedCardV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateAppFeedCardV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/im/v2/app_feed_card",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<AppFeedCardData>()
+        .await?;
         Ok(CreateAppFeedCardV2Resp {
             api_resp,
             code_error,
@@ -106,11 +262,25 @@ impl AppFeedCardBatchV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<DeleteAppFeedCardBatchV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::DELETE, "/open-apis/im/v2/app_feed_card/batch");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = DeleteAppFeedCardBatchV2Query::new(&body);
+        self.delete_by_query(&query, option).await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteAppFeedCardBatchV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteAppFeedCardBatchV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            "/open-apis/im/v2/app_feed_card/batch",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<()>()
+        .await?;
         Ok(DeleteAppFeedCardBatchV2Resp {
             api_resp,
             code_error,
@@ -123,11 +293,25 @@ impl AppFeedCardBatchV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateAppFeedCardBatchV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::PUT, "/open-apis/im/v2/app_feed_card/batch");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UpdateAppFeedCardBatchV2Query::new(&body);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateAppFeedCardBatchV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateAppFeedCardBatchV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            "/open-apis/im/v2/app_feed_card/batch",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<()>()
+        .await?;
         Ok(UpdateAppFeedCardBatchV2Resp {
             api_resp,
             code_error,
@@ -148,16 +332,25 @@ impl BizEntityTagRelationV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateBizEntityTagRelationV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = CreateBizEntityTagRelationV2Query::new(&body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateBizEntityTagRelationV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateBizEntityTagRelationV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/im/v2/biz_entity_tag_relation",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BizEntityTagRelationData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<BizEntityTagRelationData>()
+        .await?;
         Ok(CreateBizEntityTagRelationV2Resp {
             api_resp,
             code_error,
@@ -169,15 +362,24 @@ impl BizEntityTagRelationV2Resource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<GetBizEntityTagRelationV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        self.get_by_query(&GetBizEntityTagRelationV2Query::new(), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        _query: &GetBizEntityTagRelationV2Query,
+        option: &RequestOption,
+    ) -> Result<GetBizEntityTagRelationV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::GET,
             "/open-apis/im/v2/biz_entity_tag_relation",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        let (api_resp, raw) =
-            transport::request_typed::<BizEntityTagRelationData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2::<BizEntityTagRelationData>()
+        .await?;
         Ok(GetBizEntityTagRelationV2Resp {
             api_resp,
             code_error,
@@ -190,16 +392,25 @@ impl BizEntityTagRelationV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateBizEntityTagRelationV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = UpdateBizEntityTagRelationV2Query::new(&body);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateBizEntityTagRelationV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateBizEntityTagRelationV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::PUT,
             "/open-apis/im/v2/biz_entity_tag_relation",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<BizEntityTagRelationData>(self.config, &api_req, option)
-                .await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<BizEntityTagRelationData>()
+        .await?;
         Ok(UpdateBizEntityTagRelationV2Resp {
             api_resp,
             code_error,
@@ -220,11 +431,25 @@ impl ChatButtonV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateChatButtonV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::PUT, "/open-apis/im/v2/chat_button");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UpdateChatButtonV2Query::new(&body);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateChatButtonV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateChatButtonV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            "/open-apis/im/v2/chat_button",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<()>()
+        .await?;
         Ok(UpdateChatButtonV2Resp {
             api_resp,
             code_error,
@@ -245,14 +470,25 @@ impl FeedCardV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BotTimeSensitiveFeedCardV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = BotTimeSensitiveFeedCardV2Query::new(&body);
+        self.bot_time_sensitive_by_query(&query, option).await
+    }
+
+    pub async fn bot_time_sensitive_by_query(
+        &self,
+        query: &BotTimeSensitiveFeedCardV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<BotTimeSensitiveFeedCardV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::PATCH,
             "/open-apis/im/v2/feed_cards/bot_time_sentive",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<()>()
+        .await?;
         Ok(BotTimeSensitiveFeedCardV2Resp {
             api_resp,
             code_error,
@@ -266,12 +502,26 @@ impl FeedCardV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<PatchFeedCardV2Resp, LarkError> {
-        let path = format!("/open-apis/im/v2/feed_cards/{feed_card_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = PatchFeedCardV2Query::new(feed_card_id, &body);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchFeedCardV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchFeedCardV2Resp, LarkError> {
+        let path = format!("/open-apis/im/v2/feed_cards/{}", query.feed_card_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<()>()
+        .await?;
         Ok(PatchFeedCardV2Resp {
             api_resp,
             code_error,
@@ -292,12 +542,25 @@ impl TagV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<CreateTagV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/im/v2/tags");
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TagData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = CreateTagV2Query::new(&body);
+        self.create_by_query(&query, option).await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateTagV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateTagV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/im/v2/tags",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<TagData>()
+        .await?;
         Ok(CreateTagV2Resp {
             api_resp,
             code_error,
@@ -311,13 +574,26 @@ impl TagV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<PatchTagV2Resp, LarkError> {
-        let path = format!("/open-apis/im/v2/tags/{tag_id}");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<TagData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = PatchTagV2Query::new(tag_id, &body);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchTagV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchTagV2Resp, LarkError> {
+        let path = format!("/open-apis/im/v2/tags/{}", query.tag_id);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<TagData>()
+        .await?;
         Ok(PatchTagV2Resp {
             api_resp,
             code_error,
@@ -338,14 +614,25 @@ impl UrlPreviewV2Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchUpdateUrlPreviewV2Resp, LarkError> {
-        let mut api_req = ApiReq::new(
+        let query = BatchUpdateUrlPreviewV2Query::new(&body);
+        self.batch_update_by_query(&query, option).await
+    }
+
+    pub async fn batch_update_by_query(
+        &self,
+        query: &BatchUpdateUrlPreviewV2Query<'_>,
+        option: &RequestOption,
+    ) -> Result<BatchUpdateUrlPreviewV2Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
             http::Method::POST,
             "/open-apis/im/v2/url_previews/batch_update",
-        );
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) = transport::request_typed::<()>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<()>()
+        .await?;
         Ok(BatchUpdateUrlPreviewV2Resp {
             api_resp,
             code_error,
