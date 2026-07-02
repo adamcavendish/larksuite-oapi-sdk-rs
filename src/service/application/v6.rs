@@ -1,9 +1,8 @@
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
-use crate::service::common::{PageQuery, RestRequest, parse_v2};
-use crate::transport;
+use crate::req::RequestOption;
+use crate::service::common::{PageQuery, RestRequest};
 
 // ── Response helper ──
 
@@ -1632,6 +1631,66 @@ pub struct ApplicationVisibilityResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CheckWhiteBlackListApplicationVisibilityQuery<'a> {
+    pub app_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> CheckWhiteBlackListApplicationVisibilityQuery<'a> {
+    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            app_id,
+            body,
+            user_id_type: None,
+            department_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchApplicationVisibilityQuery<'a> {
+    pub app_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub department_id_type: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> PatchApplicationVisibilityQuery<'a> {
+    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            app_id,
+            body,
+            department_id_type: None,
+            user_id_type: None,
+        }
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> ApplicationVisibilityResource<'a> {
     /// CheckWhiteBlackList — POST /open-apis/application/v6/applications/:app_id/visibility/check_white_black_list
     pub async fn check_white_black_list(
@@ -1642,21 +1701,33 @@ impl<'a> ApplicationVisibilityResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<CheckWhiteBlackListApplicationVisibilityResp, LarkError> {
+        let query = CheckWhiteBlackListApplicationVisibilityQuery::new(app_id, body)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type);
+        self.check_white_black_list_by_query(&query, option).await
+    }
+
+    pub async fn check_white_black_list_by_query(
+        &self,
+        query: &CheckWhiteBlackListApplicationVisibilityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CheckWhiteBlackListApplicationVisibilityResp, LarkError> {
         let path = format!(
-            "/open-apis/application/v6/applications/{app_id}/visibility/check_white_black_list"
+            "/open-apis/application/v6/applications/{}/visibility/check_white_black_list",
+            query.app_id
         );
-        let mut api_req = ApiReq::new(http::Method::POST, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(CheckWhiteBlackListApplicationVisibilityResp {
             api_resp,
             code_error,
@@ -1673,19 +1744,33 @@ impl<'a> ApplicationVisibilityResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<PatchApplicationVisibilityResp, LarkError> {
-        let path = format!("/open-apis/application/v6/applications/{app_id}/visibility");
-        let mut api_req = ApiReq::new(http::Method::PATCH, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        if let Some(v) = department_id_type {
-            api_req.query_params.set("department_id_type", v);
-        }
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = PatchApplicationVisibilityQuery::new(app_id, body)
+            .department_id_type(department_id_type)
+            .user_id_type(user_id_type);
+        self.patch_by_query(&query, option).await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchApplicationVisibilityQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchApplicationVisibilityResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/visibility",
+            query.app_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .query("department_id_type", query.department_id_type)
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(PatchApplicationVisibilityResp {
             api_resp,
             code_error,
