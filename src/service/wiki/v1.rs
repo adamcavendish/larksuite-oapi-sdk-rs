@@ -3,10 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::{ApiReq, ReqBody, RequestOption};
+use crate::req::RequestOption;
 use crate::resp::{ApiResp, CodeError};
-use crate::service::common::parse_v2;
-use crate::transport;
+use crate::service::common::RestRequest;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct NodeV1ListData {
@@ -27,6 +26,16 @@ pub struct SearchNodeV1Resp {
 impl SearchNodeV1Resp {
     pub fn success(&self) -> bool {
         self.api_resp.status_code == 200 && self.code_error.as_ref().is_none_or(|e| e.code == 0)
+    }
+}
+
+pub struct SearchNodeV1Query<'a> {
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> SearchNodeV1Query<'a> {
+    pub fn new(body: &'a serde_json::Value) -> Self {
+        Self { body }
     }
 }
 
@@ -52,12 +61,25 @@ impl NodeV1Resource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchNodeV1Resp, LarkError> {
-        let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/wiki/v1/nodes/search");
-        api_req.supported_access_token_types = vec![AccessTokenType::User];
-        api_req.body = Some(ReqBody::json(&body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<NodeV1ListData>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.search_by_query(&SearchNodeV1Query::new(&body), option)
+            .await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchNodeV1Query<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchNodeV1Resp, LarkError> {
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/wiki/v1/nodes/search",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<NodeV1ListData>()
+        .await?;
         Ok(SearchNodeV1Resp {
             api_resp,
             code_error,
