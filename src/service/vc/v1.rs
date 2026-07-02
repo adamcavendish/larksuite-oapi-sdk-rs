@@ -459,7 +459,7 @@ impl<'a> RoomResource<'a> {
         query: &CreateRoomQuery<'_>,
         option: &RequestOption,
     ) -> Result<CreateRoomResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/vc/v1/rooms",
@@ -468,13 +468,8 @@ impl<'a> RoomResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send::<RoomData>()
-        .await?;
-        Ok(CreateRoomResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RoomData, CreateRoomResp>()
+        .await
     }
 
     pub async fn get(
@@ -493,7 +488,7 @@ impl<'a> RoomResource<'a> {
         option: &RequestOption,
     ) -> Result<GetRoomResp, LarkError> {
         let path = format!("/open-apis/vc/v1/rooms/{}", query.room_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -501,13 +496,8 @@ impl<'a> RoomResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<RoomData>()
-        .await?;
-        Ok(GetRoomResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RoomData, GetRoomResp>()
+        .await
     }
 
     pub async fn update(
@@ -587,7 +577,7 @@ impl<'a> RoomResource<'a> {
         query: &ListRoomQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListRoomResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/rooms",
@@ -597,13 +587,8 @@ impl<'a> RoomResource<'a> {
         .page_query(query.page_query())
         .query("room_level_id", query.room_level_id)
         .query("user_id_type", query.user_id_type)
-        .send::<RoomListData>()
-        .await?;
-        Ok(ListRoomResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RoomListData, ListRoomResp>()
+        .await
     }
 
     pub async fn mget(
@@ -760,7 +745,7 @@ impl<'a> RoomConfigResource<'a> {
         query: &RoomConfigQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetRoomConfigResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/room_configs/query",
@@ -774,13 +759,8 @@ impl<'a> RoomConfigResource<'a> {
         .query("floor_name", query.floor_name)
         .query("room_id", query.room_id)
         .query("user_id_type", query.user_id_type)
-        .send::<RoomConfigData>()
-        .await?;
-        Ok(GetRoomConfigResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<RoomConfigData, GetRoomConfigResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -995,7 +975,7 @@ impl<'a> MeetingResource<'a> {
         option: &RequestOption,
     ) -> Result<GetMeetingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1003,14 +983,8 @@ impl<'a> MeetingResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send::<MeetingData>()
-        .await?;
-
-        Ok(GetMeetingResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MeetingData, GetMeetingResp>()
+        .await
     }
 
     pub async fn invite(
@@ -1136,7 +1110,7 @@ impl<'a> MeetingResource<'a> {
         query: &ListMeetingByNoQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListMeetingResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/meetings/list_by_no",
@@ -1148,13 +1122,8 @@ impl<'a> MeetingResource<'a> {
         .query("end_time", query.end_time)
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
-        .send::<MeetingListData>()
-        .await?;
-        Ok(ListMeetingResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MeetingListData, ListMeetingResp>()
+        .await
     }
 }
 
@@ -1172,7 +1141,7 @@ impl<'a> ParticipantResource<'a> {
         option: &RequestOption,
     ) -> Result<ListParticipantResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/participants");
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1182,14 +1151,8 @@ impl<'a> ParticipantResource<'a> {
         .query("user_id_type", user_id_type)
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send::<ParticipantListData>()
-        .await?;
-
-        Ok(ListParticipantResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ParticipantListData, ListParticipantResp>()
+        .await
     }
 }
 
@@ -1240,7 +1203,7 @@ impl<'a> ReportResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetMeetingReportResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/vc/v1/reports/get_daily",
@@ -1251,14 +1214,8 @@ impl<'a> ReportResource<'a> {
         .query("end_time", end_time)
         .query("meeting_type", meeting_type)
         .query("user_id_type", user_id_type)
-        .send::<MeetingReportData>()
-        .await?;
-
-        Ok(GetMeetingReportResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<MeetingReportData, GetMeetingReportResp>()
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]

@@ -1182,7 +1182,7 @@ impl<'a> ApprovalDefinitionResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateApprovalResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/approvals",
@@ -1192,13 +1192,8 @@ impl<'a> ApprovalDefinitionResource<'a> {
         .query("department_id_type", department_id_type)
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CreateApprovalData>()
-        .await?;
-        Ok(CreateApprovalResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateApprovalData, CreateApprovalResp>()
+        .await
     }
 
     pub async fn get(
@@ -1222,7 +1217,7 @@ impl<'a> ApprovalDefinitionResource<'a> {
         option: &RequestOption,
     ) -> Result<GetApprovalResp, LarkError> {
         let path = format!("/open-apis/approval/v4/approvals/{}", query.approval_code);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1232,13 +1227,8 @@ impl<'a> ApprovalDefinitionResource<'a> {
         .query("locale", query.locale)
         .query("user_id", query.user_id)
         .query("user_id_type", query.user_id_type)
-        .send::<ApprovalDefinition>()
-        .await?;
-        Ok(GetApprovalResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ApprovalDefinition, GetApprovalResp>()
+        .await
     }
 }
 
@@ -1253,7 +1243,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateInstanceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/instances",
@@ -1262,13 +1252,8 @@ impl<'a> ApprovalInstanceResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<CreateInstanceData>()
-        .await?;
-        Ok(CreateInstanceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CreateInstanceData, CreateInstanceResp>()
+        .await
     }
 
     pub async fn get(
@@ -1292,7 +1277,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         option: &RequestOption,
     ) -> Result<GetInstanceResp, LarkError> {
         let path = format!("/open-apis/approval/v4/instances/{}", query.instance_id);
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1302,13 +1287,8 @@ impl<'a> ApprovalInstanceResource<'a> {
         .query("locale", query.locale)
         .query("user_id", query.user_id)
         .query("user_id_type", query.user_id_type)
-        .send::<ApprovalInstance>()
-        .await?;
-        Ok(GetInstanceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ApprovalInstance, GetInstanceResp>()
+        .await
     }
 
     pub async fn cancel(
@@ -1353,7 +1333,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         query: &ListInstanceQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListInstanceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/approval/v4/instances",
@@ -1364,13 +1344,8 @@ impl<'a> ApprovalInstanceResource<'a> {
         .query("start_time", query.start_time)
         .query("end_time", query.end_time)
         .page_query(query.page)
-        .send::<InstanceListData>()
-        .await?;
-        Ok(ListInstanceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<InstanceListData, ListInstanceResp>()
+        .await
     }
 
     pub async fn add_sign(
@@ -1789,7 +1764,7 @@ impl<'a> ExternalApprovalResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateExternalApprovalResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/external_approvals",
@@ -1799,13 +1774,8 @@ impl<'a> ExternalApprovalResource<'a> {
         .query("department_id_type", department_id_type)
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send::<ExternalApproval>()
-        .await?;
-        Ok(CreateExternalApprovalResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ExternalApproval, CreateExternalApprovalResp>()
+        .await
     }
 
     pub async fn get(
@@ -1827,7 +1797,7 @@ impl<'a> ExternalApprovalResource<'a> {
             "/open-apis/approval/v4/external_approvals/{}",
             query.approval_code
         );
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::GET,
             path,
@@ -1835,13 +1805,8 @@ impl<'a> ExternalApprovalResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send::<ExternalApproval>()
-        .await?;
-        Ok(GetExternalApprovalResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ExternalApproval, GetExternalApprovalResp>()
+        .await
     }
 }
 
@@ -1855,7 +1820,7 @@ impl<'a> ExternalInstanceResource<'a> {
         body: &CreateExternalInstanceReqBody,
         option: &RequestOption,
     ) -> Result<CreateExternalInstanceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/external_instances",
@@ -1863,13 +1828,8 @@ impl<'a> ExternalInstanceResource<'a> {
             option,
         )
         .json_body(body)?
-        .send::<ExternalInstance>()
-        .await?;
-        Ok(CreateExternalInstanceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<ExternalInstance, CreateExternalInstanceResp>()
+        .await
     }
 
     pub async fn check(
@@ -1877,7 +1837,7 @@ impl<'a> ExternalInstanceResource<'a> {
         instances: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<CheckExternalInstanceResp, LarkError> {
-        let (api_resp, raw) = RestRequest::new(
+        RestRequest::new(
             self.config,
             http::Method::POST,
             "/open-apis/approval/v4/external_instances/check",
@@ -1885,13 +1845,8 @@ impl<'a> ExternalInstanceResource<'a> {
             option,
         )
         .json_body(instances)?
-        .send::<CheckExternalInstanceData>()
-        .await?;
-        Ok(CheckExternalInstanceResp {
-            api_resp,
-            code_error: raw.code_error,
-            data: raw.data,
-        })
+        .send_response::<CheckExternalInstanceData, CheckExternalInstanceResp>()
+        .await
     }
 }
 
