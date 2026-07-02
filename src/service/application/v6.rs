@@ -1508,6 +1508,19 @@ pub struct ApplicationManagementResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateApplicationManagementQuery<'a> {
+    pub app_id: &'a str,
+    pub body: &'a serde_json::Value,
+}
+
+impl<'a> UpdateApplicationManagementQuery<'a> {
+    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self { app_id, body }
+    }
+}
+
 impl<'a> ApplicationManagementResource<'a> {
     /// Update management — PUT /open-apis/application/v6/applications/:app_id/management
     pub async fn update(
@@ -1516,13 +1529,29 @@ impl<'a> ApplicationManagementResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateApplicationManagementResp, LarkError> {
-        let path = format!("/open-apis/application/v6/applications/{app_id}/management");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        self.update_by_query(&UpdateApplicationManagementQuery::new(app_id, body), option)
+            .await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateApplicationManagementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateApplicationManagementResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/management",
+            query.app_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UpdateApplicationManagementResp {
             api_resp,
             code_error,
@@ -1535,6 +1564,29 @@ pub struct ApplicationOwnerResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct UpdateApplicationOwnerQuery<'a> {
+    pub app_id: &'a str,
+    pub body: &'a serde_json::Value,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UpdateApplicationOwnerQuery<'a> {
+    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+        Self {
+            app_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> ApplicationOwnerResource<'a> {
     /// Update owner — PUT /open-apis/application/v6/applications/:app_id/owner
     pub async fn update(
@@ -1544,16 +1596,30 @@ impl<'a> ApplicationOwnerResource<'a> {
         body: &serde_json::Value,
         option: &RequestOption,
     ) -> Result<UpdateApplicationOwnerResp, LarkError> {
-        let path = format!("/open-apis/application/v6/applications/{app_id}/owner");
-        let mut api_req = ApiReq::new(http::Method::PUT, &path);
-        api_req.supported_access_token_types = vec![AccessTokenType::Tenant, AccessTokenType::User];
-        if let Some(v) = user_id_type {
-            api_req.query_params.set("user_id_type", v);
-        }
-        api_req.body = Some(ReqBody::json(body)?);
-        let (api_resp, raw) =
-            transport::request_typed::<serde_json::Value>(self.config, &api_req, option).await?;
-        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        let query = UpdateApplicationOwnerQuery::new(app_id, body).user_id_type(user_id_type);
+        self.update_by_query(&query, option).await
+    }
+
+    pub async fn update_by_query(
+        &self,
+        query: &UpdateApplicationOwnerQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<UpdateApplicationOwnerResp, LarkError> {
+        let path = format!(
+            "/open-apis/application/v6/applications/{}/owner",
+            query.app_id
+        );
+        let (api_resp, code_error, data) = RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_v2::<serde_json::Value>()
+        .await?;
         Ok(UpdateApplicationOwnerResp {
             api_resp,
             code_error,
