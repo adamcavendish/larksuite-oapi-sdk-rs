@@ -4,7 +4,9 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::service::common::{EmptyResp, PageQuery, RestRequest};
+use crate::service::common::{
+    EmptyResp, PageIteratorState, PageQuery, RestRequest, impl_page_iterator_controls,
+};
 
 // ── Domain types ──
 
@@ -740,6 +742,237 @@ impl_resp_v2!(ListAppRoleMemberResp, AppRoleMemberListData);
 impl_resp_v2!(ListAppWorkflowResp, WorkflowListData);
 impl_resp_v2!(UpdateAppWorkflowResp, ());
 
+// ── Iterators ──
+
+#[derive(Debug, Clone)]
+pub struct ListTableIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<AppTable>,
+    app_token: String,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ListTableIterator);
+
+impl ListTableIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<AppTable>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = AppTableResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.app_token,
+                self.page_size,
+                self.state.page_token_for_request(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListViewIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<AppTableView>,
+    app_token: String,
+    table_id: String,
+    page_size: Option<i32>,
+    user_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(ListViewIterator);
+
+impl ListViewIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<AppTableView>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = AppTableViewResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.app_token,
+                &self.table_id,
+                self.page_size,
+                self.state.page_token_for_request(),
+                self.user_id_type.as_deref(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListFieldIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<AppTableField>,
+    app_token: String,
+    table_id: String,
+    view_id: Option<String>,
+    text_field_as_array: Option<bool>,
+    user_id_type: Option<String>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ListFieldIterator);
+
+impl ListFieldIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<AppTableField>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = AppTableFieldResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.app_token,
+                &self.table_id,
+                self.view_id.as_deref(),
+                self.text_field_as_array,
+                self.user_id_type.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListRecordIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<AppTableRecord>,
+    app_token: String,
+    table_id: String,
+    view_id: Option<String>,
+    filter: Option<String>,
+    sort: Option<String>,
+    field_names: Option<String>,
+    text_field_as_array: Option<bool>,
+    user_id_type: Option<String>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ListRecordIterator);
+
+impl ListRecordIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<AppTableRecord>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = AppTableRecordResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                &self.app_token,
+                &self.table_id,
+                self.view_id.as_deref(),
+                self.filter.as_deref(),
+                self.sort.as_deref(),
+                self.field_names.as_deref(),
+                self.text_field_as_array,
+                self.user_id_type.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SearchRecordIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<AppTableRecord>,
+    app_token: String,
+    table_id: String,
+    user_id_type: Option<String>,
+    page_size: Option<i32>,
+    body: SearchRecordReqBody,
+}
+
+impl_page_iterator_controls!(SearchRecordIterator);
+
+impl SearchRecordIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<AppTableRecord>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = AppTableRecordResource {
+            config: self.config,
+        };
+        let resp = resource
+            .search(
+                &self.app_token,
+                &self.table_id,
+                &self.body,
+                self.user_id_type.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
 // ── Resources ──
 
 pub struct AppResource<'a> {
@@ -995,6 +1228,25 @@ impl<'a> AppTableResource<'a> {
         .send_response::<TableListData, ListTableResp>()
         .await
     }
+
+    pub fn list_by_iterator(
+        &self,
+        app_token: &str,
+        page_size: Option<i32>,
+    ) -> ListTableIterator<'a> {
+        let query = ListTableQuery::new(app_token).page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListTableQuery<'_>) -> ListTableIterator<'a> {
+        ListTableIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            app_token: query.app_token.to_owned(),
+            page_size: query.page_size,
+        }
+    }
 }
 
 pub struct AppTableViewResource<'a> {
@@ -1167,6 +1419,31 @@ impl<'a> AppTableViewResource<'a> {
         .query("user_id_type", query.user_id_type)
         .send_response::<ViewListData, ListViewResp>()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        page_size: Option<i32>,
+        user_id_type: Option<&str>,
+    ) -> ListViewIterator<'a> {
+        let query = ListViewQuery::new(app_token, table_id)
+            .page_size(page_size)
+            .user_id_type(user_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListViewQuery<'_>) -> ListViewIterator<'a> {
+        ListViewIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            app_token: query.app_token.to_owned(),
+            table_id: query.table_id.to_owned(),
+            page_size: query.page_size,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
@@ -1341,6 +1618,38 @@ impl<'a> AppTableFieldResource<'a> {
         .page_query(query.page_query())
         .send_response::<FieldListData, ListFieldResp>()
         .await
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn list_by_iterator(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        view_id: Option<&str>,
+        text_field_as_array: Option<bool>,
+        user_id_type: Option<&str>,
+        page_size: Option<i32>,
+    ) -> ListFieldIterator<'a> {
+        let query = ListFieldQuery::new(app_token, table_id)
+            .view_id(view_id)
+            .text_field_as_array(text_field_as_array)
+            .user_id_type(user_id_type)
+            .page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListFieldQuery<'_>) -> ListFieldIterator<'a> {
+        ListFieldIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            app_token: query.app_token.to_owned(),
+            table_id: query.table_id.to_owned(),
+            view_id: query.view_id.map(ToOwned::to_owned),
+            text_field_as_array: query.text_field_as_array,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            page_size: query.page_size,
+        }
     }
 }
 
@@ -1620,6 +1929,47 @@ impl<'a> AppTableRecordResource<'a> {
         .await
     }
 
+    #[allow(clippy::too_many_arguments)]
+    pub fn list_by_iterator(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        view_id: Option<&str>,
+        filter: Option<&str>,
+        sort: Option<&str>,
+        field_names: Option<&str>,
+        text_field_as_array: Option<bool>,
+        user_id_type: Option<&str>,
+        page_size: Option<i32>,
+    ) -> ListRecordIterator<'a> {
+        let query = ListRecordQuery::new(app_token, table_id)
+            .view_id(view_id)
+            .filter(filter)
+            .sort(sort)
+            .field_names(field_names)
+            .text_field_as_array(text_field_as_array)
+            .user_id_type(user_id_type)
+            .page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListRecordQuery<'_>) -> ListRecordIterator<'a> {
+        ListRecordIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            app_token: query.app_token.to_owned(),
+            table_id: query.table_id.to_owned(),
+            view_id: query.view_id.map(ToOwned::to_owned),
+            filter: query.filter.map(ToOwned::to_owned),
+            sort: query.sort.map(ToOwned::to_owned),
+            field_names: query.field_names.map(ToOwned::to_owned),
+            text_field_as_array: query.text_field_as_array,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            page_size: query.page_size,
+        }
+    }
+
     pub async fn batch_create(
         &self,
         app_token: &str,
@@ -1755,6 +2105,37 @@ impl<'a> AppTableRecordResource<'a> {
         .json_body(body)?
         .send_response::<SearchRecordData, SearchRecordResp>()
         .await
+    }
+
+    pub fn search_by_iterator(
+        &self,
+        app_token: &str,
+        table_id: &str,
+        body: &SearchRecordReqBody,
+        user_id_type: Option<&str>,
+        page_size: Option<i32>,
+    ) -> SearchRecordIterator<'a> {
+        let query = SearchRecordQuery::new(app_token, table_id)
+            .user_id_type(user_id_type)
+            .page_size(page_size);
+        self.search_iterator_by_query(&query, body)
+    }
+
+    pub fn search_iterator_by_query(
+        &self,
+        query: &SearchRecordQuery<'_>,
+        body: &SearchRecordReqBody,
+    ) -> SearchRecordIterator<'a> {
+        SearchRecordIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            app_token: query.app_token.to_owned(),
+            table_id: query.table_id.to_owned(),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            page_size: query.page_size,
+            body: body.clone(),
+        }
     }
 }
 
