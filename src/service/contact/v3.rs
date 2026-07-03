@@ -4,7 +4,9 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::service::common::{EmptyResp, PageQuery, RestRequest};
+use crate::service::common::{
+    EmptyResp, PageIteratorState, PageQuery, RestRequest, impl_page_iterator_controls,
+};
 
 // ── Domain types ──
 
@@ -932,6 +934,282 @@ pub struct CustomAttrListData {
 
 impl_resp!(ListCustomAttrResp, CustomAttrListData);
 
+// ── Iterators ──
+
+#[derive(Debug, Clone)]
+pub struct ListDepartmentIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Department>,
+    user_id_type: Option<String>,
+    department_id_type: Option<String>,
+    parent_department_id: Option<String>,
+    fetch_child: Option<bool>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ListDepartmentIterator);
+
+impl ListDepartmentIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Department>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = DepartmentResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                self.user_id_type.as_deref(),
+                self.department_id_type.as_deref(),
+                self.parent_department_id.as_deref(),
+                self.fetch_child,
+                self.page_size,
+                self.state.page_token_for_request(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ChildrenDepartmentIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Department>,
+    department_id: String,
+    user_id_type: Option<String>,
+    department_id_type: Option<String>,
+    fetch_child: Option<bool>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ChildrenDepartmentIterator);
+
+impl ChildrenDepartmentIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Department>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = DepartmentResource {
+            config: self.config,
+        };
+        let resp = resource
+            .children(
+                &self.department_id,
+                self.user_id_type.as_deref(),
+                self.department_id_type.as_deref(),
+                self.fetch_child,
+                self.page_size,
+                self.state.page_token_for_request(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ParentDepartmentIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Department>,
+    department_id: String,
+    user_id_type: Option<String>,
+    department_id_type: Option<String>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ParentDepartmentIterator);
+
+impl ParentDepartmentIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Department>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = DepartmentResource {
+            config: self.config,
+        };
+        let resp = resource
+            .parent(
+                &self.department_id,
+                self.user_id_type.as_deref(),
+                self.department_id_type.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListUserIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<User>,
+    user_id_type: Option<String>,
+    department_id_type: Option<String>,
+    department_id: Option<String>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ListUserIterator);
+
+impl ListUserIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<User>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = UserResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(
+                self.user_id_type.as_deref(),
+                self.department_id_type.as_deref(),
+                self.department_id.as_deref(),
+                self.state.page_token_for_request(),
+                self.page_size,
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct FindUserByDepartmentIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<User>,
+    department_id: String,
+    user_id_type: Option<String>,
+    department_id_type: Option<String>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(FindUserByDepartmentIterator);
+
+impl FindUserByDepartmentIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<User>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = UserResource {
+            config: self.config,
+        };
+        let resp = resource
+            .find_by_department(
+                &self.department_id,
+                self.user_id_type.as_deref(),
+                self.department_id_type.as_deref(),
+                self.page_size,
+                self.state.page_token_for_request(),
+                option,
+            )
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListEmployeeTypeEnumIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<EmployeeTypeEnum>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ListEmployeeTypeEnumIterator);
+
+impl ListEmployeeTypeEnumIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<EmployeeTypeEnum>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = EmployeeTypeEnumResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(self.state.page_token_for_request(), self.page_size, option)
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.items, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListUnitIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Unit>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ListUnitIterator);
+
+impl ListUnitIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Unit>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let resource = UnitResource {
+            config: self.config,
+        };
+        let resp = resource
+            .list(self.page_size, self.state.page_token_for_request(), option)
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(data.unitlist, data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
 // ── Resources ──
 
 pub struct DepartmentResource<'a> {
@@ -1413,6 +1691,40 @@ impl<'a> DepartmentResource<'a> {
         .await
     }
 
+    #[allow(clippy::too_many_arguments)]
+    pub fn list_by_iterator(
+        &self,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        parent_department_id: Option<&str>,
+        fetch_child: Option<bool>,
+        page_size: Option<i32>,
+    ) -> ListDepartmentIterator<'a> {
+        let query = ListDepartmentQuery::new()
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .parent_department_id(parent_department_id)
+            .fetch_child(fetch_child)
+            .page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListDepartmentQuery<'_>,
+    ) -> ListDepartmentIterator<'a> {
+        ListDepartmentIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            department_id_type: query.department_id_type.map(ToOwned::to_owned),
+            parent_department_id: query.parent_department_id.map(ToOwned::to_owned),
+            fetch_child: query.fetch_child,
+            page_size: query.page_size,
+        }
+    }
+
     pub async fn batch(
         &self,
         department_ids: &[&str],
@@ -1489,6 +1801,39 @@ impl<'a> DepartmentResource<'a> {
         .await
     }
 
+    #[allow(clippy::too_many_arguments)]
+    pub fn children_by_iterator(
+        &self,
+        department_id: &str,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        fetch_child: Option<bool>,
+        page_size: Option<i32>,
+    ) -> ChildrenDepartmentIterator<'a> {
+        let query = ChildrenDepartmentQuery::new(department_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .fetch_child(fetch_child)
+            .page_size(page_size);
+        self.children_iterator_by_query(&query)
+    }
+
+    pub fn children_iterator_by_query(
+        &self,
+        query: &ChildrenDepartmentQuery<'_>,
+    ) -> ChildrenDepartmentIterator<'a> {
+        ChildrenDepartmentIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            department_id: query.department_id.to_owned(),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            department_id_type: query.department_id_type.map(ToOwned::to_owned),
+            fetch_child: query.fetch_child,
+            page_size: query.page_size,
+        }
+    }
+
     pub async fn parent(
         &self,
         department_id: &str,
@@ -1524,6 +1869,35 @@ impl<'a> DepartmentResource<'a> {
         .page_query(query.page_query())
         .send_response::<ListDepartmentRespData, ParentDepartmentResp>()
         .await
+    }
+
+    pub fn parent_by_iterator(
+        &self,
+        department_id: &str,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        page_size: Option<i32>,
+    ) -> ParentDepartmentIterator<'a> {
+        let query = ParentDepartmentQuery::new(department_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .page_size(page_size);
+        self.parent_iterator_by_query(&query)
+    }
+
+    pub fn parent_iterator_by_query(
+        &self,
+        query: &ParentDepartmentQuery<'_>,
+    ) -> ParentDepartmentIterator<'a> {
+        ParentDepartmentIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            department_id: query.department_id.to_owned(),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            department_id_type: query.department_id_type.map(ToOwned::to_owned),
+            page_size: query.page_size,
+        }
     }
 
     pub async fn search(
@@ -1968,6 +2342,33 @@ impl<'a> UserResource<'a> {
         .await
     }
 
+    pub fn list_by_iterator(
+        &self,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        department_id: Option<&str>,
+        page_size: Option<i32>,
+    ) -> ListUserIterator<'a> {
+        let query = ListUserQuery::new()
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .department_id(department_id)
+            .page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListUserQuery<'_>) -> ListUserIterator<'a> {
+        ListUserIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            department_id_type: query.department_id_type.map(ToOwned::to_owned),
+            department_id: query.department_id.map(ToOwned::to_owned),
+            page_size: query.page_size,
+        }
+    }
+
     pub async fn batch(
         &self,
         user_ids: &[&str],
@@ -2063,6 +2464,35 @@ impl<'a> UserResource<'a> {
         .page_query(query.page_query())
         .send_response::<ListUserRespData, FindByDepartmentUserResp>()
         .await
+    }
+
+    pub fn find_by_department_by_iterator(
+        &self,
+        department_id: &str,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        page_size: Option<i32>,
+    ) -> FindUserByDepartmentIterator<'a> {
+        let query = FindUserByDepartmentQuery::new(department_id)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .page_size(page_size);
+        self.find_by_department_iterator_by_query(&query)
+    }
+
+    pub fn find_by_department_iterator_by_query(
+        &self,
+        query: &FindUserByDepartmentQuery<'_>,
+    ) -> FindUserByDepartmentIterator<'a> {
+        FindUserByDepartmentIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            department_id: query.department_id.to_owned(),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            department_id_type: query.department_id_type.map(ToOwned::to_owned),
+            page_size: query.page_size,
+        }
     }
 
     pub async fn resurrect(
@@ -2324,6 +2754,23 @@ impl<'a> EmployeeTypeEnumResource<'a> {
         .send_response::<ListEmployeeTypeEnumRespData, ListEmployeeTypeEnumResp>()
         .await
     }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListEmployeeTypeEnumIterator<'a> {
+        let query = ListEmployeeTypeEnumQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListEmployeeTypeEnumQuery<'_>,
+    ) -> ListEmployeeTypeEnumIterator<'a> {
+        ListEmployeeTypeEnumIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
+    }
 }
 
 pub struct UnitResource<'a> {
@@ -2506,6 +2953,20 @@ impl<'a> UnitResource<'a> {
         .page_query(query.page_query())
         .send_response::<ListUnitRespData, ListUnitResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListUnitIterator<'a> {
+        let query = ListUnitQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListUnitQuery<'_>) -> ListUnitIterator<'a> {
+        ListUnitIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 
     pub async fn bind_department(

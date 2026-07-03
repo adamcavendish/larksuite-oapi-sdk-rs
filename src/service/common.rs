@@ -332,6 +332,28 @@ impl<T> PageIteratorState<T> {
     }
 }
 
+macro_rules! impl_page_iterator_controls {
+    ($iter:ident) => {
+        impl<'a> $iter<'a> {
+            pub fn limit(mut self, limit: usize) -> Self {
+                self.state = self.state.limit(limit);
+                self
+            }
+
+            pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
+                self.state = self.state.with_page_token(Some(page_token.into()));
+                self
+            }
+
+            pub fn next_page_token(&self) -> Option<&str> {
+                self.state.next_page_token()
+            }
+        }
+    };
+}
+
+pub(crate) use impl_page_iterator_controls;
+
 #[derive(Debug, Clone)]
 pub struct EmptyResp {
     pub api_resp: ApiResp,
