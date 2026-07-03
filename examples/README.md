@@ -34,7 +34,7 @@ Most examples use this shape:
 | `im_message_query` | IM v1 | List recent messages in a chat with query parameters | `APP_ID`, `APP_SECRET`, `CHAT_ID`, optional `START_TIME`, `END_TIME`, `PAGE_TOKEN` | `cargo run --example im_message_query` |
 | `im_upload_download` | IM v1 | Upload image/file bytes from local paths and download existing image/file keys | `APP_ID`, `APP_SECRET`, optional `IMAGE_PATH`, `FILE_PATH`, `IMAGE_KEY`, `FILE_KEY` | `cargo run --example im_upload_download` |
 | `drive_files` | Drive v1 | List Drive files and optionally download/export files | `APP_ID`, `APP_SECRET`, optional `FOLDER_TOKEN`, `DRIVE_FILE_TOKEN`, `EXPORT_FILE_TOKEN`, `EXPORT_TICKET` | `cargo run --example drive_files` |
-| `bitable_records` | Bitable v1 | List tables, views, and records with `PageQuery` | `APP_ID`, `APP_SECRET`, `APP_TOKEN`, `TABLE_ID`, optional `VIEW_ID` | `cargo run --example bitable_records` |
+| `bitable_records` | Bitable v1 | List tables, views, and records with `PageQuery`; use `*_by_iterator` for lazy scans | `APP_ID`, `APP_SECRET`, `APP_TOKEN`, `TABLE_ID`, optional `VIEW_ID` | `cargo run --example bitable_records` |
 | `sheets_read` | Sheets v3 | Fetch spreadsheet metadata and read a range | `APP_ID`, `APP_SECRET`, `SPREADSHEET_TOKEN`, optional `SHEET_RANGE` | `cargo run --example sheets_read` |
 | `application_v6` | Application v6 | List and get applications with `lang` and `user_id_type` | `APP_ID`, `APP_SECRET`, optional `APPLICATION_APP_ID` | `cargo run --example application_v6` |
 | `calendar_events` | Calendar v4 | List calendars and events with pagination/time filters | `APP_ID`, `APP_SECRET`, `CALENDAR_ID`, optional `START_TIME`, `END_TIME` | `cargo run --example calendar_events` |
@@ -49,7 +49,7 @@ Use this table when translating code from the official Go SDK sample tree.
 | `sample/client/main.go` | `client_config` | `NewClient(..., With...)` maps to `Client::builder(...).timeout(...).base_url(...).build()` |
 | `sample/callrawapi/api.go` | `raw_api` | `larkcore.ApiReq` maps to `ApiReq`; `SupportedAccessTokenTypes` maps to `AccessTokenType` |
 | `sample/api/im/im.go` | `send_message`, `im_message_query`, `im_upload_download` | Prefer typed IM resources before raw calls |
-| `sample/api/bitable2.go` | `bitable_records` | Use generated resources and `PageQuery` for paginated Base records |
+| `sample/api/bitable2.go` | `bitable_records` | Use generated resources, `PageQuery`, or `*_by_iterator` for paginated Base records |
 | `sample/api/sheets.go` | `sheets_read` | Use generated Sheets resources for metadata and value reads |
 | `sample/api/application.go` | `application_v6` | Use versioned accessors such as `client.application_v6()` |
 | `sample/event/event.go` | `event_handler` | Register typed event callbacks on `EventDispatcher` |

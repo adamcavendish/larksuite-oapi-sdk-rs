@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### REST service coverage
+
+- Added lazy pagination iterators for generated Contact and Bitable list/search
+  resources, with shared `limit`, `page_token`, and `next_page_token` controls
+  matching the existing IM, Drive, and CoreHR iterator behavior.
+
 ## [0.2.0] - 2026-07-03
 
 ### REST service coverage
