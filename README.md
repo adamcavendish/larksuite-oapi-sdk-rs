@@ -312,6 +312,12 @@ Generated services expose named query structs and `*_by_query` methods for
 request shapes that have path, query, body, or file inputs. Existing positional
 methods remain as compatibility adapters where they already existed.
 
+Paginated resources may also expose `*_by_iterator` helpers. These iterators
+own their request inputs, fetch pages lazily, and provide `limit`,
+`page_token`, and `next_page_token` controls for resumable scans. Contact and
+Bitable list/search resources are the first generated-service areas promoted to
+this pattern, alongside the existing IM, Drive, and CoreHR iterators.
+
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
 requests with the same token handling as the rest of the SDK.
