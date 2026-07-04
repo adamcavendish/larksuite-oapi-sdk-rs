@@ -317,6 +317,9 @@ own their request inputs, fetch pages lazily, and provide `limit`,
 `page_token`, and `next_page_token` controls for resumable scans. Contact and
 Bitable list/search resources are the first generated-service areas promoted to
 this pattern, alongside the existing IM, Drive, and CoreHR iterators.
+Hire v1 catalog resources such as registration schemas, resume sources, job
+functions, job types, locations, roles, and websites also expose typed response
+data and matching iterator helpers.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
