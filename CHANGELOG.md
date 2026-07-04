@@ -7,6 +7,9 @@
 - Added lazy pagination iterators for generated Contact and Bitable list/search
   resources, with shared `limit`, `page_token`, and `next_page_token` controls
   matching the existing IM, Drive, and CoreHR iterator behavior.
+- Added typed Hire v1 catalog responses and lazy iterators for registration
+  schemas, resume sources, job functions, job types, locations, roles, and
+  websites.
 
 ## [0.2.0] - 2026-07-03
 
