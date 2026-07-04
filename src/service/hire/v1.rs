@@ -4,7 +4,9 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::service::common::{EmptyResp, PageQuery, RestRequest};
+use crate::service::common::{
+    EmptyResp, PageIteratorState, PageQuery, RestRequest, impl_page_iterator_controls,
+};
 
 // ── Domain types ──
 
@@ -305,6 +307,128 @@ pub struct ListWebsiteRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
 }
+
+macro_rules! hire_catalog_page_query {
+    ($name:ident) => {
+        #[derive(Debug, Clone, Default)]
+        #[non_exhaustive]
+        pub struct $name<'a> {
+            pub page_size: Option<i32>,
+            pub page_token: Option<&'a str>,
+        }
+
+        impl<'a> $name<'a> {
+            pub fn new() -> Self {
+                Self::default()
+            }
+
+            pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+                self.page_size = value.into();
+                self
+            }
+
+            pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+                self.page_token = value.into();
+                self
+            }
+
+            pub fn page(mut self, page: PageQuery<'a>) -> Self {
+                self.page_size = page.page_size;
+                self.page_token = page.page_token;
+                self
+            }
+
+            pub(crate) fn page_query(&self) -> PageQuery<'a> {
+                PageQuery::from_parts(self.page_size, self.page_token)
+            }
+        }
+    };
+}
+
+hire_catalog_page_query!(ListRegistrationSchemaQuery);
+hire_catalog_page_query!(ListResumeSourceQuery);
+hire_catalog_page_query!(ListJobFunctionQuery);
+hire_catalog_page_query!(ListJobTypeQuery);
+hire_catalog_page_query!(ListLocationQuery);
+hire_catalog_page_query!(ListRoleQuery);
+hire_catalog_page_query!(ListWebsiteQuery);
+
+macro_rules! hire_catalog_iterator {
+    ($iter:ident, $item:ty, $resource:ident, $query:ident) => {
+        #[derive(Debug, Clone)]
+        pub struct $iter<'a> {
+            config: &'a Config,
+            state: PageIteratorState<$item>,
+            page_size: Option<i32>,
+        }
+
+        impl_page_iterator_controls!($iter);
+
+        impl $iter<'_> {
+            pub async fn next(
+                &mut self,
+                option: &RequestOption,
+            ) -> Result<Option<$item>, LarkError> {
+                if let Some(item) = self.state.pop() {
+                    return Ok(Some(item));
+                }
+                if !self.state.should_fetch() {
+                    return Ok(None);
+                }
+
+                let query = $query::new()
+                    .page_size(self.page_size)
+                    .page_token(self.state.page_token_for_request());
+                let resource = $resource {
+                    config: self.config,
+                };
+                let resp = resource.list_by_query(&query, option).await?;
+                let data = resp.data.unwrap_or_default();
+                self.state
+                    .accept_page(Some(data.items), data.page_token, data.has_more);
+                Ok(self.state.pop())
+            }
+        }
+    };
+}
+
+hire_catalog_iterator!(
+    ListRegistrationSchemaIterator,
+    RegistrationSchema,
+    RegistrationSchemaResource,
+    ListRegistrationSchemaQuery
+);
+hire_catalog_iterator!(
+    ListResumeSourceIterator,
+    ResumeSource,
+    ResumeSourceResource,
+    ListResumeSourceQuery
+);
+hire_catalog_iterator!(
+    ListJobFunctionIterator,
+    JobFunction,
+    JobFunctionResource,
+    ListJobFunctionQuery
+);
+hire_catalog_iterator!(
+    ListJobTypeIterator,
+    JobTypeInfo,
+    JobTypeResource,
+    ListJobTypeQuery
+);
+hire_catalog_iterator!(
+    ListLocationIterator,
+    Location,
+    LocationResource,
+    ListLocationQuery
+);
+hire_catalog_iterator!(ListRoleIterator, Role, RoleResource, ListRoleQuery);
+hire_catalog_iterator!(
+    ListWebsiteIterator,
+    Website,
+    WebsiteResource,
+    ListWebsiteQuery
+);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Candidate {
@@ -3071,6 +3195,15 @@ impl RegistrationSchemaResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<ListRegistrationSchemaResp, LarkError> {
+        self.list_by_query(&ListRegistrationSchemaQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListRegistrationSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListRegistrationSchemaResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3078,8 +3211,26 @@ impl RegistrationSchemaResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
         .send_v2_response::<ListRegistrationSchemaRespData, ListRegistrationSchemaResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListRegistrationSchemaIterator<'_> {
+        let query = ListRegistrationSchemaQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListRegistrationSchemaQuery<'_>,
+    ) -> ListRegistrationSchemaIterator<'_> {
+        ListRegistrationSchemaIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 }
 
@@ -3091,6 +3242,15 @@ pub struct ResumeSourceResource<'a> {
 
 impl ResumeSourceResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListResumeSourceResp, LarkError> {
+        self.list_by_query(&ListResumeSourceQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListResumeSourceQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListResumeSourceResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3098,8 +3258,26 @@ impl ResumeSourceResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
         .send_v2_response::<ListResumeSourceRespData, ListResumeSourceResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListResumeSourceIterator<'_> {
+        let query = ListResumeSourceQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListResumeSourceQuery<'_>,
+    ) -> ListResumeSourceIterator<'_> {
+        ListResumeSourceIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 }
 
@@ -3132,6 +3310,15 @@ pub struct JobFunctionResource<'a> {
 
 impl JobFunctionResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListJobFunctionResp, LarkError> {
+        self.list_by_query(&ListJobFunctionQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobFunctionQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobFunctionResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3139,8 +3326,26 @@ impl JobFunctionResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
         .send_v2_response::<ListJobFunctionRespData, ListJobFunctionResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListJobFunctionIterator<'_> {
+        let query = ListJobFunctionQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListJobFunctionQuery<'_>,
+    ) -> ListJobFunctionIterator<'_> {
+        ListJobFunctionIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 }
 
@@ -3150,6 +3355,14 @@ pub struct JobTypeResource<'a> {
 
 impl JobTypeResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListJobTypeResp, LarkError> {
+        self.list_by_query(&ListJobTypeQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobTypeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobTypeResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3157,8 +3370,23 @@ impl JobTypeResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
         .send_v2_response::<ListJobTypeRespData, ListJobTypeResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListJobTypeIterator<'_> {
+        let query = ListJobTypeQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListJobTypeQuery<'_>) -> ListJobTypeIterator<'_> {
+        ListJobTypeIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 }
 
@@ -3173,6 +3401,14 @@ pub struct LocationResource<'a> {
 
 impl LocationResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListLocationResp, LarkError> {
+        self.list_by_query(&ListLocationQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListLocationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListLocationResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3180,8 +3416,26 @@ impl LocationResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
         .send_v2_response::<ListLocationRespData, ListLocationResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListLocationIterator<'_> {
+        let query = ListLocationQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListLocationQuery<'_>,
+    ) -> ListLocationIterator<'_> {
+        ListLocationIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 
     pub async fn query(
@@ -3207,6 +3461,14 @@ pub struct RoleResource<'a> {
 
 impl RoleResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListRoleResp, LarkError> {
+        self.list_by_query(&ListRoleQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListRoleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListRoleResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3214,8 +3476,23 @@ impl RoleResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
         .send_v2_response::<ListRoleRespData, ListRoleResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListRoleIterator<'_> {
+        let query = ListRoleQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListRoleQuery<'_>) -> ListRoleIterator<'_> {
+        ListRoleIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 
     pub async fn get(
@@ -3261,6 +3538,14 @@ pub struct WebsiteResource<'a> {
 
 impl WebsiteResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListWebsiteResp, LarkError> {
+        self.list_by_query(&ListWebsiteQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListWebsiteQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListWebsiteResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3268,8 +3553,23 @@ impl WebsiteResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
         .send_v2_response::<ListWebsiteRespData, ListWebsiteResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListWebsiteIterator<'_> {
+        let query = ListWebsiteQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListWebsiteQuery<'_>) -> ListWebsiteIterator<'_> {
+        ListWebsiteIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 }
 
