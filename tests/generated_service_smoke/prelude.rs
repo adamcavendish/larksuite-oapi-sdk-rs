@@ -246,7 +246,11 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         ListOfferQuery as ListHireOfferQuery,
         ListRegistrationSchemaQuery as ListHireRegistrationSchemaQuery,
         ListResumeSourceQuery as ListHireResumeSourceQuery, ListRoleQuery as ListHireRoleQuery,
-        ListTalentQuery as ListHireTalentQuery, ListWebsiteQuery as ListHireWebsiteQuery,
+        ListSubjectQuery as ListHireSubjectQuery,
+        ListTalentFolderQuery as ListHireTalentFolderQuery, ListTalentQuery as ListHireTalentQuery,
+        ListTerminationReasonQuery as ListHireTerminationReasonQuery,
+        ListTodoQuery as ListHireTodoQuery, ListUserRoleQuery as ListHireUserRoleQuery,
+        ListWebsiteQuery as ListHireWebsiteQuery,
     },
     hire::v2::{
         GetInterviewRecordV2Query as GetHireV2InterviewRecordQuery,
