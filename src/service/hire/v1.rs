@@ -976,6 +976,70 @@ impl ListUserRoleIterator<'_> {
     }
 }
 
+macro_rules! hire_task_iterator {
+    ($iter:ident, $item:ty, $resource:ident, $query:ident) => {
+        #[derive(Debug, Clone)]
+        pub struct $iter<'a> {
+            config: &'a Config,
+            state: PageIteratorState<$item>,
+            page_size: Option<i32>,
+            user_id: Option<String>,
+            activity_status: Option<i32>,
+            user_id_type: Option<String>,
+        }
+
+        impl_page_iterator_controls!($iter);
+
+        impl $iter<'_> {
+            pub async fn next(
+                &mut self,
+                option: &RequestOption,
+            ) -> Result<Option<$item>, LarkError> {
+                if let Some(item) = self.state.pop() {
+                    return Ok(Some(item));
+                }
+                if !self.state.should_fetch() {
+                    return Ok(None);
+                }
+
+                let query = $query::new()
+                    .page_size(self.page_size)
+                    .page_token(self.state.page_token_for_request())
+                    .user_id(self.user_id.as_deref())
+                    .activity_status(self.activity_status)
+                    .user_id_type(self.user_id_type.as_deref());
+                let resource = $resource {
+                    config: self.config,
+                };
+                let resp = resource.list_by_query(&query, option).await?;
+                let data = resp.data.unwrap_or_default();
+                self.state
+                    .accept_page(Some(data.items), data.page_token, data.has_more);
+                Ok(self.state.pop())
+            }
+        }
+    };
+}
+
+hire_task_iterator!(
+    ListEvaluationTaskIterator,
+    EvaluationTask,
+    EvaluationTaskResource,
+    ListEvaluationTaskQuery
+);
+hire_task_iterator!(
+    ListExamMarkingTaskIterator,
+    ExamMarkingTask,
+    ExamMarkingTaskResource,
+    ListExamMarkingTaskQuery
+);
+hire_task_iterator!(
+    ListInterviewTaskIterator,
+    InterviewTask,
+    InterviewTaskResource,
+    ListInterviewTaskQuery
+);
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Candidate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -5904,6 +5968,36 @@ impl EvaluationTaskResource<'_> {
         .send_v2_response::<ListEvaluationTaskRespData, ListEvaluationTaskResp>()
         .await
     }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        user_id: Option<&str>,
+        activity_status: Option<i32>,
+        user_id_type: Option<&str>,
+    ) -> ListEvaluationTaskIterator<'_> {
+        let query = ListEvaluationTaskQuery::new()
+            .page_size(page_size)
+            .user_id(user_id)
+            .activity_status(activity_status)
+            .user_id_type(user_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListEvaluationTaskQuery<'_>,
+    ) -> ListEvaluationTaskIterator<'_> {
+        ListEvaluationTaskIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            user_id: query.user_id.map(ToOwned::to_owned),
+            activity_status: query.activity_status,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
+    }
 }
 
 // ── Exam resource ──
@@ -6021,6 +6115,36 @@ impl ExamMarkingTaskResource<'_> {
         .query("user_id_type", query.user_id_type)
         .send_v2_response::<ListExamMarkingTaskRespData, ListExamMarkingTaskResp>()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        user_id: Option<&str>,
+        activity_status: Option<i32>,
+        user_id_type: Option<&str>,
+    ) -> ListExamMarkingTaskIterator<'_> {
+        let query = ListExamMarkingTaskQuery::new()
+            .page_size(page_size)
+            .user_id(user_id)
+            .activity_status(activity_status)
+            .user_id_type(user_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListExamMarkingTaskQuery<'_>,
+    ) -> ListExamMarkingTaskIterator<'_> {
+        ListExamMarkingTaskIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            user_id: query.user_id.map(ToOwned::to_owned),
+            activity_status: query.activity_status,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
@@ -6311,6 +6435,36 @@ impl InterviewTaskResource<'_> {
         .query("user_id_type", query.user_id_type)
         .send_v2_response::<ListInterviewTaskRespData, ListInterviewTaskResp>()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        user_id: Option<&str>,
+        activity_status: Option<i32>,
+        user_id_type: Option<&str>,
+    ) -> ListInterviewTaskIterator<'_> {
+        let query = ListInterviewTaskQuery::new()
+            .page_size(page_size)
+            .user_id(user_id)
+            .activity_status(activity_status)
+            .user_id_type(user_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListInterviewTaskQuery<'_>,
+    ) -> ListInterviewTaskIterator<'_> {
+        ListInterviewTaskIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            user_id: query.user_id.map(ToOwned::to_owned),
+            activity_status: query.activity_status,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
