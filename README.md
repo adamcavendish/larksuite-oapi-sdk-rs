@@ -319,7 +319,10 @@ Bitable list/search resources are the first generated-service areas promoted to
 this pattern, alongside the existing IM, Drive, and CoreHR iterators.
 Hire v1 catalog resources such as registration schemas, resume sources, job
 functions, job types, locations, roles, and websites also expose typed response
-data and matching iterator helpers.
+data and matching iterator helpers. Lightweight Hire reference lists now cover
+subjects, talent folders, termination reasons, todos, and user-role assignments
+with typed response data, plus iterators where the Go SDK exposes
+`ListByIterator`.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
