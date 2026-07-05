@@ -233,6 +233,88 @@ pub struct Website {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Subject {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_limit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator: Option<IdNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentFolderForList {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TerminationReason {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub referral_name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub termination_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_used_as_evaluation: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TodoCommon {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Todo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub evaluation: Option<TodoCommon>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer: Option<TodoCommon>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exam: Option<TodoCommon>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview: Option<TodoCommon>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserRole {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub business_management_scopes: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListRegistrationSchemaRespData {
     #[serde(default)]
     pub items: Vec<RegistrationSchema>,
@@ -302,6 +384,56 @@ pub struct ListRoleRespData {
 pub struct ListWebsiteRespData {
     #[serde(default)]
     pub items: Vec<Website>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListSubjectRespData {
+    #[serde(default)]
+    pub items: Vec<Subject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListTalentFolderRespData {
+    #[serde(default)]
+    pub items: Vec<TalentFolderForList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListTerminationReasonRespData {
+    #[serde(default)]
+    pub items: Vec<TerminationReason>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListTodoRespData {
+    #[serde(default)]
+    pub items: Vec<Todo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListUserRoleRespData {
+    #[serde(default)]
+    pub items: Vec<UserRole>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2800,10 +2932,10 @@ impl_resp_v2!(ListJobProcessResp, serde_json::Value);
 impl_resp_v2!(ListLocationResp, ListLocationRespData);
 impl_resp_v2!(ListRoleResp, ListRoleRespData);
 impl_resp_v2!(GetRoleResp, GetRoleRespData);
-impl_resp_v2!(ListSubjectResp, serde_json::Value);
-impl_resp_v2!(ListTalentFolderResp, serde_json::Value);
-impl_resp_v2!(ListTerminationReasonResp, serde_json::Value);
-impl_resp_v2!(ListUserRoleResp, serde_json::Value);
+impl_resp_v2!(ListSubjectResp, ListSubjectRespData);
+impl_resp_v2!(ListTalentFolderResp, ListTalentFolderRespData);
+impl_resp_v2!(ListTerminationReasonResp, ListTerminationReasonRespData);
+impl_resp_v2!(ListUserRoleResp, ListUserRoleRespData);
 impl_resp_v2!(ListWebsiteResp, ListWebsiteRespData);
 impl_resp_v2!(ListWebsiteJobPostResp, serde_json::Value);
 impl_resp_v2!(GetWebsiteJobPostResp, serde_json::Value);
@@ -2824,7 +2956,7 @@ impl_resp_v2!(DeleteExternalInterviewResp, ());
 impl_resp_v2!(CreateExternalBackgroundCheckResp, serde_json::Value);
 impl_resp_v2!(UpdateExternalBackgroundCheckResp, serde_json::Value);
 impl_resp_v2!(DeleteExternalBackgroundCheckResp, ());
-impl_resp_v2!(ListTodoResp, serde_json::Value);
+impl_resp_v2!(ListTodoResp, ListTodoRespData);
 impl_resp_v2!(CreateTripartiteAgreementResp, serde_json::Value);
 impl_resp_v2!(UpdateTripartiteAgreementResp, serde_json::Value);
 impl_resp_v2!(DeleteTripartiteAgreementResp, ());
@@ -3512,26 +3644,80 @@ impl RoleResource<'_> {
         .await
     }
 }
-simple_list_resource!(
-    SubjectResource,
-    ListSubjectResp,
-    "/open-apis/hire/v1/subjects"
-);
-simple_list_resource!(
-    TalentFolderResource,
-    ListTalentFolderResp,
-    "/open-apis/hire/v1/talent_folders"
-);
-simple_list_resource!(
-    TerminationReasonResource,
-    ListTerminationReasonResp,
-    "/open-apis/hire/v1/termination_reasons"
-);
-simple_list_resource!(
-    UserRoleResource,
-    ListUserRoleResp,
-    "/open-apis/hire/v1/user_roles"
-);
+pub struct SubjectResource<'a> {
+    config: &'a Config,
+}
+
+impl SubjectResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListSubjectResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/subjects",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2_response::<ListSubjectRespData, ListSubjectResp>()
+        .await
+    }
+}
+
+pub struct TalentFolderResource<'a> {
+    config: &'a Config,
+}
+
+impl TalentFolderResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListTalentFolderResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/talent_folders",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2_response::<ListTalentFolderRespData, ListTalentFolderResp>()
+        .await
+    }
+}
+
+pub struct TerminationReasonResource<'a> {
+    config: &'a Config,
+}
+
+impl TerminationReasonResource<'_> {
+    pub async fn list(
+        &self,
+        option: &RequestOption,
+    ) -> Result<ListTerminationReasonResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/termination_reasons",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2_response::<ListTerminationReasonRespData, ListTerminationReasonResp>()
+        .await
+    }
+}
+
+pub struct UserRoleResource<'a> {
+    config: &'a Config,
+}
+
+impl UserRoleResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListUserRoleResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/user_roles",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2_response::<ListUserRoleRespData, ListUserRoleResp>()
+        .await
+    }
+}
 pub struct WebsiteResource<'a> {
     config: &'a Config,
 }
@@ -3901,7 +4087,7 @@ impl TodoResource<'_> {
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListTodoResp>()
+        .send_v2_response::<ListTodoRespData, ListTodoResp>()
         .await
     }
 }
