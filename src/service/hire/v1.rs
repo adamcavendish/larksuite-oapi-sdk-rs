@@ -485,6 +485,196 @@ hire_catalog_page_query!(ListLocationQuery);
 hire_catalog_page_query!(ListRoleQuery);
 hire_catalog_page_query!(ListWebsiteQuery);
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListSubjectQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub subject_ids: Option<&'a [&'a str]>,
+}
+
+impl<'a> ListSubjectQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn subject_ids(mut self, value: impl Into<Option<&'a [&'a str]>>) -> Self {
+        self.subject_ids = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListTalentFolderQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListTalentFolderQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+hire_catalog_page_query!(ListTerminationReasonQuery);
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListTodoQuery<'a> {
+    pub page_size: Option<&'a str>,
+    pub page_token: Option<&'a str>,
+    pub user_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub type_: Option<&'a str>,
+}
+
+impl<'a> ListTodoQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn type_(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.type_ = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListUserRoleQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id: Option<&'a str>,
+    pub role_id: Option<&'a str>,
+    pub update_start_time: Option<&'a str>,
+    pub update_end_time: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListUserRoleQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+
+    pub fn role_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.role_id = value.into();
+        self
+    }
+
+    pub fn update_start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_start_time = value.into();
+        self
+    }
+
+    pub fn update_end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_end_time = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 macro_rules! hire_catalog_iterator {
     ($iter:ident, $item:ty, $resource:ident, $query:ident) => {
         #[derive(Debug, Clone)]
@@ -561,6 +751,158 @@ hire_catalog_iterator!(
     WebsiteResource,
     ListWebsiteQuery
 );
+
+#[derive(Debug, Clone)]
+pub struct ListTalentFolderIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<TalentFolderForList>,
+    page_size: Option<i32>,
+    user_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(ListTalentFolderIterator);
+
+impl ListTalentFolderIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<TalentFolderForList>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListTalentFolderQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .user_id_type(self.user_id_type.as_deref());
+        let resource = TalentFolderResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListTerminationReasonIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<TerminationReason>,
+    page_size: Option<i32>,
+}
+
+impl_page_iterator_controls!(ListTerminationReasonIterator);
+
+impl ListTerminationReasonIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<TerminationReason>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListTerminationReasonQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request());
+        let resource = TerminationReasonResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListTodoIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Todo>,
+    page_size: Option<String>,
+    user_id: Option<String>,
+    user_id_type: Option<String>,
+    type_: Option<String>,
+}
+
+impl_page_iterator_controls!(ListTodoIterator);
+
+impl ListTodoIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Todo>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListTodoQuery::new()
+            .page_size(self.page_size.as_deref())
+            .page_token(self.state.page_token_for_request())
+            .user_id(self.user_id.as_deref())
+            .user_id_type(self.user_id_type.as_deref())
+            .type_(self.type_.as_deref());
+        let resource = TodoResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListUserRoleIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<UserRole>,
+    page_size: Option<i32>,
+    user_id: Option<String>,
+    role_id: Option<String>,
+    update_start_time: Option<String>,
+    update_end_time: Option<String>,
+    user_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(ListUserRoleIterator);
+
+impl ListUserRoleIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<UserRole>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListUserRoleQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .user_id(self.user_id.as_deref())
+            .role_id(self.role_id.as_deref())
+            .update_start_time(self.update_start_time.as_deref())
+            .update_end_time(self.update_end_time.as_deref())
+            .user_id_type(self.user_id_type.as_deref());
+        let resource = UserRoleResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Candidate {
@@ -3650,12 +3992,26 @@ pub struct SubjectResource<'a> {
 
 impl SubjectResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListSubjectResp, LarkError> {
+        self.list_by_query(&ListSubjectQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListSubjectQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListSubjectResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/subjects",
             vec![AccessTokenType::Tenant],
             option,
+        )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .query_values(
+            "subject_ids",
+            query.subject_ids.map(|ids| ids.iter().copied()),
         )
         .send_v2_response::<ListSubjectRespData, ListSubjectResp>()
         .await
@@ -3668,6 +4024,15 @@ pub struct TalentFolderResource<'a> {
 
 impl TalentFolderResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListTalentFolderResp, LarkError> {
+        self.list_by_query(&ListTalentFolderQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTalentFolderQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTalentFolderResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3675,8 +4040,34 @@ impl TalentFolderResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
         .send_v2_response::<ListTalentFolderRespData, ListTalentFolderResp>()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        user_id_type: Option<&str>,
+    ) -> ListTalentFolderIterator<'_> {
+        let query = ListTalentFolderQuery::new()
+            .page_size(page_size)
+            .user_id_type(user_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListTalentFolderQuery<'_>,
+    ) -> ListTalentFolderIterator<'_> {
+        ListTalentFolderIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
@@ -3689,6 +4080,15 @@ impl TerminationReasonResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<ListTerminationReasonResp, LarkError> {
+        self.list_by_query(&ListTerminationReasonQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTerminationReasonQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTerminationReasonResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3696,8 +4096,26 @@ impl TerminationReasonResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
         .send_v2_response::<ListTerminationReasonRespData, ListTerminationReasonResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListTerminationReasonIterator<'_> {
+        let query = ListTerminationReasonQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListTerminationReasonQuery<'_>,
+    ) -> ListTerminationReasonIterator<'_> {
+        ListTerminationReasonIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 }
 
@@ -3707,6 +4125,14 @@ pub struct UserRoleResource<'a> {
 
 impl UserRoleResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListUserRoleResp, LarkError> {
+        self.list_by_query(&ListUserRoleQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListUserRoleQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListUserRoleResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -3714,8 +4140,50 @@ impl UserRoleResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id", query.user_id)
+        .query("role_id", query.role_id)
+        .query("update_start_time", query.update_start_time)
+        .query("update_end_time", query.update_end_time)
+        .query("user_id_type", query.user_id_type)
         .send_v2_response::<ListUserRoleRespData, ListUserRoleResp>()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        user_id: Option<&str>,
+        role_id: Option<&str>,
+        update_start_time: Option<&str>,
+        update_end_time: Option<&str>,
+        user_id_type: Option<&str>,
+    ) -> ListUserRoleIterator<'_> {
+        let query = ListUserRoleQuery::new()
+            .page_size(page_size)
+            .user_id(user_id)
+            .role_id(role_id)
+            .update_start_time(update_start_time)
+            .update_end_time(update_end_time)
+            .user_id_type(user_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListUserRoleQuery<'_>,
+    ) -> ListUserRoleIterator<'_> {
+        ListUserRoleIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            user_id: query.user_id.map(ToOwned::to_owned),
+            role_id: query.role_id.map(ToOwned::to_owned),
+            update_start_time: query.update_start_time.map(ToOwned::to_owned),
+            update_end_time: query.update_end_time.map(ToOwned::to_owned),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 pub struct WebsiteResource<'a> {
@@ -4080,6 +4548,14 @@ pub struct TodoResource<'a> {
 
 impl TodoResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListTodoResp, LarkError> {
+        self.list_by_query(&ListTodoQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTodoQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTodoResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -4087,8 +4563,40 @@ impl TodoResource<'_> {
             vec![AccessTokenType::User],
             option,
         )
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
+        .query("user_id", query.user_id)
+        .query("user_id_type", query.user_id_type)
+        .query("type", query.type_)
         .send_v2_response::<ListTodoRespData, ListTodoResp>()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<&str>,
+        user_id: Option<&str>,
+        user_id_type: Option<&str>,
+        type_: Option<&str>,
+    ) -> ListTodoIterator<'_> {
+        let query = ListTodoQuery::new()
+            .page_size(page_size)
+            .user_id(user_id)
+            .user_id_type(user_id_type)
+            .type_(type_);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(&self, query: &ListTodoQuery<'_>) -> ListTodoIterator<'_> {
+        ListTodoIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size.map(ToOwned::to_owned),
+            user_id: query.user_id.map(ToOwned::to_owned),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            type_: query.type_.map(ToOwned::to_owned),
+        }
     }
 }
 
