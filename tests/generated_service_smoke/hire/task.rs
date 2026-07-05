@@ -23,7 +23,7 @@ async fn hire_evaluation_task_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("evaluation-task-1"));
+    assert_eq!(data.items[0].id.as_deref(), Some("evaluation-task-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/evaluation_tasks?"));
     assert!(request.contains("user_id=ou_user_1"));
@@ -53,7 +53,7 @@ async fn hire_exam_marking_task_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("exam-task-1"));
+    assert_eq!(data.items[0].id.as_deref(), Some("exam-task-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/exam_marking_tasks?"));
     assert!(request.contains("user_id=ou_user_1"));
@@ -84,7 +84,7 @@ async fn hire_interview_task_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("interview-task-1"));
+    assert_eq!(data.items[0].id.as_deref(), Some("interview-task-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/interview_tasks?"));
     assert!(request.contains("user_id=ou_user_1"));
