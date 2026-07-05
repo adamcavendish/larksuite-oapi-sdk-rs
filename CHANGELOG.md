@@ -10,6 +10,9 @@
 - Added typed Hire v1 catalog responses and lazy iterators for registration
   schemas, resume sources, job functions, job types, locations, roles, and
   websites.
+- Added typed Hire v1 reference responses for subjects, talent folders,
+  termination reasons, todos, and user-role assignments, with lazy iterators
+  for the paginated reference lists that expose Go SDK iterator support.
 
 ## [0.2.0] - 2026-07-03
 
