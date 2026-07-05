@@ -322,7 +322,8 @@ functions, job types, locations, roles, and websites also expose typed response
 data and matching iterator helpers. Lightweight Hire reference lists now cover
 subjects, talent folders, termination reasons, todos, and user-role assignments
 with typed response data, plus iterators where the Go SDK exposes
-`ListByIterator`.
+`ListByIterator`. Hire task lists for evaluation, exam marking, and interview
+work also expose typed response data and iterator helpers.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
