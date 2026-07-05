@@ -13,6 +13,8 @@
 - Added typed Hire v1 reference responses for subjects, talent folders,
   termination reasons, todos, and user-role assignments, with lazy iterators
   for the paginated reference lists that expose Go SDK iterator support.
+- Added typed Hire v1 task list responses and lazy iterators for evaluation,
+  exam-marking, and interview tasks.
 
 ## [0.2.0] - 2026-07-03
 
