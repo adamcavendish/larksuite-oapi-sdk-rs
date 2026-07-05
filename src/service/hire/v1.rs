@@ -315,6 +315,48 @@ pub struct UserRole {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EvaluationTask {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExamMarkingTask {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewTask {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListRegistrationSchemaRespData {
     #[serde(default)]
     pub items: Vec<RegistrationSchema>,
@@ -434,6 +476,36 @@ pub struct ListTodoRespData {
 pub struct ListUserRoleRespData {
     #[serde(default)]
     pub items: Vec<UserRole>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListEvaluationTaskRespData {
+    #[serde(default)]
+    pub items: Vec<EvaluationTask>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListExamMarkingTaskRespData {
+    #[serde(default)]
+    pub items: Vec<ExamMarkingTask>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListInterviewTaskRespData {
+    #[serde(default)]
+    pub items: Vec<InterviewTask>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -3385,9 +3457,9 @@ impl_resp_v2!(SearchWebsiteJobPostResp, serde_json::Value);
 impl_resp_v2!(OfferApplicationResp, serde_json::Value);
 impl_resp_v2!(ListApplicationInterviewResp2, serde_json::Value);
 impl_resp_v2!(PatchEhrImportTaskResp, serde_json::Value);
-impl_resp_v2!(ListEvaluationTaskResp, serde_json::Value);
+impl_resp_v2!(ListEvaluationTaskResp, ListEvaluationTaskRespData);
 impl_resp_v2!(CreateExamResp, serde_json::Value);
-impl_resp_v2!(ListExamMarkingTaskResp, serde_json::Value);
+impl_resp_v2!(ListExamMarkingTaskResp, ListExamMarkingTaskRespData);
 impl_resp_v2!(CreateExternalInterviewAssessmentResp, serde_json::Value);
 impl_resp_v2!(PatchExternalInterviewAssessmentResp, serde_json::Value);
 impl_resp_v2!(CreateExternalReferralRewardResp, serde_json::Value);
@@ -3396,7 +3468,7 @@ impl_resp_v2!(ListInterviewFeedbackFormResp, serde_json::Value);
 impl_resp_v2!(GetInterviewRecordAttachmentResp, serde_json::Value);
 impl_resp_v2!(ListInterviewRegistrationSchemaResp, serde_json::Value);
 impl_resp_v2!(ListInterviewRoundTypeResp, serde_json::Value);
-impl_resp_v2!(ListInterviewTaskResp, serde_json::Value);
+impl_resp_v2!(ListInterviewTaskResp, ListInterviewTaskRespData);
 impl_resp_v2!(GetJobManagerResp, serde_json::Value);
 impl_resp_v2!(ListJobRequirementSchemaResp, serde_json::Value);
 impl_resp_v2!(ListJobSchemaResp, serde_json::Value);
@@ -5829,7 +5901,7 @@ impl EvaluationTaskResource<'_> {
         .query("user_id", query.user_id)
         .query("activity_status", query.activity_status)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, ListEvaluationTaskResp>()
+        .send_v2_response::<ListEvaluationTaskRespData, ListEvaluationTaskResp>()
         .await
     }
 }
@@ -5947,7 +6019,7 @@ impl ExamMarkingTaskResource<'_> {
         .query("user_id", query.user_id)
         .query("activity_status", query.activity_status)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, ListExamMarkingTaskResp>()
+        .send_v2_response::<ListExamMarkingTaskRespData, ListExamMarkingTaskResp>()
         .await
     }
 }
@@ -6237,7 +6309,7 @@ impl InterviewTaskResource<'_> {
         .query("user_id", query.user_id)
         .query("activity_status", query.activity_status)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, ListInterviewTaskResp>()
+        .send_v2_response::<ListInterviewTaskRespData, ListInterviewTaskResp>()
         .await
     }
 }
