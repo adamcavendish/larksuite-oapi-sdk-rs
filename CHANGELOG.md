@@ -26,6 +26,9 @@
   employees, evaluations, notes, interview records, tripartite agreements, and
   background check orders, with lazy iterators where the Go SDK exposes
   `ListByIterator`.
+- Added typed Hire v1 referral and talent read/search responses for referral
+  lookup/search, talent object schemas, talent operation logs, and talent
+  pools, with a lazy iterator for talent pool search.
 
 ## [0.2.0] - 2026-07-03
 

@@ -333,6 +333,9 @@ includes read/list coverage for job process and schema config, Offer
 application forms and approval templates, questionnaires, talent tags,
 employees, evaluations, notes, interview records, tripartite agreements, and
 background check orders, with iterators for the Go-backed paginated lists.
+Referral and talent read/search helpers cover referral lookup/search, talent
+object schemas, talent operation logs, and talent pools, including an iterator
+for talent pool search.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
