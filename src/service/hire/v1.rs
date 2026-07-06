@@ -1141,6 +1141,130 @@ hire_task_iterator!(
     ListInterviewTaskQuery
 );
 
+#[derive(Debug, Clone)]
+pub struct ListInterviewFeedbackFormIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<InterviewFeedbackForm>,
+    page_size: Option<i32>,
+    interview_feedback_form_ids: Vec<String>,
+    user_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(ListInterviewFeedbackFormIterator);
+
+impl ListInterviewFeedbackFormIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<InterviewFeedbackForm>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let ids: Vec<&str> = self
+            .interview_feedback_form_ids
+            .iter()
+            .map(String::as_str)
+            .collect();
+        let query = ListInterviewFeedbackFormQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .interview_feedback_form_ids((!ids.is_empty()).then_some(ids.as_slice()))
+            .user_id_type(self.user_id_type.as_deref());
+        let resource = InterviewFeedbackFormResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListInterviewRegistrationSchemaIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<InterviewRegistrationSchema>,
+    page_size: Option<i32>,
+    user_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(ListInterviewRegistrationSchemaIterator);
+
+impl ListInterviewRegistrationSchemaIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<InterviewRegistrationSchema>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListInterviewRegistrationSchemaQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .user_id_type(self.user_id_type.as_deref());
+        let resource = InterviewRegistrationSchemaResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListInterviewerIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Interviewer>,
+    page_size: Option<i32>,
+    user_ids: Vec<String>,
+    verify_status: Option<i32>,
+    earliest_update_time: Option<String>,
+    latest_update_time: Option<String>,
+    user_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(ListInterviewerIterator);
+
+impl ListInterviewerIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Interviewer>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let user_ids: Vec<&str> = self.user_ids.iter().map(String::as_str).collect();
+        let query = ListInterviewerQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .user_ids((!user_ids.is_empty()).then_some(user_ids.as_slice()))
+            .verify_status(self.verify_status)
+            .earliest_update_time(self.earliest_update_time.as_deref())
+            .latest_update_time(self.latest_update_time.as_deref())
+            .user_id_type(self.user_id_type.as_deref());
+        let resource = InterviewerResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Candidate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -4578,8 +4702,80 @@ pub struct InterviewerResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListInterviewerQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_ids: Option<&'a [&'a str]>,
+    pub verify_status: Option<i32>,
+    pub earliest_update_time: Option<&'a str>,
+    pub latest_update_time: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListInterviewerQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_ids(mut self, value: impl Into<Option<&'a [&'a str]>>) -> Self {
+        self.user_ids = value.into();
+        self
+    }
+
+    pub fn verify_status(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.verify_status = value.into();
+        self
+    }
+
+    pub fn earliest_update_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.earliest_update_time = value.into();
+        self
+    }
+
+    pub fn latest_update_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.latest_update_time = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl InterviewerResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListInterviewerResp, LarkError> {
+        self.list_by_query(&ListInterviewerQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListInterviewerQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewerResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -4587,8 +4783,53 @@ impl InterviewerResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query_values("user_ids", query.user_ids.map(|ids| ids.iter().copied()))
+        .query("verify_status", query.verify_status)
+        .query("earliest_update_time", query.earliest_update_time)
+        .query("latest_update_time", query.latest_update_time)
+        .query("user_id_type", query.user_id_type)
         .send_v2_response::<ListInterviewerRespData, ListInterviewerResp>()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        user_ids: Option<&[&str]>,
+        verify_status: Option<i32>,
+        earliest_update_time: Option<&str>,
+        latest_update_time: Option<&str>,
+        user_id_type: Option<&str>,
+    ) -> ListInterviewerIterator<'_> {
+        let query = ListInterviewerQuery::new()
+            .page_size(page_size)
+            .user_ids(user_ids)
+            .verify_status(verify_status)
+            .earliest_update_time(earliest_update_time)
+            .latest_update_time(latest_update_time)
+            .user_id_type(user_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListInterviewerQuery<'_>,
+    ) -> ListInterviewerIterator<'_> {
+        ListInterviewerIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            user_ids: query
+                .user_ids
+                .map(|ids| ids.iter().map(|id| (*id).to_owned()).collect())
+                .unwrap_or_default(),
+            verify_status: query.verify_status,
+            earliest_update_time: query.earliest_update_time.map(ToOwned::to_owned),
+            latest_update_time: query.latest_update_time.map(ToOwned::to_owned),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 
     pub async fn patch(
@@ -6353,12 +6594,69 @@ pub struct InterviewFeedbackFormResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListInterviewFeedbackFormQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub interview_feedback_form_ids: Option<&'a [&'a str]>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListInterviewFeedbackFormQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn interview_feedback_form_ids(mut self, value: impl Into<Option<&'a [&'a str]>>) -> Self {
+        self.interview_feedback_form_ids = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl InterviewFeedbackFormResource<'_> {
     pub async fn list(
         &self,
         page_size: Option<i32>,
         page_token: Option<&str>,
         user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewFeedbackFormResp, LarkError> {
+        let query = ListInterviewFeedbackFormQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListInterviewFeedbackFormQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListInterviewFeedbackFormResp, LarkError> {
         RestRequest::new(
@@ -6368,11 +6666,46 @@ impl InterviewFeedbackFormResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
-        .query("user_id_type", user_id_type)
+        .page_query(query.page_query())
+        .query_values(
+            "interview_feedback_form_ids",
+            query
+                .interview_feedback_form_ids
+                .map(|ids| ids.iter().copied()),
+        )
+        .query("user_id_type", query.user_id_type)
         .send_v2_response::<ListInterviewFeedbackFormRespData, ListInterviewFeedbackFormResp>()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        interview_feedback_form_ids: Option<&[&str]>,
+        user_id_type: Option<&str>,
+    ) -> ListInterviewFeedbackFormIterator<'_> {
+        let query = ListInterviewFeedbackFormQuery::new()
+            .page_size(page_size)
+            .interview_feedback_form_ids(interview_feedback_form_ids)
+            .user_id_type(user_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListInterviewFeedbackFormQuery<'_>,
+    ) -> ListInterviewFeedbackFormIterator<'_> {
+        ListInterviewFeedbackFormIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            interview_feedback_form_ids: query
+                .interview_feedback_form_ids
+                .map(|ids| ids.iter().map(|id| (*id).to_owned()).collect())
+                .unwrap_or_default(),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
@@ -6405,12 +6738,63 @@ pub struct InterviewRegistrationSchemaResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListInterviewRegistrationSchemaQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListInterviewRegistrationSchemaQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl InterviewRegistrationSchemaResource<'_> {
     pub async fn list(
         &self,
         page_size: Option<i32>,
         page_token: Option<&str>,
         user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewRegistrationSchemaResp, LarkError> {
+        let query = ListInterviewRegistrationSchemaQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListInterviewRegistrationSchemaQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListInterviewRegistrationSchemaResp, LarkError> {
         RestRequest::new(
@@ -6420,14 +6804,37 @@ impl InterviewRegistrationSchemaResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
-        .query("user_id_type", user_id_type)
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
         .send_v2_response::<
             ListInterviewRegistrationSchemaRespData,
             ListInterviewRegistrationSchemaResp,
         >()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        user_id_type: Option<&str>,
+    ) -> ListInterviewRegistrationSchemaIterator<'_> {
+        let query = ListInterviewRegistrationSchemaQuery::new()
+            .page_size(page_size)
+            .user_id_type(user_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListInterviewRegistrationSchemaQuery<'_>,
+    ) -> ListInterviewRegistrationSchemaIterator<'_> {
+        ListInterviewRegistrationSchemaIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
@@ -6437,11 +6844,51 @@ pub struct InterviewRoundTypeResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListInterviewRoundTypeQuery {
+    pub page_size: Option<i32>,
+    pub page_token: Option<String>,
+    pub process_type: Option<i32>,
+}
+
+impl ListInterviewRoundTypeQuery {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<String>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn process_type(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.process_type = value.into();
+        self
+    }
+}
+
 impl InterviewRoundTypeResource<'_> {
     pub async fn list(
         &self,
         page_size: Option<i32>,
         page_token: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewRoundTypeResp, LarkError> {
+        let query = ListInterviewRoundTypeQuery::new()
+            .page_size(page_size)
+            .page_token(page_token.map(ToOwned::to_owned));
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListInterviewRoundTypeQuery,
         option: &RequestOption,
     ) -> Result<ListInterviewRoundTypeResp, LarkError> {
         RestRequest::new(
@@ -6451,8 +6898,9 @@ impl InterviewRoundTypeResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token.as_deref())
+        .query("process_type", query.process_type)
         .send_v2_response::<ListInterviewRoundTypeRespData, ListInterviewRoundTypeResp>()
         .await
     }
