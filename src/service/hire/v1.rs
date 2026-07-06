@@ -787,6 +787,106 @@ pub struct TalentTag {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Referral {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub referral_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub referral_user: Option<IdNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReferralBasicInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub referral_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_info: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub referral_method: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReferralRecommendInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relationship: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub familiarity: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub specific_relationship: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_ability_familiarity: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub match_degree: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReferralInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub referral_user: Option<IdNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReferralInfoV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub basic_info: Option<ReferralBasicInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recommend_info: Option<ReferralRecommendInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentOperationLog {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operation_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operation_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentPool {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_private: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Employee {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1028,6 +1128,44 @@ pub struct ListBackgroundCheckOrderRespData {
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetReferralRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub referral: Option<Referral>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchReferralRespData {
+    #[serde(default)]
+    pub items: Vec<ReferralInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryTalentObjectRespData {
+    #[serde(default)]
+    pub items: Vec<CommonSchema>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchTalentOperationLogRespData {
+    #[serde(default)]
+    pub items: Vec<TalentOperationLog>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchTalentPoolRespData {
+    #[serde(default)]
+    pub items: Vec<TalentPool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1853,6 +1991,124 @@ impl<'a> ListBackgroundCheckOrderQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct GetReferralQuery<'a> {
+    pub application_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetReferralQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.application_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SearchReferralQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> SearchReferralQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SearchTalentOperationLogQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> SearchTalentOperationLogQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SearchTalentPoolQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub id_list: Option<&'a [&'a str]>,
+}
+
+impl<'a> SearchTalentPoolQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn id_list(mut self, value: impl Into<Option<&'a [&'a str]>>) -> Self {
+        self.id_list = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct GetWebsiteJobPostQuery<'a> {
@@ -2556,6 +2812,44 @@ impl ListTripartiteAgreementIterator<'_> {
             config: self.config,
         };
         let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SearchTalentPoolIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<TalentPool>,
+    page_size: Option<i32>,
+    id_list: Option<Vec<String>>,
+}
+
+impl_page_iterator_controls!(SearchTalentPoolIterator);
+
+impl SearchTalentPoolIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<TalentPool>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let id_list = self
+            .id_list
+            .as_ref()
+            .map(|values| values.iter().map(String::as_str).collect::<Vec<_>>());
+        let query = SearchTalentPoolQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .id_list(id_list.as_deref());
+        let resource = TalentPoolResource {
+            config: self.config,
+        };
+        let resp = resource.search_by_query(&query, option).await?;
         let data = resp.data.unwrap_or_default();
         self.state
             .accept_page(Some(data.items), data.page_token, data.has_more);
@@ -5417,7 +5711,7 @@ impl_resp_v2!(GetNoteResp, GetNoteRespData);
 impl_resp_v2!(PatchNoteResp, serde_json::Value);
 impl_resp_v2!(DeleteNoteResp, ());
 impl_resp_v2!(ListQuestionnaireResp, ListQuestionnaireRespData);
-impl_resp_v2!(GetReferralResp, serde_json::Value);
+impl_resp_v2!(GetReferralResp, GetReferralRespData);
 impl_resp_v2!(ListRegistrationSchemaResp, ListRegistrationSchemaRespData);
 impl_resp_v2!(ListResumeSourceResp, ListResumeSourceRespData);
 impl_resp_v2!(ListJobFunctionResp, ListJobFunctionRespData);
@@ -5514,7 +5808,7 @@ impl_resp_v2!(SearchJobPublishRecordResp, serde_json::Value);
 impl_resp_v2!(ListByIdJobRequirementResp, serde_json::Value);
 impl_resp_v2!(QueryLocationResp, serde_json::Value);
 impl_resp_v2!(InternOfferStatusResp, serde_json::Value);
-impl_resp_v2!(SearchReferralResp, serde_json::Value);
+impl_resp_v2!(SearchReferralResp, SearchReferralRespData);
 impl_resp_v2!(DeactivateReferralAccountResp, serde_json::Value);
 impl_resp_v2!(EnableReferralAccountResp, serde_json::Value);
 impl_resp_v2!(GetAccountAssetsReferralAccountResp, serde_json::Value);
@@ -5528,11 +5822,14 @@ impl_resp_v2!(OnboardStatusTalentResp, serde_json::Value);
 impl_resp_v2!(RemoveToFolderTalentResp, serde_json::Value);
 impl_resp_v2!(TagTalentResp, serde_json::Value);
 impl_resp_v2!(ChangeTalentBlockResp, serde_json::Value);
-impl_resp_v2!(QueryTalentObjectResp, serde_json::Value);
-impl_resp_v2!(SearchTalentOperationLogResp, serde_json::Value);
+impl_resp_v2!(QueryTalentObjectResp, QueryTalentObjectRespData);
+impl_resp_v2!(
+    SearchTalentOperationLogResp,
+    SearchTalentOperationLogRespData
+);
 impl_resp_v2!(BatchChangeTalentPoolResp, serde_json::Value);
 impl_resp_v2!(MoveTalentTalentPoolResp, serde_json::Value);
-impl_resp_v2!(SearchTalentPoolResp, serde_json::Value);
+impl_resp_v2!(SearchTalentPoolResp, SearchTalentPoolRespData);
 impl_resp_v2!(SearchTestResp, serde_json::Value);
 impl_resp_v2!(CreateByAttachmentWebsiteDeliveryResp, serde_json::Value);
 impl_resp_v2!(CreateByResumeWebsiteDeliveryResp, serde_json::Value);
@@ -5888,6 +6185,15 @@ impl ReferralResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<GetReferralResp, LarkError> {
+        self.get_by_application_query(&GetReferralQuery::new(), option)
+            .await
+    }
+
+    pub async fn get_by_application_query(
+        &self,
+        query: &GetReferralQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetReferralResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -5895,12 +6201,24 @@ impl ReferralResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetReferralResp>()
+        .query("application_id", query.application_id)
+        .query("user_id_type", query.user_id_type)
+        .send_v2_response::<GetReferralRespData, GetReferralResp>()
         .await
     }
 
     pub async fn search(
         &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchReferralResp, LarkError> {
+        self.search_by_query(&SearchReferralQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchReferralQuery<'_>,
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchReferralResp, LarkError> {
@@ -5911,8 +6229,9 @@ impl ReferralResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .query("user_id_type", query.user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SearchReferralResp>()
+        .send_v2_response::<SearchReferralRespData, SearchReferralResp>()
         .await
     }
 }
@@ -8038,7 +8357,7 @@ impl TalentObjectResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, QueryTalentObjectResp>()
+        .send_v2_response::<QueryTalentObjectRespData, QueryTalentObjectResp>()
         .await
     }
 }
@@ -8055,6 +8374,16 @@ impl TalentOperationLogResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchTalentOperationLogResp, LarkError> {
+        self.search_by_query(&SearchTalentOperationLogQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchTalentOperationLogQuery<'_>,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchTalentOperationLogResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::POST,
@@ -8062,8 +8391,10 @@ impl TalentOperationLogResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SearchTalentOperationLogResp>()
+        .send_v2_response::<SearchTalentOperationLogRespData, SearchTalentOperationLogResp>()
         .await
     }
 }
@@ -8115,6 +8446,15 @@ impl TalentPoolResource<'_> {
     }
 
     pub async fn search(&self, option: &RequestOption) -> Result<SearchTalentPoolResp, LarkError> {
+        self.search_by_query(&SearchTalentPoolQuery::new(), option)
+            .await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchTalentPoolQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<SearchTalentPoolResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -8122,8 +8462,30 @@ impl TalentPoolResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, SearchTalentPoolResp>()
+        .page_query(query.page_query())
+        .query_values("id_list", query.id_list)
+        .send_v2_response::<SearchTalentPoolRespData, SearchTalentPoolResp>()
         .await
+    }
+
+    pub fn search_by_iterator(&self, page_size: Option<i32>) -> SearchTalentPoolIterator<'_> {
+        let query = SearchTalentPoolQuery::new().page_size(page_size);
+        self.search_iterator_by_query(&query)
+    }
+
+    pub fn search_iterator_by_query(
+        &self,
+        query: &SearchTalentPoolQuery<'_>,
+    ) -> SearchTalentPoolIterator<'_> {
+        SearchTalentPoolIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            id_list: query
+                .id_list
+                .map(|values| values.iter().map(|value| (*value).to_owned()).collect()),
+        }
     }
 }
 
