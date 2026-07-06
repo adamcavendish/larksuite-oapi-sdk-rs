@@ -214,6 +214,8 @@ mod hire_offer;
 mod hire_read_models;
 #[path = "generated_service_smoke/hire/reference.rs"]
 mod hire_reference;
+#[path = "generated_service_smoke/hire/referral_talent.rs"]
+mod hire_referral_talent;
 #[path = "generated_service_smoke/hire/talent.rs"]
 mod hire_talent;
 #[path = "generated_service_smoke/hire/task.rs"]
