@@ -233,6 +233,204 @@ pub struct Website {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CommonAddress {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub district: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country: Option<CodeNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WebsiteJobPostCustomizedData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<WebsiteJobPostCustomizedValue>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WebsiteJobPostCustomizedValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option: Option<WebsiteJobPostCustomizedOption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_list: Option<Vec<WebsiteJobPostCustomizedOption>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_range: Option<WebsiteJobPostCustomizedTimeRange>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WebsiteJobPostCustomizedOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WebsiteJobPostCustomizedTimeRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PortalJobPost {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_expire_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_active_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_process_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_recruitment_type: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_department: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_type: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_job_level: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_job_level: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address: Option<CommonAddress>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_salary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_salary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_degree: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub headcount: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub high_light_list: Option<Vec<IdNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub requirement: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customized_data_list: Option<Vec<WebsiteJobPostCustomizedData>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_function: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subject: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_list: Option<Vec<CommonAddress>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WebsiteJobPost {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_expire_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_active_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_process_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_recruitment_type: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_department: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_type: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_job_level: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_job_level: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address: Option<CommonAddress>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_salary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_salary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_degree: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub headcount: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub high_light_list: Option<Vec<IdNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub requirement: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customized_data_list: Option<Vec<WebsiteJobPostCustomizedData>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_function: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subject: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_list: Option<Vec<CommonAddress>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_sequence_info: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_major_list: Option<Vec<IdNameObject>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WebsiteChannelInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Subject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -483,6 +681,68 @@ pub struct ListWebsiteRespData {
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetWebsiteJobPostRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_post: Option<WebsiteJobPost>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListWebsiteJobPostRespData {
+    #[serde(default)]
+    pub items: Vec<WebsiteJobPost>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchWebsiteJobPostRespData {
+    #[serde(default)]
+    pub items: Vec<WebsiteJobPost>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetReferralWebsiteJobPostRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_post: Option<PortalJobPost>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListReferralWebsiteJobPostRespData {
+    #[serde(default)]
+    pub items: Vec<PortalJobPost>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListPortalApplySchemaRespData {
+    #[serde(default)]
+    pub items: Vec<RegistrationSchema>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListWebsiteChannelRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default)]
+    pub website_channel_list: Vec<WebsiteChannelInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -3640,8 +3900,8 @@ impl_resp_v2!(ListTalentFolderResp, ListTalentFolderRespData);
 impl_resp_v2!(ListTerminationReasonResp, ListTerminationReasonRespData);
 impl_resp_v2!(ListUserRoleResp, ListUserRoleRespData);
 impl_resp_v2!(ListWebsiteResp, ListWebsiteRespData);
-impl_resp_v2!(ListWebsiteJobPostResp, serde_json::Value);
-impl_resp_v2!(GetWebsiteJobPostResp, serde_json::Value);
+impl_resp_v2!(ListWebsiteJobPostResp, ListWebsiteJobPostRespData);
+impl_resp_v2!(GetWebsiteJobPostResp, GetWebsiteJobPostRespData);
 impl_resp_v2!(ListInterviewRecordResp, serde_json::Value);
 impl_resp_v2!(GetInterviewRecordResp, serde_json::Value);
 impl_resp_v2!(ListInterviewerResp, ListInterviewerRespData);
@@ -3739,7 +3999,7 @@ impl_resp_v2!(SearchTalentPoolResp, serde_json::Value);
 impl_resp_v2!(SearchTestResp, serde_json::Value);
 impl_resp_v2!(CreateByAttachmentWebsiteDeliveryResp, serde_json::Value);
 impl_resp_v2!(CreateByResumeWebsiteDeliveryResp, serde_json::Value);
-impl_resp_v2!(SearchWebsiteJobPostResp, serde_json::Value);
+impl_resp_v2!(SearchWebsiteJobPostResp, SearchWebsiteJobPostRespData);
 
 // ── Additional response types ──
 
@@ -3775,15 +4035,21 @@ impl_resp_v2!(GetOfferApplicationFormResp, serde_json::Value);
 impl_resp_v2!(ListOfferApplicationFormResp, serde_json::Value);
 impl_resp_v2!(ListOfferApprovalTemplateResp, serde_json::Value);
 impl_resp_v2!(UpdateOfferCustomFieldResp, serde_json::Value);
-impl_resp_v2!(ListPortalApplySchemaResp, serde_json::Value);
-impl_resp_v2!(GetReferralWebsiteJobPostResp, serde_json::Value);
-impl_resp_v2!(ListReferralWebsiteJobPostResp, serde_json::Value);
+impl_resp_v2!(ListPortalApplySchemaResp, ListPortalApplySchemaRespData);
+impl_resp_v2!(
+    GetReferralWebsiteJobPostResp,
+    GetReferralWebsiteJobPostRespData
+);
+impl_resp_v2!(
+    ListReferralWebsiteJobPostResp,
+    ListReferralWebsiteJobPostRespData
+);
 impl_resp_v2!(CreateTalentExternalInfoResp, serde_json::Value);
 impl_resp_v2!(UpdateTalentExternalInfoResp, serde_json::Value);
 impl_resp_v2!(ListTalentTagResp, serde_json::Value);
 impl_resp_v2!(CreateWebsiteChannelResp, serde_json::Value);
 impl_resp_v2!(DeleteWebsiteChannelResp, ());
-impl_resp_v2!(ListWebsiteChannelResp, serde_json::Value);
+impl_resp_v2!(ListWebsiteChannelResp, ListWebsiteChannelRespData);
 impl_resp_v2!(UpdateWebsiteChannelResp, serde_json::Value);
 impl_resp_v2!(GetWebsiteDeliveryTaskResp, serde_json::Value);
 impl_resp_v2!(CreateWebsiteSiteUserResp, serde_json::Value);
@@ -4618,7 +4884,7 @@ impl WebsiteJobPostResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetWebsiteJobPostResp>()
+        .send_v2_response::<GetWebsiteJobPostRespData, GetWebsiteJobPostResp>()
         .await
     }
 
@@ -4635,7 +4901,7 @@ impl WebsiteJobPostResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListWebsiteJobPostResp>()
+        .send_v2_response::<ListWebsiteJobPostRespData, ListWebsiteJobPostResp>()
         .await
     }
 
@@ -4654,7 +4920,7 @@ impl WebsiteJobPostResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SearchWebsiteJobPostResp>()
+        .send_v2_response::<SearchWebsiteJobPostRespData, SearchWebsiteJobPostResp>()
         .await
     }
 }
@@ -7224,7 +7490,7 @@ impl PortalApplySchemaResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListPortalApplySchemaResp>()
+        .send_v2_response::<ListPortalApplySchemaRespData, ListPortalApplySchemaResp>()
         .await
     }
 }
@@ -7251,7 +7517,7 @@ impl ReferralWebsiteJobPostResource<'_> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, GetReferralWebsiteJobPostResp>()
+        .send_v2_response::<GetReferralWebsiteJobPostRespData, GetReferralWebsiteJobPostResp>()
         .await
     }
 
@@ -7272,7 +7538,7 @@ impl ReferralWebsiteJobPostResource<'_> {
         .query("page_size", page_size)
         .query("page_token", page_token)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, ListReferralWebsiteJobPostResp>()
+        .send_v2_response::<ListReferralWebsiteJobPostRespData, ListReferralWebsiteJobPostResp>()
         .await
     }
 }
@@ -7411,7 +7677,7 @@ impl WebsiteChannelResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListWebsiteChannelResp>()
+        .send_v2_response::<ListWebsiteChannelRespData, ListWebsiteChannelResp>()
         .await
     }
 
