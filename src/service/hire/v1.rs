@@ -917,6 +917,316 @@ hire_catalog_page_query!(ListJobTypeQuery);
 hire_catalog_page_query!(ListLocationQuery);
 hire_catalog_page_query!(ListRoleQuery);
 hire_catalog_page_query!(ListWebsiteQuery);
+hire_catalog_page_query!(ListPortalApplySchemaQuery);
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetWebsiteJobPostQuery<'a> {
+    pub website_id: &'a str,
+    pub job_post_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+}
+
+impl<'a> GetWebsiteJobPostQuery<'a> {
+    pub fn new(website_id: &'a str, job_post_id: &'a str) -> Self {
+        Self {
+            website_id,
+            job_post_id,
+            user_id_type: None,
+            department_id_type: None,
+            job_level_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListWebsiteJobPostQuery<'a> {
+    pub website_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+    pub update_start_time: Option<&'a str>,
+    pub update_end_time: Option<&'a str>,
+    pub create_start_time: Option<&'a str>,
+    pub create_end_time: Option<&'a str>,
+}
+
+impl<'a> ListWebsiteJobPostQuery<'a> {
+    pub fn new(website_id: &'a str) -> Self {
+        Self {
+            website_id,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+            department_id_type: None,
+            job_level_id_type: None,
+            update_start_time: None,
+            update_end_time: None,
+            create_start_time: None,
+            create_end_time: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub fn update_start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_start_time = value.into();
+        self
+    }
+
+    pub fn update_end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_end_time = value.into();
+        self
+    }
+
+    pub fn create_start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.create_start_time = value.into();
+        self
+    }
+
+    pub fn create_end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.create_end_time = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct SearchWebsiteJobPostQuery<'a> {
+    pub website_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+}
+
+impl<'a> SearchWebsiteJobPostQuery<'a> {
+    pub fn new(website_id: &'a str) -> Self {
+        Self {
+            website_id,
+            page_size: None,
+            page_token: None,
+            user_id_type: None,
+            department_id_type: None,
+            job_level_id_type: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetReferralWebsiteJobPostQuery<'a> {
+    pub job_post_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+}
+
+impl<'a> GetReferralWebsiteJobPostQuery<'a> {
+    pub fn new(job_post_id: &'a str) -> Self {
+        Self {
+            job_post_id,
+            user_id_type: None,
+            department_id_type: None,
+            job_level_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListReferralWebsiteJobPostQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub process_type: Option<i32>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+}
+
+impl<'a> ListReferralWebsiteJobPostQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn process_type(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.process_type = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListWebsiteChannelQuery<'a> {
+    pub website_id: &'a str,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> ListWebsiteChannelQuery<'a> {
+    pub fn new(website_id: &'a str) -> Self {
+        Self {
+            website_id,
+            page_size: None,
+            page_token: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+}
 
 #[derive(Debug, Clone, Default)]
 #[non_exhaustive]
@@ -1184,6 +1494,150 @@ hire_catalog_iterator!(
     WebsiteResource,
     ListWebsiteQuery
 );
+hire_catalog_iterator!(
+    ListPortalApplySchemaIterator,
+    RegistrationSchema,
+    PortalApplySchemaResource,
+    ListPortalApplySchemaQuery
+);
+
+#[derive(Debug, Clone)]
+pub struct ListWebsiteJobPostIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<WebsiteJobPost>,
+    website_id: String,
+    page_size: Option<i32>,
+    user_id_type: Option<String>,
+    department_id_type: Option<String>,
+    job_level_id_type: Option<String>,
+    update_start_time: Option<String>,
+    update_end_time: Option<String>,
+    create_start_time: Option<String>,
+    create_end_time: Option<String>,
+}
+
+impl_page_iterator_controls!(ListWebsiteJobPostIterator);
+
+impl ListWebsiteJobPostIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<WebsiteJobPost>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListWebsiteJobPostQuery::new(&self.website_id)
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .user_id_type(self.user_id_type.as_deref())
+            .department_id_type(self.department_id_type.as_deref())
+            .job_level_id_type(self.job_level_id_type.as_deref())
+            .update_start_time(self.update_start_time.as_deref())
+            .update_end_time(self.update_end_time.as_deref())
+            .create_start_time(self.create_start_time.as_deref())
+            .create_end_time(self.create_end_time.as_deref());
+        let resource = WebsiteJobPostResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SearchWebsiteJobPostIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<WebsiteJobPost>,
+    website_id: String,
+    body: serde_json::Value,
+    page_size: Option<i32>,
+    user_id_type: Option<String>,
+    department_id_type: Option<String>,
+    job_level_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(SearchWebsiteJobPostIterator);
+
+impl SearchWebsiteJobPostIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<WebsiteJobPost>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = SearchWebsiteJobPostQuery::new(&self.website_id)
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .user_id_type(self.user_id_type.as_deref())
+            .department_id_type(self.department_id_type.as_deref())
+            .job_level_id_type(self.job_level_id_type.as_deref());
+        let resource = WebsiteJobPostResource {
+            config: self.config,
+        };
+        let resp = resource
+            .search_by_query(&query, self.body.clone(), option)
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListReferralWebsiteJobPostIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<PortalJobPost>,
+    page_size: Option<i32>,
+    process_type: Option<i32>,
+    user_id_type: Option<String>,
+    department_id_type: Option<String>,
+    job_level_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(ListReferralWebsiteJobPostIterator);
+
+impl ListReferralWebsiteJobPostIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<PortalJobPost>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListReferralWebsiteJobPostQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .process_type(self.process_type)
+            .user_id_type(self.user_id_type.as_deref())
+            .department_id_type(self.department_id_type.as_deref())
+            .job_level_id_type(self.job_level_id_type.as_deref());
+        let resource = ReferralWebsiteJobPostResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct ListTalentFolderIterator<'a> {
@@ -4876,7 +5330,19 @@ impl WebsiteJobPostResource<'_> {
         job_post_id: &str,
         option: &RequestOption,
     ) -> Result<GetWebsiteJobPostResp, LarkError> {
-        let path = format!("/open-apis/hire/v1/websites/{website_id}/job_posts/{job_post_id}");
+        let query = GetWebsiteJobPostQuery::new(website_id, job_post_id);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetWebsiteJobPostQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetWebsiteJobPostResp, LarkError> {
+        let path = format!(
+            "/open-apis/hire/v1/websites/{}/job_posts/{}",
+            query.website_id, query.job_post_id
+        );
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -4884,6 +5350,9 @@ impl WebsiteJobPostResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
         .send_v2_response::<GetWebsiteJobPostRespData, GetWebsiteJobPostResp>()
         .await
     }
@@ -4893,7 +5362,16 @@ impl WebsiteJobPostResource<'_> {
         website_id: &str,
         option: &RequestOption,
     ) -> Result<ListWebsiteJobPostResp, LarkError> {
-        let path = format!("/open-apis/hire/v1/websites/{website_id}/job_posts");
+        let query = ListWebsiteJobPostQuery::new(website_id);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListWebsiteJobPostQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListWebsiteJobPostResp, LarkError> {
+        let path = format!("/open-apis/hire/v1/websites/{}/job_posts", query.website_id);
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -4901,8 +5379,61 @@ impl WebsiteJobPostResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .query("update_start_time", query.update_start_time)
+        .query("update_end_time", query.update_end_time)
+        .query("create_start_time", query.create_start_time)
+        .query("create_end_time", query.create_end_time)
         .send_v2_response::<ListWebsiteJobPostRespData, ListWebsiteJobPostResp>()
         .await
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn list_by_iterator(
+        &self,
+        website_id: &str,
+        page_size: Option<i32>,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        job_level_id_type: Option<&str>,
+        update_start_time: Option<&str>,
+        update_end_time: Option<&str>,
+        create_start_time: Option<&str>,
+        create_end_time: Option<&str>,
+    ) -> ListWebsiteJobPostIterator<'_> {
+        let query = ListWebsiteJobPostQuery::new(website_id)
+            .page_size(page_size)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .job_level_id_type(job_level_id_type)
+            .update_start_time(update_start_time)
+            .update_end_time(update_end_time)
+            .create_start_time(create_start_time)
+            .create_end_time(create_end_time);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListWebsiteJobPostQuery<'_>,
+    ) -> ListWebsiteJobPostIterator<'_> {
+        ListWebsiteJobPostIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            website_id: query.website_id.to_owned(),
+            page_size: query.page_size,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            department_id_type: query.department_id_type.map(ToOwned::to_owned),
+            job_level_id_type: query.job_level_id_type.map(ToOwned::to_owned),
+            update_start_time: query.update_start_time.map(ToOwned::to_owned),
+            update_end_time: query.update_end_time.map(ToOwned::to_owned),
+            create_start_time: query.create_start_time.map(ToOwned::to_owned),
+            create_end_time: query.create_end_time.map(ToOwned::to_owned),
+        }
     }
 
     pub async fn search(
@@ -4911,7 +5442,20 @@ impl WebsiteJobPostResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchWebsiteJobPostResp, LarkError> {
-        let path = format!("/open-apis/hire/v1/websites/{website_id}/job_posts/search");
+        let query = SearchWebsiteJobPostQuery::new(website_id);
+        self.search_by_query(&query, body, option).await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchWebsiteJobPostQuery<'_>,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchWebsiteJobPostResp, LarkError> {
+        let path = format!(
+            "/open-apis/hire/v1/websites/{}/job_posts/search",
+            query.website_id
+        );
         RestRequest::new(
             self.config,
             http::Method::POST,
@@ -4919,9 +5463,48 @@ impl WebsiteJobPostResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
         .json_body(&body)?
         .send_v2_response::<SearchWebsiteJobPostRespData, SearchWebsiteJobPostResp>()
         .await
+    }
+
+    pub fn search_by_iterator(
+        &self,
+        website_id: &str,
+        body: serde_json::Value,
+        page_size: Option<i32>,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        job_level_id_type: Option<&str>,
+    ) -> SearchWebsiteJobPostIterator<'_> {
+        let query = SearchWebsiteJobPostQuery::new(website_id)
+            .page_size(page_size)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .job_level_id_type(job_level_id_type);
+        self.search_iterator_by_query(&query, body)
+    }
+
+    pub fn search_iterator_by_query(
+        &self,
+        query: &SearchWebsiteJobPostQuery<'_>,
+        body: serde_json::Value,
+    ) -> SearchWebsiteJobPostIterator<'_> {
+        SearchWebsiteJobPostIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            website_id: query.website_id.to_owned(),
+            body,
+            page_size: query.page_size,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            department_id_type: query.department_id_type.map(ToOwned::to_owned),
+            job_level_id_type: query.job_level_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
@@ -7481,6 +8064,17 @@ impl PortalApplySchemaResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListPortalApplySchemaResp, LarkError> {
+        let query = ListPortalApplySchemaQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListPortalApplySchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListPortalApplySchemaResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -7488,10 +8082,26 @@ impl PortalApplySchemaResource<'_> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
+        .page_query(query.page_query())
         .send_v2_response::<ListPortalApplySchemaRespData, ListPortalApplySchemaResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListPortalApplySchemaIterator<'_> {
+        let query = ListPortalApplySchemaQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListPortalApplySchemaQuery<'_>,
+    ) -> ListPortalApplySchemaIterator<'_> {
+        ListPortalApplySchemaIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 }
 
@@ -7508,7 +8118,19 @@ impl ReferralWebsiteJobPostResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<GetReferralWebsiteJobPostResp, LarkError> {
-        let path = format!("/open-apis/hire/v1/referral_websites/job_posts/{job_post_id}");
+        let query = GetReferralWebsiteJobPostQuery::new(job_post_id).user_id_type(user_id_type);
+        self.get_by_query(&query, option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetReferralWebsiteJobPostQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetReferralWebsiteJobPostResp, LarkError> {
+        let path = format!(
+            "/open-apis/hire/v1/referral_websites/job_posts/{}",
+            query.job_post_id
+        );
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -7516,7 +8138,9 @@ impl ReferralWebsiteJobPostResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("user_id_type", user_id_type)
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
         .send_v2_response::<GetReferralWebsiteJobPostRespData, GetReferralWebsiteJobPostResp>()
         .await
     }
@@ -7528,6 +8152,18 @@ impl ReferralWebsiteJobPostResource<'_> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListReferralWebsiteJobPostResp, LarkError> {
+        let query = ListReferralWebsiteJobPostQuery::new()
+            .page_size(page_size)
+            .page_token(page_token)
+            .user_id_type(user_id_type);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListReferralWebsiteJobPostQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListReferralWebsiteJobPostResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -7535,11 +8171,46 @@ impl ReferralWebsiteJobPostResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
-        .query("user_id_type", user_id_type)
+        .page_query(query.page_query())
+        .query("process_type", query.process_type)
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
         .send_v2_response::<ListReferralWebsiteJobPostRespData, ListReferralWebsiteJobPostResp>()
         .await
+    }
+
+    pub fn list_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        process_type: Option<i32>,
+        user_id_type: Option<&str>,
+        department_id_type: Option<&str>,
+        job_level_id_type: Option<&str>,
+    ) -> ListReferralWebsiteJobPostIterator<'_> {
+        let query = ListReferralWebsiteJobPostQuery::new()
+            .page_size(page_size)
+            .process_type(process_type)
+            .user_id_type(user_id_type)
+            .department_id_type(department_id_type)
+            .job_level_id_type(job_level_id_type);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListReferralWebsiteJobPostQuery<'_>,
+    ) -> ListReferralWebsiteJobPostIterator<'_> {
+        ListReferralWebsiteJobPostIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            process_type: query.process_type,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            department_id_type: query.department_id_type.map(ToOwned::to_owned),
+            job_level_id_type: query.job_level_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
@@ -7667,7 +8338,18 @@ impl WebsiteChannelResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListWebsiteChannelResp, LarkError> {
-        let path = format!("/open-apis/hire/v1/websites/{website_id}/channels");
+        let query = ListWebsiteChannelQuery::new(website_id)
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListWebsiteChannelQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListWebsiteChannelResp, LarkError> {
+        let path = format!("/open-apis/hire/v1/websites/{}/channels", query.website_id);
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -7675,8 +8357,8 @@ impl WebsiteChannelResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
+        .query("page_size", query.page_size)
+        .query("page_token", query.page_token)
         .send_v2_response::<ListWebsiteChannelRespData, ListWebsiteChannelResp>()
         .await
     }
