@@ -335,7 +335,10 @@ employees, evaluations, notes, interview records, tripartite agreements, and
 background check orders, with iterators for the Go-backed paginated lists.
 Referral and talent read/search helpers cover referral lookup/search, talent
 object schemas, talent operation logs, and talent pools, including an iterator
-for talent pool search.
+for talent pool search. External Hire read helpers now type external
+applications, background checks, interviews, offers, and talent interview
+lookups, with iterators for the Go-backed external list and batch-query
+surfaces.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
