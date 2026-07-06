@@ -29,6 +29,10 @@
 - Added typed Hire v1 referral and talent read/search responses for referral
   lookup/search, talent object schemas, talent operation logs, and talent
   pools, with a lazy iterator for talent pool search.
+- Added typed Hire v1 external read responses for external applications,
+  external background checks, external interviews, external offers, and
+  talent interview lookups, with lazy iterators for the Go-backed external
+  list and batch-query surfaces.
 
 ## [0.2.0] - 2026-07-03
 
