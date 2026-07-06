@@ -18,6 +18,9 @@
 - Added typed Hire v1 interview-support list responses for application
   interviews, interviewers, feedback forms, registration schemas, and round
   types, with lazy iterators where the Go SDK exposes iterator support.
+- Added typed Hire v1 website posting responses for website job posts, referral
+  job posts, portal apply schemas, and website channels, with lazy iterators
+  for the paginated job-posting and portal schema surfaces.
 
 ## [0.2.0] - 2026-07-03
 

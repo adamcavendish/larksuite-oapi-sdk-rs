@@ -326,7 +326,9 @@ with typed response data, plus iterators where the Go SDK exposes
 work also expose typed response data and iterator helpers. Hire interview
 support lists cover application interviews, interviewers, feedback forms,
 registration schemas, and round types, with iterators where the Go SDK exposes
-them.
+them. Hire website posting resources now type website job posts, referral job
+posts, portal apply schemas, and website channels, with iterators for the
+paginated job-posting and portal schema scans.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
