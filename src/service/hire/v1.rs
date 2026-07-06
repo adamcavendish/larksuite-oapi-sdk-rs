@@ -5454,10 +5454,7 @@ impl_resp_v2!(ListTodoResp, ListTodoRespData);
 impl_resp_v2!(CreateTripartiteAgreementResp, serde_json::Value);
 impl_resp_v2!(UpdateTripartiteAgreementResp, serde_json::Value);
 impl_resp_v2!(DeleteTripartiteAgreementResp, ());
-impl_resp_v2!(
-    ListTripartiteAgreementResp,
-    ListTripartiteAgreementRespData
-);
+impl_resp_v2!(ListTripartiteAgreementResp, ListTripartiteAgreementRespData);
 
 // ── New response types for missing methods ──
 
@@ -5568,12 +5565,21 @@ impl_resp_v2!(
 impl_resp_v2!(ListInterviewRoundTypeResp, ListInterviewRoundTypeRespData);
 impl_resp_v2!(ListInterviewTaskResp, ListInterviewTaskRespData);
 impl_resp_v2!(GetJobManagerResp, serde_json::Value);
-impl_resp_v2!(ListJobRequirementSchemaResp, ListJobRequirementSchemaRespData);
+impl_resp_v2!(
+    ListJobRequirementSchemaResp,
+    ListJobRequirementSchemaRespData
+);
 impl_resp_v2!(ListJobSchemaResp, ListJobSchemaRespData);
 impl_resp_v2!(GetMinutesResp, serde_json::Value);
 impl_resp_v2!(GetOfferApplicationFormResp, GetOfferApplicationFormRespData);
-impl_resp_v2!(ListOfferApplicationFormResp, ListOfferApplicationFormRespData);
-impl_resp_v2!(ListOfferApprovalTemplateResp, ListOfferApprovalTemplateRespData);
+impl_resp_v2!(
+    ListOfferApplicationFormResp,
+    ListOfferApplicationFormRespData
+);
+impl_resp_v2!(
+    ListOfferApprovalTemplateResp,
+    ListOfferApprovalTemplateRespData
+);
 impl_resp_v2!(UpdateOfferCustomFieldResp, serde_json::Value);
 impl_resp_v2!(ListPortalApplySchemaResp, ListPortalApplySchemaRespData);
 impl_resp_v2!(
@@ -6098,7 +6104,8 @@ pub struct JobProcessResource<'a> {
 
 impl JobProcessResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListJobProcessResp, LarkError> {
-        self.list_by_query(&ListJobProcessQuery::new(), option).await
+        self.list_by_query(&ListJobProcessQuery::new(), option)
+            .await
     }
 
     pub async fn list_by_query(
