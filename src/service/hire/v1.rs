@@ -357,6 +357,59 @@ pub struct InterviewTask {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Interviewer {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verify_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewFeedbackForm {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score_calculation_config: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modules: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewRegistrationSchema {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_used_as_interview: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_list: Option<Vec<CommonSchema>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewRoundType {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_assessment_template_info: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListRegistrationSchemaRespData {
     #[serde(default)]
     pub items: Vec<RegistrationSchema>,
@@ -510,6 +563,54 @@ pub struct ListInterviewTaskRespData {
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListApplicationInterviewRespData {
+    #[serde(default)]
+    pub items: Vec<Interview>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListInterviewerRespData {
+    #[serde(default)]
+    pub items: Vec<Interviewer>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListInterviewFeedbackFormRespData {
+    #[serde(default)]
+    pub items: Vec<InterviewFeedbackForm>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListInterviewRegistrationSchemaRespData {
+    #[serde(default)]
+    pub items: Vec<InterviewRegistrationSchema>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListInterviewRoundTypeRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default)]
+    pub items: Vec<InterviewRoundType>,
 }
 
 macro_rules! hire_catalog_page_query {
@@ -3419,7 +3520,7 @@ impl_resp_v2!(ListWebsiteJobPostResp, serde_json::Value);
 impl_resp_v2!(GetWebsiteJobPostResp, serde_json::Value);
 impl_resp_v2!(ListInterviewRecordResp, serde_json::Value);
 impl_resp_v2!(GetInterviewRecordResp, serde_json::Value);
-impl_resp_v2!(ListInterviewerResp, serde_json::Value);
+impl_resp_v2!(ListInterviewerResp, ListInterviewerRespData);
 impl_resp_v2!(PatchInterviewerResp, serde_json::Value);
 impl_resp_v2!(CreateExternalApplicationResp, serde_json::Value);
 impl_resp_v2!(UpdateExternalApplicationResp, serde_json::Value);
@@ -3519,7 +3620,10 @@ impl_resp_v2!(SearchWebsiteJobPostResp, serde_json::Value);
 // ── Additional response types ──
 
 impl_resp_v2!(OfferApplicationResp, serde_json::Value);
-impl_resp_v2!(ListApplicationInterviewResp2, serde_json::Value);
+impl_resp_v2!(
+    ListApplicationInterviewResp2,
+    ListApplicationInterviewRespData
+);
 impl_resp_v2!(PatchEhrImportTaskResp, serde_json::Value);
 impl_resp_v2!(ListEvaluationTaskResp, ListEvaluationTaskRespData);
 impl_resp_v2!(CreateExamResp, serde_json::Value);
@@ -3528,10 +3632,16 @@ impl_resp_v2!(CreateExternalInterviewAssessmentResp, serde_json::Value);
 impl_resp_v2!(PatchExternalInterviewAssessmentResp, serde_json::Value);
 impl_resp_v2!(CreateExternalReferralRewardResp, serde_json::Value);
 impl_resp_v2!(DeleteExternalReferralRewardResp, ());
-impl_resp_v2!(ListInterviewFeedbackFormResp, serde_json::Value);
+impl_resp_v2!(
+    ListInterviewFeedbackFormResp,
+    ListInterviewFeedbackFormRespData
+);
 impl_resp_v2!(GetInterviewRecordAttachmentResp, serde_json::Value);
-impl_resp_v2!(ListInterviewRegistrationSchemaResp, serde_json::Value);
-impl_resp_v2!(ListInterviewRoundTypeResp, serde_json::Value);
+impl_resp_v2!(
+    ListInterviewRegistrationSchemaResp,
+    ListInterviewRegistrationSchemaRespData
+);
+impl_resp_v2!(ListInterviewRoundTypeResp, ListInterviewRoundTypeRespData);
 impl_resp_v2!(ListInterviewTaskResp, ListInterviewTaskRespData);
 impl_resp_v2!(GetJobManagerResp, serde_json::Value);
 impl_resp_v2!(ListJobRequirementSchemaResp, serde_json::Value);
@@ -4477,7 +4587,7 @@ impl InterviewerResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListInterviewerResp>()
+        .send_v2_response::<ListInterviewerRespData, ListInterviewerResp>()
         .await
     }
 
@@ -5845,7 +5955,7 @@ impl ApplicationInterviewResource<'_> {
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
         .query("job_level_id_type", query.job_level_id_type)
-        .send_v2_response::<serde_json::Value, ListApplicationInterviewResp2>()
+        .send_v2_response::<ListApplicationInterviewRespData, ListApplicationInterviewResp2>()
         .await
     }
 }
@@ -6261,7 +6371,7 @@ impl InterviewFeedbackFormResource<'_> {
         .query("page_size", page_size)
         .query("page_token", page_token)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, ListInterviewFeedbackFormResp>()
+        .send_v2_response::<ListInterviewFeedbackFormRespData, ListInterviewFeedbackFormResp>()
         .await
     }
 }
@@ -6313,7 +6423,10 @@ impl InterviewRegistrationSchemaResource<'_> {
         .query("page_size", page_size)
         .query("page_token", page_token)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, ListInterviewRegistrationSchemaResp>()
+        .send_v2_response::<
+            ListInterviewRegistrationSchemaRespData,
+            ListInterviewRegistrationSchemaResp,
+        >()
         .await
     }
 }
@@ -6340,7 +6453,7 @@ impl InterviewRoundTypeResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListInterviewRoundTypeResp>()
+        .send_v2_response::<ListInterviewRoundTypeRespData, ListInterviewRoundTypeResp>()
         .await
     }
 }
