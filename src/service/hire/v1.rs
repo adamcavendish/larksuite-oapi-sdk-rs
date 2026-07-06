@@ -937,6 +937,100 @@ pub struct ListInterviewRecordRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TripartiteAgreementInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BackgroundCheckOrder {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_third_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub package: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feedback_info_list: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_info_list: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub upload_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub candidate_info: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_info: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contactor_info: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub begin_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conclusion: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_info: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field_list: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_data_list: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ext_item_info_list: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub geo: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListTripartiteAgreementRespData {
+    #[serde(default)]
+    pub items: Vec<TripartiteAgreementInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchQueryBackgroundCheckOrderRespData {
+    #[serde(default)]
+    pub items: Vec<BackgroundCheckOrder>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListBackgroundCheckOrderRespData {
+    #[serde(default)]
+    pub items: Vec<BackgroundCheckOrder>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListRegistrationSchemaRespData {
     #[serde(default)]
     pub items: Vec<RegistrationSchema>,
@@ -1657,6 +1751,108 @@ impl<'a> ListInterviewRecordQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListTripartiteAgreementQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub application_id: Option<&'a str>,
+    pub tripartite_agreement_id: Option<&'a str>,
+}
+
+impl<'a> ListTripartiteAgreementQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.application_id = value.into();
+        self
+    }
+
+    pub fn tripartite_agreement_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.tripartite_agreement_id = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListBackgroundCheckOrderQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub application_id: Option<&'a str>,
+    pub update_start_time: Option<&'a str>,
+    pub update_end_time: Option<&'a str>,
+}
+
+impl<'a> ListBackgroundCheckOrderQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.application_id = value.into();
+        self
+    }
+
+    pub fn update_start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_start_time = value.into();
+        self
+    }
+
+    pub fn update_end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_end_time = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct GetWebsiteJobPostQuery<'a> {
@@ -2318,6 +2514,45 @@ impl ListInterviewRecordIterator<'_> {
             .ids(ids.as_deref())
             .user_id_type(self.user_id_type.as_deref());
         let resource = InterviewRecordResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListTripartiteAgreementIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<TripartiteAgreementInfo>,
+    page_size: Option<i32>,
+    application_id: Option<String>,
+    tripartite_agreement_id: Option<String>,
+}
+
+impl_page_iterator_controls!(ListTripartiteAgreementIterator);
+
+impl ListTripartiteAgreementIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<TripartiteAgreementInfo>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListTripartiteAgreementQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .application_id(self.application_id.as_deref())
+            .tripartite_agreement_id(self.tripartite_agreement_id.as_deref());
+        let resource = TripartiteAgreementResource {
             config: self.config,
         };
         let resp = resource.list_by_query(&query, option).await?;
@@ -5219,7 +5454,10 @@ impl_resp_v2!(ListTodoResp, ListTodoRespData);
 impl_resp_v2!(CreateTripartiteAgreementResp, serde_json::Value);
 impl_resp_v2!(UpdateTripartiteAgreementResp, serde_json::Value);
 impl_resp_v2!(DeleteTripartiteAgreementResp, ());
-impl_resp_v2!(ListTripartiteAgreementResp, serde_json::Value);
+impl_resp_v2!(
+    ListTripartiteAgreementResp,
+    ListTripartiteAgreementRespData
+);
 
 // ── New response types for missing methods ──
 
@@ -5234,8 +5472,14 @@ impl_resp_v2!(CancelOnboardApplicationResp, serde_json::Value);
 impl_resp_v2!(GetDetailApplicationResp, serde_json::Value);
 impl_resp_v2!(RecoverApplicationResp, serde_json::Value);
 impl_resp_v2!(TransferOnboardApplicationResp, serde_json::Value);
-impl_resp_v2!(BatchQueryBackgroundCheckOrderResp, serde_json::Value);
-impl_resp_v2!(ListBackgroundCheckOrderResp, serde_json::Value);
+impl_resp_v2!(
+    BatchQueryBackgroundCheckOrderResp,
+    BatchQueryBackgroundCheckOrderRespData
+);
+impl_resp_v2!(
+    ListBackgroundCheckOrderResp,
+    ListBackgroundCheckOrderRespData
+);
 impl_resp_v2!(SearchDiversityInclusionResp, serde_json::Value);
 impl_resp_v2!(BatchDeleteEcoAccountCustomFieldResp, serde_json::Value);
 impl_resp_v2!(BatchUpdateEcoAccountCustomFieldResp, serde_json::Value);
@@ -6929,6 +7173,15 @@ impl TripartiteAgreementResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<ListTripartiteAgreementResp, LarkError> {
+        self.list_by_query(&ListTripartiteAgreementQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTripartiteAgreementQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTripartiteAgreementResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -6936,8 +7189,30 @@ impl TripartiteAgreementResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListTripartiteAgreementResp>()
+        .page_query(query.page_query())
+        .query("application_id", query.application_id)
+        .query("tripartite_agreement_id", query.tripartite_agreement_id)
+        .send_v2_response::<ListTripartiteAgreementRespData, ListTripartiteAgreementResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListTripartiteAgreementIterator<'_> {
+        let query = ListTripartiteAgreementQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListTripartiteAgreementQuery<'_>,
+    ) -> ListTripartiteAgreementIterator<'_> {
+        ListTripartiteAgreementIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            application_id: query.application_id.map(ToOwned::to_owned),
+            tripartite_agreement_id: query.tripartite_agreement_id.map(ToOwned::to_owned),
+        }
     }
 
     pub async fn update(
@@ -7131,12 +7406,24 @@ impl BackgroundCheckOrderResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchQueryBackgroundCheckOrderResp>()
+        .send_v2_response::<
+            BatchQueryBackgroundCheckOrderRespData,
+            BatchQueryBackgroundCheckOrderResp,
+        >()
         .await
     }
 
     pub async fn list(
         &self,
+        option: &RequestOption,
+    ) -> Result<ListBackgroundCheckOrderResp, LarkError> {
+        self.list_by_query(&ListBackgroundCheckOrderQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListBackgroundCheckOrderQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListBackgroundCheckOrderResp, LarkError> {
         RestRequest::new(
@@ -7146,7 +7433,12 @@ impl BackgroundCheckOrderResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListBackgroundCheckOrderResp>()
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .query("application_id", query.application_id)
+        .query("update_start_time", query.update_start_time)
+        .query("update_end_time", query.update_end_time)
+        .send_v2_response::<ListBackgroundCheckOrderRespData, ListBackgroundCheckOrderResp>()
         .await
     }
 }
