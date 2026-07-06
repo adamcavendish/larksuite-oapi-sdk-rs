@@ -608,6 +608,185 @@ pub struct InterviewRoundType {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobProcess {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_list: Option<Vec<JobProcessStage>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobProcessStage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobRequirementSchema {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_list: Option<Vec<CommonSchema>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobSchema {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scenario_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_list: Option<Vec<CommonSchema>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Department {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyForm {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub schema: Option<OfferApplyFormSchema>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormSchema {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub module_list: Option<Vec<OfferApplyFormModuleInfo>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormModuleInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_customized: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hint: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_list: Option<Vec<OfferApplyFormObjectInfo>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormObjectInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub module_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_customized: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub need_approve: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_sensitive: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_type_v2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub config: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApprovalTemplate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_list: Option<Vec<Department>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Questionnaire {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub questionnaire_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub questions: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_answers: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentTag {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListRegistrationSchemaRespData {
     #[serde(default)]
     pub items: Vec<RegistrationSchema>,
@@ -645,6 +824,16 @@ pub struct ListJobTypeRespData {
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListJobProcessRespData {
+    #[serde(default)]
+    pub items: Vec<JobProcess>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -746,6 +935,16 @@ pub struct ListWebsiteChannelRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListQuestionnaireRespData {
+    #[serde(default)]
+    pub items: Vec<Questionnaire>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListSubjectRespData {
     #[serde(default)]
     pub items: Vec<Subject>,
@@ -789,6 +988,62 @@ pub struct ListTodoRespData {
 pub struct ListUserRoleRespData {
     #[serde(default)]
     pub items: Vec<UserRole>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListJobRequirementSchemaRespData {
+    #[serde(default)]
+    pub items: Vec<JobRequirementSchema>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListJobSchemaRespData {
+    #[serde(default)]
+    pub items: Vec<JobSchema>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetOfferApplicationFormRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_apply_form: Option<OfferApplyFormInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListOfferApplicationFormRespData {
+    #[serde(default)]
+    pub items: Vec<OfferApplyForm>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListOfferApprovalTemplateRespData {
+    #[serde(default)]
+    pub items: Vec<OfferApprovalTemplate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListTalentTagRespData {
+    #[serde(default)]
+    pub items: Vec<TalentTag>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -914,10 +1169,149 @@ hire_catalog_page_query!(ListRegistrationSchemaQuery);
 hire_catalog_page_query!(ListResumeSourceQuery);
 hire_catalog_page_query!(ListJobFunctionQuery);
 hire_catalog_page_query!(ListJobTypeQuery);
+hire_catalog_page_query!(ListJobProcessQuery);
 hire_catalog_page_query!(ListLocationQuery);
 hire_catalog_page_query!(ListRoleQuery);
 hire_catalog_page_query!(ListWebsiteQuery);
 hire_catalog_page_query!(ListPortalApplySchemaQuery);
+hire_catalog_page_query!(ListJobRequirementSchemaQuery);
+hire_catalog_page_query!(ListOfferApplicationFormQuery);
+hire_catalog_page_query!(ListTalentTagQuery);
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListJobSchemaQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub scenario: Option<i32>,
+}
+
+impl<'a> ListJobSchemaQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn scenario(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.scenario = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListQuestionnaireQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub application_id: Option<&'a str>,
+    pub interview_id: Option<&'a str>,
+    pub update_start_time: Option<&'a str>,
+    pub update_end_time: Option<&'a str>,
+}
+
+impl<'a> ListQuestionnaireQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.application_id = value.into();
+        self
+    }
+
+    pub fn interview_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.interview_id = value.into();
+        self
+    }
+
+    pub fn update_start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_start_time = value.into();
+        self
+    }
+
+    pub fn update_end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_end_time = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListOfferApprovalTemplateQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+}
+
+impl<'a> ListOfferApprovalTemplateQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
 
 #[derive(Debug, Clone)]
 #[non_exhaustive]
@@ -1499,6 +1893,12 @@ hire_catalog_iterator!(
     RegistrationSchema,
     PortalApplySchemaResource,
     ListPortalApplySchemaQuery
+);
+hire_catalog_iterator!(
+    ListTalentTagIterator,
+    TalentTag,
+    TalentTagResource,
+    ListTalentTagQuery
 );
 
 #[derive(Debug, Clone)]
@@ -4339,13 +4739,13 @@ impl_resp_v2!(CreateNoteResp, serde_json::Value);
 impl_resp_v2!(GetNoteResp, serde_json::Value);
 impl_resp_v2!(PatchNoteResp, serde_json::Value);
 impl_resp_v2!(DeleteNoteResp, ());
-impl_resp_v2!(ListQuestionnaireResp, serde_json::Value);
+impl_resp_v2!(ListQuestionnaireResp, ListQuestionnaireRespData);
 impl_resp_v2!(GetReferralResp, serde_json::Value);
 impl_resp_v2!(ListRegistrationSchemaResp, ListRegistrationSchemaRespData);
 impl_resp_v2!(ListResumeSourceResp, ListResumeSourceRespData);
 impl_resp_v2!(ListJobFunctionResp, ListJobFunctionRespData);
 impl_resp_v2!(ListJobTypeResp, ListJobTypeRespData);
-impl_resp_v2!(ListJobProcessResp, serde_json::Value);
+impl_resp_v2!(ListJobProcessResp, ListJobProcessRespData);
 impl_resp_v2!(ListLocationResp, ListLocationRespData);
 impl_resp_v2!(ListRoleResp, ListRoleRespData);
 impl_resp_v2!(GetRoleResp, GetRoleRespData);
@@ -4482,12 +4882,12 @@ impl_resp_v2!(
 impl_resp_v2!(ListInterviewRoundTypeResp, ListInterviewRoundTypeRespData);
 impl_resp_v2!(ListInterviewTaskResp, ListInterviewTaskRespData);
 impl_resp_v2!(GetJobManagerResp, serde_json::Value);
-impl_resp_v2!(ListJobRequirementSchemaResp, serde_json::Value);
-impl_resp_v2!(ListJobSchemaResp, serde_json::Value);
+impl_resp_v2!(ListJobRequirementSchemaResp, ListJobRequirementSchemaRespData);
+impl_resp_v2!(ListJobSchemaResp, ListJobSchemaRespData);
 impl_resp_v2!(GetMinutesResp, serde_json::Value);
-impl_resp_v2!(GetOfferApplicationFormResp, serde_json::Value);
-impl_resp_v2!(ListOfferApplicationFormResp, serde_json::Value);
-impl_resp_v2!(ListOfferApprovalTemplateResp, serde_json::Value);
+impl_resp_v2!(GetOfferApplicationFormResp, GetOfferApplicationFormRespData);
+impl_resp_v2!(ListOfferApplicationFormResp, ListOfferApplicationFormRespData);
+impl_resp_v2!(ListOfferApprovalTemplateResp, ListOfferApprovalTemplateRespData);
 impl_resp_v2!(UpdateOfferCustomFieldResp, serde_json::Value);
 impl_resp_v2!(ListPortalApplySchemaResp, ListPortalApplySchemaRespData);
 impl_resp_v2!(
@@ -4500,7 +4900,7 @@ impl_resp_v2!(
 );
 impl_resp_v2!(CreateTalentExternalInfoResp, serde_json::Value);
 impl_resp_v2!(UpdateTalentExternalInfoResp, serde_json::Value);
-impl_resp_v2!(ListTalentTagResp, serde_json::Value);
+impl_resp_v2!(ListTalentTagResp, ListTalentTagRespData);
 impl_resp_v2!(CreateWebsiteChannelResp, serde_json::Value);
 impl_resp_v2!(DeleteWebsiteChannelResp, ());
 impl_resp_v2!(ListWebsiteChannelResp, ListWebsiteChannelRespData);
@@ -4698,6 +5098,15 @@ pub struct QuestionnaireResource<'a> {
 
 impl QuestionnaireResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListQuestionnaireResp, LarkError> {
+        self.list_by_query(&ListQuestionnaireQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListQuestionnaireQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListQuestionnaireResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -4705,7 +5114,12 @@ impl QuestionnaireResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListQuestionnaireResp>()
+        .page_query(query.page_query())
+        .query("application_id", query.application_id)
+        .query("interview_id", query.interview_id)
+        .query("update_start_time", query.update_start_time)
+        .query("update_end_time", query.update_end_time)
+        .send_v2_response::<ListQuestionnaireRespData, ListQuestionnaireResp>()
         .await
     }
 }
@@ -4845,29 +5259,6 @@ impl ResumeSourceResource<'_> {
     }
 }
 
-// ── Simple list-only resources ──
-
-macro_rules! simple_list_resource {
-    ($struct_name:ident, $resp:ident, $path:literal) => {
-        pub struct $struct_name<'a> {
-            config: &'a Config,
-        }
-        impl $struct_name<'_> {
-            pub async fn list(&self, option: &RequestOption) -> Result<$resp, LarkError> {
-                RestRequest::new(
-                    self.config,
-                    http::Method::GET,
-                    $path,
-                    vec![AccessTokenType::Tenant],
-                    option,
-                )
-                .send_v2_response::<serde_json::Value, $resp>()
-                .await
-            }
-        }
-    };
-}
-
 pub struct JobFunctionResource<'a> {
     config: &'a Config,
 }
@@ -4954,11 +5345,32 @@ impl JobTypeResource<'_> {
     }
 }
 
-simple_list_resource!(
-    JobProcessResource,
-    ListJobProcessResp,
-    "/open-apis/hire/v1/job_processes"
-);
+pub struct JobProcessResource<'a> {
+    config: &'a Config,
+}
+
+impl JobProcessResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<ListJobProcessResp, LarkError> {
+        self.list_by_query(&ListJobProcessQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobProcessQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobProcessResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/hire/v1/job_processes",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .page_query(query.page_query())
+        .send_v2_response::<ListJobProcessRespData, ListJobProcessResp>()
+        .await
+    }
+}
 pub struct LocationResource<'a> {
     config: &'a Config,
 }
@@ -7891,6 +8303,17 @@ impl JobRequirementSchemaResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobRequirementSchemaResp, LarkError> {
+        let query = ListJobRequirementSchemaQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobRequirementSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobRequirementSchemaResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -7898,9 +8321,8 @@ impl JobRequirementSchemaResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListJobRequirementSchemaResp>()
+        .page_query(query.page_query())
+        .send_v2_response::<ListJobRequirementSchemaRespData, ListJobRequirementSchemaResp>()
         .await
     }
 }
@@ -7918,6 +8340,17 @@ impl JobSchemaResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListJobSchemaResp, LarkError> {
+        let query = ListJobSchemaQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListJobSchemaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListJobSchemaResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -7925,9 +8358,9 @@ impl JobSchemaResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListJobSchemaResp>()
+        .page_query(query.page_query())
+        .query("scenario", query.scenario)
+        .send_v2_response::<ListJobSchemaRespData, ListJobSchemaResp>()
         .await
     }
 }
@@ -7973,7 +8406,7 @@ impl OfferApplicationFormResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetOfferApplicationFormResp>()
+        .send_v2_response::<GetOfferApplicationFormRespData, GetOfferApplicationFormResp>()
         .await
     }
 
@@ -7983,6 +8416,17 @@ impl OfferApplicationFormResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListOfferApplicationFormResp, LarkError> {
+        let query = ListOfferApplicationFormQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListOfferApplicationFormQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListOfferApplicationFormResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -7990,9 +8434,8 @@ impl OfferApplicationFormResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListOfferApplicationFormResp>()
+        .page_query(query.page_query())
+        .send_v2_response::<ListOfferApplicationFormRespData, ListOfferApplicationFormResp>()
         .await
     }
 }
@@ -8010,6 +8453,17 @@ impl OfferApprovalTemplateResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListOfferApprovalTemplateResp, LarkError> {
+        let query = ListOfferApprovalTemplateQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListOfferApprovalTemplateQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListOfferApprovalTemplateResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -8017,9 +8471,9 @@ impl OfferApprovalTemplateResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListOfferApprovalTemplateResp>()
+        .page_query(query.page_query())
+        .query("department_id_type", query.department_id_type)
+        .send_v2_response::<ListOfferApprovalTemplateRespData, ListOfferApprovalTemplateResp>()
         .await
     }
 }
@@ -8273,6 +8727,17 @@ impl TalentTagResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<ListTalentTagResp, LarkError> {
+        let query = ListTalentTagQuery::new()
+            .page_size(page_size)
+            .page_token(page_token);
+        self.list_by_query(&query, option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListTalentTagQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListTalentTagResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -8280,10 +8745,26 @@ impl TalentTagResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("page_size", page_size)
-        .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListTalentTagResp>()
+        .page_query(query.page_query())
+        .send_v2_response::<ListTalentTagRespData, ListTalentTagResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListTalentTagIterator<'_> {
+        let query = ListTalentTagQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListTalentTagQuery<'_>,
+    ) -> ListTalentTagIterator<'_> {
+        ListTalentTagIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+        }
     }
 }
 
