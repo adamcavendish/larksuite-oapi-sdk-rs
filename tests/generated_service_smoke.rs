@@ -210,6 +210,8 @@ mod hire_interview;
 mod hire_job;
 #[path = "generated_service_smoke/hire/job_requirement.rs"]
 mod hire_job_requirement;
+#[path = "generated_service_smoke/hire/job_utility_read.rs"]
+mod hire_job_utility_read;
 #[path = "generated_service_smoke/hire/offer.rs"]
 mod hire_offer;
 #[path = "generated_service_smoke/hire/read_models.rs"]
