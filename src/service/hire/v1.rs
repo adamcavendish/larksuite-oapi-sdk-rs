@@ -787,6 +787,156 @@ pub struct TalentTag {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Employee {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conversion_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_conversion_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actual_conversion_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overboard_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overboard_note: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_city_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leader: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_requirement_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_employment_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Evaluation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub evaluator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub commit_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conclusion: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MentionEntity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Note {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_private: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub privacy: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notify_mentioned_user: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mention_entity_list: Option<Vec<MentionEntity>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetEmployeeRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee: Option<Employee>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetByApplicationEmployeeRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee: Option<Employee>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListEvaluationRespData {
+    #[serde(default)]
+    pub items: Vec<Evaluation>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetNoteRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<Note>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListNoteRespData {
+    #[serde(default)]
+    pub items: Vec<Note>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetInterviewRecordRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_record: Option<InterviewRecord>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListInterviewRecordRespData {
+    #[serde(default)]
+    pub items: Vec<InterviewRecord>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListRegistrationSchemaRespData {
     #[serde(default)]
     pub items: Vec<RegistrationSchema>,
@@ -1299,6 +1449,200 @@ impl<'a> ListOfferApprovalTemplateQuery<'a> {
 
     pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.department_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct GetByApplicationEmployeeQuery<'a> {
+    pub application_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+    pub job_family_id_type: Option<&'a str>,
+    pub employee_type_id_type: Option<&'a str>,
+}
+
+impl<'a> GetByApplicationEmployeeQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.application_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub fn job_family_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_family_id_type = value.into();
+        self
+    }
+
+    pub fn employee_type_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.employee_type_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListEvaluationQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub application_id: Option<&'a str>,
+    pub update_start_time: Option<&'a str>,
+    pub update_end_time: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListEvaluationQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.application_id = value.into();
+        self
+    }
+
+    pub fn update_start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_start_time = value.into();
+        self
+    }
+
+    pub fn update_end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.update_end_time = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListNoteQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub talent_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListNoteQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn talent_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.talent_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListInterviewRecordQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub ids: Option<&'a [&'a str]>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListInterviewRecordQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn ids(mut self, value: impl Into<Option<&'a [&'a str]>>) -> Self {
+        self.ids = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
         self
     }
 
@@ -1900,6 +2244,89 @@ hire_catalog_iterator!(
     TalentTagResource,
     ListTalentTagQuery
 );
+
+#[derive(Debug, Clone)]
+pub struct ListEvaluationIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Evaluation>,
+    page_size: Option<i32>,
+    application_id: Option<String>,
+    update_start_time: Option<String>,
+    update_end_time: Option<String>,
+    user_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(ListEvaluationIterator);
+
+impl ListEvaluationIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Evaluation>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListEvaluationQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .application_id(self.application_id.as_deref())
+            .update_start_time(self.update_start_time.as_deref())
+            .update_end_time(self.update_end_time.as_deref())
+            .user_id_type(self.user_id_type.as_deref());
+        let resource = EvaluationResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ListInterviewRecordIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<InterviewRecord>,
+    page_size: Option<i32>,
+    ids: Option<Vec<String>>,
+    user_id_type: Option<String>,
+}
+
+impl_page_iterator_controls!(ListInterviewRecordIterator);
+
+impl ListInterviewRecordIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<InterviewRecord>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let ids = self
+            .ids
+            .as_ref()
+            .map(|values| values.iter().map(String::as_str).collect::<Vec<_>>());
+        let query = ListInterviewRecordQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .ids(ids.as_deref())
+            .user_id_type(self.user_id_type.as_deref());
+        let resource = InterviewRecordResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct ListWebsiteJobPostIterator<'a> {
@@ -2670,9 +3097,21 @@ pub struct InterviewRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub commit_status: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feedback_submit_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub conclusion: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub interview_score: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assessment_score: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub question_list: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code_question_list: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interviewer: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image_list: Option<Vec<serde_json::Value>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub talent_quality_list: Option<Vec<serde_json::Value>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -4730,13 +5169,16 @@ impl<'a> OfferSchemaResource<'a> {
 
 // ── Helpers for newer resources (use Option<CodeError> pattern) ──
 
-impl_resp_v2!(GetEmployeeResp, serde_json::Value);
-impl_resp_v2!(GetByApplicationEmployeeResp, serde_json::Value);
+impl_resp_v2!(GetEmployeeResp, GetEmployeeRespData);
+impl_resp_v2!(
+    GetByApplicationEmployeeResp,
+    GetByApplicationEmployeeRespData
+);
 impl_resp_v2!(PatchEmployeeResp, serde_json::Value);
-impl_resp_v2!(ListEvaluationResp, serde_json::Value);
-impl_resp_v2!(ListNoteResp, serde_json::Value);
+impl_resp_v2!(ListEvaluationResp, ListEvaluationRespData);
+impl_resp_v2!(ListNoteResp, ListNoteRespData);
 impl_resp_v2!(CreateNoteResp, serde_json::Value);
-impl_resp_v2!(GetNoteResp, serde_json::Value);
+impl_resp_v2!(GetNoteResp, GetNoteRespData);
 impl_resp_v2!(PatchNoteResp, serde_json::Value);
 impl_resp_v2!(DeleteNoteResp, ());
 impl_resp_v2!(ListQuestionnaireResp, ListQuestionnaireRespData);
@@ -4756,8 +5198,8 @@ impl_resp_v2!(ListUserRoleResp, ListUserRoleRespData);
 impl_resp_v2!(ListWebsiteResp, ListWebsiteRespData);
 impl_resp_v2!(ListWebsiteJobPostResp, ListWebsiteJobPostRespData);
 impl_resp_v2!(GetWebsiteJobPostResp, GetWebsiteJobPostRespData);
-impl_resp_v2!(ListInterviewRecordResp, serde_json::Value);
-impl_resp_v2!(GetInterviewRecordResp, serde_json::Value);
+impl_resp_v2!(ListInterviewRecordResp, ListInterviewRecordRespData);
+impl_resp_v2!(GetInterviewRecordResp, GetInterviewRecordRespData);
 impl_resp_v2!(ListInterviewerResp, ListInterviewerRespData);
 impl_resp_v2!(PatchInterviewerResp, serde_json::Value);
 impl_resp_v2!(CreateExternalApplicationResp, serde_json::Value);
@@ -4941,7 +5383,7 @@ impl EmployeeResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetEmployeeResp>()
+        .send_v2_response::<GetEmployeeRespData, GetEmployeeResp>()
         .await
     }
 
@@ -4968,6 +5410,15 @@ impl EmployeeResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<GetByApplicationEmployeeResp, LarkError> {
+        self.get_by_application_query(&GetByApplicationEmployeeQuery::new(), option)
+            .await
+    }
+
+    pub async fn get_by_application_query(
+        &self,
+        query: &GetByApplicationEmployeeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetByApplicationEmployeeResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -4975,7 +5426,13 @@ impl EmployeeResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetByApplicationEmployeeResp>()
+        .query("application_id", query.application_id)
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .query("job_family_id_type", query.job_family_id_type)
+        .query("employee_type_id_type", query.employee_type_id_type)
+        .send_v2_response::<GetByApplicationEmployeeRespData, GetByApplicationEmployeeResp>()
         .await
     }
 }
@@ -4988,6 +5445,15 @@ pub struct EvaluationResource<'a> {
 
 impl EvaluationResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListEvaluationResp, LarkError> {
+        self.list_by_query(&ListEvaluationQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListEvaluationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListEvaluationResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -4995,8 +5461,34 @@ impl EvaluationResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListEvaluationResp>()
+        .page_query(query.page_query())
+        .query("application_id", query.application_id)
+        .query("update_start_time", query.update_start_time)
+        .query("update_end_time", query.update_end_time)
+        .query("user_id_type", query.user_id_type)
+        .send_v2_response::<ListEvaluationRespData, ListEvaluationResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListEvaluationIterator<'_> {
+        let query = ListEvaluationQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListEvaluationQuery<'_>,
+    ) -> ListEvaluationIterator<'_> {
+        ListEvaluationIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            application_id: query.application_id.map(ToOwned::to_owned),
+            update_start_time: query.update_start_time.map(ToOwned::to_owned),
+            update_end_time: query.update_end_time.map(ToOwned::to_owned),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
@@ -5054,11 +5546,19 @@ impl NoteResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetNoteResp>()
+        .send_v2_response::<GetNoteRespData, GetNoteResp>()
         .await
     }
 
     pub async fn list(&self, option: &RequestOption) -> Result<ListNoteResp, LarkError> {
+        self.list_by_query(&ListNoteQuery::new(), option).await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListNoteQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListNoteResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -5066,7 +5566,10 @@ impl NoteResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListNoteResp>()
+        .page_query(query.page_query())
+        .query("talent_id", query.talent_id)
+        .query("user_id_type", query.user_id_type)
+        .send_v2_response::<ListNoteRespData, ListNoteResp>()
         .await
     }
 
@@ -5940,11 +6443,20 @@ impl InterviewRecordResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetInterviewRecordResp>()
+        .send_v2_response::<GetInterviewRecordRespData, GetInterviewRecordResp>()
         .await
     }
 
     pub async fn list(&self, option: &RequestOption) -> Result<ListInterviewRecordResp, LarkError> {
+        self.list_by_query(&ListInterviewRecordQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListInterviewRecordQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListInterviewRecordResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -5952,8 +6464,32 @@ impl InterviewRecordResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListInterviewRecordResp>()
+        .page_query(query.page_query())
+        .query_values("ids", query.ids)
+        .query("user_id_type", query.user_id_type)
+        .send_v2_response::<ListInterviewRecordRespData, ListInterviewRecordResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListInterviewRecordIterator<'_> {
+        let query = ListInterviewRecordQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListInterviewRecordQuery<'_>,
+    ) -> ListInterviewRecordIterator<'_> {
+        ListInterviewRecordIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            ids: query
+                .ids
+                .map(|values| values.iter().map(|value| (*value).to_owned()).collect()),
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+        }
     }
 }
 
