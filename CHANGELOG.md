@@ -33,6 +33,8 @@
   external background checks, external interviews, external offers, and
   talent interview lookups, with lazy iterators for the Go-backed external
   list and batch-query surfaces.
+- Added typed Hire v1 job utility read/search responses for job publish
+  record search, job requirement lookup by ID, and location query helpers.
 
 ## [0.2.0] - 2026-07-03
 
