@@ -1169,6 +1169,32 @@ pub struct SearchTalentPoolRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchJobPublishRecordRespData {
+    #[serde(default)]
+    pub items: Vec<WebsiteJobPost>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListByIdJobRequirementRespData {
+    #[serde(default)]
+    pub items: Vec<JobRequirementDto>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryLocationRespData {
+    #[serde(default)]
+    pub items: Vec<LocationDto>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListExternalApplicationRespData {
     #[serde(default)]
     pub items: Vec<ExternalApplication>,
@@ -4127,6 +4153,168 @@ pub struct JobRequirement {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobRequirementDto {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub short_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_progress: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub head_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recruitment_type: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_level: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_level: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub category: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recruiter_list: Option<Vec<IdNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jr_hiring_managers: Option<Vec<IdNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub direct_leader_list: Option<Vec<IdNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deadline: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub priority: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_degree: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_salary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_salary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customized_data_list: Option<Vec<JobRequirementCustomizedDataDto>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_type: Option<JobTypeInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub completion_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub count_data: Option<JrCountDataInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobRequirementCustomizedDataDto {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JrCountDataInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pre_hire_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub complete_count: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LocationDto {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country: Option<LocationCountry>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<LocationState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<LocationCity>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub district: Option<LocationDistrict>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LocationNameInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub py_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LocationCountry {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_name_info: Option<LocationNameInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LocationState {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state_name_info: Option<LocationNameInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LocationCity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city_name_info: Option<LocationNameInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LocationDistrict {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub district_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub district_name_info: Option<LocationNameInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RecruitmentConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub offer_apply_schema: Option<serde_json::Value>,
@@ -5880,6 +6068,47 @@ impl<'a> ListJobRequirementQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListByIdJobRequirementQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+    pub job_family_id_type: Option<&'a str>,
+    pub employee_type_id_type: Option<&'a str>,
+}
+
+impl<'a> ListByIdJobRequirementQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub fn job_family_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_family_id_type = value.into();
+        self
+    }
+
+    pub fn employee_type_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.employee_type_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> JobRequirementResource<'a> {
     pub async fn create(
         &self,
@@ -5999,6 +6228,16 @@ impl<'a> JobRequirementResource<'a> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<ListByIdJobRequirementResp, LarkError> {
+        self.list_by_id_by_query(&ListByIdJobRequirementQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn list_by_id_by_query(
+        &self,
+        query: &ListByIdJobRequirementQuery<'_>,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<ListByIdJobRequirementResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::POST,
@@ -6006,8 +6245,13 @@ impl<'a> JobRequirementResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .query("job_family_id_type", query.job_family_id_type)
+        .query("employee_type_id_type", query.employee_type_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ListByIdJobRequirementResp>()
+        .send_v2_response::<ListByIdJobRequirementRespData, ListByIdJobRequirementResp>()
         .await
     }
 }
@@ -6206,9 +6450,9 @@ impl_resp_v2!(OpenJobResp, serde_json::Value);
 impl_resp_v2!(RecruiterJobResp, serde_json::Value);
 impl_resp_v2!(UpdateConfigJobResp, serde_json::Value);
 impl_resp_v2!(BatchUpdateJobManagerResp, serde_json::Value);
-impl_resp_v2!(SearchJobPublishRecordResp, serde_json::Value);
-impl_resp_v2!(ListByIdJobRequirementResp, serde_json::Value);
-impl_resp_v2!(QueryLocationResp, serde_json::Value);
+impl_resp_v2!(SearchJobPublishRecordResp, SearchJobPublishRecordRespData);
+impl_resp_v2!(ListByIdJobRequirementResp, ListByIdJobRequirementRespData);
+impl_resp_v2!(QueryLocationResp, QueryLocationRespData);
 impl_resp_v2!(InternOfferStatusResp, serde_json::Value);
 impl_resp_v2!(SearchReferralResp, SearchReferralRespData);
 impl_resp_v2!(DeactivateReferralAccountResp, serde_json::Value);
@@ -6850,6 +7094,39 @@ pub struct LocationResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct QueryLocationQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> QueryLocationQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl LocationResource<'_> {
     pub async fn list(&self, option: &RequestOption) -> Result<ListLocationResp, LarkError> {
         self.list_by_query(&ListLocationQuery::new(), option).await
@@ -6894,6 +7171,16 @@ impl LocationResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<QueryLocationResp, LarkError> {
+        self.query_by_query(&QueryLocationQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryLocationQuery<'_>,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<QueryLocationResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::POST,
@@ -6901,8 +7188,9 @@ impl LocationResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QueryLocationResp>()
+        .send_v2_response::<QueryLocationRespData, QueryLocationResp>()
         .await
     }
 }
@@ -8816,9 +9104,76 @@ pub struct JobPublishRecordResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SearchJobPublishRecordQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub department_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+    pub job_family_id_type: Option<&'a str>,
+}
+
+impl<'a> SearchJobPublishRecordQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn department_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.department_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+
+    pub fn job_family_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_family_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl JobPublishRecordResource<'_> {
     pub async fn search(
         &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchJobPublishRecordResp, LarkError> {
+        self.search_by_query(&SearchJobPublishRecordQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchJobPublishRecordQuery<'_>,
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchJobPublishRecordResp, LarkError> {
@@ -8829,8 +9184,13 @@ impl JobPublishRecordResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
+        .query("department_id_type", query.department_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .query("job_family_id_type", query.job_family_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SearchJobPublishRecordResp>()
+        .send_v2_response::<SearchJobPublishRecordRespData, SearchJobPublishRecordResp>()
         .await
     }
 }
