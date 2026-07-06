@@ -218,6 +218,8 @@ mod hire_talent;
 mod hire_task;
 #[path = "generated_service_smoke/hire/v2.rs"]
 mod hire_v2;
+#[path = "generated_service_smoke/hire/website.rs"]
+mod hire_website;
 #[path = "generated_service_smoke/human_authentication.rs"]
 mod human_authentication;
 #[path = "generated_service_smoke/im/announcement.rs"]
