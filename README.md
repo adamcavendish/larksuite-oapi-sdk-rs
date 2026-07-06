@@ -328,7 +328,11 @@ support lists cover application interviews, interviewers, feedback forms,
 registration schemas, and round types, with iterators where the Go SDK exposes
 them. Hire website posting resources now type website job posts, referral job
 posts, portal apply schemas, and website channels, with iterators for the
-paginated job-posting and portal schema scans.
+paginated job-posting and portal schema scans. The typed Hire surface also
+includes read/list coverage for job process and schema config, Offer
+application forms and approval templates, questionnaires, talent tags,
+employees, evaluations, notes, interview records, tripartite agreements, and
+background check orders, with iterators for the Go-backed paginated lists.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
