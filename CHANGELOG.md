@@ -21,6 +21,11 @@
 - Added typed Hire v1 website posting responses for website job posts, referral
   job posts, portal apply schemas, and website channels, with lazy iterators
   for the paginated job-posting and portal schema surfaces.
+- Added typed Hire v1 read/list responses for job process and schema config,
+  Offer application forms and approval templates, questionnaires, talent tags,
+  employees, evaluations, notes, interview records, tripartite agreements, and
+  background check orders, with lazy iterators where the Go SDK exposes
+  `ListByIterator`.
 
 ## [0.2.0] - 2026-07-03
 
