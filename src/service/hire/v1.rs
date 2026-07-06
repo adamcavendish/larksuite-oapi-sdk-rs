@@ -1169,6 +1169,52 @@ pub struct SearchTalentPoolRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListExternalApplicationRespData {
+    #[serde(default)]
+    pub items: Vec<ExternalApplication>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchQueryExternalBackgroundCheckRespData {
+    #[serde(default)]
+    pub items: Vec<ExternalBackgroundCheck>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchQueryExternalInterviewRespData {
+    #[serde(default)]
+    pub items: Vec<ExternalInterview>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchQueryExternalOfferRespData {
+    #[serde(default)]
+    pub items: Vec<ExternalOffer>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetByTalentInterviewRespData {
+    #[serde(default)]
+    pub items: Vec<TalentInterview>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListRegistrationSchemaRespData {
     #[serde(default)]
     pub items: Vec<RegistrationSchema>,
@@ -2698,6 +2744,163 @@ hire_catalog_iterator!(
 );
 
 #[derive(Debug, Clone)]
+pub struct ListExternalApplicationIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<ExternalApplication>,
+    page_size: Option<i32>,
+    talent_id: Option<String>,
+}
+
+impl_page_iterator_controls!(ListExternalApplicationIterator);
+
+impl ListExternalApplicationIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<ExternalApplication>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = ListExternalApplicationQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .talent_id(self.talent_id.as_deref());
+        let resource = ExternalApplicationResource {
+            config: self.config,
+        };
+        let resp = resource.list_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct BatchQueryExternalBackgroundCheckIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<ExternalBackgroundCheck>,
+    page_size: Option<i32>,
+    external_application_id: Option<String>,
+    body: serde_json::Value,
+}
+
+impl_page_iterator_controls!(BatchQueryExternalBackgroundCheckIterator);
+
+impl BatchQueryExternalBackgroundCheckIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<ExternalBackgroundCheck>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = BatchQueryExternalBackgroundCheckQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .external_application_id(self.external_application_id.as_deref());
+        let resource = ExternalBackgroundCheckResource {
+            config: self.config,
+        };
+        let resp = resource
+            .batch_query_by_query(&query, self.body.clone(), option)
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct BatchQueryExternalInterviewIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<ExternalInterview>,
+    page_size: Option<i32>,
+    external_application_id: Option<String>,
+    body: serde_json::Value,
+}
+
+impl_page_iterator_controls!(BatchQueryExternalInterviewIterator);
+
+impl BatchQueryExternalInterviewIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<ExternalInterview>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = BatchQueryExternalInterviewQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .external_application_id(self.external_application_id.as_deref());
+        let resource = ExternalInterviewResource {
+            config: self.config,
+        };
+        let resp = resource
+            .batch_query_by_query(&query, self.body.clone(), option)
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct BatchQueryExternalOfferIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<ExternalOffer>,
+    page_size: Option<i32>,
+    external_application_id: Option<String>,
+    body: serde_json::Value,
+}
+
+impl_page_iterator_controls!(BatchQueryExternalOfferIterator);
+
+impl BatchQueryExternalOfferIterator<'_> {
+    pub async fn next(
+        &mut self,
+        option: &RequestOption,
+    ) -> Result<Option<ExternalOffer>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = BatchQueryExternalOfferQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .external_application_id(self.external_application_id.as_deref());
+        let resource = ExternalOfferResource {
+            config: self.config,
+        };
+        let resp = resource
+            .batch_query_by_query(&query, self.body.clone(), option)
+            .await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct ListEvaluationIterator<'a> {
     config: &'a Config,
     state: PageIteratorState<Evaluation>,
@@ -3355,6 +3558,158 @@ pub struct TalentReferralInfo {
     pub referral_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalApplication {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_recruitment_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resume_source: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub termination_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub delivery_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub termination_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalBackgroundCheckAttachment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalBackgroundCheck {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_list: Option<Vec<ExternalBackgroundCheckAttachment>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalCommonAttachment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalInterviewAssessmentDimension {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assessment_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalInterviewAssessment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub username: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conclusion: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assessment_dimension_list: Option<Vec<ExternalInterviewAssessmentDimension>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_interview_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalInterview {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub participate_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub begin_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_assessments: Option<Vec<ExternalInterviewAssessment>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalOffer {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_list: Option<Vec<ExternalCommonAttachment>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentInterview {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_list: Option<Vec<serde_json::Value>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -5065,6 +5420,35 @@ impl<'a> ListInterviewQuery<'a> {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct GetByTalentInterviewQuery<'a> {
+    pub talent_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+    pub job_level_id_type: Option<&'a str>,
+}
+
+impl<'a> GetByTalentInterviewQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn talent_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.talent_id = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn job_level_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.job_level_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> InterviewResource<'a> {
     #[allow(clippy::too_many_arguments)]
     pub async fn list(
@@ -5116,6 +5500,15 @@ impl<'a> InterviewResource<'a> {
         &self,
         option: &RequestOption,
     ) -> Result<GetByTalentInterviewResp, LarkError> {
+        self.get_by_talent_query(&GetByTalentInterviewQuery::new(), option)
+            .await
+    }
+
+    pub async fn get_by_talent_query(
+        &self,
+        query: &GetByTalentInterviewQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetByTalentInterviewResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -5123,7 +5516,10 @@ impl<'a> InterviewResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetByTalentInterviewResp>()
+        .query("talent_id", query.talent_id)
+        .query("user_id_type", query.user_id_type)
+        .query("job_level_id_type", query.job_level_id_type)
+        .send_v2_response::<GetByTalentInterviewRespData, GetByTalentInterviewResp>()
         .await
     }
 }
@@ -5734,7 +6130,7 @@ impl_resp_v2!(PatchInterviewerResp, serde_json::Value);
 impl_resp_v2!(CreateExternalApplicationResp, serde_json::Value);
 impl_resp_v2!(UpdateExternalApplicationResp, serde_json::Value);
 impl_resp_v2!(DeleteExternalApplicationResp, ());
-impl_resp_v2!(ListExternalApplicationResp, serde_json::Value);
+impl_resp_v2!(ListExternalApplicationResp, ListExternalApplicationRespData);
 impl_resp_v2!(CreateExternalOfferResp, serde_json::Value);
 impl_resp_v2!(UpdateExternalOfferResp, serde_json::Value);
 impl_resp_v2!(DeleteExternalOfferResp, ());
@@ -5791,10 +6187,16 @@ impl_resp_v2!(LoginInfoEcoExamResp, serde_json::Value);
 impl_resp_v2!(UpdateResultEcoExamResp, serde_json::Value);
 impl_resp_v2!(BatchDeleteEcoExamPaperResp, serde_json::Value);
 impl_resp_v2!(BatchUpdateEcoExamPaperResp, serde_json::Value);
-impl_resp_v2!(BatchQueryExternalBackgroundCheckResp, serde_json::Value);
-impl_resp_v2!(BatchQueryExternalInterviewResp, serde_json::Value);
-impl_resp_v2!(BatchQueryExternalOfferResp, serde_json::Value);
-impl_resp_v2!(GetByTalentInterviewResp, serde_json::Value);
+impl_resp_v2!(
+    BatchQueryExternalBackgroundCheckResp,
+    BatchQueryExternalBackgroundCheckRespData
+);
+impl_resp_v2!(
+    BatchQueryExternalInterviewResp,
+    BatchQueryExternalInterviewRespData
+);
+impl_resp_v2!(BatchQueryExternalOfferResp, BatchQueryExternalOfferRespData);
+impl_resp_v2!(GetByTalentInterviewResp, GetByTalentInterviewRespData);
 impl_resp_v2!(CloseJobResp, serde_json::Value);
 impl_resp_v2!(CombinedCreateJobResp, serde_json::Value);
 impl_resp_v2!(CombinedUpdateJobResp, serde_json::Value);
@@ -7284,6 +7686,92 @@ macro_rules! external_crud_resource {
     };
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListExternalApplicationQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub talent_id: Option<&'a str>,
+}
+
+impl<'a> ListExternalApplicationQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn talent_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.talent_id = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+macro_rules! external_batch_query {
+    ($query:ident) => {
+        #[derive(Debug, Clone, Default)]
+        #[non_exhaustive]
+        pub struct $query<'a> {
+            pub page_size: Option<i32>,
+            pub page_token: Option<&'a str>,
+            pub external_application_id: Option<&'a str>,
+        }
+
+        impl<'a> $query<'a> {
+            pub fn new() -> Self {
+                Self::default()
+            }
+
+            pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+                self.page_size = value.into();
+                self
+            }
+
+            pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+                self.page_token = value.into();
+                self
+            }
+
+            pub fn external_application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+                self.external_application_id = value.into();
+                self
+            }
+
+            pub fn page(mut self, page: PageQuery<'a>) -> Self {
+                self.page_size = page.page_size;
+                self.page_token = page.page_token;
+                self
+            }
+
+            pub(crate) fn page_query(&self) -> PageQuery<'a> {
+                PageQuery::from_parts(self.page_size, self.page_token)
+            }
+        }
+    };
+}
+
+external_batch_query!(BatchQueryExternalBackgroundCheckQuery);
+external_batch_query!(BatchQueryExternalInterviewQuery);
+external_batch_query!(BatchQueryExternalOfferQuery);
+
 external_crud_resource!(
     ExternalApplicationResource,
     "/open-apis/hire/v1/external_applications",
@@ -7298,6 +7786,15 @@ impl ExternalApplicationResource<'_> {
         &self,
         option: &RequestOption,
     ) -> Result<ListExternalApplicationResp, LarkError> {
+        self.list_by_query(&ListExternalApplicationQuery::new(), option)
+            .await
+    }
+
+    pub async fn list_by_query(
+        &self,
+        query: &ListExternalApplicationQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListExternalApplicationResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -7305,8 +7802,28 @@ impl ExternalApplicationResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListExternalApplicationResp>()
+        .page_query(query.page_query())
+        .query("talent_id", query.talent_id)
+        .send_v2_response::<ListExternalApplicationRespData, ListExternalApplicationResp>()
         .await
+    }
+
+    pub fn list_by_iterator(&self, page_size: Option<i32>) -> ListExternalApplicationIterator<'_> {
+        let query = ListExternalApplicationQuery::new().page_size(page_size);
+        self.list_iterator_by_query(&query)
+    }
+
+    pub fn list_iterator_by_query(
+        &self,
+        query: &ListExternalApplicationQuery<'_>,
+    ) -> ListExternalApplicationIterator<'_> {
+        ListExternalApplicationIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            talent_id: query.talent_id.map(ToOwned::to_owned),
+        }
     }
 }
 
@@ -7325,6 +7842,16 @@ impl ExternalOfferResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalOfferResp, LarkError> {
+        self.batch_query_by_query(&BatchQueryExternalOfferQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn batch_query_by_query(
+        &self,
+        query: &BatchQueryExternalOfferQuery<'_>,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchQueryExternalOfferResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::POST,
@@ -7332,9 +7859,35 @@ impl ExternalOfferResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("external_application_id", query.external_application_id)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchQueryExternalOfferResp>()
+        .send_v2_response::<BatchQueryExternalOfferRespData, BatchQueryExternalOfferResp>()
         .await
+    }
+
+    pub fn batch_query_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        body: serde_json::Value,
+    ) -> BatchQueryExternalOfferIterator<'_> {
+        let query = BatchQueryExternalOfferQuery::new().page_size(page_size);
+        self.batch_query_iterator_by_query(&query, body)
+    }
+
+    pub fn batch_query_iterator_by_query(
+        &self,
+        query: &BatchQueryExternalOfferQuery<'_>,
+        body: serde_json::Value,
+    ) -> BatchQueryExternalOfferIterator<'_> {
+        BatchQueryExternalOfferIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            external_application_id: query.external_application_id.map(ToOwned::to_owned),
+            body,
+        }
     }
 }
 
@@ -7353,6 +7906,16 @@ impl ExternalInterviewResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalInterviewResp, LarkError> {
+        self.batch_query_by_query(&BatchQueryExternalInterviewQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn batch_query_by_query(
+        &self,
+        query: &BatchQueryExternalInterviewQuery<'_>,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchQueryExternalInterviewResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::POST,
@@ -7360,9 +7923,35 @@ impl ExternalInterviewResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("external_application_id", query.external_application_id)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchQueryExternalInterviewResp>()
+        .send_v2_response::<BatchQueryExternalInterviewRespData, BatchQueryExternalInterviewResp>()
         .await
+    }
+
+    pub fn batch_query_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        body: serde_json::Value,
+    ) -> BatchQueryExternalInterviewIterator<'_> {
+        let query = BatchQueryExternalInterviewQuery::new().page_size(page_size);
+        self.batch_query_iterator_by_query(&query, body)
+    }
+
+    pub fn batch_query_iterator_by_query(
+        &self,
+        query: &BatchQueryExternalInterviewQuery<'_>,
+        body: serde_json::Value,
+    ) -> BatchQueryExternalInterviewIterator<'_> {
+        BatchQueryExternalInterviewIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            external_application_id: query.external_application_id.map(ToOwned::to_owned),
+            body,
+        }
     }
 }
 
@@ -7381,6 +7970,16 @@ impl ExternalBackgroundCheckResource<'_> {
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalBackgroundCheckResp, LarkError> {
+        self.batch_query_by_query(&BatchQueryExternalBackgroundCheckQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn batch_query_by_query(
+        &self,
+        query: &BatchQueryExternalBackgroundCheckQuery<'_>,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchQueryExternalBackgroundCheckResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::POST,
@@ -7388,9 +7987,38 @@ impl ExternalBackgroundCheckResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("external_application_id", query.external_application_id)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchQueryExternalBackgroundCheckResp>()
+        .send_v2_response::<
+            BatchQueryExternalBackgroundCheckRespData,
+            BatchQueryExternalBackgroundCheckResp,
+        >()
         .await
+    }
+
+    pub fn batch_query_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        body: serde_json::Value,
+    ) -> BatchQueryExternalBackgroundCheckIterator<'_> {
+        let query = BatchQueryExternalBackgroundCheckQuery::new().page_size(page_size);
+        self.batch_query_iterator_by_query(&query, body)
+    }
+
+    pub fn batch_query_iterator_by_query(
+        &self,
+        query: &BatchQueryExternalBackgroundCheckQuery<'_>,
+        body: serde_json::Value,
+    ) -> BatchQueryExternalBackgroundCheckIterator<'_> {
+        BatchQueryExternalBackgroundCheckIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            external_application_id: query.external_application_id.map(ToOwned::to_owned),
+            body,
+        }
     }
 }
 
