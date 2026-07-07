@@ -202,6 +202,8 @@ mod helpdesk_ticket;
 mod hire_agency;
 #[path = "generated_service_smoke/hire/application.rs"]
 mod hire_application;
+#[path = "generated_service_smoke/hire/auxiliary_read.rs"]
+mod hire_auxiliary_read;
 #[path = "generated_service_smoke/hire/catalog.rs"]
 mod hire_catalog;
 #[path = "generated_service_smoke/hire/external_read.rs"]
