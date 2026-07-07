@@ -287,7 +287,7 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         SearchJobPublishRecordQuery as SearchHireJobPublishRecordQuery,
         SearchReferralQuery as SearchHireReferralQuery,
         SearchTalentOperationLogQuery as SearchHireTalentOperationLogQuery,
-        SearchTalentPoolQuery as SearchHireTalentPoolQuery,
+        SearchTalentPoolQuery as SearchHireTalentPoolQuery, SearchTestQuery as SearchHireTestQuery,
         SearchWebsiteJobPostQuery as SearchHireWebsiteJobPostQuery,
     },
     hire::v2::{
