@@ -344,7 +344,9 @@ helpers now type supplier, agency detail, account, and protection payloads.
 Auxiliary Hire reads now type diversity inclusion, interview attachment,
 minutes, and website delivery task payloads. Hire utility helpers now type job
 manager, referral account asset, talent ID lookup, test search, and website
-delivery creation payloads, with an iterator for test search.
+delivery creation payloads, with an iterator for test search. Hire write
+utility helpers now type employee, interviewer, note, attachment, and website
+channel write responses.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
