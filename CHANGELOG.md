@@ -43,6 +43,8 @@
 - Added typed Hire v1 utility responses for job managers, referral account
   assets, talent ID lookup, test search, and website delivery creation, with a
   lazy iterator for test search.
+- Added typed Hire v1 write utility responses for employee, interviewer, note,
+  attachment, and website channel write helpers.
 
 ## [0.2.0] - 2026-07-03
 
