@@ -346,7 +346,9 @@ minutes, and website delivery task payloads. Hire utility helpers now type job
 manager, referral account asset, talent ID lookup, test search, and website
 delivery creation payloads, with an iterator for test search. Hire write
 utility helpers now type employee, interviewer, note, attachment, and website
-channel write responses.
+channel write responses. Hire external write helpers now type external
+application, background check, interview, offer, interview assessment, referral
+reward, talent external info, and website site-user responses.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw

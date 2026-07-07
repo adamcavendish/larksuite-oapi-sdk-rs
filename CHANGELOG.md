@@ -45,6 +45,9 @@
   lazy iterator for test search.
 - Added typed Hire v1 write utility responses for employee, interviewer, note,
   attachment, and website channel write helpers.
+- Added typed Hire v1 external and adjacent write responses for external
+  application, background check, interview, offer, interview assessment,
+  referral reward, talent external info, and website site-user helpers.
 
 ## [0.2.0] - 2026-07-03
 
