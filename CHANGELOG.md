@@ -40,6 +40,9 @@
 - Added typed Hire v1 auxiliary read responses for diversity inclusion search,
   interview record attachments, interview minutes, and website delivery task
   lookups.
+- Added typed Hire v1 utility responses for job managers, referral account
+  assets, talent ID lookup, test search, and website delivery creation, with a
+  lazy iterator for test search.
 
 ## [0.2.0] - 2026-07-03
 
