@@ -265,6 +265,14 @@ pub struct TalentBatchInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentExternalInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_create_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TestResultDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subject: Option<String>,
@@ -786,6 +794,22 @@ pub struct WebsiteChannelInfo {
     pub link: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WebsiteUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_country_code: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1699,6 +1723,18 @@ pub struct ListExternalApplicationRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateExternalApplicationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_application: Option<ExternalApplication>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateExternalApplicationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_application: Option<ExternalApplication>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchQueryExternalBackgroundCheckRespData {
     #[serde(default)]
     pub items: Vec<ExternalBackgroundCheck>,
@@ -1706,6 +1742,18 @@ pub struct BatchQueryExternalBackgroundCheckRespData {
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateExternalBackgroundCheckRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_background_check: Option<ExternalBackgroundCheck>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateExternalBackgroundCheckRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_background_check: Option<ExternalBackgroundCheck>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1719,6 +1767,18 @@ pub struct BatchQueryExternalInterviewRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateExternalInterviewRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_interview: Option<ExternalInterview>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateExternalInterviewRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_interview: Option<ExternalInterview>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchQueryExternalOfferRespData {
     #[serde(default)]
     pub items: Vec<ExternalOffer>,
@@ -1729,9 +1789,57 @@ pub struct BatchQueryExternalOfferRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateExternalOfferRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_offer: Option<ExternalOffer>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateExternalOfferRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_offer: Option<ExternalOffer>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetByTalentInterviewRespData {
     #[serde(default)]
     pub items: Vec<TalentInterview>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateExternalInterviewAssessmentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_interview_assessment: Option<ExternalInterviewAssessment>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchExternalInterviewAssessmentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_interview_assessment: Option<ExternalInterviewAssessment>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateExternalReferralRewardRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateTalentExternalInfoRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_info: Option<TalentExternalInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateTalentExternalInfoRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_info: Option<TalentExternalInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateWebsiteSiteUserRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub site_user: Option<WebsiteUser>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -6938,18 +7046,30 @@ impl_resp_v2!(ListInterviewRecordResp, ListInterviewRecordRespData);
 impl_resp_v2!(GetInterviewRecordResp, GetInterviewRecordRespData);
 impl_resp_v2!(ListInterviewerResp, ListInterviewerRespData);
 impl_resp_v2!(PatchInterviewerResp, PatchInterviewerRespData);
-impl_resp_v2!(CreateExternalApplicationResp, serde_json::Value);
-impl_resp_v2!(UpdateExternalApplicationResp, serde_json::Value);
+impl_resp_v2!(
+    CreateExternalApplicationResp,
+    CreateExternalApplicationRespData
+);
+impl_resp_v2!(
+    UpdateExternalApplicationResp,
+    UpdateExternalApplicationRespData
+);
 impl_resp_v2!(DeleteExternalApplicationResp, ());
 impl_resp_v2!(ListExternalApplicationResp, ListExternalApplicationRespData);
-impl_resp_v2!(CreateExternalOfferResp, serde_json::Value);
-impl_resp_v2!(UpdateExternalOfferResp, serde_json::Value);
+impl_resp_v2!(CreateExternalOfferResp, CreateExternalOfferRespData);
+impl_resp_v2!(UpdateExternalOfferResp, UpdateExternalOfferRespData);
 impl_resp_v2!(DeleteExternalOfferResp, ());
-impl_resp_v2!(CreateExternalInterviewResp, serde_json::Value);
-impl_resp_v2!(UpdateExternalInterviewResp, serde_json::Value);
+impl_resp_v2!(CreateExternalInterviewResp, CreateExternalInterviewRespData);
+impl_resp_v2!(UpdateExternalInterviewResp, UpdateExternalInterviewRespData);
 impl_resp_v2!(DeleteExternalInterviewResp, ());
-impl_resp_v2!(CreateExternalBackgroundCheckResp, serde_json::Value);
-impl_resp_v2!(UpdateExternalBackgroundCheckResp, serde_json::Value);
+impl_resp_v2!(
+    CreateExternalBackgroundCheckResp,
+    CreateExternalBackgroundCheckRespData
+);
+impl_resp_v2!(
+    UpdateExternalBackgroundCheckResp,
+    UpdateExternalBackgroundCheckRespData
+);
 impl_resp_v2!(DeleteExternalBackgroundCheckResp, ());
 impl_resp_v2!(ListTodoResp, ListTodoRespData);
 impl_resp_v2!(CreateTripartiteAgreementResp, serde_json::Value);
@@ -7071,9 +7191,18 @@ impl_resp_v2!(PatchEhrImportTaskResp, serde_json::Value);
 impl_resp_v2!(ListEvaluationTaskResp, ListEvaluationTaskRespData);
 impl_resp_v2!(CreateExamResp, serde_json::Value);
 impl_resp_v2!(ListExamMarkingTaskResp, ListExamMarkingTaskRespData);
-impl_resp_v2!(CreateExternalInterviewAssessmentResp, serde_json::Value);
-impl_resp_v2!(PatchExternalInterviewAssessmentResp, serde_json::Value);
-impl_resp_v2!(CreateExternalReferralRewardResp, serde_json::Value);
+impl_resp_v2!(
+    CreateExternalInterviewAssessmentResp,
+    CreateExternalInterviewAssessmentRespData
+);
+impl_resp_v2!(
+    PatchExternalInterviewAssessmentResp,
+    PatchExternalInterviewAssessmentRespData
+);
+impl_resp_v2!(
+    CreateExternalReferralRewardResp,
+    CreateExternalReferralRewardRespData
+);
 impl_resp_v2!(DeleteExternalReferralRewardResp, ());
 impl_resp_v2!(
     ListInterviewFeedbackFormResp,
@@ -7115,15 +7244,21 @@ impl_resp_v2!(
     ListReferralWebsiteJobPostResp,
     ListReferralWebsiteJobPostRespData
 );
-impl_resp_v2!(CreateTalentExternalInfoResp, serde_json::Value);
-impl_resp_v2!(UpdateTalentExternalInfoResp, serde_json::Value);
+impl_resp_v2!(
+    CreateTalentExternalInfoResp,
+    CreateTalentExternalInfoRespData
+);
+impl_resp_v2!(
+    UpdateTalentExternalInfoResp,
+    UpdateTalentExternalInfoRespData
+);
 impl_resp_v2!(ListTalentTagResp, ListTalentTagRespData);
 impl_resp_v2!(CreateWebsiteChannelResp, CreateWebsiteChannelRespData);
 impl_resp_v2!(DeleteWebsiteChannelResp, ());
 impl_resp_v2!(ListWebsiteChannelResp, ListWebsiteChannelRespData);
 impl_resp_v2!(UpdateWebsiteChannelResp, UpdateWebsiteChannelRespData);
 impl_resp_v2!(GetWebsiteDeliveryTaskResp, GetWebsiteDeliveryTaskRespData);
-impl_resp_v2!(CreateWebsiteSiteUserResp, serde_json::Value);
+impl_resp_v2!(CreateWebsiteSiteUserResp, CreateWebsiteSiteUserRespData);
 
 // ── New response types (Phase 11 — missing methods) ──
 
@@ -8495,7 +8630,9 @@ impl InterviewerResource<'_> {
 
 macro_rules! external_crud_resource {
     ($struct_name:ident, $base_path:literal,
-     $create_resp:ident, $update_resp:ident, $delete_resp:ident, $id_param:ident) => {
+     $create_resp:ident, $create_data:ident,
+     $update_resp:ident, $update_data:ident,
+     $delete_resp:ident, $id_param:ident) => {
         pub struct $struct_name<'a> {
             config: &'a Config,
         }
@@ -8513,7 +8650,7 @@ macro_rules! external_crud_resource {
                     option,
                 )
                 .json_body(&body)?
-                .send_v2_response::<serde_json::Value, $create_resp>()
+                .send_v2_response::<$create_data, $create_resp>()
                 .await
             }
 
@@ -8532,7 +8669,7 @@ macro_rules! external_crud_resource {
                     option,
                 )
                 .json_body(&body)?
-                .send_v2_response::<serde_json::Value, $update_resp>()
+                .send_v2_response::<$update_data, $update_resp>()
                 .await
             }
 
@@ -8646,7 +8783,9 @@ external_crud_resource!(
     ExternalApplicationResource,
     "/open-apis/hire/v1/external_applications",
     CreateExternalApplicationResp,
+    CreateExternalApplicationRespData,
     UpdateExternalApplicationResp,
+    UpdateExternalApplicationRespData,
     DeleteExternalApplicationResp,
     external_application_id
 );
@@ -8701,7 +8840,9 @@ external_crud_resource!(
     ExternalOfferResource,
     "/open-apis/hire/v1/external_offers",
     CreateExternalOfferResp,
+    CreateExternalOfferRespData,
     UpdateExternalOfferResp,
+    UpdateExternalOfferRespData,
     DeleteExternalOfferResp,
     external_offer_id
 );
@@ -8765,7 +8906,9 @@ external_crud_resource!(
     ExternalInterviewResource,
     "/open-apis/hire/v1/external_interviews",
     CreateExternalInterviewResp,
+    CreateExternalInterviewRespData,
     UpdateExternalInterviewResp,
+    UpdateExternalInterviewRespData,
     DeleteExternalInterviewResp,
     external_interview_id
 );
@@ -8829,7 +8972,9 @@ external_crud_resource!(
     ExternalBackgroundCheckResource,
     "/open-apis/hire/v1/external_background_checks",
     CreateExternalBackgroundCheckResp,
+    CreateExternalBackgroundCheckRespData,
     UpdateExternalBackgroundCheckResp,
+    UpdateExternalBackgroundCheckRespData,
     DeleteExternalBackgroundCheckResp,
     external_background_check_id
 );
@@ -10795,7 +10940,10 @@ impl ExternalInterviewAssessmentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateExternalInterviewAssessmentResp>()
+        .send_v2_response::<
+            CreateExternalInterviewAssessmentRespData,
+            CreateExternalInterviewAssessmentResp,
+        >()
         .await
     }
 
@@ -10816,7 +10964,10 @@ impl ExternalInterviewAssessmentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchExternalInterviewAssessmentResp>()
+        .send_v2_response::<
+            PatchExternalInterviewAssessmentRespData,
+            PatchExternalInterviewAssessmentResp,
+        >()
         .await
     }
 }
@@ -10841,7 +10992,8 @@ impl ExternalReferralRewardResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateExternalReferralRewardResp>()
+        .send_v2_response::<CreateExternalReferralRewardRespData, CreateExternalReferralRewardResp>(
+        )
         .await
     }
 
@@ -11796,7 +11948,7 @@ impl TalentExternalInfoResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateTalentExternalInfoResp>()
+        .send_v2_response::<CreateTalentExternalInfoRespData, CreateTalentExternalInfoResp>()
         .await
     }
 
@@ -11815,7 +11967,7 @@ impl TalentExternalInfoResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateTalentExternalInfoResp>()
+        .send_v2_response::<UpdateTalentExternalInfoRespData, UpdateTalentExternalInfoResp>()
         .await
     }
 }
@@ -12020,7 +12172,7 @@ impl WebsiteSiteUserResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateWebsiteSiteUserResp>()
+        .send_v2_response::<CreateWebsiteSiteUserRespData, CreateWebsiteSiteUserResp>()
         .await
     }
 }
