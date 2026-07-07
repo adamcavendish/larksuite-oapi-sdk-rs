@@ -37,6 +37,9 @@
   record search, job requirement lookup by ID, and location query helpers.
 - Added typed Hire v1 agency read/query responses for agency batch query,
   agency detail, account lookup, protection search, and agency query helpers.
+- Added typed Hire v1 auxiliary read responses for diversity inclusion search,
+  interview record attachments, interview minutes, and website delivery task
+  lookups.
 
 ## [0.2.0] - 2026-07-03
 
