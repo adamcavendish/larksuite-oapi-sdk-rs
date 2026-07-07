@@ -234,6 +234,8 @@ mod hire_utility_test;
 mod hire_v2;
 #[path = "generated_service_smoke/hire/website.rs"]
 mod hire_website;
+#[path = "generated_service_smoke/hire/write_utility.rs"]
+mod hire_write_utility;
 #[path = "generated_service_smoke/human_authentication.rs"]
 mod human_authentication;
 #[path = "generated_service_smoke/im/announcement.rs"]
