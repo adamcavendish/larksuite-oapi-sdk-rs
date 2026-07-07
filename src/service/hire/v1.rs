@@ -1353,6 +1353,12 @@ pub struct GetByApplicationEmployeeRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchEmployeeRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee: Option<Employee>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListEvaluationRespData {
     #[serde(default)]
     pub items: Vec<Evaluation>,
@@ -1376,6 +1382,18 @@ pub struct ListNoteRespData {
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateNoteRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<Note>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchNoteRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<Note>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1865,6 +1883,30 @@ pub struct ListWebsiteChannelRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateWebsiteChannelRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateWebsiteChannelRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListQuestionnaireRespData {
     #[serde(default)]
     pub items: Vec<Questionnaire>,
@@ -2028,6 +2070,12 @@ pub struct ListInterviewerRespData {
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchInterviewerRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interviewer: Option<Interviewer>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -5058,6 +5106,12 @@ pub struct AttachmentData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateAttachmentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct OfferSchemaData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub offer_schema: Option<OfferSchema>,
@@ -6821,7 +6875,7 @@ impl<'a> AttachmentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateAttachmentResp>()
+        .send_v2_response::<CreateAttachmentRespData, CreateAttachmentResp>()
         .await
     }
 }
@@ -6856,12 +6910,12 @@ impl_resp_v2!(
     GetByApplicationEmployeeResp,
     GetByApplicationEmployeeRespData
 );
-impl_resp_v2!(PatchEmployeeResp, serde_json::Value);
+impl_resp_v2!(PatchEmployeeResp, PatchEmployeeRespData);
 impl_resp_v2!(ListEvaluationResp, ListEvaluationRespData);
 impl_resp_v2!(ListNoteResp, ListNoteRespData);
-impl_resp_v2!(CreateNoteResp, serde_json::Value);
+impl_resp_v2!(CreateNoteResp, CreateNoteRespData);
 impl_resp_v2!(GetNoteResp, GetNoteRespData);
-impl_resp_v2!(PatchNoteResp, serde_json::Value);
+impl_resp_v2!(PatchNoteResp, PatchNoteRespData);
 impl_resp_v2!(DeleteNoteResp, ());
 impl_resp_v2!(ListQuestionnaireResp, ListQuestionnaireRespData);
 impl_resp_v2!(GetReferralResp, GetReferralRespData);
@@ -6883,7 +6937,7 @@ impl_resp_v2!(GetWebsiteJobPostResp, GetWebsiteJobPostRespData);
 impl_resp_v2!(ListInterviewRecordResp, ListInterviewRecordRespData);
 impl_resp_v2!(GetInterviewRecordResp, GetInterviewRecordRespData);
 impl_resp_v2!(ListInterviewerResp, ListInterviewerRespData);
-impl_resp_v2!(PatchInterviewerResp, serde_json::Value);
+impl_resp_v2!(PatchInterviewerResp, PatchInterviewerRespData);
 impl_resp_v2!(CreateExternalApplicationResp, serde_json::Value);
 impl_resp_v2!(UpdateExternalApplicationResp, serde_json::Value);
 impl_resp_v2!(DeleteExternalApplicationResp, ());
@@ -7064,17 +7118,17 @@ impl_resp_v2!(
 impl_resp_v2!(CreateTalentExternalInfoResp, serde_json::Value);
 impl_resp_v2!(UpdateTalentExternalInfoResp, serde_json::Value);
 impl_resp_v2!(ListTalentTagResp, ListTalentTagRespData);
-impl_resp_v2!(CreateWebsiteChannelResp, serde_json::Value);
+impl_resp_v2!(CreateWebsiteChannelResp, CreateWebsiteChannelRespData);
 impl_resp_v2!(DeleteWebsiteChannelResp, ());
 impl_resp_v2!(ListWebsiteChannelResp, ListWebsiteChannelRespData);
-impl_resp_v2!(UpdateWebsiteChannelResp, serde_json::Value);
+impl_resp_v2!(UpdateWebsiteChannelResp, UpdateWebsiteChannelRespData);
 impl_resp_v2!(GetWebsiteDeliveryTaskResp, GetWebsiteDeliveryTaskRespData);
 impl_resp_v2!(CreateWebsiteSiteUserResp, serde_json::Value);
 
 // ── New response types (Phase 11 — missing methods) ──
 
 impl_resp_v2!(GetAgencyResp, GetAgencyRespData);
-impl_resp_v2!(CreateAttachmentResp, serde_json::Value);
+impl_resp_v2!(CreateAttachmentResp, CreateAttachmentRespData);
 impl_resp_v2!(CreateEcoAccountCustomFieldResp, serde_json::Value);
 impl_resp_v2!(CreateEcoBackgroundCheckCustomFieldResp, serde_json::Value);
 impl_resp_v2!(CreateEcoBackgroundCheckPackageResp, serde_json::Value);
@@ -7123,7 +7177,7 @@ impl EmployeeResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchEmployeeResp>()
+        .send_v2_response::<PatchEmployeeRespData, PatchEmployeeResp>()
         .await
     }
 
@@ -7233,7 +7287,7 @@ impl NoteResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateNoteResp>()
+        .send_v2_response::<CreateNoteRespData, CreateNoteResp>()
         .await
     }
 
@@ -7309,7 +7363,7 @@ impl NoteResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchNoteResp>()
+        .send_v2_response::<PatchNoteRespData, PatchNoteResp>()
         .await
     }
 }
@@ -8432,7 +8486,7 @@ impl InterviewerResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchInterviewerResp>()
+        .send_v2_response::<PatchInterviewerRespData, PatchInterviewerResp>()
         .await
     }
 }
@@ -11842,7 +11896,7 @@ impl WebsiteChannelResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateWebsiteChannelResp>()
+        .send_v2_response::<CreateWebsiteChannelRespData, CreateWebsiteChannelResp>()
         .await
     }
 
@@ -11912,7 +11966,7 @@ impl WebsiteChannelResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateWebsiteChannelResp>()
+        .send_v2_response::<UpdateWebsiteChannelRespData, UpdateWebsiteChannelResp>()
         .await
     }
 }
