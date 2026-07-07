@@ -91,6 +91,130 @@ pub struct CodeNameObject {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Agency {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contactor_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contactor_name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencyAccount {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_info: Option<AgencyAccountUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencyAccountUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencyProtection {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub protection_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expire_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agency_supplier_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agency_supplier_name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agency_supplier_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agency_supplier_user_name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencySupplier {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label_list: Option<Vec<AgencySupplierLabel>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub admin_list: Option<Vec<AgencySupplierAdmin>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agency_protect_time: Option<AgencySupplierProtectTime>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cooperation_create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cooperation_start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cooperation_end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cooperation_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invite_email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub supplier_area: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_protect_time: Option<AgencySupplierTalentProtectTime>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencySupplierAdmin {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencySupplierLabel {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencySupplierProtectTime {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_default: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencySupplierTalentProtectTime {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_default: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub forever: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CommonSchema {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1192,6 +1316,50 @@ pub struct QueryLocationRespData {
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchQueryAgencyRespData {
+    #[serde(default)]
+    pub items: Vec<AgencySupplier>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetAgencyRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agency: Option<Agency>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetAgencyAccountRespData {
+    #[serde(default)]
+    pub items: Vec<AgencyAccount>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ProtectSearchAgencyRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_onboarded: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboarded_in_protection: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboarded_protection: Option<AgencyProtection>,
+    #[serde(default)]
+    pub protection_list: Vec<AgencyProtection>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryAgencyRespData {
+    #[serde(default)]
+    pub items: Vec<Agency>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -6393,12 +6561,12 @@ impl_resp_v2!(ListTripartiteAgreementResp, ListTripartiteAgreementRespData);
 // ── New response types for missing methods ──
 
 impl_resp_v2!(PublishAdvertisementResp, serde_json::Value);
-impl_resp_v2!(BatchQueryAgencyResp, serde_json::Value);
-impl_resp_v2!(GetAgencyAccountResp, serde_json::Value);
+impl_resp_v2!(BatchQueryAgencyResp, BatchQueryAgencyRespData);
+impl_resp_v2!(GetAgencyAccountResp, GetAgencyAccountRespData);
 impl_resp_v2!(OperateAgencyAccountResp, serde_json::Value);
 impl_resp_v2!(ProtectAgencyResp, serde_json::Value);
-impl_resp_v2!(ProtectSearchAgencyResp, serde_json::Value);
-impl_resp_v2!(QueryAgencyResp, serde_json::Value);
+impl_resp_v2!(ProtectSearchAgencyResp, ProtectSearchAgencyRespData);
+impl_resp_v2!(QueryAgencyResp, QueryAgencyRespData);
 impl_resp_v2!(CancelOnboardApplicationResp, serde_json::Value);
 impl_resp_v2!(GetDetailApplicationResp, serde_json::Value);
 impl_resp_v2!(RecoverApplicationResp, serde_json::Value);
@@ -6545,7 +6713,7 @@ impl_resp_v2!(CreateWebsiteSiteUserResp, serde_json::Value);
 
 // ── New response types (Phase 11 — missing methods) ──
 
-impl_resp_v2!(GetAgencyResp, serde_json::Value);
+impl_resp_v2!(GetAgencyResp, GetAgencyRespData);
 impl_resp_v2!(CreateAttachmentResp, serde_json::Value);
 impl_resp_v2!(CreateEcoAccountCustomFieldResp, serde_json::Value);
 impl_resp_v2!(CreateEcoBackgroundCheckCustomFieldResp, serde_json::Value);
@@ -8510,9 +8678,137 @@ pub struct AgencyResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct BatchQueryAgencyQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> BatchQueryAgencyQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct GetAgencyAccountQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> GetAgencyAccountQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct QueryAgencyQuery<'a> {
+    pub name: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> QueryAgencyQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.name = value.into();
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct GetAgencyQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetAgencyQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl AgencyResource<'_> {
     pub async fn batch_query(
         &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<BatchQueryAgencyResp, LarkError> {
+        self.batch_query_by_query(&BatchQueryAgencyQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn batch_query_by_query(
+        &self,
+        query: &BatchQueryAgencyQuery<'_>,
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<BatchQueryAgencyResp, LarkError> {
@@ -8523,13 +8819,25 @@ impl AgencyResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchQueryAgencyResp>()
+        .send_v2_response::<BatchQueryAgencyRespData, BatchQueryAgencyResp>()
         .await
     }
 
     pub async fn get_agency_account(
         &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<GetAgencyAccountResp, LarkError> {
+        self.get_agency_account_by_query(&GetAgencyAccountQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn get_agency_account_by_query(
+        &self,
+        query: &GetAgencyAccountQuery<'_>,
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<GetAgencyAccountResp, LarkError> {
@@ -8540,8 +8848,10 @@ impl AgencyResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, GetAgencyAccountResp>()
+        .send_v2_response::<GetAgencyAccountRespData, GetAgencyAccountResp>()
         .await
     }
 
@@ -8592,11 +8902,19 @@ impl AgencyResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ProtectSearchAgencyResp>()
+        .send_v2_response::<ProtectSearchAgencyRespData, ProtectSearchAgencyResp>()
         .await
     }
 
     pub async fn query(&self, option: &RequestOption) -> Result<QueryAgencyResp, LarkError> {
+        self.query_by_query(&QueryAgencyQuery::new(), option).await
+    }
+
+    pub async fn query_by_query(
+        &self,
+        query: &QueryAgencyQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<QueryAgencyResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -8604,7 +8922,9 @@ impl AgencyResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, QueryAgencyResp>()
+        .query("name", query.name)
+        .query("user_id_type", query.user_id_type)
+        .send_v2_response::<QueryAgencyRespData, QueryAgencyResp>()
         .await
     }
 
@@ -8612,6 +8932,20 @@ impl AgencyResource<'_> {
         &self,
         agency_id: &str,
         user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<GetAgencyResp, LarkError> {
+        self.get_by_query(
+            agency_id,
+            &GetAgencyQuery::new().user_id_type(user_id_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        agency_id: &str,
+        query: &GetAgencyQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetAgencyResp, LarkError> {
         let path = format!("/open-apis/hire/v1/agencies/{agency_id}");
@@ -8622,8 +8956,8 @@ impl AgencyResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, GetAgencyResp>()
+        .query("user_id_type", query.user_id_type)
+        .send_v2_response::<GetAgencyRespData, GetAgencyResp>()
         .await
     }
 }
