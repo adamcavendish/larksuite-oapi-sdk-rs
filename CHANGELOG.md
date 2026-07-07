@@ -35,6 +35,8 @@
   list and batch-query surfaces.
 - Added typed Hire v1 job utility read/search responses for job publish
   record search, job requirement lookup by ID, and location query helpers.
+- Added typed Hire v1 agency read/query responses for agency batch query,
+  agency detail, account lookup, protection search, and agency query helpers.
 
 ## [0.2.0] - 2026-07-03
 

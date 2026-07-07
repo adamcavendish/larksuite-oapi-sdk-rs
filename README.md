@@ -339,7 +339,8 @@ for talent pool search. External Hire read helpers now type external
 applications, background checks, interviews, offers, and talent interview
 lookups, with iterators for the Go-backed external list and batch-query
 surfaces. Job utility read/search helpers now type job publish record search,
-job requirement lookup by ID, and location query responses.
+job requirement lookup by ID, and location query responses. Agency read/query
+helpers now type supplier, agency detail, account, and protection payloads.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
