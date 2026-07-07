@@ -183,6 +183,148 @@ pub struct WebsiteDeliveryDto {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Cash {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub amount: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BonusAmount {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bonus_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub point_bonus: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cash: Option<Cash>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cash_bonus: Option<Vec<Cash>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Assets {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confirmed_bonus: Option<BonusAmount>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub paid_bonus: Option<BonusAmount>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AccountReferrer {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Account {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assets: Option<Assets>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub referrer: Option<AccountReferrer>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobManager {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recruiter_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hiring_manager_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assistant_id_list: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentBatchInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub identification_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub identification_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_onboarded: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TestResultDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subject: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TestSchedule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Test {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub test_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub test_paper_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub test_paper_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub test_paper_source_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub test_paper_source_name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reply_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub test_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub test_schedule: Option<TestSchedule>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub test_complete_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub report_url_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result_detail_list: Option<Vec<TestResultDetail>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result_upload_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score_submit_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewer: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review_created_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Agency {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1486,6 +1628,46 @@ pub struct GetWebsiteDeliveryTaskRespData {
     pub status_msg: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub extra_info: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetJobManagerRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub info: Option<JobManager>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetAccountAssetsReferralAccountRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account: Option<Account>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetIdTalentRespData {
+    #[serde(default)]
+    pub talent_list: Vec<TalentBatchInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchTestRespData {
+    #[serde(default)]
+    pub items: Vec<Test>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateByAttachmentWebsiteDeliveryRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateByResumeWebsiteDeliveryRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub delivery: Option<WebsiteDeliveryDto>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -3373,6 +3555,43 @@ impl SearchTalentPoolIterator<'_> {
             config: self.config,
         };
         let resp = resource.search_by_query(&query, option).await?;
+        let data = resp.data.unwrap_or_default();
+        self.state
+            .accept_page(Some(data.items), data.page_token, data.has_more);
+        Ok(self.state.pop())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SearchTestIterator<'a> {
+    config: &'a Config,
+    state: PageIteratorState<Test>,
+    page_size: Option<i32>,
+    user_id_type: Option<String>,
+    body: serde_json::Value,
+}
+
+impl_page_iterator_controls!(SearchTestIterator);
+
+impl SearchTestIterator<'_> {
+    pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Test>, LarkError> {
+        if let Some(item) = self.state.pop() {
+            return Ok(Some(item));
+        }
+        if !self.state.should_fetch() {
+            return Ok(None);
+        }
+
+        let query = SearchTestQuery::new()
+            .page_size(self.page_size)
+            .page_token(self.state.page_token_for_request())
+            .user_id_type(self.user_id_type.as_deref());
+        let resource = TestResource {
+            config: self.config,
+        };
+        let resp = resource
+            .search_by_query(&query, self.body.clone(), option)
+            .await?;
         let data = resp.data.unwrap_or_default();
         self.state
             .accept_page(Some(data.items), data.page_token, data.has_more);
@@ -5405,7 +5624,7 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchGetIdTalentResp>()
+        .send_v2_response::<BatchGetIdTalentRespData, BatchGetIdTalentResp>()
         .await
     }
 
@@ -6754,11 +6973,14 @@ impl_resp_v2!(InternOfferStatusResp, serde_json::Value);
 impl_resp_v2!(SearchReferralResp, SearchReferralRespData);
 impl_resp_v2!(DeactivateReferralAccountResp, serde_json::Value);
 impl_resp_v2!(EnableReferralAccountResp, serde_json::Value);
-impl_resp_v2!(GetAccountAssetsReferralAccountResp, serde_json::Value);
+impl_resp_v2!(
+    GetAccountAssetsReferralAccountResp,
+    GetAccountAssetsReferralAccountRespData
+);
 impl_resp_v2!(ReconciliationReferralAccountResp, serde_json::Value);
 impl_resp_v2!(WithdrawReferralAccountResp, serde_json::Value);
 impl_resp_v2!(AddToFolderTalentResp, serde_json::Value);
-impl_resp_v2!(BatchGetIdTalentResp, serde_json::Value);
+impl_resp_v2!(BatchGetIdTalentResp, BatchGetIdTalentRespData);
 impl_resp_v2!(CombinedCreateTalentResp, serde_json::Value);
 impl_resp_v2!(CombinedUpdateTalentResp, serde_json::Value);
 impl_resp_v2!(OnboardStatusTalentResp, serde_json::Value);
@@ -6773,9 +6995,15 @@ impl_resp_v2!(
 impl_resp_v2!(BatchChangeTalentPoolResp, serde_json::Value);
 impl_resp_v2!(MoveTalentTalentPoolResp, serde_json::Value);
 impl_resp_v2!(SearchTalentPoolResp, SearchTalentPoolRespData);
-impl_resp_v2!(SearchTestResp, serde_json::Value);
-impl_resp_v2!(CreateByAttachmentWebsiteDeliveryResp, serde_json::Value);
-impl_resp_v2!(CreateByResumeWebsiteDeliveryResp, serde_json::Value);
+impl_resp_v2!(SearchTestResp, SearchTestRespData);
+impl_resp_v2!(
+    CreateByAttachmentWebsiteDeliveryResp,
+    CreateByAttachmentWebsiteDeliveryRespData
+);
+impl_resp_v2!(
+    CreateByResumeWebsiteDeliveryResp,
+    CreateByResumeWebsiteDeliveryRespData
+);
 impl_resp_v2!(SearchWebsiteJobPostResp, SearchWebsiteJobPostRespData);
 
 // ── Additional response types ──
@@ -6807,7 +7035,7 @@ impl_resp_v2!(
 );
 impl_resp_v2!(ListInterviewRoundTypeResp, ListInterviewRoundTypeRespData);
 impl_resp_v2!(ListInterviewTaskResp, ListInterviewTaskRespData);
-impl_resp_v2!(GetJobManagerResp, serde_json::Value);
+impl_resp_v2!(GetJobManagerResp, GetJobManagerRespData);
 impl_resp_v2!(
     ListJobRequirementSchemaResp,
     ListJobRequirementSchemaRespData
@@ -9559,7 +9787,7 @@ impl JobManagerResource<'_> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, GetJobManagerResp>()
+        .send_v2_response::<GetJobManagerRespData, GetJobManagerResp>()
         .await
     }
 }
@@ -9730,7 +9958,10 @@ impl ReferralAccountResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetAccountAssetsReferralAccountResp>()
+        .send_v2_response::<
+            GetAccountAssetsReferralAccountRespData,
+            GetAccountAssetsReferralAccountResp,
+        >()
         .await
     }
 
@@ -9949,9 +10180,58 @@ pub struct TestResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SearchTestQuery<'a> {
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> SearchTestQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl TestResource<'_> {
     pub async fn search(
         &self,
+        body: serde_json::Value,
+        option: &RequestOption,
+    ) -> Result<SearchTestResp, LarkError> {
+        self.search_by_query(&SearchTestQuery::new(), body, option)
+            .await
+    }
+
+    pub async fn search_by_query(
+        &self,
+        query: &SearchTestQuery<'_>,
         body: serde_json::Value,
         option: &RequestOption,
     ) -> Result<SearchTestResp, LarkError> {
@@ -9962,9 +10242,35 @@ impl TestResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
+        .page_query(query.page_query())
+        .query("user_id_type", query.user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SearchTestResp>()
+        .send_v2_response::<SearchTestRespData, SearchTestResp>()
         .await
+    }
+
+    pub fn search_by_iterator(
+        &self,
+        page_size: Option<i32>,
+        body: serde_json::Value,
+    ) -> SearchTestIterator<'_> {
+        let query = SearchTestQuery::new().page_size(page_size);
+        self.search_iterator_by_query(&query, body)
+    }
+
+    pub fn search_iterator_by_query(
+        &self,
+        query: &SearchTestQuery<'_>,
+        body: serde_json::Value,
+    ) -> SearchTestIterator<'_> {
+        SearchTestIterator {
+            config: self.config,
+            state: PageIteratorState::default()
+                .with_page_token(query.page_token.map(ToOwned::to_owned)),
+            page_size: query.page_size,
+            user_id_type: query.user_id_type.map(ToOwned::to_owned),
+            body,
+        }
     }
 }
 
@@ -9991,7 +10297,10 @@ impl WebsiteDeliveryResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateByAttachmentWebsiteDeliveryResp>()
+        .send_v2_response::<
+            CreateByAttachmentWebsiteDeliveryRespData,
+            CreateByAttachmentWebsiteDeliveryResp,
+        >()
         .await
     }
 
@@ -10010,7 +10319,8 @@ impl WebsiteDeliveryResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateByResumeWebsiteDeliveryResp>()
+        .send_v2_response::<CreateByResumeWebsiteDeliveryRespData, CreateByResumeWebsiteDeliveryResp>(
+        )
         .await
     }
 }
