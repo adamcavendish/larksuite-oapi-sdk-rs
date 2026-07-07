@@ -91,6 +91,98 @@ pub struct CodeNameObject {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ObjectAttribute {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Vec<i32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_fcf_data: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_di_data: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DiData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_attribute: Option<ObjectAttribute>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DiInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub di_data: Option<Vec<DiData>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AttachmentInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mime: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Sentence {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub speak_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub speaker_name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Minutes {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sentences: Option<Vec<Sentence>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WebsiteDeliveryDto {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_post_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub portal_resume_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Agency {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1360,6 +1452,40 @@ pub struct ProtectSearchAgencyRespData {
 pub struct QueryAgencyRespData {
     #[serde(default)]
     pub items: Vec<Agency>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchDiversityInclusionRespData {
+    #[serde(default)]
+    pub items: Vec<DiInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetInterviewRecordAttachmentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment: Option<AttachmentInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetMinutesRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub minutes: Option<Minutes>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetWebsiteDeliveryTaskRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub delivery: Option<WebsiteDeliveryDto>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status_msg: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra_info: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -6579,7 +6705,10 @@ impl_resp_v2!(
     ListBackgroundCheckOrderResp,
     ListBackgroundCheckOrderRespData
 );
-impl_resp_v2!(SearchDiversityInclusionResp, serde_json::Value);
+impl_resp_v2!(
+    SearchDiversityInclusionResp,
+    SearchDiversityInclusionRespData
+);
 impl_resp_v2!(BatchDeleteEcoAccountCustomFieldResp, serde_json::Value);
 impl_resp_v2!(BatchUpdateEcoAccountCustomFieldResp, serde_json::Value);
 impl_resp_v2!(CancelEcoBackgroundCheckResp, serde_json::Value);
@@ -6668,7 +6797,10 @@ impl_resp_v2!(
     ListInterviewFeedbackFormResp,
     ListInterviewFeedbackFormRespData
 );
-impl_resp_v2!(GetInterviewRecordAttachmentResp, serde_json::Value);
+impl_resp_v2!(
+    GetInterviewRecordAttachmentResp,
+    GetInterviewRecordAttachmentRespData
+);
 impl_resp_v2!(
     ListInterviewRegistrationSchemaResp,
     ListInterviewRegistrationSchemaRespData
@@ -6681,7 +6813,7 @@ impl_resp_v2!(
     ListJobRequirementSchemaRespData
 );
 impl_resp_v2!(ListJobSchemaResp, ListJobSchemaRespData);
-impl_resp_v2!(GetMinutesResp, serde_json::Value);
+impl_resp_v2!(GetMinutesResp, GetMinutesRespData);
 impl_resp_v2!(GetOfferApplicationFormResp, GetOfferApplicationFormRespData);
 impl_resp_v2!(
     ListOfferApplicationFormResp,
@@ -6708,7 +6840,7 @@ impl_resp_v2!(CreateWebsiteChannelResp, serde_json::Value);
 impl_resp_v2!(DeleteWebsiteChannelResp, ());
 impl_resp_v2!(ListWebsiteChannelResp, ListWebsiteChannelRespData);
 impl_resp_v2!(UpdateWebsiteChannelResp, serde_json::Value);
-impl_resp_v2!(GetWebsiteDeliveryTaskResp, serde_json::Value);
+impl_resp_v2!(GetWebsiteDeliveryTaskResp, GetWebsiteDeliveryTaskRespData);
 impl_resp_v2!(CreateWebsiteSiteUserResp, serde_json::Value);
 
 // ── New response types (Phase 11 — missing methods) ──
@@ -9039,7 +9171,7 @@ impl DiversityInclusionResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SearchDiversityInclusionResp>()
+        .send_v2_response::<SearchDiversityInclusionRespData, SearchDiversityInclusionResp>()
         .await
     }
 }
@@ -10495,9 +10627,47 @@ pub struct InterviewRecordAttachmentResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct GetInterviewRecordAttachmentQuery<'a> {
+    pub application_id: Option<&'a str>,
+    pub interview_record_id: Option<&'a str>,
+    pub language: Option<i32>,
+}
+
+impl<'a> GetInterviewRecordAttachmentQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn application_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.application_id = value.into();
+        self
+    }
+
+    pub fn interview_record_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.interview_record_id = value.into();
+        self
+    }
+
+    pub fn language(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.language = value.into();
+        self
+    }
+}
+
 impl InterviewRecordAttachmentResource<'_> {
     pub async fn get(
         &self,
+        option: &RequestOption,
+    ) -> Result<GetInterviewRecordAttachmentResp, LarkError> {
+        self.get_by_query(&GetInterviewRecordAttachmentQuery::new(), option)
+            .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetInterviewRecordAttachmentQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetInterviewRecordAttachmentResp, LarkError> {
         RestRequest::new(
@@ -10507,7 +10677,11 @@ impl InterviewRecordAttachmentResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetInterviewRecordAttachmentResp>()
+        .query("application_id", query.application_id)
+        .query("interview_record_id", query.interview_record_id)
+        .query("language", query.language)
+        .send_v2_response::<GetInterviewRecordAttachmentRespData, GetInterviewRecordAttachmentResp>(
+        )
         .await
     }
 }
@@ -10890,8 +11064,55 @@ pub struct MinutesResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct GetMinutesQuery<'a> {
+    pub interview_id: Option<&'a str>,
+    pub page_size: Option<i32>,
+    pub page_token: Option<&'a str>,
+}
+
+impl<'a> GetMinutesQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn interview_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.interview_id = value.into();
+        self
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page_token = value.into();
+        self
+    }
+
+    pub fn page(mut self, page: PageQuery<'a>) -> Self {
+        self.page_size = page.page_size;
+        self.page_token = page.page_token;
+        self
+    }
+
+    pub(crate) fn page_query(&self) -> PageQuery<'a> {
+        PageQuery::from_parts(self.page_size, self.page_token)
+    }
+}
+
 impl MinutesResource<'_> {
     pub async fn get(&self, option: &RequestOption) -> Result<GetMinutesResp, LarkError> {
+        self.get_by_query(&GetMinutesQuery::new(), option).await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetMinutesQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetMinutesResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -10899,7 +11120,9 @@ impl MinutesResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetMinutesResp>()
+        .page_query(query.page_query())
+        .query("interview_id", query.interview_id)
+        .send_v2_response::<GetMinutesRespData, GetMinutesResp>()
         .await
     }
 }
@@ -11406,7 +11629,7 @@ impl WebsiteDeliveryTaskResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetWebsiteDeliveryTaskResp>()
+        .send_v2_response::<GetWebsiteDeliveryTaskRespData, GetWebsiteDeliveryTaskResp>()
         .await
     }
 }
