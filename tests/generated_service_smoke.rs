@@ -206,6 +206,8 @@ mod hire_application;
 mod hire_auxiliary_read;
 #[path = "generated_service_smoke/hire/catalog.rs"]
 mod hire_catalog;
+#[path = "generated_service_smoke/hire/existing_model_write.rs"]
+mod hire_existing_model_write;
 #[path = "generated_service_smoke/hire/external_read.rs"]
 mod hire_external_read;
 #[path = "generated_service_smoke/hire/external_write.rs"]
