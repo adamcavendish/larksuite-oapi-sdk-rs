@@ -235,6 +235,16 @@ pub struct Account {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CheckFailedAccountInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_withdraw_reward_info: Option<BonusAmount>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_recharge_reward_info: Option<BonusAmount>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct JobManager {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1679,9 +1689,49 @@ pub struct GetJobManagerRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchUpdateJobManagerRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_manager: Option<JobManager>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetAccountAssetsReferralAccountRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub account: Option<Account>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateReferralAccountRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account: Option<Account>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeactivateReferralAccountRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account: Option<Account>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EnableReferralAccountRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account: Option<Account>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReconciliationReferralAccountRespData {
+    #[serde(default)]
+    pub check_failed_list: Vec<CheckFailedAccountInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WithdrawReferralAccountRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_order_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trans_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub withdrawal_details: Option<BonusAmount>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1822,6 +1872,18 @@ pub struct PatchExternalInterviewAssessmentRespData {
 pub struct CreateExternalReferralRewardRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateTripartiteAgreementRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateJobRequirementRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_requirement: Option<JobRequirementDto>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -6802,7 +6864,7 @@ impl<'a> JobRequirementResource<'a> {
         .query("user_id_type", user_id_type)
         .query("department_id_type", department_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateJobRequirementResp>()
+        .send_v2_response::<CreateJobRequirementRespData, CreateJobRequirementResp>()
         .await
     }
 
@@ -7072,7 +7134,10 @@ impl_resp_v2!(
 );
 impl_resp_v2!(DeleteExternalBackgroundCheckResp, ());
 impl_resp_v2!(ListTodoResp, ListTodoRespData);
-impl_resp_v2!(CreateTripartiteAgreementResp, serde_json::Value);
+impl_resp_v2!(
+    CreateTripartiteAgreementResp,
+    CreateTripartiteAgreementRespData
+);
 impl_resp_v2!(UpdateTripartiteAgreementResp, serde_json::Value);
 impl_resp_v2!(DeleteTripartiteAgreementResp, ());
 impl_resp_v2!(ListTripartiteAgreementResp, ListTripartiteAgreementRespData);
@@ -7139,20 +7204,26 @@ impl_resp_v2!(GetDetailJobResp, serde_json::Value);
 impl_resp_v2!(OpenJobResp, serde_json::Value);
 impl_resp_v2!(RecruiterJobResp, serde_json::Value);
 impl_resp_v2!(UpdateConfigJobResp, serde_json::Value);
-impl_resp_v2!(BatchUpdateJobManagerResp, serde_json::Value);
+impl_resp_v2!(BatchUpdateJobManagerResp, BatchUpdateJobManagerRespData);
 impl_resp_v2!(SearchJobPublishRecordResp, SearchJobPublishRecordRespData);
 impl_resp_v2!(ListByIdJobRequirementResp, ListByIdJobRequirementRespData);
 impl_resp_v2!(QueryLocationResp, QueryLocationRespData);
 impl_resp_v2!(InternOfferStatusResp, serde_json::Value);
 impl_resp_v2!(SearchReferralResp, SearchReferralRespData);
-impl_resp_v2!(DeactivateReferralAccountResp, serde_json::Value);
-impl_resp_v2!(EnableReferralAccountResp, serde_json::Value);
+impl_resp_v2!(
+    DeactivateReferralAccountResp,
+    DeactivateReferralAccountRespData
+);
+impl_resp_v2!(EnableReferralAccountResp, EnableReferralAccountRespData);
 impl_resp_v2!(
     GetAccountAssetsReferralAccountResp,
     GetAccountAssetsReferralAccountRespData
 );
-impl_resp_v2!(ReconciliationReferralAccountResp, serde_json::Value);
-impl_resp_v2!(WithdrawReferralAccountResp, serde_json::Value);
+impl_resp_v2!(
+    ReconciliationReferralAccountResp,
+    ReconciliationReferralAccountRespData
+);
+impl_resp_v2!(WithdrawReferralAccountResp, WithdrawReferralAccountRespData);
 impl_resp_v2!(AddToFolderTalentResp, serde_json::Value);
 impl_resp_v2!(BatchGetIdTalentResp, BatchGetIdTalentRespData);
 impl_resp_v2!(CombinedCreateTalentResp, serde_json::Value);
@@ -7268,10 +7339,10 @@ impl_resp_v2!(CreateEcoAccountCustomFieldResp, serde_json::Value);
 impl_resp_v2!(CreateEcoBackgroundCheckCustomFieldResp, serde_json::Value);
 impl_resp_v2!(CreateEcoBackgroundCheckPackageResp, serde_json::Value);
 impl_resp_v2!(CreateEcoExamPaperResp, serde_json::Value);
-impl_resp_v2!(CreateJobRequirementResp, serde_json::Value);
+impl_resp_v2!(CreateJobRequirementResp, CreateJobRequirementRespData);
 impl_resp_v2!(DeleteJobRequirementResp, ());
 impl_resp_v2!(UpdateJobRequirementResp, serde_json::Value);
-impl_resp_v2!(CreateReferralAccountResp, serde_json::Value);
+impl_resp_v2!(CreateReferralAccountResp, CreateReferralAccountRespData);
 
 // ── Employee resource ──
 
@@ -9117,7 +9188,7 @@ impl TripartiteAgreementResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateTripartiteAgreementResp>()
+        .send_v2_response::<CreateTripartiteAgreementRespData, CreateTripartiteAgreementResp>()
         .await
     }
 
@@ -9966,7 +10037,7 @@ impl JobManagerResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateJobManagerResp>()
+        .send_v2_response::<BatchUpdateJobManagerRespData, BatchUpdateJobManagerResp>()
         .await
     }
 
@@ -10108,7 +10179,7 @@ impl ReferralAccountResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateReferralAccountResp>()
+        .send_v2_response::<CreateReferralAccountRespData, CreateReferralAccountResp>()
         .await
     }
 
@@ -10125,7 +10196,7 @@ impl ReferralAccountResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, DeactivateReferralAccountResp>()
+        .send_v2_response::<DeactivateReferralAccountRespData, DeactivateReferralAccountResp>()
         .await
     }
 
@@ -10142,7 +10213,7 @@ impl ReferralAccountResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, EnableReferralAccountResp>()
+        .send_v2_response::<EnableReferralAccountRespData, EnableReferralAccountResp>()
         .await
     }
 
@@ -10177,7 +10248,10 @@ impl ReferralAccountResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ReconciliationReferralAccountResp>()
+        .send_v2_response::<
+            ReconciliationReferralAccountRespData,
+            ReconciliationReferralAccountResp,
+        >()
         .await
     }
 
@@ -10196,7 +10270,7 @@ impl ReferralAccountResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, WithdrawReferralAccountResp>()
+        .send_v2_response::<WithdrawReferralAccountRespData, WithdrawReferralAccountResp>()
         .await
     }
 }
