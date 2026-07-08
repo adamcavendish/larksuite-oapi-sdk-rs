@@ -48,6 +48,10 @@
 - Added typed Hire v1 external and adjacent write responses for external
   application, background check, interview, offer, interview assessment,
   referral reward, talent external info, and website site-user helpers.
+- Added typed Hire v1 existing-model write responses for job manager batch
+  updates, job requirement creation, referral account write actions, referral
+  account reconciliation, referral account withdrawals, and tripartite
+  agreement creation.
 
 ## [0.2.0] - 2026-07-03
 
