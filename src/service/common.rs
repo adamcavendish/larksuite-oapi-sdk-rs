@@ -1,4 +1,6 @@
 use std::collections::VecDeque;
+use std::future::Future;
+use std::pin::Pin;
 
 pub use crate::config::Config;
 pub use crate::constants::AccessTokenType;
@@ -6,6 +8,8 @@ use crate::error::LarkError;
 pub use crate::req::{ApiReq, ReqBody, RequestOption};
 pub use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::transport;
+
+type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
 pub(crate) trait QueryValue {
     fn set_query(self, req: &mut ApiReq, key: &str);
@@ -165,30 +169,33 @@ impl<'a> RestRequest<'a> {
         self
     }
 
-    pub(crate) async fn send<T: for<'de> serde::Deserialize<'de>>(
-        self,
-    ) -> Result<(ApiResp, RawResponse<T>), LarkError> {
-        let mut option;
-        let request_option = if self.file_upload {
-            option = self.option.clone();
-            option.file_upload = true;
-            &option
-        } else {
-            self.option
-        };
-        transport::request_typed::<T>(self.config, &self.api_req, request_option).await
+    pub(crate) fn send<T>(self) -> BoxFuture<'a, Result<(ApiResp, RawResponse<T>), LarkError>>
+    where
+        T: for<'de> serde::Deserialize<'de> + Send + 'a,
+    {
+        Box::pin(async move {
+            let mut option;
+            let request_option = if self.file_upload {
+                option = self.option.clone();
+                option.file_upload = true;
+                &option
+            } else {
+                self.option
+            };
+            transport::request_typed::<T>(self.config, &self.api_req, request_option).await
+        })
     }
 
     pub(crate) async fn send_response<T, R>(self) -> Result<R, LarkError>
     where
-        T: for<'de> serde::Deserialize<'de>,
+        T: for<'de> serde::Deserialize<'de> + Send + 'a,
         R: FromRawResponse<T>,
     {
         let (api_resp, raw) = self.send::<T>().await?;
         Ok(R::from_raw_response(api_resp, raw))
     }
 
-    pub(crate) async fn send_v2<T: for<'de> serde::Deserialize<'de>>(
+    pub(crate) async fn send_v2<T: for<'de> serde::Deserialize<'de> + Send + 'a>(
         self,
     ) -> Result<(ApiResp, Option<CodeError>, Option<T>), LarkError> {
         let (api_resp, raw) = self.send::<T>().await?;
@@ -197,7 +204,7 @@ impl<'a> RestRequest<'a> {
 
     pub(crate) async fn send_v2_response<T, R>(self) -> Result<R, LarkError>
     where
-        T: for<'de> serde::Deserialize<'de>,
+        T: for<'de> serde::Deserialize<'de> + Send + 'a,
         R: FromV2Response<T>,
     {
         let (api_resp, code_error, data) = self.send_v2::<T>().await?;

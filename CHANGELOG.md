@@ -212,7 +212,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 ### Requirements
 
-- Rust 1.94.0+, edition 2024
+- Rust 1.95.0+, edition 2024
 
 [0.2.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.0
 [0.1.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.2

@@ -15,10 +15,10 @@ build-all:
     cargo build --features axum
     cargo build --all-features
 
-# Check MSRV (1.94)
+# Check MSRV (1.95)
 msrv:
-    cargo +1.94.0 check --workspace
-    cargo +1.94.0 check --workspace --all-features
+    cargo +1.95.0 check --workspace
+    cargo +1.95.0 check --workspace --all-features
 
 # ---------- Lint ----------
 

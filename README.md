@@ -388,7 +388,7 @@ with focused Rust examples:
 
 ## Requirements
 
-- Rust 1.94.0+
+- Rust 1.95.0+
 - Edition 2024
 
 ## License
