@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 use larksuite_oapi_sdk_rs::service::im::v1::ListMessageQuery;
 use larksuite_oapi_sdk_rs::{Client, RequestOption};
 

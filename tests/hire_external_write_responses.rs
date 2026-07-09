@@ -31,56 +31,48 @@ async fn hire_external_application_and_background_write_responses() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    let created_application = hire
-        .external_application
-        .create(
-            json!({"external_id":"ext-app-1","talent_id":"talent-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_application
-        .unwrap();
-    let updated_application = hire
-        .external_application
-        .update(
-            "external-application-1",
-            json!({"stage":"interview"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_application
-        .unwrap();
-    let created_background_check = hire
-        .external_background_check
-        .create(
-            json!({"external_id":"ext-bg-1","external_application_id":"external-application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_background_check
-        .unwrap();
-    let updated_background_check = hire
-        .external_background_check
-        .update(
-            "background-1",
-            json!({"result":"pass"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_background_check
-        .unwrap();
+    let created_application = Box::pin(hire.external_application.create(
+        json!({"external_id":"ext-app-1","talent_id":"talent-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_application
+    .unwrap();
+    let updated_application = Box::pin(hire.external_application.update(
+        "external-application-1",
+        json!({"stage":"interview"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_application
+    .unwrap();
+    let created_background_check = Box::pin(hire.external_background_check.create(
+        json!({"external_id":"ext-bg-1","external_application_id":"external-application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_background_check
+    .unwrap();
+    let updated_background_check = Box::pin(hire.external_background_check.update(
+        "background-1",
+        json!({"result":"pass"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_background_check
+    .unwrap();
 
     assert_eq!(
         created_application.id.as_deref(),
@@ -123,56 +115,48 @@ async fn hire_external_interview_and_offer_write_responses() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    let created_interview = hire
-        .external_interview
-        .create(
-            json!({"external_id":"ext-interview-1","external_application_id":"external-application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_interview
-        .unwrap();
-    let updated_interview = hire
-        .external_interview
-        .update(
-            "interview-1",
-            json!({"participate_status":2}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_interview
-        .unwrap();
-    let created_offer = hire
-        .external_offer
-        .create(
-            json!({"external_id":"ext-offer-1","external_application_id":"external-application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_offer
-        .unwrap();
-    let updated_offer = hire
-        .external_offer
-        .update(
-            "offer-1",
-            json!({"creator":"ou_creator"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_offer
-        .unwrap();
+    let created_interview = Box::pin(hire.external_interview.create(
+        json!({"external_id":"ext-interview-1","external_application_id":"external-application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_interview
+    .unwrap();
+    let updated_interview = Box::pin(hire.external_interview.update(
+        "interview-1",
+        json!({"participate_status":2}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_interview
+    .unwrap();
+    let created_offer = Box::pin(hire.external_offer.create(
+        json!({"external_id":"ext-offer-1","external_application_id":"external-application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_offer
+    .unwrap();
+    let updated_offer = Box::pin(hire.external_offer.update(
+        "offer-1",
+        json!({"creator":"ou_creator"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_offer
+    .unwrap();
 
     assert_eq!(created_interview.participate_status, Some(1));
     assert_eq!(updated_interview.participate_status, Some(2));
@@ -203,41 +187,35 @@ async fn hire_external_assessment_and_reward_responses() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    let created_assessment = hire
-        .external_interview_assessment
-        .create(
-            json!({"external_id":"ext-assessment-1","external_interview_id":"interview-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_interview_assessment
-        .unwrap();
-    let patched_assessment = hire
-        .external_interview_assessment
-        .patch(
-            "assessment-1",
-            json!({"content":"strong"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_interview_assessment
-        .unwrap();
-    let reward = hire
-        .external_referral_reward
-        .create(
-            json!({"external_id":"reward-ext-1","application_id":"application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap();
+    let created_assessment = Box::pin(hire.external_interview_assessment.create(
+        json!({"external_id":"ext-assessment-1","external_interview_id":"interview-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_interview_assessment
+    .unwrap();
+    let patched_assessment = Box::pin(hire.external_interview_assessment.patch(
+        "assessment-1",
+        json!({"content":"strong"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_interview_assessment
+    .unwrap();
+    let reward = Box::pin(hire.external_referral_reward.create(
+        json!({"external_id":"reward-ext-1","application_id":"application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap();
 
     assert_eq!(
         created_assessment
@@ -276,45 +254,39 @@ async fn hire_talent_external_info_and_site_user_responses() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    let created_external_info = hire
-        .talent_external_info
-        .create(
-            "talent-1",
-            json!({"external_create_time":"1710000000000"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_info
-        .unwrap();
-    let updated_external_info = hire
-        .talent_external_info
-        .update(
-            "talent-1",
-            json!({"external_create_time":"1710003600000"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .external_info
-        .unwrap();
-    let site_user = hire
-        .website_site_user
-        .create(
-            "website-1",
-            json!({"external_id":"external-user-1","email":"candidate@example.test"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .site_user
-        .unwrap();
+    let created_external_info = Box::pin(hire.talent_external_info.create(
+        "talent-1",
+        json!({"external_create_time":"1710000000000"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_info
+    .unwrap();
+    let updated_external_info = Box::pin(hire.talent_external_info.update(
+        "talent-1",
+        json!({"external_create_time":"1710003600000"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .external_info
+    .unwrap();
+    let site_user = Box::pin(hire.website_site_user.create(
+        "website-1",
+        json!({"external_id":"external-user-1","email":"candidate@example.test"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .site_user
+    .unwrap();
 
     assert_eq!(
         created_external_info.external_create_time.as_deref(),

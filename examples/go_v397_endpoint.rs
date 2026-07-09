@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 use larksuite_oapi_sdk_rs::service::go_v397::GoV397Endpoint;
 use larksuite_oapi_sdk_rs::{Client, RequestOption};
 
@@ -12,16 +10,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
-    let resp = client
-        .go_v397()
-        .request_json(
-            GoV397Endpoint::GetVcV1NotesByNoteId,
-            [("note_id", note_id.as_str())],
-            [("user_id_type", "open_id")],
-            None,
-            &option,
-        )
-        .await?;
+    let resp = Box::pin(client.go_v397().request_json(
+        GoV397Endpoint::GetVcV1NotesByNoteId,
+        [("note_id", note_id.as_str())],
+        [("user_id_type", "open_id")],
+        None,
+        &option,
+    ))
+    .await?;
 
     if resp.success() {
         println!("note_id: {note_id}");

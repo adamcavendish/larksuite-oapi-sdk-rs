@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 mod common;
 
 use common::{http_response, mock_server_with_requests};
@@ -37,8 +35,8 @@ async fn corehr_offboarding_iterator_requests_resume_token() {
         ..Default::default()
     };
 
-    let _ = iter.next(&option).await.unwrap();
-    let _ = iter.next(&option).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
 
     let reqs = requests.lock().unwrap();
     assert!(reqs[0].contains("POST /open-apis/corehr/v1/offboardings/search?"));
@@ -67,7 +65,7 @@ async fn corehr_offboarding_iterator_next_page_token_uses_server_cursor_after_re
         ..Default::default()
     };
 
-    let _ = iter.next(&option).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
     assert_eq!(iter.next_page_token(), Some("token-1"));
 }
 
@@ -90,8 +88,8 @@ async fn corehr_offboarding_iterator_preserves_token_on_empty_page() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.offboarding_id.as_deref(), Some("o1"));
     assert!(second.is_none());

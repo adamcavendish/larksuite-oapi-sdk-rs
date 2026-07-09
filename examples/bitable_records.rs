@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 use larksuite_oapi_sdk_rs::service::bitable::v1::{ListRecordQuery, ListTableQuery, ListViewQuery};
 use larksuite_oapi_sdk_rs::service::common::PageQuery;
 use larksuite_oapi_sdk_rs::{Client, RequestOption};

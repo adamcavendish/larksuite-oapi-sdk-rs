@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 use larksuite_oapi_sdk_rs::{AccessTokenType, ApiReq, Client, HttpMethod, ReqBody, RequestOption};
 
 #[tokio::main]

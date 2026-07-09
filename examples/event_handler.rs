@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 use larksuite_oapi_sdk_rs::event::{EventDispatcher, EventReq};
 use larksuite_oapi_sdk_rs::events::im::P2MessageReceiveV1;
 

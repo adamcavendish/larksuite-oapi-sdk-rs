@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 use larksuite_oapi_sdk_rs::service::application::v6::{GetApplicationQuery, ListApplicationQuery};
 use larksuite_oapi_sdk_rs::{Client, RequestOption};
 

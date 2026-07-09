@@ -2791,15 +2791,14 @@ impl<'a> SearchOffboardingIterator<'a> {
         let resource = OffboardingResource {
             config: self.config,
         };
-        let resp = resource
-            .search_page(
-                self.page_size,
-                self.state.page_token_for_request(),
-                self.user_id_type.as_deref(),
-                self.body.clone(),
-                option,
-            )
-            .await?;
+        let resp = Box::pin(resource.search_page(
+            self.page_size,
+            self.state.page_token_for_request(),
+            self.user_id_type.as_deref(),
+            self.body.clone(),
+            option,
+        ))
+        .await?;
         let data = resp.data.unwrap_or_default();
         self.state
             .accept_page(data.items, data.page_token, data.has_more);

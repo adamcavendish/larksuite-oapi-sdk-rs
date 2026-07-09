@@ -22,63 +22,62 @@ async fn hire_config_read_model_query_smoke() {
     let hire = client.hire();
     let page = PageQuery::new().page_size(20).page_token("seed-token");
 
-    hire.job_process
-        .list_by_query(
-            &ListHireJobProcessQuery::new().page(page),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.job_requirement_schema
-        .list_by_query(
-            &ListHireJobRequirementSchemaQuery::new().page(page),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.job_schema
-        .list_by_query(
-            &ListHireJobSchemaQuery::new().page(page).scenario(1),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.offer_application_form
-        .get("form-1", &RequestOption::default())
-        .await
-        .unwrap();
-    hire.offer_application_form
-        .list_by_query(
-            &ListHireOfferApplicationFormQuery::new().page(page),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.offer_approval_template
-        .list_by_query(
+    Box::pin(hire.job_process.list_by_query(
+        &ListHireJobProcessQuery::new().page(page),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.job_requirement_schema.list_by_query(
+        &ListHireJobRequirementSchemaQuery::new().page(page),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.job_schema.list_by_query(
+        &ListHireJobSchemaQuery::new().page(page).scenario(1),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(
+        hire.offer_application_form
+            .get("form-1", &RequestOption::default()),
+    )
+    .await
+    .unwrap();
+    Box::pin(hire.offer_application_form.list_by_query(
+        &ListHireOfferApplicationFormQuery::new().page(page),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(
+        hire.offer_approval_template.list_by_query(
             &ListHireOfferApprovalTemplateQuery::new()
                 .page(page)
                 .department_id_type("open_department_id"),
             &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.questionnaire
-        .list_by_query(
+        ),
+    )
+    .await
+    .unwrap();
+    Box::pin(
+        hire.questionnaire.list_by_query(
             &ListHireQuestionnaireQuery::new()
                 .page(page)
                 .application_id("app-1"),
             &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.talent_tag
-        .list_by_query(
-            &ListHireTalentTagQuery::new().page(page),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+        ),
+    )
+    .await
+    .unwrap();
+    Box::pin(hire.talent_tag.list_by_query(
+        &ListHireTalentTagQuery::new().page(page),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/job_processes?"));

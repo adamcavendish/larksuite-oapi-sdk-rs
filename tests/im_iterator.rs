@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 mod common;
 
 use common::{http_response, mock_server, mock_server_with_requests};
@@ -33,9 +31,9 @@ async fn im_message_list_by_iterator_pages_and_limits() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap().unwrap();
-    let third = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let third = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.message_id.as_deref(), Some("m1"));
     assert_eq!(second.message_id.as_deref(), Some("m2"));
@@ -61,8 +59,8 @@ async fn im_message_iterator_sends_page_token_on_resume() {
         ..Default::default()
     };
 
-    let _ = iter.next(&option).await.unwrap();
-    let _ = iter.next(&option).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
 
     let reqs = requests.lock().unwrap();
     assert!(reqs[0].contains("GET /open-apis/im/v1/messages?"));
@@ -88,7 +86,7 @@ async fn im_message_iterator_next_page_token_uses_server_cursor_after_resume() {
         ..Default::default()
     };
 
-    let _ = iter.next(&option).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
     assert_eq!(iter.next_page_token(), Some("next-1"));
 }
 
@@ -108,9 +106,9 @@ async fn im_chat_members_iterator_requests_follow_up_page() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap().unwrap();
-    let third = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let third = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.member_id.as_deref(), Some("u1"));
     assert_eq!(second.member_id.as_deref(), Some("u2"));
@@ -135,8 +133,8 @@ async fn im_message_iterator_preserves_token_on_empty_page() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.message_id.as_deref(), Some("m1"));
     assert!(second.is_none());
@@ -158,6 +156,6 @@ async fn im_search_chat_iterator_errors_are_propagated() {
         ..Default::default()
     };
 
-    let err = iter.next(&option).await.unwrap_err();
+    let err = Box::pin(iter.next(&option)).await.unwrap_err();
     assert!(matches!(err, LarkError::Api(_)));
 }

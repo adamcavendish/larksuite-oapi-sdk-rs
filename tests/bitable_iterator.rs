@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 mod common;
 
 use common::{http_response, mock_server, mock_server_with_requests};
@@ -34,9 +32,9 @@ async fn bitable_table_iterator_pages_and_limits() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap().unwrap();
-    let third = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let third = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.table_id.as_deref(), Some("tbl1"));
     assert_eq!(second.table_id.as_deref(), Some("tbl2"));
@@ -62,8 +60,8 @@ async fn bitable_view_iterator_sends_resume_token() {
         ..Default::default()
     };
 
-    let _ = iter.next(&option).await.unwrap();
-    let _ = iter.next(&option).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
 
     let reqs = requests.lock().unwrap();
     assert!(reqs[0].contains("GET /open-apis/bitable/v1/apps/app-token/tables/tbl1/views?"));
@@ -91,7 +89,7 @@ async fn bitable_field_iterator_uses_query_shape() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
 
     assert_eq!(first.field_id.as_deref(), Some("fld1"));
     let request = requests.lock().unwrap().join("\n");
@@ -126,9 +124,9 @@ async fn bitable_record_search_iterator_posts_each_page() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap().unwrap();
-    let third = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let third = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.record_id.as_deref(), Some("rec1"));
     assert_eq!(second.record_id.as_deref(), Some("rec2"));

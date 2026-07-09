@@ -22,36 +22,32 @@ async fn hire_external_application_and_background_write_smoke() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    hire.external_application
-        .create(
-            json!({"external_id":"ext-app-1","talent_id":"talent-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.external_application
-        .update(
-            "external-application-1",
-            json!({"stage":"interview"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.external_background_check
-        .create(
-            json!({"external_id":"ext-bg-1","external_application_id":"external-application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.external_background_check
-        .update(
-            "background-1",
-            json!({"result":"pass"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+    Box::pin(hire.external_application.create(
+        json!({"external_id":"ext-app-1","talent_id":"talent-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.external_application.update(
+        "external-application-1",
+        json!({"stage":"interview"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.external_background_check.create(
+        json!({"external_id":"ext-bg-1","external_application_id":"external-application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.external_background_check.update(
+        "background-1",
+        json!({"result":"pass"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/hire/v1/external_applications "));
@@ -83,36 +79,32 @@ async fn hire_external_interview_and_offer_write_smoke() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    hire.external_interview
-        .create(
-            json!({"external_id":"ext-interview-1","external_application_id":"external-application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.external_interview
-        .update(
-            "interview-1",
-            json!({"participate_status":2}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.external_offer
-        .create(
-            json!({"external_id":"ext-offer-1","external_application_id":"external-application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.external_offer
-        .update(
-            "offer-1",
-            json!({"creator":"ou_creator"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+    Box::pin(hire.external_interview.create(
+        json!({"external_id":"ext-interview-1","external_application_id":"external-application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.external_interview.update(
+        "interview-1",
+        json!({"participate_status":2}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.external_offer.create(
+        json!({"external_id":"ext-offer-1","external_application_id":"external-application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.external_offer.update(
+        "offer-1",
+        json!({"creator":"ou_creator"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/hire/v1/external_interviews "));
@@ -140,28 +132,25 @@ async fn hire_external_assessment_and_reward_smoke() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    hire.external_interview_assessment
-        .create(
-            json!({"external_id":"ext-assessment-1","external_interview_id":"interview-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.external_interview_assessment
-        .patch(
-            "assessment-1",
-            json!({"content":"strong"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.external_referral_reward
-        .create(
-            json!({"external_id":"reward-ext-1","application_id":"application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+    Box::pin(hire.external_interview_assessment.create(
+        json!({"external_id":"ext-assessment-1","external_interview_id":"interview-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.external_interview_assessment.patch(
+        "assessment-1",
+        json!({"content":"strong"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.external_referral_reward.create(
+        json!({"external_id":"reward-ext-1","application_id":"application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/hire/v1/external_interview_assessments "));
@@ -190,30 +179,27 @@ async fn hire_talent_external_info_and_site_user_smoke() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    hire.talent_external_info
-        .create(
-            "talent-1",
-            json!({"external_create_time":"1710000000000"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.talent_external_info
-        .update(
-            "talent-1",
-            json!({"external_create_time":"1710003600000"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.website_site_user
-        .create(
-            "website-1",
-            json!({"external_id":"external-user-1","email":"candidate@example.test"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+    Box::pin(hire.talent_external_info.create(
+        "talent-1",
+        json!({"external_create_time":"1710000000000"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.talent_external_info.update(
+        "talent-1",
+        json!({"external_create_time":"1710003600000"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.website_site_user.create(
+        "website-1",
+        json!({"external_id":"external-user-1","email":"candidate@example.test"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/hire/v1/talents/talent-1/external_info "));
