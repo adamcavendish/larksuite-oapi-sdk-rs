@@ -30,9 +30,9 @@ dependencies = [
 
 [[package]]
 name = "aioduct"
-version = "0.2.0"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c269f3acce4b5b8491308ad6f009cfc38df8466b872899bc8792050955aadfa1"
+checksum = "58fa9d6ed662d937fe4bfc52608fd9f8cdec3faeb245aaacd7a95f09d2e0da42"
 dependencies = [
  "base64",
  "bytes",
@@ -2403,9 +2403,9 @@ checksum = "1ffae5123b2d3fc086436f8834ae3ab053a283cfac8fe0a0b8eaae044768a4c4"
 
 [[package]]
 name = "x509-parser"
-version = "0.17.0"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4569f339c0c402346d4a75a9e39cf8dad310e287eef1ff56d4c68e5067f53460"
+checksum = "d43b0f71ce057da06bc0851b23ee24f3f86190b07203dd8f567d0b706a185202"
 dependencies = [
  "asn1-rs",
  "data-encoding",

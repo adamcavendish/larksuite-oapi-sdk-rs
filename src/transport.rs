@@ -1,4 +1,5 @@
 use std::future::Future;
+use std::pin::Pin;
 
 use http::header::{CONTENT_TYPE, HeaderValue, USER_AGENT as UA_HEADER};
 use serde_json::Value;
@@ -15,32 +16,38 @@ use crate::req::{ApiReq, FormDataValue, ReqBody, RequestOption};
 use crate::resp::{ApiResp, CodeError, RawResponse};
 use crate::token::{AppTicketManager, TokenManager};
 
-pub(crate) async fn request(
-    config: &Config,
-    api_req: &ApiReq,
-    option: &RequestOption,
-) -> Result<ApiResp, LarkError> {
-    let span = request_span(api_req);
+type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
-    let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
+pub(crate) fn request<'a>(
+    config: &'a Config,
+    api_req: &'a ApiReq,
+    option: &'a RequestOption,
+) -> BoxFuture<'a, Result<ApiResp, LarkError>> {
+    Box::pin(async move {
+        let span = request_span(api_req);
 
-    do_request(config, api_req, option, token_type)
-        .instrument(span)
-        .await
+        let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
+
+        do_request(config, api_req, option, token_type)
+            .instrument(span)
+            .await
+    })
 }
 
-pub(crate) async fn request_stream(
-    config: &Config,
-    api_req: &ApiReq,
-    option: &RequestOption,
-) -> Result<StreamResp, LarkError> {
-    let span = request_span(api_req);
+pub(crate) fn request_stream<'a>(
+    config: &'a Config,
+    api_req: &'a ApiReq,
+    option: &'a RequestOption,
+) -> BoxFuture<'a, Result<StreamResp, LarkError>> {
+    Box::pin(async move {
+        let span = request_span(api_req);
 
-    let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
+        let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
 
-    do_request_stream(config, api_req, option, token_type)
-        .instrument(span)
-        .await
+        do_request_stream(config, api_req, option, token_type)
+            .instrument(span)
+            .await
+    })
 }
 
 pub(crate) async fn request_typed<T: for<'de> serde::Deserialize<'de>>(
