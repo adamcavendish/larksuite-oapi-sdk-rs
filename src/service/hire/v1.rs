@@ -1741,6 +1741,42 @@ pub struct BatchGetIdTalentRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddToFolderTalentRespData {
+    #[serde(default)]
+    pub talent_id_list: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CombinedCreateTalentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_account_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CombinedUpdateTalentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_account_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RemoveToFolderTalentRespData {
+    #[serde(default)]
+    pub talent_id_list: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchTestRespData {
     #[serde(default)]
     pub items: Vec<Test>,
@@ -1884,6 +1920,32 @@ pub struct CreateTripartiteAgreementRespData {
 pub struct CreateJobRequirementRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub job_requirement: Option<JobRequirementDto>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MoveTalentTalentPoolRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_pool_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateExamRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exam_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exam_resource_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operate_time: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -5831,7 +5893,7 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, AddToFolderTalentResp>()
+        .send_v2_response::<AddToFolderTalentRespData, AddToFolderTalentResp>()
         .await
     }
 
@@ -5865,7 +5927,7 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CombinedCreateTalentResp>()
+        .send_v2_response::<CombinedCreateTalentRespData, CombinedCreateTalentResp>()
         .await
     }
 
@@ -5882,7 +5944,7 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CombinedUpdateTalentResp>()
+        .send_v2_response::<CombinedUpdateTalentRespData, CombinedUpdateTalentResp>()
         .await
     }
 
@@ -5918,7 +5980,7 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, RemoveToFolderTalentResp>()
+        .send_v2_response::<RemoveToFolderTalentRespData, RemoveToFolderTalentResp>()
         .await
     }
 
@@ -7224,12 +7286,12 @@ impl_resp_v2!(
     ReconciliationReferralAccountRespData
 );
 impl_resp_v2!(WithdrawReferralAccountResp, WithdrawReferralAccountRespData);
-impl_resp_v2!(AddToFolderTalentResp, serde_json::Value);
+impl_resp_v2!(AddToFolderTalentResp, AddToFolderTalentRespData);
 impl_resp_v2!(BatchGetIdTalentResp, BatchGetIdTalentRespData);
-impl_resp_v2!(CombinedCreateTalentResp, serde_json::Value);
-impl_resp_v2!(CombinedUpdateTalentResp, serde_json::Value);
+impl_resp_v2!(CombinedCreateTalentResp, CombinedCreateTalentRespData);
+impl_resp_v2!(CombinedUpdateTalentResp, CombinedUpdateTalentRespData);
 impl_resp_v2!(OnboardStatusTalentResp, serde_json::Value);
-impl_resp_v2!(RemoveToFolderTalentResp, serde_json::Value);
+impl_resp_v2!(RemoveToFolderTalentResp, RemoveToFolderTalentRespData);
 impl_resp_v2!(TagTalentResp, serde_json::Value);
 impl_resp_v2!(ChangeTalentBlockResp, serde_json::Value);
 impl_resp_v2!(QueryTalentObjectResp, QueryTalentObjectRespData);
@@ -7238,7 +7300,7 @@ impl_resp_v2!(
     SearchTalentOperationLogRespData
 );
 impl_resp_v2!(BatchChangeTalentPoolResp, serde_json::Value);
-impl_resp_v2!(MoveTalentTalentPoolResp, serde_json::Value);
+impl_resp_v2!(MoveTalentTalentPoolResp, MoveTalentTalentPoolRespData);
 impl_resp_v2!(SearchTalentPoolResp, SearchTalentPoolRespData);
 impl_resp_v2!(SearchTestResp, SearchTestRespData);
 impl_resp_v2!(
@@ -7260,7 +7322,7 @@ impl_resp_v2!(
 );
 impl_resp_v2!(PatchEhrImportTaskResp, serde_json::Value);
 impl_resp_v2!(ListEvaluationTaskResp, ListEvaluationTaskRespData);
-impl_resp_v2!(CreateExamResp, serde_json::Value);
+impl_resp_v2!(CreateExamResp, CreateExamRespData);
 impl_resp_v2!(ListExamMarkingTaskResp, ListExamMarkingTaskRespData);
 impl_resp_v2!(
     CreateExternalInterviewAssessmentResp,
@@ -10399,7 +10461,7 @@ impl TalentPoolResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, MoveTalentTalentPoolResp>()
+        .send_v2_response::<MoveTalentTalentPoolRespData, MoveTalentTalentPoolResp>()
         .await
     }
 
@@ -10866,7 +10928,7 @@ impl ExamResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateExamResp>()
+        .send_v2_response::<CreateExamRespData, CreateExamResp>()
         .await
     }
 }
