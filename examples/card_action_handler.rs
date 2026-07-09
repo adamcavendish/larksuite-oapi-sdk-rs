@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use std::collections::HashMap;
 
 use larksuite_oapi_sdk_rs::{CardAction, CardActionHandler, EventReq};

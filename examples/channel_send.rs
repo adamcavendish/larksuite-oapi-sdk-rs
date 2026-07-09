@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use larksuite_oapi_sdk_rs::channel::{Channel, SendInput};
 use larksuite_oapi_sdk_rs::{Client, EventDispatcher, RequestOption};
 

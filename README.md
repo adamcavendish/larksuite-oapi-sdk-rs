@@ -311,6 +311,12 @@ Dedicated service modules are the preferred API surface when a resource exists.
 Generated services expose named query structs and `*_by_query` methods for
 request shapes that have path, query, body, or file inputs. Existing positional
 methods remain as compatibility adapters where they already existed.
+Streaming download helpers follow the same query-helper convention and expose
+HTTP metadata before the response body is consumed. Because the body is not
+pre-read, Lark JSON code errors returned as a 2xx response body are surfaced to
+the caller as body bytes rather than retried after metadata has been exposed.
+Non-success JSON responses may still be read before returning so token-refresh
+retries keep the same behavior as buffered requests.
 
 Paginated resources may also expose `*_by_iterator` helpers. These iterators
 own their request inputs, fetch pages lazily, and provide `limit`,

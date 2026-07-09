@@ -1,4 +1,6 @@
 # List available recipes
+export RUST_MIN_STACK := "33554432"
+
 default:
     @just --list
 

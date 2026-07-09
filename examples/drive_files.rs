@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use larksuite_oapi_sdk_rs::service::common::PageQuery;
 use larksuite_oapi_sdk_rs::service::drive::v1::ListFileQuery;
 use larksuite_oapi_sdk_rs::{Client, RequestOption};

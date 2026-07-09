@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use larksuite_oapi_sdk_rs::registration::{
     AppAddons, AppAddonsCallbacks, AppAddonsEventItems, AppAddonsEvents, AppAddonsScopes,
     AppPreset, Options, register_app,

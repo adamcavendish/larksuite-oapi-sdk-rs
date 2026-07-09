@@ -70,6 +70,8 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     needs: [basics]
+    env:
+      RUST_MIN_STACK: 33554432
     steps:
       - uses: actions/checkout@v6
       - run: sudo apt-get install -y protobuf-compiler
@@ -83,6 +85,8 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     needs: [basics]
+    env:
+      RUST_MIN_STACK: 33554432
     steps:
       - uses: actions/checkout@v6
       - run: sudo apt-get install -y protobuf-compiler

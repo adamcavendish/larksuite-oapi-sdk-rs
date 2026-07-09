@@ -229,6 +229,23 @@ impl<'a> RestRequest<'a> {
             data,
         })
     }
+
+    pub(crate) async fn download_stream(self) -> Result<DownloadStreamResp, LarkError> {
+        let mut option = self.option.clone();
+        option.file_download = true;
+        let stream_resp = transport::request_stream(self.config, &self.api_req, &option).await?;
+        let file_name = stream_resp.api_resp.file_name_by_header();
+        let content_length = stream_resp.api_resp.content_length();
+
+        Ok(DownloadStreamResp {
+            api_resp: stream_resp.api_resp,
+            file_name,
+            content_length,
+            body: DownloadBody {
+                inner: stream_resp.body,
+            },
+        })
+    }
 }
 
 pub fn parse_v2<T>(
@@ -382,6 +399,31 @@ pub struct DownloadResp {
     pub data: Vec<u8>,
 }
 
+#[derive(Debug)]
+pub struct DownloadStreamResp {
+    /// HTTP metadata available before the body is consumed.
+    ///
+    /// The streaming path does not pre-read 2xx JSON bodies to discover Lark
+    /// code errors, because doing so would either buffer the download or expose
+    /// metadata for a response that may later be retried. Non-success JSON
+    /// responses may still be buffered to preserve token-refresh retries.
+    pub api_resp: ApiResp,
+    pub file_name: Option<String>,
+    pub content_length: Option<u64>,
+    pub body: DownloadBody,
+}
+
+#[derive(Debug)]
+pub struct DownloadBody {
+    inner: transport::StreamBody,
+}
+
+impl DownloadBody {
+    pub async fn next_chunk(&mut self) -> Result<Option<bytes::Bytes>, LarkError> {
+        self.inner.next_chunk().await
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct EmptyRespV2 {
     pub api_resp: ApiResp,
@@ -449,4 +491,25 @@ pub async fn request_json(
         request
     };
     request.send_json().await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn download_resp_data_stays_vec_u8() {
+        let resp = DownloadResp {
+            api_resp: ApiResp {
+                status_code: 200,
+                header: http::HeaderMap::new(),
+                raw_body: b"download-bytes".to_vec(),
+            },
+            file_name: Some("resource.bin".to_string()),
+            data: b"download-bytes".to_vec(),
+        };
+
+        let data: Vec<u8> = resp.data;
+        assert_eq!(data, b"download-bytes");
+    }
 }

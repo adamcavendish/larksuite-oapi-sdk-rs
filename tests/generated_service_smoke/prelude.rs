@@ -1,5 +1,6 @@
 pub(crate) use super::harness::{
-    client_for, http_response, http_response_with_headers, mock_server_with_requests,
+    client_for, http_response, http_response_with_headers, mock_server_with_gated_body,
+    mock_server_with_gated_chunked_body, mock_server_with_requests,
 };
 
 pub(crate) use larksuite_oapi_sdk_rs::FormDataBuilder;
@@ -300,10 +301,10 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
     },
     im::v1::{
         GetChatAnnouncementQuery, GetChatMembersQuery, GetChatModerationQuery,
-        GetChatQuery as GetImChatQuery, GetMessageQuery as GetImMessageQuery, IsInChatMembersQuery,
-        ListChatQuery as ListImChatQuery, ListMessageQuery as ListImMessageQuery,
-        ListMessageReactionQuery, ListPinQuery, ReadUsersMessageQuery,
-        SearchChatQuery as SearchImChatQuery,
+        GetChatQuery as GetImChatQuery, GetMessageQuery as GetImMessageQuery,
+        GetMessageResourceDownloadQuery, IsInChatMembersQuery, ListChatQuery as ListImChatQuery,
+        ListMessageQuery as ListImMessageQuery, ListMessageReactionQuery, ListPinQuery,
+        ReadUsersMessageQuery, SearchChatQuery as SearchImChatQuery,
     },
     im::v2::{
         BatchUpdateUrlPreviewV2Query, BotTimeSensitiveFeedCardV2Query, CreateAppFeedCardV2Query,

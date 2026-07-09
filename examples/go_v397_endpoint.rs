@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use larksuite_oapi_sdk_rs::service::go_v397::GoV397Endpoint;
 use larksuite_oapi_sdk_rs::{Client, RequestOption};
 
