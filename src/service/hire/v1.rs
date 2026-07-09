@@ -1393,6 +1393,12 @@ pub struct PatchEmployeeRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TransferOnboardApplicationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee: Option<Employee>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListEvaluationRespData {
     #[serde(default)]
     pub items: Vec<Evaluation>,
@@ -1684,6 +1690,12 @@ pub struct GetWebsiteDeliveryTaskRespData {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetJobManagerRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub info: Option<JobManager>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RecruiterJobRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub info: Option<JobManager>,
 }
@@ -5677,7 +5689,7 @@ impl<'a> JobResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, RecruiterJobResp>()
+        .send_v2_response::<RecruiterJobRespData, RecruiterJobResp>()
         .await
     }
 
@@ -6310,7 +6322,7 @@ impl<'a> ApplicationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, TransferOnboardApplicationResp>()
+        .send_v2_response::<TransferOnboardApplicationRespData, TransferOnboardApplicationResp>()
         .await
     }
 
@@ -7216,7 +7228,10 @@ impl_resp_v2!(QueryAgencyResp, QueryAgencyRespData);
 impl_resp_v2!(CancelOnboardApplicationResp, serde_json::Value);
 impl_resp_v2!(GetDetailApplicationResp, serde_json::Value);
 impl_resp_v2!(RecoverApplicationResp, serde_json::Value);
-impl_resp_v2!(TransferOnboardApplicationResp, serde_json::Value);
+impl_resp_v2!(
+    TransferOnboardApplicationResp,
+    TransferOnboardApplicationRespData
+);
 impl_resp_v2!(
     BatchQueryBackgroundCheckOrderResp,
     BatchQueryBackgroundCheckOrderRespData
@@ -7264,7 +7279,7 @@ impl_resp_v2!(CombinedUpdateJobResp, serde_json::Value);
 impl_resp_v2!(ConfigJobResp, serde_json::Value);
 impl_resp_v2!(GetDetailJobResp, serde_json::Value);
 impl_resp_v2!(OpenJobResp, serde_json::Value);
-impl_resp_v2!(RecruiterJobResp, serde_json::Value);
+impl_resp_v2!(RecruiterJobResp, RecruiterJobRespData);
 impl_resp_v2!(UpdateConfigJobResp, serde_json::Value);
 impl_resp_v2!(BatchUpdateJobManagerResp, BatchUpdateJobManagerRespData);
 impl_resp_v2!(SearchJobPublishRecordResp, SearchJobPublishRecordRespData);
