@@ -362,7 +362,8 @@ Hire write helpers now type job manager batch updates, job requirement
 creation, referral account write actions, reconciliation, withdrawals, and
 tripartite agreement creation. Simple Talent and Exam write helpers now type
 folder updates, combined talent create/update, talent-pool moves, and exam
-creation.
+creation. Hire action helpers now type application transfer-onboard and job
+recruiter response payloads.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw

@@ -56,6 +56,8 @@
   agreement creation.
 - Added typed Hire v1 simple Talent and Exam write responses for folder
   updates, combined talent create/update, talent-pool moves, and exam creation.
+- Added typed Hire v1 action response wrappers for application transfer-onboard
+  and job recruiter lookups.
 
 ### Documentation and maintenance
 
