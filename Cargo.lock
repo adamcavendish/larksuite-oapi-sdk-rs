@@ -882,6 +882,7 @@ dependencies = [
  "aioduct",
  "axum",
  "base64",
+ "bytes",
  "cbc",
  "flate2",
  "futures-util",

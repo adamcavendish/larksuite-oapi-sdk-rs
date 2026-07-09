@@ -19,6 +19,7 @@ ws = ["dep:tokio-tungstenite", "dep:prost", "dep:futures-util", "dep:prost-build
 aes = "0.9"
 axum = { version = "0.8", optional = true }
 base64 = "0.22"
+bytes = "1"
 cbc = { version = "0.2", features = ["alloc"] }
 flate2 = "1"
 futures-util = { version = "0.3", optional = true }

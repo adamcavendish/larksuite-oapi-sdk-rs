@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 mod common;
 
 use common::{http_response, mock_server_with_requests};

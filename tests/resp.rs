@@ -47,6 +47,21 @@ fn log_id_missing() {
 }
 
 #[test]
+fn content_length_from_header() {
+    let resp = make_api_resp(vec![("Content-Length", "42")], b"");
+    assert_eq!(resp.content_length(), Some(42));
+}
+
+#[test]
+fn content_length_missing_or_invalid() {
+    let missing = make_api_resp(vec![], b"");
+    assert_eq!(missing.content_length(), None);
+
+    let invalid = make_api_resp(vec![("Content-Length", "not-a-number")], b"");
+    assert_eq!(invalid.content_length(), None);
+}
+
+#[test]
 fn file_name_from_content_disposition() {
     let resp = make_api_resp(
         vec![("Content-Disposition", "attachment; filename=\"report.pdf\"")],

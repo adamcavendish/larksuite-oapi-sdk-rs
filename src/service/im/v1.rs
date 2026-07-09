@@ -4,7 +4,9 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{FormDataField, FormDataValue, RequestOption};
-use crate::service::common::{DownloadResp, EmptyResp, PageIteratorState, RestRequest};
+use crate::service::common::{
+    DownloadResp, DownloadStreamResp, EmptyResp, PageIteratorState, RestRequest,
+};
 
 // ── Domain types ──
 
@@ -2078,6 +2080,24 @@ pub struct MessageResourceDownload<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetMessageResourceDownloadQuery<'a> {
+    pub message_id: &'a str,
+    pub file_key: &'a str,
+    pub resource_type: &'a str,
+}
+
+impl<'a> GetMessageResourceDownloadQuery<'a> {
+    pub fn new(message_id: &'a str, file_key: &'a str, resource_type: &'a str) -> Self {
+        Self {
+            message_id,
+            file_key,
+            resource_type,
+        }
+    }
+}
+
 impl<'a> MessageResourceDownload<'a> {
     pub async fn get(
         &self,
@@ -2086,7 +2106,38 @@ impl<'a> MessageResourceDownload<'a> {
         resource_type: &str,
         option: &RequestOption,
     ) -> Result<DownloadResp, LarkError> {
-        let path = format!("/open-apis/im/v1/messages/{message_id}/resources/{file_key}");
+        self.get_by_query(
+            &GetMessageResourceDownloadQuery::new(message_id, file_key, resource_type),
+            option,
+        )
+        .await
+    }
+
+    pub async fn get_by_query(
+        &self,
+        query: &GetMessageResourceDownloadQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DownloadResp, LarkError> {
+        self.request(query, option).download().await
+    }
+
+    pub async fn get_stream_by_query(
+        &self,
+        query: &GetMessageResourceDownloadQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DownloadStreamResp, LarkError> {
+        self.request(query, option).download_stream().await
+    }
+
+    fn request<'b>(
+        &'b self,
+        query: &GetMessageResourceDownloadQuery<'_>,
+        option: &'b RequestOption,
+    ) -> RestRequest<'b> {
+        let path = format!(
+            "/open-apis/im/v1/messages/{}/resources/{}",
+            query.message_id, query.file_key
+        );
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -2094,9 +2145,7 @@ impl<'a> MessageResourceDownload<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .query("type", resource_type)
-        .download()
-        .await
+        .query("type", query.resource_type)
     }
 }
 

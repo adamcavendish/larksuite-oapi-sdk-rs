@@ -1,4 +1,5 @@
 use http::HeaderMap;
+use http::header::CONTENT_LENGTH;
 use serde::{Deserialize, Serialize};
 
 use crate::constants::{
@@ -25,6 +26,13 @@ impl ApiResp {
         self.header
             .get(HTTP_HEADER_KEY_LOG_ID)
             .and_then(|v| v.to_str().ok())
+    }
+
+    pub fn content_length(&self) -> Option<u64> {
+        self.header
+            .get(CONTENT_LENGTH)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.parse().ok())
     }
 
     pub fn file_name_by_header(&self) -> Option<String> {

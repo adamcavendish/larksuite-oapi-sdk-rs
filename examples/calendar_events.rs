@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use larksuite_oapi_sdk_rs::service::calendar::v4::{ListCalendarQuery, ListEventQuery};
 use larksuite_oapi_sdk_rs::{Client, RequestOption};
 

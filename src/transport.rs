@@ -1,3 +1,5 @@
+use std::future::Future;
+
 use http::header::{CONTENT_TYPE, HeaderValue, USER_AGENT as UA_HEADER};
 use serde_json::Value;
 use tracing::Instrument;
@@ -18,18 +20,25 @@ pub(crate) async fn request(
     api_req: &ApiReq,
     option: &RequestOption,
 ) -> Result<ApiResp, LarkError> {
-    let span = tracing::info_span!(
-        "lark.request",
-        method = %api_req.http_method,
-        path = %api_req.api_path,
-    );
+    let span = request_span(api_req);
 
-    let token_type = span.in_scope(|| {
-        validate(config, api_req, option)?;
-        Ok::<_, LarkError>(determine_token_type(config, api_req, option))
-    })?;
+    let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
 
     do_request(config, api_req, option, token_type)
+        .instrument(span)
+        .await
+}
+
+pub(crate) async fn request_stream(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+) -> Result<StreamResp, LarkError> {
+    let span = request_span(api_req);
+
+    let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
+
+    do_request_stream(config, api_req, option, token_type)
         .instrument(span)
         .await
 }
@@ -56,6 +65,70 @@ pub(crate) async fn request_typed<T: for<'de> serde::Deserialize<'de>>(
         return Err(LarkError::Api(Box::new(raw.code_error)));
     }
     Ok((resp, raw))
+}
+
+#[derive(Debug)]
+pub(crate) struct StreamResp {
+    pub(crate) api_resp: ApiResp,
+    pub(crate) body: StreamBody,
+}
+
+#[derive(Debug)]
+pub(crate) struct StreamBody {
+    replay: std::collections::VecDeque<bytes::Bytes>,
+    inner: Option<aioduct::BodyStreamSend>,
+}
+
+impl StreamBody {
+    fn streaming(inner: aioduct::BodyStreamSend) -> Self {
+        Self {
+            replay: std::collections::VecDeque::new(),
+            inner: Some(inner),
+        }
+    }
+
+    fn replay(chunk: bytes::Bytes) -> Self {
+        Self {
+            replay: [chunk].into(),
+            inner: None,
+        }
+    }
+
+    pub(crate) async fn next_chunk(&mut self) -> Result<Option<bytes::Bytes>, LarkError> {
+        if let Some(chunk) = self.replay.pop_front() {
+            return Ok(Some(chunk));
+        }
+
+        let Some(inner) = &mut self.inner else {
+            return Ok(None);
+        };
+
+        match inner.next().await {
+            Some(Ok(chunk)) => Ok(Some(chunk)),
+            Some(Err(err)) => Err(LarkError::Http(err)),
+            None => {
+                self.inner = None;
+                Ok(None)
+            }
+        }
+    }
+}
+
+fn request_span(api_req: &ApiReq) -> tracing::Span {
+    tracing::info_span!(
+        "lark.request",
+        method = %api_req.http_method,
+        path = %api_req.api_path,
+    )
+}
+
+fn prepare_request(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+) -> Result<AccessTokenType, LarkError> {
+    validate(config, api_req, option)?;
+    Ok(determine_token_type(config, api_req, option))
 }
 
 fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result<(), LarkError> {
@@ -208,45 +281,117 @@ async fn do_request(
     option: &RequestOption,
     token_type: AccessTokenType,
 ) -> Result<ApiResp, LarkError> {
+    retry_request(config, option, token_type, |bearer| async move {
+        let resp = raw_send(config, api_req, option, token_type, bearer.as_deref()).await?;
+        classify_buffered_response(config, resp).await
+    })
+    .await
+}
+
+async fn classify_buffered_response(
+    config: &Config,
+    resp: ApiResp,
+) -> Result<RequestAttempt<ApiResp>, LarkError> {
+    if is_json_content_type(&resp)
+        && let Some(err) = json_code_error_retry(config, &resp.raw_body).await
+    {
+        return Ok(RequestAttempt::Retry(err));
+    }
+
+    Ok(RequestAttempt::Done(resp))
+}
+
+async fn json_code_error_retry(config: &Config, raw_body: &[u8]) -> Option<LarkError> {
+    let Ok(code_err) = serde_json::from_slice::<CodeError>(raw_body) else {
+        return None;
+    };
+
+    if code_err.code == ERR_CODE_APP_TICKET_INVALID {
+        let atm = AppTicketManager::new(config.token_cache.clone());
+        let _ = atm.apply_app_ticket(config).await;
+    }
+    if is_token_invalid_error(code_err.code) {
+        return Some(LarkError::Api(Box::new(code_err)));
+    }
+
+    None
+}
+
+async fn do_request_stream(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+    token_type: AccessTokenType,
+) -> Result<StreamResp, LarkError> {
+    retry_request(config, option, token_type, |bearer| async move {
+        let resp = raw_send_stream(config, api_req, option, token_type, bearer.as_deref()).await?;
+        classify_stream_response(config, resp).await
+    })
+    .await
+}
+
+async fn classify_stream_response(
+    config: &Config,
+    resp: StreamResp,
+) -> Result<RequestAttempt<StreamResp>, LarkError> {
+    if is_json_content_type(&resp.api_resp)
+        && !resp.api_resp.raw_body.is_empty()
+        && let Some(err) = json_code_error_retry(config, &resp.api_resp.raw_body).await
+    {
+        return Ok(RequestAttempt::Retry(err));
+    }
+
+    Ok(RequestAttempt::Done(resp))
+}
+
+enum RequestAttempt<T> {
+    Done(T),
+    Retry(LarkError),
+}
+
+async fn retry_request<T, F, Fut>(
+    config: &Config,
+    option: &RequestOption,
+    token_type: AccessTokenType,
+    mut send: F,
+) -> Result<T, LarkError>
+where
+    F: FnMut(Option<String>) -> Fut,
+    Fut: Future<Output = Result<RequestAttempt<T>, LarkError>>,
+{
     let max_retries = config.max_retries;
     let mut last_err = None;
 
     for _ in 0..max_retries {
         let bearer = resolve_bearer_token(config, option, token_type).await?;
-        match raw_send(config, api_req, option, token_type, bearer.as_deref()).await {
-            Ok(resp) => {
-                if is_json_content_type(&resp)
-                    && let Ok(code_err) = serde_json::from_slice::<CodeError>(&resp.raw_body)
-                {
-                    if code_err.code == ERR_CODE_APP_TICKET_INVALID {
-                        let atm = AppTicketManager::new(config.token_cache.clone());
-                        let _ = atm.apply_app_ticket(config).await;
-                    }
-                    if is_token_invalid_error(code_err.code) {
-                        last_err = Some(LarkError::Api(Box::new(code_err)));
-                        continue;
-                    }
-                }
-                return Ok(resp);
-            }
-            Err(LarkError::DialFailed(msg)) => {
-                last_err = Some(LarkError::DialFailed(msg));
+        match send(bearer).await {
+            Ok(RequestAttempt::Done(value)) => return Ok(value),
+            Ok(RequestAttempt::Retry(err)) => {
+                last_err = Some(err);
                 continue;
             }
-            Err(LarkError::ServerTimeout(msg)) => {
-                last_err = Some(LarkError::ServerTimeout(msg));
-                continue;
-            }
-            Err(LarkError::RateLimited(_)) => {
-                return Err(LarkError::RateLimited(
-                    "server returned 429 Too Many Requests".to_string(),
-                ));
-            }
-            Err(e) => return Err(e),
+            Err(e) => handle_request_error(e, &mut last_err)?,
         }
     }
 
     Err(last_err.unwrap_or(LarkError::MaxRetries))
+}
+
+fn handle_request_error(err: LarkError, last_err: &mut Option<LarkError>) -> Result<(), LarkError> {
+    match err {
+        LarkError::DialFailed(msg) => {
+            *last_err = Some(LarkError::DialFailed(msg));
+            Ok(())
+        }
+        LarkError::ServerTimeout(msg) => {
+            *last_err = Some(LarkError::ServerTimeout(msg));
+            Ok(())
+        }
+        LarkError::RateLimited(_) => Err(LarkError::RateLimited(
+            "server returned 429 Too Many Requests".to_string(),
+        )),
+        e => Err(e),
+    }
 }
 
 async fn resolve_bearer_token(
@@ -373,6 +518,16 @@ pub(crate) async fn raw_send(
     raw_send_inner(config, api_req, option, bearer_token, false).await
 }
 
+pub(crate) async fn raw_send_stream(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+    _token_type: AccessTokenType,
+    bearer_token: Option<&str>,
+) -> Result<StreamResp, LarkError> {
+    raw_send_stream_inner(config, api_req, option, bearer_token, false).await
+}
+
 async fn raw_send_inner(
     config: &Config,
     api_req: &ApiReq,
@@ -380,6 +535,70 @@ async fn raw_send_inner(
     bearer_token: Option<&str>,
     absolute_url: bool,
 ) -> Result<ApiResp, LarkError> {
+    let (full_url, response) =
+        send_http_response(config, api_req, option, bearer_token, absolute_url).await?;
+    let status_code = response.status().as_u16();
+    check_status_errors(api_req, status_code, response.headers())?;
+
+    let header = response.headers().clone();
+    let raw_body = response.bytes().await.map_err(LarkError::Http)?.to_vec();
+
+    log_buffered_response(config, &full_url, status_code, &header, &raw_body);
+
+    Ok(ApiResp {
+        status_code,
+        header,
+        raw_body,
+    })
+}
+
+async fn raw_send_stream_inner(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+    bearer_token: Option<&str>,
+    absolute_url: bool,
+) -> Result<StreamResp, LarkError> {
+    let (full_url, response) =
+        send_http_response(config, api_req, option, bearer_token, absolute_url).await?;
+    let status_code = response.status().as_u16();
+    check_status_errors(api_req, status_code, response.headers())?;
+
+    let header = response.headers().clone();
+
+    if !(200..300).contains(&status_code) && is_json_header(&header) {
+        let raw_body = response.bytes().await.map_err(LarkError::Http)?.to_vec();
+        log_buffered_response(config, &full_url, status_code, &header, &raw_body);
+
+        return Ok(StreamResp {
+            api_resp: ApiResp {
+                status_code,
+                header,
+                raw_body: raw_body.clone(),
+            },
+            body: StreamBody::replay(bytes::Bytes::from(raw_body)),
+        });
+    }
+
+    log_stream_response(config, &full_url, status_code);
+
+    Ok(StreamResp {
+        api_resp: ApiResp {
+            status_code,
+            header,
+            raw_body: Vec::new(),
+        },
+        body: StreamBody::streaming(response.into_bytes_stream()),
+    })
+}
+
+async fn send_http_response(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+    bearer_token: Option<&str>,
+    absolute_url: bool,
+) -> Result<(String, aioduct::Response), LarkError> {
     let full_url = if absolute_url {
         api_req.api_path.clone()
     } else {
@@ -515,13 +734,18 @@ async fn raw_send_inner(
         }
     })?;
 
-    let status_code = response.status().as_u16();
+    Ok((full_url, response))
+}
 
+fn check_status_errors(
+    api_req: &ApiReq,
+    status_code: u16,
+    headers: &http::HeaderMap,
+) -> Result<(), LarkError> {
     if status_code == 504 {
-        let log_id = response
-            .headers()
+        let log_id = headers
             .get("X-Tt-Logid")
-            .or_else(|| response.headers().get("X-Request-Id"))
+            .or_else(|| headers.get("X-Request-Id"))
             .and_then(|v| v.to_str().ok())
             .unwrap_or("");
         tracing::info!(
@@ -535,10 +759,9 @@ async fn raw_send_inner(
     }
 
     if status_code == 429 {
-        let log_id = response
-            .headers()
+        let log_id = headers
             .get("X-Tt-Logid")
-            .or_else(|| response.headers().get("X-Request-Id"))
+            .or_else(|| headers.get("X-Request-Id"))
             .and_then(|v| v.to_str().ok())
             .unwrap_or("");
         tracing::info!(
@@ -551,9 +774,16 @@ async fn raw_send_inner(
         ));
     }
 
-    let header = response.headers().clone();
-    let raw_body = response.bytes().await.map_err(LarkError::Http)?.to_vec();
+    Ok(())
+}
 
+fn log_buffered_response(
+    config: &Config,
+    full_url: &str,
+    status_code: u16,
+    header: &http::HeaderMap,
+    raw_body: &[u8],
+) {
     let enabled = config
         .log_level
         .is_none_or(|lvl| lvl <= tracing::Level::DEBUG);
@@ -563,7 +793,7 @@ async fn raw_send_inner(
                 .get(CONTENT_TYPE)
                 .and_then(|v| v.to_str().ok())
                 .unwrap_or("");
-            let body_str = response_body_for_debug(&full_url, content_type, &raw_body);
+            let body_str = response_body_for_debug(full_url, content_type, raw_body);
             tracing::debug!(
                 status = status_code,
                 url = %full_url,
@@ -574,12 +804,24 @@ async fn raw_send_inner(
             tracing::debug!(status = status_code, url = %full_url, "lark.response");
         }
     }
+}
 
-    Ok(ApiResp {
-        status_code,
-        header,
-        raw_body,
-    })
+fn log_stream_response(config: &Config, full_url: &str, status_code: u16) {
+    let enabled = config
+        .log_level
+        .is_none_or(|lvl| lvl <= tracing::Level::DEBUG);
+    if enabled {
+        if config.log_req_at_debug {
+            tracing::debug!(
+                status = status_code,
+                url = %full_url,
+                body = "<streaming body>",
+                "lark.response"
+            );
+        } else {
+            tracing::debug!(status = status_code, url = %full_url, "lark.response");
+        }
+    }
 }
 
 fn response_body_for_debug<'a>(
@@ -698,7 +940,11 @@ fn build_url(config: &Config, api_req: &ApiReq) -> String {
 }
 
 fn is_json_content_type(resp: &ApiResp) -> bool {
-    resp.header
+    is_json_header(&resp.header)
+}
+
+fn is_json_header(header: &http::HeaderMap) -> bool {
+    header
         .get(CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .is_some_and(|v| v.contains("application/json"))
