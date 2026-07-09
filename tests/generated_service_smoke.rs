@@ -198,6 +198,8 @@ mod helpdesk_download;
 mod helpdesk_faq;
 #[path = "generated_service_smoke/helpdesk/ticket.rs"]
 mod helpdesk_ticket;
+#[path = "generated_service_smoke/hire/action_response.rs"]
+mod hire_action_response;
 #[path = "generated_service_smoke/hire/agency.rs"]
 mod hire_agency;
 #[path = "generated_service_smoke/hire/application.rs"]
