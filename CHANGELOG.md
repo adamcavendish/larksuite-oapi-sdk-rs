@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.2.1] - 2026-07-09
+
 ### REST service coverage
 
 - Added lazy pagination iterators for generated Contact and Bitable list/search
@@ -52,6 +54,11 @@
   updates, job requirement creation, referral account write actions, referral
   account reconciliation, referral account withdrawals, and tripartite
   agreement creation.
+
+### Documentation and maintenance
+
+- Added an IM streaming-download example that writes chunks to disk, computes
+  SHA-256 incrementally, and supports an optional byte limit.
 
 ## [0.2.0] - 2026-07-03
 
@@ -214,6 +221,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.2.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.1
 [0.2.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.0
 [0.1.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.2
 [0.1.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.1
