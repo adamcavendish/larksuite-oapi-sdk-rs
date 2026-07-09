@@ -316,7 +316,10 @@ HTTP metadata before the response body is consumed. Because the body is not
 pre-read, Lark JSON code errors returned as a 2xx response body are surfaced to
 the caller as body bytes rather than retried after metadata has been exposed.
 Non-success JSON responses may still be read before returning so token-refresh
-retries keep the same behavior as buffered requests.
+retries keep the same behavior as buffered requests. See
+[`examples/im_stream_download.rs`](examples/im_stream_download.rs) for a
+message-resource stream that writes chunks to disk, hashes incrementally, and
+enforces an optional byte limit.
 
 Paginated resources may also expose `*_by_iterator` helpers. These iterators
 own their request inputs, fetch pages lazily, and provide `limit`,
@@ -378,7 +381,7 @@ with focused Rust examples:
 | --- | --- | --- |
 | `sample/client/main.go` | [`examples/client_config.rs`](examples/client_config.rs) | Client builder options, timeouts, headers, retries, logging, token cache toggles |
 | `sample/callrawapi/api.go` | [`examples/raw_api.rs`](examples/raw_api.rs) | `ApiReq`, path/query params, user and tenant token raw calls |
-| `sample/api/im/im.go` | [`examples/send_message.rs`](examples/send_message.rs), [`examples/im_message_query.rs`](examples/im_message_query.rs), [`examples/im_upload_download.rs`](examples/im_upload_download.rs) | Typed IM send, list, upload, and download flows |
+| `sample/api/im/im.go` | [`examples/send_message.rs`](examples/send_message.rs), [`examples/im_message_query.rs`](examples/im_message_query.rs), [`examples/im_upload_download.rs`](examples/im_upload_download.rs), [`examples/im_stream_download.rs`](examples/im_stream_download.rs) | Typed IM send, list, upload, buffered download, and streaming download flows |
 | `sample/event/event.go` | [`examples/event_handler.rs`](examples/event_handler.rs) | Webhook event dispatcher and callback payload handling |
 | `sample/ws/sample.go` | [`examples/ws_client.rs`](examples/ws_client.rs) | Long-connection event stream; enable the `ws` feature |
 | `sample/card/card.go` | [`examples/card_action_handler.rs`](examples/card_action_handler.rs), card builder APIs | Card callback handling and interactive card JSON construction |
