@@ -29,44 +29,38 @@ async fn hire_job_existing_model_write_responses() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    let manager = hire
-        .job_manager
-        .batch_update(
-            "job-1",
-            json!({"recruiter_id":"ou_recruiter"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .job_manager
-        .unwrap();
-    let requirement = hire
-        .job_requirement
-        .create(
-            json!({"name":"Backend Engineer"}),
-            Some("open_id"),
-            Some("open_department_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .job_requirement
-        .unwrap();
-    let agreement_id = hire
-        .tripartite_agreement
-        .create(
-            json!({"application_id":"application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .id;
+    let manager = Box::pin(hire.job_manager.batch_update(
+        "job-1",
+        json!({"recruiter_id":"ou_recruiter"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .job_manager
+    .unwrap();
+    let requirement = Box::pin(hire.job_requirement.create(
+        json!({"name":"Backend Engineer"}),
+        Some("open_id"),
+        Some("open_department_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .job_requirement
+    .unwrap();
+    let agreement_id = Box::pin(hire.tripartite_agreement.create(
+        json!({"application_id":"application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .id;
 
     assert_eq!(manager.id.as_deref(), Some("manager-1"));
     assert_eq!(manager.recruiter_id.as_deref(), Some("ou_recruiter"));
@@ -118,64 +112,57 @@ async fn hire_referral_account_existing_model_write_responses() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    let created = hire
-        .referral_account
-        .create(
-            json!({"referrer_id":"ou_referrer"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .account
-        .unwrap();
-    let deactivated = hire
-        .referral_account
-        .deactivate("account-1", &RequestOption::default())
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .account
-        .unwrap();
-    let enabled = hire
-        .referral_account
-        .enable(
-            json!({"referral_account_id":"account-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .account
-        .unwrap();
-    let failed = hire
-        .referral_account
-        .reconciliation(
-            json!({"account_id_list":["account-2"]}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .check_failed_list
-        .into_iter()
-        .next()
-        .unwrap();
-    let withdrawn = hire
-        .referral_account
-        .withdraw(
-            "account-1",
-            json!({"withdraw_bonus_type":[1],"external_order_id":"withdraw-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap();
+    let created = Box::pin(hire.referral_account.create(
+        json!({"referrer_id":"ou_referrer"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .account
+    .unwrap();
+    let deactivated = Box::pin(
+        hire.referral_account
+            .deactivate("account-1", &RequestOption::default()),
+    )
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .account
+    .unwrap();
+    let enabled = Box::pin(hire.referral_account.enable(
+        json!({"referral_account_id":"account-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .account
+    .unwrap();
+    let failed = Box::pin(hire.referral_account.reconciliation(
+        json!({"account_id_list":["account-2"]}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .check_failed_list
+    .into_iter()
+    .next()
+    .unwrap();
+    let withdrawn = Box::pin(hire.referral_account.withdraw(
+        "account-1",
+        json!({"withdraw_bonus_type":[1],"external_order_id":"withdraw-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap();
 
     assert_eq!(created.account_id.as_deref(), Some("account-1"));
     assert_eq!(

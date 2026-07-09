@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 use larksuite_oapi_sdk_rs::{Client, RequestOption};
 
 fn print_token_summary(label: &str, token: Option<&str>, expires_in: Option<i64>) {

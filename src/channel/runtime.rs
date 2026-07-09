@@ -89,34 +89,33 @@ impl<'a> Channel<'a> {
     ) -> Result<SendResult, LarkError> {
         let (receive_id_type, receive_id) = resolve_target(input)?;
         let mut input = input.clone();
-        self.prepare_uploads(&mut input, option).await?;
+        Box::pin(self.prepare_uploads(&mut input, option)).await?;
 
         match build_payloads(&input)? {
             SendPayloads::Single { msg_type, content } => {
-                self.send_one_with_fallback(
+                Box::pin(self.send_one_with_fallback(
                     &receive_id_type,
                     &receive_id,
                     &msg_type,
                     &content,
                     &input,
                     option,
-                )
+                ))
                 .await
             }
             SendPayloads::Chunks(chunks) => {
                 let mut chunk_ids = Vec::new();
                 let mut chat_id = None;
                 for (msg_type, content) in chunks {
-                    let result = self
-                        .send_one_with_fallback(
-                            &receive_id_type,
-                            &receive_id,
-                            &msg_type,
-                            &content,
-                            &input,
-                            option,
-                        )
-                        .await?;
+                    let result = Box::pin(self.send_one_with_fallback(
+                        &receive_id_type,
+                        &receive_id,
+                        &msg_type,
+                        &content,
+                        &input,
+                        option,
+                    ))
+                    .await?;
                     if chat_id.is_none() {
                         chat_id = result.chat_id.clone();
                     }

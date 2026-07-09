@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 mod common;
 
 use common::{http_response, mock_server, mock_server_with_requests};
@@ -34,9 +32,9 @@ async fn contact_department_iterator_pages_and_limits() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap().unwrap();
-    let third = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let third = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.department_id.as_deref(), Some("d1"));
     assert_eq!(second.department_id.as_deref(), Some("d2"));
@@ -62,8 +60,8 @@ async fn contact_user_iterator_sends_resume_token() {
         ..Default::default()
     };
 
-    let _ = iter.next(&option).await.unwrap();
-    let _ = iter.next(&option).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
 
     let reqs = requests.lock().unwrap();
     assert!(reqs[0].contains("GET /open-apis/contact/v3/users?"));
@@ -90,8 +88,8 @@ async fn contact_children_iterator_preserves_token_on_empty_page() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.department_id.as_deref(), Some("d1"));
     assert!(second.is_none());
@@ -119,7 +117,7 @@ async fn contact_find_user_by_department_iterator_uses_query_shape() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
 
     assert_eq!(first.user_id.as_deref(), Some("u1"));
     let request = requests.lock().unwrap().join("\n");
@@ -143,9 +141,9 @@ async fn contact_unit_iterator_pages_unitlist() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap().unwrap();
-    let third = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let third = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.unit_id.as_deref(), Some("unit-1"));
     assert_eq!(second.unit_id.as_deref(), Some("unit-2"));

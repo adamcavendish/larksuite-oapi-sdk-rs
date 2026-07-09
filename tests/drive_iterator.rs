@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 mod common;
 
 use common::{http_response, mock_server, mock_server_with_requests};
@@ -32,9 +30,9 @@ async fn drive_file_version_iterator_pages_and_limits() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap().unwrap();
-    let third = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let third = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.name.as_deref(), Some("v1"));
     assert_eq!(second.name.as_deref(), Some("v2"));
@@ -60,8 +58,8 @@ async fn drive_file_version_iterator_sends_page_token_on_resume() {
         ..Default::default()
     };
 
-    let _ = iter.next(&option).await.unwrap();
-    let _ = iter.next(&option).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
 
     let reqs = requests.lock().unwrap();
     assert!(reqs[0].contains("GET /open-apis/drive/v1/files/file-token/versions?"));
@@ -85,7 +83,7 @@ async fn drive_file_version_iterator_next_page_token_uses_server_cursor_after_re
         ..Default::default()
     };
 
-    let _ = iter.next(&option).await.unwrap();
+    let _ = Box::pin(iter.next(&option)).await.unwrap();
     assert_eq!(iter.next_page_token(), Some("next-1"));
 }
 
@@ -106,9 +104,9 @@ async fn drive_file_view_record_iterator_limit_zero_is_unlimited() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap().unwrap();
-    let third = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let third = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.viewer_id.as_deref(), Some("u1"));
     assert_eq!(second.viewer_id.as_deref(), Some("u2"));
@@ -134,8 +132,8 @@ async fn drive_file_view_record_iterator_preserves_token_on_empty_page() {
         ..Default::default()
     };
 
-    let first = iter.next(&option).await.unwrap().unwrap();
-    let second = iter.next(&option).await.unwrap();
+    let first = Box::pin(iter.next(&option)).await.unwrap().unwrap();
+    let second = Box::pin(iter.next(&option)).await.unwrap();
 
     assert_eq!(first.viewer_id.as_deref(), Some("u1"));
     assert!(second.is_none());

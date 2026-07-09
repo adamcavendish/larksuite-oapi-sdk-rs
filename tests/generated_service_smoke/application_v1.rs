@@ -33,90 +33,74 @@ async fn application_v1_by_query_smoke() {
         department_list: Some(vec!["od-1".to_string()]),
     };
 
-    let app_resp = client
-        .application()
-        .app
-        .get_by_query(
-            &GetApplicationV1AppQuery::new("cli_a").lang("zh_cn"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let app_list_resp = client
-        .application()
-        .app
-        .list_by_query(
+    let app_resp = Box::pin(client.application().app.get_by_query(
+        &GetApplicationV1AppQuery::new("cli_a").lang("zh_cn"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    let app_list_resp = Box::pin(
+        client.application().app.list_by_query(
             &ListApplicationV1AppQuery::new()
                 .page_size(20)
                 .page_token("next-page")
                 .lang("zh_cn"),
             &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let admin_resp = client
-        .application()
-        .app
-        .check_user_admin_by_query(
-            &CheckApplicationV1UserAdminQuery::new("cli_a", "ou-1").user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let blacklist_resp = client
-        .application()
-        .app
-        .check_user_in_blacklist_by_query(
+        ),
+    )
+    .await
+    .unwrap();
+    let admin_resp = Box::pin(client.application().app.check_user_admin_by_query(
+        &CheckApplicationV1UserAdminQuery::new("cli_a", "ou-1").user_id_type("open_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    let blacklist_resp = Box::pin(
+        client.application().app.check_user_in_blacklist_by_query(
             &CheckApplicationV1BlacklistQuery::new("cli_a", &blacklist_req)
                 .user_id_type("open_id")
                 .department_id_type("open_department_id"),
             &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let version_resp = client
-        .application()
-        .app_version
-        .get_by_query(
-            &GetApplicationV1AppVersionQuery::new("cli_a", "ver-1", "zh_cn"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let version_list_resp = client
-        .application()
-        .app_version
-        .list_by_query(
+        ),
+    )
+    .await
+    .unwrap();
+    let version_resp = Box::pin(client.application().app_version.get_by_query(
+        &GetApplicationV1AppVersionQuery::new("cli_a", "ver-1", "zh_cn"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    let version_list_resp = Box::pin(
+        client.application().app_version.list_by_query(
             &ListApplicationV1AppVersionQuery::new("cli_a", "zh_cn")
                 .page_size(20)
                 .page_token("next-page")
                 .order(1),
             &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let department_usage_resp = client
-        .application()
-        .app_usage
-        .department_overview_by_query(
+        ),
+    )
+    .await
+    .unwrap();
+    let department_usage_resp = Box::pin(
+        client.application().app_usage.department_overview_by_query(
             &DepartmentOverviewAppUsageQuery::new("cli_a", "2026-06-01", 1)
                 .department_id("od-1")
                 .recursion(1)
                 .page_size(20)
                 .page_token("next-page"),
             &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let usage_resp = client
-        .application()
-        .app_usage
-        .overview_by_query(
-            &OverviewAppUsageQuery::new("cli_a", "2026-06-01", 1),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+        ),
+    )
+    .await
+    .unwrap();
+    let usage_resp = Box::pin(client.application().app_usage.overview_by_query(
+        &OverviewAppUsageQuery::new("cli_a", "2026-06-01", 1),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     assert!(app_resp.success());
     assert!(app_list_resp.success());

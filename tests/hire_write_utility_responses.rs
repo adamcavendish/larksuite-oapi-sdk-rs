@@ -37,90 +37,76 @@ async fn hire_write_utility_responses_deserialize_and_preserve_requests() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    let employee = hire
-        .employee
-        .patch(
-            "employee-1",
-            json!({"onboard_status":2}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .employee
-        .unwrap();
-    let interviewer = hire
-        .interviewer
-        .patch(
-            "interviewer-1",
-            json!({"verify_status":1}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .interviewer
-        .unwrap();
-    let created_note = hire
-        .note
-        .create(
-            json!({"talent_id":"talent-1","content":"created"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .note
-        .unwrap();
-    let patched_note = hire
-        .note
-        .patch(
-            "note-1",
-            json!({"content":"patched"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap()
-        .note
-        .unwrap();
-    let attachment = hire
-        .attachment
-        .create(
-            json!({"file_name":"resume.pdf","file_content":"base64"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap();
-    let created_channel = hire
-        .website_channel
-        .create(
-            "website-1",
-            json!({"channel_name":"Campus"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap();
-    let updated_channel = hire
-        .website_channel
-        .update(
-            "website-1",
-            "channel-1",
-            json!({"channel_name":"Campus Updated"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap()
-        .data
-        .unwrap();
+    let employee = Box::pin(hire.employee.patch(
+        "employee-1",
+        json!({"onboard_status":2}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .employee
+    .unwrap();
+    let interviewer = Box::pin(hire.interviewer.patch(
+        "interviewer-1",
+        json!({"verify_status":1}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .interviewer
+    .unwrap();
+    let created_note = Box::pin(hire.note.create(
+        json!({"talent_id":"talent-1","content":"created"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .note
+    .unwrap();
+    let patched_note = Box::pin(hire.note.patch(
+        "note-1",
+        json!({"content":"patched"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .note
+    .unwrap();
+    let attachment = Box::pin(hire.attachment.create(
+        json!({"file_name":"resume.pdf","file_content":"base64"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap();
+    let created_channel = Box::pin(hire.website_channel.create(
+        "website-1",
+        json!({"channel_name":"Campus"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap();
+    let updated_channel = Box::pin(hire.website_channel.update(
+        "website-1",
+        "channel-1",
+        json!({"channel_name":"Campus Updated"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap();
 
     assert_eq!(employee.id.as_deref(), Some("employee-1"));
     assert_eq!(employee.onboard_status, Some(2));

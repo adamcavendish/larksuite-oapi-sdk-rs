@@ -16,30 +16,27 @@ async fn hire_job_existing_model_write_smoke() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    hire.job_manager
-        .batch_update(
-            "job-1",
-            json!({"recruiter_id":"ou_recruiter"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.job_requirement
-        .create(
-            json!({"name":"Backend Engineer"}),
-            Some("open_id"),
-            Some("open_department_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.tripartite_agreement
-        .create(
-            json!({"application_id":"application-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+    Box::pin(hire.job_manager.batch_update(
+        "job-1",
+        json!({"recruiter_id":"ou_recruiter"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.job_requirement.create(
+        json!({"name":"Backend Engineer"}),
+        Some("open_id"),
+        Some("open_department_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.tripartite_agreement.create(
+        json!({"application_id":"application-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/managers/batch_update "));
@@ -68,39 +65,37 @@ async fn hire_referral_account_existing_model_write_smoke() {
     let client = client_for(addr);
     let hire = client.hire();
 
-    hire.referral_account
-        .create(
-            json!({"referrer_id":"ou_referrer"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.referral_account
-        .deactivate("account-1", &RequestOption::default())
-        .await
-        .unwrap();
-    hire.referral_account
-        .enable(
-            json!({"referral_account_id":"account-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.referral_account
-        .reconciliation(
-            json!({"account_id_list":["account-2"]}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    hire.referral_account
-        .withdraw(
-            "account-1",
-            json!({"withdraw_bonus_type":[1],"external_order_id":"withdraw-1"}),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+    Box::pin(hire.referral_account.create(
+        json!({"referrer_id":"ou_referrer"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(
+        hire.referral_account
+            .deactivate("account-1", &RequestOption::default()),
+    )
+    .await
+    .unwrap();
+    Box::pin(hire.referral_account.enable(
+        json!({"referral_account_id":"account-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.referral_account.reconciliation(
+        json!({"account_id_list":["account-2"]}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(hire.referral_account.withdraw(
+        "account-1",
+        json!({"withdraw_bonus_type":[1],"external_order_id":"withdraw-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/hire/v1/referral_account "));

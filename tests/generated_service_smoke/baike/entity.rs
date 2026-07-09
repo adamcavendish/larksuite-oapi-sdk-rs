@@ -48,86 +48,68 @@ async fn baike_entity_by_query_smoke() {
     let extract_body = serde_json::json!({"text":"Term extract"});
     let match_body = serde_json::json!({"text":"Term match"});
 
-    let create_resp = client
-        .baike()
-        .entity
-        .create_by_query(
-            &CreateBaikeEntityQuery::new(&create_body).user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let update_resp = client
-        .baike()
-        .entity
-        .update_by_query(
-            &UpdateBaikeEntityQuery::new("entity-1", &update_body).user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let get_resp = client
-        .baike()
-        .entity
-        .get_by_query(
+    let create_resp = Box::pin(client.baike().entity.create_by_query(
+        &CreateBaikeEntityQuery::new(&create_body).user_id_type("open_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    let update_resp = Box::pin(client.baike().entity.update_by_query(
+        &UpdateBaikeEntityQuery::new("entity-1", &update_body).user_id_type("open_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    let get_resp = Box::pin(
+        client.baike().entity.get_by_query(
             &GetBaikeEntityQuery::new("entity-1")
                 .provider("provider-1")
                 .outer_id("outer-1")
                 .user_id_type("open_id"),
             &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let list_resp = client
-        .baike()
-        .entity
-        .list_by_query(
+        ),
+    )
+    .await
+    .unwrap();
+    let list_resp = Box::pin(
+        client.baike().entity.list_by_query(
             &ListBaikeEntityQuery::new()
                 .page(PageQuery::new().page_size(20).page_token("next-page"))
                 .provider("provider-1")
                 .user_id_type("open_id"),
             &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let search_resp = client
-        .baike()
-        .entity
-        .search_by_query(
+        ),
+    )
+    .await
+    .unwrap();
+    let search_resp = Box::pin(
+        client.baike().entity.search_by_query(
             &SearchBaikeEntityQuery::new(&search_body)
                 .page(PageQuery::new().page_size(10).page_token("search-page"))
                 .user_id_type("open_id"),
             &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let highlight_resp = client
-        .baike()
-        .entity
-        .highlight_by_query(
-            &HighlightBaikeEntityQuery::new(&highlight_body),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let extract_resp = client
-        .baike()
-        .entity
-        .extract_by_query(
-            &ExtractBaikeEntityQuery::new(&extract_body),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    let match_resp = client
-        .baike()
-        .entity
-        .match_by_query(
-            &MatchBaikeEntityQuery::new(&match_body),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+        ),
+    )
+    .await
+    .unwrap();
+    let highlight_resp = Box::pin(client.baike().entity.highlight_by_query(
+        &HighlightBaikeEntityQuery::new(&highlight_body),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    let extract_resp = Box::pin(client.baike().entity.extract_by_query(
+        &ExtractBaikeEntityQuery::new(&extract_body),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    let match_resp = Box::pin(client.baike().entity.match_by_query(
+        &MatchBaikeEntityQuery::new(&match_body),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     assert!(create_resp.success());
     assert!(update_resp.success());

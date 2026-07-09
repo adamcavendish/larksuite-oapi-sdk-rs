@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 use larksuite_oapi_sdk_rs::channel::{Channel, SendInput};
 use larksuite_oapi_sdk_rs::{Client, EventDispatcher, RequestOption};
 
@@ -13,17 +11,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dispatcher = EventDispatcher::new("", "");
     let channel = Channel::builder(&client, dispatcher).build();
 
-    let sent = channel
-        .send(
-            &SendInput {
-                chat_id: Some(chat_id),
-                markdown: Some("**Hello from channel send**".into()),
-                title: Some("Rust SDK".into()),
-                ..Default::default()
-            },
-            &RequestOption::default(),
-        )
-        .await?;
+    let sent = Box::pin(channel.send(
+        &SendInput {
+            chat_id: Some(chat_id),
+            markdown: Some("**Hello from channel send**".into()),
+            title: Some("Rust SDK".into()),
+            ..Default::default()
+        },
+        &RequestOption::default(),
+    ))
+    .await?;
 
     println!("sent message: {}", sent.message_id);
     Ok(())

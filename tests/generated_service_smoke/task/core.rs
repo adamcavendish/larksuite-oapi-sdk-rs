@@ -30,73 +30,58 @@ async fn task_core_by_query_smoke() {
     };
     let batch_delete_body = serde_json::json!({"ids":["u-1"]});
 
-    client
-        .task()
-        .task
-        .create_by_query(
-            &CreateTaskV1Query::new(&create_body).user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    client
-        .task()
-        .task
-        .get_by_query(
-            &GetTaskV1Query::new("task-1").user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    client
-        .task()
-        .task
-        .patch_by_query(
-            &PatchTaskV1Query::new("task-1", &patch_body).user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    client
-        .task()
-        .task
-        .delete_by_query(&DeleteTaskQuery::new("task-1"), &RequestOption::default())
-        .await
-        .unwrap();
-    client
-        .task()
-        .task
-        .complete_by_query(&CompleteTaskQuery::new("task-1"), &RequestOption::default())
-        .await
-        .unwrap();
-    client
-        .task()
-        .task
-        .uncomplete_by_query(
-            &UncompleteTaskQuery::new("task-1"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    client
-        .task()
-        .task
-        .batch_delete_collaborator_by_query(
-            &BatchDeleteCollaboratorQuery::new("task-1", &batch_delete_body)
-                .user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
-    client
-        .task()
-        .task
-        .batch_delete_follower_by_query(
-            &BatchDeleteFollowerQuery::new("task-1", &batch_delete_body).user_id_type("open_id"),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
+    Box::pin(client.task().task.create_by_query(
+        &CreateTaskV1Query::new(&create_body).user_id_type("open_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(client.task().task.get_by_query(
+        &GetTaskV1Query::new("task-1").user_id_type("open_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(client.task().task.patch_by_query(
+        &PatchTaskV1Query::new("task-1", &patch_body).user_id_type("open_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(
+        client
+            .task()
+            .task
+            .delete_by_query(&DeleteTaskQuery::new("task-1"), &RequestOption::default()),
+    )
+    .await
+    .unwrap();
+    Box::pin(
+        client
+            .task()
+            .task
+            .complete_by_query(&CompleteTaskQuery::new("task-1"), &RequestOption::default()),
+    )
+    .await
+    .unwrap();
+    Box::pin(client.task().task.uncomplete_by_query(
+        &UncompleteTaskQuery::new("task-1"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(client.task().task.batch_delete_collaborator_by_query(
+        &BatchDeleteCollaboratorQuery::new("task-1", &batch_delete_body).user_id_type("open_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(client.task().task.batch_delete_follower_by_query(
+        &BatchDeleteFollowerQuery::new("task-1", &batch_delete_body).user_id_type("open_id"),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/task/v1/tasks?"));
