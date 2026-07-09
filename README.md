@@ -360,7 +360,9 @@ application, background check, interview, offer, interview assessment, referral
 reward, talent external info, and website site-user responses. Existing-model
 Hire write helpers now type job manager batch updates, job requirement
 creation, referral account write actions, reconciliation, withdrawals, and
-tripartite agreement creation.
+tripartite agreement creation. Simple Talent and Exam write helpers now type
+folder updates, combined talent create/update, talent-pool moves, and exam
+creation.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw

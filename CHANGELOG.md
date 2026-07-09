@@ -54,6 +54,8 @@
   updates, job requirement creation, referral account write actions, referral
   account reconciliation, referral account withdrawals, and tripartite
   agreement creation.
+- Added typed Hire v1 simple Talent and Exam write responses for folder
+  updates, combined talent create/update, talent-pool moves, and exam creation.
 
 ### Documentation and maintenance
 
