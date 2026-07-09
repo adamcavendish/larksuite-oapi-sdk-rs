@@ -230,6 +230,8 @@ mod hire_reference;
 mod hire_referral_talent;
 #[path = "generated_service_smoke/hire/talent.rs"]
 mod hire_talent;
+#[path = "generated_service_smoke/hire/talent_exam_write.rs"]
+mod hire_talent_exam_write;
 #[path = "generated_service_smoke/hire/task.rs"]
 mod hire_task;
 #[path = "generated_service_smoke/hire/utility_test.rs"]
