@@ -5,7 +5,7 @@ use serde_json::json;
 async fn hire_job_utility_read_query_smoke() {
     let publish_records =
         r#"{"code":0,"msg":"ok","data":{"items":[{"id":"post-1"}],"has_more":false}}"#;
-    let job_requirements = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"jr-1"}]}}"#;
+    let job_requirements = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"jr-1","customized_data_list":[{"object_id":"field-1","value":{"time_range":{"start_time":"1710000000","end_time":"1710003600"}}}]}]}}"#;
     let locations = r#"{"code":0,"msg":"ok","data":{"items":[{"country":{"country_code":"CN_1"}}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, publish_records),
@@ -31,7 +31,8 @@ async fn hire_job_utility_read_query_smoke() {
         )
         .await
         .unwrap();
-    hire.job_requirement
+    let job_requirements = hire
+        .job_requirement
         .list_by_id_by_query(
             &ListByIdHireJobRequirementQuery::new()
                 .user_id_type("open_id")
@@ -44,6 +45,21 @@ async fn hire_job_utility_read_query_smoke() {
         )
         .await
         .unwrap();
+    assert_eq!(
+        job_requirements.data.unwrap().items[0]
+            .customized_data_list
+            .as_ref()
+            .unwrap()[0]
+            .value
+            .as_ref()
+            .unwrap()
+            .time_range
+            .as_ref()
+            .unwrap()
+            .end_time
+            .as_deref(),
+        Some("1710003600")
+    );
     hire.location
         .query_by_query(
             &QueryHireLocationQuery::new().page(page),

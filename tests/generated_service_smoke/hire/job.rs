@@ -68,7 +68,7 @@ async fn hire_job_list_by_query_smoke() {
 
 #[tokio::test]
 async fn hire_job_get_detail_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"job_detail":{"basic_info":{"id":"job-1","title":"Engineer"},"recruiter":{"id":"ou_recruiter","name":{"en_us":"Recruiter"}},"job_config":{"id":"job-1","internship_offer_apply_schema":{"id":"intern-schema-1"}},"stage_count_list":[{"count":2,"stage":{"id":"stage-1"}}]}}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"job_detail":{"basic_info":{"id":"job-1","title":"Engineer","customized_data_list":[{"object_id":"field-1","value":{"content":"Required","option":{"key":"eligible"}}}]},"recruiter":{"id":"ou_recruiter","name":{"en_us":"Recruiter"}},"job_config":{"id":"job-1","internship_offer_apply_schema":{"id":"intern-schema-1"}},"storefront_list":[{"id":"store-1","manager":{"id":"ou_manager"}}],"stage_count_list":[{"count":2,"stage":{"id":"stage-1","type":2}}]}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -81,9 +81,19 @@ async fn hire_job_get_detail_smoke() {
 
     assert!(resp.success());
     let detail = resp.data.unwrap().job_detail.unwrap();
+    let basic_info = detail.basic_info.unwrap();
+    assert_eq!(basic_info.title.as_deref(), Some("Engineer"));
     assert_eq!(
-        detail.basic_info.unwrap().title.as_deref(),
-        Some("Engineer")
+        basic_info.customized_data_list.unwrap()[0]
+            .value
+            .as_ref()
+            .unwrap()
+            .option
+            .as_ref()
+            .unwrap()
+            .key
+            .as_deref(),
+        Some("eligible")
     );
     assert_eq!(
         detail.recruiter.unwrap().id.as_deref(),
@@ -100,6 +110,15 @@ async fn hire_job_get_detail_smoke() {
         Some("intern-schema-1")
     );
     assert_eq!(detail.stage_count_list.unwrap()[0].count, Some(2));
+    assert_eq!(
+        detail.storefront_list.unwrap()[0]
+            .manager
+            .as_ref()
+            .unwrap()
+            .id
+            .as_deref(),
+        Some("ou_manager")
+    );
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/jobs/job-1/get_detail "));
