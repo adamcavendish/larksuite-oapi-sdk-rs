@@ -28,9 +28,11 @@ fn tenant_option() -> RequestOption {
 #[tokio::test]
 async fn hire_interview_support_lists_deserialize_typed_items() {
     let app_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"interview-1","begin_time":1710000000,"stage_id":"stage-1"}],"page_token":"next-1","has_more":false}}"#;
-    let round_body = r#"{"code":0,"msg":"ok","data":{"active_status":1,"items":[{"id":"round-1","biz_id":"biz-1","name":{"en_us":"Technical"},"process_type":1,"active_status":1,"interview_assessment_template_info":{"id":"form-1"}}]}}"#;
+    let feedback_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"form-1","version":1,"name":{"en_us":"Default"},"type":1,"score_calculation_config":{"enabled":true,"calculation_mode":1},"modules":[{"id":"module-1","name":{"en_us":"Technical"},"description":{"en_us":"Technical interview"},"type":1,"sequence":1,"weight":1.0,"dimensions":[{"id":"dimension-1","name":{"en_us":"Coding"},"description":{"en_us":"Coding skill"},"type":2,"enabled":true,"sequence":1,"is_required":true,"weight":0.5,"score_dimension_config":{"score_dimension_type":1,"lower_limit_score":1,"upper_limit_score":5},"option_items":[{"id":"option-1","name":{"en_us":"Strong"},"description":{"en_us":"Strong answer"},"score_val":5,"alias_name":{"en_us":"Excellent"}}],"display_not_evident":true,"ability_list":[{"id":"ability-1","name":{"en_us":"Communication"},"description":{"en_us":"Communication skill"}}],"related_dimension_config":{"type":1,"related_dimension_settings":[{"dimension_id":"dimension-2","related_operator_type":1,"dimension_option_ids":["option-1"]}]},"dimension_ability_args":[{"ability_id":"ability-1","place_holder":"评价","en_place_holder":"Assessment"}]}]}]}],"page_token":"next-form","has_more":false}}"#;
+    let round_body = r#"{"code":0,"msg":"ok","data":{"active_status":1,"items":[{"id":"round-1","biz_id":"biz-1","name":{"en_us":"Technical"},"process_type":1,"active_status":1,"interview_assessment_template_info":{"id":"form-1","biz_id":"form-biz-1","name":{"en_us":"Technical Assessment"}}}]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, app_body),
+        http_response(200, feedback_body),
         http_response(200, round_body),
     ])
     .await;
@@ -44,6 +46,15 @@ async fn hire_interview_support_lists_deserialize_typed_items() {
                 .page(PageQuery::new().page_size(20).page_token("seed-token"))
                 .user_id_type("open_id")
                 .job_level_id_type("job_level_id"),
+            &tenant_option(),
+        )
+        .await
+        .unwrap();
+    let feedback_resp = client
+        .hire()
+        .interview_feedback_form
+        .list_by_query(
+            &ListInterviewFeedbackFormQuery::new().page_size(Some(20)),
             &tenant_option(),
         )
         .await
@@ -63,6 +74,56 @@ async fn hire_interview_support_lists_deserialize_typed_items() {
     assert_eq!(app_data.items[0].stage_id.as_deref(), Some("stage-1"));
     assert_eq!(app_data.page_token.as_deref(), Some("next-1"));
 
+    let feedback = &feedback_resp.data.unwrap().items[0];
+    assert_eq!(
+        feedback
+            .score_calculation_config
+            .as_ref()
+            .unwrap()
+            .calculation_mode,
+        Some(1)
+    );
+    let dimension = &feedback.modules.as_ref().unwrap()[0]
+        .dimensions
+        .as_ref()
+        .unwrap()[0];
+    assert_eq!(
+        dimension
+            .score_dimension_config
+            .as_ref()
+            .unwrap()
+            .upper_limit_score,
+        Some(5)
+    );
+    assert_eq!(
+        dimension.option_items.as_ref().unwrap()[0]
+            .alias_name
+            .as_ref()
+            .unwrap()
+            .en_us
+            .as_deref(),
+        Some("Excellent")
+    );
+    assert_eq!(
+        dimension
+            .related_dimension_config
+            .as_ref()
+            .unwrap()
+            .related_dimension_settings
+            .as_ref()
+            .unwrap()[0]
+            .dimension_option_ids
+            .as_ref()
+            .unwrap()[0],
+        "option-1"
+    );
+    assert_eq!(
+        dimension.dimension_ability_args.as_ref().unwrap()[0]
+            .en_place_holder
+            .as_deref(),
+        Some("Assessment")
+    );
+
     let round_data = round_resp.data.unwrap();
     assert_eq!(round_data.active_status, Some(1));
     assert_eq!(round_data.items[0].id.as_deref(), Some("round-1"));
@@ -73,6 +134,18 @@ async fn hire_interview_support_lists_deserialize_typed_items() {
             .and_then(|name| name.en_us.as_deref()),
         Some("Technical")
     );
+    assert_eq!(
+        round_data.items[0]
+            .interview_assessment_template_info
+            .as_ref()
+            .unwrap()
+            .name
+            .as_ref()
+            .unwrap()
+            .en_us
+            .as_deref(),
+        Some("Technical Assessment")
+    );
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/applications/app-1/interviews?"));
@@ -81,6 +154,7 @@ async fn hire_interview_support_lists_deserialize_typed_items() {
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("job_level_id_type=job_level_id"));
     assert!(request.contains("GET /open-apis/hire/v1/interview_round_types?"));
+    assert!(request.contains("GET /open-apis/hire/v1/interview_feedback_forms?"));
     assert!(request.contains("process_type=1"));
 }
 
