@@ -65,3 +65,42 @@ async fn hire_job_list_by_query_smoke() {
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }
+
+#[tokio::test]
+async fn hire_job_get_detail_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"job_detail":{"basic_info":{"id":"job-1","title":"Engineer"},"recruiter":{"id":"ou_recruiter","name":{"en_us":"Recruiter"}},"job_config":{"id":"job-1","internship_offer_apply_schema":{"id":"intern-schema-1"}},"stage_count_list":[{"count":2,"stage":{"id":"stage-1"}}]}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .hire()
+        .job
+        .get_detail("job-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let detail = resp.data.unwrap().job_detail.unwrap();
+    assert_eq!(
+        detail.basic_info.unwrap().title.as_deref(),
+        Some("Engineer")
+    );
+    assert_eq!(
+        detail.recruiter.unwrap().id.as_deref(),
+        Some("ou_recruiter")
+    );
+    assert_eq!(
+        detail
+            .job_config
+            .unwrap()
+            .internship_offer_apply_schema
+            .unwrap()
+            .id
+            .as_deref(),
+        Some("intern-schema-1")
+    );
+    assert_eq!(detail.stage_count_list.unwrap()[0].count, Some(2));
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/jobs/job-1/get_detail "));
+}
