@@ -112,3 +112,41 @@ async fn hire_ehr_and_offer_field_code_only_response_smoke() {
     assert!(request.contains("PATCH /open-apis/hire/v1/ehr_import_tasks/ehr-task-1 "));
     assert!(request.contains("PUT /open-apis/hire/v1/offer_custom_fields/field-1 "));
 }
+
+#[tokio::test]
+async fn hire_agency_and_talent_pool_code_only_response_smoke() {
+    let responses = (0..3)
+        .map(|_| http_response(200, r#"{"code":0,"msg":"ok"}"#))
+        .collect();
+    let (addr, _handle, requests) = mock_server_with_requests(responses).await;
+
+    let client = client_for(addr);
+    let hire = client.hire();
+
+    Box::pin(hire.agency.operate_agency_account(
+        json!({"account_id": "account-1"}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+    Box::pin(
+        hire.talent_blocklist
+            .change_talent_block(json!({"talent_id": "talent-1"}), &RequestOption::default()),
+    )
+    .await
+    .unwrap();
+    Box::pin(hire.talent_pool.batch_change_talent_pool(
+        "pool-1",
+        json!({"talent_id_list": ["talent-1"]}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/hire/v1/agencies/operate_agency_account "));
+    assert!(request.contains("POST /open-apis/hire/v1/talent_blocklist/change_talent_block "));
+    assert!(
+        request.contains("POST /open-apis/hire/v1/talent_pools/pool-1/batch_change_talent_pool ")
+    );
+}
