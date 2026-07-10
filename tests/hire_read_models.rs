@@ -22,6 +22,106 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
 }
 
 #[tokio::test]
+async fn hire_job_response_models_deserialize_and_preserve_requests() {
+    let config = r#"{"code":0,"msg":"ok","data":{"job_config":{"id":"job-1","offer_apply_schema":{"id":"offer-schema-1","name":{"en_us":"Offer"}},"interview_round_list":[{"round":1,"interviewer_list":[{"id":"ou_interviewer"}]}],"interview_registration":{"schema_id":"interview-schema-1","name":"Interview"},"interview_round_type_list":[{"assessment_round":{"id":"round-type-1"}}],"interview_appointment_config":{"enable_interview_appointment_by_interviewer":true,"config":{"interview_type":1,"cc":["ou_cc"]}}}}}"#;
+    let combined_create = r#"{"code":0,"msg":"ok","data":{"default_job_post":{"id":"post-1"},"job":{"id":"job-1","title":"Engineer"},"job_manager":{"id":"manager-1","recruiter_id":"ou_recruiter"},"interview_registration_schema_info":{"schema_id":"interview-schema-1","name":"Interview"},"target_major_list":[{"id":"major-1","zh_name":"Computer Science","en_name":"Computer Science"}]}}"#;
+    let combined_update = r#"{"code":0,"msg":"ok","data":{"default_job_post":{"id":"post-1"},"job":{"id":"job-1","title":"Staff Engineer"},"job_manager":{"id":"manager-1","assistant_id_list":["ou_assistant"]},"onboard_registration_schema_info":{"schema_id":"onboard-schema-1","name":"Onboard"}}}"#;
+    let update_config = r#"{"code":0,"msg":"ok","data":{"job_config":{"id":"job-1","job_attribute":2,"onboard_registration":{"schema_id":"onboard-schema-1","name":"Onboard"}}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, config),
+        http_response(200, combined_create),
+        http_response(200, combined_update),
+        http_response(200, update_config),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let hire = client.hire();
+
+    let config = Box::pin(hire.job.config("job-1", &RequestOption::default()))
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .job_config
+        .unwrap();
+    let combined_create = Box::pin(hire.job.combined_create(
+        json!({"job":{"title":"Engineer"}}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap();
+    let combined_update = Box::pin(hire.job.combined_update(
+        "job-1",
+        json!({"job":{"title":"Staff Engineer"}}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap();
+    let update_config = Box::pin(hire.job.update_config(
+        "job-1",
+        json!({"job_attribute":2}),
+        &RequestOption::default(),
+    ))
+    .await
+    .unwrap()
+    .data
+    .unwrap()
+    .job_config
+    .unwrap();
+
+    assert_eq!(config.id.as_deref(), Some("job-1"));
+    assert_eq!(
+        config.interview_round_list.as_ref().unwrap()[0].round,
+        Some(1)
+    );
+    assert_eq!(
+        config
+            .interview_appointment_config
+            .as_ref()
+            .unwrap()
+            .config
+            .as_ref()
+            .unwrap()
+            .cc
+            .as_ref()
+            .unwrap()[0],
+        "ou_cc"
+    );
+    assert_eq!(
+        combined_create.default_job_post.unwrap().id.as_deref(),
+        Some("post-1")
+    );
+    assert_eq!(
+        combined_create.target_major_list.unwrap()[0]
+            .zh_name
+            .as_deref(),
+        Some("Computer Science")
+    );
+    assert_eq!(
+        combined_update
+            .onboard_registration_schema_info
+            .unwrap()
+            .schema_id
+            .as_deref(),
+        Some("onboard-schema-1")
+    );
+    assert_eq!(update_config.job_attribute, Some(2));
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/jobs/job-1/config "));
+    assert!(request.contains("POST /open-apis/hire/v1/jobs/combined_create "));
+    assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/combined_update "));
+    assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/update_config "));
+    assert!(request.contains(r#""title":"Engineer""#));
+    assert!(request.contains("job_attribute"));
+}
+
+#[tokio::test]
 async fn hire_config_read_models_deserialize_and_send_filters() {
     let job_process = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"process-1","zh_name":"流程","type":1,"stage_list":[{"id":"stage-1","type":4}]}],"has_more":false,"page_token":"p2"}}"#;
     let job_schema = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"schema-1","scenario_type":2,"name":{"en_us":"Job schema"},"object_list":[{"id":"field-1","name":{"zh_cn":"字段"}}]}],"has_more":false}}"#;
