@@ -104,7 +104,7 @@ async fn hire_application_list_positional_adapter_smoke() {
 
 #[tokio::test]
 async fn hire_application_offer_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"offer":{"id":"offer-1","application_id":"app-1","job_info":{"job_id":"job-1","job_name":"Engineer"}}}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"offer":{"id":"offer-1","application_id":"app-1","basic_info":{"onboard_address":{"city":{"en_name":"Shanghai"}},"work_location_address_info":{"location_info":{"id":"location-1"}}},"job_info":{"job_id":"job-1","job_name":"Engineer"},"offer_send_record_list":[{"email_info":{"receiver_email_list":["candidate@example.com"]},"acceptance_list":[{"conclusion":1}],"offer_file_list":[{"id":"file-1"}],"offer_signature_info":{"attachment_list":[{"file_name":"Signed Offer.pdf"}]}}]}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -116,16 +116,52 @@ async fn hire_application_offer_smoke() {
         .unwrap();
 
     assert!(resp.success());
+    let offer = resp.data.unwrap().offer.unwrap();
     assert_eq!(
-        resp.data
-            .unwrap()
-            .offer
-            .unwrap()
-            .job_info
-            .unwrap()
-            .job_name
-            .as_deref(),
+        offer.job_info.unwrap().job_name.as_deref(),
         Some("Engineer")
+    );
+    assert_eq!(
+        offer
+            .basic_info
+            .as_ref()
+            .unwrap()
+            .onboard_address
+            .as_ref()
+            .unwrap()
+            .city
+            .as_ref()
+            .unwrap()
+            .en_name
+            .as_deref(),
+        Some("Shanghai")
+    );
+    let send_record = &offer.offer_send_record_list.as_ref().unwrap()[0];
+    assert_eq!(
+        send_record
+            .email_info
+            .as_ref()
+            .unwrap()
+            .receiver_email_list
+            .as_ref()
+            .unwrap()[0],
+        "candidate@example.com"
+    );
+    assert_eq!(
+        send_record.acceptance_list.as_ref().unwrap()[0].conclusion,
+        Some(1)
+    );
+    assert_eq!(
+        send_record
+            .offer_signature_info
+            .as_ref()
+            .unwrap()
+            .attachment_list
+            .as_ref()
+            .unwrap()[0]
+            .file_name
+            .as_deref(),
+        Some("Signed Offer.pdf")
     );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/applications/app-1/offer?"));
@@ -190,7 +226,7 @@ async fn hire_application_lifecycle_smoke() {
 
 #[tokio::test]
 async fn hire_application_detail_graph_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"application_detail":{"evaluations":[{"id":"evaluation-1","conclusion":1}],"interview_aggregation":{"interviews":[{"id":"interview-1","meeting_room_list":[{"room_id":"room-1"}]}]},"offer":{"offer_basic":{"id":"offer-1","attachment_list":[{"id":"attachment-1","name":"Offer.pdf"}]}},"employee":{"id":"employee-1","department_id":"dept-1"},"agency":{"basic_info":{"hunter_company_name":"Search Co"}},"portal":{"campus_volunteer_info":{"volunteer_seq":1}},"referral":{"basic_info":{"id":"referral-1","user_info":{"id":"ou_referrer"}}}}}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"application_detail":{"evaluations":[{"id":"evaluation-1","conclusion":1}],"interview_aggregation":{"interviews":[{"id":"interview-1","interview_record_list":[{"record_score":{"score":9.0},"attachments":[{"file_id":"file-1"}],"module_assessments":[{"module_score":4.5,"dimension_assessments":[{"dimension_score":5,"ability_assessments":[{"content":"Strong"}]}]}]}],"meeting_room_list":[{"room_id":"room-1"}]}]},"offer":{"offer_basic":{"id":"offer-1","attachment_list":[{"id":"attachment-1","name":"Offer.pdf"}]}},"employee":{"id":"employee-1","department_id":"dept-1"},"agency":{"basic_info":{"hunter_company_name":"Search Co"}},"portal":{"campus_volunteer_info":{"volunteer_seq":1}},"referral":{"basic_info":{"id":"referral-1","user_info":{"id":"ou_referrer"}},"recommend_info":{"specific_relationship":{"extra":"Former colleague"}}}}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -212,6 +248,20 @@ async fn hire_application_detail_graph_smoke() {
             .room_id
             .as_deref(),
         Some("room-1")
+    );
+    let record = &interviews[0].interview_record_list.as_ref().unwrap()[0];
+    assert_eq!(record.record_score.as_ref().unwrap().score, Some(9.0));
+    assert_eq!(
+        record.module_assessments.as_ref().unwrap()[0]
+            .dimension_assessments
+            .as_ref()
+            .unwrap()[0]
+            .ability_assessments
+            .as_ref()
+            .unwrap()[0]
+            .content
+            .as_deref(),
+        Some("Strong")
     );
     assert_eq!(
         detail
@@ -251,14 +301,29 @@ async fn hire_application_detail_graph_smoke() {
     assert_eq!(
         detail
             .referral
+            .as_ref()
             .unwrap()
             .basic_info
+            .as_ref()
             .unwrap()
             .user_info
+            .as_ref()
             .unwrap()
             .id
             .as_deref(),
         Some("ou_referrer")
+    );
+    assert_eq!(
+        detail
+            .referral
+            .unwrap()
+            .recommend_info
+            .unwrap()
+            .specific_relationship
+            .unwrap()
+            .extra
+            .as_deref(),
+        Some("Former colleague")
     );
 
     let request = requests.lock().unwrap().join("\n");
