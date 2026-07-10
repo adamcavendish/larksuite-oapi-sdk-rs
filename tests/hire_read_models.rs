@@ -923,8 +923,8 @@ async fn hire_new_read_iterators_and_background_models_use_page_state() {
     let evaluation_page =
         r#"{"code":0,"msg":"ok","data":{"items":[{"id":"eval-1"}],"has_more":false}}"#;
     let agreement_page = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"agreement-1","application_id":"app-1","state":1}],"has_more":false}}"#;
-    let background_list = r#"{"code":0,"msg":"ok","data":{"items":[{"order_id":"order-1","application_id":"app-1","package":"standard","candidate_info":{"name":"Ada"}}],"has_more":false}}"#;
-    let background_batch = r#"{"code":0,"msg":"ok","data":{"items":[{"order_id":"order-2","order_status":2,"provider_info":{"id":"provider-1"}}],"has_more":false}}"#;
+    let background_list = r#"{"code":0,"msg":"ok","data":{"items":[{"order_id":"order-1","application_id":"app-1","package":"standard","feedback_info_list":[{"id":"report-1","attachment_url":"https://example.com/report.pdf","report_preview_url":"https://example.com/preview","result":"green","report_type":1,"create_time":"1710000000","report_name":"Background report"}],"process_info_list":[{"process":"arranged","update_time":"1710000001","en_process":"arranged"}],"candidate_info":{"name":"Ada","mobile":"13800000000","email":"ada@example.com","first_name":"Ada","last_name":"Lovelace"},"creator_info":{"user_id":"ou_creator"},"contactor_info":{"name":"Grace","email":"grace@example.com"},"provider_info":{"provider_id":"provider-1","provider_name":{"en_us":"Provider"}},"custom_field_list":[{"type":"select","key":"candidate_resume","name":{"en_us":"Resume"},"is_required":true,"description":{"en_us":"Attach a resume"},"options":[{"key":"A","name":{"en_us":"Option A"}}]}],"custom_data_list":[{"key":"candidate_resume","value":"A"}],"ext_item_info_list":[{"id":"item-1","name":"Identity check"}]}],"has_more":false}}"#;
+    let background_batch = r#"{"code":0,"msg":"ok","data":{"items":[{"order_id":"order-2","order_status":2,"provider_info":{"provider_id":"provider-1"}}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, tag_page1),
         http_response(200, tag_page2),
@@ -996,12 +996,53 @@ async fn hire_new_read_iterators_and_background_models_use_page_state() {
     assert_eq!(evaluation.id.as_deref(), Some("eval-1"));
     assert_eq!(agreement.state, Some(1));
     assert_eq!(
-        background
-            .candidate_info
-            .as_ref()
-            .and_then(|value| value.get("name"))
-            .and_then(|value| value.as_str()),
+        background.candidate_info.as_ref().unwrap().name.as_deref(),
         Some("Ada")
+    );
+    assert_eq!(
+        background.feedback_info_list.as_ref().unwrap()[0]
+            .report_name
+            .as_deref(),
+        Some("Background report")
+    );
+    assert_eq!(
+        background.process_info_list.as_ref().unwrap()[0]
+            .en_process
+            .as_deref(),
+        Some("arranged")
+    );
+    assert_eq!(
+        background
+            .provider_info
+            .as_ref()
+            .unwrap()
+            .provider_name
+            .as_ref()
+            .unwrap()
+            .en_us
+            .as_deref(),
+        Some("Provider")
+    );
+    assert_eq!(
+        background.custom_field_list.as_ref().unwrap()[0]
+            .options
+            .as_ref()
+            .unwrap()[0]
+            .key
+            .as_deref(),
+        Some("A")
+    );
+    assert_eq!(
+        background.custom_data_list.as_ref().unwrap()[0]
+            .value
+            .as_deref(),
+        Some("A")
+    );
+    assert_eq!(
+        background.ext_item_info_list.as_ref().unwrap()[0]
+            .name
+            .as_deref(),
+        Some("Identity check")
     );
     assert_eq!(batch.order_status, Some(2));
 
