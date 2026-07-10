@@ -178,6 +178,43 @@ async fn hire_schema_response_models_smoke() {
 }
 
 #[tokio::test]
+async fn hire_offer_application_form_config_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"offer_apply_form":{"id":"form-1","schema":{"module_list":[{"object_list":[{"id":"field-1","config":{"formula":{"value":"[field-1] * 12","result":1,"extra_map":[{"key":"field-1","value":{"en_us":"Salary"}}]},"object_display_config":{"display_condition":1,"pre_object_config_list":[{"id":"field-0","operator":1,"value":["yes"]}]}}}]}]}}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let field = client_for(addr)
+        .hire()
+        .offer_application_form
+        .get("form-1", &RequestOption::default())
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .offer_apply_form
+        .unwrap()
+        .schema
+        .unwrap()
+        .module_list
+        .unwrap()[0]
+        .object_list
+        .as_ref()
+        .unwrap()[0]
+        .clone();
+
+    assert_eq!(
+        field.config.unwrap().formula.unwrap().extra_map.unwrap()[0]
+            .value
+            .as_ref()
+            .unwrap()
+            .en_us
+            .as_deref(),
+        Some("Salary")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/offer_application_forms/form-1 "));
+}
+
+#[tokio::test]
 async fn hire_activity_read_model_query_smoke() {
     let paged_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"item-1"}],"page_token":"next-page","has_more":false}}"#;
     let employee_body = r#"{"code":0,"msg":"ok","data":{"employee":{"id":"emp-1"}}}"#;
