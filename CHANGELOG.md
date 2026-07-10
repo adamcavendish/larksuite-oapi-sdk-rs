@@ -15,6 +15,8 @@
 - Added code-only response wrappers for selected Hire v1 talent, job
   requirement, agreement, advertisement, agency, EHR import, and Offer-field
   mutation helpers.
+- Completed Go-backed code-only response wrappers across Hire v1 ECO account,
+  background-check, package, exam, and exam-paper mutation helpers.
 
 ## [0.2.1] - 2026-07-09
 
