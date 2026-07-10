@@ -257,6 +257,122 @@ pub struct JobManager {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CombinedJobResultDefaultJobPost {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RegistrationSchemaInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub schema_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TargetMajorInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobConfigInterviewRound {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interviewer_list: Option<Vec<IdNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub round: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RegistrationInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub schema_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobConfigRoundTypeResult {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assessment_round: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assessment_template: Option<IdNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewAppointmentConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable_interview_appointment_by_interviewer: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub config: Option<InterviewAppointmentConfigContent>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewAppointmentConfigContent {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_timezone_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cc: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_notification_template_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub appointment_notification_template_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cancel_interview_notification_template_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobConfigResult {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_apply_schema: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_process_conf: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recommended_evaluator_list: Option<Vec<IdNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assessment_template: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_round_list: Option<Vec<JobConfigInterviewRound>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_requirement_list: Option<Vec<IdNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_registration: Option<RegistrationInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_registration: Option<RegistrationInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_round_type_list: Option<Vec<JobConfigRoundTypeResult>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub related_job_list: Option<Vec<IdNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_attribute: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_appointment_config: Option<InterviewAppointmentConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub portal_website_apply_form_schema_info: Option<RegistrationInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TalentBatchInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub talent_id: Option<String>,
@@ -1698,6 +1814,54 @@ pub struct GetJobManagerRespData {
 pub struct RecruiterJobRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub info: Option<JobManager>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CombinedCreateJobRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_job_post: Option<CombinedJobResultDefaultJobPost>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job: Option<Job>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_manager: Option<JobManager>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_registration_schema_info: Option<RegistrationSchemaInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_registration_schema_info: Option<RegistrationSchemaInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_major_list: Option<Vec<TargetMajorInfo>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub portal_website_apply_form_schema_info: Option<RegistrationSchemaInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CombinedUpdateJobRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_job_post: Option<CombinedJobResultDefaultJobPost>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job: Option<Job>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_manager: Option<JobManager>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_registration_schema_info: Option<RegistrationSchemaInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_registration_schema_info: Option<RegistrationSchemaInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_major_list: Option<Vec<TargetMajorInfo>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub portal_website_apply_form_schema_info: Option<RegistrationSchemaInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ConfigJobRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_config: Option<JobConfigResult>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateConfigJobRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_config: Option<JobConfigResult>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -5600,7 +5764,7 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CombinedCreateJobResp>()
+        .send_v2_response::<CombinedCreateJobRespData, CombinedCreateJobResp>()
         .await
     }
 
@@ -5619,7 +5783,7 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CombinedUpdateJobResp>()
+        .send_v2_response::<CombinedUpdateJobRespData, CombinedUpdateJobResp>()
         .await
     }
 
@@ -5636,7 +5800,7 @@ impl<'a> JobResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ConfigJobResp>()
+        .send_v2_response::<ConfigJobRespData, ConfigJobResp>()
         .await
     }
 
@@ -5708,7 +5872,7 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateConfigJobResp>()
+        .send_v2_response::<UpdateConfigJobRespData, UpdateConfigJobResp>()
         .await
     }
 }
@@ -7274,13 +7438,13 @@ impl_resp_v2!(
 impl_resp_v2!(BatchQueryExternalOfferResp, BatchQueryExternalOfferRespData);
 impl_resp_v2!(GetByTalentInterviewResp, GetByTalentInterviewRespData);
 impl_resp_v2!(CloseJobResp, serde_json::Value);
-impl_resp_v2!(CombinedCreateJobResp, serde_json::Value);
-impl_resp_v2!(CombinedUpdateJobResp, serde_json::Value);
-impl_resp_v2!(ConfigJobResp, serde_json::Value);
+impl_resp_v2!(CombinedCreateJobResp, CombinedCreateJobRespData);
+impl_resp_v2!(CombinedUpdateJobResp, CombinedUpdateJobRespData);
+impl_resp_v2!(ConfigJobResp, ConfigJobRespData);
 impl_resp_v2!(GetDetailJobResp, serde_json::Value);
 impl_resp_v2!(OpenJobResp, serde_json::Value);
 impl_resp_v2!(RecruiterJobResp, RecruiterJobRespData);
-impl_resp_v2!(UpdateConfigJobResp, serde_json::Value);
+impl_resp_v2!(UpdateConfigJobResp, UpdateConfigJobRespData);
 impl_resp_v2!(BatchUpdateJobManagerResp, BatchUpdateJobManagerRespData);
 impl_resp_v2!(SearchJobPublishRecordResp, SearchJobPublishRecordRespData);
 impl_resp_v2!(ListByIdJobRequirementResp, ListByIdJobRequirementRespData);
