@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### REST service coverage
+
+- Added typed Hire v1 Job response data for job configuration reads and writes,
+  plus combined job create and update helpers.
+
 ## [0.2.1] - 2026-07-09
 
 ### REST service coverage
