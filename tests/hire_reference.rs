@@ -69,6 +69,80 @@ async fn hire_reference_subject_list_deserializes_typed_items() {
 }
 
 #[tokio::test]
+async fn hire_role_permissions_deserialize_typed_scopes() {
+    let role = r#"{"code":0,"msg":"ok","data":{"role":{"id":"role-1","has_business_management_scope":true,"socail_permission_collection":{"feature_permissions":[{"id":"feature-1","name":"Feature"}],"management_permissions":[{"id":"management-1"}],"data_permissions":[{"id":"data-1","name":{"en_us":"Data"},"select_status":1}],"business_management_scopes":[{"entity":{"code":"application","name":{"en_us":"Application"}},"permission_groups":[{"permission_ids":["permission-1"],"scope_rule":{"rule_type":1}}]}]},"campus_permission_collection":{"business_management_scopes":[{"entity":{"code":"campus"},"permission_groups":[{"permission_ids":["permission-2"]}]}]}}}}"#;
+    let user_roles = r#"{"code":0,"msg":"ok","data":{"items":[{"user_id":"ou_user_1","role_id":"role-1","business_management_scopes":[{"entity":{"code":"application","name":{"en_us":"Application"}},"scope_rule":{"rule_type":2}}]}],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, role),
+        http_response(200, user_roles),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let role = client
+        .hire()
+        .role
+        .get("role-1", &tenant_option())
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .role
+        .unwrap();
+    let user_role = client
+        .hire()
+        .user_role
+        .list_by_query(
+            &larksuite_oapi_sdk_rs::service::hire::v1::ListUserRoleQuery::new().page_size(Some(20)),
+            &tenant_option(),
+        )
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .items
+        .remove(0);
+
+    assert_eq!(
+        role.socail_permission_collection
+            .as_ref()
+            .unwrap()
+            .data_permissions
+            .as_ref()
+            .unwrap()[0]
+            .select_status,
+        Some(1)
+    );
+    assert_eq!(
+        role.campus_permission_collection
+            .as_ref()
+            .unwrap()
+            .business_management_scopes
+            .as_ref()
+            .unwrap()[0]
+            .permission_groups
+            .as_ref()
+            .unwrap()[0]
+            .permission_ids
+            .as_ref()
+            .unwrap()[0],
+        "permission-2"
+    );
+    assert_eq!(
+        user_role.business_management_scopes.as_ref().unwrap()[0]
+            .scope_rule
+            .as_ref()
+            .unwrap()
+            .rule_type,
+        Some(2)
+    );
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/roles/role-1 "));
+    assert!(request.contains("GET /open-apis/hire/v1/user_roles?"));
+}
+
+#[tokio::test]
 async fn hire_reference_todo_list_deserializes_typed_items() {
     let body = r#"{"code":0,"msg":"ok","data":{"items":[{"evaluation":{"talent_id":"talent-1","job_id":"job-1","application_id":"app-1","id":"eval-1"},"offer":{"id":"offer-1"}}],"page_token":"next-1","has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;

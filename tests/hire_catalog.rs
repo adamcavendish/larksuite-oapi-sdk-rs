@@ -49,7 +49,7 @@ async fn hire_catalog_lists_deserialize_typed_items() {
 
 #[tokio::test]
 async fn hire_role_get_deserializes_role_detail() {
-    let body = r#"{"code":0,"msg":"ok","data":{"role":{"id":"role-1","name":{"zh_cn":"管理员"},"has_business_management_scope":true,"socail_permission_collection":{"enabled":true}}}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"role":{"id":"role-1","name":{"zh_cn":"管理员"},"has_business_management_scope":true,"socail_permission_collection":{"data_permissions":[{"id":"data-1","select_status":1}]}}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -66,9 +66,10 @@ async fn hire_role_get_deserializes_role_detail() {
     assert_eq!(
         role.socail_permission_collection
             .as_ref()
-            .and_then(|value| value.get("enabled"))
-            .and_then(|value| value.as_bool()),
-        Some(true)
+            .and_then(|permissions| permissions.data_permissions.as_ref())
+            .and_then(|permissions| permissions.first())
+            .and_then(|permission| permission.select_status),
+        Some(1)
     );
 
     let request = requests.lock().unwrap().join("\n");
