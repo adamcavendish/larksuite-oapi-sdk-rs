@@ -185,6 +185,69 @@ async fn hire_job_response_models_deserialize_and_preserve_requests() {
 }
 
 #[tokio::test]
+async fn hire_job_detail_response_deserializes_and_preserves_request() {
+    let body = r#"{"code":0,"msg":"ok","data":{"job_detail":{"basic_info":{"id":"job-1","title":"Engineer","recruitment_type":{"id":"employment-1","name":{"en_us":"Full time"},"active_status":1},"department":{"id":"dept-1","name":{"en_us":"Engineering"}},"highlight_list":[{"id":"highlight-1","name":{"en_us":"Remote"}}],"customized_data_list":[{"object_id":"field-1","name":{"en_us":"Work authorization"},"object_type":1,"value":{"content":"Required"}}],"city_list":[{"code":"CN-SH","name":{"en_us":"Shanghai"}}],"target_major_list":[{"id":"major-1","name":{"en_us":"Computer Science"}}]},"recruiter":{"id":"ou_recruiter","name":{"en_us":"Recruiter"}},"assistant_list":[{"id":"ou_assistant","name":{"en_us":"Assistant"}}],"hiring_manager_list":[{"id":"ou_manager","name":{"en_us":"Manager"}}],"job_requirement_list":[{"id":"requirement-1","short_code":"REQ-1","name":"Platform","department_id":"dept-1"}],"address_list":[{"id":"address-1","name":{"en_us":"Shanghai"}}],"job_config":{"id":"job-1","internship_offer_apply_schema":{"id":"intern-schema-1"}},"storefront_list":[{"id":"store-1","name":{"en_us":"Store"}}],"tag_list":[{"id":"tag-1","name":{"en_us":"Priority"},"order":1}],"stage_count_list":[{"count":3,"stage":{"id":"stage-1"}}]}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let detail = client
+        .hire()
+        .job
+        .get_detail("job-1", &RequestOption::default())
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .job_detail
+        .unwrap();
+
+    let basic_info = detail.basic_info.as_ref().unwrap();
+    assert_eq!(basic_info.title.as_deref(), Some("Engineer"));
+    assert_eq!(
+        basic_info.recruitment_type.as_ref().unwrap().active_status,
+        Some(1)
+    );
+    assert_eq!(
+        basic_info.customized_data_list.as_ref().unwrap()[0]
+            .value
+            .as_ref()
+            .unwrap()["content"],
+        "Required"
+    );
+    assert_eq!(
+        basic_info.city_list.as_ref().unwrap()[0].code.as_deref(),
+        Some("CN-SH")
+    );
+    assert_eq!(
+        detail.recruiter.as_ref().unwrap().id.as_deref(),
+        Some("ou_recruiter")
+    );
+    assert_eq!(
+        detail.job_requirement_list.as_ref().unwrap()[0]
+            .short_code
+            .as_deref(),
+        Some("REQ-1")
+    );
+    assert_eq!(
+        detail
+            .job_config
+            .as_ref()
+            .unwrap()
+            .internship_offer_apply_schema
+            .as_ref()
+            .unwrap()
+            .id
+            .as_deref(),
+        Some("intern-schema-1")
+    );
+    assert_eq!(detail.tag_list.as_ref().unwrap()[0].order, Some(1));
+    assert_eq!(detail.stage_count_list.as_ref().unwrap()[0].count, Some(3));
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/jobs/job-1/get_detail "));
+}
+
+#[tokio::test]
 async fn hire_config_read_models_deserialize_and_send_filters() {
     let job_process = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"process-1","zh_name":"流程","type":1,"stage_list":[{"id":"stage-1","type":4}]}],"has_more":false,"page_token":"p2"}}"#;
     let job_schema = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"schema-1","scenario_type":2,"name":{"en_us":"Job schema"},"object_list":[{"id":"field-1","name":{"zh_cn":"字段"}}]}],"has_more":false}}"#;
