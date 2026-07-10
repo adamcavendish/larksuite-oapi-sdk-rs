@@ -10,6 +10,8 @@
   compensation, and send-record data.
 - Added a typed Hire v1 Job detail response with structured job, manager,
   requirement, address, configuration, tag, and stage-count data.
+- Added typed Hire v1 application-detail summaries and code-only application
+  and Job lifecycle action responses.
 
 ## [0.2.1] - 2026-07-09
 

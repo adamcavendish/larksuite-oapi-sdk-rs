@@ -368,6 +368,9 @@ updates, plus combined job create and update response payloads. Application
 Offer lookups now return structured offer, compensation, and send-record data.
 Job detail lookups return structured job, manager, requirement, address,
 configuration, tag, and stage-count data.
+Application detail lookups now type application, Job, and talent summaries;
+application and Job lifecycle actions return code-only response wrappers where
+the Go SDK exposes no response data.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
