@@ -248,6 +248,116 @@ async fn hire_job_detail_response_deserializes_and_preserves_request() {
 }
 
 #[tokio::test]
+async fn hire_application_lifecycle_responses_deserialize_and_preserve_requests() {
+    let detail = r#"{"code":0,"msg":"ok","data":{"application_detail":{"basic_info":{"id":"application-1","job_id":"job-1","talent_id":"talent-1","stage":{"id":"stage-1","zh_name":"筛选","en_name":"Screening","type":2},"active_status":1,"delivery_type":2,"resume_source_info":{"id":"source-1","name":{"en_us":"Referral"},"resume_source_type":3},"website_resume_source":{"website_id":"website-1","website_name":{"en_us":"Careers"},"channel":{"channel_id":"channel-1","channel_name":{"en_us":"Organic"}}},"stage_time_list":[{"stage_id":"stage-1","enter_time":"1710000000"}],"application_preferred_city_list":[{"code":"CN-SH","name":{"en_us":"Shanghai"}}],"termination_reason":{"id":"reason-1","name":{"en_us":"Candidate withdrew"},"children":[{"id":"reason-child-1","name":{"en_us":"Compensation"}}]}},"job":{"id":"job-1","name":"Engineer","recruitment_type":{"id":"employment-1","name":{"en_us":"Full time"},"active_status":1},"city_list":{"code":"CN-SH","name":{"en_us":"Shanghai"}}},"talent":{"id":"talent-1","name":"Taylor","mobile_code":"+86","mobile_number":"13800000000","email":"taylor@example.com"},"evaluations":[{"id":"evaluation-1"}],"offer":{"id":"offer-1"}}}}"#;
+    let empty = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, detail),
+        http_response(200, empty),
+        http_response(200, empty),
+        http_response(200, empty),
+        http_response(200, empty),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let detail = client
+        .hire()
+        .application
+        .get_detail("application-1", &RequestOption::default())
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .application_detail
+        .unwrap();
+    let cancel_onboard = client
+        .hire()
+        .application
+        .cancel_onboard(
+            "application-1",
+            json!({"termination_type": 1}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let recover = client
+        .hire()
+        .application
+        .recover("application-1", &RequestOption::default())
+        .await
+        .unwrap();
+    let close = client
+        .hire()
+        .job
+        .close(
+            "job-1",
+            json!({"termination_type": 1}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let open = client
+        .hire()
+        .job
+        .open("job-1", json!({}), &RequestOption::default())
+        .await
+        .unwrap();
+
+    let basic_info = detail.basic_info.as_ref().unwrap();
+    assert_eq!(basic_info.id.as_deref(), Some("application-1"));
+    assert_eq!(basic_info.stage.as_ref().unwrap().type_, Some(2));
+    assert_eq!(
+        basic_info
+            .website_resume_source
+            .as_ref()
+            .unwrap()
+            .channel
+            .as_ref()
+            .unwrap()
+            .channel_id
+            .as_deref(),
+        Some("channel-1")
+    );
+    assert_eq!(
+        basic_info
+            .termination_reason
+            .as_ref()
+            .unwrap()
+            .children
+            .as_ref()
+            .unwrap()[0]
+            .id
+            .as_deref(),
+        Some("reason-child-1")
+    );
+    assert_eq!(
+        detail.job.as_ref().unwrap().name.as_deref(),
+        Some("Engineer")
+    );
+    assert_eq!(
+        detail.talent.as_ref().unwrap().email.as_deref(),
+        Some("taylor@example.com")
+    );
+    assert_eq!(
+        detail.evaluations.as_ref().unwrap()[0]["id"],
+        "evaluation-1"
+    );
+    assert!(cancel_onboard.success());
+    assert!(recover.success());
+    assert!(close.success());
+    assert!(open.success());
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/applications/application-1/get_detail "));
+    assert!(request.contains("POST /open-apis/hire/v1/applications/application-1/cancel_onboard "));
+    assert!(request.contains("POST /open-apis/hire/v1/applications/application-1/recover "));
+    assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/close "));
+    assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/open "));
+    assert!(request.contains("termination_type"));
+}
+
+#[tokio::test]
 async fn hire_config_read_models_deserialize_and_send_filters() {
     let job_process = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"process-1","zh_name":"流程","type":1,"stage_list":[{"id":"stage-1","type":4}]}],"has_more":false,"page_token":"p2"}}"#;
     let job_schema = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"schema-1","scenario_type":2,"name":{"en_us":"Job schema"},"object_list":[{"id":"field-1","name":{"zh_cn":"字段"}}]}],"has_more":false}}"#;
