@@ -249,7 +249,7 @@ async fn hire_job_detail_response_deserializes_and_preserves_request() {
 
 #[tokio::test]
 async fn hire_application_lifecycle_responses_deserialize_and_preserve_requests() {
-    let detail = r#"{"code":0,"msg":"ok","data":{"application_detail":{"basic_info":{"id":"application-1","job_id":"job-1","talent_id":"talent-1","stage":{"id":"stage-1","zh_name":"筛选","en_name":"Screening","type":2},"active_status":1,"delivery_type":2,"resume_source_info":{"id":"source-1","name":{"en_us":"Referral"},"resume_source_type":3},"website_resume_source":{"website_id":"website-1","website_name":{"en_us":"Careers"},"channel":{"channel_id":"channel-1","channel_name":{"en_us":"Organic"}}},"stage_time_list":[{"stage_id":"stage-1","enter_time":"1710000000"}],"application_preferred_city_list":[{"code":"CN-SH","name":{"en_us":"Shanghai"}}],"termination_reason":{"id":"reason-1","name":{"en_us":"Candidate withdrew"},"children":[{"id":"reason-child-1","name":{"en_us":"Compensation"}}]}},"job":{"id":"job-1","name":"Engineer","recruitment_type":{"id":"employment-1","name":{"en_us":"Full time"},"active_status":1},"city_list":{"code":"CN-SH","name":{"en_us":"Shanghai"}}},"talent":{"id":"talent-1","name":"Taylor","mobile_code":"+86","mobile_number":"13800000000","email":"taylor@example.com"},"evaluations":[{"id":"evaluation-1"}],"offer":{"id":"offer-1"}}}}"#;
+    let detail = r#"{"code":0,"msg":"ok","data":{"application_detail":{"basic_info":{"id":"application-1","job_id":"job-1","talent_id":"talent-1","stage":{"id":"stage-1","zh_name":"Screening","en_name":"Screening","type":2},"active_status":1,"delivery_type":2,"resume_source_info":{"id":"source-1","name":{"en_us":"Referral"},"resume_source_type":3},"website_resume_source":{"website_id":"website-1","website_name":{"en_us":"Careers"},"channel":{"channel_id":"channel-1","channel_name":{"en_us":"Organic"}}},"stage_time_list":[{"stage_id":"stage-1","enter_time":"1710000000"}],"application_preferred_city_list":[{"code":"CN-SH","name":{"en_us":"Shanghai"}}],"termination_reason":{"id":"reason-1","name":{"en_us":"Candidate withdrew"},"children":[{"id":"reason-child-1","name":{"en_us":"Compensation"}}]}},"job":{"id":"job-1","name":"Engineer","recruitment_type":{"id":"employment-1","name":{"en_us":"Full time"},"active_status":1},"city_list":{"code":"CN-SH","name":{"en_us":"Shanghai"}}},"talent":{"id":"talent-1","name":"Taylor","mobile_code":"+86","mobile_number":"13800000000","email":"taylor@example.com"},"evaluations":[{"id":"evaluation-1","conclusion":1}],"interview_aggregation":{"interviews":[{"id":"interview-1","round":2,"interview_record_list":[{"id":"record-1","interviewer":{"id":"ou_interviewer","name":{"en_us":"Interviewer"}}}],"meeting_room_list":[{"room_id":"room-1","room_name":"Orchid"}]}]},"offer":{"offer_basic":{"id":"offer-1","offer_status":2,"leader":{"id":"ou_leader","name":{"en_us":"Leader"}},"contract_period":{"period_type":1,"period":3},"attachment_list":[{"id":"attachment-1","name":"Offer.pdf"}]},"offer_salary":{"id":"salary-1","total_annual_cash":"200000"}},"employee":{"id":"employee-1","onboard_status":1,"department_id":"dept-1"},"agency":{"basic_info":{"hunter_company_name":"Search Co"},"comment_info":[{"name":{"en_us":"Recommendation"},"value":{"en_us":"Strong"}}]},"portal":{"campus_volunteer_info":{"volunteer_seq":1}},"referral":{"basic_info":{"id":"referral-1","user_info":{"id":"ou_referrer","name":{"en_us":"Referrer"}}},"recommend_info":{"comment":"Excellent candidate"}}}}}"#;
     let empty = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, detail),
@@ -339,9 +339,78 @@ async fn hire_application_lifecycle_responses_deserialize_and_preserve_requests(
         detail.talent.as_ref().unwrap().email.as_deref(),
         Some("taylor@example.com")
     );
+    assert_eq!(detail.evaluations.as_ref().unwrap()[0].conclusion, Some(1));
     assert_eq!(
-        detail.evaluations.as_ref().unwrap()[0]["id"],
-        "evaluation-1"
+        detail
+            .interview_aggregation
+            .as_ref()
+            .unwrap()
+            .interviews
+            .as_ref()
+            .unwrap()[0]
+            .meeting_room_list
+            .as_ref()
+            .unwrap()[0]
+            .room_name
+            .as_deref(),
+        Some("Orchid")
+    );
+    assert_eq!(
+        detail
+            .offer
+            .as_ref()
+            .unwrap()
+            .offer_basic
+            .as_ref()
+            .unwrap()
+            .attachment_list
+            .as_ref()
+            .unwrap()[0]
+            .name
+            .as_deref(),
+        Some("Offer.pdf")
+    );
+    assert_eq!(
+        detail.employee.as_ref().unwrap().department_id.as_deref(),
+        Some("dept-1")
+    );
+    assert_eq!(
+        detail
+            .agency
+            .as_ref()
+            .unwrap()
+            .basic_info
+            .as_ref()
+            .unwrap()
+            .hunter_company_name
+            .as_deref(),
+        Some("Search Co")
+    );
+    assert_eq!(
+        detail
+            .portal
+            .as_ref()
+            .unwrap()
+            .campus_volunteer_info
+            .as_ref()
+            .unwrap()
+            .volunteer_seq,
+        Some(1)
+    );
+    assert_eq!(
+        detail
+            .referral
+            .as_ref()
+            .unwrap()
+            .basic_info
+            .as_ref()
+            .unwrap()
+            .user_info
+            .as_ref()
+            .unwrap()
+            .id
+            .as_deref(),
+        Some("ou_referrer")
     );
     assert!(cancel_onboard.success());
     assert!(recover.success());
@@ -355,6 +424,40 @@ async fn hire_application_lifecycle_responses_deserialize_and_preserve_requests(
     assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/close "));
     assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/open "));
     assert!(request.contains("termination_type"));
+}
+
+#[tokio::test]
+async fn hire_intern_offer_status_response_deserializes_and_preserves_request() {
+    let body = r#"{"code":0,"msg":"ok","data":{"offer_id":"offer-1","operation":"offboard","onboarding_info":{"actual_onboarding_date":"2022-01-01"},"offboarding_info":{"actual_offboarding_date":"2022-03-02","notes":"Completed internship"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let data = client
+        .hire()
+        .offer
+        .intern_offer_status(
+            "offer-1",
+            json!({"operation": "offboard"}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap()
+        .data
+        .unwrap();
+
+    assert_eq!(data.offer_id.as_deref(), Some("offer-1"));
+    assert_eq!(data.operation.as_deref(), Some("offboard"));
+    assert_eq!(
+        data.offboarding_info
+            .unwrap()
+            .actual_offboarding_date
+            .as_deref(),
+        Some("2022-03-02")
+    );
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/hire/v1/offers/offer-1/intern_offer_status "));
+    assert!(request.contains("offboard"));
 }
 
 #[tokio::test]
