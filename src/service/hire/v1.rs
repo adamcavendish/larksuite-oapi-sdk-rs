@@ -1515,6 +1515,12 @@ pub struct TransferOnboardApplicationRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplicationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer: Option<ApplicationOffer>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListEvaluationRespData {
     #[serde(default)]
     pub items: Vec<Evaluation>,
@@ -5036,6 +5042,158 @@ pub struct Offer {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationOffer {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub basic_info: Option<ApplicationOfferBasicInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub salary_plan: Option<ApplicationOfferSalaryPlan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub schema_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_info: Option<OfferJobInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customized_module_list: Option<Vec<ApplicationOfferCustomModule>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_requirement_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_send_record_list: Option<Vec<OfferSendRecord>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationOfferBasicInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expire_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leader_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_month: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_year: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_period: Option<ContractPeriodInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recruitment_type: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_address: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_address: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customize_info_list: Option<Vec<ApplicationOfferCustomValue>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_location_address_info: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_offered: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_grade_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub common_attachment_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pathway_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContractPeriodInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationOfferCustomValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customize_value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationOfferSalaryPlan {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub basic_salary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_salary_percentage: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub award_salary_multiple: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_shares: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quarterly_bonus: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub half_year_bonus: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_annual_cash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customize_info_list: Option<Vec<ApplicationOfferCustomValue>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferJobInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationOfferCustomModule {
+    #[serde(default, rename = "ID", skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_list: Option<Vec<ApplicationOfferCustomValue>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferSendRecord {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_send_record_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub send_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_letter_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_info: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub acceptance_list: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_file_list: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_signature_info: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct OfferBasicInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub offer_type: Option<i32>,
@@ -6505,7 +6663,7 @@ impl<'a> ApplicationResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, OfferApplicationResp>()
+        .send_v2_response::<OfferApplicationRespData, OfferApplicationResp>()
         .await
     }
 }
@@ -7494,7 +7652,7 @@ impl_resp_v2!(SearchWebsiteJobPostResp, SearchWebsiteJobPostRespData);
 
 // ── Additional response types ──
 
-impl_resp_v2!(OfferApplicationResp, serde_json::Value);
+impl_resp_v2!(OfferApplicationResp, OfferApplicationRespData);
 impl_resp_v2!(
     ListApplicationInterviewResp2,
     ListApplicationInterviewRespData
