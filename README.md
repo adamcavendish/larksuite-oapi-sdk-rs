@@ -371,6 +371,8 @@ configuration, tag, and stage-count data.
 Application detail lookups now type application, Job, and talent summaries;
 application and Job lifecycle actions return code-only response wrappers where
 the Go SDK exposes no response data.
+Selected talent, job requirement, agreement, advertisement, agency, EHR import,
+and Offer-field mutation helpers likewise expose code-only response wrappers.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
