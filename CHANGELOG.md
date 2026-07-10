@@ -20,6 +20,8 @@
 - Completed typed Hire v1 application-detail response branches for evaluations,
   interviews, Offer, employee, agency, portal, and referral data, plus intern
   Offer-status responses.
+- Completed typed Hire v1 application-detail interview assessment, referral
+  relationship, and application Offer delivery and address leaf models.
 
 ## [0.2.1] - 2026-07-09
 
