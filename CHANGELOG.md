@@ -6,6 +6,8 @@
 
 - Added typed Hire v1 Job response data for job configuration reads and writes,
   plus combined job create and update helpers.
+- Added a typed Hire v1 application Offer response with structured offer,
+  compensation, and send-record data.
 
 ## [0.2.1] - 2026-07-09
 
