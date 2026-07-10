@@ -66,3 +66,25 @@ async fn hire_offer_list_by_query_smoke() {
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
 }
+
+#[tokio::test]
+async fn hire_offer_intern_status_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"offer_id":"offer-1","operation":"offboard","offboarding_info":{"actual_offboarding_date":"2022-03-02"}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .hire()
+        .offer
+        .intern_offer_status(
+            "offer-1",
+            serde_json::json!({"operation": "offboard"}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(resp.data.unwrap().operation.as_deref(), Some("offboard"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/hire/v1/offers/offer-1/intern_offer_status "));
+}

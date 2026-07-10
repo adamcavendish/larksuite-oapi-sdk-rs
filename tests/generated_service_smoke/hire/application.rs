@@ -187,3 +187,80 @@ async fn hire_application_lifecycle_smoke() {
     assert!(request.contains("POST /open-apis/hire/v1/applications/app-1/cancel_onboard "));
     assert!(request.contains("POST /open-apis/hire/v1/applications/app-1/recover "));
 }
+
+#[tokio::test]
+async fn hire_application_detail_graph_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"application_detail":{"evaluations":[{"id":"evaluation-1","conclusion":1}],"interview_aggregation":{"interviews":[{"id":"interview-1","meeting_room_list":[{"room_id":"room-1"}]}]},"offer":{"offer_basic":{"id":"offer-1","attachment_list":[{"id":"attachment-1","name":"Offer.pdf"}]}},"employee":{"id":"employee-1","department_id":"dept-1"},"agency":{"basic_info":{"hunter_company_name":"Search Co"}},"portal":{"campus_volunteer_info":{"volunteer_seq":1}},"referral":{"basic_info":{"id":"referral-1","user_info":{"id":"ou_referrer"}}}}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let detail = client
+        .hire()
+        .application
+        .get_detail("app-1", &RequestOption::default())
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .application_detail
+        .unwrap();
+
+    assert_eq!(detail.evaluations.unwrap()[0].conclusion, Some(1));
+    let interviews = detail.interview_aggregation.unwrap().interviews.unwrap();
+    assert_eq!(
+        interviews[0].meeting_room_list.as_ref().unwrap()[0]
+            .room_id
+            .as_deref(),
+        Some("room-1")
+    );
+    assert_eq!(
+        detail
+            .offer
+            .unwrap()
+            .offer_basic
+            .unwrap()
+            .attachment_list
+            .unwrap()[0]
+            .name
+            .as_deref(),
+        Some("Offer.pdf")
+    );
+    assert_eq!(
+        detail.employee.unwrap().department_id.as_deref(),
+        Some("dept-1")
+    );
+    assert_eq!(
+        detail
+            .agency
+            .unwrap()
+            .basic_info
+            .unwrap()
+            .hunter_company_name
+            .as_deref(),
+        Some("Search Co")
+    );
+    assert_eq!(
+        detail
+            .portal
+            .unwrap()
+            .campus_volunteer_info
+            .unwrap()
+            .volunteer_seq,
+        Some(1)
+    );
+    assert_eq!(
+        detail
+            .referral
+            .unwrap()
+            .basic_info
+            .unwrap()
+            .user_info
+            .unwrap()
+            .id
+            .as_deref(),
+        Some("ou_referrer")
+    );
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/applications/app-1/get_detail "));
+}
