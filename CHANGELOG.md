@@ -8,6 +8,8 @@
   plus combined job create and update helpers.
 - Added a typed Hire v1 application Offer response with structured offer,
   compensation, and send-record data.
+- Added a typed Hire v1 Job detail response with structured job, manager,
+  requirement, address, configuration, tag, and stage-count data.
 
 ## [0.2.1] - 2026-07-09
 
