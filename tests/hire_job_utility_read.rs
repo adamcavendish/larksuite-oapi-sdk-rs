@@ -21,7 +21,7 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
 #[tokio::test]
 async fn hire_job_utility_read_responses_deserialize_and_send_filters() {
     let publish_records = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"post-1","title":"Backend","job_id":"job-1"}],"has_more":false,"page_token":"publish-next"}}"#;
-    let job_requirements = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"jr-1","short_code":"JR-1","recruiter_list":[{"id":"ou_1","en_name":"Recruiter"}],"job_id_list":["job-1"],"count_data":{"offer_count":1}}]}}"#;
+    let job_requirements = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"jr-1","short_code":"JR-1","recruiter_list":[{"id":"ou_1","en_name":"Recruiter"}],"customized_data_list":[{"object_id":"field-1","value":{"option":{"key":"option-1","name":{"en_us":"Engineering"}},"time_range":{"start_time":"1710000000","end_time":"1710003600"}}}],"job_id_list":["job-1"],"count_data":{"offer_count":1}}]}}"#;
     let locations = r#"{"code":0,"msg":"ok","data":{"items":[{"city":{"city_code":"CT_1","city_name_info":{"zh_name":"成都"}}}],"has_more":false,"page_token":"location-next"}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, publish_records),
@@ -92,6 +92,18 @@ async fn hire_job_utility_read_responses_deserialize_and_send_filters() {
         Some("Recruiter")
     );
     assert_eq!(job_requirement.job_id_list.as_ref().unwrap()[0], "job-1");
+    assert_eq!(
+        job_requirement.customized_data_list.as_ref().unwrap()[0]
+            .value
+            .as_ref()
+            .unwrap()
+            .option
+            .as_ref()
+            .unwrap()
+            .key
+            .as_deref(),
+        Some("option-1")
+    );
     assert_eq!(
         job_requirement
             .count_data
