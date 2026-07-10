@@ -17,6 +17,9 @@
   mutation helpers.
 - Completed Go-backed code-only response wrappers across Hire v1 ECO account,
   background-check, package, exam, and exam-paper mutation helpers.
+- Completed typed Hire v1 application-detail response branches for evaluations,
+  interviews, Offer, employee, agency, portal, and referral data, plus intern
+  Offer-status responses.
 
 ## [0.2.1] - 2026-07-09
 

@@ -375,6 +375,9 @@ Selected talent, job requirement, agreement, advertisement, agency, EHR import,
 and Offer-field mutation helpers likewise expose code-only response wrappers.
 ECO account, background-check, package, exam, and exam-paper mutations follow
 the same Go-backed code-only response behavior.
+Application-detail lookups now type evaluation, interview, Offer, employee,
+agency, portal, and referral branches; intern Offer-status responses are also
+structured.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
