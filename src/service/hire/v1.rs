@@ -2512,17 +2512,17 @@ pub struct BackgroundCheckOrder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub feedback_info_list: Option<Vec<serde_json::Value>>,
+    pub feedback_info_list: Option<Vec<BackgroundCheckOrderFeedbackInfo>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub process_info_list: Option<Vec<serde_json::Value>>,
+    pub process_info_list: Option<Vec<BackgroundCheckOrderProcessInfo>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub upload_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub candidate_info: Option<serde_json::Value>,
+    pub candidate_info: Option<UserContactInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub creator_info: Option<serde_json::Value>,
+    pub creator_info: Option<BackgroundCheckOrderCreator>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contactor_info: Option<serde_json::Value>,
+    pub contactor_info: Option<UserContactInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub begin_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2530,13 +2530,13 @@ pub struct BackgroundCheckOrder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub conclusion: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub provider_info: Option<serde_json::Value>,
+    pub provider_info: Option<ProviderIdNameObject>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub custom_field_list: Option<Vec<serde_json::Value>>,
+    pub custom_field_list: Option<Vec<EcoBackgroundCheckCustomFieldData>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub custom_data_list: Option<Vec<serde_json::Value>>,
+    pub custom_data_list: Option<Vec<BackgroundCheckCustomFieldDataValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ext_item_info_list: Option<Vec<serde_json::Value>>,
+    pub ext_item_info_list: Option<Vec<BackgroundCheckItemInfo>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub update_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2545,6 +2545,102 @@ pub struct BackgroundCheckOrder {
     pub location_code: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remark: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BackgroundCheckOrderFeedbackInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub report_preview_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub report_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub report_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BackgroundCheckOrderProcessInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_process: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserContactInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub first_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BackgroundCheckOrderCreator {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ProviderIdNameObject {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EcoBackgroundCheckCustomFieldData {
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
+    pub type_: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<Vec<EcoBackgroundCheckCustomFieldDataOption>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EcoBackgroundCheckCustomFieldDataOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BackgroundCheckCustomFieldDataValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BackgroundCheckItemInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
