@@ -1853,9 +1853,129 @@ pub struct InterviewFeedbackForm {
     #[serde(rename = "type")]
     pub type_: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub score_calculation_config: Option<serde_json::Value>,
+    pub score_calculation_config: Option<ScoreCalculationConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub modules: Option<Vec<serde_json::Value>>,
+    pub modules: Option<Vec<InterviewFeedbackFormModule>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ScoreCalculationConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calculation_mode: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewFeedbackFormModule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
+    pub type_: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimensions: Option<Vec<InterviewFeedbackFormDimension>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewFeedbackFormDimension {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
+    pub type_: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score_dimension_config: Option<ScoreDimensionConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_items: Option<Vec<InterviewDimensionOption>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_not_evident: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability_list: Option<Vec<DimensionAbility>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub related_dimension_config: Option<RelatedDimensionConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_ability_args: Option<Vec<DimensionAbilityArgs>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ScoreDimensionConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score_dimension_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lower_limit_score: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub upper_limit_score: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewDimensionOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score_val: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alias_name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DimensionAbility {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RelatedDimensionConfig {
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
+    pub type_: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub related_dimension_settings: Option<Vec<RelatedDimensionSetting>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RelatedDimensionSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub related_operator_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_option_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DimensionAbilityArgs {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub place_holder: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_place_holder: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1883,7 +2003,17 @@ pub struct InterviewRoundType {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub active_status: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub interview_assessment_template_info: Option<serde_json::Value>,
+    pub interview_assessment_template_info: Option<InterviewRoundTypeAssessmentTemplate>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewRoundTypeAssessmentTemplate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
