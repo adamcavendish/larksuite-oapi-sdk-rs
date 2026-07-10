@@ -401,7 +401,39 @@ pub struct JobCustomizedData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub value: Option<serde_json::Value>,
+    pub value: Option<JobCustomizedValue>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobCustomizedValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option: Option<JobCustomizedOption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_list: Option<Vec<JobCustomizedOption>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_range: Option<JobCustomizedTimeRange>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobCustomizedOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobCustomizedTimeRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -507,7 +539,35 @@ pub struct StageCountInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub stage: Option<serde_json::Value>,
+    pub stage: Option<ApplicationStageInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobStorefront {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<JobDepartmentSimple>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address: Option<CommonAddress>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub manager: Option<JobUserInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobDepartmentSimple {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -527,7 +587,7 @@ pub struct JobDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub job_config: Option<JobConfigResult>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub storefront_list: Option<Vec<serde_json::Value>>,
+    pub storefront_list: Option<Vec<JobStorefront>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tag_list: Option<Vec<JobDetailTag>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2253,7 +2313,63 @@ pub struct OfferApplyFormObjectInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object_type_v2: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub config: Option<serde_json::Value>,
+    pub config: Option<OfferApplyFormObjectConfigInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormObjectConfigInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<Vec<OfferApplyFormConfigOptionInfo>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub formula: Option<OfferApplyFormConfigFormulaInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_display_config: Option<OfferApplyFormObjectDisplayConfigInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormConfigOptionInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormConfigFormulaInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra_map: Option<Vec<OfferApplyFormFormulaExtraMapInfo>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormFormulaExtraMapInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormObjectDisplayConfigInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_condition: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pre_object_config_list: Option<Vec<OfferApplyFormPreObjectConfigInfo>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferApplyFormPreObjectConfigInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -6663,7 +6779,39 @@ pub struct JobRequirementCustomizedDataDto {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub value: Option<serde_json::Value>,
+    pub value: Option<JobRequirementCustomizedValue>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobRequirementCustomizedValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option: Option<JobRequirementCustomizedOption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_list: Option<Vec<JobRequirementCustomizedOption>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_range: Option<JobRequirementCustomizedTimeRange>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobRequirementCustomizedOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobRequirementCustomizedTimeRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
