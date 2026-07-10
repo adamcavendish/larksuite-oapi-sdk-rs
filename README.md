@@ -382,6 +382,8 @@ feedback, referral relationships, and application Offer delivery and address
 leaves are typed as well. Interview feedback-form configuration, including
 modules, dimensions, scoring, abilities, and related-dimension settings, is
 also structured alongside round-type assessment-template metadata.
+Background-check order reads also expose typed report, progress, contact,
+provider, custom-field, and investigation-item data.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
