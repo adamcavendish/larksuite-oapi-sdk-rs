@@ -668,10 +668,10 @@ async fn hire_intern_offer_status_response_deserializes_and_preserves_request() 
 #[tokio::test]
 async fn hire_config_read_models_deserialize_and_send_filters() {
     let job_process = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"process-1","zh_name":"流程","type":1,"stage_list":[{"id":"stage-1","type":4}]}],"has_more":false,"page_token":"p2"}}"#;
-    let job_schema = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"schema-1","scenario_type":2,"name":{"en_us":"Job schema"},"object_list":[{"id":"field-1","name":{"zh_cn":"字段"}}]}],"has_more":false}}"#;
+    let job_schema = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"schema-1","scenario_type":2,"name":{"en_us":"Job schema"},"object_list":[{"id":"module-1","name":{"zh_cn":"模块"},"setting":{"object_type":1,"config":{"options":[{"key":"option-1","name":{"en_us":"Option"},"active_status":1}]}},"children_list":[{"id":"field-1","name":{"zh_cn":"字段"},"parent_id":"module-1","setting":{"object_type":2,"config":{"options":[{"key":"child-option"}]}}}]}]}],"has_more":false}}"#;
     let offer_form = r#"{"code":0,"msg":"ok","data":{"offer_apply_form":{"id":"form-1","name":{"en_us":"Offer Form"},"schema":{"id":"schema-v1","module_list":[{"id":"module-1","object_list":[{"id":"object-1","object_type_v2":"text","config":{"max_length":100}}]}]}}}}"#;
     let offer_template = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"template-1","name":{"zh_cn":"审批"},"department_list":[{"id":"dept-1","name":"研发"}]}],"has_more":false}}"#;
-    let questionnaire = r#"{"code":0,"msg":"ok","data":{"items":[{"questionnaire_id":"q-1","application_id":"app-1","version":3,"questions":[{"id":"question-1"}],"has_answers":true}],"has_more":false}}"#;
+    let questionnaire = r#"{"code":0,"msg":"ok","data":{"items":[{"questionnaire_id":"q-1","application_id":"app-1","version":3,"questions":[{"question_id":"question-1","question_name":"Overall experience","question_en_name":"Overall experience","question_type":4,"is_required":true,"select_option_result_list":[{"option_id":"option-1","option_name":"Good","is_selected":true}],"five_start_scoring_result":{"highest_score_desc":"Great","lowest_score_desc":"Poor","score_result":4.5},"description_result":"Helpful"}],"has_answers":true}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, job_process),
         http_response(200, job_schema),
@@ -738,14 +738,34 @@ async fn hire_config_read_models_deserialize_and_send_filters() {
             .type_,
         Some(4)
     );
+    let schema = schema_resp.data.unwrap().items.remove(0);
     assert_eq!(
-        schema_resp.data.unwrap().items[0]
-            .object_list
+        schema.object_list.as_ref().unwrap()[0].id.as_deref(),
+        Some("module-1")
+    );
+    assert_eq!(
+        schema.object_list.as_ref().unwrap()[0]
+            .setting
+            .as_ref()
+            .unwrap()
+            .config
+            .as_ref()
+            .unwrap()
+            .options
             .as_ref()
             .unwrap()[0]
-            .id
+            .key
             .as_deref(),
-        Some("field-1")
+        Some("option-1")
+    );
+    assert_eq!(
+        schema.object_list.as_ref().unwrap()[0]
+            .children_list
+            .as_ref()
+            .unwrap()[0]
+            .parent_id
+            .as_deref(),
+        Some("module-1")
     );
     assert_eq!(
         form_resp
@@ -773,9 +793,21 @@ async fn hire_config_read_models_deserialize_and_send_filters() {
             .as_deref(),
         Some("研发")
     );
+    let questionnaire = questionnaire_resp.data.unwrap().items.remove(0);
+    assert_eq!(questionnaire.has_answers, Some(true));
+    let question = &questionnaire.questions.as_ref().unwrap()[0];
+    assert_eq!(question.question_id.as_deref(), Some("question-1"));
     assert_eq!(
-        questionnaire_resp.data.unwrap().items[0].has_answers,
+        question.select_option_result_list.as_ref().unwrap()[0].is_selected,
         Some(true)
+    );
+    assert_eq!(
+        question
+            .five_start_scoring_result
+            .as_ref()
+            .unwrap()
+            .score_result,
+        Some(4.5)
     );
 
     let request = requests.lock().unwrap().join("\n");
