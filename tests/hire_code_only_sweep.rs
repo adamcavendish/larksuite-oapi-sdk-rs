@@ -14,7 +14,7 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
         .unwrap()
 }
 
-fn empty_responses(count: usize) -> Vec<common::MockResponse> {
+fn empty_responses(count: usize) -> Vec<String> {
     (0..count)
         .map(|_| http_response(200, r#"{"code":0,"msg":"ok"}"#))
         .collect()
@@ -37,7 +37,7 @@ async fn hire_agency_and_talent_code_only_sweep_preserves_requests() {
     let block = client
         .hire()
         .talent_blocklist
-        .change(json!({"talent_id": "talent-1"}), &RequestOption::default())
+        .change_talent_block(json!({"talent_id": "talent-1"}), &RequestOption::default())
         .await
         .unwrap();
     let pool = client
