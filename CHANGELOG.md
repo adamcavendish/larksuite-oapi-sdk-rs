@@ -26,6 +26,8 @@
   assessment-template response models.
 - Added typed Hire v1 background-check order reports, progress, contacts,
   provider, custom-field, and investigation-item response models.
+- Added typed Hire v1 role permission scopes and reusable schema, questionnaire,
+  and Offer-schema detail response models.
 
 ## [0.2.1] - 2026-07-09
 
