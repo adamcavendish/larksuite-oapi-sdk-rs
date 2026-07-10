@@ -23,7 +23,7 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
 
 #[tokio::test]
 async fn hire_application_offer_response_deserializes_and_sends_user_id_type() {
-    let offer = r#"{"code":0,"msg":"ok","data":{"offer":{"id":"offer-1","application_id":"application-1","schema_id":"offer-schema-1","offer_status":2,"basic_info":{"offer_type":1,"employee_type":{"id":"employee-type-1","zh_name":"正式"},"contract_period":{"period_type":1,"period":3},"customize_info_list":[{"object_id":"field-1","customize_value":"value-1"}],"common_attachment_id_list":["attachment-1"]},"salary_plan":{"currency":"CNY","basic_salary":"10000","customize_info_list":[{"object_id":"salary-field-1","customize_value":"value-2"}]},"job_info":{"job_id":"job-1","job_name":"Engineer"},"customized_module_list":[{"ID":"module-1","object_list":[{"object_id":"module-field-1","customize_value":"value-3"}]}],"job_requirement_id":"requirement-1","offer_send_record_list":[{"offer_send_record_id":"send-1","operator_user_id":"ou_operator","offer_letter_status":1,"email_info":{"subject":"Offer"}}]}}}"#;
+    let offer = r#"{"code":0,"msg":"ok","data":{"offer":{"id":"offer-1","application_id":"application-1","schema_id":"offer-schema-1","offer_status":2,"basic_info":{"offer_type":1,"employee_type":{"id":"employee-type-1","zh_name":"正式"},"contract_period":{"period_type":1,"period":3},"onboard_address":{"id":"address-1","city":{"en_name":"Shanghai","location_type":3}},"work_address":{"id":"address-2","district":{"zh_name":"徐汇","location_type":4}},"work_location_address_info":{"location_info":{"id":"location-1","en_name":"Shanghai Office"},"address_info":{"id":"location-2","zh_name":"徐汇区"}},"customize_info_list":[{"object_id":"field-1","customize_value":"value-1"}],"common_attachment_id_list":["attachment-1"]},"salary_plan":{"currency":"CNY","basic_salary":"10000","customize_info_list":[{"object_id":"salary-field-1","customize_value":"value-2"}]},"job_info":{"job_id":"job-1","job_name":"Engineer"},"customized_module_list":[{"ID":"module-1","object_list":[{"object_id":"module-field-1","customize_value":"value-3"}]}],"job_requirement_id":"requirement-1","offer_send_record_list":[{"offer_send_record_id":"send-1","operator_user_id":"ou_operator","offer_letter_status":1,"email_info":{"cc_email_list":["cc@example.com"],"receiver_email_list":["candidate@example.com"],"content":"Welcome"},"acceptance_list":[{"operator_type":1,"conclusion":2,"memo":"Accepted","operate_time":"1718959426734"}],"offer_file_list":[{"id":"file-1","file_template_name":"Offer Letter"}],"offer_signature_info":{"id":"signature-1","signature_status":1,"attachment_list":[{"id":"attachment-1","file_name":"Signed Offer.pdf"}]}}]}}}"#;
     let (addr, _handle, requests) =
         mock_server_with_requests(vec![http_response(200, offer)]).await;
 
@@ -77,6 +77,64 @@ async fn hire_application_offer_response_deserializes_and_sends_user_id_type() {
     assert_eq!(
         offer.offer_send_record_list.as_ref().unwrap()[0].offer_letter_status,
         Some(1)
+    );
+    let basic_info = offer.basic_info.as_ref().unwrap();
+    assert_eq!(
+        basic_info
+            .onboard_address
+            .as_ref()
+            .unwrap()
+            .city
+            .as_ref()
+            .unwrap()
+            .en_name
+            .as_deref(),
+        Some("Shanghai")
+    );
+    assert_eq!(
+        basic_info
+            .work_location_address_info
+            .as_ref()
+            .unwrap()
+            .address_info
+            .as_ref()
+            .unwrap()
+            .zh_name
+            .as_deref(),
+        Some("徐汇区")
+    );
+    let send_record = &offer.offer_send_record_list.as_ref().unwrap()[0];
+    assert_eq!(
+        send_record
+            .email_info
+            .as_ref()
+            .unwrap()
+            .receiver_email_list
+            .as_ref()
+            .unwrap()[0],
+        "candidate@example.com"
+    );
+    assert_eq!(
+        send_record.acceptance_list.as_ref().unwrap()[0].conclusion,
+        Some(2)
+    );
+    assert_eq!(
+        send_record.offer_file_list.as_ref().unwrap()[0]
+            .file_template_name
+            .as_deref(),
+        Some("Offer Letter")
+    );
+    assert_eq!(
+        send_record
+            .offer_signature_info
+            .as_ref()
+            .unwrap()
+            .attachment_list
+            .as_ref()
+            .unwrap()[0]
+            .file_name
+            .as_deref(),
+        Some("Signed Offer.pdf")
     );
 
     let request = requests.lock().unwrap().join("\n");
@@ -424,6 +482,153 @@ async fn hire_application_lifecycle_responses_deserialize_and_preserve_requests(
     assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/close "));
     assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/open "));
     assert!(request.contains("termination_type"));
+}
+
+#[tokio::test]
+async fn hire_application_detail_leaf_models_deserialize() {
+    let ability = json!({"id": "ability-1", "name": {"en_us": "Communication"}});
+    let question = json!({
+        "question_type": 1,
+        "title": {"en_us": "Design"},
+        "content": "Detailed answer",
+        "abilities": [ability]
+    });
+    let dimension = json!({
+        "interview_feedback_form_dimension_id": "dimension-1",
+        "dimension_name": {"en_us": "Coding"},
+        "dimension_type": 2,
+        "weight": 0.5,
+        "dimension_option": {"id": "option-1", "name": {"en_us": "Strong"}, "score_val": 5},
+        "dimension_options": [{"id": "option-2", "alias_name": {"en_us": "Excellent"}}],
+        "dimension_score": 5,
+        "recommended_job_level": {
+            "lower_limit_job_level_name": {"en_us": "L4"},
+            "higher_limit_job_level_name": {"en_us": "L5"}
+        },
+        "question_assessments": [question],
+        "ability_assessments": [{"id": "assessment-1", "ability_id": "ability-1", "content": "Strong"}]
+    });
+    let module = json!({
+        "interview_feedback_form_module_id": "module-1",
+        "module_name": {"en_us": "Technical"},
+        "module_type": 1,
+        "module_weight": 0.5,
+        "module_score": 4.5,
+        "dimension_assessments": [dimension]
+    });
+    let record = json!({
+        "id": "record-1",
+        "record_score": {"score": 8.5, "total_score": 10.0},
+        "attachments": [{
+            "file_id": "file-1",
+            "file_name": "feedback.pdf",
+            "content_type": "application/pdf",
+            "create_time": "1710399930151"
+        }],
+        "module_assessments": [module]
+    });
+    let body = json!({
+        "code": 0,
+        "msg": "ok",
+        "data": {
+            "application_detail": {
+                "interview_aggregation": {"interviews": [{"interview_record_list": [record]}]},
+                "referral": {
+                    "recommend_info": {
+                        "specific_relationship": {"relation_with_candidate": 1, "extra": "Former colleague"}
+                    }
+                }
+            }
+        }
+    })
+    .to_string();
+    let (addr, _handle, requests) =
+        mock_server_with_requests(vec![http_response(200, &body)]).await;
+
+    let detail = client_for(addr)
+        .hire()
+        .application
+        .get_detail("application-1", &RequestOption::default())
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .application_detail
+        .unwrap();
+
+    let record = &detail
+        .interview_aggregation
+        .as_ref()
+        .unwrap()
+        .interviews
+        .as_ref()
+        .unwrap()[0]
+        .interview_record_list
+        .as_ref()
+        .unwrap()[0];
+    assert_eq!(record.record_score.as_ref().unwrap().score, Some(8.5));
+    assert_eq!(
+        record.attachments.as_ref().unwrap()[0]
+            .content_type
+            .as_deref(),
+        Some("application/pdf")
+    );
+    let dimension = &record.module_assessments.as_ref().unwrap()[0]
+        .dimension_assessments
+        .as_ref()
+        .unwrap()[0];
+    assert_eq!(
+        dimension.dimension_option.as_ref().unwrap().score_val,
+        Some(5)
+    );
+    assert_eq!(
+        dimension
+            .recommended_job_level
+            .as_ref()
+            .unwrap()
+            .higher_limit_job_level_name
+            .as_ref()
+            .unwrap()
+            .en_us
+            .as_deref(),
+        Some("L5")
+    );
+    assert_eq!(
+        dimension.question_assessments.as_ref().unwrap()[0]
+            .abilities
+            .as_ref()
+            .unwrap()[0]
+            .name
+            .as_ref()
+            .unwrap()
+            .en_us
+            .as_deref(),
+        Some("Communication")
+    );
+    assert_eq!(
+        dimension.ability_assessments.as_ref().unwrap()[0]
+            .content
+            .as_deref(),
+        Some("Strong")
+    );
+    assert_eq!(
+        detail
+            .referral
+            .as_ref()
+            .unwrap()
+            .recommend_info
+            .as_ref()
+            .unwrap()
+            .specific_relationship
+            .as_ref()
+            .unwrap()
+            .extra
+            .as_deref(),
+        Some("Former colleague")
+    );
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/applications/application-1/get_detail "));
 }
 
 #[tokio::test]
