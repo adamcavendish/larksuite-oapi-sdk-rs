@@ -70,9 +70,9 @@ async fn hire_application_interview_list_by_query_smoke() {
 #[tokio::test]
 async fn hire_interview_support_list_by_query_smoke() {
     let interviewer_body = r#"{"code":0,"msg":"ok","data":{"items":[{"user_id":"ou_user_1","verify_status":1}],"page_token":"next-page","has_more":false}}"#;
-    let feedback_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"form-1","version":1,"name":{"en_us":"Default"},"type":1}],"page_token":"next-page","has_more":false}}"#;
+    let feedback_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"form-1","version":1,"name":{"en_us":"Default"},"type":1,"score_calculation_config":{"enabled":true,"calculation_mode":1},"modules":[{"id":"module-1","dimensions":[{"id":"dimension-1","score_dimension_config":{"upper_limit_score":5},"option_items":[{"id":"option-1","score_val":5}],"ability_list":[{"id":"ability-1"}],"related_dimension_config":{"related_dimension_settings":[{"dimension_id":"dimension-2"}]},"dimension_ability_args":[{"ability_id":"ability-1"}]}]}]}],"page_token":"next-page","has_more":false}}"#;
     let schema_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"schema-1","name":"登记表","is_used_as_interview":true}],"page_token":"next-page","has_more":false}}"#;
-    let round_body = r#"{"code":0,"msg":"ok","data":{"active_status":1,"items":[{"id":"round-1","name":{"en_us":"Technical"},"process_type":1}]}}"#;
+    let round_body = r#"{"code":0,"msg":"ok","data":{"active_status":1,"items":[{"id":"round-1","name":{"en_us":"Technical"},"process_type":1,"interview_assessment_template_info":{"id":"form-1","biz_id":"form-biz-1","name":{"en_us":"Assessment"}}}]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, interviewer_body),
         http_response(200, feedback_body),
@@ -101,7 +101,7 @@ async fn hire_interview_support_list_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+    let feedback = client
         .hire()
         .interview_feedback_form
         .list_by_query(
@@ -113,6 +113,7 @@ async fn hire_interview_support_list_by_query_smoke() {
         )
         .await
         .unwrap();
+
     client
         .hire()
         .interview_registration_schema
@@ -124,7 +125,7 @@ async fn hire_interview_support_list_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+    let round = client
         .hire()
         .interview_round_type
         .list_by_query(
@@ -133,6 +134,33 @@ async fn hire_interview_support_list_by_query_smoke() {
         )
         .await
         .unwrap();
+
+    let feedback = &feedback.data.unwrap().items[0];
+    assert_eq!(
+        feedback.score_calculation_config.as_ref().unwrap().enabled,
+        Some(true)
+    );
+    assert_eq!(
+        feedback.modules.as_ref().unwrap()[0]
+            .dimensions
+            .as_ref()
+            .unwrap()[0]
+            .score_dimension_config
+            .as_ref()
+            .unwrap()
+            .upper_limit_score,
+        Some(5)
+    );
+    let round = round.data.unwrap();
+    assert_eq!(
+        round.items[0]
+            .interview_assessment_template_info
+            .as_ref()
+            .unwrap()
+            .biz_id
+            .as_deref(),
+        Some("form-biz-1")
+    );
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/interviewers?"));
