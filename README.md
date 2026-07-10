@@ -379,7 +379,9 @@ Application-detail lookups now type evaluation, interview, Offer, employee,
 agency, portal, and referral branches; intern Offer-status responses are also
 structured. Interview assessment scores, attachments, module and dimension
 feedback, referral relationships, and application Offer delivery and address
-leaves are typed as well.
+leaves are typed as well. Interview feedback-form configuration, including
+modules, dimensions, scoring, abilities, and related-dimension settings, is
+also structured alongside round-type assessment-template metadata.
 
 For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
 resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw

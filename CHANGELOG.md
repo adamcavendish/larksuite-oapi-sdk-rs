@@ -22,6 +22,8 @@
   Offer-status responses.
 - Completed typed Hire v1 application-detail interview assessment, referral
   relationship, and application Offer delivery and address leaf models.
+- Added typed Hire v1 interview feedback-form configuration and round-type
+  assessment-template response models.
 
 ## [0.2.1] - 2026-07-09
 
