@@ -342,8 +342,10 @@ includes read/list coverage for job process and schema config, Offer
 application forms and approval templates, questionnaires, talent tags,
 employees, evaluations, notes, interview records, tripartite agreements, and
 background check orders. Role permissions, common schema settings and children,
-questionnaire answers, and Offer-schema fields now return typed nested data,
-with iterators for the Go-backed paginated lists.
+questionnaire answers, and Offer-schema fields now return typed nested data.
+Job custom fields, storefronts, stage counts, job-requirement custom fields,
+and Offer application-form configuration now do as well, with iterators for
+the Go-backed paginated lists.
 Referral and talent read/search helpers cover referral lookup/search, talent
 object schemas, talent operation logs, and talent pools, including an iterator
 for talent pool search. External Hire read helpers now type external

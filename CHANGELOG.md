@@ -28,6 +28,8 @@
   provider, custom-field, and investigation-item response models.
 - Added typed Hire v1 role permission scopes and reusable schema, questionnaire,
   and Offer-schema detail response models.
+- Added typed Hire v1 job custom-field values, storefronts, stage counts,
+  job-requirement custom fields, and Offer application-form configuration.
 
 ## [0.2.1] - 2026-07-09
 
