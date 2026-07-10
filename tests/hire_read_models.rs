@@ -22,6 +22,69 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
 }
 
 #[tokio::test]
+async fn hire_application_offer_response_deserializes_and_sends_user_id_type() {
+    let offer = r#"{"code":0,"msg":"ok","data":{"offer":{"id":"offer-1","application_id":"application-1","schema_id":"offer-schema-1","offer_status":2,"basic_info":{"offer_type":1,"employee_type":{"id":"employee-type-1","zh_name":"正式"},"contract_period":{"period_type":1,"period":3},"customize_info_list":[{"object_id":"field-1","customize_value":"value-1"}],"common_attachment_id_list":["attachment-1"]},"salary_plan":{"currency":"CNY","basic_salary":"10000","customize_info_list":[{"object_id":"salary-field-1","customize_value":"value-2"}]},"job_info":{"job_id":"job-1","job_name":"Engineer"},"customized_module_list":[{"ID":"module-1","object_list":[{"object_id":"module-field-1","customize_value":"value-3"}]}],"job_requirement_id":"requirement-1","offer_send_record_list":[{"offer_send_record_id":"send-1","operator_user_id":"ou_operator","offer_letter_status":1,"email_info":{"subject":"Offer"}}]}}}"#;
+    let (addr, _handle, requests) =
+        mock_server_with_requests(vec![http_response(200, offer)]).await;
+
+    let client = client_for(addr);
+    let offer = client
+        .hire()
+        .application
+        .offer("application-1", Some("open_id"), &RequestOption::default())
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .offer
+        .unwrap();
+
+    assert_eq!(offer.id.as_deref(), Some("offer-1"));
+    assert_eq!(offer.offer_status, Some(2));
+    assert_eq!(
+        offer
+            .basic_info
+            .as_ref()
+            .unwrap()
+            .contract_period
+            .as_ref()
+            .unwrap()
+            .period,
+        Some(3)
+    );
+    assert_eq!(
+        offer
+            .salary_plan
+            .as_ref()
+            .unwrap()
+            .customize_info_list
+            .as_ref()
+            .unwrap()[0]
+            .object_id
+            .as_deref(),
+        Some("salary-field-1")
+    );
+    assert_eq!(
+        offer.job_info.as_ref().unwrap().job_name.as_deref(),
+        Some("Engineer")
+    );
+    assert_eq!(
+        offer.customized_module_list.as_ref().unwrap()[0]
+            .id
+            .as_deref(),
+        Some("module-1")
+    );
+    assert_eq!(
+        offer.offer_send_record_list.as_ref().unwrap()[0].offer_letter_status,
+        Some(1)
+    );
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/applications/application-1/offer?"));
+    assert!(request.contains("user_id_type=open_id"));
+}
+
+#[tokio::test]
 async fn hire_job_response_models_deserialize_and_preserve_requests() {
     let config = r#"{"code":0,"msg":"ok","data":{"job_config":{"id":"job-1","offer_apply_schema":{"id":"offer-schema-1","name":{"en_us":"Offer"}},"interview_round_list":[{"round":1,"interviewer_list":[{"id":"ou_interviewer"}]}],"interview_registration":{"schema_id":"interview-schema-1","name":"Interview"},"interview_round_type_list":[{"assessment_round":{"id":"round-type-1"}}],"interview_appointment_config":{"enable_interview_appointment_by_interviewer":true,"config":{"interview_type":1,"cc":["ou_cc"]}}}}}"#;
     let combined_create = r#"{"code":0,"msg":"ok","data":{"default_job_post":{"id":"post-1"},"job":{"id":"job-1","title":"Engineer"},"job_manager":{"id":"manager-1","recruiter_id":"ou_recruiter"},"interview_registration_schema_info":{"schema_id":"interview-schema-1","name":"Interview"},"target_major_list":[{"id":"major-1","zh_name":"Computer Science","en_name":"Computer Science"}]}}"#;
