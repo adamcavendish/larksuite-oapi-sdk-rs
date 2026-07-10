@@ -7880,7 +7880,7 @@ impl_resp_v2!(ListTripartiteAgreementResp, ListTripartiteAgreementRespData);
 impl_resp_v2!(PublishAdvertisementResp, ());
 impl_resp_v2!(BatchQueryAgencyResp, BatchQueryAgencyRespData);
 impl_resp_v2!(GetAgencyAccountResp, GetAgencyAccountRespData);
-impl_resp_v2!(OperateAgencyAccountResp, serde_json::Value);
+impl_resp_v2!(OperateAgencyAccountResp, ());
 impl_resp_v2!(ProtectAgencyResp, ());
 impl_resp_v2!(ProtectSearchAgencyResp, ProtectSearchAgencyRespData);
 impl_resp_v2!(QueryAgencyResp, QueryAgencyRespData);
@@ -7903,25 +7903,19 @@ impl_resp_v2!(
     SearchDiversityInclusionResp,
     SearchDiversityInclusionRespData
 );
-impl_resp_v2!(BatchDeleteEcoAccountCustomFieldResp, serde_json::Value);
-impl_resp_v2!(BatchUpdateEcoAccountCustomFieldResp, serde_json::Value);
-impl_resp_v2!(CancelEcoBackgroundCheckResp, serde_json::Value);
-impl_resp_v2!(UpdateProgressEcoBackgroundCheckResp, serde_json::Value);
-impl_resp_v2!(UpdateResultEcoBackgroundCheckResp, serde_json::Value);
-impl_resp_v2!(
-    BatchDeleteEcoBackgroundCheckCustomFieldResp,
-    serde_json::Value
-);
-impl_resp_v2!(
-    BatchUpdateEcoBackgroundCheckCustomFieldResp,
-    serde_json::Value
-);
-impl_resp_v2!(BatchDeleteEcoBackgroundCheckPackageResp, serde_json::Value);
-impl_resp_v2!(BatchUpdateEcoBackgroundCheckPackageResp, serde_json::Value);
-impl_resp_v2!(LoginInfoEcoExamResp, serde_json::Value);
-impl_resp_v2!(UpdateResultEcoExamResp, serde_json::Value);
-impl_resp_v2!(BatchDeleteEcoExamPaperResp, serde_json::Value);
-impl_resp_v2!(BatchUpdateEcoExamPaperResp, serde_json::Value);
+impl_resp_v2!(BatchDeleteEcoAccountCustomFieldResp, ());
+impl_resp_v2!(BatchUpdateEcoAccountCustomFieldResp, ());
+impl_resp_v2!(CancelEcoBackgroundCheckResp, ());
+impl_resp_v2!(UpdateProgressEcoBackgroundCheckResp, ());
+impl_resp_v2!(UpdateResultEcoBackgroundCheckResp, ());
+impl_resp_v2!(BatchDeleteEcoBackgroundCheckCustomFieldResp, ());
+impl_resp_v2!(BatchUpdateEcoBackgroundCheckCustomFieldResp, ());
+impl_resp_v2!(BatchDeleteEcoBackgroundCheckPackageResp, ());
+impl_resp_v2!(BatchUpdateEcoBackgroundCheckPackageResp, ());
+impl_resp_v2!(LoginInfoEcoExamResp, ());
+impl_resp_v2!(UpdateResultEcoExamResp, ());
+impl_resp_v2!(BatchDeleteEcoExamPaperResp, ());
+impl_resp_v2!(BatchUpdateEcoExamPaperResp, ());
 impl_resp_v2!(
     BatchQueryExternalBackgroundCheckResp,
     BatchQueryExternalBackgroundCheckRespData
@@ -7967,13 +7961,13 @@ impl_resp_v2!(CombinedUpdateTalentResp, CombinedUpdateTalentRespData);
 impl_resp_v2!(OnboardStatusTalentResp, ());
 impl_resp_v2!(RemoveToFolderTalentResp, RemoveToFolderTalentRespData);
 impl_resp_v2!(TagTalentResp, ());
-impl_resp_v2!(ChangeTalentBlockResp, serde_json::Value);
+impl_resp_v2!(ChangeTalentBlockResp, ());
 impl_resp_v2!(QueryTalentObjectResp, QueryTalentObjectRespData);
 impl_resp_v2!(
     SearchTalentOperationLogResp,
     SearchTalentOperationLogRespData
 );
-impl_resp_v2!(BatchChangeTalentPoolResp, serde_json::Value);
+impl_resp_v2!(BatchChangeTalentPoolResp, ());
 impl_resp_v2!(MoveTalentTalentPoolResp, MoveTalentTalentPoolRespData);
 impl_resp_v2!(SearchTalentPoolResp, SearchTalentPoolRespData);
 impl_resp_v2!(SearchTestResp, SearchTestRespData);
@@ -8071,10 +8065,10 @@ impl_resp_v2!(CreateWebsiteSiteUserResp, CreateWebsiteSiteUserRespData);
 
 impl_resp_v2!(GetAgencyResp, GetAgencyRespData);
 impl_resp_v2!(CreateAttachmentResp, CreateAttachmentRespData);
-impl_resp_v2!(CreateEcoAccountCustomFieldResp, serde_json::Value);
-impl_resp_v2!(CreateEcoBackgroundCheckCustomFieldResp, serde_json::Value);
-impl_resp_v2!(CreateEcoBackgroundCheckPackageResp, serde_json::Value);
-impl_resp_v2!(CreateEcoExamPaperResp, serde_json::Value);
+impl_resp_v2!(CreateEcoAccountCustomFieldResp, ());
+impl_resp_v2!(CreateEcoBackgroundCheckCustomFieldResp, ());
+impl_resp_v2!(CreateEcoBackgroundCheckPackageResp, ());
+impl_resp_v2!(CreateEcoExamPaperResp, ());
 impl_resp_v2!(CreateJobRequirementResp, CreateJobRequirementRespData);
 impl_resp_v2!(DeleteJobRequirementResp, ());
 impl_resp_v2!(UpdateJobRequirementResp, ());
@@ -10234,7 +10228,7 @@ impl AgencyResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, OperateAgencyAccountResp>()
+        .send_v2_response::<(), OperateAgencyAccountResp>()
         .await
     }
 
@@ -10430,7 +10424,7 @@ impl EcoAccountCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateEcoAccountCustomFieldResp>()
+        .send_v2_response::<(), CreateEcoAccountCustomFieldResp>()
         .await
     }
 
@@ -10447,7 +10441,7 @@ impl EcoAccountCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchDeleteEcoAccountCustomFieldResp>()
+        .send_v2_response::<(), BatchDeleteEcoAccountCustomFieldResp>()
         .await
     }
 
@@ -10464,7 +10458,7 @@ impl EcoAccountCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateEcoAccountCustomFieldResp>()
+        .send_v2_response::<(), BatchUpdateEcoAccountCustomFieldResp>()
         .await
     }
 }
@@ -10489,7 +10483,7 @@ impl EcoBackgroundCheckResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CancelEcoBackgroundCheckResp>()
+        .send_v2_response::<(), CancelEcoBackgroundCheckResp>()
         .await
     }
 
@@ -10506,7 +10500,7 @@ impl EcoBackgroundCheckResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateProgressEcoBackgroundCheckResp>()
+        .send_v2_response::<(), UpdateProgressEcoBackgroundCheckResp>()
         .await
     }
 
@@ -10523,7 +10517,7 @@ impl EcoBackgroundCheckResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateResultEcoBackgroundCheckResp>()
+        .send_v2_response::<(), UpdateResultEcoBackgroundCheckResp>()
         .await
     }
 }
@@ -10548,7 +10542,7 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateEcoBackgroundCheckCustomFieldResp>()
+        .send_v2_response::<(), CreateEcoBackgroundCheckCustomFieldResp>()
         .await
     }
 
@@ -10565,7 +10559,7 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchDeleteEcoBackgroundCheckCustomFieldResp>()
+        .send_v2_response::<(), BatchDeleteEcoBackgroundCheckCustomFieldResp>()
         .await
     }
 
@@ -10582,7 +10576,7 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateEcoBackgroundCheckCustomFieldResp>()
+        .send_v2_response::<(), BatchUpdateEcoBackgroundCheckCustomFieldResp>()
         .await
     }
 }
@@ -10607,7 +10601,7 @@ impl EcoBackgroundCheckPackageResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateEcoBackgroundCheckPackageResp>()
+        .send_v2_response::<(), CreateEcoBackgroundCheckPackageResp>()
         .await
     }
 
@@ -10624,7 +10618,7 @@ impl EcoBackgroundCheckPackageResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchDeleteEcoBackgroundCheckPackageResp>()
+        .send_v2_response::<(), BatchDeleteEcoBackgroundCheckPackageResp>()
         .await
     }
 
@@ -10641,7 +10635,7 @@ impl EcoBackgroundCheckPackageResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateEcoBackgroundCheckPackageResp>()
+        .send_v2_response::<(), BatchUpdateEcoBackgroundCheckPackageResp>()
         .await
     }
 }
@@ -10668,7 +10662,7 @@ impl EcoExamResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, LoginInfoEcoExamResp>()
+        .send_v2_response::<(), LoginInfoEcoExamResp>()
         .await
     }
 
@@ -10687,7 +10681,7 @@ impl EcoExamResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateResultEcoExamResp>()
+        .send_v2_response::<(), UpdateResultEcoExamResp>()
         .await
     }
 }
@@ -10712,7 +10706,7 @@ impl EcoExamPaperResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateEcoExamPaperResp>()
+        .send_v2_response::<(), CreateEcoExamPaperResp>()
         .await
     }
 
@@ -10729,7 +10723,7 @@ impl EcoExamPaperResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchDeleteEcoExamPaperResp>()
+        .send_v2_response::<(), BatchDeleteEcoExamPaperResp>()
         .await
     }
 
@@ -10746,7 +10740,7 @@ impl EcoExamPaperResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateEcoExamPaperResp>()
+        .send_v2_response::<(), BatchUpdateEcoExamPaperResp>()
         .await
     }
 }
@@ -11031,7 +11025,7 @@ impl TalentBlocklistResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ChangeTalentBlockResp>()
+        .send_v2_response::<(), ChangeTalentBlockResp>()
         .await
     }
 }
@@ -11116,7 +11110,7 @@ impl TalentPoolResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchChangeTalentPoolResp>()
+        .send_v2_response::<(), BatchChangeTalentPoolResp>()
         .await
     }
 
