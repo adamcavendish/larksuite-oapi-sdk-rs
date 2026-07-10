@@ -92,6 +92,92 @@ async fn hire_config_read_model_query_smoke() {
 }
 
 #[tokio::test]
+async fn hire_schema_response_models_smoke() {
+    let job_schema = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"job-schema-1","object_list":[{"id":"module-1","setting":{"object_type":1,"config":{"options":[{"key":"option-1"}]}},"children_list":[{"id":"field-1","parent_id":"module-1"}]}]}],"has_more":false}}"#;
+    let questionnaire = r#"{"code":0,"msg":"ok","data":{"items":[{"questionnaire_id":"questionnaire-1","questions":[{"question_id":"question-1","select_option_result_list":[{"option_id":"option-1","is_selected":true}],"five_start_scoring_result":{"score_result":4.5}}]}],"has_more":false}}"#;
+    let offer_schema = r#"{"code":0,"msg":"ok","data":{"offer_schema":{"id":"offer-schema-1","object_list":[{"id":"field-1","name":{"en_us":"Department"},"type":"select","option_list":[{"name":{"en_us":"Engineering"},"index":1,"active_status":1}]}]}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, job_schema),
+        http_response(200, questionnaire),
+        http_response(200, offer_schema),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let job_schema = client
+        .hire()
+        .job_schema
+        .list_by_query(
+            &ListHireJobSchemaQuery::new().page(PageQuery::new().page_size(20)),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .items
+        .remove(0);
+    let questionnaire = client
+        .hire()
+        .questionnaire
+        .list_by_query(
+            &ListHireQuestionnaireQuery::new().page(PageQuery::new().page_size(20)),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .items
+        .remove(0);
+    let offer_schema = client
+        .hire()
+        .offer_schema
+        .get("offer-schema-1", &RequestOption::default())
+        .await
+        .unwrap()
+        .data
+        .unwrap()
+        .offer_schema
+        .unwrap();
+
+    assert_eq!(
+        job_schema.object_list.as_ref().unwrap()[0]
+            .children_list
+            .as_ref()
+            .unwrap()[0]
+            .parent_id
+            .as_deref(),
+        Some("module-1")
+    );
+    assert_eq!(
+        questionnaire.questions.as_ref().unwrap()[0]
+            .five_start_scoring_result
+            .as_ref()
+            .unwrap()
+            .score_result,
+        Some(4.5)
+    );
+    assert_eq!(
+        offer_schema.object_list.as_ref().unwrap()[0]
+            .option_list
+            .as_ref()
+            .unwrap()[0]
+            .name
+            .as_ref()
+            .unwrap()
+            .en_us
+            .as_deref(),
+        Some("Engineering")
+    );
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/job_schemas?"));
+    assert!(request.contains("GET /open-apis/hire/v1/questionnaires?"));
+    assert!(request.contains("GET /open-apis/hire/v1/offer_schemas/offer-schema-1 "));
+}
+
+#[tokio::test]
 async fn hire_activity_read_model_query_smoke() {
     let paged_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"item-1"}],"page_token":"next-page","has_more":false}}"#;
     let employee_body = r#"{"code":0,"msg":"ok","data":{"employee":{"id":"emp-1"}}}"#;
