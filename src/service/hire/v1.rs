@@ -688,25 +688,343 @@ pub struct ApplicationDetailInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub talent: Option<TalentBasicInfoV2>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub evaluations: Option<Vec<serde_json::Value>>,
+    pub evaluations: Option<Vec<Evaluation>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub interview_aggregation: Option<serde_json::Value>,
+    pub interview_aggregation: Option<InterviewAggregation>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub offer: Option<serde_json::Value>,
+    pub offer: Option<OfferInfoV2>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub employee: Option<serde_json::Value>,
+    pub employee: Option<EmployeeV2>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub agency: Option<serde_json::Value>,
+    pub agency: Option<AgencyInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub portal: Option<serde_json::Value>,
+    pub portal: Option<ApplicationDetailPortalInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub referral: Option<serde_json::Value>,
+    pub referral: Option<ReferralInfoV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetDetailApplicationRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub application_detail: Option<ApplicationDetailInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BasicUserInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BasicDepartmentInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BaseAddressV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub district: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country: Option<CodeNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewRecordV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feedback_form_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub commit_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub submit_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub record_score: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interviewer: Option<BasicUserInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachments: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub module_assessments: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewMeetingRoom {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub building_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserved_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub floor_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewExtendV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub begin_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub round: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_record_list: Option<Vec<InterviewRecordV2>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feedback_submit_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_round_summary: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_arrangement_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_time_zone: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_user: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address: Option<BaseAddressV2>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub arrangement_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub arrangement_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub arrangement_appointment_kind: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_room_list: Option<Vec<InterviewMeetingRoom>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_round_type: Option<IdNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewAggregation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interviews: Option<Vec<InterviewExtendV2>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferAttachmentInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub common_attachment_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferBasicInfoV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leader: Option<BasicUserInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<BasicDepartmentInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub company_main_body: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_requirement_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_month: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_period: Option<ContractPeriodInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner: Option<BasicUserInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_address: Option<BaseAddressV2>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_address: Option<BaseAddressV2>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_list: Option<Vec<OfferAttachmentInfo>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customize_info_list: Option<Vec<ApplicationOfferCustomValue>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferSalaryInfoV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub salary_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_salary_percentage: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub award_salary_multiple: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_shares: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quarterly_bonus: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub half_year_bonus: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_annual_cash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customize_info_list: Option<Vec<ApplicationOfferCustomValue>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OfferInfoV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_basic: Option<OfferBasicInfoV2>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_salary: Option<OfferSalaryInfoV2>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EmployeeV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conversion_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_conversion_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actual_conversion_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overboard_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overboard_note: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_city_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leader_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_requirement_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencyBasicInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hunter_user_name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hunter_company_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReportCustomData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgencyInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub basic_info: Option<AgencyBasicInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment_info: Option<Vec<ReportCustomData>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub salary_info: Option<Vec<ReportCustomData>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CampusVolunteerInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub volunteer_seq: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationDetailPortalInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub campus_volunteer_info: Option<CampusVolunteerInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InternOfferOnboardingInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actual_onboarding_date: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InternOfferOffboardingInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actual_offboarding_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notes: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InternOfferStatusRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboarding_info: Option<InternOfferOnboardingInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_info: Option<InternOfferOffboardingInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1654,7 +1972,7 @@ pub struct ReferralBasicInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub referral_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_info: Option<serde_json::Value>,
+    pub user_info: Option<BasicUserInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub create_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -7436,7 +7754,7 @@ impl<'a> OfferResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, InternOfferStatusResp>()
+        .send_v2_response::<InternOfferStatusRespData, InternOfferStatusResp>()
         .await
     }
 }
@@ -7938,7 +8256,7 @@ impl_resp_v2!(BatchUpdateJobManagerResp, BatchUpdateJobManagerRespData);
 impl_resp_v2!(SearchJobPublishRecordResp, SearchJobPublishRecordRespData);
 impl_resp_v2!(ListByIdJobRequirementResp, ListByIdJobRequirementRespData);
 impl_resp_v2!(QueryLocationResp, QueryLocationRespData);
-impl_resp_v2!(InternOfferStatusResp, serde_json::Value);
+impl_resp_v2!(InternOfferStatusResp, InternOfferStatusRespData);
 impl_resp_v2!(SearchReferralResp, SearchReferralRespData);
 impl_resp_v2!(
     DeactivateReferralAccountResp,
