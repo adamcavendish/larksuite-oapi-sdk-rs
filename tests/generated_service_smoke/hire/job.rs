@@ -104,3 +104,35 @@ async fn hire_job_get_detail_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/jobs/job-1/get_detail "));
 }
+
+#[tokio::test]
+async fn hire_job_lifecycle_smoke() {
+    let empty = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) =
+        mock_server_with_requests(vec![http_response(200, empty), http_response(200, empty)]).await;
+
+    let client = client_for(addr);
+    let close = client
+        .hire()
+        .job
+        .close(
+            "job-1",
+            serde_json::json!({"termination_type": 1}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let open = client
+        .hire()
+        .job
+        .open("job-1", serde_json::json!({}), &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(close.success());
+    assert!(open.success());
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/close "));
+    assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/open "));
+}
