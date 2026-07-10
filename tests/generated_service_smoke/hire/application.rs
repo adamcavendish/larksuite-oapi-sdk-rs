@@ -131,3 +131,59 @@ async fn hire_application_offer_smoke() {
     assert!(request.contains("GET /open-apis/hire/v1/applications/app-1/offer?"));
     assert!(request.contains("user_id_type=open_id"));
 }
+
+#[tokio::test]
+async fn hire_application_lifecycle_smoke() {
+    let detail = r#"{"code":0,"msg":"ok","data":{"application_detail":{"basic_info":{"id":"app-1","stage":{"id":"stage-1","type":2}},"job":{"id":"job-1","name":"Engineer"},"talent":{"id":"talent-1","name":"Taylor"}}}}"#;
+    let empty = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, detail),
+        http_response(200, empty),
+        http_response(200, empty),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let detail = client
+        .hire()
+        .application
+        .get_detail("app-1", &RequestOption::default())
+        .await
+        .unwrap();
+    let cancel_onboard = client
+        .hire()
+        .application
+        .cancel_onboard(
+            "app-1",
+            serde_json::json!({"termination_type": 1}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let recover = client
+        .hire()
+        .application
+        .recover("app-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert_eq!(
+        detail
+            .data
+            .unwrap()
+            .application_detail
+            .unwrap()
+            .job
+            .unwrap()
+            .name
+            .as_deref(),
+        Some("Engineer")
+    );
+    assert!(cancel_onboard.success());
+    assert!(recover.success());
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/hire/v1/applications/app-1/get_detail "));
+    assert!(request.contains("POST /open-apis/hire/v1/applications/app-1/cancel_onboard "));
+    assert!(request.contains("POST /open-apis/hire/v1/applications/app-1/recover "));
+}
