@@ -541,6 +541,175 @@ pub struct GetDetailJobRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationStageInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationResumeSource {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resume_source_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationWebsiteChannel {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub channel_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub channel_name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationWebsiteResumeSource {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub website_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub website_name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub channel: Option<ApplicationWebsiteChannel>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationStageTime {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enter_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exit_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationTerminationReason {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub children: Option<Vec<JobDetailIdName>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationDetailBasicInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage: Option<ApplicationStageInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub delivery_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resume_source_info: Option<ApplicationResumeSource>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub website_resume_source: Option<ApplicationWebsiteResumeSource>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_attachment_resume_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_time_list: Option<Vec<ApplicationStageTime>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_preferred_city_list: Option<Vec<CodeNameObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub termination_reason: Option<ApplicationTerminationReason>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub terminator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobBasicInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub requirement: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recruitment_type: Option<JobDetailStatusInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<JobDetailIdName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city_list: Option<CodeNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentBasicInfoV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplicationDetailInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub basic_info: Option<ApplicationDetailBasicInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job: Option<JobBasicInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent: Option<TalentBasicInfoV2>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub evaluations: Option<Vec<serde_json::Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_aggregation: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agency: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub portal: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub referral: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetDetailApplicationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_detail: Option<ApplicationDetailInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TalentBatchInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub talent_id: Option<String>,
@@ -6073,7 +6242,7 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CloseJobResp>()
+        .send_v2_response::<(), CloseJobResp>()
         .await
     }
 
@@ -6162,7 +6331,7 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, OpenJobResp>()
+        .send_v2_response::<(), OpenJobResp>()
         .await
     }
 
@@ -6759,7 +6928,7 @@ impl<'a> ApplicationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CancelOnboardApplicationResp>()
+        .send_v2_response::<(), CancelOnboardApplicationResp>()
         .await
     }
 
@@ -6776,7 +6945,7 @@ impl<'a> ApplicationResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetDetailApplicationResp>()
+        .send_v2_response::<GetDetailApplicationRespData, GetDetailApplicationResp>()
         .await
     }
 
@@ -6793,7 +6962,7 @@ impl<'a> ApplicationResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, RecoverApplicationResp>()
+        .send_v2_response::<(), RecoverApplicationResp>()
         .await
     }
 
@@ -7715,9 +7884,9 @@ impl_resp_v2!(OperateAgencyAccountResp, serde_json::Value);
 impl_resp_v2!(ProtectAgencyResp, serde_json::Value);
 impl_resp_v2!(ProtectSearchAgencyResp, ProtectSearchAgencyRespData);
 impl_resp_v2!(QueryAgencyResp, QueryAgencyRespData);
-impl_resp_v2!(CancelOnboardApplicationResp, serde_json::Value);
-impl_resp_v2!(GetDetailApplicationResp, serde_json::Value);
-impl_resp_v2!(RecoverApplicationResp, serde_json::Value);
+impl_resp_v2!(CancelOnboardApplicationResp, ());
+impl_resp_v2!(GetDetailApplicationResp, GetDetailApplicationRespData);
+impl_resp_v2!(RecoverApplicationResp, ());
 impl_resp_v2!(
     TransferOnboardApplicationResp,
     TransferOnboardApplicationRespData
@@ -7763,12 +7932,12 @@ impl_resp_v2!(
 );
 impl_resp_v2!(BatchQueryExternalOfferResp, BatchQueryExternalOfferRespData);
 impl_resp_v2!(GetByTalentInterviewResp, GetByTalentInterviewRespData);
-impl_resp_v2!(CloseJobResp, serde_json::Value);
+impl_resp_v2!(CloseJobResp, ());
 impl_resp_v2!(CombinedCreateJobResp, CombinedCreateJobRespData);
 impl_resp_v2!(CombinedUpdateJobResp, CombinedUpdateJobRespData);
 impl_resp_v2!(ConfigJobResp, ConfigJobRespData);
 impl_resp_v2!(GetDetailJobResp, GetDetailJobRespData);
-impl_resp_v2!(OpenJobResp, serde_json::Value);
+impl_resp_v2!(OpenJobResp, ());
 impl_resp_v2!(RecruiterJobResp, RecruiterJobRespData);
 impl_resp_v2!(UpdateConfigJobResp, UpdateConfigJobRespData);
 impl_resp_v2!(BatchUpdateJobManagerResp, BatchUpdateJobManagerRespData);
