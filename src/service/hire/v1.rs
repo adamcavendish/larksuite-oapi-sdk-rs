@@ -6634,7 +6634,7 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, OnboardStatusTalentResp>()
+        .send_v2_response::<(), OnboardStatusTalentResp>()
         .await
     }
 
@@ -6670,7 +6670,7 @@ impl<'a> TalentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, TagTalentResp>()
+        .send_v2_response::<(), TagTalentResp>()
         .await
     }
 }
@@ -7637,7 +7637,7 @@ impl<'a> JobRequirementResource<'a> {
         .query("user_id_type", user_id_type)
         .query("department_id_type", department_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateJobRequirementResp>()
+        .send_v2_response::<(), UpdateJobRequirementResp>()
         .await
     }
 
@@ -7871,17 +7871,17 @@ impl_resp_v2!(
     CreateTripartiteAgreementResp,
     CreateTripartiteAgreementRespData
 );
-impl_resp_v2!(UpdateTripartiteAgreementResp, serde_json::Value);
+impl_resp_v2!(UpdateTripartiteAgreementResp, ());
 impl_resp_v2!(DeleteTripartiteAgreementResp, ());
 impl_resp_v2!(ListTripartiteAgreementResp, ListTripartiteAgreementRespData);
 
 // ── New response types for missing methods ──
 
-impl_resp_v2!(PublishAdvertisementResp, serde_json::Value);
+impl_resp_v2!(PublishAdvertisementResp, ());
 impl_resp_v2!(BatchQueryAgencyResp, BatchQueryAgencyRespData);
 impl_resp_v2!(GetAgencyAccountResp, GetAgencyAccountRespData);
 impl_resp_v2!(OperateAgencyAccountResp, serde_json::Value);
-impl_resp_v2!(ProtectAgencyResp, serde_json::Value);
+impl_resp_v2!(ProtectAgencyResp, ());
 impl_resp_v2!(ProtectSearchAgencyResp, ProtectSearchAgencyRespData);
 impl_resp_v2!(QueryAgencyResp, QueryAgencyRespData);
 impl_resp_v2!(CancelOnboardApplicationResp, ());
@@ -7964,9 +7964,9 @@ impl_resp_v2!(AddToFolderTalentResp, AddToFolderTalentRespData);
 impl_resp_v2!(BatchGetIdTalentResp, BatchGetIdTalentRespData);
 impl_resp_v2!(CombinedCreateTalentResp, CombinedCreateTalentRespData);
 impl_resp_v2!(CombinedUpdateTalentResp, CombinedUpdateTalentRespData);
-impl_resp_v2!(OnboardStatusTalentResp, serde_json::Value);
+impl_resp_v2!(OnboardStatusTalentResp, ());
 impl_resp_v2!(RemoveToFolderTalentResp, RemoveToFolderTalentRespData);
-impl_resp_v2!(TagTalentResp, serde_json::Value);
+impl_resp_v2!(TagTalentResp, ());
 impl_resp_v2!(ChangeTalentBlockResp, serde_json::Value);
 impl_resp_v2!(QueryTalentObjectResp, QueryTalentObjectRespData);
 impl_resp_v2!(
@@ -7994,7 +7994,7 @@ impl_resp_v2!(
     ListApplicationInterviewResp2,
     ListApplicationInterviewRespData
 );
-impl_resp_v2!(PatchEhrImportTaskResp, serde_json::Value);
+impl_resp_v2!(PatchEhrImportTaskResp, ());
 impl_resp_v2!(ListEvaluationTaskResp, ListEvaluationTaskRespData);
 impl_resp_v2!(CreateExamResp, CreateExamRespData);
 impl_resp_v2!(ListExamMarkingTaskResp, ListExamMarkingTaskRespData);
@@ -8041,7 +8041,7 @@ impl_resp_v2!(
     ListOfferApprovalTemplateResp,
     ListOfferApprovalTemplateRespData
 );
-impl_resp_v2!(UpdateOfferCustomFieldResp, serde_json::Value);
+impl_resp_v2!(UpdateOfferCustomFieldResp, ());
 impl_resp_v2!(ListPortalApplySchemaResp, ListPortalApplySchemaRespData);
 impl_resp_v2!(
     GetReferralWebsiteJobPostResp,
@@ -8077,7 +8077,7 @@ impl_resp_v2!(CreateEcoBackgroundCheckPackageResp, serde_json::Value);
 impl_resp_v2!(CreateEcoExamPaperResp, serde_json::Value);
 impl_resp_v2!(CreateJobRequirementResp, CreateJobRequirementRespData);
 impl_resp_v2!(DeleteJobRequirementResp, ());
-impl_resp_v2!(UpdateJobRequirementResp, serde_json::Value);
+impl_resp_v2!(UpdateJobRequirementResp, ());
 impl_resp_v2!(CreateReferralAccountResp, CreateReferralAccountRespData);
 
 // ── Employee resource ──
@@ -10006,7 +10006,7 @@ impl TripartiteAgreementResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateTripartiteAgreementResp>()
+        .send_v2_response::<(), UpdateTripartiteAgreementResp>()
         .await
     }
 }
@@ -10033,7 +10033,7 @@ impl AdvertisementResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PublishAdvertisementResp>()
+        .send_v2_response::<(), PublishAdvertisementResp>()
         .await
     }
 }
@@ -10251,7 +10251,7 @@ impl AgencyResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ProtectAgencyResp>()
+        .send_v2_response::<(), ProtectAgencyResp>()
         .await
     }
 
@@ -11454,7 +11454,7 @@ impl EhrImportTaskResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchEhrImportTaskResp>()
+        .send_v2_response::<(), PatchEhrImportTaskResp>()
         .await
     }
 }
@@ -12568,7 +12568,7 @@ impl OfferCustomFieldResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateOfferCustomFieldResp>()
+        .send_v2_response::<(), UpdateOfferCustomFieldResp>()
         .await
     }
 }
