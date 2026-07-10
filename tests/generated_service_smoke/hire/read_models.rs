@@ -167,8 +167,7 @@ async fn hire_activity_read_model_query_smoke() {
 #[tokio::test]
 async fn hire_agreement_read_model_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"agreement-1","state":1}],"page_token":"next-page","has_more":false}}"#;
-    let background_body =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"order_id":"order-1"}],"has_more":false}}"#;
+    let background_body = r#"{"code":0,"msg":"ok","data":{"items":[{"order_id":"order-1","feedback_info_list":[{"id":"report-1","report_name":"Background report"}],"process_info_list":[{"process":"arranged"}],"candidate_info":{"name":"Ada"},"creator_info":{"user_id":"ou_creator"},"contactor_info":{"name":"Grace"},"provider_info":{"provider_id":"provider-1","provider_name":{"en_us":"Provider"}},"custom_field_list":[{"type":"select","key":"resume","options":[{"key":"A"}]}],"custom_data_list":[{"key":"resume","value":"A"}],"ext_item_info_list":[{"id":"item-1","name":"Identity check"}]}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, body),
         http_response(200, background_body),
@@ -189,7 +188,8 @@ async fn hire_agreement_read_model_query_smoke() {
         )
         .await
         .unwrap();
-    hire.background_check_order
+    let background = hire
+        .background_check_order
         .list_by_query(
             &ListHireBackgroundCheckOrderQuery::new()
                 .page_size(20)
@@ -197,11 +197,29 @@ async fn hire_agreement_read_model_query_smoke() {
             &RequestOption::default(),
         )
         .await
-        .unwrap();
+        .unwrap()
+        .data
+        .unwrap()
+        .items
+        .remove(0);
     hire.background_check_order
         .batch_query(json!({"application_id":"app-1"}), &RequestOption::default())
         .await
         .unwrap();
+
+    assert_eq!(
+        background.candidate_info.as_ref().unwrap().name.as_deref(),
+        Some("Ada")
+    );
+    assert_eq!(
+        background.custom_field_list.as_ref().unwrap()[0]
+            .options
+            .as_ref()
+            .unwrap()[0]
+            .key
+            .as_deref(),
+        Some("A")
+    );
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/tripartite_agreements?"));
