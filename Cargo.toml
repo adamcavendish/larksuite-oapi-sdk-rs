@@ -1,6 +1,6 @@
 [package]
 name = "larksuite-oapi-sdk-rs"
-version = "0.2.2"
+version = "0.3.0"
 description = "Lark/Feishu OpenAPI SDK for Rust"
 edition = "2024"
 rust-version = "1.95.0"

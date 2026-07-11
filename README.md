@@ -22,14 +22,14 @@ optional WebSocket and Axum integration.
   decryption.
 - Optional WebSocket long connections, Axum handlers, and higher-level channel
   message helpers.
-- Typed Hire v1 catalogs, lists, detail responses, and iterators across the
+- Typed Hire v1 and v2 catalogs, lists, and detail responses across the
   Go-backed surface.
 
 ## Install
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.2.2"
+larksuite-oapi-sdk-rs = "0.3.0"
 ```
 
 The minimum supported Rust version is 1.95.0.
@@ -41,11 +41,11 @@ access token and request authentication for this endpoint.
 
 ```rust,no_run
 use larksuite_oapi_sdk_rs::service::im::v1::CreateMessageReqBody;
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::builder("APP_ID", "APP_SECRET").build()?;
+    let client = LarkClient::builder("APP_ID", "APP_SECRET").build()?;
     let body = CreateMessageReqBody {
         receive_id: Some("CHAT_ID".to_string()),
         msg_type: Some("text".to_string()),
@@ -64,10 +64,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-Use `Client::builder` to set a base URL, request timeout, retry limit, token
+Use `LarkClient::builder` to set a base URL, request timeout, retry limit, token
 cache, custom headers, marketplace mode, helpdesk credentials, or a JWT client
 assertion provider. See [`examples/client_config.rs`](examples/client_config.rs)
 for the complete setup.
+
+### Migrating to 0.3
+
+This release intentionally breaks the previous client names: replace `Client`
+with `LarkClient` and `ClientBuilder` with `LarkClientBuilder`. Hire v1
+`IdNameObject.name` is now `Option<I18n>` (`zh_cn` and `en_us`), matching the
+official API shape; its old `zh_name` and `en_name` fields are removed.
 
 ## Common Flows
 
@@ -132,11 +139,11 @@ verification, and encrypted payload processing. The optional `ws` feature adds
 long connections for event delivery:
 
 ```rust,no_run
-use larksuite_oapi_sdk_rs::{Client, EventDispatcher};
+use larksuite_oapi_sdk_rs::{LarkClient, EventDispatcher};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::builder("APP_ID", "APP_SECRET").build()?;
+    let client = LarkClient::builder("APP_ID", "APP_SECRET").build()?;
     let dispatcher = EventDispatcher::new("VERIFICATION_TOKEN", "ENCRYPT_KEY");
     client.ws_client(dispatcher).start().await?;
     Ok(())
@@ -163,7 +170,7 @@ for a runnable callback response and the API documentation for card builders.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.2.2", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.3.0", features = ["ws", "axum"] }
 ```
 
 ## API Coverage
@@ -178,6 +185,9 @@ Hire v1 is a particular focus: catalog, reference, task, website-posting,
 external, agency, job, talent, application, interview, and background-check
 resources provide typed Go-backed responses. Where the Go SDK exposes iterator
 support, the Rust resource follows with lazy pagination helpers.
+
+Hire v2 provides typed interview-record and composite-talent responses,
+including nested assessment and I18n data.
 
 See the [changelog](CHANGELOG.md) for release-by-release detail and the
 [examples index](examples/README.md) for runnable service calls.
