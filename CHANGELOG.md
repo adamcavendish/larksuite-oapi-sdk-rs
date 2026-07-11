@@ -4,6 +4,8 @@
 
 ### REST service coverage
 
+- Added typed Hire v1 Offer salary-plan and job-requirement custom-data
+  response leaves.
 - Added typed Hire v1 Job response data for job configuration reads and writes,
   plus combined job create and update helpers.
 - Added a typed Hire v1 application Offer response with structured offer,
@@ -92,6 +94,8 @@
 
 ### Documentation and maintenance
 
+- Added registration `AppAddons.preset` support, including explicit empty
+  add-ons when the preset is disabled.
 - Added an IM streaming-download example that writes chunks to disk, computes
   SHA-256 incrementally, and supports an optional byte limit.
 

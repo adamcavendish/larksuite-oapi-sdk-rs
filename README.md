@@ -180,6 +180,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 See [`examples/app_registration.rs`](examples/app_registration.rs) for custom
 scopes, events, callbacks, app preset values, and existing-app update inputs.
+Set `AppAddons { preset: Some(false), ..Default::default() }` when registering
+without the default add-on template.
 
 ### WebSocket events
 
