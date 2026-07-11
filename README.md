@@ -1,82 +1,43 @@
 # larksuite-oapi-sdk-rs
 
-Lark/Feishu OpenAPI SDK for Rust.
-
 [![Crates.io](https://img.shields.io/crates/v/larksuite-oapi-sdk-rs)](https://crates.io/crates/larksuite-oapi-sdk-rs)
 [![Docs](https://docs.rs/larksuite-oapi-sdk-rs/badge.svg)](https://docs.rs/larksuite-oapi-sdk-rs)
 [![CI](https://github.com/adamcavendish/larksuite-oapi-sdk-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/adamcavendish/larksuite-oapi-sdk-rs/actions/workflows/ci.yml)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-A Rust port of the official [Go SDK](https://github.com/larksuite/oapi-sdk-go).
-The SDK handles token acquisition and caching, request construction, event
-decryption, callback signature verification, and typed OpenAPI responses so
-application code can stay close to the Lark/Feishu domain operation it is
-performing.
+Lark/Feishu OpenAPI SDK for Rust. It follows the official
+[Go SDK](https://github.com/larksuite/oapi-sdk-go) closely while providing
+idiomatic Rust client configuration, typed REST resources, event handling, and
+optional WebSocket and Axum integration.
 
-## Features
+## Highlights
 
-- **REST API client** with automatic token management, caching, and retry
-- **Named query helpers** across generated REST services, with compatibility
-  positional adapters for existing callers
-- **Client assertion (JWT bearer)** for secretless deployments
-- **OAuth flows** — authorization code exchange and refresh token rotation
-- **Event dispatching** with AES-256-CBC decryption and SHA-1/SHA-256
-  signature verification
-- **Card action handling** with typed callback actions
-- **WebSocket client** (`ws` feature) for long-connection event streams with
-  protobuf framing and fragment reassembly
-- **Axum adapter** (`axum` feature) for HTTP server integration
-- **Message Card builder** for constructing interactive Lark card messages
-- **Go SDK parity escape hatch** via `client.go_v397()` for newer generated
-  endpoints that are not yet promoted to dedicated Rust resources
-- **56+ service modules** covering IM, Calendar, Drive, Sheets, Docs,
-  Contacts, Approval, VC, Wiki, and more
+- Tenant, user, app, and marketplace token acquisition with configurable
+  caching and retry behavior.
+- Typed REST resources with named query inputs, upload/download helpers, and
+  lazy iterators for supported paginated endpoints.
+- Raw request and Go-compatibility bridge APIs for endpoints that have not yet
+  been promoted to dedicated Rust resources.
+- Webhook event dispatch with signature verification and encrypted-payload
+  decryption.
+- Optional WebSocket long connections, Axum handlers, and higher-level channel
+  message helpers.
+- Typed Hire v1 catalogs, lists, detail responses, and iterators across the
+  Go-backed surface.
 
-## Usage
-
-Add to `Cargo.toml`:
+## Install
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.2"
+larksuite-oapi-sdk-rs = "0.2.2"
 ```
 
-For runnable examples, see the curated [examples index](examples/README.md).
+The minimum supported Rust version is 1.95.0.
 
-### Client configuration
+## Quick Start
 
-`Client::builder` mirrors the Go SDK's `lark.NewClient(..., With...)` option
-style while keeping configuration immutable after build.
-
-```rust
-use std::time::Duration;
-
-use larksuite_oapi_sdk_rs::{Client, LARK_BASE_URL};
-
-fn build_client() -> Result<Client, Box<dyn std::error::Error>> {
-    let client = Client::builder("APP_ID", "APP_SECRET")
-        .base_url(LARK_BASE_URL)
-        .timeout(Duration::from_secs(3))
-        .disable_token_cache()
-        .max_retries(3)
-        .log_req_at_debug()
-        .build()?;
-
-    Ok(client)
-}
-```
-
-Use `.marketplace()` for marketplace apps, `.helpdesk_credential(...)` for
-helpdesk APIs, `.default_headers(...)` for extra headers, and
-`.client_assertion_provider(...)` for JWT bearer deployments. See
-[`examples/client_config.rs`](examples/client_config.rs) for a runnable setup
-sample.
-
-### Typed REST API
-
-Prefer generated service resources when they exist. They provide typed request
-and response structs plus query helpers for endpoints with path, query, body,
-or file inputs.
+Build a client once, then call a typed resource. The SDK handles the tenant
+access token and request authentication for this endpoint.
 
 ```rust,no_run
 use larksuite_oapi_sdk_rs::service::im::v1::CreateMessageReqBody;
@@ -85,8 +46,6 @@ use larksuite_oapi_sdk_rs::{Client, RequestOption};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::builder("APP_ID", "APP_SECRET").build()?;
-    let option = RequestOption::default();
-
     let body = CreateMessageReqBody {
         receive_id: Some("CHAT_ID".to_string()),
         msg_type: Some("text".to_string()),
@@ -94,96 +53,83 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         uuid: None,
     };
 
-    let resp = client
+    let response = client
         .im()
         .message
-        .create("chat_id", &body, &option)
+        .create("chat_id", &body, &RequestOption::default())
         .await?;
 
-    println!("success: {}", resp.success());
+    println!("success: {}", response.success());
     Ok(())
 }
 ```
 
-### Raw API escape hatch
+Use `Client::builder` to set a base URL, request timeout, retry limit, token
+cache, custom headers, marketplace mode, helpdesk credentials, or a JWT client
+assertion provider. See [`examples/client_config.rs`](examples/client_config.rs)
+for the complete setup.
 
-Use raw requests for OpenAPI endpoints that do not have a generated Rust
-resource yet. The SDK still applies token handling, request IDs, retries, and
-response helpers.
+## Common Flows
 
-```rust,no_run
-use larksuite_oapi_sdk_rs::{
-    AccessTokenType, ApiReq, Client, HttpMethod, RequestOption,
+| Need | Start here |
+| --- | --- |
+| Call a typed REST endpoint | [`examples/send_message.rs`](examples/send_message.rs) or the [generated examples](examples/README.md) |
+| Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
+| Exchange or refresh OAuth tokens | [`examples/authen_oauth.rs`](examples/authen_oauth.rs) |
+| Receive webhook events | [`examples/event_handler.rs`](examples/event_handler.rs) |
+| Handle interactive card callbacks | [`examples/card_action_handler.rs`](examples/card_action_handler.rs) |
+| Create or update an app by device code | [`examples/app_registration.rs`](examples/app_registration.rs) |
+| Run a WebSocket event client | [`examples/ws_client.rs`](examples/ws_client.rs) with `ws` enabled |
+| Send and normalize channel messages | [`examples/channel_send.rs`](examples/channel_send.rs) and [`examples/channel_normalize.rs`](examples/channel_normalize.rs) with `channel` enabled |
+
+### Raw Requests and the Go Bridge
+
+Prefer a dedicated service resource when one exists. Named `*_by_query` methods
+keep request paths, filters, and bodies explicit, while older positional methods
+remain as compatibility adapters where they were already public.
+
+For an endpoint without a generated Rust resource, use `ApiReq` through the raw
+request APIs. Token selection, request IDs, retries, and error handling remain
+the same as for typed resources. The `client.go_v397()` bridge provides the
+same transport behavior for its curated newer-Go-SDK endpoint set. See
+[`examples/raw_api.rs`](examples/raw_api.rs) and
+[`examples/go_v397_endpoint.rs`](examples/go_v397_endpoint.rs).
+
+### Pagination and Transfers
+
+Supported list and search resources expose `*_by_iterator` helpers. Iterators
+fetch pages lazily and support `limit`, `page_token`, and `next_page_token` for
+bounded or resumable scans. See [`examples/bitable_records.rs`](examples/bitable_records.rs).
+
+Upload and download helpers use the same typed-resource pattern. Buffered
+downloads are available where appropriate; streaming message-resource downloads
+expose response metadata before the body is consumed. See
+[`examples/im_upload_download.rs`](examples/im_upload_download.rs) and
+[`examples/im_stream_download.rs`](examples/im_stream_download.rs).
+
+### App Registration
+
+The `registration` module mirrors the Go SDK device-code flow. It opens a QR or
+verification URL, then polls until the app credentials are available. Use
+`AppAddons::preset` to control whether the default add-on template is applied:
+
+```rust
+use larksuite_oapi_sdk_rs::registration::AppAddons;
+
+let addons = AppAddons {
+    preset: Some(false),
+    ..Default::default()
 };
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::builder("APP_ID", "APP_SECRET").build()?;
-    let option = RequestOption {
-        user_access_token: Some("USER_ACCESS_TOKEN".to_string()),
-        ..Default::default()
-    };
-
-    let mut req = ApiReq::new(HttpMethod::GET, "/open-apis/contact/v3/users/:user_id");
-    req.path_params.set("user_id", "ou_xxx");
-    req.query_params.set("user_id_type", "open_id");
-
-    let (api_resp, raw) = client
-        .raw_request_typed_with_token::<serde_json::Value>(
-            req,
-            AccessTokenType::User,
-            &option,
-        )
-        .await?;
-
-    println!("request_id: {:?}", api_resp.request_id());
-    println!("data: {:?}", raw.data);
-    Ok(())
-}
 ```
 
-See [`examples/raw_api.rs`](examples/raw_api.rs) for both user-token and
-tenant-token raw calls.
+`Some(false)` permits an otherwise empty add-on configuration. An omitted or
+`Some(true)` preset still requires at least one scope, event, or callback.
 
-### One-click app registration
+### Events and WebSockets
 
-The `registration` module mirrors the Go SDK's `scene/registration` package.
-It uses the OAuth 2.0 device-code flow to create or update an app after the
-user opens the verification URL or scans it as a QR code.
-
-```rust,no_run
-use larksuite_oapi_sdk_rs::registration::{Options, register_app};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let result = register_app(Options {
-        source: "quickstart".to_string(),
-        domain: String::new(),
-        lark_domain: String::new(),
-        app_preset: None,
-        addons: None,
-        create_only: false,
-        app_id: String::new(),
-        on_qr_code: Box::new(|info| {
-            println!("open or scan this URL: {}", info.url);
-            println!("expires in {} seconds", info.expire_in);
-        }),
-        on_status_change: None,
-    })
-    .await?;
-
-    println!("App ID: {}", result.client_id);
-    println!("App Secret: {}", result.client_secret);
-    Ok(())
-}
-```
-
-See [`examples/app_registration.rs`](examples/app_registration.rs) for custom
-scopes, events, callbacks, app preset values, and existing-app update inputs.
-Set `AppAddons { preset: Some(false), ..Default::default() }` when registering
-without the default add-on template.
-
-### WebSocket events
+Webhook handlers use `EventDispatcher` for typed event callbacks, signature
+verification, and encrypted payload processing. The optional `ws` feature adds
+long connections for event delivery:
 
 ```rust,no_run
 use larksuite_oapi_sdk_rs::{Client, EventDispatcher};
@@ -197,234 +143,50 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### Channel helpers
+Use the optional `axum` feature for Axum HTTP adapters. The optional `channel`
+feature builds on WebSocket and IM APIs with message normalization, send helpers,
+upload inputs, and runtime policy controls.
 
-The optional `channel` feature adds Go-SDK-style message normalization and
-higher-level send helpers on top of IM and WebSocket APIs.
+### Cards
 
-```rust,no_run
-use larksuite_oapi_sdk_rs::channel::{Channel, SendInput};
-use larksuite_oapi_sdk_rs::{Client, EventDispatcher, RequestOption};
+The `card` module builds interactive Lark cards, and `CardActionHandler`
+handles callback payloads. See [`examples/card_action_handler.rs`](examples/card_action_handler.rs)
+for a runnable callback response and the API documentation for card builders.
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::builder("APP_ID", "APP_SECRET").build()?;
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
-
-    let sent = channel.send(
-        &SendInput {
-            chat_id: Some("oc_xxx".into()),
-            markdown: Some("**hello**".into()),
-            title: Some("Rust SDK".into()),
-            ..Default::default()
-        },
-        &RequestOption::default(),
-    ).await?;
-
-    println!("message_id: {}", sent.message_id);
-    Ok(())
-}
-```
-
-Incoming channel messages keep the original Lark JSON in `content` and expose
-normalized user-facing text plus attached resources through `text` and
-`resources`.
-
-```rust,no_run
-use larksuite_oapi_sdk_rs::channel::{Channel, ChannelPolicy};
-use larksuite_oapi_sdk_rs::{Client, EventDispatcher, LarkError};
-
-fn channel_with_normalized_messages(client: &Client, dispatcher: EventDispatcher) -> Channel<'_> {
-    Channel::builder(client, dispatcher)
-        .policy(ChannelPolicy::default().require_mention(false))
-        .on_message(|message| async move {
-            println!("raw: {}", message.content);
-            println!("text: {}", message.text.unwrap_or_default());
-            for resource in message.resources {
-                println!("resource: {} {}", resource.resource_type, resource.file_key);
-            }
-            Ok::<(), LarkError>(())
-        })
-        .build()
-}
-```
-
-For uploads, `SendInput` accepts pre-uploaded image/file/audio/video keys,
-`image_path`/`file_path`, or `UploadInput` with `source_path`, `source_bytes`,
-or `source_url`. URL uploads are fetched with a conservative SSRF guard and a
-bounded response size. Audio/video uploads may pass `duration` explicitly; when
-omitted, the channel helper infers duration for Opus/OGG audio and MP4 video.
-
-### OAuth authorization code
-
-```rust,no_run
-use larksuite_oapi_sdk_rs::Client;
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::builder("APP_ID", "APP_SECRET").build()?;
-    let v1 = client.authen();
-    let resp = v1.oauth.retrieve_by_authorization_code(
-        "AUTH_CODE",
-        Some("https://example.com/callback"),
-        None, None,
-        &Default::default(),
-    ).await?;
-    println!("access_token: {:?}", resp.data.and_then(|d| d.access_token));
-    Ok(())
-}
-```
-
-### Card message building
-
-```rust
-use larksuite_oapi_sdk_rs::card::{
-    Card, CardConfig, CardHeader, div, md, button
-};
-
-let card = Card::new()
-    .config(CardConfig::new().wide_screen_mode(true))
-    .header(CardHeader::new("Hello").template("blue"))
-    .element(div("**Welcome**"))
-    .element(md("*This is markdown*"));
-```
-
-For card callbacks, use `CardActionHandler` directly or pass it through
-`http_handler::card_action_handler`; the optional `axum` feature also exposes
-`axum_handler::card_action_handler`. See
-[`examples/card_action_handler.rs`](examples/card_action_handler.rs).
-
-## Features (Cargo)
+## Cargo Features
 
 | Feature | Description |
-|---------|-------------|
-| `ws`    | WebSocket long-connection event client (protobuf framing) |
-| `channel` | Channel message normalization and send helpers; enables `ws` |
-| `axum`  | Axum HTTP adapter for event/card action handlers |
+| --- | --- |
+| `ws` | WebSocket long-connection event client with protobuf framing. |
+| `channel` | Higher-level send and normalized receive helpers; enables `ws`. |
+| `axum` | Axum adapters for webhook and card-action handlers. |
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.2", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.2.2", features = ["ws", "axum"] }
 ```
 
-## Generated API coverage
+## API Coverage
 
-Dedicated service modules are the preferred API surface when a resource exists.
-Generated services expose named query structs and `*_by_query` methods for
-request shapes that have path, query, body, or file inputs. Existing positional
-methods remain as compatibility adapters where they already existed.
-Streaming download helpers follow the same query-helper convention and expose
-HTTP metadata before the response body is consumed. Because the body is not
-pre-read, Lark JSON code errors returned as a 2xx response body are surfaced to
-the caller as body bytes rather than retried after metadata has been exposed.
-Non-success JSON responses may still be read before returning so token-refresh
-retries keep the same behavior as buffered requests. See
-[`examples/im_stream_download.rs`](examples/im_stream_download.rs) for a
-message-resource stream that writes chunks to disk, hashes incrementally, and
-enforces an optional byte limit.
+The SDK provides dedicated resources across the Lark/Feishu OpenAPI service
+surface, including IM, Calendar, Drive, Docs, Sheets, Bitable, Contacts,
+Approval, VC, Wiki, and Hire. Generated service smoke tests verify request
+paths, query inputs, bodies, uploads, downloads, and response handling across
+the broader API surface.
 
-Paginated resources may also expose `*_by_iterator` helpers. These iterators
-own their request inputs, fetch pages lazily, and provide `limit`,
-`page_token`, and `next_page_token` controls for resumable scans. Contact and
-Bitable list/search resources are the first generated-service areas promoted to
-this pattern, alongside the existing IM, Drive, and CoreHR iterators.
-Hire v1 catalog resources such as registration schemas, resume sources, job
-functions, job types, locations, roles, and websites also expose typed response
-data and matching iterator helpers. Lightweight Hire reference lists now cover
-subjects, talent folders, termination reasons, todos, and user-role assignments
-with typed response data, plus iterators where the Go SDK exposes
-`ListByIterator`. Hire task lists for evaluation, exam marking, and interview
-work also expose typed response data and iterator helpers. Hire interview
-support lists cover application interviews, interviewers, feedback forms,
-registration schemas, and round types, with iterators where the Go SDK exposes
-them. Hire website posting resources now type website job posts, referral job
-posts, portal apply schemas, and website channels, with iterators for the
-paginated job-posting and portal schema scans. The typed Hire surface also
-includes read/list coverage for job process and schema config, Offer
-application forms and approval templates, questionnaires, talent tags,
-employees, evaluations, notes, interview records, tripartite agreements, and
-background check orders. Role permissions, common schema settings and children,
-questionnaire answers, and Offer-schema fields now return typed nested data.
-Job custom fields, storefronts, stage counts, job-requirement custom fields,
-and Offer application-form configuration now do as well, with iterators for
-the Go-backed paginated lists. Talent profile custom data, registrations,
-interview summaries, and interview-record scores and assessments also return
-typed nested data.
-Referral and talent read/search helpers cover referral lookup/search, talent
-object schemas, talent operation logs, and talent pools, including an iterator
-for talent pool search. External Hire read helpers now type external
-applications, background checks, interviews, offers, and talent interview
-lookups, with iterators for the Go-backed external list and batch-query
-surfaces. Job utility read/search helpers now type job publish record search,
-job requirement lookup by ID, and location query responses. Agency read/query
-helpers now type supplier, agency detail, account, and protection payloads.
-Auxiliary Hire reads now type diversity inclusion, interview attachment,
-minutes, and website delivery task payloads. Hire utility helpers now type job
-manager, referral account asset, talent ID lookup, test search, and website
-delivery creation payloads, with an iterator for test search. Hire write
-utility helpers now type employee, interviewer, note, attachment, and website
-channel write responses. Hire external write helpers now type external
-application, background check, interview, offer, interview assessment, referral
-reward, talent external info, and website site-user responses. Existing-model
-Hire write helpers now type job manager batch updates, job requirement
-creation, referral account write actions, reconciliation, withdrawals, and
-tripartite agreement creation. Simple Talent and Exam write helpers now type
-folder updates, combined talent create/update, talent-pool moves, and exam
-creation. Hire action helpers now type application transfer-onboard and job
-recruiter response payloads. Hire Job helpers now type configuration reads and
-updates, plus combined job create and update response payloads. Application
-Offer lookups now return structured offer, compensation, and send-record data.
-Job detail lookups return structured job, manager, requirement, address,
-configuration, tag, and stage-count data.
-Application detail lookups now type application, Job, and talent summaries;
-application and Job lifecycle actions return code-only response wrappers where
-the Go SDK exposes no response data.
-Selected talent, job requirement, agreement, advertisement, agency, EHR import,
-and Offer-field mutation helpers likewise expose code-only response wrappers.
-ECO account, background-check, package, exam, and exam-paper mutations follow
-the same Go-backed code-only response behavior.
-Application-detail lookups now type evaluation, interview, Offer, employee,
-agency, portal, and referral branches; intern Offer-status responses are also
-structured. Interview assessment scores, attachments, module and dimension
-feedback, referral relationships, and application Offer delivery and address
-leaves are typed as well. Interview feedback-form configuration, including
-modules, dimensions, scoring, abilities, and related-dimension settings, is
-also structured alongside round-type assessment-template metadata.
-Background-check order reads also expose typed report, progress, contact,
-provider, custom-field, and investigation-item data.
+Hire v1 is a particular focus: catalog, reference, task, website-posting,
+external, agency, job, talent, application, interview, and background-check
+resources provide typed Go-backed responses. Where the Go SDK exposes iterator
+support, the Rust resource follows with lazy pagination helpers.
 
-For newer Go SDK endpoints that have not yet been promoted to dedicated Rust
-resources, use `GoV397Endpoint` through `client.go_v397()` to make typed raw
-requests with the same token handling as the rest of the SDK.
-
-This crate keeps a curated set of examples instead of porting the Go SDK's full
-generated `sample/apiall` tree. Use the [examples index](examples/README.md)
-for representative generated-service calls, and the generated service smoke
-tests for request-shape coverage across the broader API surface.
-
-## Go SDK sample map
-
-The official Go SDK includes both hand-written samples and a generated
-`sample/apiall` tree. This crate mirrors the hand-written sample categories
-with focused Rust examples:
-
-| Go SDK sample | Rust entry point | Notes |
-| --- | --- | --- |
-| `sample/client/main.go` | [`examples/client_config.rs`](examples/client_config.rs) | Client builder options, timeouts, headers, retries, logging, token cache toggles |
-| `sample/callrawapi/api.go` | [`examples/raw_api.rs`](examples/raw_api.rs) | `ApiReq`, path/query params, user and tenant token raw calls |
-| `sample/api/im/im.go` | [`examples/send_message.rs`](examples/send_message.rs), [`examples/im_message_query.rs`](examples/im_message_query.rs), [`examples/im_upload_download.rs`](examples/im_upload_download.rs), [`examples/im_stream_download.rs`](examples/im_stream_download.rs) | Typed IM send, list, upload, buffered download, and streaming download flows |
-| `sample/event/event.go` | [`examples/event_handler.rs`](examples/event_handler.rs) | Webhook event dispatcher and callback payload handling |
-| `sample/ws/sample.go` | [`examples/ws_client.rs`](examples/ws_client.rs) | Long-connection event stream; enable the `ws` feature |
-| `sample/card/card.go` | [`examples/card_action_handler.rs`](examples/card_action_handler.rs), card builder APIs | Card callback handling and interactive card JSON construction |
-| `sample/channel/main.go` | [`examples/channel_send.rs`](examples/channel_send.rs), [`examples/channel_normalize.rs`](examples/channel_normalize.rs) | Channel send helpers and normalized incoming messages; enable the `channel` feature |
-| `sample/api/bitable2.go`, `sheets.go`, `docx.go`, `application.go`, `calendar` samples | Generated service examples in [`examples/README.md`](examples/README.md) | Representative typed resources across common services |
-| `sample/apiall/...` | Generated service smoke tests and `client.go_v397()` | Broad request-shape coverage is kept in tests instead of hand-maintained examples |
+See the [changelog](CHANGELOG.md) for release-by-release detail and the
+[examples index](examples/README.md) for runnable service calls.
 
 ## Requirements
 
-- Rust 1.95.0+
-- Edition 2024
+- Rust 1.95.0 or newer
+- Rust edition 2024
 
 ## License
 
-MIT
+Licensed under [MIT](LICENSE).
