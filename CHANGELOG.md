@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## [0.3.0] - 2026-07-12
+
+### Breaking changes
+
+- Renamed the public `Client` and `ClientBuilder` types to `LarkClient` and
+  `LarkClientBuilder`. The legacy names are not retained as aliases.
+- Updated Hire v1 `IdNameObject.name` to the typed `I18n` API shape and removed
+  its non-Go `zh_name` and `en_name` fields.
+
+### REST service coverage
+
+- Added typed Hire v2 interview-record and composite-talent response graphs,
+  including nested assessment, custom-data, attachment, talent-pool, tag, and
+  I18n models.
+
 ## [0.2.2] - 2026-07-11
 
 ### REST service coverage
@@ -270,6 +285,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.0
 [0.2.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.2
 [0.2.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.1
 [0.2.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.0
