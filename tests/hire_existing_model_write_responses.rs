@@ -2,12 +2,12 @@ mod common;
 
 use common::{http_response, mock_server_with_requests};
 
-use larksuite_oapi_sdk_rs::Client;
+use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use serde_json::json;
 
-fn client_for(addr: std::net::SocketAddr) -> Client {
-    Client::builder("test_app_id", "test_secret")
+fn client_for(addr: std::net::SocketAddr) -> LarkClient {
+    LarkClient::builder("test_app_id", "test_secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
@@ -75,8 +75,8 @@ async fn hire_job_existing_model_write_responses() {
             .name
             .as_ref()
             .unwrap()
-            .get("zh_cn")
-            .and_then(|value| value.as_str()),
+            .zh_cn
+            .as_deref(),
         Some("招聘负责人")
     );
     assert_eq!(agreement_id.as_deref(), Some("agreement-1"));

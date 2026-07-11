@@ -2,15 +2,15 @@ mod common;
 
 use common::{http_response, mock_server_with_requests};
 
-use larksuite_oapi_sdk_rs::Client;
+use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::common::PageQuery;
 use larksuite_oapi_sdk_rs::service::hire::v1::{
     ListSubjectQuery, ListTerminationReasonQuery, ListTodoQuery,
 };
 
-fn client_for(addr: std::net::SocketAddr) -> Client {
-    Client::builder("test_app_id", "test_secret")
+fn client_for(addr: std::net::SocketAddr) -> LarkClient {
+    LarkClient::builder("test_app_id", "test_secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
@@ -70,7 +70,7 @@ async fn hire_reference_subject_list_deserializes_typed_items() {
 
 #[tokio::test]
 async fn hire_role_permissions_deserialize_typed_scopes() {
-    let role = r#"{"code":0,"msg":"ok","data":{"role":{"id":"role-1","has_business_management_scope":true,"socail_permission_collection":{"feature_permissions":[{"id":"feature-1","name":"Feature"}],"management_permissions":[{"id":"management-1"}],"data_permissions":[{"id":"data-1","name":{"en_us":"Data"},"select_status":1}],"business_management_scopes":[{"entity":{"code":"application","name":{"en_us":"Application"}},"permission_groups":[{"permission_ids":["permission-1"],"scope_rule":{"rule_type":1}}]}]},"campus_permission_collection":{"business_management_scopes":[{"entity":{"code":"campus"},"permission_groups":[{"permission_ids":["permission-2"]}]}]}}}}"#;
+    let role = r#"{"code":0,"msg":"ok","data":{"role":{"id":"role-1","has_business_management_scope":true,"socail_permission_collection":{"feature_permissions":[{"id":"feature-1","name":{"en_us":"Feature"}}],"management_permissions":[{"id":"management-1"}],"data_permissions":[{"id":"data-1","name":{"en_us":"Data"},"select_status":1}],"business_management_scopes":[{"entity":{"code":"application","name":{"en_us":"Application"}},"permission_groups":[{"permission_ids":["permission-1"],"scope_rule":{"rule_type":1}}]}]},"campus_permission_collection":{"business_management_scopes":[{"entity":{"code":"campus"},"permission_groups":[{"permission_ids":["permission-2"]}]}]}}}}"#;
     let user_roles = r#"{"code":0,"msg":"ok","data":{"items":[{"user_id":"ou_user_1","role_id":"role-1","business_management_scopes":[{"entity":{"code":"application","name":{"en_us":"Application"}},"scope_rule":{"rule_type":2}}]}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, role),
