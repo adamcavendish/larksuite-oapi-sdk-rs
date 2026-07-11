@@ -21,7 +21,7 @@ pub(crate) fn install_default_crypto_provider() {
     });
 }
 
-/// SDK configuration. Construct via [`ClientBuilder`](crate::ClientBuilder).
+/// SDK configuration. Construct via [`LarkClientBuilder`](crate::LarkClientBuilder).
 #[derive(Clone)]
 pub struct Config {
     pub(crate) base_url: String,

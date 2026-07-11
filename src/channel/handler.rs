@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use crate::event::{CardActionTriggerResponse, EventDispatcher};
 use crate::events::im::{P2ChatMemberBotAddedV1, P2ChatMemberBotDeletedV1, P2MessageReceiveV1};
-use crate::{Client, LarkError, RequestOption};
+use crate::{LarkClient, LarkError, RequestOption};
 
 use super::state::ChannelState;
 use super::types::{
@@ -48,7 +48,7 @@ impl ChannelHandlers {
 
 pub(super) fn register_channel_handlers(
     dispatcher: EventDispatcher,
-    client: Client,
+    client: LarkClient,
     state: Arc<ChannelState>,
     handlers: Arc<ChannelHandlers>,
 ) -> EventDispatcher {
@@ -120,7 +120,7 @@ pub(super) fn register_channel_handlers(
 }
 
 pub(super) async fn emit_message_event(
-    client: Client,
+    client: LarkClient,
     state: Arc<ChannelState>,
     handlers: Arc<ChannelHandlers>,
     event: P2MessageReceiveV1,

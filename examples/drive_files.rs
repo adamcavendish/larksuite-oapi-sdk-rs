@@ -1,6 +1,6 @@
 use larksuite_oapi_sdk_rs::service::common::PageQuery;
 use larksuite_oapi_sdk_rs::service::drive::v1::ListFileQuery;
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let export_file_token = std::env::var("EXPORT_FILE_TOKEN").ok();
     let export_ticket = std::env::var("EXPORT_TICKET").ok();
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
     let query = ListFileQuery::new()

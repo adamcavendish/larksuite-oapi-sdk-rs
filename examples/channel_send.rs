@@ -1,5 +1,5 @@
 use larksuite_oapi_sdk_rs::channel::{Channel, SendInput};
-use larksuite_oapi_sdk_rs::{Client, EventDispatcher, RequestOption};
+use larksuite_oapi_sdk_rs::{EventDispatcher, LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -7,7 +7,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app_secret = std::env::var("APP_SECRET").expect("APP_SECRET env var required");
     let chat_id = std::env::var("CHAT_ID").expect("CHAT_ID env var required");
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let dispatcher = EventDispatcher::new("", "");
     let channel = Channel::builder(&client, dispatcher).build();
 

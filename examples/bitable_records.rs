@@ -1,6 +1,6 @@
 use larksuite_oapi_sdk_rs::service::bitable::v1::{ListRecordQuery, ListTableQuery, ListViewQuery};
 use larksuite_oapi_sdk_rs::service::common::PageQuery;
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -10,7 +10,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let table_id = std::env::var("TABLE_ID").expect("TABLE_ID env var required");
     let view_id = std::env::var("VIEW_ID").ok();
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
     let tables = client

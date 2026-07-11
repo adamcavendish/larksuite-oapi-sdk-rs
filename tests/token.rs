@@ -1,14 +1,14 @@
 mod common;
 use common::{http_response, mock_server};
 
-use larksuite_oapi_sdk_rs::Client;
+use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::cache::LocalCache;
 use larksuite_oapi_sdk_rs::error::LarkError;
 use larksuite_oapi_sdk_rs::token::{AppTicketManager, TokenManager};
 use std::sync::Arc;
 
-fn marketplace_client(addr: std::net::SocketAddr) -> Client {
-    Client::builder("app_id", "secret")
+fn marketplace_client(addr: std::net::SocketAddr) -> LarkClient {
+    LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
         .marketplace()
         .disable_token_cache()
@@ -16,8 +16,8 @@ fn marketplace_client(addr: std::net::SocketAddr) -> Client {
         .unwrap()
 }
 
-fn self_built_client(addr: std::net::SocketAddr) -> Client {
-    Client::builder("app_id", "secret")
+fn self_built_client(addr: std::net::SocketAddr) -> LarkClient {
+    LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
@@ -26,7 +26,7 @@ fn self_built_client(addr: std::net::SocketAddr) -> Client {
 
 #[tokio::test]
 async fn token_marketplace_requires_app_ticket() {
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .marketplace()
         .disable_token_cache()
         .build()
@@ -47,7 +47,7 @@ async fn token_marketplace_requires_app_ticket() {
 
 #[tokio::test]
 async fn token_marketplace_tenant_requires_app_ticket() {
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .marketplace()
         .disable_token_cache()
         .build()
@@ -70,7 +70,7 @@ async fn token_marketplace_tenant_requires_app_ticket() {
 async fn token_cache_hit_returns_cached_value() {
     use larksuite_oapi_sdk_rs::cache::Cache;
 
-    let client = Client::builder("app_id", "secret").build().unwrap();
+    let client = LarkClient::builder("app_id", "secret").build().unwrap();
     let cache = Arc::new(LocalCache::new());
 
     let cache_key = format!("app_access_token-{}", client.config().app_id());
@@ -95,7 +95,7 @@ async fn token_cache_hit_returns_cached_value() {
 async fn token_tenant_cache_hit_returns_cached_value() {
     use larksuite_oapi_sdk_rs::cache::Cache;
 
-    let client = Client::builder("app_id", "secret").build().unwrap();
+    let client = LarkClient::builder("app_id", "secret").build().unwrap();
     let cache = Arc::new(LocalCache::new());
 
     let cache_key = format!(
@@ -201,7 +201,7 @@ async fn app_ticket_manager_get_triggers_apply_when_missing() {
     let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
         .build()
         .unwrap();

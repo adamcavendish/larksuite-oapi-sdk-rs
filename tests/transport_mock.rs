@@ -3,14 +3,14 @@ use common::{http_response, http_response_with_headers, mock_server, mock_server
 
 use std::sync::Arc;
 
-use larksuite_oapi_sdk_rs::Client;
+use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::cache::{Cache, LocalCache};
 use larksuite_oapi_sdk_rs::constants::AccessTokenType;
 use larksuite_oapi_sdk_rs::error::LarkError;
 use larksuite_oapi_sdk_rs::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
 
-fn client_for(addr: std::net::SocketAddr) -> Client {
-    Client::builder("test_app_id", "test_secret")
+fn client_for(addr: std::net::SocketAddr) -> LarkClient {
+    LarkClient::builder("test_app_id", "test_secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
@@ -184,7 +184,7 @@ async fn transport_504_retries_then_fails() {
     ])
     .await;
 
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .max_retries(2)
@@ -213,7 +213,7 @@ async fn transport_429_retries_then_fails() {
     ])
     .await;
 
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .max_retries(2)
@@ -242,7 +242,7 @@ async fn transport_retry_succeeds_after_504() {
     ])
     .await;
 
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .max_retries(3)
@@ -266,7 +266,7 @@ async fn transport_token_invalid_retries() {
     let err_body = r#"{"code":99991671,"msg":"invalid access token"}"#;
     let (addr, _h) = mock_server(vec![http_response(200, err_body)]).await;
 
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .max_retries(2)
@@ -312,7 +312,7 @@ async fn transport_bearer_token_user() {
     let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
@@ -336,7 +336,7 @@ async fn transport_bearer_token_app() {
     let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
@@ -370,7 +370,7 @@ async fn transport_tenant_token_from_cache() {
         .await
         .unwrap();
 
-    let client = Client::builder("test_app", "secret")
+    let client = LarkClient::builder("test_app", "secret")
         .base_url(format!("http://{addr}"))
         .token_cache(cache)
         .build()
@@ -403,7 +403,7 @@ async fn transport_app_token_from_cache() {
         .await
         .unwrap();
 
-    let client = Client::builder("test_app", "secret")
+    let client = LarkClient::builder("test_app", "secret")
         .base_url(format!("http://{addr}"))
         .token_cache(cache)
         .build()
@@ -500,7 +500,7 @@ async fn transport_helpdesk_auth() {
     let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .helpdesk_credential("hd_id", "hd_token")
@@ -528,7 +528,7 @@ async fn transport_default_headers() {
     let mut headers = http::HeaderMap::new();
     headers.insert("X-Custom-Header", "custom-value".parse().unwrap());
 
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .default_headers(headers)
@@ -605,7 +605,7 @@ async fn transport_self_built_token_fetch() {
     ])
     .await;
 
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
         .build()
         .unwrap();
@@ -632,7 +632,7 @@ async fn transport_self_built_tenant_token_fetch() {
     ])
     .await;
 
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
         .build()
         .unwrap();
@@ -651,7 +651,7 @@ async fn transport_self_built_tenant_token_fetch() {
 
 #[tokio::test]
 async fn transport_rejects_user_token_on_tenant_only_api() {
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .disable_token_cache()
         .build()
         .unwrap();
@@ -671,7 +671,7 @@ async fn transport_rejects_user_token_on_tenant_only_api() {
 
 #[tokio::test]
 async fn transport_rejects_app_token_on_user_only_api() {
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .disable_token_cache()
         .build()
         .unwrap();
@@ -691,7 +691,7 @@ async fn transport_rejects_app_token_on_user_only_api() {
 
 #[tokio::test]
 async fn transport_rejects_tenant_token_on_app_only_api() {
-    let client = Client::builder("app", "secret")
+    let client = LarkClient::builder("app", "secret")
         .disable_token_cache()
         .build()
         .unwrap();
@@ -838,7 +838,7 @@ async fn transport_cache_enabled_app_token_type() {
     ])
     .await;
 
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
         .build()
         .unwrap();
@@ -860,7 +860,7 @@ async fn transport_user_token_priority_over_tenant() {
     let body = r#"{"code":0,"msg":"ok","data":{}}"#;
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
         .build()
         .unwrap();
@@ -883,7 +883,7 @@ async fn transport_empty_supported_tokens_treated_as_none() {
     let body = r#"{"code":0,"msg":"ok","data":{}}"#;
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
         .build()
         .unwrap();
@@ -904,7 +904,7 @@ async fn transport_log_level_filters_debug() {
     let body = r#"{"code":0,"msg":"ok","data":{}}"#;
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .log_level(tracing::Level::ERROR)

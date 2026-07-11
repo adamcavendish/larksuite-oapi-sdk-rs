@@ -3,9 +3,9 @@
 //! # Quick start
 //!
 //! ```rust,no_run
-//! use larksuite_oapi_sdk_rs::Client;
+//! use larksuite_oapi_sdk_rs::LarkClient;
 //!
-//! let client = Client::builder("APP_ID", "APP_SECRET").build().unwrap();
+//! let client = LarkClient::builder("APP_ID", "APP_SECRET").build().unwrap();
 //! ```
 //!
 //! # Features
@@ -44,7 +44,7 @@ pub mod ws;
 pub mod axum_handler;
 
 pub use cache::{Cache, LocalCache};
-pub use client::{Client, ClientBuilder};
+pub use client::{LarkClient, LarkClientBuilder};
 pub use config::Config;
 pub use constants::{AccessTokenType, AppType, FEISHU_BASE_URL, LARK_BASE_URL};
 // Re-export http::Method so downstream crates can build ApiReq without adding http directly.

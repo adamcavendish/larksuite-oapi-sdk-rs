@@ -1,4 +1,4 @@
-use larksuite_oapi_sdk_rs::Client;
+use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::event::EventDispatcher;
 use larksuite_oapi_sdk_rs::events::im::P2MessageReceiveV1;
 
@@ -9,7 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app_id = std::env::var("APP_ID").expect("APP_ID env var required");
     let app_secret = std::env::var("APP_SECRET").expect("APP_SECRET env var required");
 
-    let client = Client::builder(&app_id, &app_secret).build()?;
+    let client = LarkClient::builder(&app_id, &app_secret).build()?;
 
     let dispatcher = EventDispatcher::new("", "").on_p2_im_message_receive_v1(
         |event: P2MessageReceiveV1| async move {

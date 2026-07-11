@@ -7,7 +7,7 @@ keeping each Rust example small enough to maintain.
 Most examples use this shape:
 
 - read credentials and resource IDs from environment variables
-- build a `Client` with `Client::builder`
+- build a `LarkClient` with `LarkClient::builder`
 - create a `RequestOption::default()`
 - call a typed service resource such as `client.im().message`
 - use `*_by_query` methods when an API has several query parameters
@@ -16,7 +16,7 @@ Most examples use this shape:
 
 | Example | Service | Scenario | Required env vars | Command |
 | --- | --- | --- | --- | --- |
-| `client_config` | Client | Build default and tuned clients with Go-SDK-style builder options | optional `APP_ID`, `APP_SECRET` | `cargo run --example client_config` |
+| `client_config` | LarkClient | Build default and tuned clients with Go-SDK-style builder options | optional `APP_ID`, `APP_SECRET` | `cargo run --example client_config` |
 | `raw_api` | Raw OpenAPI | Call endpoints through `ApiReq` with path/query params and explicit token mode | `APP_ID`, `APP_SECRET`, `USER_ID`, `USER_ACCESS_TOKEN`, optional `CHAT_ID` | `cargo run --example raw_api` |
 | `app_registration` | OAuth app registration | Create or update an app through the device-code registration flow | optional `APP_AVATAR_URL`, `CREATE_ONLY`, `EXISTING_APP_ID`, `REGISTRATION_DOMAIN`, `REGISTRATION_LARK_DOMAIN` | `cargo run --example app_registration` |
 | `send_message` | IM v1 | Send a text IM message through the generated IM service | `APP_ID`, `APP_SECRET`, `CHAT_ID` | `cargo run --example send_message` |
@@ -47,7 +47,7 @@ Use this table when translating code from the official Go SDK sample tree.
 
 | Go SDK path | Rust example or API | What to copy conceptually |
 | --- | --- | --- |
-| `sample/client/main.go` | `client_config` | `NewClient(..., With...)` maps to `Client::builder(...).timeout(...).base_url(...).build()` |
+| `sample/client/main.go` | `client_config` | `NewClient(..., With...)` maps to `LarkClient::builder(...).timeout(...).base_url(...).build()` |
 | `sample/callrawapi/api.go` | `raw_api` | `larkcore.ApiReq` maps to `ApiReq`; `SupportedAccessTokenTypes` maps to `AccessTokenType` |
 | `sample/api/im/im.go` | `send_message`, `im_message_query`, `im_upload_download`, `im_stream_download` | Prefer typed IM resources before raw calls |
 | `sample/api/bitable2.go` | `bitable_records` | Use generated resources, `PageQuery`, or `*_by_iterator` for paginated Base records |

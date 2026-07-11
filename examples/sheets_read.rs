@@ -1,4 +1,4 @@
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::env::var("SPREADSHEET_TOKEN").expect("SPREADSHEET_TOKEN env var required");
     let range = std::env::var("SHEET_RANGE").unwrap_or_else(|_| "Sheet1!A1:C10".to_string());
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
     let spreadsheet = client

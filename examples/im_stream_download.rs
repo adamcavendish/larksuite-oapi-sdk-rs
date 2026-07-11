@@ -2,7 +2,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use larksuite_oapi_sdk_rs::service::im::v1::GetMessageResourceDownloadQuery;
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 use sha2::{Digest, Sha256};
 
 #[tokio::main]
@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let resource_type = std::env::var("RESOURCE_TYPE").unwrap_or_else(|_| "file".to_string());
     let max_bytes = parse_optional_u64("MAX_BYTES")?;
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
     let query =
         GetMessageResourceDownloadQuery::new(&message_id, &file_key, resource_type.as_str());

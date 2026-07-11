@@ -3,7 +3,7 @@ use std::future::Future;
 use std::sync::Arc;
 
 use crate::event::EventDispatcher;
-use crate::{Client, LarkError};
+use crate::{LarkClient, LarkError};
 
 use super::handler::{ChannelHandlers, register_channel_handlers};
 use super::identity::BotIdentityCacheConfig;
@@ -19,7 +19,7 @@ type LifecycleCallback = Arc<dyn Fn() + Send + Sync>;
 type ErrorCallback = Arc<dyn Fn(&LarkError) + Send + Sync>;
 
 pub struct ChannelBuilder<'a> {
-    client: &'a Client,
+    client: &'a LarkClient,
     dispatcher: EventDispatcher,
     policy: ChannelPolicy,
     bot_identity_cache: BotIdentityCacheConfig,
@@ -36,7 +36,7 @@ pub struct ChannelBuilder<'a> {
 }
 
 impl<'a> ChannelBuilder<'a> {
-    pub fn new(client: &'a Client, dispatcher: EventDispatcher) -> Self {
+    pub fn new(client: &'a LarkClient, dispatcher: EventDispatcher) -> Self {
         Self {
             client,
             dispatcher,

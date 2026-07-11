@@ -53,7 +53,7 @@ pub enum LarkError {
     #[error("registration error: {0}")]
     Registration(String),
 
-    /// Client assertion (JWT bearer) error.
+    /// LarkClient assertion (JWT bearer) error.
     #[error("client assertion error: {0}")]
     ClientAssertion(String),
 }
