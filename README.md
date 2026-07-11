@@ -345,7 +345,9 @@ background check orders. Role permissions, common schema settings and children,
 questionnaire answers, and Offer-schema fields now return typed nested data.
 Job custom fields, storefronts, stage counts, job-requirement custom fields,
 and Offer application-form configuration now do as well, with iterators for
-the Go-backed paginated lists.
+the Go-backed paginated lists. Talent profile custom data, registrations,
+interview summaries, and interview-record scores and assessments also return
+typed nested data.
 Referral and talent read/search helpers cover referral lookup/search, talent
 object schemas, talent operation logs, and talent pools, including an iterator
 for talent pool search. External Hire read helpers now type external
