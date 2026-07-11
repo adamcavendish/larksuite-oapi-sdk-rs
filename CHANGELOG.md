@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.2.2] - 2026-07-11
+
 ### REST service coverage
 
 - Added typed Hire v1 Offer salary-plan and job-requirement custom-data
@@ -34,6 +36,16 @@
   job-requirement custom fields, and Offer application-form configuration.
 - Added typed Hire v1 Talent profile custom data, registrations, interview
   summaries, and interview-record scoring and assessment responses.
+
+### App registration
+
+- Added `AppAddons.preset` support, including explicit empty add-ons when the
+  preset is disabled.
+
+### Documentation and maintenance
+
+- Reworked the README around installation, quick starts, common flows, feature
+  flags, API coverage, and runnable examples.
 
 ## [0.2.1] - 2026-07-09
 
@@ -94,8 +106,6 @@
 
 ### Documentation and maintenance
 
-- Added registration `AppAddons.preset` support, including explicit empty
-  add-ons when the preset is disabled.
 - Added an IM streaming-download example that writes chunks to disk, computes
   SHA-256 incrementally, and supports an optional byte limit.
 
@@ -260,6 +270,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.2.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.2
 [0.2.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.1
 [0.2.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.0
 [0.1.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.1.2
