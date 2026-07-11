@@ -5993,7 +5993,7 @@ pub struct TalentInterview {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub application_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub interview_list: Option<Vec<serde_json::Value>>,
+    pub interview_list: Option<Vec<InterviewExtend>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -6023,15 +6023,109 @@ pub struct Talent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resume_source_list: Option<Vec<TalentResumeSource>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub interview_registration_list: Option<Vec<serde_json::Value>>,
+    pub interview_registration_list: Option<Vec<TalentInterviewRegistrationSimple>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub registration_list: Option<Vec<serde_json::Value>>,
+    pub registration_list: Option<Vec<RegistrationBasicInfo>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resume_attachment_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customized_data_list: Option<Vec<TalentCustomizedData>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub top_degree: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub first_degree: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentInterviewRegistrationSimple {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub registration_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub download_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RegistrationBasicInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub registration_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub download_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scenario: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentCustomizedData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub children: Option<Vec<TalentCustomizedDataChild>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentCustomizedDataChild {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<TalentCustomizedValue>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentCustomizedValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option: Option<TalentCustomizedOption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_list: Option<Vec<TalentCustomizedOption>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_range: Option<TalentCustomizedTimeRange>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub customized_attachment: Option<Vec<TalentCustomizedAttachment>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentCustomizedOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentCustomizedTimeRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TalentCustomizedAttachment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_size: Option<i64>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -6251,6 +6345,78 @@ pub struct Interview {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewExtend {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub begin_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub round: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_record_list: Option<Vec<InterviewRecord>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feedback_submit_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_create_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_modify_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_round_summary: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_arrangement_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_time_zone: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_user: Option<IdNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address: Option<InterviewAddress>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub arrangement_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub arrangement_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub arrangement_appointment_kind: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_room_list: Option<Vec<InterviewMeetingRoom>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interview_round_type: Option<IdNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewAddress {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub district: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<CodeNameObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country: Option<CodeNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct InterviewRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -6269,21 +6435,111 @@ pub struct InterviewRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub conclusion: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub interview_score: Option<serde_json::Value>,
+    pub interview_score: Option<InterviewScore>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub assessment_score: Option<serde_json::Value>,
+    pub assessment_score: Option<AssessmentScoreInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub question_list: Option<Vec<serde_json::Value>>,
+    pub question_list: Option<Vec<InterviewQuestion>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub code_question_list: Option<Vec<serde_json::Value>>,
+    pub code_question_list: Option<Vec<InterviewQuestion>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub interviewer: Option<IdNameObject>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub image_list: Option<Vec<serde_json::Value>>,
+    pub image_list: Option<Vec<AttachmentV2>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub talent_quality_list: Option<Vec<serde_json::Value>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub dimension_assessment_list: Option<Vec<serde_json::Value>>,
+    pub dimension_assessment_list: Option<Vec<InterviewDimensionAssessment>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewScore {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_description: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AssessmentScoreInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calculate_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub full_score: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewQuestion {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability_list: Option<Vec<Ability>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AttachmentV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mime: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewDimensionAssessment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub full_score: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_score: Option<InterviewDimensionScore>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_score_list: Option<Vec<InterviewDimensionScore>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_custom_score: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability_list: Option<Vec<Ability>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub question_list: Option<Vec<InterviewQuestion>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InterviewDimensionScore {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score_val: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
