@@ -4,7 +4,7 @@ use super::prelude::*;
 
 #[tokio::test]
 async fn hire_talent_get_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"talent":{"id":"talent-1"}}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"talent":{"id":"talent-1","interview_registration_list":[{"id":"registration-1","download_url":"https://example.com/form"}],"registration_list":[{"id":"registration-2","scenario":5}],"customized_data_list":[{"object_id":"module-1","children":[{"object_id":"field-1","value":{"customized_attachment":[{"file_id":"file-1","file_size":42}]}}]}]}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -17,9 +17,21 @@ async fn hire_talent_get_by_query_smoke() {
         .unwrap();
 
     assert!(resp.success());
+    let talent = resp.data.unwrap().talent.unwrap();
+    assert_eq!(talent.id.as_deref(), Some("talent-1"));
     assert_eq!(
-        resp.data.unwrap().talent.unwrap().id.as_deref(),
-        Some("talent-1")
+        talent.customized_data_list.unwrap()[0]
+            .children
+            .as_ref()
+            .unwrap()[0]
+            .value
+            .as_ref()
+            .unwrap()
+            .customized_attachment
+            .as_ref()
+            .unwrap()[0]
+            .file_size,
+        Some(42)
     );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/talents/talent-1?"));
