@@ -38,6 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             desc: "Created from larksuite-oapi-sdk-rs".to_string(),
         }),
         addons: Some(AppAddons {
+            preset: None,
             scopes: AppAddonsScopes {
                 tenant: vec!["im:message:send_as_bot".to_string()],
                 user: vec!["calendar:calendar:read".to_string()],

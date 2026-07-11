@@ -43,6 +43,8 @@ pub struct AppPreset {
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct AppAddons {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preset: Option<bool>,
     #[serde(default, skip_serializing_if = "AppAddonsScopes::is_empty")]
     pub scopes: AppAddonsScopes,
     #[serde(default, skip_serializing_if = "AppAddonsEvents::is_empty")]
@@ -215,7 +217,7 @@ fn encode_addons(addons: &AppAddons) -> Result<String, LarkError> {
     count += validate_addons_list(&addons.events.items.tenant, "Addons.Events.Items.Tenant")?;
     count += validate_addons_list(&addons.events.items.user, "Addons.Events.Items.User")?;
     count += validate_addons_list(&addons.callbacks.items, "Addons.Callbacks.Items")?;
-    if count == 0 {
+    if count == 0 && addons.preset != Some(false) {
         return Err(LarkError::Registration(
             "registration: Addons must contain at least one scope, event or callback".into(),
         ));
@@ -559,6 +561,7 @@ mod tests {
                 desc: "Desc {user}".into(),
             }),
             addons: Some(AppAddons {
+                preset: None,
                 scopes: AppAddonsScopes {
                     tenant: vec!["im:message:send_as_bot".into()],
                     user: vec!["calendar:calendar:read".into()],
@@ -609,6 +612,56 @@ mod tests {
             "im.message.receive_v1"
         );
         assert_eq!(json["callbacks"]["items"][0], "card.action.trigger");
+        assert!(json.get("preset").is_none());
+    }
+
+    #[test]
+    fn addons_preset_false_serializes_and_allows_empty_addons() {
+        let encoded = encode_addons(&AppAddons {
+            preset: Some(false),
+            ..Default::default()
+        })
+        .unwrap();
+        let compressed = base64::engine::general_purpose::URL_SAFE_NO_PAD
+            .decode(encoded)
+            .unwrap();
+        let mut decoder = flate2::read::GzDecoder::new(compressed.as_slice());
+        let mut decoded = String::new();
+        std::io::Read::read_to_string(&mut decoder, &mut decoded).unwrap();
+
+        let json: serde_json::Value = serde_json::from_str(&decoded).unwrap();
+        assert_eq!(json, serde_json::json!({ "preset": false }));
+    }
+
+    #[test]
+    fn addons_preset_true_or_unset_requires_entries() {
+        for preset in [None, Some(true)] {
+            let err = encode_addons(&AppAddons {
+                preset,
+                ..Default::default()
+            })
+            .unwrap_err();
+            assert!(
+                err.to_string()
+                    .contains("Addons must contain at least one scope, event or callback")
+            );
+        }
+    }
+
+    #[test]
+    fn addons_preset_false_keeps_non_empty_string_validation() {
+        let err = encode_addons(&AppAddons {
+            preset: Some(false),
+            callbacks: AppAddonsCallbacks {
+                items: vec!["card.action.trigger".into(), String::new()],
+            },
+            ..Default::default()
+        })
+        .unwrap_err();
+        assert!(
+            err.to_string()
+                .contains("Addons.Callbacks.Items[1] must be a non-empty string")
+        );
     }
 
     #[tokio::test(flavor = "current_thread")]
