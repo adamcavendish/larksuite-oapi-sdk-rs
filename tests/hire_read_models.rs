@@ -959,9 +959,8 @@ async fn hire_activity_read_models_deserialize_and_send_filters() {
         record
             .assessment_score
             .as_ref()
-            .and_then(|value| value.get("score"))
-            .and_then(|value| value.as_i64()),
-        Some(5)
+            .and_then(|value| value.score),
+        Some(5.0)
     );
     assert_eq!(
         record_list_resp.data.unwrap().items[0].feedback_submit_time,

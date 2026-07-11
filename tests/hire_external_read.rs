@@ -25,7 +25,7 @@ async fn hire_external_read_responses_deserialize_and_send_filters() {
     let background_checks = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"bg-1","external_application_id":"external-app-1","attachment_list":[{"id":"file-1","name":"bg.pdf","size":42}]}],"has_more":false,"page_token":"bg-next"}}"#;
     let interviews = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"interview-1","external_application_id":"external-app-1","interview_assessments":[{"id":"assessment-1","assessment_dimension_list":[{"title":"Skill","score":5}]}]}],"has_more":false,"page_token":"interview-next"}}"#;
     let offers = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"offer-1","external_application_id":"external-app-1","offer_status":"sent","attachment_list":[{"id":"offer-file","name":"offer.pdf","size":7}]}],"has_more":false,"page_token":"offer-next"}}"#;
-    let talent_interviews = r#"{"code":0,"msg":"ok","data":{"items":[{"application_id":"app-1","interview_list":[{"id":"interview-1"}]}]}}"#;
+    let talent_interviews = r#"{"code":0,"msg":"ok","data":{"items":[{"application_id":"app-1","interview_list":[{"id":"interview-1","address":{"id":"address-1","city":{"code":"CN-SH","name":{"en_us":"Shanghai"}}},"meeting_room_list":[{"room_id":"room-1","room_name":"Orchid"}],"interview_record_list":[{"id":"record-1","interview_score":{"id":"score-1","level":3},"assessment_score":{"calculate_type":1,"score":8.5,"full_score":10},"question_list":[{"id":"question-1","title":{"en_us":"System design"},"ability_list":[{"id":"ability-1","name":{"en_us":"Architecture"}}]}],"image_list":[{"id":"image-1","name":"whiteboard.png"}],"dimension_assessment_list":[{"id":"dimension-1","dimension_score":{"id":"dimension-score-1","score_val":5},"question_list":[{"id":"question-2","content":"Strong"}]}]}]}]}]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, applications),
         http_response(200, background_checks),
@@ -135,8 +135,33 @@ async fn hire_external_read_responses_deserialize_and_send_filters() {
         Some("offer-file")
     );
     assert_eq!(
-        talent_interview.interview_list.as_ref().unwrap()[0]["id"],
-        "interview-1"
+        talent_interview.interview_list.as_ref().unwrap()[0]
+            .id
+            .as_deref(),
+        Some("interview-1")
+    );
+    let record = &talent_interview.interview_list.as_ref().unwrap()[0]
+        .interview_record_list
+        .as_ref()
+        .unwrap()[0];
+    assert_eq!(record.interview_score.as_ref().unwrap().level, Some(3));
+    assert_eq!(record.assessment_score.as_ref().unwrap().score, Some(8.5));
+    assert_eq!(
+        record.question_list.as_ref().unwrap()[0]
+            .ability_list
+            .as_ref()
+            .unwrap()[0]
+            .id
+            .as_deref(),
+        Some("ability-1")
+    );
+    assert_eq!(
+        record.dimension_assessment_list.as_ref().unwrap()[0]
+            .dimension_score
+            .as_ref()
+            .unwrap()
+            .score_val,
+        Some(5)
     );
 
     let request = requests.lock().unwrap().join("\n");
