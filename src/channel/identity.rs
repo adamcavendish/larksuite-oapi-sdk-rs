@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::events::common::UserId;
 use crate::resp::CodeError;
-use crate::{Client, LarkError, RequestOption};
+use crate::{LarkClient, LarkError, RequestOption};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BotIdentityCacheConfig {
@@ -129,7 +129,7 @@ struct BotInfo {
 }
 
 pub(super) async fn fetch_bot_identity(
-    client: &Client,
+    client: &LarkClient,
     option: &RequestOption,
 ) -> Result<BotIdentity, LarkError> {
     let resp = client.get("/open-apis/bot/v3/info", option).await?;

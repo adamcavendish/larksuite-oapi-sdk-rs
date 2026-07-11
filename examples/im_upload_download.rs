@@ -1,4 +1,4 @@
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -9,7 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let image_key = std::env::var("IMAGE_KEY").ok();
     let file_key = std::env::var("FILE_KEY").ok();
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
     if let Some(image_path) = image_path {

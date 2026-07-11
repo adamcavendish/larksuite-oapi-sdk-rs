@@ -7,11 +7,11 @@
 //! # Example
 //!
 //! ```rust,no_run
-//! use larksuite_oapi_sdk_rs::{Client, EventDispatcher};
+//! use larksuite_oapi_sdk_rs::{LarkClient, EventDispatcher};
 //!
 //! # #[tokio::main]
 //! # async fn main() {
-//! let client = Client::builder("APP_ID", "APP_SECRET").build().unwrap();
+//! let client = LarkClient::builder("APP_ID", "APP_SECRET").build().unwrap();
 //! let dispatcher = EventDispatcher::new("VERIFICATION_TOKEN", "ENCRYPT_KEY");
 //! client.ws_client(dispatcher).start().await.unwrap();
 //! # }

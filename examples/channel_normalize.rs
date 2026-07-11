@@ -1,5 +1,5 @@
 use larksuite_oapi_sdk_rs::channel::{Channel, ChannelPolicy};
-use larksuite_oapi_sdk_rs::{Client, EventDispatcher, LarkError};
+use larksuite_oapi_sdk_rs::{EventDispatcher, LarkClient, LarkError};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let verification_token = std::env::var("VERIFICATION_TOKEN").unwrap_or_default();
     let encrypt_key = std::env::var("ENCRYPT_KEY").unwrap_or_default();
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let dispatcher = EventDispatcher::new(verification_token, encrypt_key);
 
     Channel::builder(&client, dispatcher)

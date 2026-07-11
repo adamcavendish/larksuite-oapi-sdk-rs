@@ -1,4 +1,4 @@
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 fn print_token_summary(label: &str, token: Option<&str>, expires_in: Option<i64>) {
     let token_len = token.map(str::len).unwrap_or(0);
@@ -19,7 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let redirect_uri = std::env::var("REDIRECT_URI").ok();
     let refresh_token = std::env::var("REFRESH_TOKEN").ok();
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
     let token = client

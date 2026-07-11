@@ -3,7 +3,7 @@ use std::sync::Mutex;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use crate::events::im::P2MessageReceiveV1;
-use crate::{Client, LarkError, RequestOption};
+use crate::{LarkClient, LarkError, RequestOption};
 
 use super::identity::{BotIdentity, BotIdentityCache, BotIdentityCacheConfig, fetch_bot_identity};
 use super::policy::{ChannelPolicy, DmMode};
@@ -196,7 +196,7 @@ impl ChannelState {
 
     pub(super) async fn get_bot_identity(
         &self,
-        client: &Client,
+        client: &LarkClient,
         option: &RequestOption,
     ) -> Result<BotIdentity, LarkError> {
         if let Some(identity) = self.fresh_bot_identity() {

@@ -1,5 +1,5 @@
 use larksuite_oapi_sdk_rs::service::im::v1::ListMessageQuery;
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -10,7 +10,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let end_time = std::env::var("END_TIME").ok();
     let page_token = std::env::var("PAGE_TOKEN").ok();
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
     let query = ListMessageQuery::new("chat", &chat_id)

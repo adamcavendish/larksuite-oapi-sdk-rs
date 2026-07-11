@@ -1,4 +1,4 @@
-/// Generate [`Client`](crate::Client) service accessor methods.
+/// Generate [`LarkClient`](crate::LarkClient) service accessor methods.
 ///
 /// Each invocation expands to a `pub fn` that constructs the service version
 /// struct and borrows the client's config. Four tokens:
@@ -8,7 +8,7 @@
 /// service_accessor!(method_name, module, version, VersionType, deprecated = "reason");
 /// ```
 ///
-/// `method_name` is the public method name on `Client`. `module`, `version`,
+/// `method_name` is the public method name on `LarkClient`. `module`, `version`,
 /// and `VersionType` select the path `service::$module::$version::$VersionType`.
 macro_rules! service_accessor {
     ($method:ident, $mod:ident, $ver:ident, $vty:ident) => {

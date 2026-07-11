@@ -10,7 +10,7 @@ use crate::service::im::v1::{
     ReplyMessageReqBody, ReplyMessageResp,
 };
 use crate::ws::WsClient;
-use crate::{Client, LarkError, RequestOption};
+use crate::{LarkClient, LarkError, RequestOption};
 
 use super::builder::ChannelBuilder;
 use super::duration::{infer_audio_duration_ms, infer_video_duration_ms};
@@ -28,13 +28,13 @@ use super::types::{
 const DEFAULT_TEXT_CHUNK_LIMIT: usize = 20_000;
 
 pub struct Channel<'a> {
-    pub(super) client: &'a Client,
+    pub(super) client: &'a LarkClient,
     pub(super) ws_client: WsClient,
     pub(super) state: Arc<ChannelState>,
 }
 
 impl<'a> Channel<'a> {
-    pub fn builder(client: &'a Client, dispatcher: EventDispatcher) -> ChannelBuilder<'a> {
+    pub fn builder(client: &'a LarkClient, dispatcher: EventDispatcher) -> ChannelBuilder<'a> {
         ChannelBuilder::new(client, dispatcher)
     }
 

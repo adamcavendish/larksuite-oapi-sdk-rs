@@ -7,15 +7,15 @@ use crate::event::{CardActionTriggerResponse, EventDispatcher, EventReq};
 use crate::events::common::UserId;
 use crate::events::im::{Mention, Message, MessageSender, P2MessageReceiveV1};
 use crate::service::im::v1::MessageType;
-use crate::{Client, RequestOption};
+use crate::{LarkClient, RequestOption};
 
 use super::handler::{ChannelHandlers, emit_message_event, register_channel_handlers};
 use super::identity::BotIdentityCache;
 use super::state::ChannelState;
 use super::*;
 
-fn client_for(addr: std::net::SocketAddr) -> Client {
-    Client::builder("app_id", "app_secret")
+fn client_for(addr: std::net::SocketAddr) -> LarkClient {
+    LarkClient::builder("app_id", "app_secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
@@ -1070,7 +1070,7 @@ async fn channel_registration_preserves_existing_card_action_handler() {
 
     let dispatcher = register_channel_handlers(
         dispatcher,
-        Client::builder("app_id", "app_secret")
+        LarkClient::builder("app_id", "app_secret")
             .disable_token_cache()
             .build()
             .unwrap(),

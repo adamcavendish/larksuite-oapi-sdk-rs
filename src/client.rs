@@ -13,14 +13,14 @@ use crate::service;
 use crate::token::ClientAssertionProvider;
 use crate::transport;
 
-/// Builder for [`Client`]. Construct via [`Client::builder`].
+/// Builder for [`LarkClient`]. Construct via [`LarkClient::builder`].
 #[must_use]
 #[derive(Debug)]
-pub struct ClientBuilder {
+pub struct LarkClientBuilder {
     config: Config,
 }
 
-impl ClientBuilder {
+impl LarkClientBuilder {
     pub fn marketplace(mut self) -> Self {
         self.config.app_type = AppType::Marketplace;
         self
@@ -94,13 +94,13 @@ impl ClientBuilder {
         self
     }
 
-    pub fn build(self) -> Result<Client, LarkError> {
+    pub fn build(self) -> Result<LarkClient, LarkError> {
         let mut config = self.config;
         config.http_client = aioduct::TokioClient::builder()
             .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
             .timeout(config.req_timeout)
             .build()?;
-        let client = Client { config };
+        let client = LarkClient { config };
         client.resend_app_ticket_if_marketplace();
         Ok(client)
     }
@@ -108,13 +108,13 @@ impl ClientBuilder {
 
 /// Lark/Feishu API client. All service accessors borrow `&self` and are zero-cost wrappers.
 #[derive(Debug, Clone)]
-pub struct Client {
+pub struct LarkClient {
     config: Config,
 }
 
-impl Client {
-    pub fn builder(app_id: impl Into<String>, app_secret: impl Into<String>) -> ClientBuilder {
-        ClientBuilder {
+impl LarkClient {
+    pub fn builder(app_id: impl Into<String>, app_secret: impl Into<String>) -> LarkClientBuilder {
+        LarkClientBuilder {
             config: Config::new(app_id, app_secret),
         }
     }
@@ -256,7 +256,7 @@ impl Client {
     /// This is the raw escape hatch for endpoints that do not have a generated
     /// service wrapper yet. Prefer generated service methods when available.
     /// Set [`ApiReq::supported_access_token_types`] to the token accepted by
-    /// the endpoint, or use [`Client::raw_request_with_token`] for the common
+    /// the endpoint, or use [`LarkClient::raw_request_with_token`] for the common
     /// single-token case.
     pub async fn raw_request(
         &self,
@@ -280,7 +280,7 @@ impl Client {
     /// Execute a custom OpenAPI request and deserialize its `data` field.
     ///
     /// Set [`ApiReq::supported_access_token_types`] to the token accepted by
-    /// the endpoint, or use [`Client::raw_request_typed_with_token`] for the
+    /// the endpoint, or use [`LarkClient::raw_request_typed_with_token`] for the
     /// common single-token case.
     pub async fn raw_request_typed<T: for<'de> serde::Deserialize<'de>>(
         &self,

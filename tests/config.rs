@@ -1,12 +1,12 @@
 use std::time::Duration;
 
-use larksuite_oapi_sdk_rs::Client;
+use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::cache::{Cache, LocalCache};
 use larksuite_oapi_sdk_rs::constants::{AppType, FEISHU_BASE_URL};
 
 #[tokio::test]
 async fn config_new_defaults() {
-    let client = Client::builder("myapp", "mysecret").build().unwrap();
+    let client = LarkClient::builder("myapp", "mysecret").build().unwrap();
     let config = client.config();
     assert_eq!(config.app_id(), "myapp");
     assert_eq!(config.app_secret(), "mysecret");
@@ -25,7 +25,7 @@ async fn config_new_defaults() {
 
 #[tokio::test]
 async fn config_debug_hides_secret() {
-    let client = Client::builder("myapp", "supersecret").build().unwrap();
+    let client = LarkClient::builder("myapp", "supersecret").build().unwrap();
     let config = client.config();
     let debug = format!("{config:?}");
     assert!(debug.contains("myapp"));
@@ -34,7 +34,7 @@ async fn config_debug_hides_secret() {
 
 #[tokio::test]
 async fn config_clone_shares_cache() {
-    let client = Client::builder("app", "secret").build().unwrap();
+    let client = LarkClient::builder("app", "secret").build().unwrap();
     let config = client.config();
 
     config

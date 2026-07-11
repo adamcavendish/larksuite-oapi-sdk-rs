@@ -1,4 +1,6 @@
-use larksuite_oapi_sdk_rs::{AccessTokenType, ApiReq, Client, HttpMethod, ReqBody, RequestOption};
+use larksuite_oapi_sdk_rs::{
+    AccessTokenType, ApiReq, HttpMethod, LarkClient, ReqBody, RequestOption,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -8,7 +10,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let user_access_token =
         std::env::var("USER_ACCESS_TOKEN").expect("USER_ACCESS_TOKEN env var required");
 
-    let client = Client::builder(app_id, app_secret)
+    let client = LarkClient::builder(app_id, app_secret)
         .log_req_at_debug()
         .build()?;
 

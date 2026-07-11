@@ -1,5 +1,5 @@
 use larksuite_oapi_sdk_rs::service::calendar::v4::{ListCalendarQuery, ListEventQuery};
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -9,7 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start_time = std::env::var("START_TIME").ok();
     let end_time = std::env::var("END_TIME").ok();
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
     let calendars = client

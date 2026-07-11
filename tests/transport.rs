@@ -1,4 +1,4 @@
-use larksuite_oapi_sdk_rs::Client;
+use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::error::LarkError;
 use larksuite_oapi_sdk_rs::req::{ApiReq, RequestOption};
 
@@ -8,7 +8,7 @@ fn default_option() -> RequestOption {
 
 #[tokio::test]
 async fn transport_rejects_empty_app_id() {
-    let client = Client::builder("", "secret").build().unwrap();
+    let client = LarkClient::builder("", "secret").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     let err = client
         .do_req(&api_req, &default_option())
@@ -19,7 +19,7 @@ async fn transport_rejects_empty_app_id() {
 
 #[tokio::test]
 async fn transport_rejects_empty_app_secret() {
-    let client = Client::builder("app_id", "").build().unwrap();
+    let client = LarkClient::builder("app_id", "").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     let err = client
         .do_req(&api_req, &default_option())
@@ -32,7 +32,7 @@ async fn transport_rejects_empty_app_secret() {
 async fn transport_rejects_marketplace_missing_tenant_key() {
     use larksuite_oapi_sdk_rs::constants::AccessTokenType;
 
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .marketplace()
         .build()
         .unwrap();
@@ -52,7 +52,7 @@ async fn transport_user_access_token_option_sets_header() {
     // (fail at network level, not at validation level).
     use larksuite_oapi_sdk_rs::constants::AccessTokenType;
 
-    let client = Client::builder("app_id", "secret")
+    let client = LarkClient::builder("app_id", "secret")
         .disable_token_cache()
         .base_url("http://127.0.0.1:1") // connection refused — intentional
         .build()
@@ -75,7 +75,7 @@ async fn transport_user_access_token_option_sets_header() {
 
 #[tokio::test]
 async fn transport_rejects_reserved_x_request_id_header() {
-    let client = Client::builder("app_id", "secret").build().unwrap();
+    let client = LarkClient::builder("app_id", "secret").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
 
     let mut headers = http::HeaderMap::new();
@@ -91,7 +91,7 @@ async fn transport_rejects_reserved_x_request_id_header() {
 
 #[tokio::test]
 async fn transport_rejects_reserved_request_id_header() {
-    let client = Client::builder("app_id", "secret").build().unwrap();
+    let client = LarkClient::builder("app_id", "secret").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
 
     let mut headers = http::HeaderMap::new();

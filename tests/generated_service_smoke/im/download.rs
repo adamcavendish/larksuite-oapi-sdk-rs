@@ -1,7 +1,7 @@
 use super::prelude::*;
 use std::time::Duration;
 
-use larksuite_oapi_sdk_rs::Client;
+use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::service::common::{DownloadBody, DownloadStreamResp};
 
 // ── IM ──
@@ -10,7 +10,7 @@ fn message_resource_download_query() -> GetMessageResourceDownloadQuery<'static>
     GetMessageResourceDownloadQuery::new("msg-1", "file-key-1", "image")
 }
 
-async fn open_message_resource_stream(client: &Client) -> DownloadStreamResp {
+async fn open_message_resource_stream(client: &LarkClient) -> DownloadStreamResp {
     let query = message_resource_download_query();
     tokio::time::timeout(
         Duration::from_secs(1),

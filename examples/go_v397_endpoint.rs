@@ -1,5 +1,5 @@
 use larksuite_oapi_sdk_rs::service::go_v397::GoV397Endpoint;
-use larksuite_oapi_sdk_rs::{Client, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -7,7 +7,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app_secret = std::env::var("APP_SECRET").expect("APP_SECRET env var required");
     let note_id = std::env::var("NOTE_ID").expect("NOTE_ID env var required");
 
-    let client = Client::builder(app_id, app_secret).build()?;
+    let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
     let resp = Box::pin(client.go_v397().request_json(
