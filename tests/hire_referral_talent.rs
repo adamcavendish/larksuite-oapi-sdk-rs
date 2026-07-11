@@ -2,7 +2,7 @@ mod common;
 
 use common::{http_response, mock_server_with_requests};
 
-use larksuite_oapi_sdk_rs::Client;
+use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::common::PageQuery;
 use larksuite_oapi_sdk_rs::service::hire::v1::{
@@ -10,8 +10,8 @@ use larksuite_oapi_sdk_rs::service::hire::v1::{
 };
 use serde_json::json;
 
-fn client_for(addr: std::net::SocketAddr) -> Client {
-    Client::builder("test_app_id", "test_secret")
+fn client_for(addr: std::net::SocketAddr) -> LarkClient {
+    LarkClient::builder("test_app_id", "test_secret")
         .base_url(format!("http://{addr}"))
         .disable_token_cache()
         .build()
@@ -20,10 +20,10 @@ fn client_for(addr: std::net::SocketAddr) -> Client {
 
 #[tokio::test]
 async fn hire_referral_talent_responses_deserialize_typed_items() {
-    let referral_get = r#"{"code":0,"msg":"ok","data":{"referral":{"id":"ref-1","application_id":"app-1","create_time":1710000000,"referral_user":{"id":"ou_1","en_name":"Ada"}}}}"#;
-    let referral_search = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"ref-info-1","application_ids":["app-1","app-2"],"referral_user":{"id":"ou_2","zh_name":"小林"}}]}}"#;
+    let referral_get = r#"{"code":0,"msg":"ok","data":{"referral":{"id":"ref-1","application_id":"app-1","create_time":1710000000,"referral_user":{"id":"ou_1","name":{"en_us":"Ada"}}}}}"#;
+    let referral_search = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"ref-info-1","application_ids":["app-1","app-2"],"referral_user":{"id":"ou_2","name":{"zh_cn":"小林"}}}]}}"#;
     let talent_objects = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"object-1","name":{"en_us":"Portfolio"},"is_customized":true}]}}"#;
-    let operation_logs = r#"{"code":0,"msg":"ok","data":{"items":[{"application_id":"app-1","talent_id":"talent-1","operator":{"id":"ou_3","en_name":"Recruiter"},"operation_type":3001,"operation_time":"1710000000","operator_type":1}],"page_token":"op-next","has_more":false}}"#;
+    let operation_logs = r#"{"code":0,"msg":"ok","data":{"items":[{"application_id":"app-1","talent_id":"talent-1","operator":{"id":"ou_3","name":{"en_us":"Recruiter"}},"operation_type":3001,"operation_time":"1710000000","operator_type":1}],"page_token":"op-next","has_more":false}}"#;
     let talent_pools = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"pool-1","i18n_name":{"en_us":"Backend Pool"},"i18n_description":{"zh_cn":"后端"},"is_private":1}],"page_token":"pool-next","has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, referral_get),
@@ -109,7 +109,8 @@ async fn hire_referral_talent_responses_deserialize_typed_items() {
         referral
             .referral_user
             .as_ref()
-            .and_then(|user| user.en_name.as_deref()),
+            .and_then(|user| user.name.as_ref())
+            .and_then(|name| name.en_us.as_deref()),
         Some("Ada")
     );
     assert_eq!(
@@ -121,7 +122,8 @@ async fn hire_referral_talent_responses_deserialize_typed_items() {
         operation_log
             .operator
             .as_ref()
-            .and_then(|operator| operator.en_name.as_deref()),
+            .and_then(|operator| operator.name.as_ref())
+            .and_then(|name| name.en_us.as_deref()),
         Some("Recruiter")
     );
     assert_eq!(

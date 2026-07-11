@@ -67,11 +67,7 @@ pub struct IdNameObject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub name: Option<serde_json::Value>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub zh_name: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub en_name: Option<String>,
+    pub name: Option<I18n>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
