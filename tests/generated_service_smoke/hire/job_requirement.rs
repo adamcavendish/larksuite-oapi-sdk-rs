@@ -4,8 +4,7 @@ use super::prelude::*;
 
 #[tokio::test]
 async fn hire_job_requirement_list_by_query_smoke() {
-    let body =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"id":"requirement-1"}],"has_more":false}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"requirement-1","customized_data_list":[{"object_id":"field-1","value":"option-1"}]}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -31,6 +30,12 @@ async fn hire_job_requirement_list_by_query_smoke() {
     assert!(resp.success());
     let data = resp.data.unwrap();
     assert_eq!(data.items[0].id.as_deref(), Some("requirement-1"));
+    assert_eq!(
+        data.items[0].customized_data_list.as_ref().unwrap()[0]
+            .value
+            .as_deref(),
+        Some("option-1")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/job_requirements?"));
     assert!(request.contains("job_id=job-1"));
