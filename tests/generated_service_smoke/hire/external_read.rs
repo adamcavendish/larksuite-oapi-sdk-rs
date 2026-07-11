@@ -10,8 +10,7 @@ async fn hire_external_read_query_smoke() {
     let interviews =
         r#"{"code":0,"msg":"ok","data":{"items":[{"id":"interview-1"}],"has_more":false}}"#;
     let offers = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"offer-1"}],"has_more":false}}"#;
-    let talent_interviews =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"application_id":"app-1"}]}}"#;
+    let talent_interviews = r#"{"code":0,"msg":"ok","data":{"items":[{"application_id":"app-1","interview_list":[{"id":"interview-1","meeting_room_list":[{"room_id":"room-1"}],"interview_record_list":[{"id":"record-1","assessment_score":{"score":8.5},"dimension_assessment_list":[{"id":"dimension-1","dimension_score_list":[{"id":"score-1","score_val":5}]}]}]}]}]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, applications),
         http_response(200, background_checks),
@@ -64,7 +63,8 @@ async fn hire_external_read_query_smoke() {
         )
         .await
         .unwrap();
-    hire.interview
+    let talent_interviews = hire
+        .interview
         .get_by_talent_query(
             &GetHireByTalentInterviewQuery::new()
                 .talent_id("talent-1")
@@ -74,6 +74,23 @@ async fn hire_external_read_query_smoke() {
         )
         .await
         .unwrap();
+    assert_eq!(
+        talent_interviews.data.unwrap().items[0]
+            .interview_list
+            .as_ref()
+            .unwrap()[0]
+            .interview_record_list
+            .as_ref()
+            .unwrap()[0]
+            .dimension_assessment_list
+            .as_ref()
+            .unwrap()[0]
+            .dimension_score_list
+            .as_ref()
+            .unwrap()[0]
+            .score_val,
+        Some(5)
+    );
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/hire/v1/external_applications?"));
