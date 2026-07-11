@@ -6555,7 +6555,7 @@ pub struct Offer {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub basic_info: Option<OfferBasicInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub salary_plan: Option<serde_json::Value>,
+    pub salary_plan: Option<ApplicationOfferSalaryPlan>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub customize_info_list: Option<Vec<serde_json::Value>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -6943,13 +6943,21 @@ pub struct JobRequirement {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub deadline: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub customized_data_list: Option<Vec<serde_json::Value>>,
+    pub customized_data_list: Option<Vec<JobRequirementCustomizedData>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub process_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub job_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub job_type: Option<IdNameObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobRequirementCustomizedData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
