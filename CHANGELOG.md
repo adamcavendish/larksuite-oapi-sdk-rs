@@ -30,6 +30,8 @@
   and Offer-schema detail response models.
 - Added typed Hire v1 job custom-field values, storefronts, stage counts,
   job-requirement custom fields, and Offer application-form configuration.
+- Added typed Hire v1 Talent profile custom data, registrations, interview
+  summaries, and interview-record scoring and assessment responses.
 
 ## [0.2.1] - 2026-07-09
 
