@@ -11,7 +11,7 @@ async fn transport_rejects_empty_app_id() {
     let client = LarkClient::builder("", "secret").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     let err = client
-        .do_req(&api_req, &default_option())
+        .raw_request(&api_req, &default_option())
         .await
         .unwrap_err();
     assert!(matches!(err, LarkError::IllegalParam(_)));
@@ -22,7 +22,7 @@ async fn transport_rejects_empty_app_secret() {
     let client = LarkClient::builder("app_id", "").build().unwrap();
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
     let err = client
-        .do_req(&api_req, &default_option())
+        .raw_request(&api_req, &default_option())
         .await
         .unwrap_err();
     assert!(matches!(err, LarkError::IllegalParam(_)));
@@ -40,7 +40,7 @@ async fn transport_rejects_marketplace_missing_tenant_key() {
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
 
     let err = client
-        .do_req(&api_req, &default_option())
+        .raw_request(&api_req, &default_option())
         .await
         .unwrap_err();
     assert!(matches!(err, LarkError::IllegalParam(_)));
@@ -65,7 +65,7 @@ async fn transport_user_access_token_option_sets_header() {
         ..Default::default()
     };
 
-    let err = client.do_req(&api_req, &option).await.unwrap_err();
+    let err = client.raw_request(&api_req, &option).await.unwrap_err();
     // Should fail at network level (DialFailed), not at IllegalParam
     assert!(
         matches!(err, LarkError::DialFailed(_)) || matches!(err, LarkError::Http(_)),
@@ -85,7 +85,7 @@ async fn transport_rejects_reserved_x_request_id_header() {
         ..Default::default()
     };
 
-    let err = client.do_req(&api_req, &option).await.unwrap_err();
+    let err = client.raw_request(&api_req, &option).await.unwrap_err();
     assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
@@ -101,6 +101,6 @@ async fn transport_rejects_reserved_request_id_header() {
         ..Default::default()
     };
 
-    let err = client.do_req(&api_req, &option).await.unwrap_err();
+    let err = client.raw_request(&api_req, &option).await.unwrap_err();
     assert!(matches!(err, LarkError::IllegalParam(_)));
 }

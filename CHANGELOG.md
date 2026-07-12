@@ -6,6 +6,9 @@
 
 ### Breaking changes
 
+- Removed the redundant `LarkClient::{do_req, do_req_typed, get, post, put,
+  patch, delete}` methods. Use the explicit `raw_request*` APIs with an
+  `ApiReq` instead.
 - Renamed the public `Client` and `ClientBuilder` types to `LarkClient` and
   `LarkClientBuilder`. The legacy names are not retained as aliases.
 - Removed the ambiguous `LarkClient::wiki()` compatibility accessor; use

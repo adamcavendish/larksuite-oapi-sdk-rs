@@ -2,7 +2,9 @@ use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 
+use crate::constants::AccessTokenType;
 use crate::events::common::UserId;
+use crate::req::ApiReq;
 use crate::resp::CodeError;
 use crate::{LarkClient, LarkError, RequestOption};
 
@@ -132,7 +134,9 @@ pub(super) async fn fetch_bot_identity(
     client: &LarkClient,
     option: &RequestOption,
 ) -> Result<BotIdentity, LarkError> {
-    let resp = client.get("/open-apis/bot/v3/info", option).await?;
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/bot/v3/info");
+    api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+    let resp = client.raw_request(&api_req, option).await?;
     if resp.status_code != 200 {
         return Err(LarkError::Api(Box::new(CodeError {
             code: resp.status_code as i64,
