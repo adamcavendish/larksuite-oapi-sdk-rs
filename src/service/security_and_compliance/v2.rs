@@ -7,28 +7,100 @@ use crate::req::RequestOption;
 use crate::service::common::{PageQuery, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeviceRecord {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_record_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_system: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub serial_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disk_serial_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_address: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_ownership: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub certification_level: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_terminal_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub latest_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_managed: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mdm_device_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mdm_provider_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_public: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cert_verified_at_unix: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cert_serial_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cert_issuer: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DeviceRecordData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub device_record: Option<serde_json::Value>,
+    pub device_record: Option<DeviceRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DeviceRecordListData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<DeviceRecord>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
 }
 
-impl_resp_v2!(UpdateDeviceApplyRecordV2Resp, serde_json::Value);
-impl_resp_v2!(CreateDeviceRecordV2Resp, DeviceRecordData);
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateDeviceRecordData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_record_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MineDeviceRecordData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_record_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_ownership: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_status: Option<i32>,
+}
+
+impl_resp_v2!(UpdateDeviceApplyRecordV2Resp, ());
+impl_resp_v2!(CreateDeviceRecordV2Resp, CreateDeviceRecordData);
 impl_resp_v2!(DeleteDeviceRecordV2Resp, ());
 impl_resp_v2!(GetDeviceRecordV2Resp, DeviceRecordData);
 impl_resp_v2!(ListDeviceRecordV2Resp, DeviceRecordListData);
-impl_resp_v2!(MineDeviceRecordV2Resp, DeviceRecordListData);
-impl_resp_v2!(UpdateDeviceRecordV2Resp, DeviceRecordData);
+impl_resp_v2!(MineDeviceRecordV2Resp, MineDeviceRecordData);
+impl_resp_v2!(UpdateDeviceRecordV2Resp, ());
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ListDeviceRecordV2Query<'a> {
@@ -170,7 +242,7 @@ impl DeviceApplyRecordV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateDeviceApplyRecordV2Resp>()
+        .send_v2_response::<(), UpdateDeviceApplyRecordV2Resp>()
         .await
     }
 }
@@ -202,7 +274,7 @@ impl DeviceRecordV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<DeviceRecordData, CreateDeviceRecordV2Resp>()
+        .send_v2_response::<CreateDeviceRecordData, CreateDeviceRecordV2Resp>()
         .await
     }
 
@@ -309,7 +381,7 @@ impl DeviceRecordV2Resource<'_> {
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2_response::<DeviceRecordListData, MineDeviceRecordV2Resp>()
+        .send_v2_response::<MineDeviceRecordData, MineDeviceRecordV2Resp>()
         .await
     }
 
@@ -340,7 +412,7 @@ impl DeviceRecordV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<DeviceRecordData, UpdateDeviceRecordV2Resp>()
+        .send_v2_response::<(), UpdateDeviceRecordV2Resp>()
         .await
     }
 }

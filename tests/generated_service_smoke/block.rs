@@ -43,7 +43,8 @@ async fn block_v1_by_query_smoke() {
 #[tokio::test]
 async fn block_v2_by_query_smoke() {
     let entity_body = r#"{"code":0,"msg":"ok","data":{"entity":{"block_id":"block-1"}}}"#;
-    let message_body = r#"{"code":0,"msg":"ok","data":{"message":{"id":"message-1"}}}"#;
+    let message_body =
+        r#"{"code":0,"msg":"ok","data":{"message":{"block_id":"block-1","body":"hello"}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, entity_body),
         http_response(200, entity_body),
@@ -56,7 +57,7 @@ async fn block_v2_by_query_smoke() {
     let update_body = serde_json::json!({"entity":{"name":"Entity updated"}});
     let message_body = serde_json::json!({"message":{"text":"hello"}});
 
-    client
+    let create_resp = client
         .block_v2()
         .entity
         .create_by_query(
@@ -74,7 +75,18 @@ async fn block_v2_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+
+    assert_eq!(
+        create_resp
+            .data
+            .unwrap()
+            .entity
+            .unwrap()
+            .block_id
+            .as_deref(),
+        Some("block-1")
+    );
+    let message_resp = client
         .block_v2()
         .message
         .create_by_query(
@@ -83,6 +95,10 @@ async fn block_v2_by_query_smoke() {
         )
         .await
         .unwrap();
+    assert_eq!(
+        message_resp.data.unwrap().message.unwrap().body.as_deref(),
+        Some("hello")
+    );
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/block/v2/entities "));

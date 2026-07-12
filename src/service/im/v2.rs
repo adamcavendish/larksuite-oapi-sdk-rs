@@ -11,19 +11,83 @@ use crate::service::common::RestRequest;
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AppFeedCardData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub app_feed_card: Option<serde_json::Value>,
+    pub failed_cards: Option<Vec<FailedAppFeedCard>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FailedAppFeedCard {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BizEntityTagRelationData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub biz_entity_tag_relation: Option<serde_json::Value>,
+    pub tag_info_with_bind_versions: Option<Vec<TagInfoWithBindVersion>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct TagData {
+pub struct TagInfoWithBindVersion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub tag: Option<serde_json::Value>,
+    pub tag_info: Option<TagInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bind_version: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateTagData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_tag_fail_reason: Option<TagFailureReason>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchTagData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_info: Option<TagInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub patch_tag_fail_reason: Option<TagFailureReason>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TagInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenant_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_names: Option<Vec<TagI18nName>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TagI18nName {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TagFailureReason {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duplicate_id: Option<String>,
 }
 
 // ── Response types ─────────────────────────────────────────────────────────────
@@ -31,14 +95,14 @@ pub struct TagData {
 impl_resp_v2!(CreateAppFeedCardV2Resp, AppFeedCardData);
 impl_resp_v2!(DeleteAppFeedCardBatchV2Resp, ());
 impl_resp_v2!(UpdateAppFeedCardBatchV2Resp, ());
-impl_resp_v2!(CreateBizEntityTagRelationV2Resp, BizEntityTagRelationData);
+impl_resp_v2!(CreateBizEntityTagRelationV2Resp, ());
 impl_resp_v2!(GetBizEntityTagRelationV2Resp, BizEntityTagRelationData);
-impl_resp_v2!(UpdateBizEntityTagRelationV2Resp, BizEntityTagRelationData);
+impl_resp_v2!(UpdateBizEntityTagRelationV2Resp, ());
 impl_resp_v2!(UpdateChatButtonV2Resp, ());
 impl_resp_v2!(BotTimeSensitiveFeedCardV2Resp, ());
 impl_resp_v2!(PatchFeedCardV2Resp, ());
-impl_resp_v2!(CreateTagV2Resp, TagData);
-impl_resp_v2!(PatchTagV2Resp, TagData);
+impl_resp_v2!(CreateTagV2Resp, CreateTagData);
+impl_resp_v2!(PatchTagV2Resp, PatchTagData);
 impl_resp_v2!(BatchUpdateUrlPreviewV2Resp, ());
 
 #[derive(Debug, Clone, Copy)]
@@ -334,7 +398,7 @@ impl BizEntityTagRelationV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<BizEntityTagRelationData, CreateBizEntityTagRelationV2Resp>()
+        .send_v2_response::<(), CreateBizEntityTagRelationV2Resp>()
         .await
     }
 
@@ -384,7 +448,7 @@ impl BizEntityTagRelationV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<BizEntityTagRelationData, UpdateBizEntityTagRelationV2Resp>()
+        .send_v2_response::<(), UpdateBizEntityTagRelationV2Resp>()
         .await
     }
 }
@@ -514,7 +578,7 @@ impl TagV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<TagData, CreateTagV2Resp>()
+        .send_v2_response::<CreateTagData, CreateTagV2Resp>()
         .await
     }
 
@@ -542,7 +606,7 @@ impl TagV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<TagData, PatchTagV2Resp>()
+        .send_v2_response::<PatchTagData, PatchTagV2Resp>()
         .await
     }
 }

@@ -7,19 +7,120 @@ use crate::req::RequestOption;
 use crate::service::common::{PageQuery, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TableRole {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table_perm: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rec_rule: Option<RecRule>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub other_rec_rule: Option<OtherRecRule>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_perm: Option<std::collections::HashMap<String, i32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allow_add_record: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allow_delete_record: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_perm: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_rules: Option<std::collections::HashMap<String, i32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_action_rules:
+        Option<std::collections::HashMap<String, std::collections::HashMap<String, i32>>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BlockRole {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_perm: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RecRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditions: Option<Vec<RecRuleCondition>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conjunction: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub perm: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub other_perm: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition_groups: Option<Vec<ConditionGroup>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_rec_rule_version: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OtherRecRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditions: Option<Vec<RecRuleCondition>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conjunction: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub perm: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RecRuleCondition {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ConditionGroup {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditions: Option<Vec<RecRuleCondition>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conjunction: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppRoleV2 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table_roles: Option<Vec<TableRole>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_roles: Option<Vec<BlockRole>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub base_rule: Option<std::collections::HashMap<String, i32>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AppRoleData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub role: Option<serde_json::Value>,
+    pub role: Option<AppRoleV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AppRoleListData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<AppRoleV2>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
 }
 
 impl_resp_v2!(CreateAppRoleV2Resp, AppRoleData);

@@ -74,8 +74,8 @@ async fn mdm_v1_user_device_and_auth_relation_by_query_smoke() {
 
 #[tokio::test]
 async fn mdm_country_region_v3_by_query_smoke() {
-    let batch_body = r#"{"code":0,"msg":"ok","data":{"regions":[{"country_region_id":"CN"}]}}"#;
-    let list_body = r#"{"code":0,"msg":"ok","data":{"items":[{"country_region_id":"CN","name":"China"}],"has_more":false}}"#;
+    let batch_body = r#"{"code":0,"msg":"ok","data":{"data":[{"id":"CN","alpha_2_code":"CN","name":{"value":"China"}}]}}"#;
+    let list_body = r#"{"code":0,"msg":"ok","data":{"data":[{"id":"CN","alpha_2_code":"CN","name":{"multilingual_value":{"en-US":"China"}},"continents":{"value":"asia"},"md_time_zone":[{"time_zone_id":"Asia/Shanghai","name":{"languages":["zh-CN"]}}]}],"total":"1","next_page_token":"next-2"}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, batch_body),
         http_response(200, list_body),
@@ -83,7 +83,7 @@ async fn mdm_country_region_v3_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    client
+    let batch_resp = client
         .mdm_v3()
         .batch_country_region
         .get_by_query(
@@ -92,7 +92,7 @@ async fn mdm_country_region_v3_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+    let list_resp = client
         .mdm_v3()
         .country_region
         .list_by_query(
@@ -102,6 +102,43 @@ async fn mdm_country_region_v3_by_query_smoke() {
         )
         .await
         .unwrap();
+
+    assert_eq!(
+        batch_resp.data.unwrap().data[0].alpha_2_code.as_deref(),
+        Some("CN")
+    );
+    let list_data = list_resp.data.unwrap();
+    assert_eq!(list_data.data[0].id.as_deref(), Some("CN"));
+    assert_eq!(
+        list_data.data[0]
+            .name
+            .as_ref()
+            .unwrap()
+            .multilingual_value
+            .as_ref()
+            .unwrap()["en-US"],
+        "China"
+    );
+    assert_eq!(
+        list_data.data[0]
+            .continents
+            .as_ref()
+            .unwrap()
+            .value
+            .as_deref(),
+        Some("asia")
+    );
+    assert_eq!(
+        list_data.data[0].md_time_zone.as_ref().unwrap()[0]
+            .name
+            .as_ref()
+            .unwrap()
+            .languages
+            .as_ref()
+            .unwrap()[0],
+        "zh-CN"
+    );
+    assert_eq!(list_data.next_page_token.as_deref(), Some("next-2"));
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/mdm/v3/batch_country_region "));
