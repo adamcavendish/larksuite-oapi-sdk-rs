@@ -22,6 +22,7 @@
   data rather than untyped JSON payloads.
 - Added typed CoreHR v1 common-data identifier conversion and enum-option
   metadata responses.
+- Added typed CoreHR v1 company create/update and location create responses.
 - Added typed Hire v2 interview-record and composite-talent response graphs,
   including nested assessment, custom-data, attachment, talent-pool, tag, and
   I18n models.

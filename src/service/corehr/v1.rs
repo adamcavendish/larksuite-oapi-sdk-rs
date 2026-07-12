@@ -985,7 +985,7 @@ impl<'a> CompanyResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateCompanyResp>()
+        .send_v2_response::<CompanyData, CreateCompanyResp>()
         .await
     }
 
@@ -1021,7 +1021,7 @@ impl<'a> CompanyResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchCompanyResp>()
+        .send_v2_response::<CompanyData, PatchCompanyResp>()
         .await
     }
 }
@@ -1317,7 +1317,7 @@ impl_resp_v2!(WorkCalendarLeaveResp, serde_json::Value);
 impl_resp_v2!(WorkCalendarDateLeaveResp, serde_json::Value);
 impl_resp_v2!(CreateLeaveGrantingRecordResp, serde_json::Value);
 impl_resp_v2!(DeleteLeaveGrantingRecordResp, ());
-impl_resp_v2!(CreateLocationResp, serde_json::Value);
+impl_resp_v2!(CreateLocationResp, LocationData);
 impl_resp_v2!(DeleteLocationResp, ());
 impl_resp_v2!(CreateNationalIdTypeResp, serde_json::Value);
 impl_resp_v2!(DeleteNationalIdTypeResp, ());
@@ -1349,9 +1349,9 @@ impl_resp_v2!(CreateWorkingHoursTypeResp, serde_json::Value);
 impl_resp_v2!(DeleteWorkingHoursTypeResp, ());
 impl_resp_v2!(GetWorkingHoursTypeResp, serde_json::Value);
 impl_resp_v2!(PatchWorkingHoursTypeResp, serde_json::Value);
-impl_resp_v2!(CreateCompanyResp, serde_json::Value);
+impl_resp_v2!(CreateCompanyResp, CompanyData);
 impl_resp_v2!(DeleteCompanyResp, ());
-impl_resp_v2!(PatchCompanyResp, serde_json::Value);
+impl_resp_v2!(PatchCompanyResp, CompanyData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchOffboardingRespData {
@@ -3576,7 +3576,7 @@ impl<'a> LocationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateLocationResp>()
+        .send_v2_response::<LocationData, CreateLocationResp>()
         .await
     }
 

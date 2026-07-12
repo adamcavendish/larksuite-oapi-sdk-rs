@@ -3,6 +3,32 @@ use super::prelude::*;
 // CoreHR organization smoke tests
 
 #[tokio::test]
+async fn corehr_company_create_uses_typed_response() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"company":{"id":"company-1","name":[{"text":"Acme"}]}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr()
+        .company
+        .create(
+            serde_json::json!({"name": [{"text": "Acme"}]}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data.unwrap().company.unwrap().id.as_deref(),
+        Some("company-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/corehr/v1/companies"));
+}
+
+#[tokio::test]
 async fn corehr_employee_get_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"employment":{"id":"emp-1"}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
