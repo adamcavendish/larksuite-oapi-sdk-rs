@@ -3,6 +3,36 @@ use super::prelude::*;
 // CoreHR reference smoke tests
 
 #[tokio::test]
+async fn corehr_common_data_metadata_uses_typed_response() {
+    let body = r#"{"code":0,"msg":"ok","data":{"enum_field_api_name":"grade","enum_field_options":[{"option_api_name":"grade_a","active":true,"name":{"zh_cn":"A","en_us":"A"}}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr()
+        .common_data_meta_data
+        .add_enum_option(
+            serde_json::json!({"object_api_name": "employee"}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.enum_field_api_name.as_deref(), Some("grade"));
+    assert_eq!(
+        data.enum_field_options[0]
+            .name
+            .as_ref()
+            .and_then(|name| name.zh_cn.as_deref()),
+        Some("A")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/corehr/v1/common_data/meta_data/add_enum_option"));
+}
+
+#[tokio::test]
 async fn corehr_currency_list_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"items":[{"currency_id":"CNY"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;

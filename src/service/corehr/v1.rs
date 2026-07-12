@@ -145,6 +145,54 @@ pub struct OffboardingInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CorehrIdInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CorehrName {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CorehrEnumFieldOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<CorehrName>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ConvertCommonDataIdRespData {
+    #[serde(default)]
+    pub items: Vec<CorehrIdInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddEnumOptionCommonDataMetaDataRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_field_api_name: Option<String>,
+    #[serde(default)]
+    pub enum_field_options: Vec<CorehrEnumFieldOption>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EditEnumOptionCommonDataMetaDataRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_field_api_name: Option<String>,
+    #[serde(default)]
+    pub enum_field_options: Vec<CorehrEnumFieldOption>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Offboarding {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub initiating_type: Option<String>,
@@ -1209,9 +1257,15 @@ impl_resp_v2!(GetByParamAuthorizationResp, serde_json::Value);
 impl_resp_v2!(QueryAuthorizationResp, serde_json::Value);
 impl_resp_v2!(RemoveRoleAssignAuthorizationResp, serde_json::Value);
 impl_resp_v2!(UpdateRoleAssignAuthorizationResp, serde_json::Value);
-impl_resp_v2!(ConvertCommonDataIdResp, serde_json::Value);
-impl_resp_v2!(AddEnumOptionCommonDataMetaDataResp, serde_json::Value);
-impl_resp_v2!(EditEnumOptionCommonDataMetaDataResp, serde_json::Value);
+impl_resp_v2!(ConvertCommonDataIdResp, ConvertCommonDataIdRespData);
+impl_resp_v2!(
+    AddEnumOptionCommonDataMetaDataResp,
+    AddEnumOptionCommonDataMetaDataRespData
+);
+impl_resp_v2!(
+    EditEnumOptionCommonDataMetaDataResp,
+    EditEnumOptionCommonDataMetaDataRespData
+);
 impl_resp_v2!(MatchCompensationStandardResp, serde_json::Value);
 impl_resp_v2!(CreateContractResp, serde_json::Value);
 impl_resp_v2!(DeleteContractResp, ());
@@ -1235,7 +1289,7 @@ impl_resp_v2!(PatchEmployeeTypeResp, serde_json::Value);
 impl_resp_v2!(CreateEmploymentResp, serde_json::Value);
 impl_resp_v2!(DeleteEmploymentResp, ());
 impl_resp_v2!(PatchEmploymentResp, serde_json::Value);
-impl_resp_v2!(GetFileResp, serde_json::Value);
+impl_resp_v2!(GetFileResp, ());
 impl_resp_v2!(CreateJobResp, serde_json::Value);
 impl_resp_v2!(DeleteJobResp, ());
 impl_resp_v2!(GetJobResp, serde_json::Value);
@@ -1436,7 +1490,7 @@ impl<'a> CommonDataIdResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ConvertCommonDataIdResp>()
+        .send_v2_response::<ConvertCommonDataIdRespData, ConvertCommonDataIdResp>()
         .await
     }
 }
@@ -1459,7 +1513,7 @@ impl<'a> CommonDataMetaDataResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, AddEnumOptionCommonDataMetaDataResp>()
+        .send_v2_response::<AddEnumOptionCommonDataMetaDataRespData, AddEnumOptionCommonDataMetaDataResp>()
         .await
     }
 
@@ -1476,7 +1530,7 @@ impl<'a> CommonDataMetaDataResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, EditEnumOptionCommonDataMetaDataResp>()
+        .send_v2_response::<EditEnumOptionCommonDataMetaDataRespData, EditEnumOptionCommonDataMetaDataResp>()
         .await
     }
 }
@@ -1984,7 +2038,7 @@ impl<'a> FileResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetFileResp>()
+        .send_v2_response::<(), GetFileResp>()
         .await
     }
 }
