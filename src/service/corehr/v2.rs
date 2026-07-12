@@ -26,6 +26,69 @@ pub struct ListData {
     pub total: Option<i64>,
 }
 
+macro_rules! recent_change_data {
+    ($name:ident, $ids:ident, $deleted_ids:ident) => {
+        #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+        pub struct $name {
+            #[serde(default)]
+            pub $ids: Vec<String>,
+            #[serde(default, skip_serializing_if = "Option::is_none")]
+            pub page_token: Option<String>,
+            #[serde(default, skip_serializing_if = "Option::is_none")]
+            pub has_more: Option<bool>,
+            #[serde(default)]
+            pub $deleted_ids: Vec<String>,
+        }
+    };
+}
+
+recent_change_data!(
+    QueryRecentChangeCompanyV2RespData,
+    company_ids,
+    deleted_company_ids
+);
+recent_change_data!(
+    QueryRecentChangeCostCenterV2RespData,
+    cost_center_ids,
+    deleted_cost_center_ids
+);
+recent_change_data!(
+    QueryRecentChangeCustomOrgV2RespData,
+    custom_org_ids,
+    deleted_custom_org_ids
+);
+recent_change_data!(
+    QueryRecentChangeDepartmentV2RespData,
+    department_ids,
+    deleted_department_ids
+);
+recent_change_data!(QueryRecentChangeJobV2RespData, job_ids, deleted_job_ids);
+recent_change_data!(
+    QueryRecentChangeJobFamilyV2RespData,
+    job_family_ids,
+    deleted_job_family_ids
+);
+recent_change_data!(
+    QueryRecentChangeJobGradeV2RespData,
+    job_grade_ids,
+    deleted_job_grade_ids
+);
+recent_change_data!(
+    QueryRecentChangeJobLevelV2RespData,
+    job_level_ids,
+    deleted_job_level_ids
+);
+recent_change_data!(
+    QueryRecentChangeLocationV2RespData,
+    location_ids,
+    deleted_location_ids
+);
+recent_change_data!(
+    QueryRecentChangePositionV2RespData,
+    position_ids,
+    deleted_position_ids
+);
+
 // ── Response types ─────────────────────────────────────────────────────────────
 
 // approval_groups
@@ -55,7 +118,10 @@ impl_resp_v2!(ListBpV2Resp, ListData);
 // company
 impl_resp_v2!(ActiveCompanyV2Resp, ());
 impl_resp_v2!(BatchGetCompanyV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRecentChangeCompanyV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryRecentChangeCompanyV2Resp,
+    QueryRecentChangeCompanyV2RespData
+);
 // contract
 impl_resp_v2!(SearchContractV2Resp, ListData);
 // cost_allocation
@@ -67,7 +133,10 @@ impl_resp_v2!(UpdateVersionCostAllocationV2Resp, ());
 impl_resp_v2!(CreateCostCenterV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteCostCenterV2Resp, ());
 impl_resp_v2!(PatchCostCenterV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRecentChangeCostCenterV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryRecentChangeCostCenterV2Resp,
+    QueryRecentChangeCostCenterV2RespData
+);
 impl_resp_v2!(SearchCostCenterV2Resp, ListData);
 impl_resp_v2!(CreateCostCenterVersionV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteCostCenterVersionV2Resp, ());
@@ -78,7 +147,10 @@ impl_resp_v2!(CreateCustomOrgV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteOrgCustomOrgV2Resp, ());
 impl_resp_v2!(PatchCustomOrgV2Resp, ());
 impl_resp_v2!(QueryCustomOrgV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRecentChangeCustomOrgV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryRecentChangeCustomOrgV2Resp,
+    QueryRecentChangeCustomOrgV2RespData
+);
 impl_resp_v2!(UpdateRuleCustomOrgV2Resp, ());
 // default_cost_center
 impl_resp_v2!(BatchQueryDefaultCostCenterV2Resp, serde_json::Value);
@@ -92,7 +164,10 @@ impl_resp_v2!(ParentsDepartmentV2Resp, serde_json::Value);
 impl_resp_v2!(PatchDepartmentV2Resp, ());
 impl_resp_v2!(QueryMultiTimelineDepartmentV2Resp, serde_json::Value);
 impl_resp_v2!(QueryOperationLogsDepartmentV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRecentChangeDepartmentV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryRecentChangeDepartmentV2Resp,
+    QueryRecentChangeDepartmentV2RespData
+);
 impl_resp_v2!(QueryTimelineDepartmentV2Resp, serde_json::Value);
 impl_resp_v2!(SearchDepartmentV2Resp, ListData);
 impl_resp_v2!(TreeDepartmentV2Resp, serde_json::Value);
@@ -124,7 +199,7 @@ impl_resp_v2!(BatchGetJobV2Resp, serde_json::Value);
 impl_resp_v2!(GetJobV2Resp, serde_json::Value);
 impl_resp_v2!(ListJobV2Resp, ListData);
 impl_resp_v2!(QueryMultiTimelineJobV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRecentChangeJobV2Resp, serde_json::Value);
+impl_resp_v2!(QueryRecentChangeJobV2Resp, QueryRecentChangeJobV2RespData);
 // job_change
 impl_resp_v2!(CreateJobChangeV2Resp, serde_json::Value);
 impl_resp_v2!(RevokeJobChangeV2Resp, serde_json::Value);
@@ -132,21 +207,33 @@ impl_resp_v2!(SearchJobChangeV2Resp, ListData);
 // job_family
 impl_resp_v2!(BatchGetJobFamilyV2Resp, serde_json::Value);
 impl_resp_v2!(QueryMultiTimelineJobFamilyV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRecentChangeJobFamilyV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryRecentChangeJobFamilyV2Resp,
+    QueryRecentChangeJobFamilyV2RespData
+);
 // job_grade
 impl_resp_v2!(CreateJobGradeV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteJobGradeV2Resp, ());
 impl_resp_v2!(PatchJobGradeV2Resp, ());
 impl_resp_v2!(QueryJobGradeV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRecentChangeJobGradeV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryRecentChangeJobGradeV2Resp,
+    QueryRecentChangeJobGradeV2RespData
+);
 // job_level
 impl_resp_v2!(BatchGetJobLevelV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRecentChangeJobLevelV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryRecentChangeJobLevelV2Resp,
+    QueryRecentChangeJobLevelV2RespData
+);
 // location
 impl_resp_v2!(ActiveLocationV2Resp, ());
 impl_resp_v2!(BatchGetLocationV2Resp, serde_json::Value);
 impl_resp_v2!(PatchLocationV2Resp, ());
-impl_resp_v2!(QueryRecentChangeLocationV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryRecentChangeLocationV2Resp,
+    QueryRecentChangeLocationV2RespData
+);
 impl_resp_v2!(CreateLocationAddressV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteLocationAddressV2Resp, ());
 impl_resp_v2!(PatchLocationAddressV2Resp, ());
@@ -169,7 +256,10 @@ impl_resp_v2!(CreatePositionV2Resp, serde_json::Value);
 impl_resp_v2!(DelPositionV2Resp, serde_json::Value);
 impl_resp_v2!(PatchPositionV2Resp, ());
 impl_resp_v2!(QueryPositionV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRecentChangePositionV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryRecentChangePositionV2Resp,
+    QueryRecentChangePositionV2RespData
+);
 // pre_hire
 impl_resp_v2!(CompletePreHireV2Resp, serde_json::Value);
 impl_resp_v2!(CreatePreHireV2Resp, serde_json::Value);
@@ -676,7 +766,7 @@ impl CompanyV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangeCompanyV2Resp,
-        serde_json::Value,
+        QueryRecentChangeCompanyV2RespData,
         "/open-apis/corehr/v2/companies/query_recent_change"
     );
 }
@@ -784,7 +874,7 @@ impl CostCenterV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangeCostCenterV2Resp,
-        serde_json::Value,
+        QueryRecentChangeCostCenterV2RespData,
         "/open-apis/corehr/v2/cost_centers/query_recent_change"
     );
     post_method!(
@@ -918,7 +1008,7 @@ impl CustomOrgV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangeCustomOrgV2Resp,
-        serde_json::Value,
+        QueryRecentChangeCustomOrgV2RespData,
         "/open-apis/corehr/v2/custom_orgs/query_recent_change"
     );
     post_method!(
@@ -1037,7 +1127,7 @@ impl DepartmentV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangeDepartmentV2Resp,
-        serde_json::Value,
+        QueryRecentChangeDepartmentV2RespData,
         "/open-apis/corehr/v2/departments/query_recent_change"
     );
     post_method!(
@@ -1396,7 +1486,7 @@ impl JobV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangeJobV2Resp,
-        serde_json::Value,
+        QueryRecentChangeJobV2RespData,
         "/open-apis/corehr/v2/jobs/query_recent_change"
     );
 }
@@ -1464,7 +1554,7 @@ impl JobFamilyV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangeJobFamilyV2Resp,
-        serde_json::Value,
+        QueryRecentChangeJobFamilyV2RespData,
         "/open-apis/corehr/v2/job_families/query_recent_change"
     );
 }
@@ -1528,7 +1618,7 @@ impl JobGradeV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangeJobGradeV2Resp,
-        serde_json::Value,
+        QueryRecentChangeJobGradeV2RespData,
         "/open-apis/corehr/v2/job_grades/query_recent_change"
     );
 }
@@ -1549,7 +1639,7 @@ impl JobLevelV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangeJobLevelV2Resp,
-        serde_json::Value,
+        QueryRecentChangeJobLevelV2RespData,
         "/open-apis/corehr/v2/job_levels/query_recent_change"
     );
 }
@@ -1597,7 +1687,7 @@ impl LocationV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangeLocationV2Resp,
-        serde_json::Value,
+        QueryRecentChangeLocationV2RespData,
         "/open-apis/corehr/v2/locations/query_recent_change"
     );
 }
@@ -1848,7 +1938,7 @@ impl PositionV2Resource<'_> {
     get_method!(
         query_recent_change,
         QueryRecentChangePositionV2Resp,
-        serde_json::Value,
+        QueryRecentChangePositionV2RespData,
         "/open-apis/corehr/v2/positions/query_recent_change"
     );
 }
