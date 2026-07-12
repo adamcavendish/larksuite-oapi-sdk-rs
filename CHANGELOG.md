@@ -18,6 +18,10 @@
 - Added typed Hire v2 interview-record and composite-talent response graphs,
   including nested assessment, custom-data, attachment, talent-pool, tag, and
   I18n models.
+- Added Go-shaped typed Task v2 task, attachment, comment, custom-field,
+  section, tasklist, and activity-subscription responses.
+- Added typed Base v2 role, Block v2 entity/message, Security & Compliance v2
+  device-record, MDM v3 country-region, and IM v2 feed-card/tag responses.
 
 ### Internal maintenance
 
