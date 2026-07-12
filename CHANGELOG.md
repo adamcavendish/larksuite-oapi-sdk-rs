@@ -8,6 +8,8 @@
 
 - Renamed the public `Client` and `ClientBuilder` types to `LarkClient` and
   `LarkClientBuilder`. The legacy names are not retained as aliases.
+- Removed the ambiguous `LarkClient::wiki()` compatibility accessor; use
+  `wiki_v1()` or `wiki_v2()` explicitly.
 - Updated Hire v1 `IdNameObject.name` to the typed `I18n` API shape and removed
   its non-Go `zh_name` and `en_name` fields.
 
@@ -16,6 +18,15 @@
 - Added typed Hire v2 interview-record and composite-talent response graphs,
   including nested assessment, custom-data, attachment, talent-pool, tag, and
   I18n models.
+
+### Internal maintenance
+
+- Split `LarkClient` implementation into focused builder, service-accessor,
+  raw-request, and token modules without changing its public API.
+- Shared identical Hire v1 and v2 I18n, identifier/name, registration, and
+  resume-source models while preserving their versioned public paths.
+- Routed JSON response creation through the common v2 response conversion
+  path.
 
 ## [0.2.2] - 2026-07-11
 
