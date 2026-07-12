@@ -4,7 +4,7 @@ use super::prelude::*;
 
 #[tokio::test]
 async fn im_v2_app_feed_card_and_feed_card_by_query_smoke() {
-    let app_feed_body = r#"{"code":0,"msg":"ok","data":{"app_feed_card":{"id":"feed-card-1"}}}"#;
+    let app_feed_body = r#"{"code":0,"msg":"ok","data":{"biz_id":"feed-card-1","failed_cards":[{"user_id":"u-1","reason":"forbidden"}]}}"#;
     let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, app_feed_body),
@@ -85,6 +85,12 @@ async fn im_v2_app_feed_card_and_feed_card_by_query_smoke() {
     assert!(chat_button_resp.success());
     assert!(time_sensitive_resp.success());
     assert!(patch_resp.success());
+    let data = create_resp.data.unwrap();
+    assert_eq!(data.biz_id.as_deref(), Some("feed-card-1"));
+    assert_eq!(
+        data.failed_cards.unwrap()[0].reason.as_deref(),
+        Some("forbidden")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/im/v2/app_feed_card "));
     assert!(request.contains("DELETE /open-apis/im/v2/app_feed_card/batch "));
@@ -101,11 +107,12 @@ async fn im_v2_app_feed_card_and_feed_card_by_query_smoke() {
 
 #[tokio::test]
 async fn im_v2_biz_entity_tag_relation_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"biz_entity_tag_relation":{"id":"relation-1"}}}"#;
+    let empty_body = r#"{"code":0,"msg":"ok"}"#;
+    let get_body = r#"{"code":0,"msg":"ok","data":{"tag_info_with_bind_versions":[{"tag_info":{"id":"tag-1","i18n_names":[{"locale":"en_us","name":"Important"}]},"bind_version":"v1"}]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
-        http_response(200, body),
-        http_response(200, body),
-        http_response(200, body),
+        http_response(200, empty_body),
+        http_response(200, get_body),
+        http_response(200, empty_body),
     ])
     .await;
 
@@ -144,6 +151,26 @@ async fn im_v2_biz_entity_tag_relation_by_query_smoke() {
     assert!(create_resp.success());
     assert!(get_resp.success());
     assert!(update_resp.success());
+    let tag_info_with_bind_version = get_resp
+        .data
+        .unwrap()
+        .tag_info_with_bind_versions
+        .unwrap()
+        .remove(0);
+    assert_eq!(
+        tag_info_with_bind_version.bind_version.as_deref(),
+        Some("v1")
+    );
+    assert_eq!(
+        tag_info_with_bind_version
+            .tag_info
+            .unwrap()
+            .i18n_names
+            .unwrap()[0]
+            .name
+            .as_deref(),
+        Some("Important")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/im/v2/biz_entity_tag_relation "));
     assert!(request.contains("GET /open-apis/im/v2/biz_entity_tag_relation "));
@@ -155,11 +182,12 @@ async fn im_v2_biz_entity_tag_relation_by_query_smoke() {
 
 #[tokio::test]
 async fn im_v2_tag_and_url_preview_by_query_smoke() {
-    let tag_body = r#"{"code":0,"msg":"ok","data":{"tag":{"id":"tag-1"}}}"#;
+    let create_tag_body = r#"{"code":0,"msg":"ok","data":{"id":"tag-1"}}"#;
+    let patch_tag_body = r#"{"code":0,"msg":"ok","data":{"tag_info":{"id":"tag-1","name":"Renamed","i18n_names":[{"locale":"en_us","name":"Renamed"}]}}}"#;
     let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
-        http_response(200, tag_body),
-        http_response(200, tag_body),
+        http_response(200, create_tag_body),
+        http_response(200, patch_tag_body),
         http_response(200, empty_body),
     ])
     .await;
@@ -200,6 +228,13 @@ async fn im_v2_tag_and_url_preview_by_query_smoke() {
     assert!(create_resp.success());
     assert!(patch_resp.success());
     assert!(preview_resp.success());
+    assert_eq!(create_resp.data.unwrap().id.as_deref(), Some("tag-1"));
+    let tag_info = patch_resp.data.unwrap().tag_info.unwrap();
+    assert_eq!(tag_info.name.as_deref(), Some("Renamed"));
+    assert_eq!(
+        tag_info.i18n_names.unwrap()[0].locale.as_deref(),
+        Some("en_us")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/im/v2/tags "));
     assert!(request.contains("PATCH /open-apis/im/v2/tags/tag-1 "));

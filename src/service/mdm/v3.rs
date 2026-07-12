@@ -7,19 +7,155 @@ use crate::req::RequestOption;
 use crate::service::common::{PageQuery, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18nString {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub multilingual_value: Option<std::collections::HashMap<String, String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub return_language: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Enum {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub multilingual_name: Option<std::collections::HashMap<String, String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Language {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ietf_language_tag: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18nString>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mdm_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimeZone {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_zone_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Common>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub utc_offset: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mdm_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Common {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenant_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub languages: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_executors: Option<std::collections::HashMap<String, String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CountryRegion {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha_3_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha_2_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub numeric_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_script: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub western_script: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mdm_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub global_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_zone: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overseas: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18nString>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub full_name: Option<I18nString>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub continents: Option<Enum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub md_local_script: Option<Language>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub md_western_script: Option<Language>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub md_time_zone: Option<Vec<TimeZone>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchCountryRegionData {
-    #[serde(flatten)]
-    pub data: serde_json::Value,
+    #[serde(default)]
+    pub data: Vec<CountryRegion>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CountryRegionListData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub data: Vec<CountryRegion>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub page_token: Option<String>,
+    pub next_page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub has_more: Option<bool>,
+    pub total: Option<String>,
 }
 
 impl_resp_v2!(GetBatchCountryRegionV3Resp, BatchCountryRegionData);

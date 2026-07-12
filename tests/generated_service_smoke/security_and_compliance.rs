@@ -73,8 +73,7 @@ async fn security_openapi_log_list_by_query_smoke() {
 
 #[tokio::test]
 async fn security_device_record_list_positional_adapter_smoke() {
-    let body =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"device_id":"device-1"}],"has_more":false}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"device_record_id":"device-1","device_name":"Laptop"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -94,8 +93,7 @@ async fn security_device_record_list_positional_adapter_smoke() {
 
 #[tokio::test]
 async fn security_device_record_list_by_query_smoke() {
-    let body =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"device_id":"device-1"}],"has_more":false}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"device_record_id":"device-1","device_name":"Laptop"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -111,7 +109,8 @@ async fn security_device_record_list_by_query_smoke() {
     assert!(resp.success());
     let data = resp.data.unwrap();
     assert_eq!(data.items.len(), 1);
-    assert_eq!(data.items[0]["device_id"].as_str(), Some("device-1"));
+    assert_eq!(data.items[0].device_record_id.as_deref(), Some("device-1"));
+    assert_eq!(data.items[0].device_name.as_deref(), Some("Laptop"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/security_and_compliance/v2/device_records?"));
     assert!(request.contains("page_size=20"));
@@ -120,18 +119,17 @@ async fn security_device_record_list_by_query_smoke() {
 
 #[tokio::test]
 async fn security_device_records_write_by_query_smoke() {
-    let record_body = r#"{"code":0,"msg":"ok","data":{"device_record":{"device_id":"device-1"}}}"#;
-    let list_body =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"device_id":"device-1"}],"has_more":false}}"#;
-    let apply_body = r#"{"code":0,"msg":"ok","data":{"updated":true}}"#;
+    let create_body_resp = r#"{"code":0,"msg":"ok","data":{"device_record_id":"device-1"}}"#;
+    let record_body =
+        r#"{"code":0,"msg":"ok","data":{"device_record":{"device_record_id":"device-1"}}}"#;
+    let mine_body = r#"{"code":0,"msg":"ok","data":{"device_record_id":"device-1","device_ownership":1,"device_status":2}}"#;
     let ok_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, create_body_resp),
         http_response(200, record_body),
-        http_response(200, record_body),
-        http_response(200, list_body),
-        http_response(200, record_body),
+        http_response(200, mine_body),
         http_response(200, ok_body),
-        http_response(200, apply_body),
+        http_response(200, ok_body),
     ])
     .await;
 
@@ -140,7 +138,7 @@ async fn security_device_records_write_by_query_smoke() {
     let update_body = serde_json::json!({"device_id":"device-1","status":"disabled"});
     let apply_update_body = serde_json::json!({"status":"approved"});
 
-    client
+    let create_resp = client
         .security_and_compliance_v2()
         .device_record
         .create_by_query(
@@ -149,7 +147,7 @@ async fn security_device_records_write_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+    let get_resp = client
         .security_and_compliance_v2()
         .device_record
         .get_by_query(
@@ -158,7 +156,7 @@ async fn security_device_records_write_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+    let mine_resp = client
         .security_and_compliance_v2()
         .device_record
         .mine_by_query(&MineDeviceRecordV2Query::new(), &RequestOption::default())
@@ -192,6 +190,21 @@ async fn security_device_records_write_by_query_smoke() {
         .await
         .unwrap();
 
+    assert_eq!(
+        create_resp.data.unwrap().device_record_id.as_deref(),
+        Some("device-1")
+    );
+    assert_eq!(
+        get_resp
+            .data
+            .unwrap()
+            .device_record
+            .unwrap()
+            .device_record_id
+            .as_deref(),
+        Some("device-1")
+    );
+    assert_eq!(mine_resp.data.unwrap().device_status, Some(2));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/security_and_compliance/v2/device_records "));
     assert!(request.contains("GET /open-apis/security_and_compliance/v2/device_records/device-1 "));

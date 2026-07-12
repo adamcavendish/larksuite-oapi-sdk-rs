@@ -9,15 +9,59 @@ use crate::service::common::RestRequest;
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Entity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_data: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_meta: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preview: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_summay: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_preview: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Message {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub body: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct EntityData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub entity: Option<serde_json::Value>,
+    pub entity: Option<Entity>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MessageData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub message: Option<serde_json::Value>,
+    pub message: Option<Message>,
 }
 
 impl_resp!(CreateEntityResp, EntityData);
