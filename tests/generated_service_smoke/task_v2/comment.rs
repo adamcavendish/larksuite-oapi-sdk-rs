@@ -19,7 +19,8 @@ async fn task_v2_comment_get_by_query_smoke() {
 
     assert!(resp.success());
     let comment = resp.data.unwrap().comment.unwrap();
-    assert_eq!(comment["id"].as_str(), Some("comment-1"));
+    assert_eq!(comment.id.as_deref(), Some("comment-1"));
+    assert_eq!(comment.content.as_deref(), Some("Looks good"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/task/v2/comments/comment-1?"));
     assert!(request.contains("user_id_type=open_id"));
@@ -77,7 +78,7 @@ async fn task_v2_comment_list_by_query_smoke() {
     assert!(resp.success());
     let data = resp.data.unwrap();
     assert_eq!(data.items.len(), 1);
-    assert_eq!(data.items[0]["id"].as_str(), Some("comment-1"));
+    assert_eq!(data.items[0].id.as_deref(), Some("comment-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/task/v2/comments?"));
     assert!(request.contains("resource_type=task"));

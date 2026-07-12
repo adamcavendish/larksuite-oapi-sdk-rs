@@ -4,8 +4,7 @@ use super::prelude::*;
 
 #[tokio::test]
 async fn task_v2_get_by_query_smoke() {
-    let body =
-        r#"{"code":0,"msg":"ok","data":{"task":{"guid":"task-guid-1","summary":"Fix bug"}}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"task":{"guid":"task-guid-1","summary":"Fix bug","due":{"timestamp":"1700000000000","is_all_day":false},"members":[{"id":"ou-1","type":"user"}],"attachments":[{"guid":"att-1","resource":{"type":"task","id":"task-guid-1"}}],"origin":{"platform_i18n_name":{"en_us":"Import"},"href":{"url":"https://example.com"}},"custom_fields":[{"guid":"field-1","member_value":[{"id":"ou-1"}]}],"dependencies":[{"type":"finish_to_start","task_guid":"task-0"}]}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -19,7 +18,44 @@ async fn task_v2_get_by_query_smoke() {
 
     assert!(resp.success());
     let task = resp.data.unwrap().task.unwrap();
-    assert_eq!(task["guid"].as_str(), Some("task-guid-1"));
+    assert_eq!(task.guid.as_deref(), Some("task-guid-1"));
+    assert_eq!(task.summary.as_deref(), Some("Fix bug"));
+    assert_eq!(
+        task.due.unwrap().timestamp.as_deref(),
+        Some("1700000000000")
+    );
+    assert_eq!(task.members.unwrap()[0].type_.as_deref(), Some("user"));
+    assert_eq!(
+        task.attachments.unwrap()[0]
+            .resource
+            .as_ref()
+            .unwrap()
+            .id
+            .as_deref(),
+        Some("task-guid-1")
+    );
+    assert_eq!(
+        task.origin
+            .unwrap()
+            .platform_i18n_name
+            .unwrap()
+            .en_us
+            .as_deref(),
+        Some("Import")
+    );
+    assert_eq!(
+        task.custom_fields.unwrap()[0]
+            .member_value
+            .as_ref()
+            .unwrap()[0]
+            .id
+            .as_deref(),
+        Some("ou-1")
+    );
+    assert_eq!(
+        task.dependencies.unwrap()[0].task_guid.as_deref(),
+        Some("task-0")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/task/v2/tasks/task-guid-1?"));
     assert!(request.contains("user_id_type=open_id"));
@@ -75,7 +111,7 @@ async fn task_v2_list_by_query_smoke() {
     assert!(resp.success());
     let data = resp.data.unwrap();
     assert_eq!(data.items.len(), 1);
-    assert_eq!(data.items[0]["guid"].as_str(), Some("task-guid-1"));
+    assert_eq!(data.items[0].guid.as_deref(), Some("task-guid-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/task/v2/tasks?"));
     assert!(request.contains("page_size=20"));

@@ -4,8 +4,7 @@ use super::prelude::*;
 
 #[tokio::test]
 async fn task_v2_custom_field_get_by_query_smoke() {
-    let body =
-        r#"{"code":0,"msg":"ok","data":{"custom_field":{"guid":"field-1","name":"Priority"}}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"custom_field":{"guid":"field-1","name":"Priority","number_setting":{"format":"number","decimal_count":2},"member_setting":{"multi":true},"single_select_setting":{"options":[{"guid":"option-1","color_index":3}]}}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -19,7 +18,16 @@ async fn task_v2_custom_field_get_by_query_smoke() {
 
     assert!(resp.success());
     let custom_field = resp.data.unwrap().custom_field.unwrap();
-    assert_eq!(custom_field["guid"].as_str(), Some("field-1"));
+    assert_eq!(custom_field.guid.as_deref(), Some("field-1"));
+    assert_eq!(custom_field.name.as_deref(), Some("Priority"));
+    assert_eq!(custom_field.number_setting.unwrap().decimal_count, Some(2));
+    assert_eq!(custom_field.member_setting.unwrap().multi, Some(true));
+    assert_eq!(
+        custom_field.single_select_setting.unwrap().options.unwrap()[0]
+            .guid
+            .as_deref(),
+        Some("option-1")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/task/v2/custom_fields/field-1?"));
     assert!(request.contains("user_id_type=open_id"));
@@ -77,7 +85,7 @@ async fn task_v2_custom_field_list_by_query_smoke() {
     assert!(resp.success());
     let data = resp.data.unwrap();
     assert_eq!(data.items.len(), 1);
-    assert_eq!(data.items[0]["guid"].as_str(), Some("field-1"));
+    assert_eq!(data.items[0].guid.as_deref(), Some("field-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/task/v2/custom_fields?"));
     assert!(request.contains("resource_type=tasklist"));
@@ -129,6 +137,7 @@ async fn task_v2_custom_field_write_by_query_smoke() {
         )
         .await
         .unwrap();
+
     client
         .task_v2()
         .custom_field
@@ -147,7 +156,8 @@ async fn task_v2_custom_field_write_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+
+    let create_option_resp = client
         .task_v2()
         .custom_field
         .create_option_by_query(
@@ -156,7 +166,7 @@ async fn task_v2_custom_field_write_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+    let patch_option_resp = client
         .task_v2()
         .custom_field
         .patch_option_by_query(
@@ -165,6 +175,27 @@ async fn task_v2_custom_field_write_by_query_smoke() {
         )
         .await
         .unwrap();
+
+    assert_eq!(
+        create_option_resp
+            .data
+            .unwrap()
+            .option
+            .unwrap()
+            .guid
+            .as_deref(),
+        Some("option-1")
+    );
+    assert_eq!(
+        patch_option_resp
+            .data
+            .unwrap()
+            .option
+            .unwrap()
+            .guid
+            .as_deref(),
+        Some("option-1")
+    );
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/task/v2/custom_fields?"));
