@@ -25,6 +25,51 @@ async fn corehr_v2_company_active_uses_code_only_response() {
 }
 
 #[tokio::test]
+async fn corehr_v2_company_recent_change_uses_typed_response() {
+    let body = r#"{"code":0,"msg":"ok","data":{"company_ids":["company-1"],"deleted_company_ids":["company-0"],"page_token":"next","has_more":true}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr_v2()
+        .company
+        .query_recent_change(&RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.company_ids, ["company-1"]);
+    assert_eq!(data.deleted_company_ids, ["company-0"]);
+    assert_eq!(data.page_token.as_deref(), Some("next"));
+    assert_eq!(data.has_more, Some(true));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v2/companies/query_recent_change"));
+}
+
+#[tokio::test]
+async fn corehr_v2_department_recent_change_uses_typed_response() {
+    let body = r#"{"code":0,"msg":"ok","data":{"department_ids":["department-1"],"deleted_department_ids":["department-0"],"has_more":false}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr_v2()
+        .department
+        .query_recent_change(&RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let data = resp.data.unwrap();
+    assert_eq!(data.department_ids, ["department-1"]);
+    assert_eq!(data.deleted_department_ids, ["department-0"]);
+    assert_eq!(data.has_more, Some(false));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v2/departments/query_recent_change"));
+}
+
+#[tokio::test]
 async fn corehr_v2_approver_list_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"approver-1"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;

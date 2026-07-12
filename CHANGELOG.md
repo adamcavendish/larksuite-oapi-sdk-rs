@@ -18,6 +18,9 @@
 
 ### REST service coverage
 
+- Added typed CoreHR v2 recent-change responses for company, cost center,
+  custom organization, department, job, job family, job grade, job level,
+  location, and position resources.
 - Corrected CoreHR v1 and v2 status-only response wrappers so they expose unit
   data rather than untyped JSON payloads.
 - Added typed CoreHR v1 common-data identifier conversion and enum-option
