@@ -29,7 +29,7 @@ async fn transport_successful_json_response() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -54,7 +54,7 @@ async fn transport_typed_request_deserializes() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let (_resp, raw) = client
-        .do_req_typed::<TestData>(&api_req, &RequestOption::default())
+        .raw_request_typed::<TestData>(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(raw.data.unwrap().name, "hello");
@@ -140,7 +140,7 @@ async fn transport_typed_request_api_error() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let err = client
-        .do_req_typed::<serde_json::Value>(&api_req, &RequestOption::default())
+        .raw_request_typed::<serde_json::Value>(&api_req, &RequestOption::default())
         .await
         .unwrap_err();
     assert!(matches!(err, LarkError::Api(_)));
@@ -168,7 +168,7 @@ async fn transport_file_download_skips_json_parse() {
         ..Default::default()
     };
     let (_resp, raw) = client
-        .do_req_typed::<serde_json::Value>(&api_req, &option)
+        .raw_request_typed::<serde_json::Value>(&api_req, &option)
         .await
         .unwrap();
     assert!(raw.data.is_none());
@@ -195,7 +195,7 @@ async fn transport_504_retries_then_fails() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let err = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap_err();
     assert!(
@@ -224,7 +224,7 @@ async fn transport_429_retries_then_fails() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let err = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap_err();
     assert!(
@@ -253,7 +253,7 @@ async fn transport_retry_succeeds_after_504() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -277,7 +277,7 @@ async fn transport_token_invalid_retries() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let err = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap_err();
     assert!(
@@ -301,7 +301,7 @@ async fn transport_custom_request_id() {
         request_id: Some("custom-req-id-123".to_string()),
         ..Default::default()
     };
-    let resp = client.do_req(&api_req, &option).await.unwrap();
+    let resp = client.raw_request(&api_req, &option).await.unwrap();
     assert_eq!(resp.status_code, 200);
 }
 
@@ -325,7 +325,7 @@ async fn transport_bearer_token_user() {
         user_access_token: Some("u-token-abc".to_string()),
         ..Default::default()
     };
-    let resp = client.do_req(&api_req, &option).await.unwrap();
+    let resp = client.raw_request(&api_req, &option).await.unwrap();
     assert_eq!(resp.status_code, 200);
 }
 
@@ -349,7 +349,7 @@ async fn transport_bearer_token_app() {
         app_access_token: Some("app-token-xyz".to_string()),
         ..Default::default()
     };
-    let resp = client.do_req(&api_req, &option).await.unwrap();
+    let resp = client.raw_request(&api_req, &option).await.unwrap();
     assert_eq!(resp.status_code, 200);
 }
 
@@ -380,7 +380,7 @@ async fn transport_tenant_token_from_cache() {
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -413,7 +413,7 @@ async fn transport_app_token_from_cache() {
     api_req.supported_access_token_types = vec![AccessTokenType::App];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -428,15 +428,11 @@ async fn transport_post_json_body() {
 
     let client = client_for(addr);
     let option = RequestOption::default();
+    let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+    api_req.body = Some(ReqBody::Json(serde_json::json!({"key": "value"})));
 
-    let resp = client
-        .post(
-            "/open-apis/test",
-            serde_json::json!({"key": "value"}),
-            &option,
-        )
-        .await
-        .unwrap();
+    let resp = client.raw_request(&api_req, &option).await.unwrap();
     assert_eq!(resp.status_code, 200);
 }
 
@@ -448,12 +444,11 @@ async fn transport_put_json_body() {
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
+    let mut api_req = ApiReq::new(http::Method::PUT, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+    api_req.body = Some(ReqBody::Json(serde_json::json!({"updated": true})));
     let resp = client
-        .put(
-            "/open-apis/test",
-            serde_json::json!({"updated": true}),
-            &RequestOption::default(),
-        )
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -467,12 +462,11 @@ async fn transport_patch_json_body() {
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
+    let mut api_req = ApiReq::new(http::Method::PATCH, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+    api_req.body = Some(ReqBody::Json(serde_json::json!({"patched": true})));
     let resp = client
-        .patch(
-            "/open-apis/test",
-            serde_json::json!({"patched": true}),
-            &RequestOption::default(),
-        )
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -486,8 +480,10 @@ async fn transport_delete() {
     let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
+    let mut api_req = ApiReq::new(http::Method::DELETE, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
     let resp = client
-        .delete("/open-apis/test", &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -514,7 +510,7 @@ async fn transport_helpdesk_auth() {
         need_helpdesk_auth: true,
         ..Default::default()
     };
-    let resp = client.do_req(&api_req, &option).await.unwrap();
+    let resp = client.raw_request(&api_req, &option).await.unwrap();
     assert_eq!(resp.status_code, 200);
 }
 
@@ -539,7 +535,7 @@ async fn transport_default_headers() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -563,7 +559,7 @@ async fn transport_per_request_headers() {
         headers: Some(req_headers),
         ..Default::default()
     };
-    let resp = client.do_req(&api_req, &option).await.unwrap();
+    let resp = client.raw_request(&api_req, &option).await.unwrap();
     assert_eq!(resp.status_code, 200);
 }
 
@@ -583,7 +579,7 @@ async fn transport_non_json_response_not_parsed_as_error() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -614,7 +610,7 @@ async fn transport_self_built_token_fetch() {
     api_req.supported_access_token_types = vec![AccessTokenType::App];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -641,7 +637,7 @@ async fn transport_self_built_tenant_token_fetch() {
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -663,7 +659,7 @@ async fn transport_rejects_user_token_on_tenant_only_api() {
         user_access_token: Some("user-tok".to_string()),
         ..Default::default()
     };
-    let err = client.do_req(&api_req, &option).await.unwrap_err();
+    let err = client.raw_request(&api_req, &option).await.unwrap_err();
     assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
@@ -683,7 +679,7 @@ async fn transport_rejects_app_token_on_user_only_api() {
         app_access_token: Some("app-tok".to_string()),
         ..Default::default()
     };
-    let err = client.do_req(&api_req, &option).await.unwrap_err();
+    let err = client.raw_request(&api_req, &option).await.unwrap_err();
     assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
@@ -703,7 +699,7 @@ async fn transport_rejects_tenant_token_on_app_only_api() {
         tenant_access_token: Some("tenant-tok".to_string()),
         ..Default::default()
     };
-    let err = client.do_req(&api_req, &option).await.unwrap_err();
+    let err = client.raw_request(&api_req, &option).await.unwrap_err();
     assert!(matches!(err, LarkError::IllegalParam(_)));
 }
 
@@ -723,7 +719,7 @@ async fn transport_none_token_type_skips_validation() {
         app_access_token: Some("a-tok".to_string()),
         ..Default::default()
     };
-    let resp = client.do_req(&api_req, &option).await.unwrap();
+    let resp = client.raw_request(&api_req, &option).await.unwrap();
     assert_eq!(resp.status_code, 200);
 }
 
@@ -743,7 +739,7 @@ async fn transport_formdata_text_field() {
     }]));
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -773,7 +769,7 @@ async fn transport_formdata_file_upload() {
     ]));
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -797,7 +793,7 @@ async fn transport_formdata_file_no_content_type() {
     }]));
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -820,7 +816,7 @@ async fn transport_app_ticket_invalid_triggers_retry() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -847,7 +843,7 @@ async fn transport_cache_enabled_app_token_type() {
     api_req.supported_access_token_types = vec![AccessTokenType::App];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -872,7 +868,7 @@ async fn transport_user_token_priority_over_tenant() {
         user_access_token: Some("user_tok".to_string()),
         ..Default::default()
     };
-    let resp = client.do_req(&api_req, &option).await.unwrap();
+    let resp = client.raw_request(&api_req, &option).await.unwrap();
     assert_eq!(resp.status_code, 200);
 }
 
@@ -891,7 +887,7 @@ async fn transport_empty_supported_tokens_treated_as_none() {
     let api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
@@ -915,7 +911,7 @@ async fn transport_log_level_filters_debug() {
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let resp = client
-        .do_req(&api_req, &RequestOption::default())
+        .raw_request(&api_req, &RequestOption::default())
         .await
         .unwrap();
     assert_eq!(resp.status_code, 200);
