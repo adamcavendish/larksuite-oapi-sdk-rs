@@ -18,7 +18,8 @@ async fn task_v2_attachment_get_by_query_smoke() {
 
     assert!(resp.success());
     let attachment = resp.data.unwrap().attachment.unwrap();
-    assert_eq!(attachment["guid"].as_str(), Some("att-1"));
+    assert_eq!(attachment.guid.as_deref(), Some("att-1"));
+    assert_eq!(attachment.name.as_deref(), Some("spec.pdf"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/task/v2/attachments/att-1?"));
     assert!(request.contains("user_id_type=open_id"));
@@ -74,7 +75,7 @@ async fn task_v2_attachment_list_by_query_smoke() {
     assert!(resp.success());
     let data = resp.data.unwrap();
     assert_eq!(data.items.len(), 1);
-    assert_eq!(data.items[0]["guid"].as_str(), Some("att-1"));
+    assert_eq!(data.items[0].guid.as_deref(), Some("att-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/task/v2/attachments?"));
     assert!(request.contains("resource_type=task"));
