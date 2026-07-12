@@ -29,6 +29,32 @@ async fn corehr_company_create_uses_typed_response() {
 }
 
 #[tokio::test]
+async fn corehr_job_level_create_uses_typed_response() {
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"job_level":{"id":"job-level-1","name":[{"text":"L1"}]}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr()
+        .job_level
+        .create(
+            serde_json::json!({"name": [{"text": "L1"}]}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(
+        resp.data.unwrap().job_level.unwrap().id.as_deref(),
+        Some("job-level-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/corehr/v1/job_levels"));
+}
+
+#[tokio::test]
 async fn corehr_employee_get_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"employment":{"id":"emp-1"}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;

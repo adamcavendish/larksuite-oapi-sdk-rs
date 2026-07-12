@@ -536,6 +536,12 @@ pub struct WorkingHoursTypeListData {
     pub has_more: Option<bool>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkingHoursTypeData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub working_hours_type: Option<WorkingHoursType>,
+}
+
 impl_resp!(GetEmployeeResp, EmployeeData);
 impl_resp!(ListEmployeeResp, EmployeeListData);
 impl_resp!(GetDepartmentResp, DepartmentData);
@@ -1280,7 +1286,7 @@ impl_resp_v2!(ListObjectApiNameCustomFieldResp, serde_json::Value);
 impl_resp_v2!(QueryCustomFieldResp, serde_json::Value);
 impl_resp_v2!(CreateDepartmentResp, serde_json::Value);
 impl_resp_v2!(DeleteDepartmentResp, ());
-impl_resp_v2!(PatchDepartmentResp, serde_json::Value);
+impl_resp_v2!(PatchDepartmentResp, DepartmentData);
 impl_resp_v2!(CreateEmployeeTypeResp, serde_json::Value);
 impl_resp_v2!(DeleteEmployeeTypeResp, ());
 impl_resp_v2!(GetEmployeeTypeResp, serde_json::Value);
@@ -1306,9 +1312,9 @@ impl_resp_v2!(DeleteJobFamilyResp, ());
 impl_resp_v2!(GetJobFamilyResp, serde_json::Value);
 impl_resp_v2!(ListJobFamilyResp, serde_json::Value);
 impl_resp_v2!(PatchJobFamilyResp, serde_json::Value);
-impl_resp_v2!(CreateJobLevelResp, serde_json::Value);
+impl_resp_v2!(CreateJobLevelResp, JobLevelData);
 impl_resp_v2!(DeleteJobLevelResp, ());
-impl_resp_v2!(PatchJobLevelResp, serde_json::Value);
+impl_resp_v2!(PatchJobLevelResp, JobLevelData);
 impl_resp_v2!(CalendarByScopeLeaveResp, serde_json::Value);
 impl_resp_v2!(LeaveBalancesLeaveResp, serde_json::Value);
 impl_resp_v2!(LeaveRequestHistoryLeaveResp, serde_json::Value);
@@ -1345,10 +1351,10 @@ impl_resp_v2!(GetSubregionResp, serde_json::Value);
 impl_resp_v2!(ListSubregionResp, serde_json::Value);
 impl_resp_v2!(QueryTransferReasonResp, serde_json::Value);
 impl_resp_v2!(QueryTransferTypeResp, serde_json::Value);
-impl_resp_v2!(CreateWorkingHoursTypeResp, serde_json::Value);
+impl_resp_v2!(CreateWorkingHoursTypeResp, WorkingHoursTypeData);
 impl_resp_v2!(DeleteWorkingHoursTypeResp, ());
-impl_resp_v2!(GetWorkingHoursTypeResp, serde_json::Value);
-impl_resp_v2!(PatchWorkingHoursTypeResp, serde_json::Value);
+impl_resp_v2!(GetWorkingHoursTypeResp, WorkingHoursTypeData);
+impl_resp_v2!(PatchWorkingHoursTypeResp, WorkingHoursTypeData);
 impl_resp_v2!(CreateCompanyResp, CompanyData);
 impl_resp_v2!(DeleteCompanyResp, ());
 impl_resp_v2!(PatchCompanyResp, CompanyData);
@@ -3502,7 +3508,7 @@ impl<'a> JobLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateJobLevelResp>()
+        .send_v2_response::<JobLevelData, CreateJobLevelResp>()
         .await
     }
 
@@ -3538,7 +3544,7 @@ impl<'a> JobLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchJobLevelResp>()
+        .send_v2_response::<JobLevelData, PatchJobLevelResp>()
         .await
     }
 }
@@ -3648,7 +3654,7 @@ impl<'a> DepartmentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchDepartmentResp>()
+        .send_v2_response::<DepartmentData, PatchDepartmentResp>()
         .await
     }
 }
@@ -3667,7 +3673,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateWorkingHoursTypeResp>()
+        .send_v2_response::<WorkingHoursTypeData, CreateWorkingHoursTypeResp>()
         .await
     }
 
@@ -3701,7 +3707,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetWorkingHoursTypeResp>()
+        .send_v2_response::<WorkingHoursTypeData, GetWorkingHoursTypeResp>()
         .await
     }
 
@@ -3720,7 +3726,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchWorkingHoursTypeResp>()
+        .send_v2_response::<WorkingHoursTypeData, PatchWorkingHoursTypeResp>()
         .await
     }
 }
