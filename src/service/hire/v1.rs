@@ -8,6 +8,11 @@ use crate::service::common::{
     EmptyResp, PageIteratorState, PageQuery, RestRequest, impl_page_iterator_controls,
 };
 
+pub use super::shared::{
+    I18n, IdNameObject, RegistrationBasicInfo, TalentInterviewRegistrationSimple,
+    TalentResumeSource,
+};
+
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -60,22 +65,6 @@ pub struct Job {
     pub subject: Option<IdNameObject>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub address_list: Option<Vec<IdNameObject>>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct IdNameObject {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub name: Option<I18n>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct I18n {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub zh_cn: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub en_us: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -6033,28 +6022,6 @@ pub struct Talent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct TalentInterviewRegistrationSimple {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub registration_time: Option<i64>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub download_url: Option<String>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct RegistrationBasicInfo {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub registration_time: Option<i64>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub download_url: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub scenario: Option<i32>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TalentCustomizedData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object_id: Option<String>,
@@ -6268,16 +6235,6 @@ pub struct TalentSns {
     pub sns_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub link: Option<String>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct TalentResumeSource {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub zh_name: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub en_name: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
