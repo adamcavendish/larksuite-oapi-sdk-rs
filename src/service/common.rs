@@ -216,12 +216,7 @@ impl<'a> RestRequest<'a> {
     }
 
     pub(crate) async fn send_json(self) -> Result<JsonResp, LarkError> {
-        let (api_resp, code_error, data) = self.send_v2::<serde_json::Value>().await?;
-        Ok(JsonResp {
-            api_resp,
-            code_error,
-            data,
-        })
+        self.send_v2_response::<serde_json::Value, JsonResp>().await
     }
 
     pub(crate) async fn download(self) -> Result<DownloadResp, LarkError> {
