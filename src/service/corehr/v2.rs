@@ -53,7 +53,7 @@ impl_resp_v2!(SearchTimeZoneV2Resp, ListData);
 impl_resp_v2!(GetBpByDepartmentV2Resp, serde_json::Value);
 impl_resp_v2!(ListBpV2Resp, ListData);
 // company
-impl_resp_v2!(ActiveCompanyV2Resp, serde_json::Value);
+impl_resp_v2!(ActiveCompanyV2Resp, ());
 impl_resp_v2!(BatchGetCompanyV2Resp, serde_json::Value);
 impl_resp_v2!(QueryRecentChangeCompanyV2Resp, serde_json::Value);
 // contract
@@ -61,8 +61,8 @@ impl_resp_v2!(SearchContractV2Resp, ListData);
 // cost_allocation
 impl_resp_v2!(BatchQueryCostAllocationV2Resp, serde_json::Value);
 impl_resp_v2!(CreateVersionCostAllocationV2Resp, serde_json::Value);
-impl_resp_v2!(RemoveVersionCostAllocationV2Resp, serde_json::Value);
-impl_resp_v2!(UpdateVersionCostAllocationV2Resp, serde_json::Value);
+impl_resp_v2!(RemoveVersionCostAllocationV2Resp, ());
+impl_resp_v2!(UpdateVersionCostAllocationV2Resp, ());
 // cost_center
 impl_resp_v2!(CreateCostCenterV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteCostCenterV2Resp, ());
@@ -73,23 +73,23 @@ impl_resp_v2!(CreateCostCenterVersionV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteCostCenterVersionV2Resp, ());
 impl_resp_v2!(PatchCostCenterVersionV2Resp, serde_json::Value);
 // custom_org
-impl_resp_v2!(ActiveCustomOrgV2Resp, serde_json::Value);
+impl_resp_v2!(ActiveCustomOrgV2Resp, ());
 impl_resp_v2!(CreateCustomOrgV2Resp, serde_json::Value);
-impl_resp_v2!(DeleteOrgCustomOrgV2Resp, serde_json::Value);
-impl_resp_v2!(PatchCustomOrgV2Resp, serde_json::Value);
+impl_resp_v2!(DeleteOrgCustomOrgV2Resp, ());
+impl_resp_v2!(PatchCustomOrgV2Resp, ());
 impl_resp_v2!(QueryCustomOrgV2Resp, serde_json::Value);
 impl_resp_v2!(QueryRecentChangeCustomOrgV2Resp, serde_json::Value);
-impl_resp_v2!(UpdateRuleCustomOrgV2Resp, serde_json::Value);
+impl_resp_v2!(UpdateRuleCustomOrgV2Resp, ());
 // default_cost_center
 impl_resp_v2!(BatchQueryDefaultCostCenterV2Resp, serde_json::Value);
 impl_resp_v2!(CreateVersionDefaultCostCenterV2Resp, serde_json::Value);
-impl_resp_v2!(RemoveVersionDefaultCostCenterV2Resp, serde_json::Value);
-impl_resp_v2!(UpdateVersionDefaultCostCenterV2Resp, serde_json::Value);
+impl_resp_v2!(RemoveVersionDefaultCostCenterV2Resp, ());
+impl_resp_v2!(UpdateVersionDefaultCostCenterV2Resp, ());
 // department
 impl_resp_v2!(BatchGetDepartmentV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteDepartmentV2Resp, ());
 impl_resp_v2!(ParentsDepartmentV2Resp, serde_json::Value);
-impl_resp_v2!(PatchDepartmentV2Resp, serde_json::Value);
+impl_resp_v2!(PatchDepartmentV2Resp, ());
 impl_resp_v2!(QueryMultiTimelineDepartmentV2Resp, serde_json::Value);
 impl_resp_v2!(QueryOperationLogsDepartmentV2Resp, serde_json::Value);
 impl_resp_v2!(QueryRecentChangeDepartmentV2Resp, serde_json::Value);
@@ -136,38 +136,38 @@ impl_resp_v2!(QueryRecentChangeJobFamilyV2Resp, serde_json::Value);
 // job_grade
 impl_resp_v2!(CreateJobGradeV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteJobGradeV2Resp, ());
-impl_resp_v2!(PatchJobGradeV2Resp, serde_json::Value);
+impl_resp_v2!(PatchJobGradeV2Resp, ());
 impl_resp_v2!(QueryJobGradeV2Resp, serde_json::Value);
 impl_resp_v2!(QueryRecentChangeJobGradeV2Resp, serde_json::Value);
 // job_level
 impl_resp_v2!(BatchGetJobLevelV2Resp, serde_json::Value);
 impl_resp_v2!(QueryRecentChangeJobLevelV2Resp, serde_json::Value);
 // location
-impl_resp_v2!(ActiveLocationV2Resp, serde_json::Value);
+impl_resp_v2!(ActiveLocationV2Resp, ());
 impl_resp_v2!(BatchGetLocationV2Resp, serde_json::Value);
-impl_resp_v2!(PatchLocationV2Resp, serde_json::Value);
+impl_resp_v2!(PatchLocationV2Resp, ());
 impl_resp_v2!(QueryRecentChangeLocationV2Resp, serde_json::Value);
 impl_resp_v2!(CreateLocationAddressV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteLocationAddressV2Resp, ());
-impl_resp_v2!(PatchLocationAddressV2Resp, serde_json::Value);
+impl_resp_v2!(PatchLocationAddressV2Resp, ());
 // offboarding
 impl_resp_v2!(EditOffboardingV2Resp, serde_json::Value);
-impl_resp_v2!(RevokeOffboardingV2Resp, serde_json::Value);
+impl_resp_v2!(RevokeOffboardingV2Resp, ());
 impl_resp_v2!(SubmitOffboardingV2Resp, serde_json::Value);
 // pathway
-impl_resp_v2!(ActivePathwayV2Resp, serde_json::Value);
+impl_resp_v2!(ActivePathwayV2Resp, ());
 impl_resp_v2!(BatchGetPathwayV2Resp, serde_json::Value);
 impl_resp_v2!(CreatePathwayV2Resp, serde_json::Value);
 impl_resp_v2!(DeletePathwayV2Resp, ());
-impl_resp_v2!(PatchPathwayV2Resp, serde_json::Value);
+impl_resp_v2!(PatchPathwayV2Resp, ());
 // person
 impl_resp_v2!(CreatePersonV2Resp, serde_json::Value);
 impl_resp_v2!(PatchPersonV2Resp, serde_json::Value);
 // position
-impl_resp_v2!(ActivePositionV2Resp, serde_json::Value);
+impl_resp_v2!(ActivePositionV2Resp, ());
 impl_resp_v2!(CreatePositionV2Resp, serde_json::Value);
 impl_resp_v2!(DelPositionV2Resp, serde_json::Value);
-impl_resp_v2!(PatchPositionV2Resp, serde_json::Value);
+impl_resp_v2!(PatchPositionV2Resp, ());
 impl_resp_v2!(QueryPositionV2Resp, serde_json::Value);
 impl_resp_v2!(QueryRecentChangePositionV2Resp, serde_json::Value);
 // pre_hire
@@ -182,28 +182,28 @@ impl_resp_v2!(TransformOnboardingTaskPreHireV2Resp, serde_json::Value);
 impl_resp_v2!(TransitTaskPreHireV2Resp, serde_json::Value);
 impl_resp_v2!(WithdrawOnboardingPreHireV2Resp, serde_json::Value);
 // probation
-impl_resp_v2!(EnableDisableAssessmentProbationV2Resp, serde_json::Value);
+impl_resp_v2!(EnableDisableAssessmentProbationV2Resp, ());
 impl_resp_v2!(SearchProbationV2Resp, ListData);
 impl_resp_v2!(SubmitProbationV2Resp, serde_json::Value);
-impl_resp_v2!(WithdrawProbationV2Resp, serde_json::Value);
+impl_resp_v2!(WithdrawProbationV2Resp, ());
 impl_resp_v2!(CreateProbationAssessmentV2Resp, serde_json::Value);
 impl_resp_v2!(DeleteProbationAssessmentV2Resp, ());
-impl_resp_v2!(PatchProbationAssessmentV2Resp, serde_json::Value);
+impl_resp_v2!(PatchProbationAssessmentV2Resp, ());
 // process
 impl_resp_v2!(FlowVariableDataProcessV2Resp, serde_json::Value);
 impl_resp_v2!(GetProcessV2Resp, serde_json::Value);
 impl_resp_v2!(ListProcessV2Resp, ListData);
 impl_resp_v2!(UpdateProcessApproverV2Resp, serde_json::Value);
-impl_resp_v2!(UpdateProcessExtraV2Resp, serde_json::Value);
+impl_resp_v2!(UpdateProcessExtraV2Resp, ());
 impl_resp_v2!(GetProcessFormVariableDataV2Resp, serde_json::Value);
-impl_resp_v2!(UpdateProcessTransferV2Resp, serde_json::Value);
-impl_resp_v2!(UpdateProcessRevokeV2Resp, serde_json::Value);
-impl_resp_v2!(UpdateProcessWithdrawV2Resp, serde_json::Value);
+impl_resp_v2!(UpdateProcessTransferV2Resp, ());
+impl_resp_v2!(UpdateProcessRevokeV2Resp, ());
+impl_resp_v2!(UpdateProcessWithdrawV2Resp, ());
 // report_detail_row
-impl_resp_v2!(BatchDeleteReportDetailRowV2Resp, serde_json::Value);
-impl_resp_v2!(BatchSaveReportDetailRowV2Resp, serde_json::Value);
+impl_resp_v2!(BatchDeleteReportDetailRowV2Resp, ());
+impl_resp_v2!(BatchSaveReportDetailRowV2Resp, ());
 // signature_file
-impl_resp_v2!(DownloadSignatureFileV2Resp, serde_json::Value);
+impl_resp_v2!(DownloadSignatureFileV2Resp, ());
 impl_resp_v2!(ListSignatureFileV2Resp, ListData);
 impl_resp_v2!(ListByBizIdSignatureFileV2Resp, ListData);
 impl_resp_v2!(QuerySignatureFileV2Resp, serde_json::Value);
@@ -215,8 +215,8 @@ impl_resp_v2!(ListSignatureTemplateInfoWithThumbnailV2Resp, ListData);
 impl_resp_v2!(ListWorkforcePlanV2Resp, ListData);
 impl_resp_v2!(BatchWorkforcePlanDetailV2Resp, serde_json::Value);
 impl_resp_v2!(BatchV2WorkforcePlanDetailV2Resp, serde_json::Value);
-impl_resp_v2!(BatchDeleteWorkforcePlanDetailRowV2Resp, serde_json::Value);
-impl_resp_v2!(BatchSaveWorkforcePlanDetailRowV2Resp, serde_json::Value);
+impl_resp_v2!(BatchDeleteWorkforcePlanDetailRowV2Resp, ());
+impl_resp_v2!(BatchSaveWorkforcePlanDetailRowV2Resp, ());
 
 // ── V2 service entry ──────────────────────────────────────────────────────────
 
@@ -339,6 +339,24 @@ impl<'a> V2<'a> {
 // ── Macro for simple post/get/delete/patch methods ────────────────────────────
 
 macro_rules! post_method {
+    ($fn_name:ident, $resp:ident, $body:ty, $data:ty, $path:expr) => {
+        pub async fn $fn_name(
+            &self,
+            body: serde_json::Value,
+            option: &RequestOption,
+        ) -> Result<$resp, LarkError> {
+            RestRequest::new(
+                self.config,
+                http::Method::POST,
+                $path,
+                vec![AccessTokenType::Tenant],
+                option,
+            )
+            .json_body(&body)?
+            .send_v2_response::<$data, $resp>()
+            .await
+        }
+    };
     ($fn_name:ident, $resp:ident, $data:ty, $path:expr) => {
         pub async fn $fn_name(
             &self,
@@ -646,6 +664,7 @@ impl CompanyV2Resource<'_> {
         active,
         ActiveCompanyV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/companies/active"
     );
     post_method!(
@@ -700,12 +719,14 @@ impl CostAllocationV2Resource<'_> {
         remove_version,
         RemoveVersionCostAllocationV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/cost_allocations/remove_version"
     );
     post_method!(
         update_version,
         UpdateVersionCostAllocationV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/cost_allocations/update_version"
     );
 }
@@ -852,6 +873,7 @@ impl CustomOrgV2Resource<'_> {
         active,
         ActiveCustomOrgV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/custom_orgs/active"
     );
     post_method!(
@@ -864,6 +886,7 @@ impl CustomOrgV2Resource<'_> {
         delete_org,
         DeleteOrgCustomOrgV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/custom_orgs/delete_org"
     );
 
@@ -882,7 +905,7 @@ impl CustomOrgV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchCustomOrgV2Resp>()
+        .send_v2_response::<(), PatchCustomOrgV2Resp>()
         .await
     }
 
@@ -902,6 +925,7 @@ impl CustomOrgV2Resource<'_> {
         update_rule,
         UpdateRuleCustomOrgV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/custom_orgs/update_rule"
     );
 }
@@ -929,12 +953,14 @@ impl DefaultCostCenterV2Resource<'_> {
         remove_version,
         RemoveVersionDefaultCostCenterV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/default_cost_centers/remove_version"
     );
     post_method!(
         update_version,
         UpdateVersionDefaultCostCenterV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/default_cost_centers/update_version"
     );
 }
@@ -992,7 +1018,7 @@ impl DepartmentV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchDepartmentV2Resp>()
+        .send_v2_response::<(), PatchDepartmentV2Resp>()
         .await
     }
 
@@ -1489,7 +1515,7 @@ impl JobGradeV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchJobGradeV2Resp>()
+        .send_v2_response::<(), PatchJobGradeV2Resp>()
         .await
     }
 
@@ -1539,6 +1565,7 @@ impl LocationV2Resource<'_> {
         active,
         ActiveLocationV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/locations/active"
     );
     post_method!(
@@ -1563,7 +1590,7 @@ impl LocationV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchLocationV2Resp>()
+        .send_v2_response::<(), PatchLocationV2Resp>()
         .await
     }
 
@@ -1635,7 +1662,7 @@ impl LocationAddressV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchLocationAddressV2Resp>()
+        .send_v2_response::<(), PatchLocationAddressV2Resp>()
         .await
     }
 }
@@ -1657,6 +1684,7 @@ impl OffboardingV2Resource<'_> {
         revoke,
         RevokeOffboardingV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/offboardings/revoke"
     );
     post_method!(
@@ -1678,6 +1706,7 @@ impl PathwayV2Resource<'_> {
         active,
         ActivePathwayV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/pathways/active"
     );
     post_method!(
@@ -1725,7 +1754,7 @@ impl PathwayV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchPathwayV2Resp>()
+        .send_v2_response::<(), PatchPathwayV2Resp>()
         .await
     }
 }
@@ -1775,6 +1804,7 @@ impl PositionV2Resource<'_> {
         active,
         ActivePositionV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/positions/active"
     );
     post_method!(
@@ -1805,7 +1835,7 @@ impl PositionV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchPositionV2Resp>()
+        .send_v2_response::<(), PatchPositionV2Resp>()
         .await
     }
 
@@ -1955,6 +1985,7 @@ impl ProbationV2Resource<'_> {
         enable_disable_assessment,
         EnableDisableAssessmentProbationV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/probation/enable_disable_assessment"
     );
     post_method!(
@@ -1973,6 +2004,7 @@ impl ProbationV2Resource<'_> {
         withdraw,
         WithdrawProbationV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/probation/withdraw"
     );
 }
@@ -2023,7 +2055,7 @@ impl ProbationAssessmentV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchProbationAssessmentV2Resp>()
+        .send_v2_response::<(), PatchProbationAssessmentV2Resp>()
         .await
     }
 }
@@ -2182,7 +2214,7 @@ impl ProcessExtraV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateProcessExtraV2Resp>()
+        .send_v2_response::<(), UpdateProcessExtraV2Resp>()
         .await
     }
 }
@@ -2234,7 +2266,7 @@ impl ProcessTransferV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateProcessTransferV2Resp>()
+        .send_v2_response::<(), UpdateProcessTransferV2Resp>()
         .await
     }
 }
@@ -2297,7 +2329,7 @@ impl ProcessRevokeV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateProcessRevokeV2Resp>()
+        .send_v2_response::<(), UpdateProcessRevokeV2Resp>()
         .await
     }
 }
@@ -2324,7 +2356,7 @@ impl ProcessWithdrawV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateProcessWithdrawV2Resp>()
+        .send_v2_response::<(), UpdateProcessWithdrawV2Resp>()
         .await
     }
 }
@@ -2340,12 +2372,14 @@ impl ReportDetailRowV2Resource<'_> {
         batch_delete,
         BatchDeleteReportDetailRowV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/report_detail_row/batchDelete"
     );
     post_method!(
         batch_save,
         BatchSaveReportDetailRowV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/report_detail_row/batchSave"
     );
 }
@@ -2504,7 +2538,7 @@ impl SignatureFileV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, DownloadSignatureFileV2Resp>()
+        .send_v2_response::<(), DownloadSignatureFileV2Resp>()
         .await
     }
 
@@ -3015,12 +3049,14 @@ impl WorkforcePlanDetailRowV2Resource<'_> {
         batch_delete,
         BatchDeleteWorkforcePlanDetailRowV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/workforce_plan_detail_row/batchDelete"
     );
     post_method!(
         batch_save,
         BatchSaveWorkforcePlanDetailRowV2Resp,
         serde_json::Value,
+        (),
         "/open-apis/corehr/v2/workforce_plan_detail_row/batchSave"
     );
 }

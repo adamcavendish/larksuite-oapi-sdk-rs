@@ -3,6 +3,28 @@ use super::prelude::*;
 // CoreHR v2 workflow smoke tests
 
 #[tokio::test]
+async fn corehr_v2_company_active_uses_code_only_response() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr_v2()
+        .company
+        .active(
+            serde_json::json!({"company_id": "company-1"}),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(resp.data, None);
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/corehr/v2/companies/active"));
+}
+
+#[tokio::test]
 async fn corehr_v2_approver_list_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"approver-1"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
