@@ -16,24 +16,157 @@ pub struct MetricTagListData {
     pub has_more: Option<bool>,
 }
 
-impl_resp_v2!(QueryActivityV2Resp, serde_json::Value);
-impl_resp_v2!(ImportAdditionalInformationV2Resp, serde_json::Value);
-impl_resp_v2!(QueryAdditionalInformationV2Resp, serde_json::Value);
+impl_resp_v2!(QueryActivityV2Resp, QueryActivityV2RespData);
+impl_resp_v2!(
+    ImportAdditionalInformationV2Resp,
+    ImportAdditionalInformationV2RespData
+);
+impl_resp_v2!(
+    QueryAdditionalInformationV2Resp,
+    QueryAdditionalInformationV2RespData
+);
 impl_resp_v2!(DeleteAdditionalInformationsBatchV2Resp, ());
-impl_resp_v2!(QueryIndicatorV2Resp, serde_json::Value);
-impl_resp_v2!(ImportMetricDetailV2Resp, serde_json::Value);
-impl_resp_v2!(QueryMetricDetailV2Resp, serde_json::Value);
-impl_resp_v2!(QueryMetricFieldV2Resp, serde_json::Value);
-impl_resp_v2!(QueryMetricLibV2Resp, serde_json::Value);
+impl_resp_v2!(QueryIndicatorV2Resp, QueryIndicatorV2RespData);
+impl_resp_v2!(ImportMetricDetailV2Resp, ImportMetricDetailV2RespData);
+impl_resp_v2!(QueryMetricDetailV2Resp, QueryMetricDetailV2RespData);
+impl_resp_v2!(QueryMetricFieldV2Resp, QueryMetricFieldV2RespData);
+impl_resp_v2!(QueryMetricLibV2Resp, QueryMetricLibV2RespData);
 impl_resp_v2!(ListMetricTagV2Resp, MetricTagListData);
-impl_resp_v2!(QueryMetricTemplateV2Resp, serde_json::Value);
-impl_resp_v2!(QueryQuestionV2Resp, serde_json::Value);
-impl_resp_v2!(QueryReviewDataV2Resp, serde_json::Value);
-impl_resp_v2!(QueryReviewTemplateV2Resp, serde_json::Value);
-impl_resp_v2!(QueryRevieweeV2Resp, serde_json::Value);
-impl_resp_v2!(WriteUserGroupUserRelV2Resp, serde_json::Value);
-impl_resp_v2!(QueryUserInfoV2Resp, serde_json::Value);
+impl_resp_v2!(QueryMetricTemplateV2Resp, QueryMetricTemplateV2RespData);
+impl_resp_v2!(QueryQuestionV2Resp, QueryQuestionV2RespData);
+impl_resp_v2!(QueryReviewDataV2Resp, QueryReviewDataV2RespData);
+impl_resp_v2!(QueryReviewTemplateV2Resp, QueryReviewTemplateV2RespData);
+impl_resp_v2!(QueryRevieweeV2Resp, QueryRevieweeV2RespData);
+impl_resp_v2!(WriteUserGroupUserRelV2Resp, WriteUserGroupUserRelV2RespData);
+impl_resp_v2!(QueryUserInfoV2Resp, QueryUserInfoV2RespData);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryActivityV2RespData {
+    #[serde(default)]
+    pub activities: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ImportAdditionalInformationV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub import_record_id: Option<String>,
+    #[serde(default)]
+    pub additional_informations: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryAdditionalInformationV2RespData {
+    #[serde(default)]
+    pub additional_informations: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryIndicatorV2RespData {
+    #[serde(default)]
+    pub indicators: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ImportMetricDetailV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub import_record_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryMetricDetailV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semester_id: Option<String>,
+    #[serde(default)]
+    pub reviewee_metrics: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryMetricFieldV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryMetricLibV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryMetricTemplateV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryQuestionV2RespData {
+    #[serde(default)]
+    pub tag_based_questions: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryReviewDataV2RespData {
+    #[serde(default)]
+    pub datas: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryReviewTemplateV2RespData {
+    #[serde(default)]
+    pub review_templates: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryRevieweeV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semester_id: Option<String>,
+    #[serde(default)]
+    pub reviewees: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WriteUserGroupUserRelV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserInfoV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semester_id: Option<String>,
+    #[serde(default)]
+    pub user_infos: Vec<serde_json::Value>,
+}
 // -- Query parameter types --
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -99,7 +232,7 @@ impl<'a> V2<'a> {
 }
 
 macro_rules! post_query {
-    ($struct_name:ident, $query_name:ident, $method:ident, $by_query_method:ident, $resp:ident, $path:literal) => {
+    ($struct_name:ident, $query_name:ident, $method:ident, $by_query_method:ident, $data:ty, $resp:ident, $path:literal) => {
         #[derive(Debug, Clone, Copy)]
         #[non_exhaustive]
         pub struct $query_name<'a> {
@@ -139,7 +272,7 @@ macro_rules! post_query {
                     option,
                 )
                 .json_body(query.body)?
-                .send_v2_response::<serde_json::Value, $resp>()
+                .send_v2_response::<$data, $resp>()
                 .await
             }
         }
@@ -151,6 +284,7 @@ post_query!(
     QueryActivityV2Query,
     query,
     query_by_query,
+    QueryActivityV2RespData,
     QueryActivityV2Resp,
     "/open-apis/performance/v2/activity/query"
 );
@@ -206,7 +340,7 @@ impl AdditionalInformationV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, ImportAdditionalInformationV2Resp>()
+        .send_v2_response::<ImportAdditionalInformationV2RespData, ImportAdditionalInformationV2Resp>()
         .await
     }
 
@@ -232,7 +366,8 @@ impl AdditionalInformationV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, QueryAdditionalInformationV2Resp>()
+        .send_v2_response::<QueryAdditionalInformationV2RespData, QueryAdditionalInformationV2Resp>(
+        )
         .await
     }
 }
@@ -286,6 +421,7 @@ post_query!(
     QueryIndicatorV2Query,
     query,
     query_by_query,
+    QueryIndicatorV2RespData,
     QueryIndicatorV2Resp,
     "/open-apis/performance/v2/indicators/query"
 );
@@ -341,7 +477,7 @@ impl MetricDetailV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, ImportMetricDetailV2Resp>()
+        .send_v2_response::<ImportMetricDetailV2RespData, ImportMetricDetailV2Resp>()
         .await
     }
 
@@ -367,7 +503,7 @@ impl MetricDetailV2Resource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, QueryMetricDetailV2Resp>()
+        .send_v2_response::<QueryMetricDetailV2RespData, QueryMetricDetailV2Resp>()
         .await
     }
 }
@@ -377,6 +513,7 @@ post_query!(
     QueryMetricFieldV2Query,
     query,
     query_by_query,
+    QueryMetricFieldV2RespData,
     QueryMetricFieldV2Resp,
     "/open-apis/performance/v2/metric_fields/query"
 );
@@ -385,6 +522,7 @@ post_query!(
     QueryMetricLibV2Query,
     query,
     query_by_query,
+    QueryMetricLibV2RespData,
     QueryMetricLibV2Resp,
     "/open-apis/performance/v2/metric_libs/query"
 );
@@ -428,6 +566,7 @@ post_query!(
     QueryMetricTemplateV2Query,
     query,
     query_by_query,
+    QueryMetricTemplateV2RespData,
     QueryMetricTemplateV2Resp,
     "/open-apis/performance/v2/metric_templates/query"
 );
@@ -436,6 +575,7 @@ post_query!(
     QueryQuestionV2Query,
     query,
     query_by_query,
+    QueryQuestionV2RespData,
     QueryQuestionV2Resp,
     "/open-apis/performance/v2/questions/query"
 );
@@ -444,6 +584,7 @@ post_query!(
     QueryReviewDataV2Query,
     query,
     query_by_query,
+    QueryReviewDataV2RespData,
     QueryReviewDataV2Resp,
     "/open-apis/performance/v2/review_datas/query"
 );
@@ -452,6 +593,7 @@ post_query!(
     QueryReviewTemplateV2Query,
     query,
     query_by_query,
+    QueryReviewTemplateV2RespData,
     QueryReviewTemplateV2Resp,
     "/open-apis/performance/v2/review_templates/query"
 );
@@ -460,6 +602,7 @@ post_query!(
     QueryRevieweeV2Query,
     query,
     query_by_query,
+    QueryRevieweeV2RespData,
     QueryRevieweeV2Resp,
     "/open-apis/performance/v2/reviewees/query"
 );
@@ -468,6 +611,7 @@ post_query!(
     WriteUserGroupUserRelV2Query,
     write,
     write_by_query,
+    WriteUserGroupUserRelV2RespData,
     WriteUserGroupUserRelV2Resp,
     "/open-apis/performance/v2/user_group_user_rels/write"
 );
@@ -476,6 +620,7 @@ post_query!(
     QueryUserInfoV2Query,
     query,
     query_by_query,
+    QueryUserInfoV2RespData,
     QueryUserInfoV2Resp,
     "/open-apis/performance/v2/user_info/query"
 );

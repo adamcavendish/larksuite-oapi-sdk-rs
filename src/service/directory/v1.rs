@@ -38,19 +38,114 @@ pub struct UserListData {
 
 impl_resp!(ListUserResp, UserListData);
 
-impl_resp_v2!(CreateCollaborationRuleResp, serde_json::Value);
-impl_resp_v2!(ListCollaborationRuleResp, serde_json::Value);
-impl_resp_v2!(ListCollaborationTenantResp, serde_json::Value);
-impl_resp_v2!(ListShareEntityResp, serde_json::Value);
-impl_resp_v2!(CreateDepartmentResp, serde_json::Value);
-impl_resp_v2!(FilterDepartmentResp, serde_json::Value);
-impl_resp_v2!(MgetDepartmentResp, serde_json::Value);
-impl_resp_v2!(SearchDepartmentResp, serde_json::Value);
-impl_resp_v2!(CreateEmployeeResp, serde_json::Value);
-impl_resp_v2!(FilterEmployeeResp, serde_json::Value);
-impl_resp_v2!(MgetEmployeeResp, serde_json::Value);
-impl_resp_v2!(SearchEmployeeResp, serde_json::Value);
+impl_resp_v2!(CreateCollaborationRuleResp, CreateCollaborationRuleRespData);
+impl_resp_v2!(ListCollaborationRuleResp, ListCollaborationRuleRespData);
+impl_resp_v2!(ListCollaborationTenantResp, ListCollaborationTenantRespData);
+impl_resp_v2!(ListShareEntityResp, ());
+impl_resp_v2!(CreateDepartmentResp, CreateDepartmentRespData);
+impl_resp_v2!(FilterDepartmentResp, FilterDepartmentRespData);
+impl_resp_v2!(MgetDepartmentResp, MgetDepartmentRespData);
+impl_resp_v2!(SearchDepartmentResp, SearchDepartmentRespData);
+impl_resp_v2!(CreateEmployeeResp, CreateEmployeeRespData);
+impl_resp_v2!(FilterEmployeeResp, FilterEmployeeRespData);
+impl_resp_v2!(MgetEmployeeResp, MgetEmployeeRespData);
+impl_resp_v2!(SearchEmployeeResp, SearchEmployeeRespData);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateCollaborationRuleRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_rule_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListCollaborationRuleRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListCollaborationTenantRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateDepartmentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FilterDepartmentRespData {
+    #[serde(default)]
+    pub departments: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_response: Option<serde_json::Value>,
+    #[serde(default)]
+    pub abnormals: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MgetDepartmentRespData {
+    #[serde(default)]
+    pub departments: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub abnormals: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchDepartmentRespData {
+    #[serde(default)]
+    pub departments: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_response: Option<serde_json::Value>,
+    #[serde(default)]
+    pub abnormals: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateEmployeeRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FilterEmployeeRespData {
+    #[serde(default)]
+    pub employees: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_response: Option<serde_json::Value>,
+    #[serde(default)]
+    pub abnormals: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MgetEmployeeRespData {
+    #[serde(default)]
+    pub employees: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub abnormals: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchEmployeeRespData {
+    #[serde(default)]
+    pub employees: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_response: Option<serde_json::Value>,
+    #[serde(default)]
+    pub abnormals: Vec<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct UserResource<'a> {
@@ -296,7 +391,7 @@ impl CollaborationRuleResource<'_> {
         .query("target_tenant_key", query.target_tenant_key)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateCollaborationRuleResp>()
+        .send_v2_response::<CreateCollaborationRuleRespData, CreateCollaborationRuleResp>()
         .await
     }
 
@@ -366,7 +461,7 @@ impl CollaborationRuleResource<'_> {
         .query("target_tenant_key", query.target_tenant_key)
         .query("tenant_id", query.tenant_id)
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListCollaborationRuleResp>()
+        .send_v2_response::<ListCollaborationRuleRespData, ListCollaborationRuleResp>()
         .await
     }
 
@@ -482,7 +577,7 @@ impl CollaborationTenantResource<'_> {
         )
         .query("tenant_id", query.tenant_id)
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListCollaborationTenantResp>()
+        .send_v2_response::<ListCollaborationTenantRespData, ListCollaborationTenantResp>()
         .await
     }
 }
@@ -598,7 +693,7 @@ impl ShareEntityResource<'_> {
         .query("is_select_subject", query.is_select_subject)
         .query("tenant_id", query.tenant_id)
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListShareEntityResp>()
+        .send_v2_response::<(), ListShareEntityResp>()
         .await
     }
 }
@@ -821,7 +916,7 @@ impl DepartmentResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateDepartmentResp>()
+        .send_v2_response::<CreateDepartmentRespData, CreateDepartmentResp>()
         .await
     }
 
@@ -894,7 +989,7 @@ impl DepartmentResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, FilterDepartmentResp>()
+        .send_v2_response::<FilterDepartmentRespData, FilterDepartmentResp>()
         .await
     }
 
@@ -929,7 +1024,7 @@ impl DepartmentResource<'_> {
         .query("department_id_type", query.department_id_type)
         .query("is_admin_role", query.is_admin_role)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, MgetDepartmentResp>()
+        .send_v2_response::<MgetDepartmentRespData, MgetDepartmentResp>()
         .await
     }
 
@@ -1007,7 +1102,7 @@ impl DepartmentResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, SearchDepartmentResp>()
+        .send_v2_response::<SearchDepartmentRespData, SearchDepartmentResp>()
         .await
     }
 }
@@ -1285,7 +1380,7 @@ impl EmployeeResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateEmployeeResp>()
+        .send_v2_response::<CreateEmployeeRespData, CreateEmployeeResp>()
         .await
     }
 
@@ -1366,7 +1461,7 @@ impl EmployeeResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, FilterEmployeeResp>()
+        .send_v2_response::<FilterEmployeeRespData, FilterEmployeeResp>()
         .await
     }
 
@@ -1401,7 +1496,7 @@ impl EmployeeResource<'_> {
         .query("employee_id_type", query.employee_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, MgetEmployeeResp>()
+        .send_v2_response::<MgetEmployeeRespData, MgetEmployeeResp>()
         .await
     }
 
@@ -1568,7 +1663,7 @@ impl EmployeeResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, SearchEmployeeResp>()
+        .send_v2_response::<SearchEmployeeRespData, SearchEmployeeResp>()
         .await
     }
 

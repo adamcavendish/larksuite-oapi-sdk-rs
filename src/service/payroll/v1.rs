@@ -38,18 +38,27 @@ pub struct RecordListData {
 
 impl_resp!(ListPayrollRecordResp, RecordListData);
 
-impl_resp_v2!(ListAcctItemResp, serde_json::Value);
-impl_resp_v2!(ListCostAllocationDetailResp, serde_json::Value);
-impl_resp_v2!(ListCostAllocationPlanResp, serde_json::Value);
-impl_resp_v2!(ListCostAllocationReportResp, serde_json::Value);
-impl_resp_v2!(ListDatasourceResp, serde_json::Value);
-impl_resp_v2!(QueryDatasourceRecordResp, serde_json::Value);
-impl_resp_v2!(SaveDatasourceRecordResp, serde_json::Value);
-impl_resp_v2!(ListPaygroupResp, serde_json::Value);
-impl_resp_v2!(ArchivePaymentActivityResp, serde_json::Value);
-impl_resp_v2!(ListPaymentActivityResp, serde_json::Value);
-impl_resp_v2!(ListPaymentActivityDetailResp, serde_json::Value);
-impl_resp_v2!(QueryPaymentDetailResp, serde_json::Value);
+impl_resp_v2!(ListAcctItemResp, ListAcctItemRespData);
+impl_resp_v2!(
+    ListCostAllocationDetailResp,
+    ListCostAllocationDetailRespData
+);
+impl_resp_v2!(ListCostAllocationPlanResp, ListCostAllocationPlanRespData);
+impl_resp_v2!(
+    ListCostAllocationReportResp,
+    ListCostAllocationReportRespData
+);
+impl_resp_v2!(ListDatasourceResp, ListDatasourceRespData);
+impl_resp_v2!(QueryDatasourceRecordResp, QueryDatasourceRecordRespData);
+impl_resp_v2!(SaveDatasourceRecordResp, SaveDatasourceRecordRespData);
+impl_resp_v2!(ListPaygroupResp, ListPaygroupRespData);
+impl_resp_v2!(ArchivePaymentActivityResp, ());
+impl_resp_v2!(ListPaymentActivityResp, ListPaymentActivityRespData);
+impl_resp_v2!(
+    ListPaymentActivityDetailResp,
+    ListPaymentActivityDetailRespData
+);
+impl_resp_v2!(QueryPaymentDetailResp, QueryPaymentDetailRespData);
 
 #[derive(Debug, Clone, Copy, Default)]
 #[non_exhaustive]
@@ -448,6 +457,117 @@ impl<'a> QueryPaymentDetailQuery<'a> {
     }
 }
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListAcctItemRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListCostAllocationDetailRespData {
+    #[serde(default)]
+    pub cost_allocation_report_datas: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub cost_allocation_report_names: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pay_period: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListCostAllocationPlanRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListCostAllocationReportRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pay_period: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default)]
+    pub cost_allocation_report_names: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub cost_allocation_report_datas: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListDatasourceRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default)]
+    pub datasources: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryDatasourceRecordRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default)]
+    pub records: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SaveDatasourceRecordRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affect_counts: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListPaygroupRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListPaymentActivityRespData {
+    #[serde(default)]
+    pub payment_activitys: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListPaymentActivityDetailRespData {
+    #[serde(default)]
+    pub payment_activity_details: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryPaymentDetailRespData {
+    #[serde(default)]
+    pub payment_details: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
+}
 // ── Resources ──
 
 pub struct PayrollRecordResource<'a> {
@@ -520,7 +640,7 @@ impl AcctItemResource<'_> {
             option,
         )
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListAcctItemResp>()
+        .send_v2_response::<ListAcctItemRespData, ListAcctItemResp>()
         .await
     }
 }
@@ -566,7 +686,7 @@ impl CostAllocationDetailResource<'_> {
         .query("pay_period", query.pay_period)
         .query("report_type", query.report_type)
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListCostAllocationDetailResp>()
+        .send_v2_response::<ListCostAllocationDetailRespData, ListCostAllocationDetailResp>()
         .await
     }
 }
@@ -605,7 +725,7 @@ impl CostAllocationPlanResource<'_> {
         )
         .query("pay_period", query.pay_period)
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListCostAllocationPlanResp>()
+        .send_v2_response::<ListCostAllocationPlanRespData, ListCostAllocationPlanResp>()
         .await
     }
 }
@@ -651,7 +771,7 @@ impl CostAllocationReportResource<'_> {
         .query("pay_period", query.pay_period)
         .query("report_type", query.report_type)
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListCostAllocationReportResp>()
+        .send_v2_response::<ListCostAllocationReportRespData, ListCostAllocationReportResp>()
         .await
     }
 }
@@ -686,7 +806,7 @@ impl DatasourceResource<'_> {
             option,
         )
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListDatasourceResp>()
+        .send_v2_response::<ListDatasourceRespData, ListDatasourceResp>()
         .await
     }
 }
@@ -724,7 +844,7 @@ impl DatasourceRecordResource<'_> {
         )
         .page_query(query.page)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, QueryDatasourceRecordResp>()
+        .send_v2_response::<QueryDatasourceRecordRespData, QueryDatasourceRecordResp>()
         .await
     }
 
@@ -750,7 +870,7 @@ impl DatasourceRecordResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, SaveDatasourceRecordResp>()
+        .send_v2_response::<SaveDatasourceRecordRespData, SaveDatasourceRecordResp>()
         .await
     }
 }
@@ -785,7 +905,7 @@ impl PaygroupResource<'_> {
             option,
         )
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListPaygroupResp>()
+        .send_v2_response::<ListPaygroupRespData, ListPaygroupResp>()
         .await
     }
 }
@@ -819,7 +939,7 @@ impl PaymentActivityResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, ArchivePaymentActivityResp>()
+        .send_v2_response::<(), ArchivePaymentActivityResp>()
         .await
     }
 
@@ -857,7 +977,7 @@ impl PaymentActivityResource<'_> {
         .query("pay_period_end_date", query.pay_period_end_date)
         .query_values("statuses", query.statuses)
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListPaymentActivityResp>()
+        .send_v2_response::<ListPaymentActivityRespData, ListPaymentActivityResp>()
         .await
     }
 }
@@ -904,7 +1024,7 @@ impl PaymentActivityDetailResource<'_> {
         .query("page_size", query.page_size)
         .query("include_segment_data", query.include_segment_data)
         .query_values("acct_item_ids", query.acct_item_ids)
-        .send_v2_response::<serde_json::Value, ListPaymentActivityDetailResp>()
+        .send_v2_response::<ListPaymentActivityDetailRespData, ListPaymentActivityDetailResp>()
         .await
     }
 }
@@ -938,7 +1058,7 @@ impl PaymentDetailResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, QueryPaymentDetailResp>()
+        .send_v2_response::<QueryPaymentDetailRespData, QueryPaymentDetailResp>()
         .await
     }
 }
