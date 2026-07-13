@@ -56,8 +56,7 @@ async fn application_v6_get_by_query_smoke() {
         resp.data
             .as_ref()
             .and_then(|data| data.app.as_ref())
-            .and_then(|app| app.get("app_id"))
-            .and_then(|app_id| app_id.as_str()),
+            .and_then(|app| app.app_id.as_deref()),
         Some("cli_a")
     );
     let request = requests.lock().unwrap().join("\n");

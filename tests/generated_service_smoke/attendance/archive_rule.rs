@@ -24,8 +24,7 @@ async fn attendance_archive_rule_list_by_query_smoke() {
         resp.data
             .as_ref()
             .and_then(|data| data.items.first())
-            .and_then(|item| item.get("archive_rule_id"))
-            .and_then(|rule_id| rule_id.as_str()),
+            .and_then(|item| item.archive_rule_id.as_deref()),
         Some("rule-1")
     );
     let request = requests.lock().unwrap().join("\n");

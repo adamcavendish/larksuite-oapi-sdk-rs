@@ -23,8 +23,7 @@ async fn attendance_shift_list_by_query_smoke() {
         resp.data
             .as_ref()
             .and_then(|data| data.shift_list.first())
-            .and_then(|item| item.get("shift_id"))
-            .and_then(|shift_id| shift_id.as_str()),
+            .and_then(|item| item.shift_id.as_deref()),
         Some("shift-1")
     );
     let request = requests.lock().unwrap().join("\n");

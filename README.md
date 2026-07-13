@@ -183,6 +183,8 @@ the broader API surface.
 
 Generated V2 response wrappers use Go-shaped top-level data structs when the
 reference SDK defines response data, and unit responses where it does not.
+Their nested response objects follow the Go SDK model graph; raw JSON is kept
+only where the upstream shape is intentionally open-ended.
 
 Hire v1 is a particular focus: catalog, reference, task, website-posting,
 external, agency, job, talent, application, interview, and background-check

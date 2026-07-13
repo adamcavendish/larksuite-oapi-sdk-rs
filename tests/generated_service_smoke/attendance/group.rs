@@ -124,8 +124,7 @@ async fn attendance_group_list_user_by_query_smoke() {
         resp.data
             .as_ref()
             .and_then(|data| data.users.first())
-            .and_then(|item| item.get("user_id"))
-            .and_then(|user_id| user_id.as_str()),
+            .and_then(|item| item.user_id.as_deref()),
         Some("u-1")
     );
     let request = requests.lock().unwrap().join("\n");

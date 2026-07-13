@@ -28,8 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "first_app_id: {:?}",
             items
                 .and_then(|items| items.first())
-                .and_then(|app| app.get("app_id"))
-                .and_then(|app_id| app_id.as_str())
+                .and_then(|app| app.app_id.as_deref())
         );
     } else if let Some(err) = list.code_error.as_ref() {
         println!("list applications error: {err}");
@@ -52,8 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 app.data
                     .as_ref()
                     .and_then(|data| data.app.as_ref())
-                    .and_then(|app| app.get("app_id"))
-                    .and_then(|app_id| app_id.as_str())
+                    .and_then(|app| app.app_id.as_deref())
             );
         } else if let Some(err) = app.code_error.as_ref() {
             println!("get application error: {err}");
