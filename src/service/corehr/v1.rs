@@ -982,7 +982,7 @@ impl_resp!(ListWorkingHoursTypeResp, WorkingHoursTypeListData);
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchAssignedUserRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<RoleAuthorization>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -998,13 +998,13 @@ pub struct AddRoleAssignAuthorizationRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetByParamAuthorizationRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub role_authorization: Option<serde_json::Value>,
+    pub role_authorization: Option<RoleAuthorization>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryAuthorizationRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<RoleAuthorization>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1028,7 +1028,7 @@ pub struct MatchCompensationStandardRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub standard_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub grade: Option<serde_json::Value>,
+    pub grade: Option<CpstGrade>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub effective_time: Option<String>,
 }
@@ -1036,19 +1036,19 @@ pub struct MatchCompensationStandardRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateContractRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contract: Option<serde_json::Value>,
+    pub contract: Option<Contract>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetContractRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contract: Option<serde_json::Value>,
+    pub contract: Option<Contract>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListContractRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<Contract>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1058,19 +1058,19 @@ pub struct ListContractRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PatchContractRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contract: Option<serde_json::Value>,
+    pub contract: Option<Contract>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetByParamCustomFieldRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub data: Option<serde_json::Value>,
+    pub data: Option<CustomField>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListObjectApiNameCustomFieldRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<Object>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1080,25 +1080,25 @@ pub struct ListObjectApiNameCustomFieldRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryCustomFieldRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<CustomField>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateDepartmentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub department: Option<serde_json::Value>,
+    pub department: Option<DepartmentCreate>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateEmploymentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub employment: Option<serde_json::Value>,
+    pub employment: Option<EmploymentCreate>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PatchEmploymentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub employment: Option<serde_json::Value>,
+    pub employment: Option<Employment>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1120,7 +1120,7 @@ pub struct CreateJobChangeRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub created_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub transfer_info: Option<serde_json::Value>,
+    pub transfer_info: Option<TransferInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1132,7 +1132,7 @@ pub struct CalendarByScopeLeaveRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct LeaveBalancesLeaveRespData {
     #[serde(default)]
-    pub employment_leave_balance_list: Vec<serde_json::Value>,
+    pub employment_leave_balance_list: Vec<EmploymentLeaveBalance>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1142,7 +1142,7 @@ pub struct LeaveBalancesLeaveRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct LeaveRequestHistoryLeaveRespData {
     #[serde(default)]
-    pub leave_request_list: Vec<serde_json::Value>,
+    pub leave_request_list: Vec<LeaveRequest>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1152,7 +1152,7 @@ pub struct LeaveRequestHistoryLeaveRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct LeaveTypesLeaveRespData {
     #[serde(default)]
-    pub leave_type_list: Vec<serde_json::Value>,
+    pub leave_type_list: Vec<LeaveType>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1162,7 +1162,7 @@ pub struct LeaveTypesLeaveRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkCalendarLeaveRespData {
     #[serde(default)]
-    pub work_calendars: Vec<serde_json::Value>,
+    pub work_calendars: Vec<WorkCalendarDetail>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<i32>,
 }
@@ -1170,19 +1170,19 @@ pub struct WorkCalendarLeaveRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WorkCalendarDateLeaveRespData {
     #[serde(default)]
-    pub calendar_dates: Vec<serde_json::Value>,
+    pub calendar_dates: Vec<WkCalendarDate>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateLeaveGrantingRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub leave_granting_record: Option<serde_json::Value>,
+    pub leave_granting_record: Option<LeaveGrantingRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryOffboardingRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<OffboardingReason>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1210,19 +1210,19 @@ pub struct SubmitOffboardingRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreatePersonRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub person: Option<serde_json::Value>,
+    pub person: Option<Person>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetPersonRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub person: Option<serde_json::Value>,
+    pub person: Option<Person>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PatchPersonRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub person: Option<serde_json::Value>,
+    pub person: Option<Person>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1234,13 +1234,13 @@ pub struct UploadPersonRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetPreHireRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub pre_hire: Option<serde_json::Value>,
+    pub pre_hire: Option<PreHire>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListPreHireRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<PreHireQuery>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1250,19 +1250,19 @@ pub struct ListPreHireRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PatchPreHireRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub pre_hire: Option<serde_json::Value>,
+    pub pre_hire: Option<PreHire>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetProcessFormVariableDataRespData {
     #[serde(default)]
-    pub field_variable_values: Vec<serde_json::Value>,
+    pub field_variable_values: Vec<FormFieldVariable>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListSecurityGroupRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<SecurityGroup>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1272,7 +1272,1655 @@ pub struct ListSecurityGroupRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QuerySecurityGroupRespData {
     #[serde(default)]
-    pub hrbp_list: Vec<serde_json::Value>,
+    pub hrbp_list: Vec<Hrbp>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Address {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub full_address_local_script: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub full_address_western_script: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub region_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub distinct_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city_id_v2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub district_id_v2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_line1: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_line2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_line3: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_line4: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_line5: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_line6: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_line7: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_line8: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_line9: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_address_line1: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_address_line2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_address_line3: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_address_line4: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_address_line5: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_address_line6: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_address_line7: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_address_line8: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_address_line9: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub postal_code: Option<String>,
+    #[serde(default)]
+    pub address_type_list: Vec<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_primary: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_public: Option<bool>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AttachmentFieldSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_multiple: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BankAccount {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank_account_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_holder: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank_identification_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub branch_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub branch_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank_id_v2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub branch_id_v2: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region_id: Option<String>,
+    #[serde(default)]
+    pub bank_account_usage: Vec<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank_account_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BpmDataengineI18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CalculatedFieldSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CommonSchemaConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_field_setting: Option<TextFieldSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_field_setting: Option<NumberFieldSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_field_setting: Option<EnumFieldSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lookup_field_setting: Option<LookupFieldSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_time_field_setting: Option<DateTimeFieldSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_field_setting: Option<AttachmentFieldSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image_field_setting: Option<ImageFieldSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calculated_field_setting: Option<CalculatedFieldSetting>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CommonSchemaOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Name>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<Name>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_open: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Contract {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub first_party_company_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person_id: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub signing_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_status: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub renewal_status: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub signing_times: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CpstBandWidth {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub upper_limit: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lower_limit: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CpstCurrency {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<CpstI18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CpstGrade {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grade_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grade_tid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grade_standard_value: Option<CpstGradeStandardValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency: Option<CpstCurrency>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<CpstI18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CpstGradeStandardValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reference_object: Option<ReferenceObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub standard_type: Option<CpstStandardType>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub band_width: Option<CpstBandWidth>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub standard_value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CpstI18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CpstStandardType {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub api_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CustomField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Name>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<Name>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_open: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_unique: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub common_schema_config: Option<CommonSchemaConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseCustomFieldData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<CustomName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CustomName {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DateTimeFieldSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_time_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DepartmentCreate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sub_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub manager: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_confidential: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hiberarchy_common: Option<HiberarchyCommon>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_time: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_center_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub staffing_model: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_prefer_manual_encoding: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Dependent {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<PersonName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relationship: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gender: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_of_birth: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nationality_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nationality_id_v2: Option<String>,
+    #[serde(default)]
+    pub national_id_list: Vec<NationalId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spouses_working_status: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_this_person_covered_by_health_insurance: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_this_person_allowed_for_tax_deduction: Option<bool>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dependent_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employer: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone: Option<Phone>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address: Option<Address>,
+    #[serde(default)]
+    pub birth_certificate_of_child: Vec<File>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Education {
+    #[serde(default)]
+    pub school: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level_of_education: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_date: Option<String>,
+    #[serde(default)]
+    pub field_of_study: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub degree: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub school_name: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_of_study_name: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_end_date: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Email {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_primary: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_public: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_usage: Option<ResponseEnum>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EmergencyContact {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<PersonName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relationship: Option<ResponseEnum>,
+    #[serde(default)]
+    pub phone_ist: Vec<Phone>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub legal_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Employment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prehire_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenure: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_level_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_location_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_family_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub company_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub working_hours_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seniority_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_period: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_probation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub primary_employment: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition_worker: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_status: Option<ResponseEnum>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default)]
+    pub work_email_list: Vec<Email>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_address: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason_for_offboarding: Option<ResponseEnum>,
+    #[serde(default)]
+    pub cost_center_list: Vec<JobDataCostCenter>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ats_application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rehire: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rehire_employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub service_company: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub compensation_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_shift: Option<ResponseEnum>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EmploymentCreate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prehire_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenure: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_level_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_location_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_family_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub company_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub working_hours_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seniority_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_period: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_probation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub primary_employment: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_status: Option<ResponseEnum>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default)]
+    pub work_email_list: Vec<Email>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_address: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason_for_offboarding: Option<ResponseEnum>,
+    #[serde(default)]
+    pub cost_center_list: Vec<JobDataCostCenter>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ats_application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rehire: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rehire_employment_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EmploymentLeaveBalance {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default)]
+    pub employment_name: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub as_of_date: Option<String>,
+    #[serde(default)]
+    pub leave_balance_list: Vec<LeaveBalance>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseEnum {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_name: Option<String>,
+    #[serde(default)]
+    pub display: Vec<ResponseI18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EnumFieldSetting {
+    #[serde(default)]
+    pub enum_field_option_list: Vec<CommonSchemaOption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_multiple: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct File {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FilterCondition {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub left: Option<FilterRuleValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub right: Option<FilterRuleValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub right_value_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FilterExpression {
+    #[serde(default)]
+    pub conditions: Vec<FilterCondition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expression: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub logic_expression: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FilterRuleValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lookup_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lookup_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariable {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variable_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variable_name: Option<BpmDataengineI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variable_value: Option<FormVariableValueInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableBoolValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableDateValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableDatetimeValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zone: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableDepartmentValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableEmploymentValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableEnumValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<BpmDataengineI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub desc: Option<BpmDataengineI18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableFileValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub length: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mime_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableI18nValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<BpmDataengineI18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableListObject {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_value: Option<FormFieldVariableTextValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_value: Option<FormFieldVariableNumberValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_value: Option<FormFieldVariableDateValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_value: Option<FormFieldVariableEmploymentValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_time_value: Option<FormFieldVariableDatetimeValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_value: Option<FormFieldVariableEnumValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub null_value: Option<FormFieldVariableNullValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bool_value: Option<FormFieldVariableBoolValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_value: Option<FormFieldVariableDepartmentValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_value: Option<FormFieldVariableFileValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_value: Option<FormFieldVariableI18nValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_value: Option<FormFieldVariableObjectValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub record_value: Option<FormFieldVariableRecordValue>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableListValue {
+    #[serde(default)]
+    pub values: Vec<FormFieldVariableListObject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableNullValue {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableNumberValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableObjectValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wk_api_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableRecordValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub values: Option<FormFieldVariableRecordValueExample>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableRecordValueExample {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region: Option<FormVariableValueInfoExample>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormFieldVariableTextValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormVariableValueInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_value: Option<FormFieldVariableTextValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_value: Option<FormFieldVariableNumberValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_value: Option<FormFieldVariableDateValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_value: Option<FormFieldVariableEmploymentValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_time_value: Option<FormFieldVariableDatetimeValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_value: Option<FormFieldVariableEnumValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub null_value: Option<FormFieldVariableNullValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bool_value: Option<FormFieldVariableBoolValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_value: Option<FormFieldVariableDepartmentValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_value: Option<FormFieldVariableFileValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_value: Option<FormFieldVariableI18nValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_value: Option<FormFieldVariableObjectValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub list_value: Option<FormFieldVariableListValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub record_value: Option<FormFieldVariableRecordValue>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FormVariableValueInfoExample {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_value: Option<FormFieldVariableObjectValue>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct HiberarchyCommon {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_id: Option<String>,
+    #[serde(default)]
+    pub name: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default)]
+    pub description: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tree_order: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub list_order: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Hrbp {
+    #[serde(default)]
+    pub employment_id_list: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_location_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseI18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lang: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ImageFieldSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_style: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobDataCostCenter {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_center_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rate: Option<i32>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveBalance {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(default)]
+    pub leave_type_name: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub historical_cycles_left: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub this_cycle_total: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub this_cycle_taken: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_balance: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_duration_unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub history_cycle_accrual: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub balance_in_current_cycle: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub taken: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub taken_history_cycle: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_balance: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub taken_current_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_granted: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_balance_excluding_under_approval: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_quantity_under_approval: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveExtendItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveGrantingRecord {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granting_quantity: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granting_unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granted_by: Option<i32>,
+    #[serde(default)]
+    pub reason: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub section_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveProcessInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_apply_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_request_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default)]
+    pub employment_name: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(default)]
+    pub leave_type_name: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_duration: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_duration_unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_request_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grant_source: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub return_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub submitted_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub submitted_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notes: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_deducted: Option<bool>,
+    #[serde(default)]
+    pub details: Vec<LeaveRequestDetail>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_type_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actual_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub estimated_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_zone: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data_source: Option<i32>,
+    #[serde(default)]
+    pub leave_process_id: Vec<String>,
+    #[serde(default)]
+    pub leave_correct_process_id: Vec<String>,
+    #[serde(default)]
+    pub leave_cancel_process_id: Vec<String>,
+    #[serde(default)]
+    pub leave_return_process_id: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wd_paid_type: Option<i32>,
+    #[serde(default)]
+    pub leave_correct_process_info: Vec<LeaveProcessInfo>,
+    #[serde(default)]
+    pub workday_extend_infos: Vec<LeaveExtendItem>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_tag_conf: Option<LeaveTagConf>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveRequestDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_request_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_duration: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_duration_unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub paid_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveSubtype {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(default)]
+    pub leave_type_name: Vec<ResponseI18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveTagConf {
+    #[serde(default)]
+    pub tags: Vec<Tag>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveType {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(default)]
+    pub leave_type_name: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default)]
+    pub leave_subtype_list: Vec<LeaveSubtype>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_by: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LookupFieldSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lookup_obj_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_multiple: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ManagementScope {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub management_dimension: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub obj_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Name {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct NationalId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub national_id_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub national_id_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub issue_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub issued_by: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct NumberFieldSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_field_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub decimal_places: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub round_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub decimal_total_places: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Object {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Name>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_open: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseObjectFieldData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OffboardingReason {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_reason_unique_identifier: Option<String>,
+    #[serde(default)]
+    pub name: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_offboarding_reason_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OrgTruncation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub depth: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PermissionDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role: Option<SecurityGroup>,
+    #[serde(default)]
+    pub assigned_organization_list: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub grantor_rule_list: Vec<PermissionSecurityGroup>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PermissionSecurityGroup {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rule_dimension: Option<RuleDimension>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rule_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expression: Option<FilterExpression>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Person {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub legal_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preferred_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default)]
+    pub name_list: Vec<PersonName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gender: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_of_birth: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nationality_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nationality_id_v2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub race: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub marital_status: Option<ResponseEnum>,
+    #[serde(default)]
+    pub phone_list: Vec<Phone>,
+    #[serde(default)]
+    pub address_list: Vec<Address>,
+    #[serde(default)]
+    pub email_list: Vec<Email>,
+    #[serde(default)]
+    pub work_experience_list: Vec<WorkExperience>,
+    #[serde(default)]
+    pub education_list: Vec<Education>,
+    #[serde(default)]
+    pub bank_account_list: Vec<BankAccount>,
+    #[serde(default)]
+    pub national_id_list: Vec<NationalId>,
+    #[serde(default)]
+    pub dependent_list: Vec<Dependent>,
+    #[serde(default)]
+    pub emergency_contact_list: Vec<EmergencyContact>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_entered_workforce: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub profile_image_id: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_address: Option<String>,
+    #[serde(default)]
+    pub resident_tax_id_list: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub age: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub highest_level_of_education: Option<Education>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub highest_degree_of_education: Option<Education>,
+    #[serde(default)]
+    pub personal_profile: Vec<PersonalProfile>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PersonName {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_primary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_first_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_first_name_2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_primary_2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub additional_name_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub first_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub full_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hereditary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_local_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub middle_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name_primary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub secondary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub social: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tertiary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_middle_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_secondary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name_local_and_western_script: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name_local_script: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name_western_script: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PersonalProfile {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub personal_profile_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub personal_profile_type: Option<ResponseEnum>,
+    #[serde(default)]
+    pub files: Vec<File>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Phone {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub international_area_code: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub formatted_phone_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone_usage: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_primary: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_public: Option<bool>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PreHire {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ats_application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hire_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub worker_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person_id: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default)]
+    pub cost_center_rate: Vec<SupportCostCenterItem>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboarding_status: Option<ResponseEnum>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PreHireQuery {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ats_application_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hire_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type: Option<ResponseEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub worker_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person_id: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboarding_status: Option<ResponseEnum>,
+    #[serde(default)]
+    pub cost_center_rate: Vec<SupportCostCenterItem>,
+    #[serde(default)]
+    pub work_email_list: Vec<Email>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReferenceObject {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RoleAuthorization {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default)]
+    pub permission_detail_list: Vec<PermissionDetail>,
+    #[serde(default)]
+    pub management_scope_list: Vec<ManagementScope>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RuleDimension {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub entity_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub entity_name: Option<Name>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SecurityGroup {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Name>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<Name>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default)]
+    pub org_truncation: Vec<OrgTruncation>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SupportCostCenterItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_center_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rate: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Tag {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default)]
+    pub values: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TextFieldSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_multilingual: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_multiline: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_length: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_url_type: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TranferEmploymentInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub regular_employee_start_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seniority_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_number: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseCustomFieldData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TransferInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_info: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_dotted_manager_clean: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_exist: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_department: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_department: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_work_location: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_work_location: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_direct_manager: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_direct_manager: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_dotted_manager: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_dotted_manager: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_job: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_job: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_job_family: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_job_family: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_job_level: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_job_level: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_workforce_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_workforce_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_employee_subtype: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_employee_subtype: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_company: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_company: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_contract_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_contract_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_contract_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_contract_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_duration_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_duration_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_signing_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_signing_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_contract_start_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_contract_start_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_contract_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_contract_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_working_hours_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_working_hours_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_working_calendar: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_working_calendar: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_probation_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_probation_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_weekly_working_hours: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_weekly_working_hours: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_work_shift: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_work_shift: Option<String>,
+    #[serde(default)]
+    pub original_cost_center_rate: Vec<SupportCostCenterItem>,
+    #[serde(default)]
+    pub target_cost_center_rate: Vec<SupportCostCenterItem>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_employment_change: Option<TranferEmploymentInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_employment_change: Option<TranferEmploymentInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_job_grade: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_job_grade: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_compensation_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_compensation_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_service_company: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_service_company: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_position: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_position: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_pathway: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_pathway: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WkCalendarDate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calendar_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WkCalendarI18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkCalendarDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calendar_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calendar_name: Option<WkCalendarI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkExperience {
+    #[serde(default)]
+    pub company_organization: Vec<ResponseI18n>,
+    #[serde(default)]
+    pub department: Vec<ResponseI18n>,
+    #[serde(default)]
+    pub job: Vec<ResponseI18n>,
+    #[serde(default)]
+    pub description: Vec<ResponseI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_date: Option<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<ResponseObjectFieldData>,
 }
 // ── Resources ──
 
