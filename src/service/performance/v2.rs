@@ -45,7 +45,7 @@ impl_resp_v2!(QueryUserInfoV2Resp, QueryUserInfoV2RespData);
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryActivityV2RespData {
     #[serde(default)]
-    pub activities: Vec<serde_json::Value>,
+    pub activities: Vec<Activity>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -53,13 +53,13 @@ pub struct ImportAdditionalInformationV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub import_record_id: Option<String>,
     #[serde(default)]
-    pub additional_informations: Vec<serde_json::Value>,
+    pub additional_informations: Vec<AdditionalInformation>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryAdditionalInformationV2RespData {
     #[serde(default)]
-    pub additional_informations: Vec<serde_json::Value>,
+    pub additional_informations: Vec<AdditionalInformation>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -69,7 +69,7 @@ pub struct QueryAdditionalInformationV2RespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryIndicatorV2RespData {
     #[serde(default)]
-    pub indicators: Vec<serde_json::Value>,
+    pub indicators: Vec<Indicator>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -87,19 +87,19 @@ pub struct QueryMetricDetailV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub semester_id: Option<String>,
     #[serde(default)]
-    pub reviewee_metrics: Vec<serde_json::Value>,
+    pub reviewee_metrics: Vec<RevieweeMetric>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryMetricFieldV2RespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<MetricField>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryMetricLibV2RespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<MetricInLibrary>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -109,7 +109,7 @@ pub struct QueryMetricLibV2RespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryMetricTemplateV2RespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<MetricTemplate>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -119,7 +119,7 @@ pub struct QueryMetricTemplateV2RespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryQuestionV2RespData {
     #[serde(default)]
-    pub tag_based_questions: Vec<serde_json::Value>,
+    pub tag_based_questions: Vec<Question>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -129,13 +129,13 @@ pub struct QueryQuestionV2RespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryReviewDataV2RespData {
     #[serde(default)]
-    pub datas: Vec<serde_json::Value>,
+    pub datas: Vec<ReviewProfile>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryReviewTemplateV2RespData {
     #[serde(default)]
-    pub review_templates: Vec<serde_json::Value>,
+    pub review_templates: Vec<ReviewTemplate>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -147,7 +147,7 @@ pub struct QueryRevieweeV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub semester_id: Option<String>,
     #[serde(default)]
-    pub reviewees: Vec<serde_json::Value>,
+    pub reviewees: Vec<Reviewee>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -157,7 +157,7 @@ pub struct QueryRevieweeV2RespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct WriteUserGroupUserRelV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub data: Option<serde_json::Value>,
+    pub data: Option<WriteUserGroupScopeData>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -165,7 +165,670 @@ pub struct QueryUserInfoV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub semester_id: Option<String>,
     #[serde(default)]
-    pub user_infos: Vec<serde_json::Value>,
+    pub user_infos: Vec<UserInfo>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Activity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semester_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mode: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AdditionalInformation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub item_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewee_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub item: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub detailed_description: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CooperationProject {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default)]
+    pub roles: Vec<CooperationRole>,
+    #[serde(default)]
+    pub user_roles: Vec<CooperationUserRole>,
+    #[serde(default)]
+    pub underling_roles: Vec<CooperationUserRole>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CooperationRole {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewer_role: Option<CooperationUserRole>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewee_role: Option<CooperationUserRole>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CooperationUserRole {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CustomMetricConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_formula_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub least_metrics_size: Option<i32>,
+    #[serde(default)]
+    pub add_metric_options: Vec<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Department {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DirectProjectLeaderRecordInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewer_id: Option<User>,
+    #[serde(default)]
+    pub cooperation_projects: Vec<CooperationProject>,
+    #[serde(default)]
+    pub review_depend_projects: Vec<CooperationProject>,
+    #[serde(default)]
+    pub participated_projects: Vec<CooperationProject>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Field {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub indicator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_based_question_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub objective_text_qustion_title: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keyresult_text_qustion_title: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kpi_template_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Formula {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub formula_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub formula_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub formula_details: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Indicator {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default)]
+    pub options: Vec<IndicatorOption>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct IndicatorOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lable: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InvitedReviewRecordInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewer_id: Option<User>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_rejected: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rejected_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub distribute_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avg_diff: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relationship_with_reviewee: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invitedby: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobFamily {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobLevel {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct KeyresultData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keyresult_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub richtext: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metric_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub fields: Vec<MetricFieldInDetails>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_weight: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_from: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_from_library: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricDimension {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metric_dimension_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub evaluation_rule_id_for_each_metric: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_weight: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review_rule_option: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_metric_config: Option<CustomMetricConfig>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricFieldInDetails {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_value_person: Option<User>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricFieldInLibrary {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub input_setting: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_value_person: Option<User>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricFieldInTemplate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub input_setting: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filed_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_value_person: Option<User>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricGroup {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricInLibrary {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metric_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub type_id: Option<String>,
+    #[serde(default)]
+    pub tags: Vec<MetricTag>,
+    #[serde(default)]
+    pub fields: Vec<MetricFieldInLibrary>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scoring_setting_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scoring_formula: Option<Formula>,
+    #[serde(default)]
+    pub data_source_inputters: Vec<User>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range_of_availability: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_active: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricInTemplate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metric_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub type_id: Option<String>,
+    #[serde(default)]
+    pub fields: Vec<MetricFieldInTemplate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_from_library: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scoring_setting_type: Option<String>,
+    #[serde(default)]
+    pub data_source_inputters: Vec<User>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metric_dimension_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review_rule_config: Option<MetricReviewRuleConfig>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricReviewRuleConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricTag {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MetricTemplate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_set_by_group: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_metric_score_method: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metric_weight_method: Option<String>,
+    #[serde(default)]
+    pub metric_dimensions: Vec<MetricDimension>,
+    #[serde(default)]
+    pub metrics: Vec<MetricInTemplate>,
+    #[serde(default)]
+    pub groups: Vec<MetricGroup>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ObjectiveData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub objective_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default)]
+    pub keyresult_data: Vec<KeyresultData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub richtext: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Question {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub question_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default)]
+    pub tag_items: Vec<TagItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReviewDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewer_user_id: Option<User>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub submit_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub indicator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_based_question_id: Option<String>,
+    #[serde(default)]
+    pub tag_text_item_data: Vec<TagText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub perf_coefficient_value: Option<String>,
+    #[serde(default)]
+    pub sub_indicator_data: Vec<SubIndicator>,
+    #[serde(default)]
+    pub objective_data: Vec<ObjectiveData>,
+    #[serde(default)]
+    pub metric_data: Vec<MetricData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leader_review_data_source: Option<String>,
+    #[serde(default)]
+    pub multi_texts: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub richtext: Option<String>,
+    #[serde(default)]
+    pub multi_richtexts: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_principal_review_item: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReviewProfile {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<User>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semester_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review_template_id: Option<String>,
+    #[serde(default)]
+    pub stages: Vec<ReviewStage>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReviewRecord {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress: Option<i32>,
+    #[serde(default)]
+    pub units: Vec<ReviewUnit>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invited_review_record_info: Option<InvitedReviewRecordInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub direct_project_leader_record_info: Option<DirectProjectLeaderRecordInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub record_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReviewStage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_type: Option<String>,
+    #[serde(default)]
+    pub review_stage_roles: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub template_id: Option<String>,
+    #[serde(default)]
+    pub records: Vec<ReviewRecord>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review_stage_role: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReviewTemplate {
+    #[serde(default)]
+    pub templates: Vec<Template>,
+    #[serde(default)]
+    pub units: Vec<Unit>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review_template_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReviewUnit {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_unknown: Option<bool>,
+    #[serde(default)]
+    pub data: Vec<ReviewDetail>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Reviewee {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewee_user_id: Option<User>,
+    #[serde(default)]
+    pub activity_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewprofile_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RevieweeMetric {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewee_user_id: Option<User>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metric_template_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metric_details: Option<MetricDetail>,
+    #[serde(default)]
+    pub reviewee_stage_statuses: Vec<RevieweeStageStatus>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RevieweeStageStatus {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubIndicator {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub indicator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub richtext: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TagItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TagText {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_text_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_richtext: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Template {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub template_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review_stage_role: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review_stage_data_write_mode: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Unit {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default)]
+    pub fields: Vec<Field>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct User {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<User>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub direct_leader_user_id: Option<User>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<Department>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_family: Option<JobFamily>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_level: Option<JobLevel>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WriteUserGroupScopeData {
+    #[serde(default)]
+    pub success_user_ids: Vec<String>,
+    #[serde(default)]
+    pub fail_user_datas: Vec<WriteUserGroupScopeFailUserData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WriteUserGroupScopeFailUserData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fail_code: Option<i32>,
 }
 // -- Query parameter types --
 

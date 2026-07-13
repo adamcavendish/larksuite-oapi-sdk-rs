@@ -22,7 +22,7 @@ pub struct FavouriteApplicationRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default)]
-    pub app_list: Vec<serde_json::Value>,
+    pub app_list: Vec<Application>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -36,7 +36,32 @@ pub struct RecommendApplicationRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default)]
-    pub app_list: Vec<serde_json::Value>,
+    pub app_list: Vec<Application>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Application {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_url: Option<String>,
+    #[serde(default)]
+    pub open_methods: Vec<OpenMethod>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenMethod {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub applink: Option<String>,
 }
 pub struct ApplicationResource<'a> {
     config: &'a Config,

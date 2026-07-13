@@ -462,7 +462,7 @@ impl<'a> QueryPaymentDetailQuery<'a> {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListAcctItemRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<AcctItem>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -472,9 +472,9 @@ pub struct ListAcctItemRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListCostAllocationDetailRespData {
     #[serde(default)]
-    pub cost_allocation_report_datas: Vec<serde_json::Value>,
+    pub cost_allocation_report_datas: Vec<CostAllocationReportData>,
     #[serde(default)]
-    pub cost_allocation_report_names: Vec<serde_json::Value>,
+    pub cost_allocation_report_names: Vec<I18nContent>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pay_period: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -486,7 +486,7 @@ pub struct ListCostAllocationDetailRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListCostAllocationPlanRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<CostAllocationPlan>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -502,9 +502,9 @@ pub struct ListCostAllocationReportRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default)]
-    pub cost_allocation_report_names: Vec<serde_json::Value>,
+    pub cost_allocation_report_names: Vec<I18nContent>,
     #[serde(default)]
-    pub cost_allocation_report_datas: Vec<serde_json::Value>,
+    pub cost_allocation_report_datas: Vec<CostAllocationReportData>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -514,7 +514,7 @@ pub struct ListDatasourceRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default)]
-    pub datasources: Vec<serde_json::Value>,
+    pub datasources: Vec<Datasource>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -524,7 +524,7 @@ pub struct QueryDatasourceRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default)]
-    pub records: Vec<serde_json::Value>,
+    pub records: Vec<DatasourceRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -536,7 +536,7 @@ pub struct SaveDatasourceRecordRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListPaygroupRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<Paygroup>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -546,7 +546,7 @@ pub struct ListPaygroupRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListPaymentActivityRespData {
     #[serde(default)]
-    pub payment_activitys: Vec<serde_json::Value>,
+    pub payment_activitys: Vec<PaymentActivity>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -556,7 +556,7 @@ pub struct ListPaymentActivityRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListPaymentActivityDetailRespData {
     #[serde(default)]
-    pub payment_activity_details: Vec<serde_json::Value>,
+    pub payment_activity_details: Vec<PaymentActivityDetail>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub total: Option<i32>,
 }
@@ -564,9 +564,292 @@ pub struct ListPaymentActivityDetailRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryPaymentDetailRespData {
     #[serde(default)]
-    pub payment_details: Vec<serde_json::Value>,
+    pub payment_details: Vec<PaymentDetail>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub total: Option<i32>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AccountingItemValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_value: Option<String>,
+    #[serde(default)]
+    pub reference_values: Vec<I18nContent>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AcctItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default)]
+    pub i18n_names: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub category_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub decimal_places: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CalculationActivity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calculation_activity_id: Option<String>,
+    #[serde(default)]
+    pub calculation_activity_names: Vec<I18nContent>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CompensationCost {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub compensation_cost_value: Option<String>,
+    #[serde(default)]
+    pub i18n_names: Vec<I18nContent>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CompensationCostItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_of_individuals_for_payment: Option<i32>,
+    #[serde(default)]
+    pub compensation_costs: Vec<CompensationCost>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CostAllocationPlan {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default)]
+    pub names: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub applicable_country_region: Option<String>,
+    #[serde(default)]
+    pub dimensions: Vec<Dimension>,
+    #[serde(default)]
+    pub cost_items: Vec<CostItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CostAllocationReportData {
+    #[serde(default)]
+    pub data_summary_dimensions: Vec<DataSummaryDimension>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub compensation_cost_item: Option<CompensationCostItem>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CostItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default)]
+    pub name: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable_correct: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CountryRegion {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha3_code: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataSummaryDimension {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_level: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_value_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_dimension: Option<EnumObject>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dimension_value_lookup_info: Option<DimensionValueLookupInfo>,
+    #[serde(default)]
+    pub dimension_names: Vec<I18nContent>,
+    #[serde(default)]
+    pub dimension_titles: Vec<I18nContent>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Datasource {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default)]
+    pub i18n_names: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default)]
+    pub fields: Vec<DatasourceField>,
+    #[serde(default)]
+    pub i18n_description: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data_period_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DatasourceField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default)]
+    pub i18n_names: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default)]
+    pub i18n_description: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub decimal_places: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DatasourceRecord {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_status: Option<i32>,
+    #[serde(default)]
+    pub field_values: Vec<DatasourceRecordField>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DatasourceRecordField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Dimension {
+    #[serde(default)]
+    pub i18n_names: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub obj_api_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DimensionValueLookupInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EnumObject {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_value_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_key: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18nContent {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Paygroup {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pay_group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region: Option<CountryRegion>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_global_region: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PaymentAccountingItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default)]
+    pub accounting_item_names: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accounting_item_value: Option<AccountingItemValue>,
+    #[serde(default)]
+    pub segment_values: Vec<SegmentValue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accounting_item_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PaymentActivity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_id: Option<String>,
+    #[serde(default)]
+    pub activity_names: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pay_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_number_of_payroll: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_of_calculation_activities: Option<i32>,
+    #[serde(default)]
+    pub calculation_activities: Vec<CalculationActivity>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PaymentActivityDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_id: Option<String>,
+    #[serde(default)]
+    pub payment_details: Vec<PaymentAccountingItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PaymentDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_id: Option<String>,
+    #[serde(default)]
+    pub payment_accounting_items: Vec<PaymentAccountingItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SegmentValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default)]
+    pub reference_values: Vec<I18nContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_value: Option<String>,
 }
 // ── Resources ──
 
