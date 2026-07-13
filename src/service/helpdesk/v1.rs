@@ -361,6 +361,36 @@ pub struct TicketCustomizedField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserCustomizedField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_customized_field_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub helpdesk_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub editable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BotMessage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub msg_type: Option<String>,
@@ -573,7 +603,7 @@ pub struct StartServiceTicketRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CustomizedFieldsTicketRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_customized_fields: Option<Vec<serde_json::Value>>,
+    pub user_customized_fields: Option<Vec<UserCustomizedField>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket_customized_fields: Option<Vec<TicketCustomizedField>>,
 }

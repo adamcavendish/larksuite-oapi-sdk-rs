@@ -978,13 +978,32 @@ impl SearchRecordIterator<'_> {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CopyAppRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub app: Option<serde_json::Value>,
+    pub app: Option<ResponseApp>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateAppRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub app: Option<serde_json::Value>,
+    pub app: Option<ResponseApp>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseApp {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_table_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_zone: Option<String>,
 }
 // ── Resources ──
 

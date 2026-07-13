@@ -380,7 +380,7 @@ pub struct UploadImageRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchGetOkrRespData {
     #[serde(default)]
-    pub okr_list: Vec<serde_json::Value>,
+    pub okr_list: Vec<OkrBatch>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -404,7 +404,7 @@ pub struct PatchPeriodRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListPeriodRuleRespData {
     #[serde(default)]
-    pub period_rules: Vec<serde_json::Value>,
+    pub period_rules: Vec<PeriodRule>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -414,9 +414,9 @@ pub struct CreateProgressRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub modify_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content: Option<serde_json::Value>,
+    pub content: Option<ContentBlock>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub progress_rate: Option<serde_json::Value>,
+    pub progress_rate: Option<ProgressRateNew>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -426,9 +426,9 @@ pub struct GetProgressRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub modify_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content: Option<serde_json::Value>,
+    pub content: Option<ContentBlock>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub progress_rate: Option<serde_json::Value>,
+    pub progress_rate: Option<ProgressRateNew>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -438,15 +438,314 @@ pub struct UpdateProgressRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub modify_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content: Option<serde_json::Value>,
+    pub content: Option<ContentBlock>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub progress_rate: Option<serde_json::Value>,
+    pub progress_rate: Option<ProgressRateNew>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryReviewRespData {
     #[serde(default)]
-    pub review_list: Vec<serde_json::Value>,
+    pub review_list: Vec<OkrReview>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentBlock {
+    #[serde(default)]
+    pub blocks: Vec<ContentBlockElement>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentBlockElement {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub paragraph: Option<ContentParagraph>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gallery: Option<ContentGallery>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentColor {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub red: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub green: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub blue: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentDocsLink {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentGallery {
+    #[serde(default, rename = "imageList")]
+    pub image_list: Vec<ContentImageItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentImageItem {
+    #[serde(default, rename = "fileToken", skip_serializing_if = "Option::is_none")]
+    pub file_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub src: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentLink {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentList {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(
+        default,
+        rename = "indentLevel",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub indent_level: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentParagraph {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style: Option<ContentParagraphStyle>,
+    #[serde(default)]
+    pub elements: Vec<ContentParagraphElement>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentParagraphElement {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, rename = "textRun", skip_serializing_if = "Option::is_none")]
+    pub text_run: Option<ContentTextRun>,
+    #[serde(default, rename = "docsLink", skip_serializing_if = "Option::is_none")]
+    pub docs_link: Option<ContentDocsLink>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person: Option<ContentPerson>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentParagraphStyle {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub list: Option<ContentList>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentPerson {
+    #[serde(default, rename = "openId", skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentTextRun {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style: Option<ContentTextStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentTextStyle {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bold: Option<bool>,
+    #[serde(
+        default,
+        rename = "strikeThrough",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub strike_through: Option<bool>,
+    #[serde(default, rename = "backColor", skip_serializing_if = "Option::is_none")]
+    pub back_color: Option<ContentColor>,
+    #[serde(default, rename = "textColor", skip_serializing_if = "Option::is_none")]
+    pub text_color: Option<ContentColor>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<ContentLink>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrBatch {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub objective_list: Vec<ResponseOkrObjective>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confirm_status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseOkrObjective {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_report: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate: Option<OkrObjectiveProgressRate>,
+    #[serde(default)]
+    pub kr_list: Vec<OkrObjectiveKr>,
+    #[serde(default)]
+    pub aligned_objective_list: Vec<OkrObjectiveAlignedObjective>,
+    #[serde(default)]
+    pub aligning_objective_list: Vec<OkrObjectiveAlignedObjective>,
+    #[serde(default)]
+    pub progress_record_list: Vec<ProgressRecordSimplify>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate_percent_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate_status_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_record_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_report_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deadline: Option<String>,
+    #[serde(default)]
+    pub mentioned_user_list: Vec<OkrObjectiveAlignedObjectiveOwner>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrObjectiveAlignedObjective {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub okr_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner: Option<OkrObjectiveAlignedObjectiveOwner>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrObjectiveAlignedObjectiveOwner {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrObjectiveKr {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kr_weight: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate: Option<OkrObjectiveProgressRate>,
+    #[serde(default)]
+    pub progress_record_list: Vec<ProgressRecordSimplify>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate_percent_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate_status_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_record_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_report_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score_last_updated_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deadline: Option<String>,
+    #[serde(default)]
+    pub mentioned_user_list: Vec<OkrObjectiveAlignedObjectiveOwner>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrObjectiveProgressRate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub percent: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrReview {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<OkrObjectiveAlignedObjectiveOwner>,
+    #[serde(default)]
+    pub review_period_list: Vec<OkrReviewPeriod>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrReviewPeriod {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_id: Option<String>,
+    #[serde(default)]
+    pub cycle_review_list: Vec<OkrReviewPeriodUrl>,
+    #[serde(default)]
+    pub progress_report_list: Vec<OkrReviewPeriodUrl>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrReviewPeriodUrl {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PeriodRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_rule_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub length: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub first_month: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ProgressRateNew {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub percent: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ProgressRecordSimplify {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
 }
 // ── Resources ──
 

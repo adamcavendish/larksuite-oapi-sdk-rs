@@ -851,7 +851,7 @@ pub struct GetChatAnnouncementRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchUpdateChatAnnouncementBlockRespData {
     #[serde(default)]
-    pub blocks: Vec<serde_json::Value>,
+    pub blocks: Vec<ResponseBlock>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub revision_id: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -861,13 +861,13 @@ pub struct BatchUpdateChatAnnouncementBlockRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetChatAnnouncementBlockRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub block: Option<serde_json::Value>,
+    pub block: Option<ResponseBlock>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListChatAnnouncementBlockRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseBlock>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -885,7 +885,7 @@ pub struct BatchDeleteChatAnnouncementBlockChildrenRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateChatAnnouncementBlockChildrenRespData {
     #[serde(default)]
-    pub children: Vec<serde_json::Value>,
+    pub children: Vec<ResponseBlock>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub revision_id: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -895,7 +895,7 @@ pub struct CreateChatAnnouncementBlockChildrenRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetChatAnnouncementBlockChildrenRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseBlock>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -905,13 +905,13 @@ pub struct GetChatAnnouncementBlockChildrenRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateDocumentBlockDescendantRespData {
     #[serde(default)]
-    pub children: Vec<serde_json::Value>,
+    pub children: Vec<ResponseBlock>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub document_revision_id: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub client_token: Option<String>,
     #[serde(default)]
-    pub block_id_relations: Vec<serde_json::Value>,
+    pub block_id_relations: Vec<BlockIdRelation>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -919,9 +919,721 @@ pub struct ConvertDocumentRespData {
     #[serde(default)]
     pub first_level_block_ids: Vec<String>,
     #[serde(default)]
-    pub blocks: Vec<serde_json::Value>,
+    pub blocks: Vec<ResponseBlock>,
     #[serde(default)]
-    pub block_id_to_image_urls: Vec<serde_json::Value>,
+    pub block_id_to_image_urls: Vec<BlockIdToImageUrl>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddOns {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub component_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub component_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub record: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Agenda {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgendaItem {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgendaItemContent {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgendaItemTitle {
+    #[serde(default)]
+    pub elements: Vec<AgendaTitleElement>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub align: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgendaTitleElement {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_run: Option<TextRun>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mention_user: Option<MentionUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mention_doc: Option<MentionDoc>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reminder: Option<Reminder>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file: Option<InlineFile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub undefined: Option<UndefinedElement>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inline_block: Option<InlineBlock>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equation: Option<Equation>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AiTemplate {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Bitable {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseBlock {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_id: Option<String>,
+    #[serde(default)]
+    pub children: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading1: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading2: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading3: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading4: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading5: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading6: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading7: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading8: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading9: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bullet: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ordered: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quote: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equation: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub todo: Option<Text>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bitable: Option<Bitable>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub callout: Option<Callout>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_card: Option<ChatCard>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub diagram: Option<Diagram>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub divider: Option<Divider>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file: Option<File>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grid: Option<Grid>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grid_column: Option<GridColumn>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub iframe: Option<Iframe>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image: Option<Image>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub isv: Option<Isv>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_ons: Option<AddOns>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mindnote: Option<Mindnote>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sheet: Option<Sheet>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table: Option<Table>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub table_cell: Option<TableCell>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view: Option<View>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub undefined: Option<Undefined>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quote_container: Option<QuoteContainer>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task: Option<Task>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub okr: Option<Okr>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub okr_objective: Option<OkrObjective>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub okr_key_result: Option<OkrKeyResult>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub okr_progress: Option<OkrProgress>,
+    #[serde(default)]
+    pub comment_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jira_issue: Option<JiraIssue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wiki_catalog: Option<WikiCatalog>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub board: Option<Board>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agenda: Option<Agenda>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agenda_item: Option<AgendaItem>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agenda_item_title: Option<AgendaItemTitle>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agenda_item_content: Option<AgendaItemContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link_preview: Option<LinkPreview>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_synced: Option<SourceSynced>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reference_synced: Option<ReferenceSynced>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sub_page_list: Option<SubPageList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ai_template: Option<AiTemplate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reference_base: Option<ReferenceBase>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project: Option<Project>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_notes_qa: Option<MeetingNotesQa>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BlockIdRelation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub temporary_block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BlockIdToImageUrl {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Board {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub align: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Callout {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub background_color: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub border_color: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_color: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub emoji_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Caption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChatCard {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub align: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Diagram {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub diagram_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Divider {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Equation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_element_style: Option<TextElementStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct File {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Grid {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_size: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GridColumn {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width_ratio: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Iframe {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub component: Option<IframeComponent>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct IframeComponent {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub iframe_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Image {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub align: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub caption: Option<Caption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scale: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InlineBlock {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_element_style: Option<TextElementStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InlineFile {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_block_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_element_style: Option<TextElementStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InlineLinkPreview {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_element_style: Option<TextElementStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Isv {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub component_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub component_type_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JiraIssue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Link {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LinkPreview {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MeetingNotesQa {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MentionDoc {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub obj_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_element_style: Option<TextElementStyle>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fallback_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MentionUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_element_style: Option<TextElementStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Mindnote {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ObjectiveIdWithKrId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub objective_id: Option<String>,
+    #[serde(default)]
+    pub kr_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Okr {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub okr_id: Option<String>,
+    #[serde(default)]
+    pub objectives: Vec<ObjectiveIdWithKrId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_display_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_name_zh: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_name_en: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible_setting: Option<OkrVisibleSetting>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrKeyResult {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kr_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confidential: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate: Option<OkrProgressRate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<Text>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrObjective {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub objective_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confidential: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate: Option<OkrProgressRate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<Text>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrProgress {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrProgressRate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mode: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub percent: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OkrVisibleSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_fill_area_visible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_status_visible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score_visible: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Project {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sub_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QuoteContainer {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReferenceBase {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub layout_mode: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReferenceSynced {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_document_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_block_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Reminder {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_notify: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_whole_day: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expire_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notify_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_element_style: Option<TextElementStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Sheet {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_size: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_size: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SourceSynced {
+    #[serde(default)]
+    pub elements: Vec<TextElement>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub align: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubPageList {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wiki_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Table {
+    #[serde(default)]
+    pub cells: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub property: Option<TableProperty>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TableCell {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TableMergeInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_span: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub col_span: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TableProperty {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_size: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_size: Option<i32>,
+    #[serde(default)]
+    pub column_width: Vec<i32>,
+    #[serde(default)]
+    pub merge_info: Vec<TableMergeInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub header_row: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub header_column: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Task {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folded: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Text {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style: Option<TextStyle>,
+    #[serde(default)]
+    pub elements: Vec<TextElement>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TextElement {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_run: Option<TextRun>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mention_user: Option<MentionUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mention_doc: Option<MentionDoc>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reminder: Option<Reminder>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file: Option<InlineFile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub undefined: Option<UndefinedElement>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inline_block: Option<InlineBlock>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equation: Option<Equation>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link_preview: Option<InlineLinkPreview>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TextElementStyle {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bold: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub italic: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub strikethrough: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub underline: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inline_code: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub background_color: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_color: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<Link>,
+    #[serde(default)]
+    pub comment_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TextRun {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_element_style: Option<TextElementStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TextStyle {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub align: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub done: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folded: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub language: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wrap: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub background_color: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub indentation_level: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Undefined {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UndefinedElement {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct View {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WikiCatalog {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wiki_token: Option<String>,
 }
 // ── Resources ──
 
