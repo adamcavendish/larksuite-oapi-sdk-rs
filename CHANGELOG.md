@@ -18,6 +18,9 @@
 
 ### REST service coverage
 
+- Added typed CoreHR v1 reference and job-taxonomy responses for country
+  regions, currencies, national ID types, subdivisions, subregions, transfer
+  reasons and types, employee types, jobs, job data, and job families.
 - Added typed CoreHR v2 recent-change responses for company, cost center,
   custom organization, department, job, job family, job grade, job level,
   location, and position resources.
