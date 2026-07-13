@@ -434,6 +434,130 @@ pub struct WorkingHoursType {
     pub custom_fields: Option<Vec<ObjectFieldData>>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lang: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CorehrEnum {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display: Option<Vec<I18n>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CountryRegion {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha_3_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alpha_2_code: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CorehrCurrency {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency_name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub numeric_code: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency_alpha_3_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region_id_list: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct NationalIdType {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub validation_rule: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub validation_rule_description: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub identification_type: Option<CorehrEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_fields: Option<Vec<ObjectFieldData>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Subdivision {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subdivision_type: Option<CorehrEnum>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Subregion {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subdivision_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub superior_subregion_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TransferReason {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_reason_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_transfer_reason_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TransferType {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_type_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flow_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flow_name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_time: Option<String>,
+}
+
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -540,6 +664,88 @@ pub struct WorkingHoursTypeListData {
 pub struct WorkingHoursTypeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub working_hours_type: Option<WorkingHoursType>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CountryRegionData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_region: Option<CountryRegion>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CountryRegionListData {
+    #[serde(default)]
+    pub items: Vec<CountryRegion>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CorehrCurrencyData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency: Option<CorehrCurrency>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct NationalIdTypeData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub national_id_type: Option<NationalIdType>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct NationalIdTypeListData {
+    #[serde(default)]
+    pub items: Vec<NationalIdType>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubdivisionData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subdivision: Option<Subdivision>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubdivisionListData {
+    #[serde(default)]
+    pub items: Vec<Subdivision>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubregionData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subregion: Option<Subregion>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubregionListData {
+    #[serde(default)]
+    pub items: Vec<Subregion>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TransferReasonListData {
+    #[serde(default)]
+    pub items: Vec<TransferReason>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TransferTypeListData {
+    #[serde(default)]
+    pub items: Vec<TransferType>,
 }
 
 impl_resp!(GetEmployeeResp, EmployeeData);
@@ -1278,9 +1484,9 @@ impl_resp_v2!(DeleteContractResp, ());
 impl_resp_v2!(GetContractResp, serde_json::Value);
 impl_resp_v2!(ListContractResp, serde_json::Value);
 impl_resp_v2!(PatchContractResp, serde_json::Value);
-impl_resp_v2!(GetCountryRegionResp, serde_json::Value);
-impl_resp_v2!(ListCountryRegionResp, serde_json::Value);
-impl_resp_v2!(GetCurrencyResp, serde_json::Value);
+impl_resp_v2!(GetCountryRegionResp, CountryRegionData);
+impl_resp_v2!(ListCountryRegionResp, CountryRegionListData);
+impl_resp_v2!(GetCurrencyResp, CorehrCurrencyData);
 impl_resp_v2!(GetByParamCustomFieldResp, serde_json::Value);
 impl_resp_v2!(ListObjectApiNameCustomFieldResp, serde_json::Value);
 impl_resp_v2!(QueryCustomFieldResp, serde_json::Value);
@@ -1325,11 +1531,11 @@ impl_resp_v2!(CreateLeaveGrantingRecordResp, serde_json::Value);
 impl_resp_v2!(DeleteLeaveGrantingRecordResp, ());
 impl_resp_v2!(CreateLocationResp, LocationData);
 impl_resp_v2!(DeleteLocationResp, ());
-impl_resp_v2!(CreateNationalIdTypeResp, serde_json::Value);
+impl_resp_v2!(CreateNationalIdTypeResp, NationalIdTypeData);
 impl_resp_v2!(DeleteNationalIdTypeResp, ());
-impl_resp_v2!(GetNationalIdTypeResp, serde_json::Value);
-impl_resp_v2!(ListNationalIdTypeResp, serde_json::Value);
-impl_resp_v2!(PatchNationalIdTypeResp, serde_json::Value);
+impl_resp_v2!(GetNationalIdTypeResp, NationalIdTypeData);
+impl_resp_v2!(ListNationalIdTypeResp, NationalIdTypeListData);
+impl_resp_v2!(PatchNationalIdTypeResp, NationalIdTypeData);
 impl_resp_v2!(QueryOffboardingResp, serde_json::Value);
 impl_resp_v2!(SearchOffboardingResp, SearchOffboardingRespData);
 impl_resp_v2!(SubmitOffboardingResp, serde_json::Value);
@@ -1345,12 +1551,12 @@ impl_resp_v2!(PatchPreHireResp, serde_json::Value);
 impl_resp_v2!(GetProcessFormVariableDataResp, serde_json::Value);
 impl_resp_v2!(ListSecurityGroupResp, serde_json::Value);
 impl_resp_v2!(QuerySecurityGroupResp, serde_json::Value);
-impl_resp_v2!(GetSubdivisionResp, serde_json::Value);
-impl_resp_v2!(ListSubdivisionResp, serde_json::Value);
-impl_resp_v2!(GetSubregionResp, serde_json::Value);
-impl_resp_v2!(ListSubregionResp, serde_json::Value);
-impl_resp_v2!(QueryTransferReasonResp, serde_json::Value);
-impl_resp_v2!(QueryTransferTypeResp, serde_json::Value);
+impl_resp_v2!(GetSubdivisionResp, SubdivisionData);
+impl_resp_v2!(ListSubdivisionResp, SubdivisionListData);
+impl_resp_v2!(GetSubregionResp, SubregionData);
+impl_resp_v2!(ListSubregionResp, SubregionListData);
+impl_resp_v2!(QueryTransferReasonResp, TransferReasonListData);
+impl_resp_v2!(QueryTransferTypeResp, TransferTypeListData);
 impl_resp_v2!(CreateWorkingHoursTypeResp, WorkingHoursTypeData);
 impl_resp_v2!(DeleteWorkingHoursTypeResp, ());
 impl_resp_v2!(GetWorkingHoursTypeResp, WorkingHoursTypeData);
@@ -1751,7 +1957,7 @@ impl<'a> CountryRegionResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetCountryRegionResp>()
+        .send_v2_response::<CountryRegionData, GetCountryRegionResp>()
         .await
     }
 
@@ -1780,7 +1986,7 @@ impl<'a> CountryRegionResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListCountryRegionResp>()
+        .send_v2_response::<CountryRegionListData, ListCountryRegionResp>()
         .await
     }
 }
@@ -2686,7 +2892,7 @@ impl<'a> NationalIdTypeResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateNationalIdTypeResp>()
+        .send_v2_response::<NationalIdTypeData, CreateNationalIdTypeResp>()
         .await
     }
 
@@ -2720,7 +2926,7 @@ impl<'a> NationalIdTypeResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetNationalIdTypeResp>()
+        .send_v2_response::<NationalIdTypeData, GetNationalIdTypeResp>()
         .await
     }
 
@@ -2749,7 +2955,7 @@ impl<'a> NationalIdTypeResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListNationalIdTypeResp>()
+        .send_v2_response::<NationalIdTypeListData, ListNationalIdTypeResp>()
         .await
     }
 
@@ -2768,7 +2974,7 @@ impl<'a> NationalIdTypeResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchNationalIdTypeResp>()
+        .send_v2_response::<NationalIdTypeData, PatchNationalIdTypeResp>()
         .await
     }
 }
@@ -3333,7 +3539,7 @@ impl<'a> SubdivisionResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetSubdivisionResp>()
+        .send_v2_response::<SubdivisionData, GetSubdivisionResp>()
         .await
     }
 
@@ -3362,7 +3568,7 @@ impl<'a> SubdivisionResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListSubdivisionResp>()
+        .send_v2_response::<SubdivisionListData, ListSubdivisionResp>()
         .await
     }
 }
@@ -3418,7 +3624,7 @@ impl<'a> SubregionResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetSubregionResp>()
+        .send_v2_response::<SubregionData, GetSubregionResp>()
         .await
     }
 
@@ -3447,7 +3653,7 @@ impl<'a> SubregionResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListSubregionResp>()
+        .send_v2_response::<SubregionListData, ListSubregionResp>()
         .await
     }
 }
@@ -3468,7 +3674,7 @@ impl<'a> TransferReasonResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, QueryTransferReasonResp>()
+        .send_v2_response::<TransferReasonListData, QueryTransferReasonResp>()
         .await
     }
 }
@@ -3486,7 +3692,7 @@ impl<'a> TransferTypeResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, QueryTransferTypeResp>()
+        .send_v2_response::<TransferTypeListData, QueryTransferTypeResp>()
         .await
     }
 }
@@ -3563,7 +3769,7 @@ impl<'a> CurrencyResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetCurrencyResp>()
+        .send_v2_response::<CorehrCurrencyData, GetCurrencyResp>()
         .await
     }
 }

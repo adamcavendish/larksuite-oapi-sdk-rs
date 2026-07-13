@@ -263,7 +263,7 @@ async fn corehr_country_region_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("country-1"));
+    assert_eq!(data.items[0].id.as_deref(), Some("country-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/country_regions?"));
     assert!(request.contains("page_size=20"));
@@ -312,7 +312,7 @@ async fn corehr_subdivision_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("subdivision-1"));
+    assert_eq!(data.items[0].id.as_deref(), Some("subdivision-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/subdivisions?"));
     assert!(request.contains("page_size=20"));
@@ -336,9 +336,54 @@ async fn corehr_subregion_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("subregion-1"));
+    assert_eq!(data.items[0].id.as_deref(), Some("subregion-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/subregions?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
+}
+
+#[tokio::test]
+async fn corehr_currency_get_uses_typed_response() {
+    let body = r#"{"code":0,"msg":"ok","data":{"currency":{"id":"currency-1","country_region_id_list":["country-1"]}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr()
+        .currency
+        .get("currency-1", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let currency = resp.data.unwrap().currency.unwrap();
+    assert_eq!(currency.id.as_deref(), Some("currency-1"));
+    assert_eq!(currency.country_region_id_list.unwrap(), ["country-1"]);
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/currencies/currency-1"));
+}
+
+#[tokio::test]
+async fn corehr_transfer_reason_query_uses_typed_response() {
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"transfer_reason_unique_identifier":"transfer-1","name":[{"lang":"en-US","value":"Transfer"}]}]}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr()
+        .transfer_reason
+        .query(&RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let reason = resp.data.unwrap().items.into_iter().next().unwrap();
+    assert_eq!(
+        reason.transfer_reason_unique_identifier.as_deref(),
+        Some("transfer-1")
+    );
+    assert_eq!(reason.name.unwrap()[0].value.as_deref(), Some("Transfer"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/corehr/v1/transfer_reasons/query"));
 }

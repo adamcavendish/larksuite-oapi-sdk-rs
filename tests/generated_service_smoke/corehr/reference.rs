@@ -121,7 +121,7 @@ async fn corehr_national_id_type_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("nid-1"));
+    assert_eq!(data.items[0].id.as_deref(), Some("nid-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/national_id_types?"));
     assert!(request.contains("page_size=20"));
@@ -178,7 +178,7 @@ async fn corehr_security_group_list_by_query_smoke() {
 
 #[tokio::test]
 async fn corehr_transfer_reason_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"reason-1"}]}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"transfer_reason_unique_identifier":"reason-1"}]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -191,14 +191,18 @@ async fn corehr_transfer_reason_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("reason-1"));
+    assert_eq!(
+        data.items[0].transfer_reason_unique_identifier.as_deref(),
+        Some("reason-1")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/transfer_reasons/query"));
 }
 
 #[tokio::test]
 async fn corehr_transfer_type_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"type-1"}]}}"#;
+    let body =
+        r#"{"code":0,"msg":"ok","data":{"items":[{"transfer_type_unique_identifier":"type-1"}]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -211,7 +215,10 @@ async fn corehr_transfer_type_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("type-1"));
+    assert_eq!(
+        data.items[0].transfer_type_unique_identifier.as_deref(),
+        Some("type-1")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/transfer_types/query"));
 }
