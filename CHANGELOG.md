@@ -4,6 +4,10 @@
 
 ### REST service coverage
 
+- Replaced nested JSON response fields across CoreHR, Attendance, VC, Mail,
+  Application, Directory, Performance, Payroll, Docx, Approval, and related
+  services with Go-shaped model graphs. Response data now reserves raw JSON
+  only for Go-defined open-ended values.
 - Replaced the remaining raw V2 response payloads across Performance, Approval,
   Directory, Payroll, Docx, Cardkit, OKR, Lingo, Baike, Application, Trust
   Party, Admin, ACS, and Bitable with Go-shaped response-data wrappers or
