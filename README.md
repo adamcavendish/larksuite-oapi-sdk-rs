@@ -181,6 +181,9 @@ Approval, VC, Wiki, and Hire. Generated service smoke tests verify request
 paths, query inputs, bodies, uploads, downloads, and response handling across
 the broader API surface.
 
+Generated V2 response wrappers use Go-shaped top-level data structs when the
+reference SDK defines response data, and unit responses where it does not.
+
 Hire v1 is a particular focus: catalog, reference, task, website-posting,
 external, agency, job, talent, application, interview, and background-check
 resources provide typed Go-backed responses. Where the Go SDK exposes iterator

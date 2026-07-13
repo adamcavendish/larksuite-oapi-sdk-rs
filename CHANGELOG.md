@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### REST service coverage
+
+- Replaced the remaining raw V2 response payloads across Performance, Approval,
+  Directory, Payroll, Docx, Cardkit, OKR, Lingo, Baike, Application, Trust
+  Party, Admin, ACS, and Bitable with Go-shaped response-data wrappers or
+  code-only responses. No raw `impl_resp_v2!` response aliases remain.
+
 ## [0.3.0] - 2026-07-12
 
 ### Breaking changes

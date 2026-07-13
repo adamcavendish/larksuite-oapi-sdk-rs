@@ -6,7 +6,7 @@ use super::prelude::*;
 async fn acs_rule_external_by_query_smoke() {
     let rule_body = r#"{"code":0,"msg":"ok","data":{"rule":{"rule_id":"rule-1"}}}"#;
     let empty_body = r#"{"code":0,"msg":"ok"}"#;
-    let bind_body = r#"{"code":0,"msg":"ok","data":{"device_id":"dev-1"}}"#;
+    let bind_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, rule_body),
         http_response(200, empty_body),
