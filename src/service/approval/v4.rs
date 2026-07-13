@@ -792,20 +792,20 @@ impl_resp!(CheckExternalInstanceResp, CheckExternalInstanceData);
 
 // ── v2 response types for new methods ──
 
-impl_resp_v2!(AddSignInstanceResp, serde_json::Value);
-impl_resp_v2!(CcInstanceResp, serde_json::Value);
-impl_resp_v2!(PreviewInstanceResp, serde_json::Value);
-impl_resp_v2!(QueryInstanceResp, serde_json::Value);
-impl_resp_v2!(SearchCcInstanceResp, serde_json::Value);
-impl_resp_v2!(SpecifiedRollbackInstanceResp, serde_json::Value);
-impl_resp_v2!(CreateInstanceCommentResp, serde_json::Value);
-impl_resp_v2!(DeleteInstanceCommentResp, serde_json::Value);
-impl_resp_v2!(ListInstanceCommentResp, serde_json::Value);
-impl_resp_v2!(RemoveInstanceCommentResp, serde_json::Value);
-impl_resp_v2!(QueryTaskResp, serde_json::Value);
-impl_resp_v2!(ResubmitTaskResp, serde_json::Value);
-impl_resp_v2!(SearchTaskResp, serde_json::Value);
-impl_resp_v2!(ListExternalTaskResp, serde_json::Value);
+impl_resp_v2!(AddSignInstanceResp, ());
+impl_resp_v2!(CcInstanceResp, ());
+impl_resp_v2!(PreviewInstanceResp, PreviewInstanceRespData);
+impl_resp_v2!(QueryInstanceResp, QueryInstanceRespData);
+impl_resp_v2!(SearchCcInstanceResp, SearchCcInstanceRespData);
+impl_resp_v2!(SpecifiedRollbackInstanceResp, ());
+impl_resp_v2!(CreateInstanceCommentResp, CreateInstanceCommentRespData);
+impl_resp_v2!(DeleteInstanceCommentResp, DeleteInstanceCommentRespData);
+impl_resp_v2!(ListInstanceCommentResp, ListInstanceCommentRespData);
+impl_resp_v2!(RemoveInstanceCommentResp, RemoveInstanceCommentRespData);
+impl_resp_v2!(QueryTaskResp, QueryTaskRespData);
+impl_resp_v2!(ResubmitTaskResp, ());
+impl_resp_v2!(SearchTaskResp, SearchTaskRespData);
+impl_resp_v2!(ListExternalTaskResp, ListExternalTaskRespData);
 
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
@@ -1168,6 +1168,97 @@ impl<'a> ListExternalTaskQuery<'a> {
     }
 }
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PreviewInstanceRespData {
+    #[serde(default)]
+    pub preview_nodes: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryInstanceRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub count: Option<i32>,
+    #[serde(default)]
+    pub instance_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchCcInstanceRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub count: Option<i32>,
+    #[serde(default)]
+    pub cc_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateInstanceCommentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeleteInstanceCommentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListInstanceCommentRespData {
+    #[serde(default)]
+    pub comments: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RemoveInstanceCommentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instance_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryTaskRespData {
+    #[serde(default)]
+    pub tasks: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub count: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchTaskRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub count: Option<i32>,
+    #[serde(default)]
+    pub task_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListExternalTaskRespData {
+    #[serde(default)]
+    pub data: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
 // ── Resources ──
 
 pub struct ApprovalDefinitionResource<'a> {
@@ -1359,7 +1450,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, AddSignInstanceResp>()
+        .send_v2_response::<(), AddSignInstanceResp>()
         .await
     }
 
@@ -1378,7 +1469,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CcInstanceResp>()
+        .send_v2_response::<(), CcInstanceResp>()
         .await
     }
 
@@ -1397,7 +1488,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, PreviewInstanceResp>()
+        .send_v2_response::<PreviewInstanceRespData, PreviewInstanceResp>()
         .await
     }
 
@@ -1430,7 +1521,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, QueryInstanceResp>()
+        .send_v2_response::<QueryInstanceRespData, QueryInstanceResp>()
         .await
     }
 
@@ -1463,7 +1554,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, SearchCcInstanceResp>()
+        .send_v2_response::<SearchCcInstanceRespData, SearchCcInstanceResp>()
         .await
     }
 
@@ -1482,7 +1573,7 @@ impl<'a> ApprovalInstanceResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, SpecifiedRollbackInstanceResp>()
+        .send_v2_response::<(), SpecifiedRollbackInstanceResp>()
         .await
     }
 }
@@ -1582,7 +1673,7 @@ impl<'a> ApprovalTaskResource<'a> {
         .query("topic", query.topic)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, QueryTaskResp>()
+        .send_v2_response::<QueryTaskRespData, QueryTaskResp>()
         .await
     }
 
@@ -1601,7 +1692,7 @@ impl<'a> ApprovalTaskResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, ResubmitTaskResp>()
+        .send_v2_response::<(), ResubmitTaskResp>()
         .await
     }
 
@@ -1634,7 +1725,7 @@ impl<'a> ApprovalTaskResource<'a> {
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, SearchTaskResp>()
+        .send_v2_response::<SearchTaskRespData, SearchTaskResp>()
         .await
     }
 }
@@ -1807,7 +1898,7 @@ impl<'a> InstanceCommentResource<'a> {
         .query("user_id", user_id)
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateInstanceCommentResp>()
+        .send_v2_response::<CreateInstanceCommentRespData, CreateInstanceCommentResp>()
         .await
     }
 
@@ -1829,7 +1920,7 @@ impl<'a> InstanceCommentResource<'a> {
         )
         .query("user_id", user_id)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, DeleteInstanceCommentResp>()
+        .send_v2_response::<DeleteInstanceCommentRespData, DeleteInstanceCommentResp>()
         .await
     }
 
@@ -1868,7 +1959,7 @@ impl<'a> InstanceCommentResource<'a> {
         .query("user_id", query.user_id)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListInstanceCommentResp>()
+        .send_v2_response::<ListInstanceCommentRespData, ListInstanceCommentResp>()
         .await
     }
 
@@ -1889,7 +1980,7 @@ impl<'a> InstanceCommentResource<'a> {
         )
         .query("user_id", user_id)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, RemoveInstanceCommentResp>()
+        .send_v2_response::<RemoveInstanceCommentRespData, RemoveInstanceCommentResp>()
         .await
     }
 }
@@ -1927,7 +2018,7 @@ impl<'a> ExternalTaskResource<'a> {
         )
         .page_query(query.page)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, ListExternalTaskResp>()
+        .send_v2_response::<ListExternalTaskRespData, ListExternalTaskResp>()
         .await
     }
 }
