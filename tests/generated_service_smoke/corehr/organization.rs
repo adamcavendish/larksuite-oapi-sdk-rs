@@ -287,7 +287,7 @@ async fn corehr_employee_type_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("type-1"));
+    assert_eq!(data.items[0].id.as_deref(), Some("type-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/employee_types?"));
     assert!(request.contains("page_size=20"));
