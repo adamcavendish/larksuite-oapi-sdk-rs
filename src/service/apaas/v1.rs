@@ -40,62 +40,174 @@ pub struct InvokeData {
 
 impl_resp!(InvokeOpenApiResp, InvokeData);
 
-// ── v2 response types (all use serde_json::Value data) ──
+// ── v2 response types ──
 
-impl_resp_v2!(AuditLogListResp, serde_json::Value);
-impl_resp_v2!(DataChangeLogDetailResp, serde_json::Value);
-impl_resp_v2!(DataChangeLogsListResp, serde_json::Value);
-impl_resp_v2!(GetAuditLogResp, serde_json::Value);
-impl_resp_v2!(GetEnvironmentVariableResp, serde_json::Value);
-impl_resp_v2!(QueryEnvironmentVariableResp, serde_json::Value);
-impl_resp_v2!(ExecuteFlowResp, serde_json::Value);
-impl_resp_v2!(InvokeFunctionResp, serde_json::Value);
-impl_resp_v2!(OqlQueryObjectResp, serde_json::Value);
-impl_resp_v2!(SearchObjectResp, serde_json::Value);
-impl_resp_v2!(BatchCreateRecordResp, serde_json::Value);
+impl_resp_v2!(AuditLogListResp, ());
+impl_resp_v2!(DataChangeLogDetailResp, ());
+impl_resp_v2!(DataChangeLogsListResp, ());
+impl_resp_v2!(GetAuditLogResp, ());
+impl_resp_v2!(GetEnvironmentVariableResp, ());
+impl_resp_v2!(QueryEnvironmentVariableResp, ());
+impl_resp_v2!(ExecuteFlowResp, ());
+impl_resp_v2!(InvokeFunctionResp, ());
+impl_resp_v2!(OqlQueryObjectResp, ());
+impl_resp_v2!(SearchObjectResp, ());
+impl_resp_v2!(BatchCreateRecordResp, ());
 impl_resp_v2!(BatchDeleteRecordResp, ());
-impl_resp_v2!(BatchQueryRecordResp, serde_json::Value);
-impl_resp_v2!(BatchUpdateRecordResp, serde_json::Value);
-impl_resp_v2!(CreateRecordResp, serde_json::Value);
+impl_resp_v2!(BatchQueryRecordResp, ());
+impl_resp_v2!(BatchUpdateRecordResp, ());
+impl_resp_v2!(CreateRecordResp, ());
 impl_resp_v2!(DeleteRecordResp, ());
-impl_resp_v2!(PatchRecordResp, serde_json::Value);
-impl_resp_v2!(QueryRecordResp, serde_json::Value);
-impl_resp_v2!(
-    BatchCreateAuthorizationRecordPermissionResp,
-    serde_json::Value
-);
-impl_resp_v2!(
-    BatchRemoveAuthorizationRecordPermissionResp,
-    serde_json::Value
-);
-impl_resp_v2!(BatchCreateAuthorizationRoleMemberResp, serde_json::Value);
-impl_resp_v2!(BatchRemoveAuthorizationRoleMemberResp, serde_json::Value);
-impl_resp_v2!(GetRoleMemberResp, serde_json::Value);
-impl_resp_v2!(CancelApprovalInstanceResp, serde_json::Value);
-impl_resp_v2!(AddAssigneeApprovalTaskResp, serde_json::Value);
-impl_resp_v2!(AgreeApprovalTaskResp, serde_json::Value);
-impl_resp_v2!(RejectApprovalTaskResp, serde_json::Value);
-impl_resp_v2!(TransferApprovalTaskResp, serde_json::Value);
-impl_resp_v2!(ListSeatActivityResp, serde_json::Value);
-impl_resp_v2!(ListSeatAssignmentResp, serde_json::Value);
-impl_resp_v2!(CcUserTaskResp, serde_json::Value);
-impl_resp_v2!(ChatGroupUserTaskResp, serde_json::Value);
-impl_resp_v2!(ExpeditingUserTaskResp, serde_json::Value);
-impl_resp_v2!(QueryUserTaskResp, serde_json::Value);
-impl_resp_v2!(RollbackUserTaskResp, serde_json::Value);
-impl_resp_v2!(RollbackPointsUserTaskResp, serde_json::Value);
-impl_resp_v2!(SqlCommandsWorkspaceResp, serde_json::Value);
-impl_resp_v2!(EnumGetWorkspaceEnumResp, serde_json::Value);
-impl_resp_v2!(ListWorkspaceEnumResp, serde_json::Value);
-impl_resp_v2!(ListWorkspaceTableResp, serde_json::Value);
-impl_resp_v2!(RecordsBatchUpdateWorkspaceTableResp, serde_json::Value);
+impl_resp_v2!(PatchRecordResp, ());
+impl_resp_v2!(QueryRecordResp, ());
+impl_resp_v2!(BatchCreateAuthorizationRecordPermissionResp, ());
+impl_resp_v2!(BatchRemoveAuthorizationRecordPermissionResp, ());
+impl_resp_v2!(BatchCreateAuthorizationRoleMemberResp, ());
+impl_resp_v2!(BatchRemoveAuthorizationRoleMemberResp, ());
+impl_resp_v2!(GetRoleMemberResp, ());
+impl_resp_v2!(CancelApprovalInstanceResp, ());
+impl_resp_v2!(AddAssigneeApprovalTaskResp, ());
+impl_resp_v2!(AgreeApprovalTaskResp, ());
+impl_resp_v2!(RejectApprovalTaskResp, ());
+impl_resp_v2!(TransferApprovalTaskResp, ());
+impl_resp_v2!(ListSeatActivityResp, ListSeatActivityData);
+impl_resp_v2!(ListSeatAssignmentResp, ListSeatAssignmentData);
+impl_resp_v2!(CcUserTaskResp, ());
+impl_resp_v2!(ChatGroupUserTaskResp, ChatGroupUserTaskData);
+impl_resp_v2!(ExpeditingUserTaskResp, ());
+impl_resp_v2!(QueryUserTaskResp, QueryUserTaskData);
+impl_resp_v2!(RollbackUserTaskResp, ());
+impl_resp_v2!(RollbackPointsUserTaskResp, RollbackPointsUserTaskData);
+impl_resp_v2!(SqlCommandsWorkspaceResp, SqlCommandsWorkspaceData);
+impl_resp_v2!(EnumGetWorkspaceEnumResp, EnumGetWorkspaceEnumData);
+impl_resp_v2!(ListWorkspaceEnumResp, ListWorkspaceEnumData);
+impl_resp_v2!(ListWorkspaceTableResp, ListWorkspaceTableData);
+impl_resp_v2!(RecordsBatchUpdateWorkspaceTableResp, RecordIdsData);
 impl_resp_v2!(RecordsDeleteWorkspaceTableResp, ());
-impl_resp_v2!(RecordsGetWorkspaceTableResp, serde_json::Value);
-impl_resp_v2!(RecordsPatchWorkspaceTableResp, serde_json::Value);
-impl_resp_v2!(RecordsPostWorkspaceTableResp, serde_json::Value);
-impl_resp_v2!(TableGetWorkspaceTableResp, serde_json::Value);
-impl_resp_v2!(ViewsGetWorkspaceViewResp, serde_json::Value);
-impl_resp_v2!(ListAppResp, serde_json::Value);
+impl_resp_v2!(RecordsGetWorkspaceTableResp, WorkspaceRecordsData);
+impl_resp_v2!(RecordsPatchWorkspaceTableResp, RecordIdsData);
+impl_resp_v2!(RecordsPostWorkspaceTableResp, RecordIdsData);
+impl_resp_v2!(TableGetWorkspaceTableResp, WorkspaceTableData);
+impl_resp_v2!(ViewsGetWorkspaceViewResp, WorkspaceRecordsData);
+impl_resp_v2!(ListAppResp, ApaasAppListData);
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListSeatActivityData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListSeatAssignmentData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChatGroupUserTaskData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserTaskData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub count: Option<String>,
+    #[serde(default)]
+    pub tasks: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RollbackPointsUserTaskData {
+    #[serde(default)]
+    pub tasks: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SqlCommandsWorkspaceData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EnumGetWorkspaceEnumData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub options: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_by: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListWorkspaceEnumData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListWorkspaceTableData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RecordIdsData {
+    #[serde(default)]
+    pub record_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkspaceRecordsData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub items: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkspaceTableData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub columns: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApaasAppListData {
+    #[serde(default)]
+    pub items: Vec<ApaasApp>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
 
 // ── Resources ──
 
@@ -141,7 +253,7 @@ impl<'a> AppResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListAppResp>()
+        .send_v2_response::<ApaasAppListData, ListAppResp>()
         .await
     }
 }
@@ -172,9 +284,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
         if let Some(b) = body {
             request = request.json_body(b)?;
         }
-        request
-            .send_v2_response::<serde_json::Value, AuditLogListResp>()
-            .await
+        request.send_v2_response::<(), AuditLogListResp>().await
     }
 
     /// 获取数据变更日志详情
@@ -199,7 +309,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
             request = request.json_body(b)?;
         }
         request
-            .send_v2_response::<serde_json::Value, DataChangeLogDetailResp>()
+            .send_v2_response::<(), DataChangeLogDetailResp>()
             .await
     }
 
@@ -224,7 +334,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
             request = request.json_body(b)?;
         }
         request
-            .send_v2_response::<serde_json::Value, DataChangeLogsListResp>()
+            .send_v2_response::<(), DataChangeLogsListResp>()
             .await
     }
 
@@ -247,9 +357,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
         if let Some(b) = body {
             request = request.json_body(b)?;
         }
-        request
-            .send_v2_response::<serde_json::Value, GetAuditLogResp>()
-            .await
+        request.send_v2_response::<(), GetAuditLogResp>().await
     }
 }
 
@@ -278,7 +386,7 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetEnvironmentVariableResp>()
+        .send_v2_response::<(), GetEnvironmentVariableResp>()
         .await
     }
 
@@ -300,7 +408,7 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryEnvironmentVariableResp>()
+        .send_v2_response::<(), QueryEnvironmentVariableResp>()
         .await
     }
 }
@@ -330,7 +438,7 @@ impl<'a> ApplicationFlowResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, ExecuteFlowResp>()
+        .send_v2_response::<(), ExecuteFlowResp>()
         .await
     }
 }
@@ -362,7 +470,7 @@ impl<'a> ApplicationFunctionResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, InvokeFunctionResp>()
+        .send_v2_response::<(), InvokeFunctionResp>()
         .await
     }
 }
@@ -391,7 +499,7 @@ impl<'a> ApplicationObjectResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, OqlQueryObjectResp>()
+        .send_v2_response::<(), OqlQueryObjectResp>()
         .await
     }
 
@@ -412,7 +520,7 @@ impl<'a> ApplicationObjectResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, SearchObjectResp>()
+        .send_v2_response::<(), SearchObjectResp>()
         .await
     }
 }
@@ -444,7 +552,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchCreateRecordResp>()
+        .send_v2_response::<(), BatchCreateRecordResp>()
         .await
     }
 
@@ -492,7 +600,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchQueryRecordResp>()
+        .send_v2_response::<(), BatchQueryRecordResp>()
         .await
     }
 
@@ -516,7 +624,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateRecordResp>()
+        .send_v2_response::<(), BatchUpdateRecordResp>()
         .await
     }
 
@@ -540,7 +648,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateRecordResp>()
+        .send_v2_response::<(), CreateRecordResp>()
         .await
     }
 
@@ -588,7 +696,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, PatchRecordResp>()
+        .send_v2_response::<(), PatchRecordResp>()
         .await
     }
 
@@ -613,7 +721,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryRecordResp>()
+        .send_v2_response::<(), QueryRecordResp>()
         .await
     }
 }
@@ -644,7 +752,7 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchCreateAuthorizationRecordPermissionResp>()
+        .send_v2_response::<(), BatchCreateAuthorizationRecordPermissionResp>()
         .await
     }
 
@@ -667,7 +775,7 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchRemoveAuthorizationRecordPermissionResp>()
+        .send_v2_response::<(), BatchRemoveAuthorizationRecordPermissionResp>()
         .await
     }
 }
@@ -699,7 +807,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchCreateAuthorizationRoleMemberResp>()
+        .send_v2_response::<(), BatchCreateAuthorizationRoleMemberResp>()
         .await
     }
 
@@ -723,7 +831,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchRemoveAuthorizationRoleMemberResp>()
+        .send_v2_response::<(), BatchRemoveAuthorizationRoleMemberResp>()
         .await
     }
 
@@ -743,7 +851,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetRoleMemberResp>()
+        .send_v2_response::<(), GetRoleMemberResp>()
         .await
     }
 }
@@ -771,7 +879,7 @@ impl<'a> ApprovalInstanceResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CancelApprovalInstanceResp>()
+        .send_v2_response::<(), CancelApprovalInstanceResp>()
         .await
     }
 }
@@ -799,7 +907,7 @@ impl<'a> ApprovalTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, AddAssigneeApprovalTaskResp>()
+        .send_v2_response::<(), AddAssigneeApprovalTaskResp>()
         .await
     }
 
@@ -819,7 +927,7 @@ impl<'a> ApprovalTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, AgreeApprovalTaskResp>()
+        .send_v2_response::<(), AgreeApprovalTaskResp>()
         .await
     }
 
@@ -839,7 +947,7 @@ impl<'a> ApprovalTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, RejectApprovalTaskResp>()
+        .send_v2_response::<(), RejectApprovalTaskResp>()
         .await
     }
 
@@ -859,7 +967,7 @@ impl<'a> ApprovalTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, TransferApprovalTaskResp>()
+        .send_v2_response::<(), TransferApprovalTaskResp>()
         .await
     }
 }
@@ -887,7 +995,7 @@ impl<'a> SeatActivityResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListSeatActivityResp>()
+        .send_v2_response::<ListSeatActivityData, ListSeatActivityResp>()
         .await
     }
 }
@@ -915,7 +1023,7 @@ impl<'a> SeatAssignmentResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListSeatAssignmentResp>()
+        .send_v2_response::<ListSeatAssignmentData, ListSeatAssignmentResp>()
         .await
     }
 }
@@ -943,7 +1051,7 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CcUserTaskResp>()
+        .send_v2_response::<(), CcUserTaskResp>()
         .await
     }
 
@@ -963,7 +1071,7 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, ChatGroupUserTaskResp>()
+        .send_v2_response::<ChatGroupUserTaskData, ChatGroupUserTaskResp>()
         .await
     }
 
@@ -983,7 +1091,7 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, ExpeditingUserTaskResp>()
+        .send_v2_response::<(), ExpeditingUserTaskResp>()
         .await
     }
 
@@ -1002,7 +1110,7 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserTaskResp>()
+        .send_v2_response::<QueryUserTaskData, QueryUserTaskResp>()
         .await
     }
 
@@ -1022,7 +1130,7 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, RollbackUserTaskResp>()
+        .send_v2_response::<(), RollbackUserTaskResp>()
         .await
     }
 
@@ -1042,7 +1150,7 @@ impl<'a> UserTaskResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, RollbackPointsUserTaskResp>()
+        .send_v2_response::<RollbackPointsUserTaskData, RollbackPointsUserTaskResp>()
         .await
     }
 }
@@ -1071,7 +1179,7 @@ impl<'a> WorkspaceResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, SqlCommandsWorkspaceResp>()
+        .send_v2_response::<SqlCommandsWorkspaceData, SqlCommandsWorkspaceResp>()
         .await
     }
 }
@@ -1099,7 +1207,7 @@ impl<'a> WorkspaceEnumResource<'a> {
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, EnumGetWorkspaceEnumResp>()
+        .send_v2_response::<EnumGetWorkspaceEnumData, EnumGetWorkspaceEnumResp>()
         .await
     }
 
@@ -1122,7 +1230,7 @@ impl<'a> WorkspaceEnumResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListWorkspaceEnumResp>()
+        .send_v2_response::<ListWorkspaceEnumData, ListWorkspaceEnumResp>()
         .await
     }
 }
@@ -1153,7 +1261,7 @@ impl<'a> WorkspaceTableResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListWorkspaceTableResp>()
+        .send_v2_response::<ListWorkspaceTableData, ListWorkspaceTableResp>()
         .await
     }
 
@@ -1177,7 +1285,7 @@ impl<'a> WorkspaceTableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, RecordsBatchUpdateWorkspaceTableResp>()
+        .send_v2_response::<RecordIdsData, RecordsBatchUpdateWorkspaceTableResp>()
         .await
     }
 
@@ -1225,7 +1333,7 @@ impl<'a> WorkspaceTableResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, RecordsGetWorkspaceTableResp>()
+        .send_v2_response::<WorkspaceRecordsData, RecordsGetWorkspaceTableResp>()
         .await
     }
 
@@ -1248,7 +1356,7 @@ impl<'a> WorkspaceTableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, RecordsPatchWorkspaceTableResp>()
+        .send_v2_response::<RecordIdsData, RecordsPatchWorkspaceTableResp>()
         .await
     }
 
@@ -1271,7 +1379,7 @@ impl<'a> WorkspaceTableResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, RecordsPostWorkspaceTableResp>()
+        .send_v2_response::<RecordIdsData, RecordsPostWorkspaceTableResp>()
         .await
     }
 
@@ -1291,7 +1399,7 @@ impl<'a> WorkspaceTableResource<'a> {
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, TableGetWorkspaceTableResp>()
+        .send_v2_response::<WorkspaceTableData, TableGetWorkspaceTableResp>()
         .await
     }
 }
@@ -1323,7 +1431,7 @@ impl<'a> WorkspaceViewResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ViewsGetWorkspaceViewResp>()
+        .send_v2_response::<WorkspaceRecordsData, ViewsGetWorkspaceViewResp>()
         .await
     }
 }

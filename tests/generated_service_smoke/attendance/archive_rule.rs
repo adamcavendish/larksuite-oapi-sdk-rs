@@ -23,9 +23,7 @@ async fn attendance_archive_rule_list_by_query_smoke() {
     assert_eq!(
         resp.data
             .as_ref()
-            .and_then(|data| data.get("items"))
-            .and_then(|items| items.as_array())
-            .and_then(|items| items.first())
+            .and_then(|data| data.items.first())
             .and_then(|item| item.get("archive_rule_id"))
             .and_then(|rule_id| rule_id.as_str()),
         Some("rule-1")

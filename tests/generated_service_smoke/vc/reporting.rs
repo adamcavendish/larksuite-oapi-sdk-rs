@@ -197,7 +197,7 @@ async fn vc_participant_quality_list_by_query_smoke() {
 
 #[tokio::test]
 async fn vc_export_download_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"file_token":"download-1"}}"#;
+    let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -209,10 +209,7 @@ async fn vc_export_download_smoke() {
         .unwrap();
 
     assert!(resp.success());
-    assert_eq!(
-        resp.data.unwrap()["file_token"].as_str(),
-        Some("download-1")
-    );
+    assert_eq!(resp.data, None);
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/vc/v1/exports/download?"));
     assert!(request.contains("file_token=file-token-1"));

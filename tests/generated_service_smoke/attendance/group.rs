@@ -105,7 +105,7 @@ async fn attendance_group_list_by_query_smoke() {
 
 #[tokio::test]
 async fn attendance_group_list_user_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"user_id":"u-1"}],"has_more":false}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"users":[{"user_id":"u-1"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -123,9 +123,7 @@ async fn attendance_group_list_user_by_query_smoke() {
     assert_eq!(
         resp.data
             .as_ref()
-            .and_then(|data| data.get("items"))
-            .and_then(|items| items.as_array())
-            .and_then(|items| items.first())
+            .and_then(|data| data.users.first())
             .and_then(|item| item.get("user_id"))
             .and_then(|user_id| user_id.as_str()),
         Some("u-1")
