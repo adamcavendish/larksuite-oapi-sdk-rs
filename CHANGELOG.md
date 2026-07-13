@@ -18,6 +18,9 @@
 
 ### REST service coverage
 
+- Replaced raw response payloads across CoreHR v1 and v2, APaaS, VC,
+  Attendance, Mail, Application v6, and Compensation v1 with Go-shaped
+  response-data wrappers or code-only responses where the Go SDK has no data.
 - Added typed CoreHR v1 reference and job-taxonomy responses for country
   regions, currencies, national ID types, subdivisions, subregions, transfer
   reasons and types, employee types, jobs, job data, and job families.
