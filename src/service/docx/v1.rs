@@ -284,18 +284,36 @@ impl_resp!(BatchUpdateBlockResp, BatchUpdateBlockData);
 impl_resp!(ListBlockResp, BlockListData);
 impl_resp!(GetBuildingBlockResp, BuildingBlockData);
 
-impl_resp_v2!(GetChatAnnouncementResp, serde_json::Value);
-impl_resp_v2!(BatchUpdateChatAnnouncementBlockResp, serde_json::Value);
-impl_resp_v2!(GetChatAnnouncementBlockResp, serde_json::Value);
-impl_resp_v2!(ListChatAnnouncementBlockResp, serde_json::Value);
+impl_resp_v2!(GetChatAnnouncementResp, GetChatAnnouncementRespData);
+impl_resp_v2!(
+    BatchUpdateChatAnnouncementBlockResp,
+    BatchUpdateChatAnnouncementBlockRespData
+);
+impl_resp_v2!(
+    GetChatAnnouncementBlockResp,
+    GetChatAnnouncementBlockRespData
+);
+impl_resp_v2!(
+    ListChatAnnouncementBlockResp,
+    ListChatAnnouncementBlockRespData
+);
 impl_resp_v2!(
     BatchDeleteChatAnnouncementBlockChildrenResp,
-    serde_json::Value
+    BatchDeleteChatAnnouncementBlockChildrenRespData
 );
-impl_resp_v2!(CreateChatAnnouncementBlockChildrenResp, serde_json::Value);
-impl_resp_v2!(GetChatAnnouncementBlockChildrenResp, serde_json::Value);
-impl_resp_v2!(CreateDocumentBlockDescendantResp, serde_json::Value);
-impl_resp_v2!(ConvertDocumentResp, serde_json::Value);
+impl_resp_v2!(
+    CreateChatAnnouncementBlockChildrenResp,
+    CreateChatAnnouncementBlockChildrenRespData
+);
+impl_resp_v2!(
+    GetChatAnnouncementBlockChildrenResp,
+    GetChatAnnouncementBlockChildrenRespData
+);
+impl_resp_v2!(
+    CreateDocumentBlockDescendantResp,
+    CreateDocumentBlockDescendantRespData
+);
+impl_resp_v2!(ConvertDocumentResp, ConvertDocumentRespData);
 
 #[derive(Debug, Clone, Copy)]
 pub struct CreateDocumentQuery<'a> {
@@ -804,6 +822,107 @@ impl<'a> CreateDocumentBlockDescendantQuery<'a> {
     }
 }
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetChatAnnouncementRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision_id: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_id_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modifier_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modifier_id_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub announcement_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time_v2: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time_v2: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchUpdateChatAnnouncementBlockRespData {
+    #[serde(default)]
+    pub blocks: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision_id: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetChatAnnouncementBlockRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListChatAnnouncementBlockRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchDeleteChatAnnouncementBlockChildrenRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision_id: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateChatAnnouncementBlockChildrenRespData {
+    #[serde(default)]
+    pub children: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision_id: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetChatAnnouncementBlockChildrenRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateDocumentBlockDescendantRespData {
+    #[serde(default)]
+    pub children: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub document_revision_id: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_token: Option<String>,
+    #[serde(default)]
+    pub block_id_relations: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ConvertDocumentRespData {
+    #[serde(default)]
+    pub first_level_block_ids: Vec<String>,
+    #[serde(default)]
+    pub blocks: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub block_id_to_image_urls: Vec<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct DocumentResource<'a> {
@@ -885,7 +1004,7 @@ impl<'a> DocumentResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, ConvertDocumentResp>()
+        .send_v2_response::<ConvertDocumentRespData, ConvertDocumentResp>()
         .await
     }
 
@@ -1251,7 +1370,7 @@ impl ChatAnnouncementResource<'_> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetChatAnnouncementResp>()
+        .send_v2_response::<GetChatAnnouncementRespData, GetChatAnnouncementResp>()
         .await
     }
 }
@@ -1294,7 +1413,7 @@ impl ChatAnnouncementBlockResource<'_> {
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateChatAnnouncementBlockResp>()
+        .send_v2_response::<BatchUpdateChatAnnouncementBlockRespData, BatchUpdateChatAnnouncementBlockResp>()
         .await
     }
 
@@ -1330,7 +1449,7 @@ impl ChatAnnouncementBlockResource<'_> {
         )
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetChatAnnouncementBlockResp>()
+        .send_v2_response::<GetChatAnnouncementBlockRespData, GetChatAnnouncementBlockResp>()
         .await
     }
 
@@ -1369,7 +1488,7 @@ impl ChatAnnouncementBlockResource<'_> {
         .page_query(query.page)
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, ListChatAnnouncementBlockResp>()
+        .send_v2_response::<ListChatAnnouncementBlockRespData, ListChatAnnouncementBlockResp>()
         .await
     }
 }
@@ -1410,7 +1529,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         )
         .query("document_revision_id", query.document_revision_id)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, BatchDeleteChatAnnouncementBlockChildrenResp>()
+        .send_v2_response::<BatchDeleteChatAnnouncementBlockChildrenRespData, BatchDeleteChatAnnouncementBlockChildrenResp>()
         .await
     }
 
@@ -1448,7 +1567,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateChatAnnouncementBlockChildrenResp>()
+        .send_v2_response::<CreateChatAnnouncementBlockChildrenRespData, CreateChatAnnouncementBlockChildrenResp>()
         .await
     }
 
@@ -1489,7 +1608,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         .page_query(query.page)
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetChatAnnouncementBlockChildrenResp>()
+        .send_v2_response::<GetChatAnnouncementBlockChildrenRespData, GetChatAnnouncementBlockChildrenResp>()
         .await
     }
 }
@@ -1533,7 +1652,7 @@ impl DocumentBlockDescendantResource<'_> {
         .query("document_revision_id", query.document_revision_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateDocumentBlockDescendantResp>()
+        .send_v2_response::<CreateDocumentBlockDescendantRespData, CreateDocumentBlockDescendantResp>()
         .await
     }
 }

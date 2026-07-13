@@ -108,13 +108,13 @@ impl_resp!(GetEntityResp, EntityData);
 impl_resp!(ListEntityResp, EntityListData);
 impl_resp!(SearchEntityResp, EntityListData);
 
-impl_resp_v2!(HighlightEntityResp, serde_json::Value);
-impl_resp_v2!(MatchEntityResp, serde_json::Value);
-impl_resp_v2!(ListClassificationResp, serde_json::Value);
-impl_resp_v2!(CreateDraftResp, serde_json::Value);
-impl_resp_v2!(UpdateDraftResp, serde_json::Value);
-impl_resp_v2!(UploadFileResp, serde_json::Value);
-impl_resp_v2!(ListRepoResp, serde_json::Value);
+impl_resp_v2!(HighlightEntityResp, HighlightEntityRespData);
+impl_resp_v2!(MatchEntityResp, MatchEntityRespData);
+impl_resp_v2!(ListClassificationResp, ListClassificationRespData);
+impl_resp_v2!(CreateDraftResp, CreateDraftRespData);
+impl_resp_v2!(UpdateDraftResp, UpdateDraftRespData);
+impl_resp_v2!(UploadFileResp, UploadFileRespData);
+impl_resp_v2!(ListRepoResp, ListRepoRespData);
 
 #[derive(Debug, Clone)]
 #[non_exhaustive]
@@ -348,6 +348,53 @@ impl<'a> MatchEntityQuery<'a> {
     }
 }
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct HighlightEntityRespData {
+    #[serde(default)]
+    pub phrases: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MatchEntityRespData {
+    #[serde(default)]
+    pub results: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListClassificationRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateDraftRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub draft: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateDraftRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub draft: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UploadFileRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListRepoRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct EntityResource<'a> {
@@ -583,7 +630,7 @@ impl<'a> EntityResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, HighlightEntityResp>()
+        .send_v2_response::<HighlightEntityRespData, HighlightEntityResp>()
         .await
     }
 
@@ -609,7 +656,7 @@ impl<'a> EntityResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, MatchEntityResp>()
+        .send_v2_response::<MatchEntityRespData, MatchEntityResp>()
         .await
     }
 }
@@ -643,7 +690,7 @@ impl<'a> ClassificationResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListClassificationResp>()
+        .send_v2_response::<ListClassificationRespData, ListClassificationResp>()
         .await
     }
 }
@@ -721,7 +768,7 @@ impl<'a> DraftResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateDraftResp>()
+        .send_v2_response::<CreateDraftRespData, CreateDraftResp>()
         .await
     }
 
@@ -751,7 +798,7 @@ impl<'a> DraftResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateDraftResp>()
+        .send_v2_response::<UpdateDraftRespData, UpdateDraftResp>()
         .await
     }
 }
@@ -812,7 +859,7 @@ impl<'a> FileResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UploadFileResp>()
+        .send_v2_response::<UploadFileRespData, UploadFileResp>()
         .await
     }
 }
@@ -849,7 +896,7 @@ impl<'a> RepoResource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListRepoResp>()
+        .send_v2_response::<ListRepoRespData, ListRepoResp>()
         .await
     }
 }
