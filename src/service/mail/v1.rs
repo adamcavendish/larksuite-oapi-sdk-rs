@@ -659,13 +659,13 @@ impl<'a> GetPublicMailboxMemberQuery<'a> {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetUserMailboxMessageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub message: Option<serde_json::Value>,
+    pub message: Option<Message>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetByCardUserMailboxMessageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub owner_info: Option<serde_json::Value>,
+    pub owner_info: Option<UserInfo>,
     #[serde(default)]
     pub message_ids: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -693,35 +693,35 @@ pub struct SendUserMailboxMessageRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DownloadUrlUserMailboxMessageAttachmentRespData {
     #[serde(default)]
-    pub download_urls: Vec<serde_json::Value>,
+    pub download_urls: Vec<ResponseAttachmentDownloadUrlItem>,
     #[serde(default)]
     pub failed_ids: Vec<String>,
     #[serde(default)]
-    pub failed_reasons: Vec<serde_json::Value>,
+    pub failed_reasons: Vec<AttachmentDownloadFailedReason>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateUserMailboxFolderRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub folder: Option<serde_json::Value>,
+    pub folder: Option<ResponseFolder>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListUserMailboxFolderRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseFolder>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateUserMailboxMailContactRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub mail_contact: Option<serde_json::Value>,
+    pub mail_contact: Option<ResponseMailContact>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListUserMailboxMailContactRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseMailContact>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -731,37 +731,37 @@ pub struct ListUserMailboxMailContactRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateUserMailboxRuleRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub rule: Option<serde_json::Value>,
+    pub rule: Option<ResponseRule>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListUserMailboxRuleRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseRule>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchCreateMailgroupMemberRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseMailgroupMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchCreatePublicMailboxMemberRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponsePublicMailboxMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateMailgroupAliasRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub mailgroup_alias: Option<serde_json::Value>,
+    pub mailgroup_alias: Option<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListMailgroupAliasRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -781,43 +781,306 @@ pub struct CreateMailgroupPermissionMemberRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchCreateMailgroupPermissionMemberRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseMailgroupPermissionMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreatePublicMailboxAliasRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub public_mailbox_alias: Option<serde_json::Value>,
+    pub public_mailbox_alias: Option<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListPublicMailboxAliasRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserRespData {
     #[serde(default)]
-    pub user_list: Vec<serde_json::Value>,
+    pub user_list: Vec<User>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateUserMailboxAliasRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_mailbox_alias: Option<serde_json::Value>,
+    pub user_mailbox_alias: Option<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListUserMailboxAliasRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SubscriptionUserMailboxEventRespData {
     #[serde(default)]
     pub event_types: Vec<i32>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseAttachment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub body: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filename: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_inline: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cid: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AttachmentDownloadFailedReason {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseAttachmentDownloadUrlItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub download_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseEmailAlias {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub primary_email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_alias: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseFolder {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_folder_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unread_message_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unread_thread_count: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseMailAddress {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mail_address: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseMailContact {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub company: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mail_address: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseMailgroupMember {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseMailgroupPermissionMember {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission_member_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Message {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub raw: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subject: Option<String>,
+    #[serde(default)]
+    pub to: Vec<ResponseMailAddress>,
+    #[serde(default)]
+    pub cc: Vec<ResponseMailAddress>,
+    #[serde(default)]
+    pub bcc: Vec<ResponseMailAddress>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub head_from: Option<ResponseMailAddress>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub body_html: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub internal_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_state: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub smtp_message_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_id: Option<String>,
+    #[serde(default)]
+    pub attachments: Vec<ResponseAttachment>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub body_plain_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub thread_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub body_preview: Option<String>,
+    #[serde(default)]
+    pub label_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_reply_to: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reply_to: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub priority_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub security_level: Option<SecurityLevel>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub references: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub body_calendar: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponsePublicMailboxMember {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition: Option<ResponseRuleCondition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action: Option<ResponseRuleAction>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ignore_the_rest_of_rules: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_enable: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseRuleAction {
+    #[serde(default)]
+    pub items: Vec<ResponseRuleActionItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseRuleActionItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub input: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseRuleCondition {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub match_type: Option<i32>,
+    #[serde(default)]
+    pub items: Vec<ResponseRuleConditionItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseRuleConditionItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub input: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SecurityLevel {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_risk: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub risk_banner_level: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub risk_banner_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_header_from_external: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub via_domain: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spam_banner_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spam_user_rule_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spam_banner_info: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct User {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub public_mailbox_id: Option<String>,
 }
 // ── Resources ──
 

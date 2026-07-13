@@ -290,13 +290,13 @@ impl_resp!(GetMeetingReportResp, MeetingReportData);
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MgetRoomRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseRoom>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchRoomRespData {
     #[serde(default)]
-    pub rooms: Vec<serde_json::Value>,
+    pub rooms: Vec<ResponseRoom>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -322,11 +322,11 @@ pub struct QueryRoomConfigRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub display_background: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub digital_signage: Option<serde_json::Value>,
+    pub digital_signage: Option<RoomDigitalSignage>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub room_box_digital_signage: Option<serde_json::Value>,
+    pub room_box_digital_signage: Option<RoomDigitalSignage>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub room_status: Option<serde_json::Value>,
+    pub room_status: Option<ResponseRoomStatus>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -336,7 +336,7 @@ pub struct ListAlertRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<Alert>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -354,81 +354,81 @@ pub struct GetExportRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetMeetingRecordingRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub recording: Option<serde_json::Value>,
+    pub recording: Option<MeetingRecording>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ApplyReserveRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reserve: Option<serde_json::Value>,
+    pub reserve: Option<Reserve>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reserve_correction_check_info: Option<serde_json::Value>,
+    pub reserve_correction_check_info: Option<ReserveCorrectionCheckInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetReserveRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reserve: Option<serde_json::Value>,
+    pub reserve: Option<Reserve>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetActiveMeetingReserveRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub meeting: Option<serde_json::Value>,
+    pub meeting: Option<ResponseMeeting>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UpdateReserveRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reserve: Option<serde_json::Value>,
+    pub reserve: Option<Reserve>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reserve_correction_check_info: Option<serde_json::Value>,
+    pub reserve_correction_check_info: Option<ReserveCorrectionCheckInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ReserveScopeReserveConfigRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub approve_config: Option<serde_json::Value>,
+    pub approve_config: Option<ApprovalConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub time_config: Option<serde_json::Value>,
+    pub time_config: Option<TimeConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reserve_scope_config: Option<serde_json::Value>,
+    pub reserve_scope_config: Option<ReserveScopeConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetReserveConfigAdminRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reserve_admin_config: Option<serde_json::Value>,
+    pub reserve_admin_config: Option<ReserveAdminConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetReserveConfigDisableInformRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub disable_inform: Option<serde_json::Value>,
+    pub disable_inform: Option<DisableInformConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetReserveConfigFormRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reserve_form_config: Option<serde_json::Value>,
+    pub reserve_form_config: Option<ReserveFormConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateRoomLevelRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub room_level: Option<serde_json::Value>,
+    pub room_level: Option<RoomLevel>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetRoomLevelRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub room_level: Option<serde_json::Value>,
+    pub room_level: Option<RoomLevel>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListRoomLevelRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<RoomLevel>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -438,7 +438,7 @@ pub struct ListRoomLevelRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MgetRoomLevelRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<RoomLevel>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -450,15 +450,15 @@ pub struct SearchRoomLevelRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetScopeConfigRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub current_config: Option<serde_json::Value>,
+    pub current_config: Option<ScopeConfig>,
     #[serde(default)]
-    pub origin_configs: Vec<serde_json::Value>,
+    pub origin_configs: Vec<ScopeConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetMeetingListRespData {
     #[serde(default)]
-    pub meeting_list: Vec<serde_json::Value>,
+    pub meeting_list: Vec<MeetingInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -468,7 +468,7 @@ pub struct GetMeetingListRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetParticipantListRespData {
     #[serde(default)]
-    pub participants: Vec<serde_json::Value>,
+    pub participants: Vec<ResponseParticipant>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -478,7 +478,7 @@ pub struct GetParticipantListRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetParticipantQualityListRespData {
     #[serde(default)]
-    pub participant_quality_list: Vec<serde_json::Value>,
+    pub participant_quality_list: Vec<ParticipantQuality>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -488,11 +488,766 @@ pub struct GetParticipantQualityListRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetResourceReservationListRespData {
     #[serde(default)]
-    pub room_reservation_list: Vec<serde_json::Value>,
+    pub room_reservation_list: Vec<RoomMeetingReservation>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Alert {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alert_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_scope: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub monitor_target: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alert_strategy: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alert_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alert_level: Option<i32>,
+    #[serde(default)]
+    pub contacts: Vec<Contact>,
+    #[serde(default, rename = "notifyMethods")]
+    pub notify_methods: Vec<i32>,
+    #[serde(default, rename = "alertRule", skip_serializing_if = "Option::is_none")]
+    pub alert_rule: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recover_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alert_rule_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub monitor_target_room_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub monitor_target_room_mac: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApprovalConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_switch: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_condition: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_duration: Option<f64>,
+    #[serde(default)]
+    pub approvers: Vec<SubscribeUser>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Conditions {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_key: Option<String>,
+    #[serde(default)]
+    pub option_keys: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Contact {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CustomList {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub need_fill: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub placeholder: Option<String>,
+    #[serde(default)]
+    pub options: Vec<Options>,
+    #[serde(default)]
+    pub conditions: Vec<Conditions>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseDevice {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DisableInformConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub if_cover_child_scope: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub if_inform: Option<bool>,
+    #[serde(default)]
+    pub informed_users: Vec<SubscribeUser>,
+    #[serde(default)]
+    pub informed_depts: Vec<SubscribeDepartment>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseMeeting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub topic: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_no: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub host_user: Option<ResponseMeetingUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_connect: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub participant_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub participant_count_accumulated: Option<String>,
+    #[serde(default)]
+    pub participants: Vec<MeetingParticipant>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability: Option<MeetingAbility>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MeetingAbility {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_video: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_audio: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_share_screen: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_follow_screen: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_recording: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_pstn: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MeetingInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_topic: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub organizer: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_duration: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_of_participants: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_of_devices: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub audio: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sharing: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recording: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub telephone: Option<bool>,
+    #[serde(default)]
+    pub reserved_rooms: Vec<ReservedRoom>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_related_document: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ai_note: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_external: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_subtype: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_instance_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_of_webinar_viewers: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MeetingParticipant {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub first_join_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub final_leave_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_meeting_duration: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_host: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_cohost: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_external: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MeetingRecording {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseMeetingUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Options {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_other: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseParticipant {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub participant_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_room_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub public_ip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub internal_ip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_rtc_proxy: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub network_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub protocol: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub microphone: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub speaker: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub camera: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub audio: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sharing: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub join_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_in_meeting: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accept_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_external: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub webinar_user_role: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ParticipantQuality {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub network: Option<QualityNetwork>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub audio: Option<QualityAudio>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video: Option<QualityVideoSharing>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub screen_sharing: Option<QualityVideoSharing>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cpu_usage: Option<QualityCpuUsage>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PstnSipInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nickname: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub main_address: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QualityAudio {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mic_input_volume: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub speaker_volume: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bitrate_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub latency_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jitter_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bitrate_sent: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub latency_sent: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jitter_sent: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QualityCpuUsage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_avg_cpu_usage: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_max_cpu_usage: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system_avg_cpu_usage: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system_max_cpu_usage: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QualityNetwork {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub network_delay: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bitrate_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub packet_loss_avg_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub packet_loss_max_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bitrate_sent: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub packet_loss_avg_sent: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub packet_loss_max_sent: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QualityVideoSharing {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bitrate_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub latency_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jitter_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub maximum_resolution_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub framerate_received: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bitrate_sent: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub latency_sent: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jitter_sent: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub maximum_resolution_sent: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub framerate_sent: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Reserve {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_no: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub live_link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expire_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_settings: Option<ReserveMeetingSetting>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveActionPermission {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission: Option<i32>,
+    #[serde(default)]
+    pub permission_checkers: Vec<ReservePermissionChecker>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveAdminConfig {
+    #[serde(default)]
+    pub depts: Vec<SubscribeDepartment>,
+    #[serde(default)]
+    pub users: Vec<SubscribeUser>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveAssignHost {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveCallSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub callee: Option<ReserveCallee>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveCallee {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pstn_sip_info: Option<PstnSipInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveCorrectionCheckInfo {
+    #[serde(default)]
+    pub invalid_host_id_list: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveFormConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub if_cover_child_scope: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_form: Option<bool>,
+    #[serde(default)]
+    pub notified_users: Vec<SubscribeUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notified_time: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_unit: Option<i32>,
+    #[serde(default)]
+    pub custom_list: Vec<CustomList>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveMeetingSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub topic: Option<String>,
+    #[serde(default)]
+    pub action_permissions: Vec<ReserveActionPermission>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_initial_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_connect: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub call_setting: Option<ReserveCallSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub auto_record: Option<bool>,
+    #[serde(default)]
+    pub assign_host_list: Vec<ReserveAssignHost>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReservePermissionChecker {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_field: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_mode: Option<i32>,
+    #[serde(default)]
+    pub check_list: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveScopeConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub if_cover_child_scope: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allow_all_users: Option<i32>,
+    #[serde(default)]
+    pub allow_users: Vec<SubscribeUser>,
+    #[serde(default)]
+    pub allow_depts: Vec<SubscribeDepartment>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReservedRoom {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseRoom {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capacity: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_room_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_level_id: Option<String>,
+    #[serde(default)]
+    pub path: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_status: Option<ResponseRoomStatus>,
+    #[serde(default)]
+    pub device: Vec<ResponseDevice>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseRoomConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_background: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_background: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub digital_signage: Option<RoomDigitalSignage>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_box_digital_signage: Option<RoomDigitalSignage>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_status: Option<ResponseRoomStatus>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RoomDigitalSignage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub if_cover_child_scope: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mute: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_display: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stop_display: Option<i32>,
+    #[serde(default)]
+    pub materials: Vec<RoomDigitalSignageMaterial>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RoomDigitalSignageMaterial {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub material_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cover: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub md5: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RoomLevel {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_level_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_id: Option<String>,
+    #[serde(default)]
+    pub path: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_child: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_group_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RoomMeetingReservation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserver: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserver_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_of_reserver: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub guests_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accepted_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_duration: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reservation_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_in_device: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_check_in_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_in_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_release_early: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub releasing_person: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub releasing_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseRoomStatus {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub schedule_status: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disable_start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disable_end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disable_reason: Option<String>,
+    #[serde(default)]
+    pub contact_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disable_notice: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resume_notice: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ScopeConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_config: Option<ResponseRoomConfig>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubscribeDepartment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubscribeUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimeConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub if_cover_child_scope: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_switch: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub days_in_advance: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub opening_hour: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_duration: Option<i32>,
 }
 // ── Resources ──
 

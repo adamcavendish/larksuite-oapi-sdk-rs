@@ -371,49 +371,49 @@ pub struct UploadReportArchiveRuleRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UserStatsFieldsQueryArchiveRuleRespData {
     #[serde(default)]
-    pub archive_report_fields: Vec<serde_json::Value>,
+    pub archive_report_fields: Vec<ArchiveField>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PatchLeaveAccrualRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub record: Option<serde_json::Value>,
+    pub record: Option<ResponseLeaveAccrualRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateUserApprovalRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_approval: Option<serde_json::Value>,
+    pub user_approval: Option<UserApproval>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserApprovalRespData {
     #[serde(default)]
-    pub user_approvals: Vec<serde_json::Value>,
+    pub user_approvals: Vec<UserApproval>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchCreateUserDailyShiftRespData {
     #[serde(default)]
-    pub user_daily_shifts: Vec<serde_json::Value>,
+    pub user_daily_shifts: Vec<UserDailyShift>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchCreateTempUserDailyShiftRespData {
     #[serde(default)]
-    pub user_tmp_daily_shifts: Vec<serde_json::Value>,
+    pub user_tmp_daily_shifts: Vec<UserTmpDailyShift>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserDailyShiftRespData {
     #[serde(default)]
-    pub user_daily_shifts: Vec<serde_json::Value>,
+    pub user_daily_shifts: Vec<UserDailyShift>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchCreateUserFlowRespData {
     #[serde(default)]
-    pub flow_records: Vec<serde_json::Value>,
+    pub flow_records: Vec<UserFlow>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -469,25 +469,25 @@ pub struct GetUserFlowRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserFlowRespData {
     #[serde(default)]
-    pub user_flow_results: Vec<serde_json::Value>,
+    pub user_flow_results: Vec<UserFlow>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ModifyUserSettingRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_setting: Option<serde_json::Value>,
+    pub user_setting: Option<ResponseUserSetting>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserSettingRespData {
     #[serde(default)]
-    pub user_settings: Vec<serde_json::Value>,
+    pub user_settings: Vec<ResponseUserSetting>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserStatsDataRespData {
     #[serde(default)]
-    pub user_datas: Vec<serde_json::Value>,
+    pub user_datas: Vec<UserStatsData>,
     #[serde(default)]
     pub invalid_user_list: Vec<String>,
 }
@@ -495,25 +495,25 @@ pub struct QueryUserStatsDataRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserStatsFieldRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_stats_field: Option<serde_json::Value>,
+    pub user_stats_field: Option<UserStatsField>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserStatsViewRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub view: Option<serde_json::Value>,
+    pub view: Option<UserStatsView>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UpdateUserStatsViewRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub view: Option<serde_json::Value>,
+    pub view: Option<UserStatsView>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserTaskRespData {
     #[serde(default)]
-    pub user_task_results: Vec<serde_json::Value>,
+    pub user_task_results: Vec<UserTask>,
     #[serde(default)]
     pub invalid_user_ids: Vec<String>,
     #[serde(default)]
@@ -523,31 +523,31 @@ pub struct QueryUserTaskRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateUserTaskRemedyRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_remedy: Option<serde_json::Value>,
+    pub user_remedy: Option<UserTaskRemedy>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserTaskRemedyRespData {
     #[serde(default)]
-    pub user_remedys: Vec<serde_json::Value>,
+    pub user_remedys: Vec<UserTaskRemedy>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryUserAllowedRemedysUserTaskRemedyRespData {
     #[serde(default)]
-    pub user_allowed_remedys: Vec<serde_json::Value>,
+    pub user_allowed_remedys: Vec<UserAllowedRemedy>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ProcessApprovalInfoRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub approval_info: Option<serde_json::Value>,
+    pub approval_info: Option<ResponseApprovalInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListArchiveRuleRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ArchiveReportMeta>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -557,13 +557,13 @@ pub struct ListArchiveRuleRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UploadFileRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub file: Option<serde_json::Value>,
+    pub file: Option<File>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListUserGroupRespData {
     #[serde(default)]
-    pub users: Vec<serde_json::Value>,
+    pub users: Vec<UserBase>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -573,19 +573,19 @@ pub struct ListUserGroupRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchGroupRespData {
     #[serde(default)]
-    pub group_list: Vec<serde_json::Value>,
+    pub group_list: Vec<GroupMeta>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetLeaveEmployExpireRecordRespData {
     #[serde(default)]
-    pub records: Vec<serde_json::Value>,
+    pub records: Vec<LeaveEmployExpireRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListShiftRespData {
     #[serde(default)]
-    pub shift_list: Vec<serde_json::Value>,
+    pub shift_list: Vec<ResponseShift>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -607,33 +607,782 @@ pub struct QueryShiftRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub flexible_minutes: Option<i32>,
     #[serde(default)]
-    pub flexible_rule: Vec<serde_json::Value>,
+    pub flexible_rule: Vec<FlexibleRule>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub no_need_off: Option<bool>,
     #[serde(default)]
-    pub punch_time_rule: Vec<serde_json::Value>,
+    pub punch_time_rule: Vec<PunchTimeRule>,
     #[serde(default)]
-    pub late_off_late_on_rule: Vec<serde_json::Value>,
+    pub late_off_late_on_rule: Vec<LateOffLateOnRule>,
     #[serde(default)]
-    pub rest_time_rule: Vec<serde_json::Value>,
+    pub rest_time_rule: Vec<RestRule>,
     #[serde(default)]
-    pub overtime_rule: Vec<serde_json::Value>,
+    pub overtime_rule: Vec<OvertimeRule>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub day_type: Option<i32>,
     #[serde(default)]
-    pub overtime_rest_time_rule: Vec<serde_json::Value>,
+    pub overtime_rest_time_rule: Vec<RestRule>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub late_minutes_as_serious_late: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub shift_middle_time_rule: Option<serde_json::Value>,
+    pub shift_middle_time_rule: Option<ShiftMiddleTimeRule>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub shift_attendance_time_config: Option<serde_json::Value>,
+    pub shift_attendance_time_config: Option<ShiftAttendanceTimeConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub late_off_late_on_setting: Option<serde_json::Value>,
+    pub late_off_late_on_setting: Option<LateOffLateOnSetting>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     #[serde(default)]
-    pub rest_time_flexible_configs: Vec<serde_json::Value>,
+    pub rest_time_flexible_configs: Vec<RestTimeFlexibleConfig>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseApprovalInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ArchiveField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default)]
+    pub upper_titles: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ArchiveReportMeta {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub report_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub report_name: Option<I18nMap>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub archive_rule_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub archive_rule_name: Option<I18nMap>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChildField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_unit: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChildItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub read_only: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Field {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default)]
+    pub child_fields: Vec<ChildField>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct File {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FlexibleRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flexible_early_minutes: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flexible_late_minutes: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GroupMeta {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18nMap {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ja: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18nNames {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ch: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ja: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Item {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default)]
+    pub child_items: Vec<ChildItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LangText {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lang: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LateOffLateOnRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_off_minutes: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_on_minutes: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LateOffLateOnSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_off_base_on_time_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_on_base_on_time_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseLeaveAccrualRecord {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granting_quantity: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granting_unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granted_by: Option<i32>,
+    #[serde(default)]
+    pub reason: Vec<LangText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub section_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveEmployExpireRecord {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granting_quantity: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub left_granting_quantity: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granting_unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_date: Option<String>,
+    #[serde(default)]
+    pub reason: Vec<LangText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_update_by_external: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accrual_source: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_sub_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub section_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OvertimeRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_overtime: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub off_overtime: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PunchTimeRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub off_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_minutes_as_late: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_minutes_as_lack: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_advance_minutes: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub early_minutes_as_early: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub early_minutes_as_lack: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub off_delay_minutes: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_minutes_as_serious_late: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub no_need_on: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub no_need_off: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PunchTimeSimpleRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub off_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RegionPlace {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub region_level: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub region_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RestRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rest_begin_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rest_end_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RestTimeFlexibleConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub need_flexible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_mins: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseShift {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub punch_times: Option<i32>,
+    #[serde(default)]
+    pub sub_shift_leader_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_flexible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flexible_minutes: Option<i32>,
+    #[serde(default)]
+    pub flexible_rule: Vec<FlexibleRule>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub no_need_off: Option<bool>,
+    #[serde(default)]
+    pub punch_time_rule: Vec<PunchTimeRule>,
+    #[serde(default)]
+    pub late_off_late_on_rule: Vec<LateOffLateOnRule>,
+    #[serde(default)]
+    pub rest_time_rule: Vec<RestRule>,
+    #[serde(default)]
+    pub overtime_rule: Vec<OvertimeRule>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day_type: Option<i32>,
+    #[serde(default)]
+    pub overtime_rest_time_rule: Vec<RestRule>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_minutes_as_serious_late: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_middle_time_rule: Option<ShiftMiddleTimeRule>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_attendance_time_config: Option<ShiftAttendanceTimeConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_off_late_on_setting: Option<LateOffLateOnSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default)]
+    pub rest_time_flexible_configs: Vec<RestTimeFlexibleConfig>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ShiftAttendanceTimeConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attendance_time: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_attendance_time: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub off_attendance_time: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ShiftMiddleTimeRule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub middle_time_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fixed_middle_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskResult {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_in_record_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_in_record: Option<UserFlow>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_out_record_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_out_record: Option<UserFlow>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_in_result: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_out_result: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_in_result_supplement: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_out_result_supplement: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_in_shift_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_out_shift_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_shift_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimeRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time_stamp: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time_stamp: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimeRangeList {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day: Option<i32>,
+    #[serde(default)]
+    pub time_ranges: Vec<TimeRange>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserAllowedRemedy {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remedy_date: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_free_punch: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub punch_no: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub punch_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub normal_punch_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remedy_start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remedy_end_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserApproval {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<String>,
+    #[serde(default)]
+    pub outs: Vec<UserOut>,
+    #[serde(default)]
+    pub leaves: Vec<UserLeave>,
+    #[serde(default)]
+    pub overtime_works: Vec<UserOvertimeWork>,
+    #[serde(default)]
+    pub trips: Vec<UserTrip>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_zone: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserBase {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default)]
+    pub department_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserDailyShift {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub month: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day_no: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_clear_schedule: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserFlow {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub record_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub longitude: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub latitude: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ssid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bssid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_field: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_wifi: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default)]
+    pub photo_urls: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_result: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub idempotent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserLeave {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uniq_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interval: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_names: Option<I18nNames>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_locale: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approve_pass_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approve_apply_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub idempotent_id: Option<String>,
+    #[serde(default)]
+    pub leave_detail_range_objs: Vec<TimeRangeList>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserOut {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uniq_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interval: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_names: Option<I18nNames>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_locale: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approve_pass_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approve_apply_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub idempotent_id: Option<String>,
+    #[serde(default)]
+    pub correct_process_id: Vec<String>,
+    #[serde(default)]
+    pub cancel_process_id: Vec<String>,
+    #[serde(default)]
+    pub process_id: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserOvertimeWork {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub category: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub idempotent_id: Option<String>,
+    #[serde(default)]
+    pub correct_process_id: Vec<String>,
+    #[serde(default)]
+    pub cancel_process_id: Vec<String>,
+    #[serde(default)]
+    pub process_id: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseUserSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub face_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub face_key_update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserStatsData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default)]
+    pub datas: Vec<UserStatsDataCell>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserStatsDataCell {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default)]
+    pub features: Vec<UserStatsDataFeature>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration_num: Option<UserStatsDataDuration>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserStatsDataDuration {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub half_day: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hour: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub half_hour: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub minute: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserStatsDataFeature {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserStatsField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stats_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default)]
+    pub fields: Vec<Field>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserStatsView {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stats_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default)]
+    pub items: Vec<Item>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserTask {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_id: Option<String>,
+    #[serde(default)]
+    pub records: Vec<TaskResult>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserTaskRemedy {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remedy_date: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub punch_no: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remedy_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_zone: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserTmpDailyShift {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_name: Option<String>,
+    #[serde(default)]
+    pub punch_time_simple_rules: Vec<PunchTimeSimpleRule>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserTrip {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approve_pass_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approve_apply_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub idempotent_id: Option<String>,
+    #[serde(default)]
+    pub correct_process_id: Vec<String>,
+    #[serde(default)]
+    pub cancel_process_id: Vec<String>,
+    #[serde(default)]
+    pub process_id: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub departure: Option<RegionPlace>,
+    #[serde(default)]
+    pub destinations: Vec<RegionPlace>,
+    #[serde(default)]
+    pub transportation: Vec<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trip_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remarks: Option<String>,
 }
 // ── Resources ──
 
