@@ -55,7 +55,7 @@ async fn application_v6_get_by_query_smoke() {
     assert_eq!(
         resp.data
             .as_ref()
-            .and_then(|data| data.get("app"))
+            .and_then(|data| data.app.as_ref())
             .and_then(|app| app.get("app_id"))
             .and_then(|app_id| app_id.as_str()),
         Some("cli_a")
@@ -103,7 +103,7 @@ async fn application_v6_list_by_query_smoke() {
 
 #[tokio::test]
 async fn application_v6_patch_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"app":{"app_id":"cli_a"}}}"#;
+    let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);

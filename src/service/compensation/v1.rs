@@ -36,27 +36,210 @@ impl_resp!(ListPlanResp, PlanListData);
 
 // ── Helpers for v2-style resources (Option<CodeError> pattern) ──
 
-impl_resp_v2!(CreateArchiveResp, serde_json::Value);
-impl_resp_v2!(QueryArchiveResp, serde_json::Value);
-impl_resp_v2!(ListChangeReasonResp, serde_json::Value);
-impl_resp_v2!(ListIndicatorResp, serde_json::Value);
-impl_resp_v2!(ListItemResp, serde_json::Value);
-impl_resp_v2!(ListItemCategoryResp, serde_json::Value);
-impl_resp_v2!(BatchCreateLumpSumPaymentResp, serde_json::Value);
-impl_resp_v2!(BatchRemoveLumpSumPaymentResp, serde_json::Value);
-impl_resp_v2!(BatchUpdateLumpSumPaymentResp, serde_json::Value);
-impl_resp_v2!(QueryLumpSumPaymentResp, serde_json::Value);
-impl_resp_v2!(QueryDetailLumpSumPaymentResp, serde_json::Value);
-impl_resp_v2!(BatchCreateRecurringPaymentResp, serde_json::Value);
-impl_resp_v2!(BatchRemoveRecurringPaymentResp, serde_json::Value);
-impl_resp_v2!(BatchUpdateRecurringPaymentResp, serde_json::Value);
-impl_resp_v2!(QueryRecurringPaymentResp, serde_json::Value);
-impl_resp_v2!(QuerySocialArchiveResp, serde_json::Value);
-impl_resp_v2!(QuerySocialArchiveAdjustRecordResp, serde_json::Value);
-impl_resp_v2!(ListSocialInsuranceResp, serde_json::Value);
-impl_resp_v2!(ListSocialPlanResp, serde_json::Value);
-impl_resp_v2!(QuerySocialPlanResp, serde_json::Value);
+impl_resp_v2!(CreateArchiveResp, CreateArchiveRespData);
+impl_resp_v2!(QueryArchiveResp, QueryArchiveRespData);
+impl_resp_v2!(ListChangeReasonResp, ListChangeReasonRespData);
+impl_resp_v2!(ListIndicatorResp, ListIndicatorRespData);
+impl_resp_v2!(ListItemResp, ListItemRespData);
+impl_resp_v2!(ListItemCategoryResp, ListItemCategoryRespData);
+impl_resp_v2!(
+    BatchCreateLumpSumPaymentResp,
+    BatchCreateLumpSumPaymentRespData
+);
+impl_resp_v2!(
+    BatchRemoveLumpSumPaymentResp,
+    BatchRemoveLumpSumPaymentRespData
+);
+impl_resp_v2!(
+    BatchUpdateLumpSumPaymentResp,
+    BatchUpdateLumpSumPaymentRespData
+);
+impl_resp_v2!(QueryLumpSumPaymentResp, QueryLumpSumPaymentRespData);
+impl_resp_v2!(
+    QueryDetailLumpSumPaymentResp,
+    QueryDetailLumpSumPaymentRespData
+);
+impl_resp_v2!(
+    BatchCreateRecurringPaymentResp,
+    BatchCreateRecurringPaymentRespData
+);
+impl_resp_v2!(
+    BatchRemoveRecurringPaymentResp,
+    BatchRemoveRecurringPaymentRespData
+);
+impl_resp_v2!(
+    BatchUpdateRecurringPaymentResp,
+    BatchUpdateRecurringPaymentRespData
+);
+impl_resp_v2!(QueryRecurringPaymentResp, QueryRecurringPaymentRespData);
+impl_resp_v2!(QuerySocialArchiveResp, QuerySocialArchiveRespData);
+impl_resp_v2!(
+    QuerySocialArchiveAdjustRecordResp,
+    QuerySocialArchiveAdjustRecordRespData
+);
+impl_resp_v2!(ListSocialInsuranceResp, ListSocialInsuranceRespData);
+impl_resp_v2!(ListSocialPlanResp, ListSocialPlanRespData);
+impl_resp_v2!(QuerySocialPlanResp, QuerySocialPlanRespData);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateArchiveRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unique_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub archive_tid: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryArchiveRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListChangeReasonRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListIndicatorRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListItemRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListItemCategoryRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchCreateLumpSumPaymentRespData {
+    #[serde(default)]
+    pub operate_results: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchRemoveLumpSumPaymentRespData {
+    #[serde(default)]
+    pub operate_results: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchUpdateLumpSumPaymentRespData {
+    #[serde(default)]
+    pub operate_results: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryLumpSumPaymentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default)]
+    pub records: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryDetailLumpSumPaymentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default)]
+    pub records: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchCreateRecurringPaymentRespData {
+    #[serde(default)]
+    pub operate_results: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchRemoveRecurringPaymentRespData {
+    #[serde(default)]
+    pub operate_results: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchUpdateRecurringPaymentRespData {
+    #[serde(default)]
+    pub operate_results: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryRecurringPaymentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default)]
+    pub records: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QuerySocialArchiveRespData {
+    #[serde(default)]
+    pub archives: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QuerySocialArchiveAdjustRecordRespData {
+    #[serde(default)]
+    pub records: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListSocialInsuranceRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListSocialPlanRespData {
+    #[serde(default)]
+    pub plans: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QuerySocialPlanRespData {
+    #[serde(default)]
+    pub plans: Vec<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct PlanResource<'a> {
@@ -104,7 +287,7 @@ impl ArchiveResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateArchiveResp>()
+        .send_v2_response::<CreateArchiveRespData, CreateArchiveResp>()
         .await
     }
 
@@ -121,7 +304,7 @@ impl ArchiveResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QueryArchiveResp>()
+        .send_v2_response::<QueryArchiveRespData, QueryArchiveResp>()
         .await
     }
 }
@@ -148,7 +331,7 @@ impl ChangeReasonResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListChangeReasonResp>()
+        .send_v2_response::<ListChangeReasonRespData, ListChangeReasonResp>()
         .await
     }
 }
@@ -175,7 +358,7 @@ impl IndicatorResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListIndicatorResp>()
+        .send_v2_response::<ListIndicatorRespData, ListIndicatorResp>()
         .await
     }
 }
@@ -202,7 +385,7 @@ impl ItemResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListItemResp>()
+        .send_v2_response::<ListItemRespData, ListItemResp>()
         .await
     }
 }
@@ -229,7 +412,7 @@ impl ItemCategoryResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListItemCategoryResp>()
+        .send_v2_response::<ListItemCategoryRespData, ListItemCategoryResp>()
         .await
     }
 }
@@ -254,7 +437,7 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchCreateLumpSumPaymentResp>()
+        .send_v2_response::<BatchCreateLumpSumPaymentRespData, BatchCreateLumpSumPaymentResp>()
         .await
     }
 
@@ -271,7 +454,7 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchRemoveLumpSumPaymentResp>()
+        .send_v2_response::<BatchRemoveLumpSumPaymentRespData, BatchRemoveLumpSumPaymentResp>()
         .await
     }
 
@@ -288,7 +471,7 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateLumpSumPaymentResp>()
+        .send_v2_response::<BatchUpdateLumpSumPaymentRespData, BatchUpdateLumpSumPaymentResp>()
         .await
     }
 
@@ -305,7 +488,7 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QueryLumpSumPaymentResp>()
+        .send_v2_response::<QueryLumpSumPaymentRespData, QueryLumpSumPaymentResp>()
         .await
     }
 
@@ -322,7 +505,7 @@ impl LumpSumPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QueryDetailLumpSumPaymentResp>()
+        .send_v2_response::<QueryDetailLumpSumPaymentRespData, QueryDetailLumpSumPaymentResp>()
         .await
     }
 }
@@ -347,7 +530,7 @@ impl RecurringPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchCreateRecurringPaymentResp>()
+        .send_v2_response::<BatchCreateRecurringPaymentRespData, BatchCreateRecurringPaymentResp>()
         .await
     }
 
@@ -364,7 +547,7 @@ impl RecurringPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchRemoveRecurringPaymentResp>()
+        .send_v2_response::<BatchRemoveRecurringPaymentRespData, BatchRemoveRecurringPaymentResp>()
         .await
     }
 
@@ -381,7 +564,7 @@ impl RecurringPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateRecurringPaymentResp>()
+        .send_v2_response::<BatchUpdateRecurringPaymentRespData, BatchUpdateRecurringPaymentResp>()
         .await
     }
 
@@ -398,7 +581,7 @@ impl RecurringPaymentResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QueryRecurringPaymentResp>()
+        .send_v2_response::<QueryRecurringPaymentRespData, QueryRecurringPaymentResp>()
         .await
     }
 }
@@ -423,7 +606,7 @@ impl SocialArchiveResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QuerySocialArchiveResp>()
+        .send_v2_response::<QuerySocialArchiveRespData, QuerySocialArchiveResp>()
         .await
     }
 }
@@ -448,7 +631,7 @@ impl SocialArchiveAdjustRecordResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QuerySocialArchiveAdjustRecordResp>()
+        .send_v2_response::<QuerySocialArchiveAdjustRecordRespData, QuerySocialArchiveAdjustRecordResp>()
         .await
     }
 }
@@ -468,7 +651,7 @@ impl SocialInsuranceResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListSocialInsuranceResp>()
+        .send_v2_response::<ListSocialInsuranceRespData, ListSocialInsuranceResp>()
         .await
     }
 }
@@ -495,7 +678,7 @@ impl SocialPlanResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListSocialPlanResp>()
+        .send_v2_response::<ListSocialPlanRespData, ListSocialPlanResp>()
         .await
     }
 
@@ -512,7 +695,7 @@ impl SocialPlanResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QuerySocialPlanResp>()
+        .send_v2_response::<QuerySocialPlanRespData, QuerySocialPlanResp>()
         .await
     }
 }

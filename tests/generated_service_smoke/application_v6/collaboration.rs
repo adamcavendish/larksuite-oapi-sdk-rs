@@ -26,7 +26,7 @@ async fn application_v6_collaborators_get_by_query_smoke() {
 
 #[tokio::test]
 async fn application_v6_collaborators_and_contacts_range_write_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"ok":true}}"#;
+    let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) =
         mock_server_with_requests(vec![http_response(200, body), http_response(200, body)]).await;
 

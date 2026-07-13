@@ -89,7 +89,7 @@ async fn application_v6_app_version_list_by_query_smoke() {
 
 #[tokio::test]
 async fn application_v6_app_version_patch_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"app_version":{"version_id":"ver-1"}}}"#;
+    let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
