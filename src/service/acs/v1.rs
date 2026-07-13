@@ -226,11 +226,11 @@ pub struct VisitorListData {
 
 impl_resp_v2!(CreateRuleExternalResp, RuleExternalData);
 impl_resp_v2!(DeleteRuleExternalResp, ());
-impl_resp_v2!(DeviceBindRuleExternalResp, serde_json::Value);
+impl_resp_v2!(DeviceBindRuleExternalResp, ());
 impl_resp_v2!(GetRuleExternalResp, RuleExternalData);
 impl_resp_v2!(GetAccessRecordAccessPhotoResp, AccessRecordAccessPhotoData);
 impl_resp_v2!(GetUserFaceResp, UserFaceData);
-impl_resp_v2!(UpdateUserFaceResp, serde_json::Value);
+impl_resp_v2!(UpdateUserFaceResp, ());
 impl_resp_v2!(CreateVisitorResp, VisitorData);
 impl_resp_v2!(DeleteVisitorResp, ());
 impl_resp_v2!(ListVisitorResp, VisitorListData);
@@ -601,7 +601,7 @@ impl RuleExternalResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, DeviceBindRuleExternalResp>()
+        .send_v2_response::<(), DeviceBindRuleExternalResp>()
         .await
     }
 
@@ -801,7 +801,7 @@ impl UserFaceResource<'_> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateUserFaceResp>()
+        .send_v2_response::<(), UpdateUserFaceResp>()
         .await
     }
 }

@@ -722,8 +722,8 @@ impl_resp!(PatchFormFieldResp, FormFieldPatchData);
 // ── v2 helpers (Option<CodeError>, used for newer endpoints) ──
 
 // app.copy / app.create
-impl_resp_v2!(CopyAppResp, serde_json::Value);
-impl_resp_v2!(CreateAppResp, serde_json::Value);
+impl_resp_v2!(CopyAppResp, CopyAppRespData);
+impl_resp_v2!(CreateAppResp, CreateAppRespData);
 
 // app_role
 impl_resp_v2!(CreateAppRoleResp, AppRoleData);
@@ -973,6 +973,19 @@ impl SearchRecordIterator<'_> {
     }
 }
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CopyAppRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateAppRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app: Option<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct AppResource<'a> {
@@ -997,7 +1010,7 @@ impl<'a> AppResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CopyAppResp>()
+        .send_v2_response::<CopyAppRespData, CopyAppResp>()
         .await
     }
 
@@ -1016,7 +1029,7 @@ impl<'a> AppResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateAppResp>()
+        .send_v2_response::<CreateAppRespData, CreateAppResp>()
         .await
     }
 

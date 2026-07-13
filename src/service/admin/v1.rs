@@ -192,11 +192,48 @@ impl_resp!(GetDeptStatResp, DeptStatListData);
 
 impl_resp_v2!(UpdateBadgeResp, BadgeData);
 impl_resp_v2!(UpdateBadgeGrantResp, BadgeGrantData);
-impl_resp_v2!(ListAdminUserStatResp, serde_json::Value);
-impl_resp_v2!(ListAuditInfoResp, serde_json::Value);
-impl_resp_v2!(CreateBadgeImageResp, serde_json::Value);
-impl_resp_v2!(ListAdminDeptStatResp, serde_json::Value);
+impl_resp_v2!(ListAdminUserStatResp, ListAdminUserStatRespData);
+impl_resp_v2!(ListAuditInfoResp, ListAuditInfoRespData);
+impl_resp_v2!(CreateBadgeImageResp, CreateBadgeImageRespData);
+impl_resp_v2!(ListAdminDeptStatResp, ListAdminDeptStatRespData);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListAdminUserStatRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListAuditInfoRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateBadgeImageRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image_key: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListAdminDeptStatRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct PasswordResource<'a> {
@@ -955,7 +992,7 @@ impl<'a> AdminDeptStatResource<'a> {
         .page_query(query.page)
         .query("target_geo", query.target_geo)
         .query("with_product_version", query.with_product_version)
-        .send_v2_response::<serde_json::Value, ListAdminDeptStatResp>()
+        .send_v2_response::<ListAdminDeptStatRespData, ListAdminDeptStatResp>()
         .await
     }
 }
@@ -1065,7 +1102,7 @@ impl<'a> AdminUserStatResource<'a> {
         .query("department_id", query.department_id)
         .query("user_id", query.user_id)
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListAdminUserStatResp>()
+        .send_v2_response::<ListAdminUserStatRespData, ListAdminUserStatResp>()
         .await
     }
 }
@@ -1186,7 +1223,7 @@ impl<'a> AuditInfoResource<'a> {
         .query("operator_value", query.operator_value)
         .query("event_module", query.event_module)
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListAuditInfoResp>()
+        .send_v2_response::<ListAuditInfoRespData, ListAuditInfoResp>()
         .await
     }
 }
@@ -1230,7 +1267,7 @@ impl<'a> BadgeImageResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateBadgeImageResp>()
+        .send_v2_response::<CreateBadgeImageRespData, CreateBadgeImageResp>()
         .await
     }
 }

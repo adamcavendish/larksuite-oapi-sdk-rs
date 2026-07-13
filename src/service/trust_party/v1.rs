@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
@@ -5,25 +7,64 @@ use crate::req::RequestOption;
 use crate::service::common::{PageQuery, RestRequest};
 use crate::service::go_v397::GoV397;
 
-impl_resp_v2!(GetCollaborationTenantResp, serde_json::Value);
+impl_resp_v2!(GetCollaborationTenantResp, GetCollaborationTenantRespData);
 
-impl_resp_v2!(ListCollaborationTenantResp, serde_json::Value);
+impl_resp_v2!(ListCollaborationTenantResp, ListCollaborationTenantRespData);
 
 impl_resp_v2!(
     VisibleOrganizationCollaborationTenantResp,
-    serde_json::Value
+    VisibleOrganizationCollaborationTenantRespData
 );
 
 impl_resp_v2!(
     GetCollaborationTenantCollaborationDepartmentResp,
-    serde_json::Value
+    GetCollaborationTenantCollaborationDepartmentRespData
 );
 
 impl_resp_v2!(
     GetCollaborationTenantCollaborationUserResp,
-    serde_json::Value
+    GetCollaborationTenantCollaborationUserRespData
 );
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetCollaborationTenantRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_tenant: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListCollaborationTenantRespData {
+    #[serde(default)]
+    pub target_tenant_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct VisibleOrganizationCollaborationTenantRespData {
+    #[serde(default)]
+    pub collaboration_entity_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetCollaborationTenantCollaborationDepartmentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_department: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetCollaborationTenantCollaborationUserRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_user: Option<serde_json::Value>,
+}
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct GetCollaborationTenantQuery<'a> {
@@ -189,7 +230,7 @@ impl<'a> CollaborationTenantResource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetCollaborationTenantResp>()
+        .send_v2_response::<GetCollaborationTenantRespData, GetCollaborationTenantResp>()
         .await
     }
 
@@ -219,7 +260,7 @@ impl<'a> CollaborationTenantResource<'a> {
             option,
         )
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListCollaborationTenantResp>()
+        .send_v2_response::<ListCollaborationTenantRespData, ListCollaborationTenantResp>()
         .await
     }
 
@@ -245,7 +286,7 @@ impl<'a> CollaborationTenantResource<'a> {
         .query("target_department_id", query.target_department_id)
         .query("group_id_type", query.group_id_type)
         .query("target_group_id", query.target_group_id)
-        .send_v2_response::<serde_json::Value, VisibleOrganizationCollaborationTenantResp>()
+        .send_v2_response::<VisibleOrganizationCollaborationTenantRespData, VisibleOrganizationCollaborationTenantResp>()
         .await
     }
 }
@@ -273,7 +314,7 @@ impl<'a> CollaborationTenantCollaborationDepartmentResource<'a> {
             option,
         )
         .query("target_department_id_type", query.target_department_id_type)
-        .send_v2_response::<serde_json::Value, GetCollaborationTenantCollaborationDepartmentResp>()
+        .send_v2_response::<GetCollaborationTenantCollaborationDepartmentRespData, GetCollaborationTenantCollaborationDepartmentResp>()
         .await
     }
 }
@@ -301,7 +342,7 @@ impl<'a> CollaborationTenantCollaborationUserResource<'a> {
             option,
         )
         .query("target_user_id_type", query.target_user_id_type)
-        .send_v2_response::<serde_json::Value, GetCollaborationTenantCollaborationUserResp>()
+        .send_v2_response::<GetCollaborationTenantCollaborationUserRespData, GetCollaborationTenantCollaborationUserResp>()
         .await
     }
 }
