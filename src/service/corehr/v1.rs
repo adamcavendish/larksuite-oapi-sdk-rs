@@ -558,6 +558,158 @@ pub struct TransferType {
     pub updated_time: Option<String>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EmployeeType {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_employee_type: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_fields: Option<Vec<ObjectFieldData>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Job {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_title: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pathway_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_family_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_level_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub working_hours_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_fields: Option<Vec<ObjectFieldData>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_prefer_manual_encoding: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CorehrSupportCostCenterItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_center_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rate: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_level_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_grade_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub working_hours_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_location_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_start_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub primary_job_data: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_family_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assignment_start_reason: Option<CorehrEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_expected_end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_outcome: Option<CorehrEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weekly_working_hours: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub direct_manager_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dotted_line_manager_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub second_direct_manager_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_center_rate: Option<Vec<CorehrSupportCostCenterItem>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_fields: Option<Vec<ObjectFieldData>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weekly_working_hours_v2: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_shift: Option<CorehrEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub compensation_type: Option<CorehrEnum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub service_company: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_subtype_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pathway_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_data_reason: Option<CorehrEnum>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobFamily {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub selectable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pathway_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_fields: Option<Vec<ObjectFieldData>>,
+}
+
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -746,6 +898,70 @@ pub struct TransferReasonListData {
 pub struct TransferTypeListData {
     #[serde(default)]
     pub items: Vec<TransferType>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EmployeeTypeData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_type: Option<EmployeeType>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EmployeeTypeListData {
+    #[serde(default)]
+    pub items: Vec<EmployeeType>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobResponseData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job: Option<Job>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobListData {
+    #[serde(default)]
+    pub items: Vec<Job>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobDataResponseData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_data: Option<JobData>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobDataListData {
+    #[serde(default)]
+    pub items: Vec<JobData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobFamilyData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_family: Option<JobFamily>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct JobFamilyListData {
+    #[serde(default)]
+    pub items: Vec<JobFamily>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
 }
 
 impl_resp!(GetEmployeeResp, EmployeeData);
@@ -1493,31 +1709,31 @@ impl_resp_v2!(QueryCustomFieldResp, serde_json::Value);
 impl_resp_v2!(CreateDepartmentResp, serde_json::Value);
 impl_resp_v2!(DeleteDepartmentResp, ());
 impl_resp_v2!(PatchDepartmentResp, DepartmentData);
-impl_resp_v2!(CreateEmployeeTypeResp, serde_json::Value);
+impl_resp_v2!(CreateEmployeeTypeResp, EmployeeTypeData);
 impl_resp_v2!(DeleteEmployeeTypeResp, ());
-impl_resp_v2!(GetEmployeeTypeResp, serde_json::Value);
-impl_resp_v2!(ListEmployeeTypeResp, serde_json::Value);
-impl_resp_v2!(PatchEmployeeTypeResp, serde_json::Value);
+impl_resp_v2!(GetEmployeeTypeResp, EmployeeTypeData);
+impl_resp_v2!(ListEmployeeTypeResp, EmployeeTypeListData);
+impl_resp_v2!(PatchEmployeeTypeResp, EmployeeTypeData);
 impl_resp_v2!(CreateEmploymentResp, serde_json::Value);
 impl_resp_v2!(DeleteEmploymentResp, ());
 impl_resp_v2!(PatchEmploymentResp, serde_json::Value);
 impl_resp_v2!(GetFileResp, ());
-impl_resp_v2!(CreateJobResp, serde_json::Value);
+impl_resp_v2!(CreateJobResp, JobResponseData);
 impl_resp_v2!(DeleteJobResp, ());
-impl_resp_v2!(GetJobResp, serde_json::Value);
-impl_resp_v2!(ListJobResp, serde_json::Value);
-impl_resp_v2!(PatchJobResp, serde_json::Value);
+impl_resp_v2!(GetJobResp, JobResponseData);
+impl_resp_v2!(ListJobResp, JobListData);
+impl_resp_v2!(PatchJobResp, JobResponseData);
 impl_resp_v2!(CreateJobChangeResp, serde_json::Value);
-impl_resp_v2!(CreateJobDataResp, serde_json::Value);
+impl_resp_v2!(CreateJobDataResp, JobDataResponseData);
 impl_resp_v2!(DeleteJobDataResp, ());
-impl_resp_v2!(GetJobDataResp, serde_json::Value);
-impl_resp_v2!(ListJobDataResp, serde_json::Value);
-impl_resp_v2!(PatchJobDataResp, serde_json::Value);
-impl_resp_v2!(CreateJobFamilyResp, serde_json::Value);
+impl_resp_v2!(GetJobDataResp, JobDataResponseData);
+impl_resp_v2!(ListJobDataResp, JobDataListData);
+impl_resp_v2!(PatchJobDataResp, JobDataResponseData);
+impl_resp_v2!(CreateJobFamilyResp, JobFamilyData);
 impl_resp_v2!(DeleteJobFamilyResp, ());
-impl_resp_v2!(GetJobFamilyResp, serde_json::Value);
-impl_resp_v2!(ListJobFamilyResp, serde_json::Value);
-impl_resp_v2!(PatchJobFamilyResp, serde_json::Value);
+impl_resp_v2!(GetJobFamilyResp, JobFamilyData);
+impl_resp_v2!(ListJobFamilyResp, JobFamilyListData);
+impl_resp_v2!(PatchJobFamilyResp, JobFamilyData);
 impl_resp_v2!(CreateJobLevelResp, JobLevelData);
 impl_resp_v2!(DeleteJobLevelResp, ());
 impl_resp_v2!(PatchJobLevelResp, JobLevelData);
@@ -2090,7 +2306,7 @@ impl<'a> EmployeeTypeResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateEmployeeTypeResp>()
+        .send_v2_response::<EmployeeTypeData, CreateEmployeeTypeResp>()
         .await
     }
 
@@ -2124,7 +2340,7 @@ impl<'a> EmployeeTypeResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetEmployeeTypeResp>()
+        .send_v2_response::<EmployeeTypeData, GetEmployeeTypeResp>()
         .await
     }
 
@@ -2153,7 +2369,7 @@ impl<'a> EmployeeTypeResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListEmployeeTypeResp>()
+        .send_v2_response::<EmployeeTypeListData, ListEmployeeTypeResp>()
         .await
     }
 
@@ -2172,7 +2388,7 @@ impl<'a> EmployeeTypeResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchEmployeeTypeResp>()
+        .send_v2_response::<EmployeeTypeData, PatchEmployeeTypeResp>()
         .await
     }
 }
@@ -2306,7 +2522,7 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateJobResp>()
+        .send_v2_response::<JobResponseData, CreateJobResp>()
         .await
     }
 
@@ -2336,7 +2552,7 @@ impl<'a> JobResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetJobResp>()
+        .send_v2_response::<JobResponseData, GetJobResp>()
         .await
     }
 
@@ -2365,7 +2581,7 @@ impl<'a> JobResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListJobResp>()
+        .send_v2_response::<JobListData, ListJobResp>()
         .await
     }
 
@@ -2384,7 +2600,7 @@ impl<'a> JobResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchJobResp>()
+        .send_v2_response::<JobResponseData, PatchJobResp>()
         .await
     }
 }
@@ -2463,7 +2679,7 @@ impl<'a> JobDataResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateJobDataResp>()
+        .send_v2_response::<JobDataResponseData, CreateJobDataResp>()
         .await
     }
 
@@ -2497,7 +2713,7 @@ impl<'a> JobDataResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetJobDataResp>()
+        .send_v2_response::<JobDataResponseData, GetJobDataResp>()
         .await
     }
 
@@ -2526,7 +2742,7 @@ impl<'a> JobDataResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListJobDataResp>()
+        .send_v2_response::<JobDataListData, ListJobDataResp>()
         .await
     }
 
@@ -2545,7 +2761,7 @@ impl<'a> JobDataResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchJobDataResp>()
+        .send_v2_response::<JobDataResponseData, PatchJobDataResp>()
         .await
     }
 }
@@ -2601,7 +2817,7 @@ impl<'a> JobFamilyResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateJobFamilyResp>()
+        .send_v2_response::<JobFamilyData, CreateJobFamilyResp>()
         .await
     }
 
@@ -2635,7 +2851,7 @@ impl<'a> JobFamilyResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetJobFamilyResp>()
+        .send_v2_response::<JobFamilyData, GetJobFamilyResp>()
         .await
     }
 
@@ -2664,7 +2880,7 @@ impl<'a> JobFamilyResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListJobFamilyResp>()
+        .send_v2_response::<JobFamilyListData, ListJobFamilyResp>()
         .await
     }
 
@@ -2683,7 +2899,7 @@ impl<'a> JobFamilyResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchJobFamilyResp>()
+        .send_v2_response::<JobFamilyData, PatchJobFamilyResp>()
         .await
     }
 }
