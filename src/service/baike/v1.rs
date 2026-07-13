@@ -351,19 +351,19 @@ impl<'a> ListClassificationQuery<'a> {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ExtractEntityRespData {
     #[serde(default)]
-    pub entity_word: Vec<serde_json::Value>,
+    pub entity_word: Vec<EntityWord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MatchEntityRespData {
     #[serde(default)]
-    pub results: Vec<serde_json::Value>,
+    pub results: Vec<MatchInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListClassificationRespData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<Classification>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
 }
@@ -371,19 +371,160 @@ pub struct ListClassificationRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateDraftRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub draft: Option<serde_json::Value>,
+    pub draft: Option<Draft>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UpdateDraftRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub draft: Option<serde_json::Value>,
+    pub draft: Option<Draft>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UploadFileRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_token: Option<String>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Abbreviation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BaikeImage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Classification {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub father_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseDisplayStatus {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allow_highlight: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allow_search: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Draft {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub draft_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub entity: Option<Entity>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Entity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default)]
+    pub main_keys: Vec<ResponseTerm>,
+    #[serde(default)]
+    pub full_names: Vec<ResponseTerm>,
+    #[serde(default)]
+    pub aliases: Vec<ResponseTerm>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updater: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub related_meta: Option<ResponseRelatedMeta>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub statistics: Option<Statistics>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outer_info: Option<ResponseOuterInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rich_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EntityWord {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub aliases: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MatchInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub entity_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseOuterInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outer_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Referer {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseRelatedMeta {
+    #[serde(default)]
+    pub users: Vec<Referer>,
+    #[serde(default)]
+    pub chats: Vec<Referer>,
+    #[serde(default)]
+    pub docs: Vec<Referer>,
+    #[serde(default)]
+    pub oncalls: Vec<Referer>,
+    #[serde(default)]
+    pub links: Vec<Referer>,
+    #[serde(default)]
+    pub abbreviations: Vec<Abbreviation>,
+    #[serde(default)]
+    pub classifications: Vec<Classification>,
+    #[serde(default)]
+    pub images: Vec<BaikeImage>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Statistics {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub like_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dislike_count: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseTerm {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_status: Option<ResponseDisplayStatus>,
 }
 // ── Resources ──
 

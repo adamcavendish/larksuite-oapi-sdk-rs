@@ -1173,7 +1173,7 @@ impl<'a> ListExternalTaskQuery<'a> {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PreviewInstanceRespData {
     #[serde(default)]
-    pub preview_nodes: Vec<serde_json::Value>,
+    pub preview_nodes: Vec<PreviewNode>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1181,7 +1181,7 @@ pub struct QueryInstanceRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<i32>,
     #[serde(default)]
-    pub instance_list: Vec<serde_json::Value>,
+    pub instance_list: Vec<InstanceSearchItem>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1193,7 +1193,7 @@ pub struct SearchCcInstanceRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<i32>,
     #[serde(default)]
-    pub cc_list: Vec<serde_json::Value>,
+    pub cc_list: Vec<CcSearchItem>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1215,7 +1215,7 @@ pub struct DeleteInstanceCommentRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListInstanceCommentRespData {
     #[serde(default)]
-    pub comments: Vec<serde_json::Value>,
+    pub comments: Vec<Comment>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1229,13 +1229,13 @@ pub struct RemoveInstanceCommentRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct QueryTaskRespData {
     #[serde(default)]
-    pub tasks: Vec<serde_json::Value>,
+    pub tasks: Vec<Task>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub count: Option<serde_json::Value>,
+    pub count: Option<Count>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1243,7 +1243,7 @@ pub struct SearchTaskRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<i32>,
     #[serde(default)]
-    pub task_list: Vec<serde_json::Value>,
+    pub task_list: Vec<TaskSearchItem>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1253,11 +1253,308 @@ pub struct SearchTaskRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListExternalTaskRespData {
     #[serde(default)]
-    pub data: Vec<serde_json::Value>,
+    pub data: Vec<ExternalTaskList>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CcSearchItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval: Option<InstanceSearchApproval>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group: Option<InstanceSearchGroup>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instance: Option<InstanceSearchNode>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cc: Option<CcSearchNode>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CcSearchNode {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub read_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<InstanceSearchLink>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Comment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_delete: Option<i32>,
+    #[serde(default)]
+    pub replies: Vec<CommentReply>,
+    #[serde(default)]
+    pub at_info_list: Vec<CommentAtInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub commentator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CommentAtInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CommentReply {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_delete: Option<i32>,
+    #[serde(default)]
+    pub at_info_list: Vec<CommentAtInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub commentator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Count {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalTaskItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalTaskList {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instance_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default)]
+    pub tasks: Vec<ExternalTaskItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstanceSearchApproval {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_external: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external: Option<InstanceSearchApprovalExternal>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstanceSearchApprovalExternal {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub batch_cc_read: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstanceSearchGroup {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstanceSearchItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval: Option<InstanceSearchApproval>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group: Option<InstanceSearchGroup>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instance: Option<InstanceSearchNode>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstanceSearchLink {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pc_link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_link: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstanceSearchNode {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub serial_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<InstanceSearchLink>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PreviewNode {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub node_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub node_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub node_type: Option<String>,
+    #[serde(default)]
+    pub comments: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_node_id: Option<String>,
+    #[serde(default)]
+    pub user_id_list: Vec<String>,
+    #[serde(default)]
+    pub end_cc_id_list: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_empty_logic: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_approver_type_free: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_cc_type_free: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Task {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub topic: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub urls: Option<TaskUrls>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub definition_code: Option<String>,
+    #[serde(default)]
+    pub initiators: Vec<String>,
+    #[serde(default)]
+    pub initiator_names: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub definition_group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub definition_group_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub definition_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub definition_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskSearchItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval: Option<InstanceSearchApproval>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group: Option<InstanceSearchGroup>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instance: Option<InstanceSearchNode>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task: Option<TaskSearchNode>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskSearchNode {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<InstanceSearchLink>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_external_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskUrls {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub helpdesk: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pc: Option<String>,
 }
 // ── Resources ──
 

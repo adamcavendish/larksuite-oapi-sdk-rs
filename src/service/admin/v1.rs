@@ -206,7 +206,7 @@ pub struct ListAdminUserStatRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<AdminUserStat>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -216,7 +216,7 @@ pub struct ListAuditInfoRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<AuditInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -232,7 +232,488 @@ pub struct ListAdminDeptStatRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<ResponseAdminDeptStat>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResponseAdminDeptStat {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_path: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_user_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_user_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_user_rate: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub suite_dau: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub suite_active_rate: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub new_user_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub new_active_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resign_user_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub im_dau: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub send_messenger_user_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub send_messenger_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avg_send_messenger_num: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub docs_dau: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_docs_user_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_docs_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avg_create_docs_num: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cal_dau: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_cal_user_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_cal_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avg_create_cal_num: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vc_dau: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vc_duration: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avg_vc_duration: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avg_duration: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_dau: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_task_user_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_task_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avg_create_task_num: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_send_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_receive_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_send_ext_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_receive_ext_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_send_in_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_receive_in_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub search_active_dau: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_search_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quick_search_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tab_search_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub product_version: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AdminUserStat {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_path: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_active_flag: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub register_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub suite_active_flag: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_active_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub im_active_flag: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub send_messenger_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub docs_active_flag: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_docs_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cal_active_flag: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_cal_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vc_active_flag: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vc_duration: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_os: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_task_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vc_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_package_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub os_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_send_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_receive_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_send_ext_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_receive_ext_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_send_in_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_receive_in_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub search_active_flag: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_search_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quick_search_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tab_search_count: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApiAuditCommonDrawers {
+    #[serde(default)]
+    pub common_draw_info_list: Vec<ApiAuditDrawerInfo>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApiAuditDrawerInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub info_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub info_val: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key_i18n_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub val_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub val_i18n_key: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditAndroidContext {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub udid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub did: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_ver: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ver: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub region: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id_i: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id_r: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hw_brand: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hw_manuf: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wifip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub route_iip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub route_gip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub env_su: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub env_tz: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub env_ml: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_ip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_ip_detail: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cell_base_station: Option<String>,
+    #[serde(default, rename = "IP", skip_serializing_if = "Option::is_none")]
+    pub ip: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditContext {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub terminal_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ios_context: Option<AuditIosContext>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pc_context: Option<AuditPcContext>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub web_context: Option<AuditWebContext>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub android_context: Option<AuditAndroidContext>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mc: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_model: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub os: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditEventExtend {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_detail: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub two_step_validation: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub login_method: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub new_people_num_in_video: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_people_num_in_video: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_people_num_in_chat: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub join_group: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quit_group: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_people_num_in_doc_share: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unique_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_name: Option<String>,
+    #[serde(default)]
+    pub department_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_module: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_value: Option<String>,
+    #[serde(default)]
+    pub objects: Vec<AuditObjectEntity>,
+    #[serde(default)]
+    pub recipients: Vec<AuditRecipientEntity>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_time: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_app: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub audit_context: Option<AuditContext>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extend: Option<AuditEventExtend>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_app_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub common_drawers: Option<ApiAuditCommonDrawers>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub audit_detail: Option<AuditDetail>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_tenant: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_detail: Option<OperatorDetail>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditIosContext {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub udid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub did: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_ver: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ver: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub os: Option<String>,
+    #[serde(default, rename = "STZone", skip_serializing_if = "Option::is_none")]
+    pub st_zone: Option<String>,
+    #[serde(default, rename = "ML", skip_serializing_if = "Option::is_none")]
+    pub ml: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sjd: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub proxyip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wifip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_ip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_ip_detail: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cell_base_station: Option<String>,
+    #[serde(default, rename = "IP", skip_serializing_if = "Option::is_none")]
+    pub ip: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditObjectDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub clone_source: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_detail: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_name: Option<String>,
+    #[serde(
+        default,
+        rename = "third_party_appID",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub third_party_app_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contain_file_num: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission_setting_type: Option<String>,
+    #[serde(
+        default,
+        rename = "permission_external_access_Type",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub permission_external_access_type: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission_share_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_service_source: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub okr_download_content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub container_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub container_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current_page: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditObjectEntity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_owner: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_detail: Option<AuditObjectDetail>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditPcContext {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub udid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub did: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_ver: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ver: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub os: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wifip: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub region: Option<String>,
+    #[serde(default, rename = "IP", skip_serializing_if = "Option::is_none")]
+    pub ip: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditRecipientDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission_action_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_flag: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditRecipientEntity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recipient_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recipient_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recipient_detail: Option<AuditRecipientDetail>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AuditWebContext {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_agent: Option<String>,
+    #[serde(default, rename = "IP", skip_serializing_if = "Option::is_none")]
+    pub ip: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OperatorDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator_name: Option<OperatorName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenant_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OperatorName {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_value: Option<I18n>,
 }
 // ── Resources ──
 

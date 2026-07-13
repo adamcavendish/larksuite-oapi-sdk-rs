@@ -31,13 +31,13 @@ impl_resp_v2!(
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetCollaborationTenantRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub target_tenant: Option<serde_json::Value>,
+    pub target_tenant: Option<CollaborationTenant>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListCollaborationTenantRespData {
     #[serde(default)]
-    pub target_tenant_list: Vec<serde_json::Value>,
+    pub target_tenant_list: Vec<CollaborationTenant>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -47,7 +47,7 @@ pub struct ListCollaborationTenantRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct VisibleOrganizationCollaborationTenantRespData {
     #[serde(default)]
-    pub collaboration_entity_list: Vec<serde_json::Value>,
+    pub collaboration_entity_list: Vec<CollaborationEntity>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -57,13 +57,226 @@ pub struct VisibleOrganizationCollaborationTenantRespData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetCollaborationTenantCollaborationDepartmentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub target_department: Option<serde_json::Value>,
+    pub target_department: Option<CollaborationDepartment>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GetCollaborationTenantCollaborationUserRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub target_user: Option<serde_json::Value>,
+    pub target_user: Option<CollaborationUser>,
+}
+// ── Generated nested response models ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AvatarInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_72: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_240: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_640: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_origin: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CollaborationDepartment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_name: Option<I18nName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<String>,
+    #[serde(default)]
+    pub leaders: Vec<CollaborationDepartmentLeader>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_department_id: Option<CollaborationDepartmentId>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CollaborationDepartmentId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_department_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CollaborationDepartmentLeader {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leader_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<CollaborationUserId>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CollaborationEntity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub collaboration_entity_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_department_name: Option<I18nName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_order: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_user_name: Option<I18nName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_avatar: Option<AvatarInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_group_name: Option<I18nName>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CollaborationTenant {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenant_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenant_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_tenant_name: Option<I18nName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenant_short_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_tenant_short_name: Option<I18nName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub connect_time: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenant_tag: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_tenant_tag: Option<I18nName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<AvatarInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub brand: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CollaborationUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_name: Option<I18nName>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<AvatarInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<UserStatus>,
+    #[serde(default)]
+    pub department_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leader_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_title: Option<String>,
+    #[serde(default)]
+    pub custom_attrs: Vec<UserCustomAttr>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_no: Option<String>,
+    #[serde(default)]
+    pub parent_department_ids: Vec<CollaborationDepartmentId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leader_id: Option<CollaborationUserId>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CollaborationUserId {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub union_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CustomAttrGenericUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18nName {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserCustomAttr {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<UserCustomAttrValue>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserCustomAttrValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pc_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub picture_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub generic_user: Option<CustomAttrGenericUser>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserStatus {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_frozen: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_resigned: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_activated: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_exited: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_unjoin: Option<bool>,
 }
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
