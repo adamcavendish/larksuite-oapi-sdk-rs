@@ -6,7 +6,7 @@ use super::prelude::*;
 async fn acs_face_visitor_by_query_smoke() {
     let photo_body = r#"{"code":0,"msg":"ok","data":{"file_content":"photo-bytes"}}"#;
     let face_body = r#"{"code":0,"msg":"ok","data":{"file_content":"face-bytes"}}"#;
-    let empty_body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let visitor_body = r#"{"code":0,"msg":"ok","data":{"visitor_id":"visitor-1"}}"#;
     let delete_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![

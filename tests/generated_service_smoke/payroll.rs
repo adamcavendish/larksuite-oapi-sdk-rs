@@ -109,8 +109,12 @@ async fn payroll_datasource_record_query_by_query_smoke() {
 #[tokio::test]
 async fn payroll_payment_activity_list_by_query_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"items":[{"activity_id":"act-1"}]}}"#;
-    let (addr, _handle, requests) =
-        mock_server_with_requests(vec![http_response(200, body), http_response(200, body)]).await;
+    let archive_body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, body),
+        http_response(200, archive_body),
+    ])
+    .await;
 
     let client = client_for(addr);
     let statuses = [1, 3];

@@ -52,13 +52,14 @@ async fn cardkit_card_instance_by_query_smoke() {
 
 #[tokio::test]
 async fn cardkit_card_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"ok":true}}"#;
+    let value_body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
-        http_response(200, body),
-        http_response(200, body),
-        http_response(200, body),
-        http_response(200, body),
-        http_response(200, body),
+        http_response(200, value_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+        http_response(200, value_body),
+        http_response(200, empty_body),
     ])
     .await;
 
@@ -135,14 +136,13 @@ async fn cardkit_card_by_query_smoke() {
 
 #[tokio::test]
 async fn cardkit_card_element_by_query_smoke() {
-    let value_body = r#"{"code":0,"msg":"ok","data":{"ok":true}}"#;
     let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
-        http_response(200, value_body),
-        http_response(200, value_body),
         http_response(200, empty_body),
-        http_response(200, value_body),
-        http_response(200, value_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
+        http_response(200, empty_body),
     ])
     .await;
 

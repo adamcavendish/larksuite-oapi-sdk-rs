@@ -20,12 +20,7 @@ async fn lingo_classification_list_by_query_smoke() {
         .unwrap();
 
     assert!(resp.success());
-    assert!(
-        resp.data
-            .as_ref()
-            .and_then(|data| data.get("items"))
-            .is_some()
-    );
+    assert_eq!(resp.data.as_ref().map(|data| data.items.len()), Some(1));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/lingo/v1/classifications?"));
     assert!(request.contains("page_size=20"));

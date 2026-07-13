@@ -75,10 +75,7 @@ async fn application_v7_app_avatar_upload_by_query_smoke() {
 
     assert!(resp.success());
     assert_eq!(
-        resp.data
-            .as_ref()
-            .and_then(|data| data.get("url"))
-            .and_then(|url| url.as_str()),
+        resp.data.as_ref().and_then(|data| data.url.as_deref()),
         Some("https://example.com/avatar.png")
     );
     let request = requests.lock().unwrap().join("\n");
@@ -90,7 +87,7 @@ async fn application_v7_app_avatar_upload_by_query_smoke() {
 
 #[tokio::test]
 async fn application_v7_patch_resources_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"ok":true}}"#;
+    let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, body),
         http_response(200, body),
@@ -180,8 +177,7 @@ async fn application_v7_publish_create_by_query_smoke() {
     assert_eq!(
         resp.data
             .as_ref()
-            .and_then(|data| data.get("version_id"))
-            .and_then(|version_id| version_id.as_str()),
+            .and_then(|data| data.version_id.as_deref()),
         Some("ver-1")
     );
     let request = requests.lock().unwrap().join("\n");

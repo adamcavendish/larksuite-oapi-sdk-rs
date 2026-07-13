@@ -4,7 +4,7 @@ use super::prelude::*;
 
 #[tokio::test]
 async fn directory_share_entity_list_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -36,7 +36,7 @@ async fn directory_share_entity_list_by_query_smoke() {
 
 #[tokio::test]
 async fn directory_share_entity_positional_adapter_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"items":[]}}"#;
+    let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
