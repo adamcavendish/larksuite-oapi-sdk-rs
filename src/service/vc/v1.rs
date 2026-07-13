@@ -285,6 +285,215 @@ impl_resp!(ListMeetingResp, MeetingListData);
 impl_resp!(ListParticipantResp, ParticipantListData);
 impl_resp!(GetMeetingReportResp, MeetingReportData);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MgetRoomRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchRoomRespData {
+    #[serde(default)]
+    pub rooms: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SetCheckboardAccessCodeRoomConfigRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub access_code: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SetRoomAccessCodeRoomConfigRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub access_code: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryRoomConfigRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_background: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_background: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub digital_signage: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_box_digital_signage: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_status: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListAlertRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetExportRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fail_msg: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetMeetingRecordingRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recording: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplyReserveRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_correction_check_info: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetReserveRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetActiveMeetingReserveRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateReserveRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_correction_check_info: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReserveScopeReserveConfigRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approve_config: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_config: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_scope_config: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetReserveConfigAdminRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_admin_config: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetReserveConfigDisableInformRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disable_inform: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetReserveConfigFormRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_form_config: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateRoomLevelRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_level: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetRoomLevelRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_level: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListRoomLevelRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MgetRoomLevelRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchRoomLevelRespData {
+    #[serde(default)]
+    pub level_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetScopeConfigRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current_config: Option<serde_json::Value>,
+    #[serde(default)]
+    pub origin_configs: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetMeetingListRespData {
+    #[serde(default)]
+    pub meeting_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetParticipantListRespData {
+    #[serde(default)]
+    pub participants: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetParticipantQualityListRespData {
+    #[serde(default)]
+    pub participant_quality_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetResourceReservationListRespData {
+    #[serde(default)]
+    pub room_reservation_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
 // ── Resources ──
 
 pub struct RoomResource<'a> {
@@ -606,7 +815,7 @@ impl<'a> RoomResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, MgetRoomResp>()
+        .send_v2_response::<MgetRoomRespData, MgetRoomResp>()
         .await
     }
 
@@ -634,7 +843,7 @@ impl<'a> RoomResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, SearchRoomResp>()
+        .send_v2_response::<SearchRoomRespData, SearchRoomResp>()
         .await
     }
 }
@@ -807,7 +1016,7 @@ impl<'a> RoomConfigResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SetCheckboardAccessCodeRoomConfigResp>()
+        .send_v2_response::<SetCheckboardAccessCodeRoomConfigRespData, SetCheckboardAccessCodeRoomConfigResp>()
         .await
     }
 
@@ -824,7 +1033,7 @@ impl<'a> RoomConfigResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SetRoomAccessCodeRoomConfigResp>()
+        .send_v2_response::<SetRoomAccessCodeRoomConfigRespData, SetRoomAccessCodeRoomConfigResp>()
         .await
     }
 
@@ -869,7 +1078,7 @@ impl<'a> RoomConfigResource<'a> {
         .query("floor_name", query.floor_name)
         .query("room_id", query.room_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, QueryRoomConfigResp>()
+        .send_v2_response::<QueryRoomConfigRespData, QueryRoomConfigResp>()
         .await
     }
 }
@@ -1200,72 +1409,90 @@ impl<'a> ReportResource<'a> {
 
 // ── impl_resp_v2! macro ──
 
-impl_resp_v2!(MgetRoomResp, serde_json::Value);
-impl_resp_v2!(SearchRoomResp, serde_json::Value);
-impl_resp_v2!(SetCheckboardAccessCodeRoomConfigResp, serde_json::Value);
-impl_resp_v2!(SetRoomAccessCodeRoomConfigResp, serde_json::Value);
-impl_resp_v2!(QueryRoomConfigResp, serde_json::Value);
+impl_resp_v2!(MgetRoomResp, MgetRoomRespData);
+impl_resp_v2!(SearchRoomResp, SearchRoomRespData);
+impl_resp_v2!(
+    SetCheckboardAccessCodeRoomConfigResp,
+    SetCheckboardAccessCodeRoomConfigRespData
+);
+impl_resp_v2!(
+    SetRoomAccessCodeRoomConfigResp,
+    SetRoomAccessCodeRoomConfigRespData
+);
+impl_resp_v2!(QueryRoomConfigResp, QueryRoomConfigRespData);
 
 // ── Alert response types ──
 
-impl_resp_v2!(ListAlertResp, serde_json::Value);
+impl_resp_v2!(ListAlertResp, ListAlertRespData);
 
 // ── Export response types ──
 
-impl_resp_v2!(ExportMeetingListResp, serde_json::Value);
-impl_resp_v2!(ExportParticipantListResp, serde_json::Value);
-impl_resp_v2!(ExportParticipantQualityListResp, serde_json::Value);
-impl_resp_v2!(ExportResourceReservationListResp, serde_json::Value);
-impl_resp_v2!(GetExportResp, serde_json::Value);
-impl_resp_v2!(DownloadExportResp, serde_json::Value);
+impl_resp_v2!(ExportMeetingListResp, ());
+impl_resp_v2!(ExportParticipantListResp, ());
+impl_resp_v2!(ExportParticipantQualityListResp, ());
+impl_resp_v2!(ExportResourceReservationListResp, ());
+impl_resp_v2!(GetExportResp, GetExportRespData);
+impl_resp_v2!(DownloadExportResp, ());
 
 // ── MeetingRecording response types ──
 
-impl_resp_v2!(GetMeetingRecordingResp, serde_json::Value);
-impl_resp_v2!(SetPermissionMeetingRecordingResp, serde_json::Value);
-impl_resp_v2!(StartMeetingRecordingResp, serde_json::Value);
-impl_resp_v2!(StopMeetingRecordingResp, serde_json::Value);
+impl_resp_v2!(GetMeetingRecordingResp, GetMeetingRecordingRespData);
+impl_resp_v2!(SetPermissionMeetingRecordingResp, ());
+impl_resp_v2!(StartMeetingRecordingResp, ());
+impl_resp_v2!(StopMeetingRecordingResp, ());
 
 // ── Reserve response types ──
 
-impl_resp_v2!(ApplyReserveResp, serde_json::Value);
+impl_resp_v2!(ApplyReserveResp, ApplyReserveRespData);
 impl_resp_v2!(DeleteReserveResp, ());
-impl_resp_v2!(GetReserveResp, serde_json::Value);
-impl_resp_v2!(GetActiveMeetingReserveResp, serde_json::Value);
-impl_resp_v2!(UpdateReserveResp, serde_json::Value);
+impl_resp_v2!(GetReserveResp, GetReserveRespData);
+impl_resp_v2!(GetActiveMeetingReserveResp, GetActiveMeetingReserveRespData);
+impl_resp_v2!(UpdateReserveResp, UpdateReserveRespData);
 
 // ── ReserveConfig response types ──
 
-impl_resp_v2!(PatchReserveConfigResp, serde_json::Value);
-impl_resp_v2!(ReserveScopeReserveConfigResp, serde_json::Value);
-impl_resp_v2!(GetReserveConfigAdminResp, serde_json::Value);
-impl_resp_v2!(PatchReserveConfigAdminResp, serde_json::Value);
-impl_resp_v2!(GetReserveConfigDisableInformResp, serde_json::Value);
-impl_resp_v2!(PatchReserveConfigDisableInformResp, serde_json::Value);
-impl_resp_v2!(GetReserveConfigFormResp, serde_json::Value);
-impl_resp_v2!(PatchReserveConfigFormResp, serde_json::Value);
+impl_resp_v2!(PatchReserveConfigResp, ());
+impl_resp_v2!(
+    ReserveScopeReserveConfigResp,
+    ReserveScopeReserveConfigRespData
+);
+impl_resp_v2!(GetReserveConfigAdminResp, GetReserveConfigAdminRespData);
+impl_resp_v2!(PatchReserveConfigAdminResp, ());
+impl_resp_v2!(
+    GetReserveConfigDisableInformResp,
+    GetReserveConfigDisableInformRespData
+);
+impl_resp_v2!(PatchReserveConfigDisableInformResp, ());
+impl_resp_v2!(GetReserveConfigFormResp, GetReserveConfigFormRespData);
+impl_resp_v2!(PatchReserveConfigFormResp, ());
 
 // ── RoomLevel response types ──
 
-impl_resp_v2!(CreateRoomLevelResp, serde_json::Value);
-impl_resp_v2!(DelRoomLevelResp, serde_json::Value);
-impl_resp_v2!(GetRoomLevelResp, serde_json::Value);
-impl_resp_v2!(ListRoomLevelResp, serde_json::Value);
-impl_resp_v2!(MgetRoomLevelResp, serde_json::Value);
-impl_resp_v2!(PatchRoomLevelResp, serde_json::Value);
-impl_resp_v2!(SearchRoomLevelResp, serde_json::Value);
+impl_resp_v2!(CreateRoomLevelResp, CreateRoomLevelRespData);
+impl_resp_v2!(DelRoomLevelResp, ());
+impl_resp_v2!(GetRoomLevelResp, GetRoomLevelRespData);
+impl_resp_v2!(ListRoomLevelResp, ListRoomLevelRespData);
+impl_resp_v2!(MgetRoomLevelResp, MgetRoomLevelRespData);
+impl_resp_v2!(PatchRoomLevelResp, ());
+impl_resp_v2!(SearchRoomLevelResp, SearchRoomLevelRespData);
 
 // ── ScopeConfig response types ──
 
-impl_resp_v2!(CreateScopeConfigResp, serde_json::Value);
-impl_resp_v2!(GetScopeConfigResp, serde_json::Value);
+impl_resp_v2!(CreateScopeConfigResp, ());
+impl_resp_v2!(GetScopeConfigResp, GetScopeConfigRespData);
 
 // ── MeetingList / ParticipantList / ParticipantQualityList / ResourceReservationList response types ──
 
-impl_resp_v2!(GetMeetingListResp, serde_json::Value);
-impl_resp_v2!(GetParticipantListResp, serde_json::Value);
-impl_resp_v2!(GetParticipantQualityListResp, serde_json::Value);
-impl_resp_v2!(GetResourceReservationListResp, serde_json::Value);
+impl_resp_v2!(GetMeetingListResp, GetMeetingListRespData);
+impl_resp_v2!(GetParticipantListResp, GetParticipantListRespData);
+impl_resp_v2!(
+    GetParticipantQualityListResp,
+    GetParticipantQualityListRespData
+);
+impl_resp_v2!(
+    GetResourceReservationListResp,
+    GetResourceReservationListRespData
+);
 
 // ── AlertResource ──
 
@@ -1349,7 +1576,7 @@ impl<'a> AlertResource<'a> {
         .query("end_time", query.end_time)
         .query("query_type", query.query_type)
         .query("query_value", query.query_value)
-        .send_v2_response::<serde_json::Value, ListAlertResp>()
+        .send_v2_response::<ListAlertRespData, ListAlertResp>()
         .await
     }
 
@@ -1396,7 +1623,7 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ExportMeetingListResp>()
+        .send_v2_response::<(), ExportMeetingListResp>()
         .await
     }
 
@@ -1414,7 +1641,7 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ExportParticipantListResp>()
+        .send_v2_response::<(), ExportParticipantListResp>()
         .await
     }
 
@@ -1432,7 +1659,7 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ExportParticipantQualityListResp>()
+        .send_v2_response::<(), ExportParticipantQualityListResp>()
         .await
     }
 
@@ -1450,7 +1677,7 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, ExportResourceReservationListResp>()
+        .send_v2_response::<(), ExportResourceReservationListResp>()
         .await
     }
 
@@ -1468,7 +1695,7 @@ impl<'a> ExportResource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetExportResp>()
+        .send_v2_response::<GetExportRespData, GetExportResp>()
         .await
     }
 
@@ -1486,7 +1713,7 @@ impl<'a> ExportResource<'a> {
             option,
         )
         .query("file_token", file_token)
-        .send_v2_response::<serde_json::Value, DownloadExportResp>()
+        .send_v2_response::<(), DownloadExportResp>()
         .await
     }
 }
@@ -1514,7 +1741,7 @@ impl<'a> MeetingRecordingResource<'a> {
             option,
         )
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, GetMeetingRecordingResp>()
+        .send_v2_response::<GetMeetingRecordingRespData, GetMeetingRecordingResp>()
         .await
     }
 
@@ -1536,7 +1763,7 @@ impl<'a> MeetingRecordingResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SetPermissionMeetingRecordingResp>()
+        .send_v2_response::<(), SetPermissionMeetingRecordingResp>()
         .await
     }
 
@@ -1556,7 +1783,7 @@ impl<'a> MeetingRecordingResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, StartMeetingRecordingResp>()
+        .send_v2_response::<(), StartMeetingRecordingResp>()
         .await
     }
 
@@ -1574,7 +1801,7 @@ impl<'a> MeetingRecordingResource<'a> {
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, StopMeetingRecordingResp>()
+        .send_v2_response::<(), StopMeetingRecordingResp>()
         .await
     }
 }
@@ -1697,7 +1924,7 @@ impl<'a> ReserveResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, ApplyReserveResp>()
+        .send_v2_response::<ApplyReserveRespData, ApplyReserveResp>()
         .await
     }
 
@@ -1744,7 +1971,7 @@ impl<'a> ReserveResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetReserveResp>()
+        .send_v2_response::<GetReserveRespData, GetReserveResp>()
         .await
     }
 
@@ -1776,7 +2003,7 @@ impl<'a> ReserveResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetActiveMeetingReserveResp>()
+        .send_v2_response::<GetActiveMeetingReserveRespData, GetActiveMeetingReserveResp>()
         .await
     }
 
@@ -1807,7 +2034,7 @@ impl<'a> ReserveResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateReserveResp>()
+        .send_v2_response::<UpdateReserveRespData, UpdateReserveResp>()
         .await
     }
 }
@@ -1837,7 +2064,7 @@ impl<'a> ReserveConfigResource<'a> {
         .query("scope_type", scope_type)
         .query("scope_id", scope_id)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, ReserveScopeReserveConfigResp>()
+        .send_v2_response::<ReserveScopeReserveConfigRespData, ReserveScopeReserveConfigResp>()
         .await
     }
 
@@ -1859,7 +2086,7 @@ impl<'a> ReserveConfigResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchReserveConfigResp>()
+        .send_v2_response::<(), PatchReserveConfigResp>()
         .await
     }
 }
@@ -1889,7 +2116,7 @@ impl<'a> ReserveConfigAdminResource<'a> {
         )
         .query("scope_type", scope_type)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, GetReserveConfigAdminResp>()
+        .send_v2_response::<GetReserveConfigAdminRespData, GetReserveConfigAdminResp>()
         .await
     }
 
@@ -1911,7 +2138,7 @@ impl<'a> ReserveConfigAdminResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchReserveConfigAdminResp>()
+        .send_v2_response::<(), PatchReserveConfigAdminResp>()
         .await
     }
 }
@@ -1941,7 +2168,7 @@ impl<'a> ReserveConfigDisableInformResource<'a> {
         )
         .query("scope_type", scope_type)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, GetReserveConfigDisableInformResp>()
+        .send_v2_response::<GetReserveConfigDisableInformRespData, GetReserveConfigDisableInformResp>()
         .await
     }
 
@@ -1963,7 +2190,7 @@ impl<'a> ReserveConfigDisableInformResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchReserveConfigDisableInformResp>()
+        .send_v2_response::<(), PatchReserveConfigDisableInformResp>()
         .await
     }
 }
@@ -1993,7 +2220,7 @@ impl<'a> ReserveConfigFormResource<'a> {
         )
         .query("scope_type", scope_type)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, GetReserveConfigFormResp>()
+        .send_v2_response::<GetReserveConfigFormRespData, GetReserveConfigFormResp>()
         .await
     }
 
@@ -2015,7 +2242,7 @@ impl<'a> ReserveConfigFormResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchReserveConfigFormResp>()
+        .send_v2_response::<(), PatchReserveConfigFormResp>()
         .await
     }
 }
@@ -2041,7 +2268,7 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateRoomLevelResp>()
+        .send_v2_response::<CreateRoomLevelRespData, CreateRoomLevelResp>()
         .await
     }
 
@@ -2059,7 +2286,7 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, DelRoomLevelResp>()
+        .send_v2_response::<(), DelRoomLevelResp>()
         .await
     }
 
@@ -2077,7 +2304,7 @@ impl<'a> RoomLevelResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetRoomLevelResp>()
+        .send_v2_response::<GetRoomLevelRespData, GetRoomLevelResp>()
         .await
     }
 
@@ -2099,7 +2326,7 @@ impl<'a> RoomLevelResource<'a> {
         .query("room_level_id", room_level_id)
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListRoomLevelResp>()
+        .send_v2_response::<ListRoomLevelRespData, ListRoomLevelResp>()
         .await
     }
 
@@ -2117,7 +2344,7 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, MgetRoomLevelResp>()
+        .send_v2_response::<MgetRoomLevelRespData, MgetRoomLevelResp>()
         .await
     }
 
@@ -2137,7 +2364,7 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchRoomLevelResp>()
+        .send_v2_response::<(), PatchRoomLevelResp>()
         .await
     }
 
@@ -2155,7 +2382,7 @@ impl<'a> RoomLevelResource<'a> {
             option,
         )
         .query("custom_level_ids", custom_level_ids)
-        .send_v2_response::<serde_json::Value, SearchRoomLevelResp>()
+        .send_v2_response::<SearchRoomLevelRespData, SearchRoomLevelResp>()
         .await
     }
 }
@@ -2183,7 +2410,7 @@ impl<'a> ScopeConfigResource<'a> {
         )
         .query("user_id_type", user_id_type)
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateScopeConfigResp>()
+        .send_v2_response::<(), CreateScopeConfigResp>()
         .await
     }
 
@@ -2205,7 +2432,7 @@ impl<'a> ScopeConfigResource<'a> {
         .query("scope_type", scope_type)
         .query("scope_id", scope_id)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, GetScopeConfigResp>()
+        .send_v2_response::<GetScopeConfigRespData, GetScopeConfigResp>()
         .await
     }
 }
@@ -2313,7 +2540,7 @@ impl<'a> MeetingListResource<'a> {
         .query("room_id", query.room_id)
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetMeetingListResp>()
+        .send_v2_response::<GetMeetingListRespData, GetMeetingListResp>()
         .await
     }
 
@@ -2445,7 +2672,7 @@ impl<'a> ParticipantListResource<'a> {
         .query("room_id", query.room_id)
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetParticipantListResp>()
+        .send_v2_response::<GetParticipantListRespData, GetParticipantListResp>()
         .await
     }
 
@@ -2572,7 +2799,7 @@ impl<'a> ParticipantQualityListResource<'a> {
         .query("room_id", query.room_id)
         .page_query(query.page_query())
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetParticipantQualityListResp>()
+        .send_v2_response::<GetParticipantQualityListRespData, GetParticipantQualityListResp>()
         .await
     }
 
@@ -2695,7 +2922,7 @@ impl<'a> ResourceReservationListResource<'a> {
         .query("room_ids", query.room_ids)
         .query("is_exclude", query.is_exclude)
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, GetResourceReservationListResp>()
+        .send_v2_response::<GetResourceReservationListRespData, GetResourceReservationListResp>()
         .await
     }
 

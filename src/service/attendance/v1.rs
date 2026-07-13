@@ -358,6 +358,283 @@ impl_resp!(QueryRecordResp, RecordListData);
 impl_resp!(GetApprovalInfoResp, ApprovalInfoListData);
 impl_resp!(ListLeaveAccrualResp, LeaveAccrualListData);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UploadReportArchiveRuleRespData {
+    #[serde(default)]
+    pub invalid_code: Vec<String>,
+    #[serde(default)]
+    pub invalid_member_id: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserStatsFieldsQueryArchiveRuleRespData {
+    #[serde(default)]
+    pub archive_report_fields: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchLeaveAccrualRecordRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub record: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateUserApprovalRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_approval: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserApprovalRespData {
+    #[serde(default)]
+    pub user_approvals: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchCreateUserDailyShiftRespData {
+    #[serde(default)]
+    pub user_daily_shifts: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchCreateTempUserDailyShiftRespData {
+    #[serde(default)]
+    pub user_tmp_daily_shifts: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserDailyShiftRespData {
+    #[serde(default)]
+    pub user_daily_shifts: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchCreateUserFlowRespData {
+    #[serde(default)]
+    pub flow_records: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchDelUserFlowRespData {
+    #[serde(default)]
+    pub success_record_ids: Vec<String>,
+    #[serde(default)]
+    pub fail_record_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetUserFlowRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub record_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub longitude: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub latitude: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ssid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bssid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_field: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_wifi: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default)]
+    pub photo_urls: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub check_result: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub idempotent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserFlowRespData {
+    #[serde(default)]
+    pub user_flow_results: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ModifyUserSettingRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_setting: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserSettingRespData {
+    #[serde(default)]
+    pub user_settings: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserStatsDataRespData {
+    #[serde(default)]
+    pub user_datas: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub invalid_user_list: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserStatsFieldRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_stats_field: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserStatsViewRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateUserStatsViewRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserTaskRespData {
+    #[serde(default)]
+    pub user_task_results: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub invalid_user_ids: Vec<String>,
+    #[serde(default)]
+    pub unauthorized_user_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateUserTaskRemedyRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_remedy: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserTaskRemedyRespData {
+    #[serde(default)]
+    pub user_remedys: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserAllowedRemedysUserTaskRemedyRespData {
+    #[serde(default)]
+    pub user_allowed_remedys: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ProcessApprovalInfoRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_info: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListArchiveRuleRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UploadFileRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListUserGroupRespData {
+    #[serde(default)]
+    pub users: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchGroupRespData {
+    #[serde(default)]
+    pub group_list: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetLeaveEmployExpireRecordRespData {
+    #[serde(default)]
+    pub records: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListShiftRespData {
+    #[serde(default)]
+    pub shift_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryShiftRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub punch_times: Option<i32>,
+    #[serde(default)]
+    pub sub_shift_leader_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_flexible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flexible_minutes: Option<i32>,
+    #[serde(default)]
+    pub flexible_rule: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub no_need_off: Option<bool>,
+    #[serde(default)]
+    pub punch_time_rule: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub late_off_late_on_rule: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub rest_time_rule: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub overtime_rule: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day_type: Option<i32>,
+    #[serde(default)]
+    pub overtime_rest_time_rule: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_minutes_as_serious_late: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_middle_time_rule: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shift_attendance_time_config: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub late_off_late_on_setting: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default)]
+    pub rest_time_flexible_configs: Vec<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct GroupResource<'a> {
@@ -618,7 +895,7 @@ impl<'a> GroupResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListUserGroupResp>()
+        .send_v2_response::<ListUserGroupRespData, ListUserGroupResp>()
         .await
     }
 
@@ -635,7 +912,7 @@ impl<'a> GroupResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, SearchGroupResp>()
+        .send_v2_response::<SearchGroupRespData, SearchGroupResp>()
         .await
     }
 }
@@ -754,7 +1031,7 @@ impl<'a> ShiftResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListShiftResp>()
+        .send_v2_response::<ListShiftRespData, ListShiftResp>()
         .await
     }
 
@@ -771,7 +1048,7 @@ impl<'a> ShiftResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryShiftResp>()
+        .send_v2_response::<QueryShiftRespData, QueryShiftResp>()
         .await
     }
 }
@@ -1034,38 +1311,53 @@ impl<'a> LeaveAccrualResource<'a> {
 
 // ── Response types for new resources ──
 
-impl_resp_v2!(UploadReportArchiveRuleResp, serde_json::Value);
-impl_resp_v2!(UserStatsFieldsQueryArchiveRuleResp, serde_json::Value);
-impl_resp_v2!(PatchLeaveAccrualRecordResp, serde_json::Value);
-impl_resp_v2!(PatchLeaveEmployExpireRecordResp, serde_json::Value);
-impl_resp_v2!(CreateUserApprovalResp, serde_json::Value);
-impl_resp_v2!(QueryUserApprovalResp, serde_json::Value);
-impl_resp_v2!(BatchCreateUserDailyShiftResp, serde_json::Value);
-impl_resp_v2!(BatchCreateTempUserDailyShiftResp, serde_json::Value);
-impl_resp_v2!(QueryUserDailyShiftResp, serde_json::Value);
-impl_resp_v2!(BatchCreateUserFlowResp, serde_json::Value);
-impl_resp_v2!(BatchDelUserFlowResp, serde_json::Value);
-impl_resp_v2!(GetUserFlowResp, serde_json::Value);
-impl_resp_v2!(QueryUserFlowResp, serde_json::Value);
-impl_resp_v2!(ModifyUserSettingResp, serde_json::Value);
-impl_resp_v2!(QueryUserSettingResp, serde_json::Value);
-impl_resp_v2!(QueryUserStatsDataResp, serde_json::Value);
-impl_resp_v2!(QueryUserStatsFieldResp, serde_json::Value);
-impl_resp_v2!(QueryUserStatsViewResp, serde_json::Value);
-impl_resp_v2!(UpdateUserStatsViewResp, serde_json::Value);
-impl_resp_v2!(QueryUserTaskResp, serde_json::Value);
-impl_resp_v2!(CreateUserTaskRemedyResp, serde_json::Value);
-impl_resp_v2!(QueryUserTaskRemedyResp, serde_json::Value);
-impl_resp_v2!(QueryUserAllowedRemedysUserTaskRemedyResp, serde_json::Value);
-impl_resp_v2!(ProcessApprovalInfoResp, serde_json::Value);
-impl_resp_v2!(DelReportArchiveRuleResp, serde_json::Value);
-impl_resp_v2!(ListArchiveRuleResp, serde_json::Value);
-impl_resp_v2!(UploadFileResp, serde_json::Value);
-impl_resp_v2!(ListUserGroupResp, serde_json::Value);
-impl_resp_v2!(SearchGroupResp, serde_json::Value);
-impl_resp_v2!(GetLeaveEmployExpireRecordResp, serde_json::Value);
-impl_resp_v2!(ListShiftResp, serde_json::Value);
-impl_resp_v2!(QueryShiftResp, serde_json::Value);
+impl_resp_v2!(UploadReportArchiveRuleResp, UploadReportArchiveRuleRespData);
+impl_resp_v2!(
+    UserStatsFieldsQueryArchiveRuleResp,
+    UserStatsFieldsQueryArchiveRuleRespData
+);
+impl_resp_v2!(PatchLeaveAccrualRecordResp, PatchLeaveAccrualRecordRespData);
+impl_resp_v2!(PatchLeaveEmployExpireRecordResp, ());
+impl_resp_v2!(CreateUserApprovalResp, CreateUserApprovalRespData);
+impl_resp_v2!(QueryUserApprovalResp, QueryUserApprovalRespData);
+impl_resp_v2!(
+    BatchCreateUserDailyShiftResp,
+    BatchCreateUserDailyShiftRespData
+);
+impl_resp_v2!(
+    BatchCreateTempUserDailyShiftResp,
+    BatchCreateTempUserDailyShiftRespData
+);
+impl_resp_v2!(QueryUserDailyShiftResp, QueryUserDailyShiftRespData);
+impl_resp_v2!(BatchCreateUserFlowResp, BatchCreateUserFlowRespData);
+impl_resp_v2!(BatchDelUserFlowResp, BatchDelUserFlowRespData);
+impl_resp_v2!(GetUserFlowResp, GetUserFlowRespData);
+impl_resp_v2!(QueryUserFlowResp, QueryUserFlowRespData);
+impl_resp_v2!(ModifyUserSettingResp, ModifyUserSettingRespData);
+impl_resp_v2!(QueryUserSettingResp, QueryUserSettingRespData);
+impl_resp_v2!(QueryUserStatsDataResp, QueryUserStatsDataRespData);
+impl_resp_v2!(QueryUserStatsFieldResp, QueryUserStatsFieldRespData);
+impl_resp_v2!(QueryUserStatsViewResp, QueryUserStatsViewRespData);
+impl_resp_v2!(UpdateUserStatsViewResp, UpdateUserStatsViewRespData);
+impl_resp_v2!(QueryUserTaskResp, QueryUserTaskRespData);
+impl_resp_v2!(CreateUserTaskRemedyResp, CreateUserTaskRemedyRespData);
+impl_resp_v2!(QueryUserTaskRemedyResp, QueryUserTaskRemedyRespData);
+impl_resp_v2!(
+    QueryUserAllowedRemedysUserTaskRemedyResp,
+    QueryUserAllowedRemedysUserTaskRemedyRespData
+);
+impl_resp_v2!(ProcessApprovalInfoResp, ProcessApprovalInfoRespData);
+impl_resp_v2!(DelReportArchiveRuleResp, ());
+impl_resp_v2!(ListArchiveRuleResp, ListArchiveRuleRespData);
+impl_resp_v2!(UploadFileResp, UploadFileRespData);
+impl_resp_v2!(ListUserGroupResp, ListUserGroupRespData);
+impl_resp_v2!(SearchGroupResp, SearchGroupRespData);
+impl_resp_v2!(
+    GetLeaveEmployExpireRecordResp,
+    GetLeaveEmployExpireRecordRespData
+);
+impl_resp_v2!(ListShiftResp, ListShiftRespData);
+impl_resp_v2!(QueryShiftResp, QueryShiftRespData);
 
 // ── Request body types for new resources ──
 
@@ -1358,7 +1650,7 @@ impl<'a> ArchiveRuleResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, UploadReportArchiveRuleResp>()
+        .send_v2_response::<UploadReportArchiveRuleRespData, UploadReportArchiveRuleResp>()
         .await
     }
 
@@ -1375,7 +1667,7 @@ impl<'a> ArchiveRuleResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, UserStatsFieldsQueryArchiveRuleResp>()
+        .send_v2_response::<UserStatsFieldsQueryArchiveRuleRespData, UserStatsFieldsQueryArchiveRuleResp>()
         .await
     }
 
@@ -1392,7 +1684,7 @@ impl<'a> ArchiveRuleResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, DelReportArchiveRuleResp>()
+        .send_v2_response::<(), DelReportArchiveRuleResp>()
         .await
     }
 
@@ -1421,7 +1713,7 @@ impl<'a> ArchiveRuleResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListArchiveRuleResp>()
+        .send_v2_response::<ListArchiveRuleRespData, ListArchiveRuleResp>()
         .await
     }
 }
@@ -1483,7 +1775,7 @@ impl<'a> LeaveAccrualRecordResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchLeaveAccrualRecordResp>()
+        .send_v2_response::<PatchLeaveAccrualRecordRespData, PatchLeaveAccrualRecordResp>()
         .await
     }
 }
@@ -1508,7 +1800,7 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, PatchLeaveEmployExpireRecordResp>()
+        .send_v2_response::<(), PatchLeaveEmployExpireRecordResp>()
         .await
     }
 
@@ -1525,7 +1817,7 @@ impl<'a> LeaveEmployExpireRecordResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetLeaveEmployExpireRecordResp>()
+        .send_v2_response::<GetLeaveEmployExpireRecordRespData, GetLeaveEmployExpireRecordResp>()
         .await
     }
 }
@@ -1548,7 +1840,7 @@ impl<'a> ApprovalInfoProcessResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, ProcessApprovalInfoResp>()
+        .send_v2_response::<ProcessApprovalInfoRespData, ProcessApprovalInfoResp>()
         .await
     }
 }
@@ -1588,7 +1880,7 @@ impl<'a> FileResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, UploadFileResp>()
+        .send_v2_response::<UploadFileRespData, UploadFileResp>()
         .await
     }
 }
@@ -1613,7 +1905,7 @@ impl<'a> UserApprovalResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateUserApprovalResp>()
+        .send_v2_response::<CreateUserApprovalRespData, CreateUserApprovalResp>()
         .await
     }
 
@@ -1632,7 +1924,7 @@ impl<'a> UserApprovalResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserApprovalResp>()
+        .send_v2_response::<QueryUserApprovalRespData, QueryUserApprovalResp>()
         .await
     }
 }
@@ -1657,7 +1949,7 @@ impl<'a> UserDailyShiftResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchCreateUserDailyShiftResp>()
+        .send_v2_response::<BatchCreateUserDailyShiftRespData, BatchCreateUserDailyShiftResp>()
         .await
     }
 
@@ -1676,7 +1968,7 @@ impl<'a> UserDailyShiftResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchCreateTempUserDailyShiftResp>()
+        .send_v2_response::<BatchCreateTempUserDailyShiftRespData, BatchCreateTempUserDailyShiftResp>()
         .await
     }
 
@@ -1695,7 +1987,7 @@ impl<'a> UserDailyShiftResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserDailyShiftResp>()
+        .send_v2_response::<QueryUserDailyShiftRespData, QueryUserDailyShiftResp>()
         .await
     }
 }
@@ -1720,7 +2012,7 @@ impl<'a> UserFlowResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchCreateUserFlowResp>()
+        .send_v2_response::<BatchCreateUserFlowRespData, BatchCreateUserFlowResp>()
         .await
     }
 
@@ -1737,7 +2029,7 @@ impl<'a> UserFlowResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchDelUserFlowResp>()
+        .send_v2_response::<BatchDelUserFlowRespData, BatchDelUserFlowResp>()
         .await
     }
 
@@ -1756,7 +2048,7 @@ impl<'a> UserFlowResource<'a> {
             option,
         )
         .query("employee_type", employee_type)
-        .send_v2_response::<serde_json::Value, GetUserFlowResp>()
+        .send_v2_response::<GetUserFlowRespData, GetUserFlowResp>()
         .await
     }
 
@@ -1775,7 +2067,7 @@ impl<'a> UserFlowResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserFlowResp>()
+        .send_v2_response::<QueryUserFlowRespData, QueryUserFlowResp>()
         .await
     }
 }
@@ -1800,7 +2092,7 @@ impl<'a> UserSettingResource2<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, ModifyUserSettingResp>()
+        .send_v2_response::<ModifyUserSettingRespData, ModifyUserSettingResp>()
         .await
     }
 
@@ -1819,7 +2111,7 @@ impl<'a> UserSettingResource2<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserSettingResp>()
+        .send_v2_response::<QueryUserSettingRespData, QueryUserSettingResp>()
         .await
     }
 }
@@ -1844,7 +2136,7 @@ impl<'a> UserStatsDataResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserStatsDataResp>()
+        .send_v2_response::<QueryUserStatsDataRespData, QueryUserStatsDataResp>()
         .await
     }
 }
@@ -1869,7 +2161,7 @@ impl<'a> UserStatsFieldResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserStatsFieldResp>()
+        .send_v2_response::<QueryUserStatsFieldRespData, QueryUserStatsFieldResp>()
         .await
     }
 }
@@ -1894,7 +2186,7 @@ impl<'a> UserStatsViewResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserStatsViewResp>()
+        .send_v2_response::<QueryUserStatsViewRespData, QueryUserStatsViewResp>()
         .await
     }
 
@@ -1915,7 +2207,7 @@ impl<'a> UserStatsViewResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, UpdateUserStatsViewResp>()
+        .send_v2_response::<UpdateUserStatsViewRespData, UpdateUserStatsViewResp>()
         .await
     }
 }
@@ -1940,7 +2232,7 @@ impl<'a> UserTaskResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserTaskResp>()
+        .send_v2_response::<QueryUserTaskRespData, QueryUserTaskResp>()
         .await
     }
 }
@@ -1965,7 +2257,7 @@ impl<'a> UserTaskRemedyResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateUserTaskRemedyResp>()
+        .send_v2_response::<CreateUserTaskRemedyRespData, CreateUserTaskRemedyResp>()
         .await
     }
 
@@ -1984,7 +2276,7 @@ impl<'a> UserTaskRemedyResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserTaskRemedyResp>()
+        .send_v2_response::<QueryUserTaskRemedyRespData, QueryUserTaskRemedyResp>()
         .await
     }
 
@@ -2003,7 +2295,7 @@ impl<'a> UserTaskRemedyResource<'a> {
         )
         .query("employee_type", employee_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserAllowedRemedysUserTaskRemedyResp>()
+        .send_v2_response::<QueryUserAllowedRemedysUserTaskRemedyRespData, QueryUserAllowedRemedysUserTaskRemedyResp>()
         .await
     }
 }

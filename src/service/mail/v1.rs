@@ -654,6 +654,171 @@ impl<'a> GetPublicMailboxMemberQuery<'a> {
     }
 }
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetUserMailboxMessageRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetByCardUserMailboxMessageRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_info: Option<serde_json::Value>,
+    #[serde(default)]
+    pub message_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub card_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListUserMailboxMessageRespData {
+    #[serde(default)]
+    pub items: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SendUserMailboxMessageRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub thread_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DownloadUrlUserMailboxMessageAttachmentRespData {
+    #[serde(default)]
+    pub download_urls: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub failed_ids: Vec<String>,
+    #[serde(default)]
+    pub failed_reasons: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateUserMailboxFolderRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListUserMailboxFolderRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateUserMailboxMailContactRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mail_contact: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListUserMailboxMailContactRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateUserMailboxRuleRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rule: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListUserMailboxRuleRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchCreateMailgroupMemberRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchCreatePublicMailboxMemberRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateMailgroupAliasRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mailgroup_alias: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListMailgroupAliasRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateMailgroupPermissionMemberRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission_member_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchCreateMailgroupPermissionMemberRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreatePublicMailboxAliasRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub public_mailbox_alias: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListPublicMailboxAliasRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryUserRespData {
+    #[serde(default)]
+    pub user_list: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateUserMailboxAliasRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_mailbox_alias: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListUserMailboxAliasRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubscriptionUserMailboxEventRespData {
+    #[serde(default)]
+    pub event_types: Vec<i32>,
+}
 // ── Resources ──
 
 pub struct MailgroupResource<'a> {
@@ -943,7 +1108,7 @@ impl<'a> MailgroupMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, BatchCreateMailgroupMemberResp>()
+        .send_v2_response::<BatchCreateMailgroupMemberRespData, BatchCreateMailgroupMemberResp>()
         .await
     }
 
@@ -1329,7 +1494,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, BatchCreatePublicMailboxMemberResp>()
+        .send_v2_response::<BatchCreatePublicMailboxMemberRespData, BatchCreatePublicMailboxMemberResp>()
         .await
     }
 
@@ -1606,43 +1771,70 @@ pub struct ReorderUserMailboxRuleReqBody {
 
 // ── Response types for new resources ──
 
-impl_resp_v2!(GetUserMailboxMessageResp, serde_json::Value);
-impl_resp_v2!(GetByCardUserMailboxMessageResp, serde_json::Value);
-impl_resp_v2!(ListUserMailboxMessageResp, serde_json::Value);
-impl_resp_v2!(SendUserMailboxMessageResp, serde_json::Value);
+impl_resp_v2!(GetUserMailboxMessageResp, GetUserMailboxMessageRespData);
+impl_resp_v2!(
+    GetByCardUserMailboxMessageResp,
+    GetByCardUserMailboxMessageRespData
+);
+impl_resp_v2!(ListUserMailboxMessageResp, ListUserMailboxMessageRespData);
+impl_resp_v2!(SendUserMailboxMessageResp, SendUserMailboxMessageRespData);
 impl_resp_v2!(
     DownloadUrlUserMailboxMessageAttachmentResp,
-    serde_json::Value
+    DownloadUrlUserMailboxMessageAttachmentRespData
 );
-impl_resp_v2!(CreateUserMailboxFolderResp, serde_json::Value);
+impl_resp_v2!(CreateUserMailboxFolderResp, CreateUserMailboxFolderRespData);
 impl_resp_v2!(DeleteUserMailboxFolderResp, ());
-impl_resp_v2!(ListUserMailboxFolderResp, serde_json::Value);
-impl_resp_v2!(PatchUserMailboxFolderResp, serde_json::Value);
-impl_resp_v2!(CreateUserMailboxMailContactResp, serde_json::Value);
+impl_resp_v2!(ListUserMailboxFolderResp, ListUserMailboxFolderRespData);
+impl_resp_v2!(PatchUserMailboxFolderResp, ());
+impl_resp_v2!(
+    CreateUserMailboxMailContactResp,
+    CreateUserMailboxMailContactRespData
+);
 impl_resp_v2!(DeleteUserMailboxMailContactResp, ());
-impl_resp_v2!(ListUserMailboxMailContactResp, serde_json::Value);
-impl_resp_v2!(PatchUserMailboxMailContactResp, serde_json::Value);
-impl_resp_v2!(CreateUserMailboxRuleResp, serde_json::Value);
+impl_resp_v2!(
+    ListUserMailboxMailContactResp,
+    ListUserMailboxMailContactRespData
+);
+impl_resp_v2!(PatchUserMailboxMailContactResp, ());
+impl_resp_v2!(CreateUserMailboxRuleResp, CreateUserMailboxRuleRespData);
 impl_resp_v2!(DeleteUserMailboxRuleResp, ());
-impl_resp_v2!(ListUserMailboxRuleResp, serde_json::Value);
+impl_resp_v2!(ListUserMailboxRuleResp, ListUserMailboxRuleRespData);
 impl_resp_v2!(ReorderUserMailboxRuleResp, ());
-impl_resp_v2!(UpdateUserMailboxRuleResp, serde_json::Value);
-impl_resp_v2!(BatchCreateMailgroupMemberResp, serde_json::Value);
-impl_resp_v2!(BatchCreatePublicMailboxMemberResp, serde_json::Value);
-impl_resp_v2!(CreateMailgroupAliasResp, serde_json::Value);
-impl_resp_v2!(ListMailgroupAliasResp, serde_json::Value);
-impl_resp_v2!(BatchCreateMailgroupManagerResp, serde_json::Value);
-impl_resp_v2!(CreateMailgroupPermissionMemberResp, serde_json::Value);
-impl_resp_v2!(BatchCreateMailgroupPermissionMemberResp, serde_json::Value);
-impl_resp_v2!(CreatePublicMailboxAliasResp, serde_json::Value);
-impl_resp_v2!(ListPublicMailboxAliasResp, serde_json::Value);
-impl_resp_v2!(QueryUserResp, serde_json::Value);
+impl_resp_v2!(UpdateUserMailboxRuleResp, ());
+impl_resp_v2!(
+    BatchCreateMailgroupMemberResp,
+    BatchCreateMailgroupMemberRespData
+);
+impl_resp_v2!(
+    BatchCreatePublicMailboxMemberResp,
+    BatchCreatePublicMailboxMemberRespData
+);
+impl_resp_v2!(CreateMailgroupAliasResp, CreateMailgroupAliasRespData);
+impl_resp_v2!(ListMailgroupAliasResp, ListMailgroupAliasRespData);
+impl_resp_v2!(BatchCreateMailgroupManagerResp, ());
+impl_resp_v2!(
+    CreateMailgroupPermissionMemberResp,
+    CreateMailgroupPermissionMemberRespData
+);
+impl_resp_v2!(
+    BatchCreateMailgroupPermissionMemberResp,
+    BatchCreateMailgroupPermissionMemberRespData
+);
+impl_resp_v2!(
+    CreatePublicMailboxAliasResp,
+    CreatePublicMailboxAliasRespData
+);
+impl_resp_v2!(ListPublicMailboxAliasResp, ListPublicMailboxAliasRespData);
+impl_resp_v2!(QueryUserResp, QueryUserRespData);
 impl_resp_v2!(DeleteUserMailboxResp, ());
-impl_resp_v2!(CreateUserMailboxAliasResp, serde_json::Value);
-impl_resp_v2!(ListUserMailboxAliasResp, serde_json::Value);
+impl_resp_v2!(CreateUserMailboxAliasResp, CreateUserMailboxAliasRespData);
+impl_resp_v2!(ListUserMailboxAliasResp, ListUserMailboxAliasRespData);
 impl_resp_v2!(DeleteUserMailboxAliasResp, ());
-impl_resp_v2!(SubscribeUserMailboxEventResp, serde_json::Value);
-impl_resp_v2!(SubscriptionUserMailboxEventResp, serde_json::Value);
+impl_resp_v2!(SubscribeUserMailboxEventResp, ());
+impl_resp_v2!(
+    SubscriptionUserMailboxEventResp,
+    SubscriptionUserMailboxEventRespData
+);
 impl_resp_v2!(UnsubscribeUserMailboxEventResp, ());
 
 // ── UserMailboxMessage resource ──
@@ -1668,7 +1860,7 @@ impl UserMailboxMessageResource<'_> {
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetUserMailboxMessageResp>()
+        .send_v2_response::<GetUserMailboxMessageRespData, GetUserMailboxMessageResp>()
         .await
     }
 
@@ -1693,7 +1885,7 @@ impl UserMailboxMessageResource<'_> {
         .query("card_id", card_id)
         .query("owner_id", owner_id)
         .query("user_id_type", user_id_type)
-        .send_v2_response::<serde_json::Value, GetByCardUserMailboxMessageResp>()
+        .send_v2_response::<GetByCardUserMailboxMessageRespData, GetByCardUserMailboxMessageResp>()
         .await
     }
 
@@ -1719,7 +1911,7 @@ impl UserMailboxMessageResource<'_> {
         .query("page_token", page_token)
         .query("folder_id", folder_id)
         .query("only_unread", only_unread)
-        .send_v2_response::<serde_json::Value, ListUserMailboxMessageResp>()
+        .send_v2_response::<ListUserMailboxMessageRespData, ListUserMailboxMessageResp>()
         .await
     }
 
@@ -1739,7 +1931,7 @@ impl UserMailboxMessageResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, SendUserMailboxMessageResp>()
+        .send_v2_response::<SendUserMailboxMessageRespData, SendUserMailboxMessageResp>()
         .await
     }
 }
@@ -1770,7 +1962,7 @@ impl UserMailboxMessageAttachmentResource<'_> {
             option,
         )
         .query_values("attachment_ids", Some(attachment_ids.iter().copied()))
-        .send_v2_response::<serde_json::Value, DownloadUrlUserMailboxMessageAttachmentResp>()
+        .send_v2_response::<DownloadUrlUserMailboxMessageAttachmentRespData, DownloadUrlUserMailboxMessageAttachmentResp>()
         .await
     }
 }
@@ -1798,7 +1990,7 @@ impl UserMailboxFolderResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateUserMailboxFolderResp>()
+        .send_v2_response::<CreateUserMailboxFolderRespData, CreateUserMailboxFolderResp>()
         .await
     }
 
@@ -1838,7 +2030,7 @@ impl UserMailboxFolderResource<'_> {
             option,
         )
         .query("folder_type", folder_type)
-        .send_v2_response::<serde_json::Value, ListUserMailboxFolderResp>()
+        .send_v2_response::<ListUserMailboxFolderRespData, ListUserMailboxFolderResp>()
         .await
     }
 
@@ -1860,7 +2052,7 @@ impl UserMailboxFolderResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, PatchUserMailboxFolderResp>()
+        .send_v2_response::<(), PatchUserMailboxFolderResp>()
         .await
     }
 }
@@ -1888,7 +2080,8 @@ impl UserMailboxMailContactResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateUserMailboxMailContactResp>()
+        .send_v2_response::<CreateUserMailboxMailContactRespData, CreateUserMailboxMailContactResp>(
+        )
         .await
     }
 
@@ -1931,7 +2124,7 @@ impl UserMailboxMailContactResource<'_> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, ListUserMailboxMailContactResp>()
+        .send_v2_response::<ListUserMailboxMailContactRespData, ListUserMailboxMailContactResp>()
         .await
     }
 
@@ -1954,7 +2147,7 @@ impl UserMailboxMailContactResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, PatchUserMailboxMailContactResp>()
+        .send_v2_response::<(), PatchUserMailboxMailContactResp>()
         .await
     }
 }
@@ -1982,7 +2175,7 @@ impl UserMailboxRuleResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateUserMailboxRuleResp>()
+        .send_v2_response::<CreateUserMailboxRuleRespData, CreateUserMailboxRuleResp>()
         .await
     }
 
@@ -2019,7 +2212,7 @@ impl UserMailboxRuleResource<'_> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListUserMailboxRuleResp>()
+        .send_v2_response::<ListUserMailboxRuleRespData, ListUserMailboxRuleResp>()
         .await
     }
 
@@ -2060,7 +2253,7 @@ impl UserMailboxRuleResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, UpdateUserMailboxRuleResp>()
+        .send_v2_response::<(), UpdateUserMailboxRuleResp>()
         .await
     }
 }
@@ -2088,7 +2281,7 @@ impl MailgroupAliasResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateMailgroupAliasResp>()
+        .send_v2_response::<CreateMailgroupAliasRespData, CreateMailgroupAliasResp>()
         .await
     }
 
@@ -2125,7 +2318,7 @@ impl MailgroupAliasResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListMailgroupAliasResp>()
+        .send_v2_response::<ListMailgroupAliasRespData, ListMailgroupAliasResp>()
         .await
     }
 }
@@ -2153,7 +2346,7 @@ impl MailgroupManagerResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchCreateMailgroupManagerResp>()
+        .send_v2_response::<(), BatchCreateMailgroupManagerResp>()
         .await
     }
 
@@ -2225,7 +2418,7 @@ impl MailgroupPermissionMemberResource<'_> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateMailgroupPermissionMemberResp>()
+        .send_v2_response::<CreateMailgroupPermissionMemberRespData, CreateMailgroupPermissionMemberResp>()
         .await
     }
 
@@ -2316,7 +2509,7 @@ impl MailgroupPermissionMemberResource<'_> {
         )
         .query("user_id_type", user_id_type)
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, BatchCreateMailgroupPermissionMemberResp>()
+        .send_v2_response::<BatchCreateMailgroupPermissionMemberRespData, BatchCreateMailgroupPermissionMemberResp>()
         .await
     }
 
@@ -2365,7 +2558,7 @@ impl PublicMailboxAliasResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreatePublicMailboxAliasResp>()
+        .send_v2_response::<CreatePublicMailboxAliasRespData, CreatePublicMailboxAliasResp>()
         .await
     }
 
@@ -2403,7 +2596,7 @@ impl PublicMailboxAliasResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListPublicMailboxAliasResp>()
+        .send_v2_response::<ListPublicMailboxAliasRespData, ListPublicMailboxAliasResp>()
         .await
     }
 }
@@ -2429,7 +2622,7 @@ impl UserResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, QueryUserResp>()
+        .send_v2_response::<QueryUserRespData, QueryUserResp>()
         .await
     }
 }
@@ -2485,7 +2678,7 @@ impl UserMailboxAliasResource<'_> {
             option,
         )
         .json_body(body)?
-        .send_v2_response::<serde_json::Value, CreateUserMailboxAliasResp>()
+        .send_v2_response::<CreateUserMailboxAliasRespData, CreateUserMailboxAliasResp>()
         .await
     }
 
@@ -2523,7 +2716,7 @@ impl UserMailboxAliasResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListUserMailboxAliasResp>()
+        .send_v2_response::<ListUserMailboxAliasRespData, ListUserMailboxAliasResp>()
         .await
     }
 }
@@ -2549,7 +2742,7 @@ impl UserMailboxEventResource<'_> {
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, SubscribeUserMailboxEventResp>()
+        .send_v2_response::<(), SubscribeUserMailboxEventResp>()
         .await
     }
 
@@ -2568,7 +2761,8 @@ impl UserMailboxEventResource<'_> {
             vec![AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, SubscriptionUserMailboxEventResp>()
+        .send_v2_response::<SubscriptionUserMailboxEventRespData, SubscriptionUserMailboxEventResp>(
+        )
         .await
     }
 

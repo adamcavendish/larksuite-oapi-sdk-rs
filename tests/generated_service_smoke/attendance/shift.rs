@@ -4,7 +4,7 @@ use super::prelude::*;
 
 #[tokio::test]
 async fn attendance_shift_list_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"items":[{"shift_id":"shift-1","shift_name":"Day"}],"has_more":false}}"#;
+    let body = r#"{"code":0,"msg":"ok","data":{"shift_list":[{"shift_id":"shift-1","shift_name":"Day"}],"has_more":false}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
@@ -22,9 +22,7 @@ async fn attendance_shift_list_by_query_smoke() {
     assert_eq!(
         resp.data
             .as_ref()
-            .and_then(|data| data.get("items"))
-            .and_then(|items| items.as_array())
-            .and_then(|items| items.first())
+            .and_then(|data| data.shift_list.first())
             .and_then(|item| item.get("shift_id"))
             .and_then(|shift_id| shift_id.as_str()),
         Some("shift-1")
