@@ -22,11 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .await?;
     if list.success() {
-        let items = list
-            .data
-            .as_ref()
-            .and_then(|data| data.get("items"))
-            .and_then(|items| items.as_array());
+        let items = list.data.as_ref().map(|data| &data.app_list);
         println!("applications: {}", items.map(Vec::len).unwrap_or(0));
         println!(
             "first_app_id: {:?}",
@@ -55,7 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "application_app_id: {:?}",
                 app.data
                     .as_ref()
-                    .and_then(|data| data.get("app"))
+                    .and_then(|data| data.app.as_ref())
                     .and_then(|app| app.get("app_id"))
                     .and_then(|app_id| app_id.as_str())
             );

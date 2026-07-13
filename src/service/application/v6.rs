@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
@@ -8,65 +10,211 @@ use crate::service::common::{PageQuery, RestRequest};
 
 // ── Response types ──
 
-impl_resp_v2!(SetAppBadgeResp, serde_json::Value);
+impl_resp_v2!(SetAppBadgeResp, ());
 
-impl_resp_v2!(ListAppRecommendRuleResp, serde_json::Value);
+impl_resp_v2!(ListAppRecommendRuleResp, ListAppRecommendRuleRespData);
 
-impl_resp_v2!(ContactsRangeConfigurationApplicationResp, serde_json::Value);
+impl_resp_v2!(
+    ContactsRangeConfigurationApplicationResp,
+    ContactsRangeConfigurationApplicationRespData
+);
 
-impl_resp_v2!(GetApplicationResp, serde_json::Value);
+impl_resp_v2!(GetApplicationResp, GetApplicationRespData);
 
-impl_resp_v2!(ListApplicationResp, serde_json::Value);
+impl_resp_v2!(ListApplicationResp, ListApplicationRespData);
 
-impl_resp_v2!(PatchApplicationResp, serde_json::Value);
+impl_resp_v2!(PatchApplicationResp, ());
 
-impl_resp_v2!(UnderauditlistApplicationResp, serde_json::Value);
+impl_resp_v2!(
+    UnderauditlistApplicationResp,
+    UnderauditlistApplicationRespData
+);
 
-impl_resp_v2!(DepartmentOverviewApplicationAppUsageResp, serde_json::Value);
+impl_resp_v2!(
+    DepartmentOverviewApplicationAppUsageResp,
+    DepartmentOverviewApplicationAppUsageRespData
+);
 
 impl_resp_v2!(
     MessagePushOverviewApplicationAppUsageResp,
-    serde_json::Value
+    MessagePushOverviewApplicationAppUsageRespData
 );
 
-impl_resp_v2!(OverviewApplicationAppUsageResp, serde_json::Value);
+impl_resp_v2!(
+    OverviewApplicationAppUsageResp,
+    OverviewApplicationAppUsageRespData
+);
 
 impl_resp_v2!(
     ContactsRangeSuggestApplicationAppVersionResp,
-    serde_json::Value
+    ContactsRangeSuggestApplicationAppVersionRespData
 );
 
-impl_resp_v2!(GetApplicationAppVersionResp, serde_json::Value);
+impl_resp_v2!(
+    GetApplicationAppVersionResp,
+    GetApplicationAppVersionRespData
+);
 
-impl_resp_v2!(ListApplicationAppVersionResp, serde_json::Value);
+impl_resp_v2!(
+    ListApplicationAppVersionResp,
+    ListApplicationAppVersionRespData
+);
 
-impl_resp_v2!(PatchApplicationAppVersionResp, serde_json::Value);
+impl_resp_v2!(PatchApplicationAppVersionResp, ());
 
-impl_resp_v2!(GetApplicationCollaboratorsResp, serde_json::Value);
+impl_resp_v2!(
+    GetApplicationCollaboratorsResp,
+    GetApplicationCollaboratorsRespData
+);
 
-impl_resp_v2!(UpdateApplicationCollaboratorsResp, serde_json::Value);
+impl_resp_v2!(UpdateApplicationCollaboratorsResp, ());
 
-impl_resp_v2!(PatchApplicationContactsRangeResp, serde_json::Value);
+impl_resp_v2!(PatchApplicationContactsRangeResp, ());
 
-impl_resp_v2!(ListApplicationFeedbackResp, serde_json::Value);
+impl_resp_v2!(ListApplicationFeedbackResp, ListApplicationFeedbackRespData);
 
-impl_resp_v2!(PatchApplicationFeedbackResp, serde_json::Value);
+impl_resp_v2!(PatchApplicationFeedbackResp, ());
 
-impl_resp_v2!(UpdateApplicationManagementResp, serde_json::Value);
+impl_resp_v2!(UpdateApplicationManagementResp, ());
 
-impl_resp_v2!(UpdateApplicationOwnerResp, serde_json::Value);
+impl_resp_v2!(UpdateApplicationOwnerResp, ());
 
 impl_resp_v2!(
     CheckWhiteBlackListApplicationVisibilityResp,
-    serde_json::Value
+    CheckWhiteBlackListApplicationVisibilityRespData
 );
 
-impl_resp_v2!(PatchApplicationVisibilityResp, serde_json::Value);
+impl_resp_v2!(PatchApplicationVisibilityResp, ());
 
-impl_resp_v2!(ApplyScopeResp, serde_json::Value);
+impl_resp_v2!(ApplyScopeResp, ());
 
-impl_resp_v2!(ListScopeResp, serde_json::Value);
+impl_resp_v2!(ListScopeResp, ListScopeRespData);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListAppRecommendRuleRespData {
+    #[serde(default)]
+    pub rules: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContactsRangeConfigurationApplicationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contacts_range: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetApplicationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListApplicationRespData {
+    #[serde(default)]
+    pub app_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_count: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UnderauditlistApplicationRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DepartmentOverviewApplicationAppUsageRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessagePushOverviewApplicationAppUsageRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OverviewApplicationAppUsageRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContactsRangeSuggestApplicationAppVersionRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contacts_range: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetApplicationAppVersionRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_version: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListApplicationAppVersionRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetApplicationCollaboratorsRespData {
+    #[serde(default)]
+    pub collaborators: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListApplicationFeedbackRespData {
+    #[serde(default)]
+    pub feedback_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CheckWhiteBlackListApplicationVisibilityRespData {
+    #[serde(default)]
+    pub user_visibility_list: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub department_visibility_list: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub group_visibility_list: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListScopeRespData {
+    #[serde(default)]
+    pub scopes: Vec<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct AppBadgeResource<'a> {
@@ -120,7 +268,7 @@ impl<'a> AppBadgeResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, SetAppBadgeResp>()
+        .send_v2_response::<(), SetAppBadgeResp>()
         .await
     }
 }
@@ -187,7 +335,7 @@ impl<'a> AppRecommendRuleResource<'a> {
         )
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, ListAppRecommendRuleResp>()
+        .send_v2_response::<ListAppRecommendRuleRespData, ListAppRecommendRuleResp>()
         .await
     }
 }
@@ -414,7 +562,7 @@ impl<'a> ApplicationResource<'a> {
         .page_query(query.page)
         .query("department_id_type", query.department_id_type)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, ContactsRangeConfigurationApplicationResp>()
+        .send_v2_response::<ContactsRangeConfigurationApplicationRespData, ContactsRangeConfigurationApplicationResp>()
         .await
     }
 
@@ -447,7 +595,7 @@ impl<'a> ApplicationResource<'a> {
         )
         .query("lang", query.lang)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetApplicationResp>()
+        .send_v2_response::<GetApplicationRespData, GetApplicationResp>()
         .await
     }
 
@@ -493,7 +641,7 @@ impl<'a> ApplicationResource<'a> {
         .query("status", query.status)
         .query("payment_type", query.payment_type)
         .query("owner_type", query.owner_type)
-        .send_v2_response::<serde_json::Value, ListApplicationResp>()
+        .send_v2_response::<ListApplicationRespData, ListApplicationResp>()
         .await
     }
 
@@ -524,7 +672,7 @@ impl<'a> ApplicationResource<'a> {
         )
         .query("lang", query.lang)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchApplicationResp>()
+        .send_v2_response::<(), PatchApplicationResp>()
         .await
     }
 
@@ -561,7 +709,7 @@ impl<'a> ApplicationResource<'a> {
         .query("lang", query.lang)
         .page_query(query.page)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, UnderauditlistApplicationResp>()
+        .send_v2_response::<UnderauditlistApplicationRespData, UnderauditlistApplicationResp>()
         .await
     }
 }
@@ -630,7 +778,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
         )
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, DepartmentOverviewApplicationAppUsageResp>()
+        .send_v2_response::<DepartmentOverviewApplicationAppUsageRespData, DepartmentOverviewApplicationAppUsageResp>()
         .await
     }
 
@@ -665,7 +813,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
         )
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, MessagePushOverviewApplicationAppUsageResp>()
+        .send_v2_response::<MessagePushOverviewApplicationAppUsageRespData, MessagePushOverviewApplicationAppUsageResp>()
         .await
     }
 
@@ -700,7 +848,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
         )
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, OverviewApplicationAppUsageResp>()
+        .send_v2_response::<OverviewApplicationAppUsageRespData, OverviewApplicationAppUsageResp>()
         .await
     }
 }
@@ -889,7 +1037,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
         )
         .query("department_id_type", query.department_id_type)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, ContactsRangeSuggestApplicationAppVersionResp>()
+        .send_v2_response::<ContactsRangeSuggestApplicationAppVersionRespData, ContactsRangeSuggestApplicationAppVersionResp>()
         .await
     }
 
@@ -926,7 +1074,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
         )
         .query("lang", query.lang)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetApplicationAppVersionResp>()
+        .send_v2_response::<GetApplicationAppVersionRespData, GetApplicationAppVersionResp>()
         .await
     }
 
@@ -972,7 +1120,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
         .page_query(query.page)
         .query("order", query.order)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, ListApplicationAppVersionResp>()
+        .send_v2_response::<ListApplicationAppVersionRespData, ListApplicationAppVersionResp>()
         .await
     }
 
@@ -1015,7 +1163,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
         .query("operator_id", query.operator_id)
         .query("reject_reason", query.reject_reason)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchApplicationAppVersionResp>()
+        .send_v2_response::<(), PatchApplicationAppVersionResp>()
         .await
     }
 }
@@ -1097,7 +1245,7 @@ impl<'a> ApplicationCollaboratorsResource<'a> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetApplicationCollaboratorsResp>()
+        .send_v2_response::<GetApplicationCollaboratorsRespData, GetApplicationCollaboratorsResp>()
         .await
     }
 
@@ -1132,7 +1280,7 @@ impl<'a> ApplicationCollaboratorsResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateApplicationCollaboratorsResp>()
+        .send_v2_response::<(), UpdateApplicationCollaboratorsResp>()
         .await
     }
 }
@@ -1206,7 +1354,7 @@ impl<'a> ApplicationContactsRangeResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchApplicationContactsRangeResp>()
+        .send_v2_response::<(), PatchApplicationContactsRangeResp>()
         .await
     }
 }
@@ -1362,7 +1510,7 @@ impl<'a> ApplicationFeedbackResource<'a> {
         .query("status", query.status)
         .query("user_id_type", query.user_id_type)
         .page_query(query.page)
-        .send_v2_response::<serde_json::Value, ListApplicationFeedbackResp>()
+        .send_v2_response::<ListApplicationFeedbackRespData, ListApplicationFeedbackResp>()
         .await
     }
 
@@ -1403,7 +1551,7 @@ impl<'a> ApplicationFeedbackResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("status", query.status)
         .query("operator_id", query.operator_id)
-        .send_v2_response::<serde_json::Value, PatchApplicationFeedbackResp>()
+        .send_v2_response::<(), PatchApplicationFeedbackResp>()
         .await
     }
 }
@@ -1454,7 +1602,7 @@ impl<'a> ApplicationManagementResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateApplicationManagementResp>()
+        .send_v2_response::<(), UpdateApplicationManagementResp>()
         .await
     }
 }
@@ -1517,7 +1665,7 @@ impl<'a> ApplicationOwnerResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateApplicationOwnerResp>()
+        .send_v2_response::<(), UpdateApplicationOwnerResp>()
         .await
     }
 }
@@ -1621,7 +1769,7 @@ impl<'a> ApplicationVisibilityResource<'a> {
         .query("user_id_type", query.user_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CheckWhiteBlackListApplicationVisibilityResp>()
+        .send_v2_response::<CheckWhiteBlackListApplicationVisibilityRespData, CheckWhiteBlackListApplicationVisibilityResp>()
         .await
     }
 
@@ -1659,7 +1807,7 @@ impl<'a> ApplicationVisibilityResource<'a> {
         .query("department_id_type", query.department_id_type)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchApplicationVisibilityResp>()
+        .send_v2_response::<(), PatchApplicationVisibilityResp>()
         .await
     }
 }
@@ -1706,7 +1854,7 @@ impl<'a> ScopeResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ApplyScopeResp>()
+        .send_v2_response::<(), ApplyScopeResp>()
         .await
     }
 
@@ -1727,7 +1875,7 @@ impl<'a> ScopeResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListScopeResp>()
+        .send_v2_response::<ListScopeRespData, ListScopeResp>()
         .await
     }
 }

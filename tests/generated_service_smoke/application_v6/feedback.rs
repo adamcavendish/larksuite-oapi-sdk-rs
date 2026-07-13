@@ -39,7 +39,7 @@ async fn application_v6_feedback_list_by_query_smoke() {
 
 #[tokio::test]
 async fn application_v6_feedback_patch_by_query_smoke() {
-    let body = r#"{"code":0,"msg":"ok","data":{"feedback_id":"fb-1"}}"#;
+    let body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
