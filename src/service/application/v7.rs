@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
@@ -7,16 +7,34 @@ use crate::req::{FormDataBuilder, FormDataField, RequestOption};
 use crate::service::common::RestRequest;
 use crate::service::go_v397::GoV397;
 
-impl_resp_v2!(CreateAppAvatarUploadResp, serde_json::Value);
+impl_resp_v2!(CreateAppAvatarUploadResp, CreateAppAvatarUploadRespData);
 
-impl_resp_v2!(PatchApplicationAbilityResp, serde_json::Value);
+impl_resp_v2!(PatchApplicationAbilityResp, ());
 
-impl_resp_v2!(PatchApplicationBaseResp, serde_json::Value);
+impl_resp_v2!(PatchApplicationBaseResp, ());
 
-impl_resp_v2!(PatchApplicationConfigResp, serde_json::Value);
+impl_resp_v2!(PatchApplicationConfigResp, ());
 
-impl_resp_v2!(CreateApplicationPublishResp, serde_json::Value);
+impl_resp_v2!(
+    CreateApplicationPublishResp,
+    CreateApplicationPublishRespData
+);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateAppAvatarUploadRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateApplicationPublishRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+}
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct CreateAppAvatarUploadQuery {
@@ -301,7 +319,7 @@ impl<'a> AppAvatarUploadResource<'a> {
             option,
         )
         .form_body(query.body.clone())
-        .send_v2_response::<serde_json::Value, CreateAppAvatarUploadResp>()
+        .send_v2_response::<CreateAppAvatarUploadRespData, CreateAppAvatarUploadResp>()
         .await
     }
 }
@@ -339,7 +357,7 @@ impl<'a> ApplicationAbilityResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchApplicationAbilityResp>()
+        .send_v2_response::<(), PatchApplicationAbilityResp>()
         .await
     }
 }
@@ -377,7 +395,7 @@ impl<'a> ApplicationBaseResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchApplicationBaseResp>()
+        .send_v2_response::<(), PatchApplicationBaseResp>()
         .await
     }
 }
@@ -421,7 +439,7 @@ impl<'a> ApplicationConfigResource<'a> {
         .query("department_id_type", query.department_id_type)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchApplicationConfigResp>()
+        .send_v2_response::<(), PatchApplicationConfigResp>()
         .await
     }
 }
@@ -459,7 +477,7 @@ impl<'a> ApplicationPublishResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateApplicationPublishResp>()
+        .send_v2_response::<CreateApplicationPublishRespData, CreateApplicationPublishResp>()
         .await
     }
 }

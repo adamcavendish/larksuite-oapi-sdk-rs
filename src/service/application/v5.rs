@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
@@ -5,10 +7,37 @@ use crate::req::RequestOption;
 use crate::service::common::{PageQuery, RestRequest};
 use crate::service::go_v397::GoV397;
 
-impl_resp_v2!(FavouriteApplicationResp, serde_json::Value);
+impl_resp_v2!(FavouriteApplicationResp, FavouriteApplicationRespData);
 
-impl_resp_v2!(RecommendApplicationResp, serde_json::Value);
+impl_resp_v2!(RecommendApplicationResp, RecommendApplicationRespData);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FavouriteApplicationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default)]
+    pub app_list: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RecommendApplicationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_size: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default)]
+    pub app_list: Vec<serde_json::Value>,
+}
 pub struct ApplicationResource<'a> {
     config: &'a Config,
 }
@@ -105,7 +134,7 @@ impl<'a> ApplicationResource<'a> {
         )
         .page_query(query.page)
         .query("language", query.language)
-        .send_v2_response::<serde_json::Value, FavouriteApplicationResp>()
+        .send_v2_response::<FavouriteApplicationRespData, FavouriteApplicationResp>()
         .await
     }
 
@@ -141,7 +170,7 @@ impl<'a> ApplicationResource<'a> {
         .page_query(query.page)
         .query("language", query.language)
         .query("recommend_type", query.recommend_type)
-        .send_v2_response::<serde_json::Value, RecommendApplicationResp>()
+        .send_v2_response::<RecommendApplicationRespData, RecommendApplicationResp>()
         .await
     }
 }
