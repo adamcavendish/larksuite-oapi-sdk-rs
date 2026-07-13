@@ -977,6 +977,303 @@ impl_resp!(ListLocationResp, LocationListData);
 impl_resp!(ListCurrencyResp, CurrencyListData);
 impl_resp!(ListWorkingHoursTypeResp, WorkingHoursTypeListData);
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchAssignedUserRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddRoleAssignAuthorizationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assign_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetByParamAuthorizationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_authorization: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryAuthorizationRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RemoveRoleAssignAuthorizationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assign_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateRoleAssignAuthorizationRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assign_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MatchCompensationStandardRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub standard_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grade: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateContractRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetContractRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListContractRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchContractRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetByParamCustomFieldRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListObjectApiNameCustomFieldRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryCustomFieldRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateDepartmentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateEmploymentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchEmploymentRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateJobChangeRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_change_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_type_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_reason_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_info: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CalendarByScopeLeaveRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calendar_wk_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveBalancesLeaveRespData {
+    #[serde(default)]
+    pub employment_leave_balance_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveRequestHistoryLeaveRespData {
+    #[serde(default)]
+    pub leave_request_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LeaveTypesLeaveRespData {
+    #[serde(default)]
+    pub leave_type_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkCalendarLeaveRespData {
+    #[serde(default)]
+    pub work_calendars: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub count: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkCalendarDateLeaveRespData {
+    #[serde(default)]
+    pub calendar_dates: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateLeaveGrantingRecordRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_granting_record: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryOffboardingRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubmitOffboardingRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_reason_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_reason_explanation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_block_list: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_reason_explanation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreatePersonRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetPersonRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchPersonRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UploadPersonRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetPreHireRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pre_hire: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListPreHireRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchPreHireRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pre_hire: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetProcessFormVariableDataRespData {
+    #[serde(default)]
+    pub field_variable_values: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListSecurityGroupRespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QuerySecurityGroupRespData {
+    #[serde(default)]
+    pub hrbp_list: Vec<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct EmployeeResource<'a> {
@@ -1679,12 +1976,21 @@ impl<'a> WorkingHoursTypeResource<'a> {
 
 // ── Response types for new resources ──
 
-impl_resp_v2!(SearchAssignedUserResp, serde_json::Value);
-impl_resp_v2!(AddRoleAssignAuthorizationResp, serde_json::Value);
-impl_resp_v2!(GetByParamAuthorizationResp, serde_json::Value);
-impl_resp_v2!(QueryAuthorizationResp, serde_json::Value);
-impl_resp_v2!(RemoveRoleAssignAuthorizationResp, serde_json::Value);
-impl_resp_v2!(UpdateRoleAssignAuthorizationResp, serde_json::Value);
+impl_resp_v2!(SearchAssignedUserResp, SearchAssignedUserRespData);
+impl_resp_v2!(
+    AddRoleAssignAuthorizationResp,
+    AddRoleAssignAuthorizationRespData
+);
+impl_resp_v2!(GetByParamAuthorizationResp, GetByParamAuthorizationRespData);
+impl_resp_v2!(QueryAuthorizationResp, QueryAuthorizationRespData);
+impl_resp_v2!(
+    RemoveRoleAssignAuthorizationResp,
+    RemoveRoleAssignAuthorizationRespData
+);
+impl_resp_v2!(
+    UpdateRoleAssignAuthorizationResp,
+    UpdateRoleAssignAuthorizationRespData
+);
 impl_resp_v2!(ConvertCommonDataIdResp, ConvertCommonDataIdRespData);
 impl_resp_v2!(
     AddEnumOptionCommonDataMetaDataResp,
@@ -1694,19 +2000,25 @@ impl_resp_v2!(
     EditEnumOptionCommonDataMetaDataResp,
     EditEnumOptionCommonDataMetaDataRespData
 );
-impl_resp_v2!(MatchCompensationStandardResp, serde_json::Value);
-impl_resp_v2!(CreateContractResp, serde_json::Value);
+impl_resp_v2!(
+    MatchCompensationStandardResp,
+    MatchCompensationStandardRespData
+);
+impl_resp_v2!(CreateContractResp, CreateContractRespData);
 impl_resp_v2!(DeleteContractResp, ());
-impl_resp_v2!(GetContractResp, serde_json::Value);
-impl_resp_v2!(ListContractResp, serde_json::Value);
-impl_resp_v2!(PatchContractResp, serde_json::Value);
+impl_resp_v2!(GetContractResp, GetContractRespData);
+impl_resp_v2!(ListContractResp, ListContractRespData);
+impl_resp_v2!(PatchContractResp, PatchContractRespData);
 impl_resp_v2!(GetCountryRegionResp, CountryRegionData);
 impl_resp_v2!(ListCountryRegionResp, CountryRegionListData);
 impl_resp_v2!(GetCurrencyResp, CorehrCurrencyData);
-impl_resp_v2!(GetByParamCustomFieldResp, serde_json::Value);
-impl_resp_v2!(ListObjectApiNameCustomFieldResp, serde_json::Value);
-impl_resp_v2!(QueryCustomFieldResp, serde_json::Value);
-impl_resp_v2!(CreateDepartmentResp, serde_json::Value);
+impl_resp_v2!(GetByParamCustomFieldResp, GetByParamCustomFieldRespData);
+impl_resp_v2!(
+    ListObjectApiNameCustomFieldResp,
+    ListObjectApiNameCustomFieldRespData
+);
+impl_resp_v2!(QueryCustomFieldResp, QueryCustomFieldRespData);
+impl_resp_v2!(CreateDepartmentResp, CreateDepartmentRespData);
 impl_resp_v2!(DeleteDepartmentResp, ());
 impl_resp_v2!(PatchDepartmentResp, DepartmentData);
 impl_resp_v2!(CreateEmployeeTypeResp, EmployeeTypeData);
@@ -1714,16 +2026,16 @@ impl_resp_v2!(DeleteEmployeeTypeResp, ());
 impl_resp_v2!(GetEmployeeTypeResp, EmployeeTypeData);
 impl_resp_v2!(ListEmployeeTypeResp, EmployeeTypeListData);
 impl_resp_v2!(PatchEmployeeTypeResp, EmployeeTypeData);
-impl_resp_v2!(CreateEmploymentResp, serde_json::Value);
+impl_resp_v2!(CreateEmploymentResp, CreateEmploymentRespData);
 impl_resp_v2!(DeleteEmploymentResp, ());
-impl_resp_v2!(PatchEmploymentResp, serde_json::Value);
+impl_resp_v2!(PatchEmploymentResp, PatchEmploymentRespData);
 impl_resp_v2!(GetFileResp, ());
 impl_resp_v2!(CreateJobResp, JobResponseData);
 impl_resp_v2!(DeleteJobResp, ());
 impl_resp_v2!(GetJobResp, JobResponseData);
 impl_resp_v2!(ListJobResp, JobListData);
 impl_resp_v2!(PatchJobResp, JobResponseData);
-impl_resp_v2!(CreateJobChangeResp, serde_json::Value);
+impl_resp_v2!(CreateJobChangeResp, CreateJobChangeRespData);
 impl_resp_v2!(CreateJobDataResp, JobDataResponseData);
 impl_resp_v2!(DeleteJobDataResp, ());
 impl_resp_v2!(GetJobDataResp, JobDataResponseData);
@@ -1737,13 +2049,19 @@ impl_resp_v2!(PatchJobFamilyResp, JobFamilyData);
 impl_resp_v2!(CreateJobLevelResp, JobLevelData);
 impl_resp_v2!(DeleteJobLevelResp, ());
 impl_resp_v2!(PatchJobLevelResp, JobLevelData);
-impl_resp_v2!(CalendarByScopeLeaveResp, serde_json::Value);
-impl_resp_v2!(LeaveBalancesLeaveResp, serde_json::Value);
-impl_resp_v2!(LeaveRequestHistoryLeaveResp, serde_json::Value);
-impl_resp_v2!(LeaveTypesLeaveResp, serde_json::Value);
-impl_resp_v2!(WorkCalendarLeaveResp, serde_json::Value);
-impl_resp_v2!(WorkCalendarDateLeaveResp, serde_json::Value);
-impl_resp_v2!(CreateLeaveGrantingRecordResp, serde_json::Value);
+impl_resp_v2!(CalendarByScopeLeaveResp, CalendarByScopeLeaveRespData);
+impl_resp_v2!(LeaveBalancesLeaveResp, LeaveBalancesLeaveRespData);
+impl_resp_v2!(
+    LeaveRequestHistoryLeaveResp,
+    LeaveRequestHistoryLeaveRespData
+);
+impl_resp_v2!(LeaveTypesLeaveResp, LeaveTypesLeaveRespData);
+impl_resp_v2!(WorkCalendarLeaveResp, WorkCalendarLeaveRespData);
+impl_resp_v2!(WorkCalendarDateLeaveResp, WorkCalendarDateLeaveRespData);
+impl_resp_v2!(
+    CreateLeaveGrantingRecordResp,
+    CreateLeaveGrantingRecordRespData
+);
 impl_resp_v2!(DeleteLeaveGrantingRecordResp, ());
 impl_resp_v2!(CreateLocationResp, LocationData);
 impl_resp_v2!(DeleteLocationResp, ());
@@ -1752,21 +2070,24 @@ impl_resp_v2!(DeleteNationalIdTypeResp, ());
 impl_resp_v2!(GetNationalIdTypeResp, NationalIdTypeData);
 impl_resp_v2!(ListNationalIdTypeResp, NationalIdTypeListData);
 impl_resp_v2!(PatchNationalIdTypeResp, NationalIdTypeData);
-impl_resp_v2!(QueryOffboardingResp, serde_json::Value);
+impl_resp_v2!(QueryOffboardingResp, QueryOffboardingRespData);
 impl_resp_v2!(SearchOffboardingResp, SearchOffboardingRespData);
-impl_resp_v2!(SubmitOffboardingResp, serde_json::Value);
-impl_resp_v2!(CreatePersonResp, serde_json::Value);
+impl_resp_v2!(SubmitOffboardingResp, SubmitOffboardingRespData);
+impl_resp_v2!(CreatePersonResp, CreatePersonRespData);
 impl_resp_v2!(DeletePersonResp, ());
-impl_resp_v2!(GetPersonResp, serde_json::Value);
-impl_resp_v2!(PatchPersonResp, serde_json::Value);
-impl_resp_v2!(UploadPersonResp, serde_json::Value);
+impl_resp_v2!(GetPersonResp, GetPersonRespData);
+impl_resp_v2!(PatchPersonResp, PatchPersonRespData);
+impl_resp_v2!(UploadPersonResp, UploadPersonRespData);
 impl_resp_v2!(DeletePreHireResp, ());
-impl_resp_v2!(GetPreHireResp, serde_json::Value);
-impl_resp_v2!(ListPreHireResp, serde_json::Value);
-impl_resp_v2!(PatchPreHireResp, serde_json::Value);
-impl_resp_v2!(GetProcessFormVariableDataResp, serde_json::Value);
-impl_resp_v2!(ListSecurityGroupResp, serde_json::Value);
-impl_resp_v2!(QuerySecurityGroupResp, serde_json::Value);
+impl_resp_v2!(GetPreHireResp, GetPreHireRespData);
+impl_resp_v2!(ListPreHireResp, ListPreHireRespData);
+impl_resp_v2!(PatchPreHireResp, PatchPreHireRespData);
+impl_resp_v2!(
+    GetProcessFormVariableDataResp,
+    GetProcessFormVariableDataRespData
+);
+impl_resp_v2!(ListSecurityGroupResp, ListSecurityGroupRespData);
+impl_resp_v2!(QuerySecurityGroupResp, QuerySecurityGroupRespData);
 impl_resp_v2!(GetSubdivisionResp, SubdivisionData);
 impl_resp_v2!(ListSubdivisionResp, SubdivisionListData);
 impl_resp_v2!(GetSubregionResp, SubregionData);
@@ -1811,7 +2132,7 @@ impl<'a> AssignedUserResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SearchAssignedUserResp>()
+        .send_v2_response::<SearchAssignedUserRespData, SearchAssignedUserResp>()
         .await
     }
 }
@@ -1834,7 +2155,7 @@ impl<'a> AuthorizationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, AddRoleAssignAuthorizationResp>()
+        .send_v2_response::<AddRoleAssignAuthorizationRespData, AddRoleAssignAuthorizationResp>()
         .await
     }
 
@@ -1849,7 +2170,7 @@ impl<'a> AuthorizationResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetByParamAuthorizationResp>()
+        .send_v2_response::<GetByParamAuthorizationRespData, GetByParamAuthorizationResp>()
         .await
     }
 
@@ -1861,7 +2182,7 @@ impl<'a> AuthorizationResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, QueryAuthorizationResp>()
+        .send_v2_response::<QueryAuthorizationRespData, QueryAuthorizationResp>()
         .await
     }
 
@@ -1878,7 +2199,7 @@ impl<'a> AuthorizationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, RemoveRoleAssignAuthorizationResp>()
+        .send_v2_response::<RemoveRoleAssignAuthorizationRespData, RemoveRoleAssignAuthorizationResp>()
         .await
     }
 
@@ -1895,7 +2216,7 @@ impl<'a> AuthorizationResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateRoleAssignAuthorizationResp>()
+        .send_v2_response::<UpdateRoleAssignAuthorizationRespData, UpdateRoleAssignAuthorizationResp>()
         .await
     }
 }
@@ -1979,7 +2300,7 @@ impl<'a> CompensationStandardResource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, MatchCompensationStandardResp>()
+        .send_v2_response::<MatchCompensationStandardRespData, MatchCompensationStandardResp>()
         .await
     }
 }
@@ -2035,7 +2356,7 @@ impl<'a> ContractResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateContractResp>()
+        .send_v2_response::<CreateContractRespData, CreateContractResp>()
         .await
     }
 
@@ -2069,7 +2390,7 @@ impl<'a> ContractResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetContractResp>()
+        .send_v2_response::<GetContractRespData, GetContractResp>()
         .await
     }
 
@@ -2098,7 +2419,7 @@ impl<'a> ContractResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListContractResp>()
+        .send_v2_response::<ListContractRespData, ListContractResp>()
         .await
     }
 
@@ -2117,7 +2438,7 @@ impl<'a> ContractResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchContractResp>()
+        .send_v2_response::<PatchContractRespData, PatchContractResp>()
         .await
     }
 }
@@ -2223,7 +2544,7 @@ impl<'a> CustomFieldResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetByParamCustomFieldResp>()
+        .send_v2_response::<GetByParamCustomFieldRespData, GetByParamCustomFieldResp>()
         .await
     }
 
@@ -2238,7 +2559,8 @@ impl<'a> CustomFieldResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListObjectApiNameCustomFieldResp>()
+        .send_v2_response::<ListObjectApiNameCustomFieldRespData, ListObjectApiNameCustomFieldResp>(
+        )
         .await
     }
 
@@ -2250,7 +2572,7 @@ impl<'a> CustomFieldResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, QueryCustomFieldResp>()
+        .send_v2_response::<QueryCustomFieldRespData, QueryCustomFieldResp>()
         .await
     }
 }
@@ -2411,7 +2733,7 @@ impl<'a> EmploymentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateEmploymentResp>()
+        .send_v2_response::<CreateEmploymentRespData, CreateEmploymentResp>()
         .await
     }
 
@@ -2447,7 +2769,7 @@ impl<'a> EmploymentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchEmploymentResp>()
+        .send_v2_response::<PatchEmploymentRespData, PatchEmploymentResp>()
         .await
     }
 }
@@ -2623,7 +2945,7 @@ impl<'a> JobChangeResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateJobChangeResp>()
+        .send_v2_response::<CreateJobChangeRespData, CreateJobChangeResp>()
         .await
     }
 }
@@ -2920,7 +3242,7 @@ impl<'a> LeaveResource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, CalendarByScopeLeaveResp>()
+        .send_v2_response::<CalendarByScopeLeaveRespData, CalendarByScopeLeaveResp>()
         .await
     }
 
@@ -2939,7 +3261,7 @@ impl<'a> LeaveResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, LeaveBalancesLeaveResp>()
+        .send_v2_response::<LeaveBalancesLeaveRespData, LeaveBalancesLeaveResp>()
         .await
     }
 
@@ -2958,7 +3280,7 @@ impl<'a> LeaveResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, LeaveRequestHistoryLeaveResp>()
+        .send_v2_response::<LeaveRequestHistoryLeaveRespData, LeaveRequestHistoryLeaveResp>()
         .await
     }
 
@@ -2977,7 +3299,7 @@ impl<'a> LeaveResource<'a> {
         )
         .query("page_size", page_size)
         .query("page_token", page_token)
-        .send_v2_response::<serde_json::Value, LeaveTypesLeaveResp>()
+        .send_v2_response::<LeaveTypesLeaveRespData, LeaveTypesLeaveResp>()
         .await
     }
 
@@ -2994,7 +3316,7 @@ impl<'a> LeaveResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, WorkCalendarLeaveResp>()
+        .send_v2_response::<WorkCalendarLeaveRespData, WorkCalendarLeaveResp>()
         .await
     }
 
@@ -3011,7 +3333,7 @@ impl<'a> LeaveResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, WorkCalendarDateLeaveResp>()
+        .send_v2_response::<WorkCalendarDateLeaveRespData, WorkCalendarDateLeaveResp>()
         .await
     }
 }
@@ -3034,7 +3356,7 @@ impl<'a> LeaveGrantingRecordResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateLeaveGrantingRecordResp>()
+        .send_v2_response::<CreateLeaveGrantingRecordRespData, CreateLeaveGrantingRecordResp>()
         .await
     }
 
@@ -3302,7 +3624,7 @@ impl<'a> OffboardingResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QueryOffboardingResp>()
+        .send_v2_response::<QueryOffboardingRespData, QueryOffboardingResp>()
         .await
     }
 
@@ -3377,7 +3699,7 @@ impl<'a> OffboardingResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, SubmitOffboardingResp>()
+        .send_v2_response::<SubmitOffboardingRespData, SubmitOffboardingResp>()
         .await
     }
 }
@@ -3400,7 +3722,7 @@ impl<'a> PersonResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreatePersonResp>()
+        .send_v2_response::<CreatePersonRespData, CreatePersonResp>()
         .await
     }
 
@@ -3434,7 +3756,7 @@ impl<'a> PersonResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetPersonResp>()
+        .send_v2_response::<GetPersonRespData, GetPersonResp>()
         .await
     }
 
@@ -3453,7 +3775,7 @@ impl<'a> PersonResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchPersonResp>()
+        .send_v2_response::<PatchPersonRespData, PatchPersonResp>()
         .await
     }
 
@@ -3470,7 +3792,7 @@ impl<'a> PersonResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UploadPersonResp>()
+        .send_v2_response::<UploadPersonRespData, UploadPersonResp>()
         .await
     }
 }
@@ -3543,7 +3865,7 @@ impl<'a> PreHireResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetPreHireResp>()
+        .send_v2_response::<GetPreHireRespData, GetPreHireResp>()
         .await
     }
 
@@ -3572,7 +3894,7 @@ impl<'a> PreHireResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListPreHireResp>()
+        .send_v2_response::<ListPreHireRespData, ListPreHireResp>()
         .await
     }
 
@@ -3591,7 +3913,7 @@ impl<'a> PreHireResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchPreHireResp>()
+        .send_v2_response::<PatchPreHireRespData, PatchPreHireResp>()
         .await
     }
 }
@@ -3614,7 +3936,7 @@ impl<'a> ProcessFormVariableDataResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetProcessFormVariableDataResp>()
+        .send_v2_response::<GetProcessFormVariableDataRespData, GetProcessFormVariableDataResp>()
         .await
     }
 }
@@ -3682,7 +4004,7 @@ impl<'a> SecurityGroupResource<'a> {
             option,
         )
         .page_query(query.page_query())
-        .send_v2_response::<serde_json::Value, ListSecurityGroupResp>()
+        .send_v2_response::<ListSecurityGroupRespData, ListSecurityGroupResp>()
         .await
     }
 
@@ -3699,7 +4021,7 @@ impl<'a> SecurityGroupResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, QuerySecurityGroupResp>()
+        .send_v2_response::<QuerySecurityGroupRespData, QuerySecurityGroupResp>()
         .await
     }
 }
@@ -4040,7 +4362,7 @@ impl<'a> DepartmentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateDepartmentResp>()
+        .send_v2_response::<CreateDepartmentRespData, CreateDepartmentResp>()
         .await
     }
 
