@@ -101,15 +101,15 @@ pub struct OkrListData {
 impl_resp!(ListPeriodResp, PeriodListData);
 impl_resp!(GetUserOkrResp, OkrListData);
 
-impl_resp_v2!(UploadImageResp, serde_json::Value);
-impl_resp_v2!(BatchGetOkrResp, serde_json::Value);
-impl_resp_v2!(CreatePeriodResp, serde_json::Value);
-impl_resp_v2!(PatchPeriodResp, serde_json::Value);
-impl_resp_v2!(ListPeriodRuleResp, serde_json::Value);
-impl_resp_v2!(CreateProgressRecordResp, serde_json::Value);
-impl_resp_v2!(GetProgressRecordResp, serde_json::Value);
-impl_resp_v2!(UpdateProgressRecordResp, serde_json::Value);
-impl_resp_v2!(QueryReviewResp, serde_json::Value);
+impl_resp_v2!(UploadImageResp, UploadImageRespData);
+impl_resp_v2!(BatchGetOkrResp, BatchGetOkrRespData);
+impl_resp_v2!(CreatePeriodResp, CreatePeriodRespData);
+impl_resp_v2!(PatchPeriodResp, PatchPeriodRespData);
+impl_resp_v2!(ListPeriodRuleResp, ListPeriodRuleRespData);
+impl_resp_v2!(CreateProgressRecordResp, CreateProgressRecordRespData);
+impl_resp_v2!(GetProgressRecordResp, GetProgressRecordRespData);
+impl_resp_v2!(UpdateProgressRecordResp, UpdateProgressRecordRespData);
+impl_resp_v2!(QueryReviewResp, QueryReviewRespData);
 
 #[derive(Debug, Clone, Copy, Default)]
 #[non_exhaustive]
@@ -367,6 +367,87 @@ impl<'a> GetUserOkrQuery<'a> {
     }
 }
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UploadImageRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetOkrRespData {
+    #[serde(default)]
+    pub okr_list: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreatePeriodRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_month: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_month: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchPeriodRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListPeriodRuleRespData {
+    #[serde(default)]
+    pub period_rules: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateProgressRecordRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetProgressRecordRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateProgressRecordRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modify_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryReviewRespData {
+    #[serde(default)]
+    pub review_list: Vec<serde_json::Value>,
+}
 // ── Resources ──
 
 pub struct PeriodResource<'a> {
@@ -423,7 +504,7 @@ impl<'a> PeriodResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreatePeriodResp>()
+        .send_v2_response::<CreatePeriodRespData, CreatePeriodResp>()
         .await
     }
 
@@ -451,7 +532,7 @@ impl<'a> PeriodResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchPeriodResp>()
+        .send_v2_response::<PatchPeriodRespData, PatchPeriodResp>()
         .await
     }
 }
@@ -480,7 +561,7 @@ impl PeriodRuleResource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, ListPeriodRuleResp>()
+        .send_v2_response::<ListPeriodRuleRespData, ListPeriodRuleResp>()
         .await
     }
 }
@@ -514,7 +595,7 @@ impl ImageResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UploadImageResp>()
+        .send_v2_response::<UploadImageRespData, UploadImageResp>()
         .await
     }
 }
@@ -554,7 +635,7 @@ impl OkrResource<'_> {
         .query_values("okr_ids", Some(query.okr_ids.iter().copied()))
         .query("user_id_type", query.user_id_type)
         .query("lang", query.lang)
-        .send_v2_response::<serde_json::Value, BatchGetOkrResp>()
+        .send_v2_response::<BatchGetOkrRespData, BatchGetOkrResp>()
         .await
     }
 }
@@ -590,7 +671,7 @@ impl ProgressRecordResource<'_> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateProgressRecordResp>()
+        .send_v2_response::<CreateProgressRecordRespData, CreateProgressRecordResp>()
         .await
     }
 
@@ -644,7 +725,7 @@ impl ProgressRecordResource<'_> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, GetProgressRecordResp>()
+        .send_v2_response::<GetProgressRecordRespData, GetProgressRecordResp>()
         .await
     }
 
@@ -674,7 +755,7 @@ impl ProgressRecordResource<'_> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateProgressRecordResp>()
+        .send_v2_response::<UpdateProgressRecordRespData, UpdateProgressRecordResp>()
         .await
     }
 }
@@ -717,7 +798,7 @@ impl ReviewResource<'_> {
             query.period_ids.map(|ids| ids.iter().copied()),
         )
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<serde_json::Value, QueryReviewResp>()
+        .send_v2_response::<QueryReviewRespData, QueryReviewResp>()
         .await
     }
 }

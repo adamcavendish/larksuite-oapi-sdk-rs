@@ -42,16 +42,16 @@ pub struct CardInstanceData {
 
 impl_resp!(CreateCardInstanceResp, CardInstanceData);
 
-impl_resp_v2!(CreateCardResp, serde_json::Value);
-impl_resp_v2!(UpdateCardResp, serde_json::Value);
-impl_resp_v2!(BatchUpdateCardResp, serde_json::Value);
-impl_resp_v2!(IdConvertCardResp, serde_json::Value);
-impl_resp_v2!(SettingsCardResp, serde_json::Value);
-impl_resp_v2!(CreateCardElementResp, serde_json::Value);
-impl_resp_v2!(UpdateCardElementResp, serde_json::Value);
+impl_resp_v2!(CreateCardResp, CreateCardRespData);
+impl_resp_v2!(UpdateCardResp, ());
+impl_resp_v2!(BatchUpdateCardResp, ());
+impl_resp_v2!(IdConvertCardResp, IdConvertCardRespData);
+impl_resp_v2!(SettingsCardResp, ());
+impl_resp_v2!(CreateCardElementResp, ());
+impl_resp_v2!(UpdateCardElementResp, ());
 impl_resp_v2!(DeleteCardElementResp, ());
-impl_resp_v2!(PatchCardElementResp, serde_json::Value);
-impl_resp_v2!(ContentCardElementResp, serde_json::Value);
+impl_resp_v2!(PatchCardElementResp, ());
+impl_resp_v2!(ContentCardElementResp, ());
 
 #[derive(Debug, Clone)]
 #[non_exhaustive]
@@ -224,6 +224,19 @@ impl<'a> ContentCardElementQuery<'a> {
     }
 }
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateCardRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub card_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct IdConvertCardRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub card_id: Option<String>,
+}
 // ── Resources ──
 
 pub struct CardInstanceResource<'a> {
@@ -313,7 +326,7 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateCardResp>()
+        .send_v2_response::<CreateCardRespData, CreateCardResp>()
         .await
     }
 
@@ -341,7 +354,7 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateCardResp>()
+        .send_v2_response::<(), UpdateCardResp>()
         .await
     }
 
@@ -369,7 +382,7 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, BatchUpdateCardResp>()
+        .send_v2_response::<(), BatchUpdateCardResp>()
         .await
     }
 
@@ -395,7 +408,7 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, IdConvertCardResp>()
+        .send_v2_response::<IdConvertCardRespData, IdConvertCardResp>()
         .await
     }
 
@@ -423,7 +436,7 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, SettingsCardResp>()
+        .send_v2_response::<(), SettingsCardResp>()
         .await
     }
 }
@@ -457,7 +470,7 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, CreateCardElementResp>()
+        .send_v2_response::<(), CreateCardElementResp>()
         .await
     }
 
@@ -492,7 +505,7 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, UpdateCardElementResp>()
+        .send_v2_response::<(), UpdateCardElementResp>()
         .await
     }
 
@@ -557,7 +570,7 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, PatchCardElementResp>()
+        .send_v2_response::<(), PatchCardElementResp>()
         .await
     }
 
@@ -592,7 +605,7 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, ContentCardElementResp>()
+        .send_v2_response::<(), ContentCardElementResp>()
         .await
     }
 }
