@@ -92,13 +92,10 @@ recent_change_data!(
 // ── Response types ─────────────────────────────────────────────────────────────
 
 // approval_groups
-impl_resp_v2!(GetApprovalGroupsV2Resp, serde_json::Value);
-impl_resp_v2!(OpenQueryDeptChangeApprovalGroupsV2Resp, serde_json::Value);
-impl_resp_v2!(OpenQueryJobChangeApprovalGroupsV2Resp, serde_json::Value);
-impl_resp_v2!(
-    OpenQueryPositionChangeApprovalGroupsV2Resp,
-    serde_json::Value
-);
+impl_resp_v2!(GetApprovalGroupsV2Resp, GetApprovalGroupsV2RespData);
+impl_resp_v2!(OpenQueryDeptChangeApprovalGroupsV2Resp, ());
+impl_resp_v2!(OpenQueryJobChangeApprovalGroupsV2Resp, ());
+impl_resp_v2!(OpenQueryPositionChangeApprovalGroupsV2Resp, ());
 // approver
 impl_resp_v2!(ListApproverV2Resp, ListData);
 // basic_info
@@ -113,11 +110,11 @@ impl_resp_v2!(SearchLanguageV2Resp, ListData);
 impl_resp_v2!(SearchNationalityV2Resp, ListData);
 impl_resp_v2!(SearchTimeZoneV2Resp, ListData);
 // bp
-impl_resp_v2!(GetBpByDepartmentV2Resp, serde_json::Value);
+impl_resp_v2!(GetBpByDepartmentV2Resp, ());
 impl_resp_v2!(ListBpV2Resp, ListData);
 // company
 impl_resp_v2!(ActiveCompanyV2Resp, ());
-impl_resp_v2!(BatchGetCompanyV2Resp, serde_json::Value);
+impl_resp_v2!(BatchGetCompanyV2Resp, BatchGetCompanyV2RespData);
 impl_resp_v2!(
     QueryRecentChangeCompanyV2Resp,
     QueryRecentChangeCompanyV2RespData
@@ -125,167 +122,227 @@ impl_resp_v2!(
 // contract
 impl_resp_v2!(SearchContractV2Resp, ListData);
 // cost_allocation
-impl_resp_v2!(BatchQueryCostAllocationV2Resp, serde_json::Value);
-impl_resp_v2!(CreateVersionCostAllocationV2Resp, serde_json::Value);
+impl_resp_v2!(
+    BatchQueryCostAllocationV2Resp,
+    BatchQueryCostAllocationV2RespData
+);
+impl_resp_v2!(
+    CreateVersionCostAllocationV2Resp,
+    CreateVersionCostAllocationV2RespData
+);
 impl_resp_v2!(RemoveVersionCostAllocationV2Resp, ());
 impl_resp_v2!(UpdateVersionCostAllocationV2Resp, ());
 // cost_center
-impl_resp_v2!(CreateCostCenterV2Resp, serde_json::Value);
+impl_resp_v2!(CreateCostCenterV2Resp, CreateCostCenterV2RespData);
 impl_resp_v2!(DeleteCostCenterV2Resp, ());
-impl_resp_v2!(PatchCostCenterV2Resp, serde_json::Value);
+impl_resp_v2!(PatchCostCenterV2Resp, PatchCostCenterV2RespData);
 impl_resp_v2!(
     QueryRecentChangeCostCenterV2Resp,
     QueryRecentChangeCostCenterV2RespData
 );
 impl_resp_v2!(SearchCostCenterV2Resp, ListData);
-impl_resp_v2!(CreateCostCenterVersionV2Resp, serde_json::Value);
+impl_resp_v2!(
+    CreateCostCenterVersionV2Resp,
+    CreateCostCenterVersionV2RespData
+);
 impl_resp_v2!(DeleteCostCenterVersionV2Resp, ());
-impl_resp_v2!(PatchCostCenterVersionV2Resp, serde_json::Value);
+impl_resp_v2!(
+    PatchCostCenterVersionV2Resp,
+    PatchCostCenterVersionV2RespData
+);
 // custom_org
 impl_resp_v2!(ActiveCustomOrgV2Resp, ());
-impl_resp_v2!(CreateCustomOrgV2Resp, serde_json::Value);
+impl_resp_v2!(CreateCustomOrgV2Resp, CreateCustomOrgV2RespData);
 impl_resp_v2!(DeleteOrgCustomOrgV2Resp, ());
 impl_resp_v2!(PatchCustomOrgV2Resp, ());
-impl_resp_v2!(QueryCustomOrgV2Resp, serde_json::Value);
+impl_resp_v2!(QueryCustomOrgV2Resp, QueryCustomOrgV2RespData);
 impl_resp_v2!(
     QueryRecentChangeCustomOrgV2Resp,
     QueryRecentChangeCustomOrgV2RespData
 );
 impl_resp_v2!(UpdateRuleCustomOrgV2Resp, ());
 // default_cost_center
-impl_resp_v2!(BatchQueryDefaultCostCenterV2Resp, serde_json::Value);
-impl_resp_v2!(CreateVersionDefaultCostCenterV2Resp, serde_json::Value);
+impl_resp_v2!(
+    BatchQueryDefaultCostCenterV2Resp,
+    BatchQueryDefaultCostCenterV2RespData
+);
+impl_resp_v2!(
+    CreateVersionDefaultCostCenterV2Resp,
+    CreateVersionDefaultCostCenterV2RespData
+);
 impl_resp_v2!(RemoveVersionDefaultCostCenterV2Resp, ());
 impl_resp_v2!(UpdateVersionDefaultCostCenterV2Resp, ());
 // department
-impl_resp_v2!(BatchGetDepartmentV2Resp, serde_json::Value);
+impl_resp_v2!(BatchGetDepartmentV2Resp, BatchGetDepartmentV2RespData);
 impl_resp_v2!(DeleteDepartmentV2Resp, ());
-impl_resp_v2!(ParentsDepartmentV2Resp, serde_json::Value);
+impl_resp_v2!(ParentsDepartmentV2Resp, ParentsDepartmentV2RespData);
 impl_resp_v2!(PatchDepartmentV2Resp, ());
-impl_resp_v2!(QueryMultiTimelineDepartmentV2Resp, serde_json::Value);
-impl_resp_v2!(QueryOperationLogsDepartmentV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryMultiTimelineDepartmentV2Resp,
+    QueryMultiTimelineDepartmentV2RespData
+);
+impl_resp_v2!(
+    QueryOperationLogsDepartmentV2Resp,
+    QueryOperationLogsDepartmentV2RespData
+);
 impl_resp_v2!(
     QueryRecentChangeDepartmentV2Resp,
     QueryRecentChangeDepartmentV2RespData
 );
-impl_resp_v2!(QueryTimelineDepartmentV2Resp, serde_json::Value);
+impl_resp_v2!(
+    QueryTimelineDepartmentV2Resp,
+    QueryTimelineDepartmentV2RespData
+);
 impl_resp_v2!(SearchDepartmentV2Resp, ListData);
-impl_resp_v2!(TreeDepartmentV2Resp, serde_json::Value);
+impl_resp_v2!(TreeDepartmentV2Resp, TreeDepartmentV2RespData);
 // draft
-impl_resp_v2!(GetDraftV2Resp, serde_json::Value);
+impl_resp_v2!(GetDraftV2Resp, GetDraftV2RespData);
 // employee
-impl_resp_v2!(BatchGetEmployeeV2Resp, serde_json::Value);
-impl_resp_v2!(CreateEmployeeV2Resp, serde_json::Value);
+impl_resp_v2!(BatchGetEmployeeV2Resp, BatchGetEmployeeV2RespData);
+impl_resp_v2!(CreateEmployeeV2Resp, CreateEmployeeV2RespData);
 impl_resp_v2!(SearchEmployeeV2Resp, ListData);
 // employees_additional_job
-impl_resp_v2!(BatchEmployeesAdditionalJobV2Resp, serde_json::Value);
-impl_resp_v2!(CreateEmployeesAdditionalJobV2Resp, serde_json::Value);
+impl_resp_v2!(
+    BatchEmployeesAdditionalJobV2Resp,
+    BatchEmployeesAdditionalJobV2RespData
+);
+impl_resp_v2!(
+    CreateEmployeesAdditionalJobV2Resp,
+    CreateEmployeesAdditionalJobV2RespData
+);
 impl_resp_v2!(DeleteEmployeesAdditionalJobV2Resp, ());
-impl_resp_v2!(PatchEmployeesAdditionalJobV2Resp, serde_json::Value);
+impl_resp_v2!(
+    PatchEmployeesAdditionalJobV2Resp,
+    PatchEmployeesAdditionalJobV2RespData
+);
 // employees_bp
-impl_resp_v2!(BatchGetEmployeesBpV2Resp, serde_json::Value);
+impl_resp_v2!(BatchGetEmployeesBpV2Resp, BatchGetEmployeesBpV2RespData);
 // employees_international_assignment
-impl_resp_v2!(CreateEmployeesIntlAssignmentV2Resp, serde_json::Value);
+impl_resp_v2!(CreateEmployeesIntlAssignmentV2Resp, ());
 impl_resp_v2!(DeleteEmployeesIntlAssignmentV2Resp, ());
 impl_resp_v2!(ListEmployeesIntlAssignmentV2Resp, ListData);
-impl_resp_v2!(PatchEmployeesIntlAssignmentV2Resp, serde_json::Value);
+impl_resp_v2!(PatchEmployeesIntlAssignmentV2Resp, ());
 // employees_job_data
-impl_resp_v2!(BatchGetEmployeesJobDataV2Resp, serde_json::Value);
-impl_resp_v2!(QueryEmployeesJobDataV2Resp, serde_json::Value);
+impl_resp_v2!(
+    BatchGetEmployeesJobDataV2Resp,
+    BatchGetEmployeesJobDataV2RespData
+);
+impl_resp_v2!(QueryEmployeesJobDataV2Resp, QueryEmployeesJobDataV2RespData);
 // enum
 impl_resp_v2!(SearchEnumV2Resp, ListData);
 // job
-impl_resp_v2!(BatchGetJobV2Resp, serde_json::Value);
-impl_resp_v2!(GetJobV2Resp, serde_json::Value);
+impl_resp_v2!(BatchGetJobV2Resp, BatchGetJobV2RespData);
+impl_resp_v2!(GetJobV2Resp, GetJobV2RespData);
 impl_resp_v2!(ListJobV2Resp, ListData);
-impl_resp_v2!(QueryMultiTimelineJobV2Resp, serde_json::Value);
+impl_resp_v2!(QueryMultiTimelineJobV2Resp, QueryMultiTimelineJobV2RespData);
 impl_resp_v2!(QueryRecentChangeJobV2Resp, QueryRecentChangeJobV2RespData);
 // job_change
-impl_resp_v2!(CreateJobChangeV2Resp, serde_json::Value);
-impl_resp_v2!(RevokeJobChangeV2Resp, serde_json::Value);
+impl_resp_v2!(CreateJobChangeV2Resp, CreateJobChangeV2RespData);
+impl_resp_v2!(RevokeJobChangeV2Resp, RevokeJobChangeV2RespData);
 impl_resp_v2!(SearchJobChangeV2Resp, ListData);
 // job_family
-impl_resp_v2!(BatchGetJobFamilyV2Resp, serde_json::Value);
-impl_resp_v2!(QueryMultiTimelineJobFamilyV2Resp, serde_json::Value);
+impl_resp_v2!(BatchGetJobFamilyV2Resp, BatchGetJobFamilyV2RespData);
+impl_resp_v2!(
+    QueryMultiTimelineJobFamilyV2Resp,
+    QueryMultiTimelineJobFamilyV2RespData
+);
 impl_resp_v2!(
     QueryRecentChangeJobFamilyV2Resp,
     QueryRecentChangeJobFamilyV2RespData
 );
 // job_grade
-impl_resp_v2!(CreateJobGradeV2Resp, serde_json::Value);
+impl_resp_v2!(CreateJobGradeV2Resp, CreateJobGradeV2RespData);
 impl_resp_v2!(DeleteJobGradeV2Resp, ());
 impl_resp_v2!(PatchJobGradeV2Resp, ());
-impl_resp_v2!(QueryJobGradeV2Resp, serde_json::Value);
+impl_resp_v2!(QueryJobGradeV2Resp, QueryJobGradeV2RespData);
 impl_resp_v2!(
     QueryRecentChangeJobGradeV2Resp,
     QueryRecentChangeJobGradeV2RespData
 );
 // job_level
-impl_resp_v2!(BatchGetJobLevelV2Resp, serde_json::Value);
+impl_resp_v2!(BatchGetJobLevelV2Resp, BatchGetJobLevelV2RespData);
 impl_resp_v2!(
     QueryRecentChangeJobLevelV2Resp,
     QueryRecentChangeJobLevelV2RespData
 );
 // location
 impl_resp_v2!(ActiveLocationV2Resp, ());
-impl_resp_v2!(BatchGetLocationV2Resp, serde_json::Value);
+impl_resp_v2!(BatchGetLocationV2Resp, BatchGetLocationV2RespData);
 impl_resp_v2!(PatchLocationV2Resp, ());
 impl_resp_v2!(
     QueryRecentChangeLocationV2Resp,
     QueryRecentChangeLocationV2RespData
 );
-impl_resp_v2!(CreateLocationAddressV2Resp, serde_json::Value);
+impl_resp_v2!(CreateLocationAddressV2Resp, CreateLocationAddressV2RespData);
 impl_resp_v2!(DeleteLocationAddressV2Resp, ());
 impl_resp_v2!(PatchLocationAddressV2Resp, ());
 // offboarding
-impl_resp_v2!(EditOffboardingV2Resp, serde_json::Value);
+impl_resp_v2!(EditOffboardingV2Resp, EditOffboardingV2RespData);
 impl_resp_v2!(RevokeOffboardingV2Resp, ());
-impl_resp_v2!(SubmitOffboardingV2Resp, serde_json::Value);
+impl_resp_v2!(SubmitOffboardingV2Resp, ());
 // pathway
 impl_resp_v2!(ActivePathwayV2Resp, ());
-impl_resp_v2!(BatchGetPathwayV2Resp, serde_json::Value);
-impl_resp_v2!(CreatePathwayV2Resp, serde_json::Value);
+impl_resp_v2!(BatchGetPathwayV2Resp, BatchGetPathwayV2RespData);
+impl_resp_v2!(CreatePathwayV2Resp, CreatePathwayV2RespData);
 impl_resp_v2!(DeletePathwayV2Resp, ());
 impl_resp_v2!(PatchPathwayV2Resp, ());
 // person
-impl_resp_v2!(CreatePersonV2Resp, serde_json::Value);
-impl_resp_v2!(PatchPersonV2Resp, serde_json::Value);
+impl_resp_v2!(CreatePersonV2Resp, CreatePersonV2RespData);
+impl_resp_v2!(PatchPersonV2Resp, PatchPersonV2RespData);
 // position
 impl_resp_v2!(ActivePositionV2Resp, ());
-impl_resp_v2!(CreatePositionV2Resp, serde_json::Value);
-impl_resp_v2!(DelPositionV2Resp, serde_json::Value);
+impl_resp_v2!(CreatePositionV2Resp, CreatePositionV2RespData);
+impl_resp_v2!(DelPositionV2Resp, ());
 impl_resp_v2!(PatchPositionV2Resp, ());
-impl_resp_v2!(QueryPositionV2Resp, serde_json::Value);
+impl_resp_v2!(QueryPositionV2Resp, QueryPositionV2RespData);
 impl_resp_v2!(
     QueryRecentChangePositionV2Resp,
     QueryRecentChangePositionV2RespData
 );
 // pre_hire
-impl_resp_v2!(CompletePreHireV2Resp, serde_json::Value);
-impl_resp_v2!(CreatePreHireV2Resp, serde_json::Value);
+impl_resp_v2!(CompletePreHireV2Resp, CompletePreHireV2RespData);
+impl_resp_v2!(CreatePreHireV2Resp, CreatePreHireV2RespData);
 impl_resp_v2!(DeletePreHireV2Resp, ());
-impl_resp_v2!(PatchPreHireV2Resp, serde_json::Value);
-impl_resp_v2!(QueryPreHireV2Resp, serde_json::Value);
-impl_resp_v2!(RestoreFlowInstancePreHireV2Resp, serde_json::Value);
+impl_resp_v2!(PatchPreHireV2Resp, PatchPreHireV2RespData);
+impl_resp_v2!(QueryPreHireV2Resp, QueryPreHireV2RespData);
+impl_resp_v2!(
+    RestoreFlowInstancePreHireV2Resp,
+    RestoreFlowInstancePreHireV2RespData
+);
 impl_resp_v2!(SearchPreHireV2Resp, ListData);
-impl_resp_v2!(TransformOnboardingTaskPreHireV2Resp, serde_json::Value);
-impl_resp_v2!(TransitTaskPreHireV2Resp, serde_json::Value);
-impl_resp_v2!(WithdrawOnboardingPreHireV2Resp, serde_json::Value);
+impl_resp_v2!(
+    TransformOnboardingTaskPreHireV2Resp,
+    TransformOnboardingTaskPreHireV2RespData
+);
+impl_resp_v2!(TransitTaskPreHireV2Resp, TransitTaskPreHireV2RespData);
+impl_resp_v2!(
+    WithdrawOnboardingPreHireV2Resp,
+    WithdrawOnboardingPreHireV2RespData
+);
 // probation
 impl_resp_v2!(EnableDisableAssessmentProbationV2Resp, ());
 impl_resp_v2!(SearchProbationV2Resp, ListData);
-impl_resp_v2!(SubmitProbationV2Resp, serde_json::Value);
+impl_resp_v2!(SubmitProbationV2Resp, SubmitProbationV2RespData);
 impl_resp_v2!(WithdrawProbationV2Resp, ());
-impl_resp_v2!(CreateProbationAssessmentV2Resp, serde_json::Value);
+impl_resp_v2!(
+    CreateProbationAssessmentV2Resp,
+    CreateProbationAssessmentV2RespData
+);
 impl_resp_v2!(DeleteProbationAssessmentV2Resp, ());
 impl_resp_v2!(PatchProbationAssessmentV2Resp, ());
 // process
-impl_resp_v2!(FlowVariableDataProcessV2Resp, serde_json::Value);
-impl_resp_v2!(GetProcessV2Resp, serde_json::Value);
+impl_resp_v2!(
+    FlowVariableDataProcessV2Resp,
+    FlowVariableDataProcessV2RespData
+);
+impl_resp_v2!(GetProcessV2Resp, GetProcessV2RespData);
 impl_resp_v2!(ListProcessV2Resp, ListData);
-impl_resp_v2!(UpdateProcessApproverV2Resp, serde_json::Value);
+impl_resp_v2!(UpdateProcessApproverV2Resp, UpdateProcessApproverV2RespData);
 impl_resp_v2!(UpdateProcessExtraV2Resp, ());
-impl_resp_v2!(GetProcessFormVariableDataV2Resp, serde_json::Value);
+impl_resp_v2!(
+    GetProcessFormVariableDataV2Resp,
+    GetProcessFormVariableDataV2RespData
+);
 impl_resp_v2!(UpdateProcessTransferV2Resp, ());
 impl_resp_v2!(UpdateProcessRevokeV2Resp, ());
 impl_resp_v2!(UpdateProcessWithdrawV2Resp, ());
@@ -296,18 +353,574 @@ impl_resp_v2!(BatchSaveReportDetailRowV2Resp, ());
 impl_resp_v2!(DownloadSignatureFileV2Resp, ());
 impl_resp_v2!(ListSignatureFileV2Resp, ListData);
 impl_resp_v2!(ListByBizIdSignatureFileV2Resp, ListData);
-impl_resp_v2!(QuerySignatureFileV2Resp, serde_json::Value);
-impl_resp_v2!(TerminateSignatureFileV2Resp, serde_json::Value);
+impl_resp_v2!(QuerySignatureFileV2Resp, QuerySignatureFileV2RespData);
+impl_resp_v2!(
+    TerminateSignatureFileV2Resp,
+    TerminateSignatureFileV2RespData
+);
 impl_resp_v2!(ListByFileIdSignatureNodeV2Resp, ListData);
 impl_resp_v2!(SearchSignatureTemplateV2Resp, ListData);
 impl_resp_v2!(ListSignatureTemplateInfoWithThumbnailV2Resp, ListData);
 // workforce_plan
 impl_resp_v2!(ListWorkforcePlanV2Resp, ListData);
-impl_resp_v2!(BatchWorkforcePlanDetailV2Resp, serde_json::Value);
-impl_resp_v2!(BatchV2WorkforcePlanDetailV2Resp, serde_json::Value);
+impl_resp_v2!(
+    BatchWorkforcePlanDetailV2Resp,
+    BatchWorkforcePlanDetailV2RespData
+);
+impl_resp_v2!(
+    BatchV2WorkforcePlanDetailV2Resp,
+    BatchV2WorkforcePlanDetailV2RespData
+);
 impl_resp_v2!(BatchDeleteWorkforcePlanDetailRowV2Resp, ());
 impl_resp_v2!(BatchSaveWorkforcePlanDetailRowV2Resp, ());
 
+// ── Generated response data ──
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetApprovalGroupsV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_group: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetCompanyV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchQueryCostAllocationV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateVersionCostAllocationV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_allocation_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateCostCenterV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_center: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchCostCenterV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_center: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateCostCenterVersionV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchCostCenterVersionV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateCustomOrgV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryCustomOrgV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchQueryDefaultCostCenterV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateVersionDefaultCostCenterV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wk_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wk_tid: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetDepartmentV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ParentsDepartmentV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reject_export: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryMultiTimelineDepartmentV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryOperationLogsDepartmentV2RespData {
+    #[serde(default)]
+    pub op_logs: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub next_page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryTimelineDepartmentV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TreeDepartmentV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reject_export: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetDraftV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub draft_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub draft_status: Option<String>,
+    #[serde(default)]
+    pub process_infos: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetEmployeeV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateEmployeeV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_data_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchEmployeesAdditionalJobV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateEmployeesAdditionalJobV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub additional_job: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchEmployeesAdditionalJobV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub additional_job: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetEmployeesBpV2RespData {
+    #[serde(default)]
+    pub employment_direct_bps: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub employment_all_bps: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetEmployeesJobDataV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryEmployeesJobDataV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetJobV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetJobV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryMultiTimelineJobV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateJobChangeV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_change_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_type_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_reason_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_info: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_adjust_salary: Option<bool>,
+    #[serde(default)]
+    pub custom_fields: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub details_of_job_status_change: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_name: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exception_status: Option<String>,
+    #[serde(default)]
+    pub no_permission_fields: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RevokeJobChangeV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetJobFamilyV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryMultiTimelineJobFamilyV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateJobGradeV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grade_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryJobGradeV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetJobLevelV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetLocationV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateLocationAddressV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EditOffboardingV2RespData {
+    #[serde(default)]
+    pub data: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetPathwayV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreatePathwayV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pathway_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreatePersonV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchPersonV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub person: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreatePositionV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryPositionV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CompletePreHireV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub success: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreatePreHireV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pre_hire_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchPreHireV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pre_hire_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryPreHireV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RestoreFlowInstancePreHireV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub success: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TransformOnboardingTaskPreHireV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub success: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TransitTaskPreHireV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub success: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WithdrawOnboardingPreHireV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub success: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubmitProbationV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_info: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateProbationAssessmentV2RespData {
+    #[serde(default)]
+    pub assessment_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FlowVariableDataProcessV2RespData {
+    #[serde(default)]
+    pub field_variable_values: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetProcessV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flow_template_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flow_template_name: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flow_definition_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flow_definition_name: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initiator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initiator_name: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub complete_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_links: Option<serde_json::Value>,
+    #[serde(default)]
+    pub abstracts: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub todos: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub cc_list: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub done_list: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub properties: Option<i32>,
+    #[serde(default)]
+    pub system_todos: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub system_done_list: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub comment_infos: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_process_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_last_completed_correct_process: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_name: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateProcessApproverV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub msg: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetProcessFormVariableDataV2RespData {
+    #[serde(default)]
+    pub field_variable_values: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QuerySignatureFileV2RespData {
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TerminateSignatureFileV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub success_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fail_count: Option<i32>,
+    #[serde(default)]
+    pub success_file_id_list: Vec<String>,
+    #[serde(default)]
+    pub fail_file_id_and_reasons: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchWorkforcePlanDetailV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub workforce_plan_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub centralized_reporting_project_id: Option<String>,
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchV2WorkforcePlanDetailV2RespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub workforce_plan_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub centralized_reporting_project_id: Option<String>,
+    #[serde(default)]
+    pub items: Vec<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
 // ── V2 service entry ──────────────────────────────────────────────────────────
 
 pub struct V2<'a> {
@@ -503,26 +1116,26 @@ impl ApprovalGroupsV2Resource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetApprovalGroupsV2Resp>()
+        .send_v2_response::<GetApprovalGroupsV2RespData, GetApprovalGroupsV2Resp>()
         .await
     }
 
     post_method!(
         open_query_dept_change_list_by_ids,
         OpenQueryDeptChangeApprovalGroupsV2Resp,
-        serde_json::Value,
+        (),
         "/open-apis/corehr/v2/approval_groups/open_query_department_change_list_by_ids"
     );
     post_method!(
         open_query_job_change_list_by_ids,
         OpenQueryJobChangeApprovalGroupsV2Resp,
-        serde_json::Value,
+        (),
         "/open-apis/corehr/v2/approval_groups/open_query_job_change_list_by_ids"
     );
     post_method!(
         open_query_position_change_list_by_ids,
         OpenQueryPositionChangeApprovalGroupsV2Resp,
-        serde_json::Value,
+        (),
         "/open-apis/corehr/v2/approval_groups/open_query_position_change_list_by_ids"
     );
 }
@@ -709,7 +1322,7 @@ impl BpV2Resource<'_> {
     post_method!(
         get_by_department,
         GetBpByDepartmentV2Resp,
-        serde_json::Value,
+        (),
         "/open-apis/corehr/v2/bps/get_by_department"
     );
 
@@ -760,7 +1373,7 @@ impl CompanyV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetCompanyV2Resp,
-        serde_json::Value,
+        BatchGetCompanyV2RespData,
         "/open-apis/corehr/v2/companies/batch_get"
     );
     get_method!(
@@ -796,13 +1409,13 @@ impl CostAllocationV2Resource<'_> {
     post_method!(
         batch_query,
         BatchQueryCostAllocationV2Resp,
-        serde_json::Value,
+        BatchQueryCostAllocationV2RespData,
         "/open-apis/corehr/v2/cost_allocations/batch_query"
     );
     post_method!(
         create_version,
         CreateVersionCostAllocationV2Resp,
-        serde_json::Value,
+        CreateVersionCostAllocationV2RespData,
         "/open-apis/corehr/v2/cost_allocations/create_version"
     );
     post_method!(
@@ -831,7 +1444,7 @@ impl CostCenterV2Resource<'_> {
     post_method!(
         create,
         CreateCostCenterV2Resp,
-        serde_json::Value,
+        CreateCostCenterV2RespData,
         "/open-apis/corehr/v2/cost_centers"
     );
 
@@ -867,7 +1480,7 @@ impl CostCenterV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchCostCenterV2Resp>()
+        .send_v2_response::<PatchCostCenterV2RespData, PatchCostCenterV2Resp>()
         .await
     }
 
@@ -907,7 +1520,7 @@ impl CostCenterVersionV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateCostCenterVersionV2Resp>()
+        .send_v2_response::<CreateCostCenterVersionV2RespData, CreateCostCenterVersionV2Resp>()
         .await
     }
 
@@ -947,7 +1560,7 @@ impl CostCenterVersionV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchCostCenterVersionV2Resp>()
+        .send_v2_response::<PatchCostCenterVersionV2RespData, PatchCostCenterVersionV2Resp>()
         .await
     }
 }
@@ -969,7 +1582,7 @@ impl CustomOrgV2Resource<'_> {
     post_method!(
         create,
         CreateCustomOrgV2Resp,
-        serde_json::Value,
+        CreateCustomOrgV2RespData,
         "/open-apis/corehr/v2/custom_orgs"
     );
     post_method!(
@@ -1002,7 +1615,7 @@ impl CustomOrgV2Resource<'_> {
     post_method!(
         query,
         QueryCustomOrgV2Resp,
-        serde_json::Value,
+        QueryCustomOrgV2RespData,
         "/open-apis/corehr/v2/custom_orgs/query"
     );
     get_method!(
@@ -1030,13 +1643,13 @@ impl DefaultCostCenterV2Resource<'_> {
     post_method!(
         batch_query,
         BatchQueryDefaultCostCenterV2Resp,
-        serde_json::Value,
+        BatchQueryDefaultCostCenterV2RespData,
         "/open-apis/corehr/v2/default_cost_centers/batch_query"
     );
     post_method!(
         create_version,
         CreateVersionDefaultCostCenterV2Resp,
-        serde_json::Value,
+        CreateVersionDefaultCostCenterV2RespData,
         "/open-apis/corehr/v2/default_cost_centers/create_version"
     );
     post_method!(
@@ -1065,7 +1678,7 @@ impl DepartmentV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetDepartmentV2Resp,
-        serde_json::Value,
+        BatchGetDepartmentV2RespData,
         "/open-apis/corehr/v2/departments/batch_get"
     );
 
@@ -1089,7 +1702,7 @@ impl DepartmentV2Resource<'_> {
     post_method!(
         parents,
         ParentsDepartmentV2Resp,
-        serde_json::Value,
+        ParentsDepartmentV2RespData,
         "/open-apis/corehr/v2/departments/parents"
     );
 
@@ -1115,13 +1728,13 @@ impl DepartmentV2Resource<'_> {
     post_method!(
         query_multi_timeline,
         QueryMultiTimelineDepartmentV2Resp,
-        serde_json::Value,
+        QueryMultiTimelineDepartmentV2RespData,
         "/open-apis/corehr/v2/departments/query_multi_timeline"
     );
     post_method!(
         query_operation_logs,
         QueryOperationLogsDepartmentV2Resp,
-        serde_json::Value,
+        QueryOperationLogsDepartmentV2RespData,
         "/open-apis/corehr/v2/departments/query_operation_logs"
     );
     get_method!(
@@ -1133,7 +1746,7 @@ impl DepartmentV2Resource<'_> {
     post_method!(
         query_timeline,
         QueryTimelineDepartmentV2Resp,
-        serde_json::Value,
+        QueryTimelineDepartmentV2RespData,
         "/open-apis/corehr/v2/departments/query_timeline"
     );
     post_method!(
@@ -1145,7 +1758,7 @@ impl DepartmentV2Resource<'_> {
     post_method!(
         tree,
         TreeDepartmentV2Resp,
-        serde_json::Value,
+        TreeDepartmentV2RespData,
         "/open-apis/corehr/v2/departments/tree"
     );
 }
@@ -1170,7 +1783,7 @@ impl DraftV2Resource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetDraftV2Resp>()
+        .send_v2_response::<GetDraftV2RespData, GetDraftV2Resp>()
         .await
     }
 }
@@ -1185,13 +1798,13 @@ impl EmployeeV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetEmployeeV2Resp,
-        serde_json::Value,
+        BatchGetEmployeeV2RespData,
         "/open-apis/corehr/v2/employees/batch_get"
     );
     post_method!(
         create,
         CreateEmployeeV2Resp,
-        serde_json::Value,
+        CreateEmployeeV2RespData,
         "/open-apis/corehr/v2/employees"
     );
     post_method!(
@@ -1212,13 +1825,13 @@ impl EmployeesAdditionalJobV2Resource<'_> {
     post_method!(
         batch,
         BatchEmployeesAdditionalJobV2Resp,
-        serde_json::Value,
+        BatchEmployeesAdditionalJobV2RespData,
         "/open-apis/corehr/v2/employees/additional_jobs/batch"
     );
     post_method!(
         create,
         CreateEmployeesAdditionalJobV2Resp,
-        serde_json::Value,
+        CreateEmployeesAdditionalJobV2RespData,
         "/open-apis/corehr/v2/employees/additional_jobs"
     );
 
@@ -1254,7 +1867,7 @@ impl EmployeesAdditionalJobV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchEmployeesAdditionalJobV2Resp>()
+        .send_v2_response::<PatchEmployeesAdditionalJobV2RespData, PatchEmployeesAdditionalJobV2Resp>()
         .await
     }
 }
@@ -1269,7 +1882,7 @@ impl EmployeesBpV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetEmployeesBpV2Resp,
-        serde_json::Value,
+        BatchGetEmployeesBpV2RespData,
         "/open-apis/corehr/v2/employees/bps/batch_get"
     );
 }
@@ -1284,7 +1897,7 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
     post_method!(
         create,
         CreateEmployeesIntlAssignmentV2Resp,
-        serde_json::Value,
+        (),
         "/open-apis/corehr/v2/employees/international_assignments"
     );
 
@@ -1343,7 +1956,7 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchEmployeesIntlAssignmentV2Resp>()
+        .send_v2_response::<(), PatchEmployeesIntlAssignmentV2Resp>()
         .await
     }
 }
@@ -1358,13 +1971,13 @@ impl EmployeesJobDataV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetEmployeesJobDataV2Resp,
-        serde_json::Value,
+        BatchGetEmployeesJobDataV2RespData,
         "/open-apis/corehr/v2/employees/job_datas/batch_get"
     );
     post_method!(
         query,
         QueryEmployeesJobDataV2Resp,
-        serde_json::Value,
+        QueryEmployeesJobDataV2RespData,
         "/open-apis/corehr/v2/employees/job_datas/query"
     );
 }
@@ -1427,7 +2040,7 @@ impl JobV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetJobV2Resp,
-        serde_json::Value,
+        BatchGetJobV2RespData,
         "/open-apis/corehr/v2/jobs/batch_get"
     );
 
@@ -1444,7 +2057,7 @@ impl JobV2Resource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetJobV2Resp>()
+        .send_v2_response::<GetJobV2RespData, GetJobV2Resp>()
         .await
     }
 
@@ -1480,7 +2093,7 @@ impl JobV2Resource<'_> {
     post_method!(
         query_multi_timeline,
         QueryMultiTimelineJobV2Resp,
-        serde_json::Value,
+        QueryMultiTimelineJobV2RespData,
         "/open-apis/corehr/v2/jobs/query_multi_timeline"
     );
     get_method!(
@@ -1501,7 +2114,7 @@ impl JobChangeV2Resource<'_> {
     post_method!(
         create,
         CreateJobChangeV2Resp,
-        serde_json::Value,
+        CreateJobChangeV2RespData,
         "/open-apis/corehr/v2/job_changes"
     );
 
@@ -1520,7 +2133,7 @@ impl JobChangeV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, RevokeJobChangeV2Resp>()
+        .send_v2_response::<RevokeJobChangeV2RespData, RevokeJobChangeV2Resp>()
         .await
     }
 
@@ -1542,13 +2155,13 @@ impl JobFamilyV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetJobFamilyV2Resp,
-        serde_json::Value,
+        BatchGetJobFamilyV2RespData,
         "/open-apis/corehr/v2/job_families/batch_get"
     );
     post_method!(
         query_multi_timeline,
         QueryMultiTimelineJobFamilyV2Resp,
-        serde_json::Value,
+        QueryMultiTimelineJobFamilyV2RespData,
         "/open-apis/corehr/v2/job_families/query_multi_timeline"
     );
     get_method!(
@@ -1569,7 +2182,7 @@ impl JobGradeV2Resource<'_> {
     post_method!(
         create,
         CreateJobGradeV2Resp,
-        serde_json::Value,
+        CreateJobGradeV2RespData,
         "/open-apis/corehr/v2/job_grades"
     );
 
@@ -1612,7 +2225,7 @@ impl JobGradeV2Resource<'_> {
     post_method!(
         query,
         QueryJobGradeV2Resp,
-        serde_json::Value,
+        QueryJobGradeV2RespData,
         "/open-apis/corehr/v2/job_grades/query"
     );
     get_method!(
@@ -1633,7 +2246,7 @@ impl JobLevelV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetJobLevelV2Resp,
-        serde_json::Value,
+        BatchGetJobLevelV2RespData,
         "/open-apis/corehr/v2/job_levels/batch_get"
     );
     get_method!(
@@ -1661,7 +2274,7 @@ impl LocationV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetLocationV2Resp,
-        serde_json::Value,
+        BatchGetLocationV2RespData,
         "/open-apis/corehr/v2/locations/batch_get"
     );
 
@@ -1714,7 +2327,7 @@ impl LocationAddressV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateLocationAddressV2Resp>()
+        .send_v2_response::<CreateLocationAddressV2RespData, CreateLocationAddressV2Resp>()
         .await
     }
 
@@ -1767,7 +2380,7 @@ impl OffboardingV2Resource<'_> {
     post_method!(
         edit,
         EditOffboardingV2Resp,
-        serde_json::Value,
+        EditOffboardingV2RespData,
         "/open-apis/corehr/v2/offboardings/edit"
     );
     post_method!(
@@ -1780,7 +2393,7 @@ impl OffboardingV2Resource<'_> {
     post_method!(
         submit_v2,
         SubmitOffboardingV2Resp,
-        serde_json::Value,
+        (),
         "/open-apis/corehr/v2/offboardings/submit_v2"
     );
 }
@@ -1802,13 +2415,13 @@ impl PathwayV2Resource<'_> {
     post_method!(
         batch_get,
         BatchGetPathwayV2Resp,
-        serde_json::Value,
+        BatchGetPathwayV2RespData,
         "/open-apis/corehr/v2/pathways/batch_get"
     );
     post_method!(
         create,
         CreatePathwayV2Resp,
-        serde_json::Value,
+        CreatePathwayV2RespData,
         "/open-apis/corehr/v2/pathways"
     );
 
@@ -1859,7 +2472,7 @@ impl PersonV2Resource<'_> {
     post_method!(
         create,
         CreatePersonV2Resp,
-        serde_json::Value,
+        CreatePersonV2RespData,
         "/open-apis/corehr/v2/persons"
     );
 
@@ -1878,7 +2491,7 @@ impl PersonV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchPersonV2Resp>()
+        .send_v2_response::<PatchPersonV2RespData, PatchPersonV2Resp>()
         .await
     }
 }
@@ -1900,13 +2513,13 @@ impl PositionV2Resource<'_> {
     post_method!(
         create,
         CreatePositionV2Resp,
-        serde_json::Value,
+        CreatePositionV2RespData,
         "/open-apis/corehr/v2/positions"
     );
     post_method!(
         del_position,
         DelPositionV2Resp,
-        serde_json::Value,
+        (),
         "/open-apis/corehr/v2/positions/del_position"
     );
 
@@ -1932,7 +2545,7 @@ impl PositionV2Resource<'_> {
     post_method!(
         query,
         QueryPositionV2Resp,
-        serde_json::Value,
+        QueryPositionV2RespData,
         "/open-apis/corehr/v2/positions/query"
     );
     get_method!(
@@ -1965,14 +2578,14 @@ impl PreHireV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CompletePreHireV2Resp>()
+        .send_v2_response::<CompletePreHireV2RespData, CompletePreHireV2Resp>()
         .await
     }
 
     post_method!(
         create,
         CreatePreHireV2Resp,
-        serde_json::Value,
+        CreatePreHireV2RespData,
         "/open-apis/corehr/v2/pre_hires"
     );
 
@@ -2008,20 +2621,20 @@ impl PreHireV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, PatchPreHireV2Resp>()
+        .send_v2_response::<PatchPreHireV2RespData, PatchPreHireV2Resp>()
         .await
     }
 
     post_method!(
         query,
         QueryPreHireV2Resp,
-        serde_json::Value,
+        QueryPreHireV2RespData,
         "/open-apis/corehr/v2/pre_hires/query"
     );
     post_method!(
         restore_flow_instance,
         RestoreFlowInstancePreHireV2Resp,
-        serde_json::Value,
+        RestoreFlowInstancePreHireV2RespData,
         "/open-apis/corehr/v2/pre_hires/restore_flow_instance"
     );
     post_method!(
@@ -2033,7 +2646,7 @@ impl PreHireV2Resource<'_> {
     post_method!(
         transform_onboarding_task,
         TransformOnboardingTaskPreHireV2Resp,
-        serde_json::Value,
+        TransformOnboardingTaskPreHireV2RespData,
         "/open-apis/corehr/v2/pre_hires/transform_onboarding_task"
     );
 
@@ -2052,14 +2665,14 @@ impl PreHireV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, TransitTaskPreHireV2Resp>()
+        .send_v2_response::<TransitTaskPreHireV2RespData, TransitTaskPreHireV2Resp>()
         .await
     }
 
     post_method!(
         withdraw_onboarding,
         WithdrawOnboardingPreHireV2Resp,
-        serde_json::Value,
+        WithdrawOnboardingPreHireV2RespData,
         "/open-apis/corehr/v2/pre_hires/withdraw_onboarding"
     );
 }
@@ -2087,7 +2700,7 @@ impl ProbationV2Resource<'_> {
     post_method!(
         submit,
         SubmitProbationV2Resp,
-        serde_json::Value,
+        SubmitProbationV2RespData,
         "/open-apis/corehr/v2/probation/submit"
     );
     post_method!(
@@ -2109,7 +2722,7 @@ impl ProbationAssessmentV2Resource<'_> {
     post_method!(
         create,
         CreateProbationAssessmentV2Resp,
-        serde_json::Value,
+        CreateProbationAssessmentV2RespData,
         "/open-apis/corehr/v2/probation/assessments"
     );
 
@@ -2203,7 +2816,7 @@ impl ProcessV2Resource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, FlowVariableDataProcessV2Resp>()
+        .send_v2_response::<FlowVariableDataProcessV2RespData, FlowVariableDataProcessV2Resp>()
         .await
     }
 
@@ -2220,7 +2833,7 @@ impl ProcessV2Resource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetProcessV2Resp>()
+        .send_v2_response::<GetProcessV2RespData, GetProcessV2Resp>()
         .await
     }
 
@@ -2277,7 +2890,7 @@ impl ProcessApproverV2Resource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, UpdateProcessApproverV2Resp>()
+        .send_v2_response::<UpdateProcessApproverV2RespData, UpdateProcessApproverV2Resp>()
         .await
     }
 }
@@ -2329,7 +2942,8 @@ impl ProcessFormVariableDataV2Resource<'_> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_v2_response::<serde_json::Value, GetProcessFormVariableDataV2Resp>()
+        .send_v2_response::<GetProcessFormVariableDataV2RespData, GetProcessFormVariableDataV2Resp>(
+        )
         .await
     }
 }
@@ -2704,13 +3318,13 @@ impl SignatureFileV2Resource<'_> {
     post_method!(
         query,
         QuerySignatureFileV2Resp,
-        serde_json::Value,
+        QuerySignatureFileV2RespData,
         "/open-apis/corehr/v2/signature_files/query"
     );
     post_method!(
         terminate,
         TerminateSignatureFileV2Resp,
-        serde_json::Value,
+        TerminateSignatureFileV2RespData,
         "/open-apis/corehr/v2/signature_files/terminate"
     );
 }
@@ -3117,13 +3731,13 @@ impl WorkforcePlanDetailV2Resource<'_> {
     post_method!(
         batch,
         BatchWorkforcePlanDetailV2Resp,
-        serde_json::Value,
+        BatchWorkforcePlanDetailV2RespData,
         "/open-apis/corehr/v2/workforce_plan_details/batch"
     );
     post_method!(
         batch_v2,
         BatchV2WorkforcePlanDetailV2Resp,
-        serde_json::Value,
+        BatchV2WorkforcePlanDetailV2RespData,
         "/open-apis/corehr/v2/workforce_plan_details/batch_v2"
     );
 }

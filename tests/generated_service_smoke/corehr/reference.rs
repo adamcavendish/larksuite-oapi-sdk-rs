@@ -97,7 +97,7 @@ async fn corehr_contract_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("contract-1"));
+    assert_eq!(data.items[0]["id"].as_str(), Some("contract-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/contracts?"));
     assert!(request.contains("page_size=20"));
@@ -145,7 +145,7 @@ async fn corehr_pre_hire_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("pre-hire-1"));
+    assert_eq!(data.items[0]["id"].as_str(), Some("pre-hire-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/pre_hires?"));
     assert!(request.contains("page_size=20"));
@@ -169,7 +169,7 @@ async fn corehr_security_group_list_by_query_smoke() {
 
     assert!(resp.success());
     let data = resp.data.unwrap();
-    assert_eq!(data["items"][0]["id"].as_str(), Some("security-1"));
+    assert_eq!(data.items[0]["id"].as_str(), Some("security-1"));
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/corehr/v1/security_groups?"));
     assert!(request.contains("page_size=20"));
