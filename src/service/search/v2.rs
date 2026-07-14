@@ -9,6 +9,166 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Acl {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub access: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
+    pub type_: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18nMeta {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SchemaFieldAnswerOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_searchable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_returnable: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SchemaSearchOptions {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable_semantic_match: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable_exact_match: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable_prefix_match: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable_number_suffix_match: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable_camel_match: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SchemaDisplayFieldMapping {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_field: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data_field: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimeRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DocFilter {
+    #[serde(default)]
+    pub creator_ids: Vec<String>,
+    #[serde(default)]
+    pub doc_types: Vec<String>,
+    #[serde(default)]
+    pub folder_tokens: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub only_title: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_time: Option<TimeRange>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sort_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<TimeRange>,
+    #[serde(default)]
+    pub chat_ids: Vec<String>,
+    #[serde(default)]
+    pub sharer_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub only_comment: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub my_edit_time: Option<TimeRange>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub my_comment_time: Option<TimeRange>,
+    #[serde(default)]
+    pub original_creator_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WikiFilter {
+    #[serde(default)]
+    pub creator_ids: Vec<String>,
+    #[serde(default)]
+    pub doc_types: Vec<String>,
+    #[serde(default)]
+    pub space_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub only_title: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_time: Option<TimeRange>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sort_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<TimeRange>,
+    #[serde(default)]
+    pub chat_ids: Vec<String>,
+    #[serde(default)]
+    pub sharer_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub only_comment: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub my_edit_time: Option<TimeRange>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub my_comment_time: Option<TimeRange>,
+    #[serde(default)]
+    pub original_creator_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DocMeta {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub doc_types: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_cross_tenant: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_open_time: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub edit_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub edit_user_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon_info: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DocResUnit {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title_highlighted: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub summary_highlighted: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub entity_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result_meta: Option<DocMeta>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DataSource {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -31,9 +191,9 @@ pub struct DataSource {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub searchable_fields: Option<Vec<String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18n_name: Option<serde_json::Value>,
+    pub i18n_name: Option<I18nMeta>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18n_description: Option<serde_json::Value>,
+    pub i18n_description: Option<I18nMeta>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub schema_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -45,7 +205,7 @@ pub struct DataRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub acl: Option<Vec<serde_json::Value>>,
+    pub acl: Option<Vec<Acl>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub metadata: Option<DataRecordMetadata>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -101,9 +261,9 @@ pub struct SchemaProperty {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_filterable: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub answer_option: Option<serde_json::Value>,
+    pub answer_option: Option<SchemaFieldAnswerOption>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub search_options: Option<serde_json::Value>,
+    pub search_options: Option<SchemaSearchOptions>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -111,7 +271,7 @@ pub struct SchemaDisplay {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub card_key: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub fields_mapping: Option<Vec<serde_json::Value>>,
+    pub fields_mapping: Option<Vec<SchemaDisplayFieldMapping>>,
 }
 
 // ── Request body types ──
@@ -131,9 +291,9 @@ pub struct CreateDataSourceReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub searchable_fields: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub i18n_name: Option<serde_json::Value>,
+    pub i18n_name: Option<I18nMeta>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub i18n_description: Option<serde_json::Value>,
+    pub i18n_description: Option<I18nMeta>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub schema_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -151,9 +311,9 @@ pub struct PatchDataSourceReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub icon_url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub i18n_name: Option<serde_json::Value>,
+    pub i18n_name: Option<I18nMeta>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub i18n_description: Option<serde_json::Value>,
+    pub i18n_description: Option<I18nMeta>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -161,7 +321,7 @@ pub struct CreateDataRecordReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub acl: Option<Vec<serde_json::Value>>,
+    pub acl: Option<Vec<Acl>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub metadata: Option<DataRecordMetadata>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -227,9 +387,9 @@ pub struct SearchDocWikiReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub query: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub doc_filter: Option<serde_json::Value>,
+    pub doc_filter: Option<DocFilter>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub wiki_filter: Option<serde_json::Value>,
+    pub wiki_filter: Option<WikiFilter>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -263,7 +423,7 @@ pub struct DataRecordData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchMessageData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -273,7 +433,7 @@ pub struct SearchMessageData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SearchAppData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -587,7 +747,7 @@ pub struct SearchDocWikiData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     #[serde(default)]
-    pub res_units: Vec<serde_json::Value>,
+    pub res_units: Vec<DocResUnit>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
 }
