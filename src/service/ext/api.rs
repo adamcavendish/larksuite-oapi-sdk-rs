@@ -120,7 +120,18 @@ impl_resp!(
     RefreshAuthenAccessTokenRespBody
 );
 impl_resp!(AuthenUserInfoResp, AuthenUserInfoRespBody);
-impl_resp!(CreateFileResp);
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateFileRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision: Option<i64>,
+}
+
+impl_resp_v2!(CreateFileResp, CreateFileRespData);
 
 pub struct ExtService<'a> {
     pub authen: AuthenExtResource<'a>,
@@ -208,7 +219,7 @@ impl DriveExplorerExtResource<'_> {
             option,
         )
         .json_body(&body)?
-        .send_v2_response::<serde_json::Value, CreateFileResp>()
+        .send_v2_response::<CreateFileRespData, CreateFileResp>()
         .await
     }
 }
