@@ -12,6 +12,10 @@
   Directory, Payroll, Docx, Cardkit, OKR, Lingo, Baike, Application, Trust
   Party, Admin, ACS, and Bitable with Go-shaped response-data wrappers or
   code-only responses. No raw `impl_resp_v2!` response aliases remain.
+- Added Go-shaped legacy response payloads for Sheets find/replace, Helpdesk
+  agent schedules, Task batch deletes, Docx raw content, and Drive Explorer
+  file creation. Status-only Auth, Board, Calendar, Directory, and OKR
+  responses now discard their data bodies explicitly.
 
 ## [0.3.0] - 2026-07-12
 

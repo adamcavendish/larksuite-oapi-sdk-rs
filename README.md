@@ -186,6 +186,10 @@ reference SDK defines response data, and unit responses where it does not.
 Their nested response objects follow the Go SDK model graph; raw JSON is kept
 only where the upstream shape is intentionally open-ended.
 
+Legacy response wrappers follow the same rule. The six Sheets range-value
+operations remain raw because the reference Go SDK defines no response models
+for their meaningful, variable-shaped payloads.
+
 Hire v1 is a particular focus: catalog, reference, task, website-posting,
 external, agency, job, talent, application, interview, and background-check
 resources provide typed Go-backed responses. Where the Go SDK exposes iterator
