@@ -30,7 +30,7 @@ async fn board_whiteboard_download_as_image_smoke() {
 async fn board_whiteboard_by_query_smoke() {
     let board_body = r#"{"code":0,"msg":"ok","data":{"whiteboard":{"whiteboard_id":"whiteboard-1","title":"Roadmap"}}}"#;
     let theme_body = r#"{"code":0,"msg":"ok","data":{"theme":{"background":"grid"}}}"#;
-    let update_theme_body = r#"{"code":0,"msg":"ok","data":{"updated":true}}"#;
+    let update_theme_response = r#"{"code":0,"msg":"ok"}"#;
     let download_body = "whiteboard-image-bytes";
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, board_body),
@@ -41,7 +41,7 @@ async fn board_whiteboard_by_query_smoke() {
             download_body,
         ),
         http_response(200, theme_body),
-        http_response(200, update_theme_body),
+        http_response(200, update_theme_response),
     ])
     .await;
 
@@ -90,7 +90,7 @@ async fn board_whiteboard_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+    let update_theme = client
         .board()
         .whiteboard
         .update_theme_by_query(
@@ -102,6 +102,7 @@ async fn board_whiteboard_by_query_smoke() {
 
     assert_eq!(download.file_name.as_deref(), Some("whiteboard.png"));
     assert_eq!(download.data, download_body.as_bytes());
+    assert!(update_theme.success());
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/board/v1/whiteboards "));
     assert!(request.contains("GET /open-apis/board/v1/whiteboards/whiteboard-1 "));

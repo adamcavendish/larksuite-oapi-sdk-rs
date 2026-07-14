@@ -10,6 +10,9 @@ async fn task_member_by_query_smoke() {
         r#"{"code":0,"msg":"ok","data":{"collaborator":{"id":"u-1","id_type":"open_id"}}}"#;
     let list_body = r#"{"code":0,"msg":"ok","data":{"items":[{"id":"u-1","id_type":"open_id"}],"has_more":false}}"#;
     let empty_body = r#"{"code":0,"msg":"ok"}"#;
+    let batch_delete_collaborator_body =
+        r#"{"code":0,"msg":"ok","data":{"collaborators":["u-1"]}}"#;
+    let batch_delete_follower_body = r#"{"code":0,"msg":"ok","data":{"followers":["u-2"]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, follower_body),
         http_response(200, empty_body),
@@ -17,6 +20,8 @@ async fn task_member_by_query_smoke() {
         http_response(200, collaborator_body),
         http_response(200, empty_body),
         http_response(200, list_body),
+        http_response(200, batch_delete_collaborator_body),
+        http_response(200, batch_delete_follower_body),
     ])
     .await;
 
@@ -88,7 +93,45 @@ async fn task_member_by_query_smoke() {
         )
         .await
         .unwrap();
+    let batch_delete_collaborator = client
+        .task()
+        .task
+        .batch_delete_collaborator_by_query(
+            &BatchDeleteCollaboratorQuery::new("task-1", &serde_json::json!({"ids":["u-1"]}))
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    let batch_delete_follower = client
+        .task()
+        .task
+        .batch_delete_follower_by_query(
+            &BatchDeleteFollowerQuery::new("task-1", &serde_json::json!({"ids":["u-2"]}))
+                .user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
 
+    assert_eq!(
+        batch_delete_collaborator
+            .data
+            .as_ref()
+            .and_then(|data| data.collaborators.as_ref())
+            .and_then(|collaborators| collaborators.first())
+            .map(String::as_str),
+        Some("u-1")
+    );
+    assert_eq!(
+        batch_delete_follower
+            .data
+            .as_ref()
+            .and_then(|data| data.followers.as_ref())
+            .and_then(|followers| followers.first())
+            .map(String::as_str),
+        Some("u-2")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/followers?"));
     assert!(request.contains("DELETE /open-apis/task/v1/tasks/task-1/followers/u-1?"));
@@ -96,6 +139,8 @@ async fn task_member_by_query_smoke() {
     assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/collaborators?"));
     assert!(request.contains("DELETE /open-apis/task/v1/tasks/task-1/collaborators/u-1?"));
     assert!(request.contains("GET /open-apis/task/v1/tasks/task-1/collaborators?"));
+    assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/batch_delete_collaborator?"));
+    assert!(request.contains("POST /open-apis/task/v1/tasks/task-1/batch_delete_follower?"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
     assert!(request.contains("user_id_type=open_id"));

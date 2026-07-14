@@ -274,9 +274,15 @@ pub struct BuildingBlockData {
     pub building_block: Option<BuildingBlock>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetDocumentRawContentData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+}
+
 impl_resp!(CreateDocumentResp, DocumentData);
 impl_resp!(GetDocumentResp, DocumentData);
-impl_resp!(GetDocumentRawContentResp, serde_json::Value);
+impl_resp!(GetDocumentRawContentResp, GetDocumentRawContentData);
 impl_resp!(CreateBlockResp, CreateBlockData);
 impl_resp!(GetBlockResp, BlockData);
 impl_resp!(UpdateBlockResp, UpdateBlockData);
@@ -1747,7 +1753,7 @@ impl<'a> DocumentResource<'a> {
             option,
         )
         .query("lang", query.lang)
-        .send_response::<serde_json::Value, GetDocumentRawContentResp>()
+        .send_response::<GetDocumentRawContentData, GetDocumentRawContentResp>()
         .await
     }
 }

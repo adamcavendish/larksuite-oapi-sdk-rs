@@ -276,6 +276,18 @@ pub struct ReminderListData {
     pub has_more: Option<bool>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchDeleteCollaboratorData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub collaborators: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchDeleteFollowerData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub followers: Option<Vec<String>>,
+}
+
 impl_resp!(CreateTaskResp, TaskData);
 impl_resp!(GetTaskResp, TaskData);
 impl_resp!(PatchTaskResp, TaskData);
@@ -292,8 +304,8 @@ impl_resp!(CreateReminderResp, ReminderData);
 impl_resp!(GetReminderResp, ReminderData);
 impl_resp!(UpdateReminderResp, ReminderData);
 impl_resp!(ListReminderResp, ReminderListData);
-impl_resp!(BatchDeleteCollaboratorResp, serde_json::Value);
-impl_resp!(BatchDeleteFollowerResp, serde_json::Value);
+impl_resp!(BatchDeleteCollaboratorResp, BatchDeleteCollaboratorData);
+impl_resp!(BatchDeleteFollowerResp, BatchDeleteFollowerData);
 
 // ── Resources ──
 
@@ -1046,7 +1058,7 @@ impl<'a> TaskResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_response::<serde_json::Value, BatchDeleteCollaboratorResp>()
+        .send_response::<BatchDeleteCollaboratorData, BatchDeleteCollaboratorResp>()
         .await
     }
 
@@ -1079,7 +1091,7 @@ impl<'a> TaskResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_response::<serde_json::Value, BatchDeleteFollowerResp>()
+        .send_response::<BatchDeleteFollowerData, BatchDeleteFollowerResp>()
         .await
     }
 }
