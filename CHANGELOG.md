@@ -4,6 +4,9 @@
 
 ### REST service coverage
 
+- Replaced concrete Approval v4, Attendance v1, and Search v2 shared and
+  response payload fields with Go-shaped models for attachments, i18n,
+  approval actions, attendance rules, search schemas, filters, and results.
 - Added typed Document AI recognition result graphs for invoice, identity,
   travel permit, license, resume, and contract field-extraction responses.
 - Replaced raw Docx document and shared block fields with the existing
