@@ -499,6 +499,72 @@ pub struct AgentListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgentUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub company_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WeekdaySchedule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weekday: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgentSkillLessInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_default: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgentSchedule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent: Option<AgentUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub schedule: Option<Vec<WeekdaySchedule>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_skills: Option<Vec<AgentSkillLessInfo>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgentEmailData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agents: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetAgentSchedulesData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_schedule: Option<AgentSchedule>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ListAgentScheduleData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_schedules: Option<Vec<AgentSchedule>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CategoryData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub category: Option<Category>,
@@ -686,13 +752,13 @@ impl_resp!(
     ListTicketCustomizedFieldResp,
     ListTicketCustomizedFieldRespData
 );
-impl_resp!(AgentEmailResp, serde_json::Value);
-impl_resp!(PatchAgentResp, serde_json::Value);
-impl_resp!(DeleteAgentSchedulesResp, serde_json::Value);
-impl_resp!(GetAgentSchedulesResp, serde_json::Value);
-impl_resp!(PatchAgentSchedulesResp, serde_json::Value);
-impl_resp!(CreateAgentScheduleResp, serde_json::Value);
-impl_resp!(ListAgentScheduleResp, serde_json::Value);
+impl_resp!(AgentEmailResp, AgentEmailData);
+impl_resp!(PatchAgentResp, ());
+impl_resp!(DeleteAgentSchedulesResp, ());
+impl_resp!(GetAgentSchedulesResp, GetAgentSchedulesData);
+impl_resp!(PatchAgentSchedulesResp, ());
+impl_resp!(CreateAgentScheduleResp, ());
+impl_resp!(ListAgentScheduleResp, ListAgentScheduleData);
 
 // ── Resources ──
 
@@ -1170,7 +1236,7 @@ impl<'a> AgentResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_response::<serde_json::Value, AgentEmailResp>()
+        .send_response::<AgentEmailData, AgentEmailResp>()
         .await
     }
 
@@ -1189,7 +1255,7 @@ impl<'a> AgentResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_response::<serde_json::Value, PatchAgentResp>()
+        .send_response::<(), PatchAgentResp>()
         .await
     }
 }
@@ -1224,7 +1290,7 @@ impl<'a> AgentSchedulesResource<'a> {
             vec![AccessTokenType::User],
             option,
         )
-        .send_response::<serde_json::Value, DeleteAgentSchedulesResp>()
+        .send_response::<(), DeleteAgentSchedulesResp>()
         .await
     }
 
@@ -1250,7 +1316,7 @@ impl<'a> AgentSchedulesResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .send_response::<serde_json::Value, GetAgentSchedulesResp>()
+        .send_response::<GetAgentSchedulesData, GetAgentSchedulesResp>()
         .await
     }
 
@@ -1269,7 +1335,7 @@ impl<'a> AgentSchedulesResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_response::<serde_json::Value, PatchAgentSchedulesResp>()
+        .send_response::<(), PatchAgentSchedulesResp>()
         .await
     }
 }
@@ -1309,7 +1375,7 @@ impl<'a> AgentScheduleResource<'a> {
             option,
         )
         .json_body(&body)?
-        .send_response::<serde_json::Value, CreateAgentScheduleResp>()
+        .send_response::<(), CreateAgentScheduleResp>()
         .await
     }
 
@@ -1335,7 +1401,7 @@ impl<'a> AgentScheduleResource<'a> {
             option,
         )
         .query_values("status", query.status)
-        .send_response::<serde_json::Value, ListAgentScheduleResp>()
+        .send_response::<ListAgentScheduleData, ListAgentScheduleResp>()
         .await
     }
 }

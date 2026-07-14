@@ -300,6 +300,28 @@ pub struct DataValidationListData {
     pub items: Vec<DataValidation>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FindReplaceResult {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub matched_cells: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub matched_formula_cells: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rows_count: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FindSheetData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub find_result: Option<FindReplaceResult>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReplaceSheetData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub replace_result: Option<FindReplaceResult>,
+}
+
 impl_resp!(CreateSpreadsheetResp, SpreadsheetData);
 impl_resp!(GetSpreadsheetResp, SpreadsheetData);
 impl_resp!(PatchSpreadsheetResp, SpreadsheetData);
@@ -322,9 +344,9 @@ impl_resp!(UpdateFilterViewConditionResp, FilterViewConditionData);
 impl_resp!(QueryFilterViewConditionResp, FilterViewConditionListData);
 impl_resp!(QueryConditionalFormatResp, ConditionalFormatListData);
 impl_resp!(QueryDataValidationResp, DataValidationListData);
-impl_resp!(FindSheetResp, serde_json::Value);
-impl_resp!(MoveDimensionSheetResp, serde_json::Value);
-impl_resp!(ReplaceSheetResp, serde_json::Value);
+impl_resp!(FindSheetResp, FindSheetData);
+impl_resp!(MoveDimensionSheetResp, ());
+impl_resp!(ReplaceSheetResp, ReplaceSheetData);
 impl_resp!(GetSheetFilterResp, SheetFilterData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -530,7 +552,7 @@ impl<'a> SheetResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_response::<serde_json::Value, FindSheetResp>()
+        .send_response::<FindSheetData, FindSheetResp>()
         .await
     }
 
@@ -552,7 +574,7 @@ impl<'a> SheetResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_response::<serde_json::Value, MoveDimensionSheetResp>()
+        .send_response::<(), MoveDimensionSheetResp>()
         .await
     }
 
@@ -574,7 +596,7 @@ impl<'a> SheetResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_response::<serde_json::Value, ReplaceSheetResp>()
+        .send_response::<ReplaceSheetData, ReplaceSheetResp>()
         .await
     }
 }
