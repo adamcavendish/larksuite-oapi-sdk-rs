@@ -4,6 +4,10 @@
 
 ### REST service coverage
 
+- Added typed Document AI recognition result graphs for invoice, identity,
+  travel permit, license, resume, and contract field-extraction responses.
+- Replaced raw Docx document and shared block fields with the existing
+  Go-shaped document, text, table, media, task, and embedded-content models.
 - Replaced nested JSON response fields across CoreHR, Attendance, VC, Mail,
   Application, Directory, Performance, Payroll, Docx, Approval, and related
   services with Go-shaped model graphs. Response data now reserves raw JSON
