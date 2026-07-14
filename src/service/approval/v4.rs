@@ -9,6 +9,148 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FieldGroup {
+    #[serde(default)]
+    pub writable: Vec<String>,
+    #[serde(default)]
+    pub readable: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApprovalFile {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_size: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
+    pub type_: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18nResource {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(default)]
+    pub texts: Vec<I18nResourceText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_default: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18nResourceText {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalInstanceForm {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalInstanceLink {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pc_link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_link: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CcNode {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cc_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub links: Option<ExternalInstanceLink>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub read_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_method: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InstanceComment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default)]
+    pub files: Vec<ApprovalFile>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ActionConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_need_reason: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_reason_required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_need_attachment: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExternalInstanceCheckResponse {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instance_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+    #[serde(default)]
+    pub tasks: Vec<ExternalInstanceTask>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApprovalSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revert_option: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reject_option: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quick_approval_option: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApprovalConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub can_update_viewer: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub can_update_form: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub can_update_process: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub can_update_revert: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub help_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ApprovalForm {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub form: Option<String>,
@@ -57,7 +199,7 @@ pub struct ApprovalNode {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ccer: Option<Vec<ApprovalCcer>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub privilege_field: Option<serde_json::Value>,
+    pub privilege_field: Option<FieldGroup>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub node_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -129,9 +271,9 @@ pub struct ApprovalTimeline {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub node_key: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub files: Option<Vec<serde_json::Value>>,
+    pub files: Option<Vec<ApprovalFile>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ext: Option<serde_json::Value>,
+    pub ext: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -161,7 +303,7 @@ pub struct ApprovalInstance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_list: Option<Vec<InstanceTask>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub comment_list: Option<Vec<serde_json::Value>>,
+    pub comment_list: Option<Vec<InstanceComment>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub timeline: Option<Vec<ApprovalTimeline>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -171,7 +313,7 @@ pub struct ApprovalInstance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub definition_code: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18n_resources: Option<Vec<serde_json::Value>>,
+    pub i18n_resources: Option<Vec<I18nResource>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub allow_resubmit: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -181,7 +323,7 @@ pub struct ApprovalInstance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub allow_delete_after_revoked: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub link: Option<serde_json::Value>,
+    pub link: Option<ExternalInstanceLink>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub instance_code: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -231,7 +373,7 @@ pub struct ExternalApproval {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub viewers: Option<Vec<ApprovalViewer>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18n_resources: Option<Vec<serde_json::Value>>,
+    pub i18n_resources: Option<Vec<I18nResource>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -271,7 +413,7 @@ pub struct ExternalInstance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub callback_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub form: Option<Vec<serde_json::Value>>,
+    pub form: Option<Vec<ExternalInstanceForm>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -295,13 +437,13 @@ pub struct ExternalInstance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_list: Option<Vec<ExternalInstanceTask>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cc_list: Option<Vec<serde_json::Value>>,
+    pub cc_list: Option<Vec<CcNode>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub form_schema_list: Option<Vec<serde_json::Value>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18n_resources: Option<Vec<serde_json::Value>>,
+    pub i18n_resources: Option<Vec<I18nResource>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub flow_template_id: Option<String>,
 }
@@ -317,7 +459,7 @@ pub struct ExternalInstanceTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub links: Option<serde_json::Value>,
+    pub links: Option<ExternalInstanceLink>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -327,7 +469,7 @@ pub struct ExternalInstanceTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub end_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ext: Option<serde_json::Value>,
+    pub ext: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub node_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -337,7 +479,7 @@ pub struct ExternalInstanceTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub action_context: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub action_configs: Option<Vec<serde_json::Value>>,
+    pub action_configs: Option<Vec<ActionConfig>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub display_method: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -419,7 +561,7 @@ pub struct CommentRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub at_info_list: Option<Vec<serde_json::Value>>,
+    pub at_info_list: Option<Vec<CommentAtInfo>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_comment_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -487,13 +629,13 @@ pub struct CreateApprovalReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub node_list: Option<Vec<ApprovalNode>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub settings: Option<serde_json::Value>,
+    pub settings: Option<ApprovalSetting>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub config: Option<serde_json::Value>,
+    pub config: Option<ApprovalConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub icon: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub i18n_resources: Option<Vec<serde_json::Value>>,
+    pub i18n_resources: Option<Vec<I18nResource>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -509,13 +651,13 @@ pub struct CreateInstanceReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub form: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub node_approver_user_id_list: Option<Vec<serde_json::Value>>,
+    pub node_approver_user_id_list: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub node_approver_open_id_list: Option<Vec<serde_json::Value>>,
+    pub node_approver_open_id_list: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub node_cc_user_id_list: Option<Vec<serde_json::Value>>,
+    pub node_cc_user_id_list: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub node_cc_open_id_list: Option<Vec<serde_json::Value>>,
+    pub node_cc_open_id_list: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub uuid: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -609,7 +751,7 @@ pub struct CreateExternalInstanceReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub callback_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub form: Option<Vec<serde_json::Value>>,
+    pub form: Option<Vec<ExternalInstanceForm>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -633,13 +775,13 @@ pub struct CreateExternalInstanceReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub task_list: Option<Vec<ExternalInstanceTask>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub cc_list: Option<Vec<serde_json::Value>>,
+    pub cc_list: Option<Vec<CcNode>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub form_schema_list: Option<Vec<serde_json::Value>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub i18n_resources: Option<Vec<serde_json::Value>>,
+    pub i18n_resources: Option<Vec<I18nResource>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flow_template_id: Option<String>,
 }
@@ -661,7 +803,7 @@ pub struct CreateExternalApprovalReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub viewers: Option<Vec<ApprovalViewer>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub i18n_resources: Option<Vec<serde_json::Value>>,
+    pub i18n_resources: Option<Vec<I18nResource>>,
 }
 
 // ── Additional request body types ──
@@ -775,7 +917,7 @@ pub struct InstanceListData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CheckExternalInstanceData {
     #[serde(default)]
-    pub diff_instance_list: Vec<serde_json::Value>,
+    pub diff_instance_list: Vec<ExternalInstanceCheckResponse>,
 }
 
 impl_resp!(CreateApprovalResp, CreateApprovalData);
