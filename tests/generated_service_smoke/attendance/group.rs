@@ -93,8 +93,7 @@ async fn attendance_group_list_by_query_smoke() {
         resp.data
             .as_ref()
             .and_then(|data| data.group_list.first())
-            .and_then(|group| group.get("group_id"))
-            .and_then(|group_id| group_id.as_str()),
+            .and_then(|group| group.group_id.as_deref()),
         Some("group-1")
     );
     let request = requests.lock().unwrap().join("\n");

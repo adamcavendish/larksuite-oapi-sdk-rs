@@ -4,10 +4,8 @@ use super::prelude::*;
 
 #[tokio::test]
 async fn search_message_app_doc_wiki_by_query_smoke() {
-    let message_body =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"message_id":"om_1"}],"has_more":false}}"#;
-    let app_body =
-        r#"{"code":0,"msg":"ok","data":{"items":[{"app_id":"cli_a"}],"has_more":false}}"#;
+    let message_body = r#"{"code":0,"msg":"ok","data":{"items":["om_1"],"has_more":false}}"#;
+    let app_body = r#"{"code":0,"msg":"ok","data":{"items":["cli_a"],"has_more":false}}"#;
     let doc_wiki_body =
         r#"{"code":0,"msg":"ok","data":{"total":1,"has_more":false,"res_units":[{"id":"doc-1"}]}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
@@ -34,7 +32,10 @@ async fn search_message_app_doc_wiki_by_query_smoke() {
     };
     let doc_wiki_query_body = SearchDocWikiReqBody {
         query: Some("handbook".into()),
-        doc_filter: Some(serde_json::json!({"owner_ids":["ou-1"]})),
+        doc_filter: Some(DocFilter {
+            creator_ids: vec!["ou-1".into()],
+            ..Default::default()
+        }),
         page_token: Some("doc-page".into()),
         page_size: Some(5),
         ..Default::default()
@@ -76,5 +77,5 @@ async fn search_message_app_doc_wiki_by_query_smoke() {
     assert!(request.contains(r#""with_url":true"#));
     assert!(request.contains(r#""query":"approval""#));
     assert!(request.contains(r#""query":"handbook""#));
-    assert!(request.contains(r#""owner_ids":["ou-1"]"#));
+    assert!(request.contains(r#""creator_ids":["ou-1"]"#));
 }
