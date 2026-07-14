@@ -17,9 +17,37 @@ pub struct Document {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub display_setting: Option<serde_json::Value>,
+    pub display_setting: Option<DocumentDisplaySetting>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cover: Option<serde_json::Value>,
+    pub cover: Option<DocumentCover>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DocumentCover {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset_ratio_x: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset_ratio_y: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DocumentDisplaySetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_authors: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_create_time: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_pv: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_uv: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_like_count: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_comment_count: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_related_matters: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -33,93 +61,119 @@ pub struct Block {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub page: Option<serde_json::Value>,
+    pub page: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub text: Option<serde_json::Value>,
+    pub text: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading1: Option<serde_json::Value>,
+    pub heading1: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading2: Option<serde_json::Value>,
+    pub heading2: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading3: Option<serde_json::Value>,
+    pub heading3: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading4: Option<serde_json::Value>,
+    pub heading4: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading5: Option<serde_json::Value>,
+    pub heading5: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading6: Option<serde_json::Value>,
+    pub heading6: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading7: Option<serde_json::Value>,
+    pub heading7: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading8: Option<serde_json::Value>,
+    pub heading8: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading9: Option<serde_json::Value>,
+    pub heading9: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub bullet: Option<serde_json::Value>,
+    pub bullet: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ordered: Option<serde_json::Value>,
+    pub ordered: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub code: Option<serde_json::Value>,
+    pub code: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub quote: Option<serde_json::Value>,
+    pub quote: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub equation: Option<serde_json::Value>,
+    pub equation: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub todo: Option<serde_json::Value>,
+    pub todo: Option<Text>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub bitable: Option<serde_json::Value>,
+    pub bitable: Option<Bitable>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub callout: Option<serde_json::Value>,
+    pub callout: Option<Callout>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub chat_card: Option<serde_json::Value>,
+    pub chat_card: Option<ChatCard>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub diagram: Option<serde_json::Value>,
+    pub diagram: Option<Diagram>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub divider: Option<serde_json::Value>,
+    pub divider: Option<Divider>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub file: Option<serde_json::Value>,
+    pub file: Option<File>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub grid: Option<serde_json::Value>,
+    pub grid: Option<Grid>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub grid_column: Option<serde_json::Value>,
+    pub grid_column: Option<GridColumn>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub iframe: Option<serde_json::Value>,
+    pub iframe: Option<Iframe>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub image: Option<serde_json::Value>,
+    pub image: Option<Image>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub isv: Option<serde_json::Value>,
+    pub isv: Option<Isv>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub mindnote: Option<serde_json::Value>,
+    pub mindnote: Option<Mindnote>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub sheet: Option<serde_json::Value>,
+    pub sheet: Option<Sheet>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub table: Option<serde_json::Value>,
+    pub table: Option<Table>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub table_cell: Option<serde_json::Value>,
+    pub table_cell: Option<TableCell>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub view: Option<serde_json::Value>,
+    pub view: Option<View>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub undefined: Option<serde_json::Value>,
+    pub undefined: Option<Undefined>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub quote_container: Option<serde_json::Value>,
+    pub quote_container: Option<QuoteContainer>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub task: Option<serde_json::Value>,
+    pub task: Option<Task>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub okr: Option<serde_json::Value>,
+    pub okr: Option<Okr>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub okr_objective: Option<serde_json::Value>,
+    pub okr_objective: Option<OkrObjective>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub okr_key_result: Option<serde_json::Value>,
+    pub okr_key_result: Option<OkrKeyResult>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub okr_progress: Option<serde_json::Value>,
+    pub okr_progress: Option<OkrProgress>,
+    #[serde(default)]
+    pub comment_ids: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub add_ons: Option<serde_json::Value>,
+    pub add_ons: Option<AddOns>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub jira_issue: Option<serde_json::Value>,
+    pub jira_issue: Option<JiraIssue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub wiki_catalog: Option<serde_json::Value>,
+    pub wiki_catalog: Option<WikiCatalog>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub board: Option<serde_json::Value>,
+    pub board: Option<Board>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agenda: Option<Agenda>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agenda_item: Option<AgendaItem>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agenda_item_title: Option<AgendaItemTitle>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agenda_item_content: Option<AgendaItemContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link_preview: Option<LinkPreview>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_synced: Option<SourceSynced>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reference_synced: Option<ReferenceSynced>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sub_page_list: Option<SubPageList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ai_template: Option<AiTemplate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reference_base: Option<ReferenceBase>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project: Option<Project>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_notes_qa: Option<MeetingNotesQa>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub synced_block: Option<serde_json::Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
