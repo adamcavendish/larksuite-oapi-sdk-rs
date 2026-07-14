@@ -822,7 +822,7 @@ impl_resp!(SubscribeCalendarResp, SubscribeCalendarData);
 impl_resp!(PrimarysCalendarResp, PrimarysCalendarData);
 impl_resp!(InstanceViewResp, InstanceViewData);
 impl_resp!(InstancesResp, InstancesData);
-impl_resp!(ReplyEventResp, serde_json::Value);
+impl_resp!(ReplyEventResp, ());
 impl_resp!(SearchEventResp, SearchEventData);
 impl_resp!(ListChatMemberResp, ChatMemberListData);
 impl_resp!(CreateMeetingChatResp, MeetingChatData);

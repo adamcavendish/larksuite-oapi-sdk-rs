@@ -72,7 +72,7 @@ async fn docx_document_by_query_smoke() {
         )
         .await
         .unwrap();
-    client
+    let raw_content = client
         .docx()
         .document
         .raw_content_by_query(
@@ -82,6 +82,13 @@ async fn docx_document_by_query_smoke() {
         .await
         .unwrap();
 
+    assert_eq!(
+        raw_content
+            .data
+            .as_ref()
+            .and_then(|data| data.content.as_deref()),
+        Some("hello")
+    );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/docx/v1/documents "));
     assert!(request.contains("GET /open-apis/docx/v1/documents/doc-1 "));

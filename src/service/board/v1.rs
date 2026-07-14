@@ -67,7 +67,7 @@ pub struct ThemeData {
 }
 
 impl_resp!(ThemeWhiteboardResp, ThemeData);
-impl_resp!(UpdateThemeWhiteboardResp, serde_json::Value);
+impl_resp!(UpdateThemeWhiteboardResp, ());
 
 #[derive(Debug, Clone)]
 pub struct DownloadAsImageWhiteboardResp {
@@ -351,7 +351,7 @@ impl<'a> WhiteboardResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_response::<serde_json::Value, UpdateThemeWhiteboardResp>()
+        .send_response::<(), UpdateThemeWhiteboardResp>()
         .await
     }
 }
