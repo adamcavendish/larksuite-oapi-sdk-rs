@@ -188,6 +188,8 @@ mod drive_media;
 mod drive_permission;
 #[path = "generated_service_smoke/ehr.rs"]
 mod ehr;
+#[path = "generated_service_smoke/ext.rs"]
+mod ext;
 #[path = "generated_service_smoke/helpdesk/agent.rs"]
 mod helpdesk_agent;
 #[path = "generated_service_smoke/helpdesk/category.rs"]

@@ -158,7 +158,7 @@ impl<'a> AppAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_response::<serde_json::Value, RawTokenResp>()
+        .send_response::<(), RawTokenResp>()
         .await
     }
 
@@ -185,7 +185,7 @@ impl<'a> AppAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_response::<serde_json::Value, RawTokenResp>()
+        .send_response::<(), RawTokenResp>()
         .await
     }
 }
@@ -218,7 +218,7 @@ impl<'a> AppTicketResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_response::<serde_json::Value, RawTokenResp>()
+        .send_response::<(), RawTokenResp>()
         .await
     }
 }
@@ -251,7 +251,7 @@ impl<'a> TenantAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_response::<serde_json::Value, RawTokenResp>()
+        .send_response::<(), RawTokenResp>()
         .await
     }
 
@@ -278,7 +278,7 @@ impl<'a> TenantAccessTokenResource<'a> {
             option,
         )
         .json_body(query.body)?
-        .send_response::<serde_json::Value, RawTokenResp>()
+        .send_response::<(), RawTokenResp>()
         .await
     }
 }

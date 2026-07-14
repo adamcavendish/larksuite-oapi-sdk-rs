@@ -1453,7 +1453,7 @@ impl CollaborationRuleResource<'_> {
         )
         .query("target_tenant_key", query.target_tenant_key)
         .query("tenant_id", query.tenant_id)
-        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
         .await
     }
 
@@ -1525,7 +1525,7 @@ impl CollaborationRuleResource<'_> {
         .query("target_tenant_key", query.target_tenant_key)
         .query("tenant_id", query.tenant_id)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
         .await
     }
 }
@@ -1978,7 +1978,7 @@ impl DepartmentResource<'_> {
         )
         .query("is_admin_role", query.is_admin_role)
         .query("employee_id_type", query.employee_id_type)
-        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
         .await
     }
 
@@ -2091,7 +2091,7 @@ impl DepartmentResource<'_> {
         .query("department_id_type", query.department_id_type)
         .query("is_admin_role", query.is_admin_role)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
         .await
     }
 
@@ -2450,7 +2450,7 @@ impl EmployeeResource<'_> {
             request
         };
         request
-            .send_v2_response::<serde_json::Value, EmptyResp>()
+            .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
             .await
     }
 
@@ -2560,7 +2560,7 @@ impl EmployeeResource<'_> {
         .query("is_admin_role", query.is_admin_role)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
         .await
     }
 
@@ -2606,7 +2606,7 @@ impl EmployeeResource<'_> {
             request
         };
         request
-            .send_v2_response::<serde_json::Value, EmptyResp>()
+            .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
             .await
     }
 
@@ -2652,7 +2652,7 @@ impl EmployeeResource<'_> {
             request
         };
         request
-            .send_v2_response::<serde_json::Value, EmptyResp>()
+            .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
             .await
     }
 
@@ -2730,7 +2730,7 @@ impl EmployeeResource<'_> {
         .query("employee_id_type", query.employee_id_type)
         .query("department_id_type", query.department_id_type)
         .json_body(query.body)?
-        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
         .await
     }
 }

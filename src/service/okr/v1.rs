@@ -996,7 +996,7 @@ impl ProgressRecordResource<'_> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .send_v2_response::<serde_json::Value, EmptyResp>()
+        .send_v2_response::<serde::de::IgnoredAny, EmptyResp>()
         .await
     }
 
