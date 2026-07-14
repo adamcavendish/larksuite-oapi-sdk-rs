@@ -51,3 +51,107 @@ fn docx_domain_models_deserialize_typed_block_and_document_fields() {
     assert_eq!(document.display_setting.unwrap().show_authors, Some(true));
     assert_eq!(document.cover.unwrap().token.as_deref(), Some("img_1"));
 }
+
+#[test]
+fn approval_shared_models_deserialize_nested_structures() {
+    use larksuite_oapi_sdk_rs::service::approval::v4;
+
+    let instance: v4::ApprovalInstance = serde_json::from_str(
+        r#"{
+            "comment_list": [{"id": "comment_1", "files": [{"url": "https://example.test/a"}]}],
+            "i18n_resources": [{"locale": "en-US", "texts": [{"key": "@i18n@name", "value": "Leave"}]}],
+            "link": {"pc_link": "https://example.test/pc"}
+        }"#,
+    )
+    .unwrap();
+
+    assert_eq!(
+        instance.comment_list.unwrap()[0].files[0].url.as_deref(),
+        Some("https://example.test/a")
+    );
+    assert_eq!(
+        instance.i18n_resources.unwrap()[0].texts[0]
+            .value
+            .as_deref(),
+        Some("Leave")
+    );
+    assert_eq!(
+        instance.link.unwrap().pc_link.as_deref(),
+        Some("https://example.test/pc")
+    );
+}
+
+#[test]
+fn attendance_shared_models_deserialize_group_and_shift_rules() {
+    use larksuite_oapi_sdk_rs::service::attendance::v1;
+
+    let group: v1::AttendanceGroup = serde_json::from_str(
+        r#"{
+            "locations": [{"location_id": "loc_1", "latitude": 1.5}],
+            "free_punch_cfg": {"free_start_time": "09:00", "free_clock_setting": {"clock_mode": 1}},
+            "need_punch_special_days": [{"punch_day": 20260715, "shift_id": "shift_1"}]
+        }"#,
+    )
+    .unwrap();
+    let shift: v1::Shift = serde_json::from_str(
+        r#"{
+            "punch_time_rule": [{"on_time": "09:00", "off_time": "18:00"}],
+            "break_time_rule": [{"rest_begin_time": "12:00", "rest_end_time": "13:00"}]
+        }"#,
+    )
+    .unwrap();
+
+    assert_eq!(
+        group.locations.unwrap()[0].location_id.as_deref(),
+        Some("loc_1")
+    );
+    assert_eq!(
+        group
+            .free_punch_cfg
+            .unwrap()
+            .free_clock_setting
+            .unwrap()
+            .clock_mode,
+        Some(1)
+    );
+    assert_eq!(
+        shift.punch_time_rule.unwrap()[0].on_time.as_deref(),
+        Some("09:00")
+    );
+}
+
+#[test]
+fn search_shared_models_deserialize_filters_and_result_units() {
+    use larksuite_oapi_sdk_rs::service::search::v2;
+
+    let source: v2::DataSource = serde_json::from_str(
+        r#"{
+            "i18n_name": {"zh_cn": "知识库", "en_us": "Knowledge"},
+            "i18n_description": {"en_us": "Searchable records"}
+        }"#,
+    )
+    .unwrap();
+    let response: v2::SearchDocWikiData = serde_json::from_str(
+        r#"{
+            "res_units": [{
+                "title_highlighted": "Guide",
+                "result_meta": {"token": "doc_1", "owner_id": "ou_1"}
+            }]
+        }"#,
+    )
+    .unwrap();
+
+    assert_eq!(
+        source.i18n_name.unwrap().en_us.as_deref(),
+        Some("Knowledge")
+    );
+    assert_eq!(
+        response.res_units[0]
+            .result_meta
+            .as_ref()
+            .unwrap()
+            .token
+            .as_deref(),
+        Some("doc_1")
+    );
+}
