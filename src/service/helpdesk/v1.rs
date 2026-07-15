@@ -17,7 +17,7 @@ pub struct Ticket {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guest: Option<TicketUser>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub comments: Option<serde_json::Value>,
+    pub comments: Option<Vec<Comment>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -31,7 +31,7 @@ pub struct Ticket {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub closed_at: Option<i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub dissatisfaction_reason: Option<Vec<serde_json::Value>>,
+    pub dissatisfaction_reason: Option<I18n>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agents: Option<Vec<TicketUser>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -43,7 +43,7 @@ pub struct Ticket {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub collaborators: Option<Vec<TicketUser>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub customized_fields: Option<Vec<serde_json::Value>>,
+    pub customized_fields: Option<Vec<CustomizedFieldDisplayItem>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -111,7 +111,7 @@ pub struct AgentInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub agent_skills: Option<Vec<serde_json::Value>>,
+    pub agent_skills: Option<Vec<AgentSkillLessInfo>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub create_at: Option<i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -151,7 +151,7 @@ pub struct Faq {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub answer: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub answer_richtext: Option<Vec<serde_json::Value>>,
+    pub answer_richtext: Option<Vec<Richtext>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub create_time: Option<i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -205,15 +205,99 @@ pub struct Notification {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub new_staff_scope_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub new_staff_scope_department_list: Option<Vec<serde_json::Value>>,
+    pub new_staff_scope_department_list: Option<Vec<NotificationDepartment>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_list: Option<Vec<TicketUser>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub department_list: Option<Vec<serde_json::Value>>,
+    pub department_list: Option<Vec<NotificationDepartment>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub chat_list: Option<Vec<serde_json::Value>>,
+    pub chat_list: Option<Vec<NotificationChat>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub msg_i18n_contents: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Comment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_avatar_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct I18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zh_cn: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub en_us: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ja_jp: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CustomizedFieldDisplayItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub editable: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Richtext {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
+    pub type_: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct NotificationDepartment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct NotificationChat {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserQueryFaqInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub score: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct HelpdeskEvent {
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
+    pub type_: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subtype: Option<String>,
 }
 
 // ── Request body types ──
@@ -227,7 +311,7 @@ pub struct UpdateTicketReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub comment: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub customized_fields: Option<Vec<serde_json::Value>>,
+    pub customized_fields: Option<Vec<CustomizedFieldDisplayItem>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ticket_type: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -241,7 +325,7 @@ pub struct AnswerUserQueryReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub event_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub faqs: Option<Vec<serde_json::Value>>,
+    pub faqs: Option<Vec<UserQueryFaqInfo>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -423,13 +507,13 @@ pub struct PatchAgentSkillReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct SubscribeEventReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub events: Option<Vec<serde_json::Value>>,
+    pub events: Option<Vec<HelpdeskEvent>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct UnsubscribeEventReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub events: Option<Vec<serde_json::Value>>,
+    pub events: Option<Vec<HelpdeskEvent>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
