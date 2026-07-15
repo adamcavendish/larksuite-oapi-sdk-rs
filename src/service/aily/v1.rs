@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
@@ -17,7 +19,7 @@ pub struct AilySession {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub modified_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub channel_context: Option<serde_json::Value>,
+    pub channel_context: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -31,7 +33,7 @@ pub struct AilyMessage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content_type: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content: Option<serde_json::Value>,
+    pub content: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -55,7 +57,7 @@ pub struct AilyRun {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ended_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub error: Option<serde_json::Value>,
+    pub error: Option<RunError>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -69,7 +71,7 @@ pub struct DataAsset {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<serde_json::Value>,
+    pub description: Option<HashMap<String, String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub created_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -81,7 +83,7 @@ pub struct DataAssetTag {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub name: Option<serde_json::Value>,
+    pub name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub created_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -93,11 +95,159 @@ pub struct Skill {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub name: Option<serde_json::Value>,
+    pub name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<serde_json::Value>,
+    pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RunError {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AilyMention {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub entity_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub identity_provider: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub aily_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataAssetFile {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mime_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AilyKnowledgeMessage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AilyKnowledgeAskProcessData {
+    #[serde(default)]
+    pub chart_dsls: Vec<String>,
+    #[serde(default)]
+    pub chunks: Vec<String>,
+    #[serde(default)]
+    pub sql_data: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AilyKnowledgeFaq {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub question: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub answer: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Channel {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variables: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SkillGlobalVariable {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub query: Option<String>,
+    #[serde(default)]
+    pub files: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub channel: Option<Channel>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataAssetKnowledgeChunkSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rule_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub separate_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overlap: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataAssetImportKnowledgeFile {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mime_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataAssetImportKnowledgeLarkDoc {
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
+    pub type_: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub with_sub_docs: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataAssetImportKnowledgeWikiSubDoc {
+    #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
+    pub type_: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataAssetImportKnowledgeWiki {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub space_id: Option<String>,
+    #[serde(default)]
+    pub sub_docs: Vec<DataAssetImportKnowledgeWikiSubDoc>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataAssetImportKnowledgeHelpdesk {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub helpdesk_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataAssetImportKnowledgeSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chunk_setting: Option<DataAssetKnowledgeChunkSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file: Option<DataAssetImportKnowledgeFile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lark_doc: Option<DataAssetImportKnowledgeLarkDoc>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lark_wiki_space: Option<DataAssetImportKnowledgeWiki>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lark_helpdesk: Option<DataAssetImportKnowledgeHelpdesk>,
 }
 
 // ── Request body types ──
@@ -105,9 +255,9 @@ pub struct Skill {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct CreateSessionReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub channel_context: Option<serde_json::Value>,
+    pub channel_context: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub metadata: Option<serde_json::Value>,
+    pub metadata: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -125,13 +275,13 @@ pub struct CreateMessageReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub role: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub content: Option<serde_json::Value>,
+    pub content: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub files: Option<Vec<serde_json::Value>>,
+    pub files: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub mentions: Option<Vec<serde_json::Value>>,
+    pub mentions: Option<Vec<AilyMention>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_message_id: Option<String>,
 }
@@ -141,9 +291,9 @@ pub struct CreateRunReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skill_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub skill_input: Option<serde_json::Value>,
+    pub skill_input: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub metadata: Option<serde_json::Value>,
+    pub metadata: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -153,15 +303,15 @@ pub struct CreateDataAssetReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub import_knowledge_setting: Option<serde_json::Value>,
+    pub import_knowledge_setting: Option<DataAssetImportKnowledgeSetting>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<serde_json::Value>,
+    pub description: Option<HashMap<String, String>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct AskKnowledgeReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub message: Option<serde_json::Value>,
+    pub message: Option<AilyKnowledgeMessage>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data_asset_ids: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -171,7 +321,7 @@ pub struct AskKnowledgeReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct StartSkillReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub global_variable: Option<serde_json::Value>,
+    pub global_variable: Option<SkillGlobalVariable>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub input: Option<String>,
 }
@@ -235,7 +385,7 @@ pub struct DataAssetListData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UploadFileData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub file_info: Option<serde_json::Value>,
+    pub file_info: Option<DataAssetFile>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -255,11 +405,11 @@ pub struct AskKnowledgeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub finish_type: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub message: Option<serde_json::Value>,
+    pub message: Option<AilyKnowledgeMessage>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub process_data: Option<serde_json::Value>,
+    pub process_data: Option<AilyKnowledgeAskProcessData>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub faq_result: Option<serde_json::Value>,
+    pub faq_result: Option<AilyKnowledgeFaq>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_answer: Option<bool>,
 }
