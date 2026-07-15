@@ -208,32 +208,134 @@ pub struct CreateBlockReqBody {
     pub index: Option<i32>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateTextElementsRequest {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub elements: Vec<TextElement>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateTextStyleRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style: Option<TextStyle>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub fields: Vec<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateTablePropertyRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_width: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub header_row: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub header_column: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InsertTableRowRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InsertTableColumnRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeleteTableRowsRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_start_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_end_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeleteTableColumnsRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_start_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_end_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MergeTableCellsRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_start_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_end_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_start_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_end_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UnmergeTableCellsRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReplaceImageRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub align: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub caption: Option<Caption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scale: Option<f64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReplaceFileRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateGridColumnWidthRatioRequest {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub width_ratios: Vec<i32>,
+}
+
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct UpdateBlockReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_text_elements: Option<serde_json::Value>,
+    pub update_text_elements: Option<UpdateTextElementsRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_text_style: Option<serde_json::Value>,
+    pub update_text_style: Option<UpdateTextStyleRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_table_property: Option<serde_json::Value>,
+    pub update_table_property: Option<UpdateTablePropertyRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub insert_table_row: Option<serde_json::Value>,
+    pub insert_table_row: Option<InsertTableRowRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub insert_table_column: Option<serde_json::Value>,
+    pub insert_table_column: Option<InsertTableColumnRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub delete_table_rows: Option<serde_json::Value>,
+    pub delete_table_rows: Option<DeleteTableRowsRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub delete_table_columns: Option<serde_json::Value>,
+    pub delete_table_columns: Option<DeleteTableColumnsRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub merge_table_cells: Option<serde_json::Value>,
+    pub merge_table_cells: Option<MergeTableCellsRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub unmerge_table_cells: Option<serde_json::Value>,
+    pub unmerge_table_cells: Option<UnmergeTableCellsRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub update_table_column_width: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub replace_image: Option<serde_json::Value>,
+    pub replace_image: Option<ReplaceImageRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub replace_file: Option<serde_json::Value>,
+    pub replace_file: Option<ReplaceFileRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub update_grid: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -241,7 +343,7 @@ pub struct UpdateBlockReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delete_grid_column: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_grid_column_width_ratio: Option<serde_json::Value>,
+    pub update_grid_column_width_ratio: Option<UpdateGridColumnWidthRatioRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub update_code_block: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]

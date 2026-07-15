@@ -30,7 +30,7 @@ async fn docx_document_block_by_query_smoke() {
         index: Some(0),
     };
     let update_body = UpdateBlockReqBody {
-        update_text_elements: Some(serde_json::json!({"elements":[]})),
+        update_text_elements: Some(UpdateTextElementsRequest::default()),
         ..Default::default()
     };
     let batch_body = BatchUpdateBlockReqBody {

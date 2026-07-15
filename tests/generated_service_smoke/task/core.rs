@@ -25,7 +25,10 @@ async fn task_core_by_query_smoke() {
         ..Default::default()
     };
     let patch_body = PatchTaskReqBody {
-        task: Some(serde_json::json!({"summary":"Updated task"})),
+        task: Some(Task {
+            summary: Some("Updated task".into()),
+            ..Default::default()
+        }),
         update_fields: Some(vec!["summary".to_string()]),
     };
     let batch_delete_body = serde_json::json!({"ids":["u-1"]});

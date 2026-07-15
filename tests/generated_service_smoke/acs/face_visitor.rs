@@ -24,7 +24,13 @@ async fn acs_face_visitor_by_query_smoke() {
         file_type: Some("jpg".to_string()),
         file_name: Some("face.jpg".to_string()),
     };
-    let visitor_create_body = serde_json::json!({"name":"Visitor","user_id":"ou-1"});
+    let visitor_create_body = CreateVisitorReqBody {
+        user: Some(UserExternal {
+            user_name: Some("Visitor".into()),
+            user_id: Some("ou-1".into()),
+            ..Default::default()
+        }),
+    };
     let photo_resp = client
         .acs()
         .access_record_access_photo
@@ -88,5 +94,5 @@ async fn acs_face_visitor_by_query_smoke() {
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains(r#""file_type":"jpg""#));
     assert!(request.contains(r#""file_name":"face.jpg""#));
-    assert!(request.contains(r#""name":"Visitor""#));
+    assert!(request.contains(r#""user_name":"Visitor""#));
 }

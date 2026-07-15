@@ -20,6 +20,24 @@ pub struct VerificationTask {
     pub expire_time: Option<String>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct VerificationDetail {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verification_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verification_source: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub usci: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub legal_person_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enterprise_license: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verification_letter: Option<String>,
+}
+
 // ── Request body types ──
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -44,7 +62,7 @@ impl_resp!(GetVerificationTaskResp, VerificationTaskData);
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct VerificationData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub verification: Option<serde_json::Value>,
+    pub verification: Option<VerificationDetail>,
 }
 
 impl_resp!(GetVerificationResp, VerificationData);

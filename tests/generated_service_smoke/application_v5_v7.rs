@@ -97,15 +97,34 @@ async fn application_v7_patch_resources_by_query_smoke() {
 
     let client = client_for(addr);
     let ability_body = PatchApplicationAbilityReqBody::new()
-        .web_app(serde_json::json!({"pc_url":"https://example.com/app"}))
-        .bot(serde_json::json!({"card_request_url":"https://example.com/card"}));
+        .web_app(AppAbilityWeb {
+            pc_url: Some("https://example.com/app".into()),
+            ..Default::default()
+        })
+        .bot(AppAbilityBot {
+            message_card_callback_url: Some("https://example.com/card".into()),
+            ..Default::default()
+        });
     let base_body = PatchApplicationBaseReqBody::new()
-        .i18ns(serde_json::json!([{"locale":"zh_cn","name":"应用"}]))
+        .i18ns(vec![AppI18nInfo {
+            i18n_key: Some("zh_cn".into()),
+            name: Some("Application".into()),
+            ..Default::default()
+        }])
         .avatar_url("https://example.com/avatar.png")
         .homepage_url("https://example.com/home");
     let config_body = PatchApplicationConfigReqBody::new()
-        .scope(serde_json::json!({"tenant":["im:message"]}))
-        .callback(serde_json::json!({"request_url":"https://example.com/callback"}));
+        .scope(AppConfigScope {
+            add_scopes: vec![AppConfigScopeItem {
+                scope_name: Some("im:message".into()),
+                token_type: Some("tenant".into()),
+            }],
+            ..Default::default()
+        })
+        .callback(AppConfigCallback {
+            request_url: Some("https://example.com/callback".into()),
+            ..Default::default()
+        });
 
     let ability = client
         .application_v7()

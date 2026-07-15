@@ -75,9 +75,9 @@ pub struct RoomConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub display_background: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub digital_signage: Option<serde_json::Value>,
+    pub digital_signage: Option<RoomDigitalSignage>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub room_box_digital_signage: Option<serde_json::Value>,
+    pub room_box_digital_signage: Option<RoomDigitalSignage>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_status: Option<RoomStatus>,
 }
@@ -109,7 +109,7 @@ pub struct Meeting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub participants: Option<Vec<Participant>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ability: Option<serde_json::Value>,
+    pub ability: Option<MeetingAbility>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -209,11 +209,11 @@ pub struct SetRoomConfigReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub set_digital_signage: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub digital_signage: Option<serde_json::Value>,
+    pub digital_signage: Option<RoomDigitalSignage>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub set_room_box_digital_signage: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub room_box_digital_signage: Option<serde_json::Value>,
+    pub room_box_digital_signage: Option<RoomDigitalSignage>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub set_room_status: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]

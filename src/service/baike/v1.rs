@@ -51,23 +51,31 @@ pub struct DisplayStatus {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ClassificationFilter {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub include: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub exclude: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RelatedMeta {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub users: Option<Vec<serde_json::Value>>,
+    pub users: Option<Vec<Referer>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub chats: Option<Vec<serde_json::Value>>,
+    pub chats: Option<Vec<Referer>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub docs: Option<Vec<serde_json::Value>>,
+    pub docs: Option<Vec<Referer>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub oncalls: Option<Vec<serde_json::Value>>,
+    pub oncalls: Option<Vec<Referer>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub links: Option<Vec<serde_json::Value>>,
+    pub links: Option<Vec<Referer>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub abbreviations: Option<Vec<serde_json::Value>>,
+    pub abbreviations: Option<Vec<Abbreviation>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub classifications: Option<Vec<serde_json::Value>>,
+    pub classifications: Option<Vec<Classification>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub images: Option<Vec<serde_json::Value>>,
+    pub images: Option<Vec<BaikeImage>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -109,7 +117,7 @@ pub struct SearchEntityReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub query: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub classification_filter: Option<serde_json::Value>,
+    pub classification_filter: Option<ClassificationFilter>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sources: Option<Vec<i32>>,
     #[serde(skip_serializing_if = "Option::is_none")]
