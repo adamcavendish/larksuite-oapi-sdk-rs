@@ -69,7 +69,13 @@ async fn acs_user_patch_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"card_list":[{"card_id":"card-1"}]});
+    let body = User {
+        user_id: Some("ou-1".into()),
+        feature: Some(Feature {
+            card: Some(7),
+            face_uploaded: Some(true),
+        }),
+    };
     let resp = client
         .acs()
         .user
@@ -84,5 +90,5 @@ async fn acs_user_patch_by_query_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("PATCH /open-apis/acs/v1/users/ou-1?"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""card_id":"card-1""#));
+    assert!(request.contains(r#""card":7"#));
 }

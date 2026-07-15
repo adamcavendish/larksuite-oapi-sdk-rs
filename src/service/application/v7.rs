@@ -35,6 +35,158 @@ pub struct CreateApplicationPublishRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
 }
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppAbilityWeb {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pc_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pc_new_page_open_mode: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppAbilityBot {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_card_callback_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub i18ns: Vec<AppAbilityBotI18n>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppAbilityBotI18n {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub get_started_desc: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppI18nInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub help_use: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppConfigScope {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub add_scopes: Vec<AppConfigScopeItem>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub remove_scopes: Vec<AppConfigScopeItem>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppConfigScopeItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppConfigEvent {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subscription_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub request_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub add_events: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub remove_events: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppConfigSecurity {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add: Option<AppConfigSecurityItem>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remove: Option<AppConfigSecurityItem>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allow_refresh_token: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppConfigSecurityItem {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub redirect_urls: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub allowed_ips: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub h5_trusted_domains: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub web_view_trusted_domains: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub allowed_schemas: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub allowed_server_domains: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppConfigVisibility {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_visible_to_all: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible_list: Option<AppVisibilityIdList>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppVisibilityIdList {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub user_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub department_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub group_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppConfigContactsRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contacts_range_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible_list: Option<AppContactsRangeIdList>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppContactsRangeIdList {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub user_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub department_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub group_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EventAndCallbackEncryptStrategy {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub encryption_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verification_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppConfigCallback {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub callback_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub request_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub add_callbacks: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub remove_callbacks: Vec<String>,
+}
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct CreateAppAvatarUploadQuery {
@@ -63,9 +215,9 @@ impl CreateAppAvatarUploadQuery {
 #[non_exhaustive]
 pub struct PatchApplicationAbilityReqBody {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub web_app: Option<serde_json::Value>,
+    pub web_app: Option<AppAbilityWeb>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub bot: Option<serde_json::Value>,
+    pub bot: Option<AppAbilityBot>,
 }
 
 impl PatchApplicationAbilityReqBody {
@@ -73,12 +225,12 @@ impl PatchApplicationAbilityReqBody {
         Self::default()
     }
 
-    pub fn web_app(mut self, value: serde_json::Value) -> Self {
+    pub fn web_app(mut self, value: AppAbilityWeb) -> Self {
         self.web_app = Some(value);
         self
     }
 
-    pub fn bot(mut self, value: serde_json::Value) -> Self {
+    pub fn bot(mut self, value: AppAbilityBot) -> Self {
         self.bot = Some(value);
         self
     }
@@ -101,7 +253,7 @@ impl<'a> PatchApplicationAbilityQuery<'a> {
 #[non_exhaustive]
 pub struct PatchApplicationBaseReqBody {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18ns: Option<serde_json::Value>,
+    pub i18ns: Option<Vec<AppI18nInfo>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub avatar_url: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -113,7 +265,7 @@ impl PatchApplicationBaseReqBody {
         Self::default()
     }
 
-    pub fn i18ns(mut self, value: serde_json::Value) -> Self {
+    pub fn i18ns(mut self, value: Vec<AppI18nInfo>) -> Self {
         self.i18ns = Some(value);
         self
     }
@@ -146,19 +298,19 @@ impl<'a> PatchApplicationBaseQuery<'a> {
 #[non_exhaustive]
 pub struct PatchApplicationConfigReqBody {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub scope: Option<serde_json::Value>,
+    pub scope: Option<AppConfigScope>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub event: Option<serde_json::Value>,
+    pub event: Option<AppConfigEvent>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub security: Option<serde_json::Value>,
+    pub security: Option<AppConfigSecurity>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub visibility: Option<serde_json::Value>,
+    pub visibility: Option<AppConfigVisibility>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contacts: Option<serde_json::Value>,
+    pub contacts: Option<AppConfigContactsRange>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub event_and_callback_encrypt_strategy: Option<serde_json::Value>,
+    pub event_and_callback_encrypt_strategy: Option<EventAndCallbackEncryptStrategy>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub callback: Option<serde_json::Value>,
+    pub callback: Option<AppConfigCallback>,
 }
 
 impl PatchApplicationConfigReqBody {
@@ -166,37 +318,40 @@ impl PatchApplicationConfigReqBody {
         Self::default()
     }
 
-    pub fn scope(mut self, value: serde_json::Value) -> Self {
+    pub fn scope(mut self, value: AppConfigScope) -> Self {
         self.scope = Some(value);
         self
     }
 
-    pub fn event(mut self, value: serde_json::Value) -> Self {
+    pub fn event(mut self, value: AppConfigEvent) -> Self {
         self.event = Some(value);
         self
     }
 
-    pub fn security(mut self, value: serde_json::Value) -> Self {
+    pub fn security(mut self, value: AppConfigSecurity) -> Self {
         self.security = Some(value);
         self
     }
 
-    pub fn visibility(mut self, value: serde_json::Value) -> Self {
+    pub fn visibility(mut self, value: AppConfigVisibility) -> Self {
         self.visibility = Some(value);
         self
     }
 
-    pub fn contacts(mut self, value: serde_json::Value) -> Self {
+    pub fn contacts(mut self, value: AppConfigContactsRange) -> Self {
         self.contacts = Some(value);
         self
     }
 
-    pub fn event_and_callback_encrypt_strategy(mut self, value: serde_json::Value) -> Self {
+    pub fn event_and_callback_encrypt_strategy(
+        mut self,
+        value: EventAndCallbackEncryptStrategy,
+    ) -> Self {
         self.event_and_callback_encrypt_strategy = Some(value);
         self
     }
 
-    pub fn callback(mut self, value: serde_json::Value) -> Self {
+    pub fn callback(mut self, value: AppConfigCallback) -> Self {
         self.callback = Some(value);
         self
     }
@@ -505,5 +660,38 @@ impl<'a> V7<'a> {
 
     pub fn go_v397(&self) -> GoV397<'a> {
         GoV397::new(self.config)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn typed_patch_builders_assign_every_supported_branch() {
+        let ability = PatchApplicationAbilityReqBody::new()
+            .web_app(AppAbilityWeb {
+                enable: Some(true),
+                ..Default::default()
+            })
+            .bot(AppAbilityBot {
+                enable: Some(true),
+                ..Default::default()
+            });
+        let base = PatchApplicationBaseReqBody::new().i18ns(vec![AppI18nInfo {
+            i18n_key: Some("en_us".into()),
+            ..Default::default()
+        }]);
+        let config = PatchApplicationConfigReqBody::new()
+            .scope(AppConfigScope::default())
+            .visibility(AppConfigVisibility::default())
+            .callback(AppConfigCallback::default());
+
+        assert!(ability.web_app.is_some());
+        assert!(ability.bot.is_some());
+        assert_eq!(base.i18ns.unwrap()[0].i18n_key.as_deref(), Some("en_us"));
+        assert!(config.scope.is_some());
+        assert!(config.visibility.is_some());
+        assert!(config.callback.is_some());
     }
 }

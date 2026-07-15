@@ -1,4 +1,179 @@
-use larksuite_oapi_sdk_rs::service::{aily::v1 as aily_v1, document_ai::v1, docx::v1 as docx_v1};
+use larksuite_oapi_sdk_rs::service::{
+    aily::v1 as aily_v1, board::v1 as board_v1, document_ai::v1, docx::v1 as docx_v1,
+};
+
+#[test]
+fn board_models_deserialize_full_typed_node_graph() {
+    let response: board_v1::WhiteboardNodeListData = serde_json::from_str(
+        r##"{
+            "nodes": [{
+                "id": "node_1",
+                "type": "connector",
+                "text": {
+                    "text": "Roadmap",
+                    "rich_text": {"paragraphs": [{"elements": [{
+                        "element_type": 1,
+                        "text_element": {"text": "Milestone", "text_style": {"font_size": 14}}
+                    }]}]}
+                },
+                "style": {
+                    "fill_gradient": {"type": "linear", "handle_positions": [{"x": 0.0, "y": 1.0}], "stops": [{"position": 0.5, "color": "#00ff00"}]},
+                    "border_radius": {"top_left": 8}
+                },
+                "connector": {"turning_points": [{"x": 1.0, "y": 2.0}], "start": {"position": {"x": 1.0, "y": 2.0}}},
+                "table": {"meta": {"row_num": 1, "col_num": 1}, "cells": [{"row_index": 1, "col_index": 1, "text": {"text": "Cell"}}]},
+                "mind_map_node": {"type": "topic", "children": ["node_2"]},
+                "syntax": {"syntax_type": 1, "code": "@startuml"}
+            }]
+        }"##,
+    )
+    .unwrap();
+    let node = &response.nodes[0];
+
+    assert_eq!(node.r#type.as_deref(), Some("connector"));
+    assert_eq!(
+        node.text
+            .as_ref()
+            .unwrap()
+            .rich_text
+            .as_ref()
+            .unwrap()
+            .paragraphs[0]
+            .elements[0]
+            .text_element
+            .as_ref()
+            .unwrap()
+            .text
+            .as_deref(),
+        Some("Milestone")
+    );
+    assert_eq!(
+        node.style
+            .as_ref()
+            .unwrap()
+            .fill_gradient
+            .as_ref()
+            .unwrap()
+            .stops[0]
+            .color
+            .as_deref(),
+        Some("#00ff00")
+    );
+    assert_eq!(
+        node.connector.as_ref().unwrap().turning_points[0].x,
+        Some(1.0)
+    );
+    assert_eq!(node.table.as_ref().unwrap().cells[0].row_index, Some(1));
+
+    let body = board_v1::CreateWhiteboardNodeReqBody {
+        nodes: vec![node.clone()],
+        overwrite: Some(true),
+    };
+    assert_eq!(
+        serde_json::to_value(body).unwrap()["nodes"][0]["type"],
+        serde_json::json!("connector")
+    );
+}
+
+#[test]
+fn acs_models_deserialize_typed_rule_and_user_graphs() {
+    use larksuite_oapi_sdk_rs::service::acs::v1 as acs_v1;
+
+    let rules: acs_v1::GetRuleExternalData = serde_json::from_str(
+        r#"{
+            "rules": [{
+                "id": "rule_1",
+                "devices": [{"id": "device_1", "name": "Front door"}],
+                "users": [{"user_id": "ou_1", "user_name": "Ada"}],
+                "opening_time": {"valid_day": {"start_day": 20260715}, "day_times": [{"start_hhmm": 900, "end_hhmm": 1800}]}
+            }]
+        }"#,
+    )
+    .unwrap();
+    let record: acs_v1::AccessRecord =
+        serde_json::from_str(r#"{"access_type":"face","is_door_open":true}"#).unwrap();
+
+    assert_eq!(
+        rules.rules[0].devices[0].name.as_deref(),
+        Some("Front door")
+    );
+    assert_eq!(
+        rules.rules[0].opening_time.as_ref().unwrap().day_times[0].end_hhmm,
+        Some(1800)
+    );
+    assert_eq!(record.access_type.as_deref(), Some("face"));
+}
+
+#[test]
+fn board_and_acs_model_defaults_serialize() {
+    use larksuite_oapi_sdk_rs::service::acs::v1 as acs_v1;
+
+    macro_rules! assert_serializes {
+        ($($value:expr),+ $(,)?) => {{
+            $(assert!(serde_json::to_value($value).is_ok());)+
+        }};
+    }
+
+    assert_serializes!(
+        board_v1::AuthInfo::default(),
+        board_v1::BorderRadius::default(),
+        board_v1::ClientInfo::default(),
+        board_v1::CompositeShape::default(),
+        board_v1::Connector::default(),
+        board_v1::ConnectorAttachedObject::default(),
+        board_v1::ConnectorCaption::default(),
+        board_v1::ConnectorInfo::default(),
+        board_v1::Cube::default(),
+        board_v1::DepartmentId::default(),
+        board_v1::FillGradient::default(),
+        board_v1::GradientStop::default(),
+        board_v1::Head::default(),
+        board_v1::Image::default(),
+        board_v1::Lifeline::default(),
+        board_v1::MindMap::default(),
+        board_v1::MindMapNode::default(),
+        board_v1::MindMapRoot::default(),
+        board_v1::Paint::default(),
+        board_v1::Pie::default(),
+        board_v1::Point::default(),
+        board_v1::RichText::default(),
+        board_v1::RichTextElement::default(),
+        board_v1::RichTextElementLink::default(),
+        board_v1::RichTextElementMentionDoc::default(),
+        board_v1::RichTextElementMentionUser::default(),
+        board_v1::RichTextElementText::default(),
+        board_v1::RichTextElementTextStyle::default(),
+        board_v1::RichTextParagraph::default(),
+        board_v1::Section::default(),
+        board_v1::Shadow::default(),
+        board_v1::StickyNote::default(),
+        board_v1::Style::default(),
+        board_v1::Svg::default(),
+        board_v1::Syntax::default(),
+        board_v1::Table::default(),
+        board_v1::TableCell::default(),
+        board_v1::TableCellMergeInfo::default(),
+        board_v1::TableMeta::default(),
+        board_v1::Text::default(),
+        board_v1::Trapezoid::default(),
+        board_v1::WhiteboardNode::default(),
+        board_v1::BatchDeleteWhiteboardNodeReqBody::default(),
+        board_v1::CreatePlantumlWhiteboardNodeReqBody::default(),
+        acs_v1::Feature::default(),
+        acs_v1::Property::default(),
+        acs_v1::DeviceExternal::default(),
+        acs_v1::UserExternal::default(),
+        acs_v1::OpeningTimePeriodExternal::default(),
+        acs_v1::OpeningTimeValidDayExternal::default(),
+        acs_v1::OpeningTimeExternal::default(),
+        acs_v1::Rule::default(),
+        acs_v1::User::default(),
+        acs_v1::CreateRuleExternalReqBody::default(),
+        acs_v1::DeviceBindRuleExternalReqBody::default(),
+        acs_v1::CreateVisitorReqBody::default(),
+        acs_v1::CreateRuleExternalData::default(),
+    );
+}
 
 #[test]
 fn document_ai_recognition_response_deserializes_nested_models() {
@@ -389,5 +564,130 @@ fn lingo_models_deserialize_entity_metadata_and_search_filter() {
     assert_eq!(
         serde_json::to_value(body).unwrap()["classification_filter"]["include"],
         serde_json::json!(["cls_1"])
+    );
+}
+
+#[test]
+fn application_v7_patch_models_serialize_typed_configuration() {
+    use larksuite_oapi_sdk_rs::service::application::v7;
+
+    let body = v7::PatchApplicationConfigReqBody::new()
+        .scope(v7::AppConfigScope {
+            add_scopes: vec![v7::AppConfigScopeItem {
+                scope_name: Some("im:message".into()),
+                token_type: Some("tenant".into()),
+            }],
+            ..Default::default()
+        })
+        .visibility(v7::AppConfigVisibility {
+            is_visible_to_all: Some(false),
+            visible_list: Some(v7::AppVisibilityIdList {
+                user_ids: vec!["ou_1".into()],
+                ..Default::default()
+            }),
+        })
+        .callback(v7::AppConfigCallback {
+            request_url: Some("https://example.test/callback".into()),
+            ..Default::default()
+        });
+
+    let value = serde_json::to_value(body).unwrap();
+    assert_eq!(value["scope"]["add_scopes"][0]["scope_name"], "im:message");
+    assert_eq!(
+        value["visibility"]["visible_list"]["user_ids"],
+        serde_json::json!(["ou_1"])
+    );
+    assert_eq!(
+        value["callback"]["request_url"],
+        "https://example.test/callback"
+    );
+    assert!(value["callback"].get("add_callbacks").is_none());
+}
+
+#[test]
+fn baike_and_attendance_models_serialize_typed_nested_values() {
+    use larksuite_oapi_sdk_rs::service::{attendance::v1 as attendance_v1, baike::v1 as baike_v1};
+
+    let entity: baike_v1::BaikeEntity = serde_json::from_str(
+        r#"{
+            "related_meta": {
+                "users": [{"id": "ou_1", "title": "Ada"}],
+                "classifications": [{"id": "cls_1"}],
+                "images": [{"token": "img_1"}]
+            }
+        }"#,
+    )
+    .unwrap();
+    let report = attendance_v1::UploadReportArchiveRuleReqBody {
+        archive_report_datas: Some(vec![attendance_v1::ArchiveReportData {
+            member_id: Some("ou_1".into()),
+            field_datas: Some(vec![attendance_v1::ArchiveFieldData {
+                code: Some("work_hours".into()),
+                value: Some("8".into()),
+            }]),
+            ..Default::default()
+        }]),
+        ..Default::default()
+    };
+
+    assert_eq!(
+        entity.related_meta.unwrap().users.unwrap()[0]
+            .title
+            .as_deref(),
+        Some("Ada")
+    );
+    assert_eq!(
+        serde_json::to_value(report).unwrap()["archive_report_datas"][0]["field_datas"][0]["code"],
+        "work_hours"
+    );
+}
+
+#[test]
+fn docx_vc_and_task_models_use_existing_typed_graphs() {
+    use larksuite_oapi_sdk_rs::service::{
+        docx::v1 as docx_v1, task::v1 as task_v1, vc::v1 as vc_v1,
+    };
+
+    let update = docx_v1::UpdateBlockReqBody {
+        update_text_elements: Some(docx_v1::UpdateTextElementsRequest {
+            elements: vec![docx_v1::TextElement {
+                text_run: Some(docx_v1::TextRun {
+                    content: Some("updated".into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }],
+        }),
+        merge_table_cells: Some(docx_v1::MergeTableCellsRequest {
+            row_start_index: Some(0),
+            row_end_index: Some(2),
+            column_start_index: Some(0),
+            column_end_index: Some(2),
+        }),
+        ..Default::default()
+    };
+    let config = vc_v1::SetRoomConfigReqBody {
+        digital_signage: Some(vc_v1::RoomDigitalSignage {
+            enable: Some(true),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let task = task_v1::PatchTaskReqBody {
+        task: Some(task_v1::Task {
+            summary: Some("Follow up".into()),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+
+    assert_eq!(
+        serde_json::to_value(update).unwrap()["update_text_elements"]["elements"][0]["text_run"]["content"],
+        "updated"
+    );
+    assert_eq!(config.digital_signage.unwrap().enable, Some(true));
+    assert_eq!(
+        serde_json::to_value(task).unwrap()["task"]["summary"],
+        "Follow up"
     );
 }

@@ -29,6 +29,8 @@
   agent schedules, Task batch deletes, Docx raw content, and Drive Explorer
   file creation. Status-only Auth, Board, Calendar, Directory, and OKR
   responses now discard their data bodies explicitly.
+- Replaced Board v1 raw node and theme payloads with the complete Go-shaped
+  whiteboard model graph, including typed node creation and PlantUML requests.
 
 ## [0.3.0] - 2026-07-12
 

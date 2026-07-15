@@ -89,7 +89,7 @@ pub struct Href {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TaskOrigin {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub platform_i18n_name: Option<serde_json::Value>,
+    pub platform_i18n_name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub href: Option<Href>,
 }
@@ -147,7 +147,7 @@ pub struct CreateTaskReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PatchTaskReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub task: Option<serde_json::Value>,
+    pub task: Option<Task>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub update_fields: Option<Vec<String>>,
 }

@@ -203,6 +203,26 @@ pub struct UserSetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ArchiveFieldData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ArchiveReportData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_datas: Option<Vec<ArchiveFieldData>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AttendanceRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -2179,7 +2199,7 @@ pub struct UploadReportArchiveRuleReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub operator_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub archive_report_datas: Option<Vec<serde_json::Value>>,
+    pub archive_report_datas: Option<Vec<ArchiveReportData>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub archive_rule_id: Option<String>,
 }
@@ -2205,7 +2225,7 @@ pub struct PatchLeaveAccrualRecordReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub leave_type_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reason: Option<Vec<serde_json::Value>>,
+    pub reason: Option<Vec<LangText>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub time_offset: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2233,7 +2253,7 @@ pub struct PatchLeaveEmployExpireRecordReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct CreateUserApprovalReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_approval: Option<serde_json::Value>,
+    pub user_approval: Option<UserApproval>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -2257,7 +2277,7 @@ pub struct QueryUserApprovalReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct BatchCreateUserDailyShiftReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_daily_shifts: Option<Vec<serde_json::Value>>,
+    pub user_daily_shifts: Option<Vec<UserDailyShift>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub operator_id: Option<String>,
 }
@@ -2275,7 +2295,7 @@ pub struct QueryUserDailyShiftReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct BatchCreateUserFlowReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub flow_records: Option<Vec<serde_json::Value>>,
+    pub flow_records: Option<Vec<UserFlow>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -2297,7 +2317,7 @@ pub struct QueryUserFlowReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct ModifyUserSettingReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_setting: Option<serde_json::Value>,
+    pub user_setting: Option<UserSetting>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -2351,7 +2371,7 @@ pub struct QueryUserStatsViewReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct UpdateUserStatsViewReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub view: Option<serde_json::Value>,
+    pub view: Option<UserStatsView>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]

@@ -9,13 +9,117 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Feature {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub card: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub face_uploaded: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Property {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current_device_face_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_face_capacity: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub online_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_clock_in: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeviceExternal {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserExternal {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone_num: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpeningTimePeriodExternal {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_hhmm: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_hhmm: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpeningTimeValidDayExternal {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_day: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_day: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpeningTimeExternal {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub valid_day: Option<OpeningTimeValidDayExternal>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub weekdays: Vec<i32>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub day_times: Vec<OpeningTimePeriodExternal>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Rule {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub devices: Vec<DeviceExternal>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub users: Vec<UserExternal>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visitor_count: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub visitors: Vec<UserExternal>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remind_face: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub opening_time: Option<OpeningTimeExternal>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_temp: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct User {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feature: Option<Feature>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AcsUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub card_list: Option<Vec<serde_json::Value>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub feature: Option<serde_json::Value>,
+    pub feature: Option<Feature>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -31,7 +135,7 @@ pub struct AccessRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub access_type: Option<i32>,
+    pub access_type: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_data: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -50,6 +154,8 @@ pub struct AcsDevice {
     pub door_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub door_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub property: Option<Property>,
 }
 
 // ── Request body types ──
@@ -62,6 +168,26 @@ pub struct UpdateUserFaceReqBody {
     pub file_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateRuleExternalReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rule: Option<Rule>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeviceBindRuleExternalReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub rule_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateVisitorReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user: Option<UserExternal>,
 }
 
 // ── Response wrappers ──
@@ -191,9 +317,15 @@ impl<'a> ListAccessRecordQuery<'a> {
 // ── New data types (v2 pattern) ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct RuleExternalData {
+pub struct CreateRuleExternalData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub rule: Option<serde_json::Value>,
+    pub rule_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GetRuleExternalData {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub rules: Vec<Rule>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -224,10 +356,10 @@ pub struct VisitorListData {
     pub has_more: Option<bool>,
 }
 
-impl_resp_v2!(CreateRuleExternalResp, RuleExternalData);
+impl_resp_v2!(CreateRuleExternalResp, CreateRuleExternalData);
 impl_resp_v2!(DeleteRuleExternalResp, ());
 impl_resp_v2!(DeviceBindRuleExternalResp, ());
-impl_resp_v2!(GetRuleExternalResp, RuleExternalData);
+impl_resp_v2!(GetRuleExternalResp, GetRuleExternalData);
 impl_resp_v2!(GetAccessRecordAccessPhotoResp, AccessRecordAccessPhotoData);
 impl_resp_v2!(GetUserFaceResp, UserFaceData);
 impl_resp_v2!(UpdateUserFaceResp, ());
@@ -245,12 +377,12 @@ pub struct AcsUserResource<'a> {
 #[non_exhaustive]
 pub struct PatchUserQuery<'a> {
     pub user_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a User,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> PatchUserQuery<'a> {
-    pub fn new(user_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(user_id: &'a str, body: &'a User) -> Self {
         Self {
             user_id,
             body,
@@ -327,7 +459,7 @@ impl<'a> AcsUserResource<'a> {
     pub async fn patch(
         &self,
         user_id: &str,
-        body: &serde_json::Value,
+        body: &User,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
@@ -448,13 +580,13 @@ pub struct RuleExternalResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateRuleExternalQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateRuleExternalReqBody,
     pub rule_id: Option<&'a str>,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateRuleExternalQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CreateRuleExternalReqBody) -> Self {
         Self {
             body,
             rule_id: None,
@@ -488,11 +620,11 @@ impl<'a> DeleteRuleExternalQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct DeviceBindRuleExternalQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a DeviceBindRuleExternalReqBody,
 }
 
 impl<'a> DeviceBindRuleExternalQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a DeviceBindRuleExternalReqBody) -> Self {
         Self { body }
     }
 }
@@ -523,7 +655,7 @@ impl<'a> GetRuleExternalQuery<'a> {
 impl RuleExternalResource<'_> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &CreateRuleExternalReqBody,
         rule_id: Option<&str>,
         user_id_type: Option<&str>,
         option: &RequestOption,
@@ -549,7 +681,7 @@ impl RuleExternalResource<'_> {
         .query("rule_id", query.rule_id)
         .query("user_id_type", query.user_id_type)
         .json_body(query.body)?
-        .send_v2_response::<RuleExternalData, CreateRuleExternalResp>()
+        .send_v2_response::<CreateRuleExternalData, CreateRuleExternalResp>()
         .await
     }
 
@@ -581,7 +713,7 @@ impl RuleExternalResource<'_> {
 
     pub async fn device_bind(
         &self,
-        body: &serde_json::Value,
+        body: &DeviceBindRuleExternalReqBody,
         option: &RequestOption,
     ) -> Result<DeviceBindRuleExternalResp, LarkError> {
         let query = DeviceBindRuleExternalQuery::new(body);
@@ -631,7 +763,7 @@ impl RuleExternalResource<'_> {
         )
         .query("device_id", query.device_id)
         .query("user_id_type", query.user_id_type)
-        .send_v2_response::<RuleExternalData, GetRuleExternalResp>()
+        .send_v2_response::<GetRuleExternalData, GetRuleExternalResp>()
         .await
     }
 }
@@ -815,12 +947,12 @@ pub struct VisitorResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateVisitorQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateVisitorReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateVisitorQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CreateVisitorReqBody) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -857,7 +989,7 @@ impl<'a> DeleteVisitorQuery<'a> {
 impl VisitorResource<'_> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &CreateVisitorReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateVisitorResp, LarkError> {

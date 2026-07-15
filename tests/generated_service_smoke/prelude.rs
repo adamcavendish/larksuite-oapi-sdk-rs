@@ -7,13 +7,15 @@ pub(crate) use larksuite_oapi_sdk_rs::FormDataBuilder;
 pub(crate) use larksuite_oapi_sdk_rs::req::RequestOption;
 pub(crate) use larksuite_oapi_sdk_rs::service::{
     acs::v1::{
-        CreateRuleExternalQuery as CreateAcsRuleExternalQuery, CreateVisitorQuery,
+        CreateRuleExternalQuery as CreateAcsRuleExternalQuery, CreateRuleExternalReqBody,
+        CreateVisitorQuery, CreateVisitorReqBody,
         DeleteRuleExternalQuery as DeleteAcsRuleExternalQuery, DeleteVisitorQuery,
-        DeviceBindRuleExternalQuery, GetAccessRecordAccessPhotoQuery, GetRuleExternalQuery,
-        GetUserFaceQuery, GetUserQuery as GetAcsUserQuery,
-        ListAccessRecordQuery as ListAcsAccessRecordQuery, ListDeviceQuery,
-        ListUserQuery as ListAcsUserQuery, PatchUserQuery as PatchAcsUserQuery,
-        UpdateUserFaceQuery, UpdateUserFaceReqBody,
+        DeviceBindRuleExternalQuery, DeviceBindRuleExternalReqBody, DeviceExternal, Feature,
+        GetAccessRecordAccessPhotoQuery, GetRuleExternalQuery, GetUserFaceQuery,
+        GetUserQuery as GetAcsUserQuery, ListAccessRecordQuery as ListAcsAccessRecordQuery,
+        ListDeviceQuery, ListUserQuery as ListAcsUserQuery, OpeningTimeExternal,
+        OpeningTimePeriodExternal, PatchUserQuery as PatchAcsUserQuery, Rule, UpdateUserFaceQuery,
+        UpdateUserFaceReqBody, User, UserExternal,
     },
     admin::v1::{
         CreateBadgeGrantQuery, CreateBadgeGrantReqBody, CreateBadgeImageQuery, CreateBadgeQuery,
@@ -48,9 +50,11 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         UpdateApplicationOwnerQuery,
     },
     application::v7::{
-        CreateAppAvatarUploadQuery, CreateApplicationPublishQuery, CreateApplicationPublishReqBody,
-        PatchApplicationAbilityQuery, PatchApplicationAbilityReqBody, PatchApplicationBaseQuery,
-        PatchApplicationBaseReqBody, PatchApplicationConfigQuery, PatchApplicationConfigReqBody,
+        AppAbilityBot, AppAbilityWeb, AppConfigCallback, AppConfigScope, AppConfigScopeItem,
+        AppI18nInfo, CreateAppAvatarUploadQuery, CreateApplicationPublishQuery,
+        CreateApplicationPublishReqBody, PatchApplicationAbilityQuery,
+        PatchApplicationAbilityReqBody, PatchApplicationBaseQuery, PatchApplicationBaseReqBody,
+        PatchApplicationConfigQuery, PatchApplicationConfigReqBody,
     },
     approval::v4::{
         CcSearch, GetApprovalQuery, GetExternalApprovalQuery, GetInstanceQuery, InstanceSearch,
@@ -110,10 +114,12 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         },
     },
     board::v1::{
-        CreateBoardReqBody, CreatePlantumlWhiteboardNodeQuery, CreatePlantumlWhiteboardNodeReqBody,
-        CreateWhiteboardNodeQuery, CreateWhiteboardQuery, DownloadAsImageWhiteboardQuery,
-        GetWhiteboardQuery, ListWhiteboardNodeQuery, ThemeWhiteboardQuery,
-        UpdateThemeWhiteboardQuery, UpdateThemeWhiteboardReqBody,
+        BatchDeleteWhiteboardNodeQuery, BatchDeleteWhiteboardNodeReqBody, CreateBoardReqBody,
+        CreatePlantumlWhiteboardNodeQuery, CreatePlantumlWhiteboardNodeReqBody,
+        CreateWhiteboardNodeQuery, CreateWhiteboardNodeReqBody, CreateWhiteboardQuery,
+        DownloadAsImageWhiteboardQuery, GetWhiteboardQuery, ListWhiteboardNodeQuery, Text,
+        ThemeWhiteboardQuery, UpdateThemeWhiteboardQuery, UpdateThemeWhiteboardReqBody,
+        WhiteboardNode,
     },
     calendar::v4::{
         BatchFreeBusyQuery, BatchFreeBusyReqBody, GetCalendarQuery,
@@ -210,6 +216,7 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         GetDocumentBlockQuery, GetDocumentQuery as GetDocxDocumentQuery,
         GetDocumentRawContentQuery, ListChatAnnouncementBlockQuery, ListDocumentBlockChildrenQuery,
         ListDocumentBlockQuery, UpdateBlockReqBody, UpdateDocumentBlockQuery,
+        UpdateTextElementsRequest,
     },
     drive::{
         v1::{
@@ -424,8 +431,8 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         GetCommentQuery as GetTaskCommentQuery, GetReminderQuery, GetTaskQuery as GetTaskV1Query,
         ListCollaboratorQuery, ListCommentQuery as ListTaskCommentQuery, ListFollowerQuery,
         ListReminderQuery, ListTaskQuery, PatchTaskQuery as PatchTaskV1Query, PatchTaskReqBody,
-        UncompleteTaskQuery, UpdateCommentQuery as UpdateTaskCommentQuery, UpdateCommentReqBody,
-        UpdateReminderQuery, UpdateReminderReqBody,
+        Task, UncompleteTaskQuery, UpdateCommentQuery as UpdateTaskCommentQuery,
+        UpdateCommentReqBody, UpdateReminderQuery, UpdateReminderReqBody,
         v2::{
             AddCustomFieldV2Query, AddMembersTaskV2Query, AddMembersTasklistV2Query,
             CreateActivitySubscriptionV2Query, CreateCommentV2Query,
