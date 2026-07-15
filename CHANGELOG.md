@@ -4,6 +4,9 @@
 
 ### REST service coverage
 
+- Replaced Go-backed raw Aily, Helpdesk, and Hire v1 request and response
+  fields with concrete session, knowledge, ticket, notification, offer, and
+  recruitment-configuration models.
 - Replaced concrete Approval v4, Attendance v1, and Search v2 shared and
   response payload fields with Go-shaped models for attachments, i18n,
   approval actions, attendance rules, search schemas, filters, and results.
