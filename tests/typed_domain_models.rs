@@ -286,3 +286,108 @@ fn hire_models_deserialize_offer_configuration_and_salary() {
         Some("remote")
     );
 }
+
+#[test]
+fn corehr_models_deserialize_contact_hierarchy_and_permission_fields() {
+    use larksuite_oapi_sdk_rs::service::corehr::v1;
+
+    let employee: v1::Employee = serde_json::from_str(
+        r#"{
+            "phone_list": [{"phone_number": "123456", "is_primary": true}],
+            "address_list": [{"address_line1": "1 Main Street"}],
+            "email_list": [{"email": "ada@example.test"}],
+            "cost_center_rate": [{"cost_center_id": "cc_1", "rate": 100}]
+        }"#,
+    )
+    .unwrap();
+    let department: v1::Department =
+        serde_json::from_str(r#"{"hiberarchy_common": {"parent_id": "od_root"}}"#).unwrap();
+    let permission: v1::PermissionDetail = serde_json::from_str(
+        r#"{
+            "assigned_organization_list": [[{
+                "org_key": "department",
+                "org_name": {"en_us": "Engineering"},
+                "org_id_list": ["od_1"]
+            }]]
+        }"#,
+    )
+    .unwrap();
+    let field: v1::CustomFieldData =
+        serde_json::from_str(r#"{"name": {"en_us": "Work mode"}}"#).unwrap();
+
+    assert_eq!(
+        employee.phone_list.unwrap()[0].phone_number.as_deref(),
+        Some("123456")
+    );
+    assert_eq!(
+        employee.email_list.unwrap()[0].email.as_deref(),
+        Some("ada@example.test")
+    );
+    assert_eq!(
+        employee.cost_center_rate.unwrap()[0]
+            .cost_center_id
+            .as_deref(),
+        Some("cc_1")
+    );
+    assert_eq!(
+        department.hiberarchy_common.unwrap().parent_id.as_deref(),
+        Some("od_root")
+    );
+    assert_eq!(
+        permission.assigned_organization_list[0][0]
+            .org_name
+            .as_ref()
+            .unwrap()
+            .en_us
+            .as_deref(),
+        Some("Engineering")
+    );
+    assert_eq!(field.name.unwrap().en_us.as_deref(), Some("Work mode"));
+}
+
+#[test]
+fn lingo_models_deserialize_entity_metadata_and_search_filter() {
+    use larksuite_oapi_sdk_rs::service::lingo::v1;
+
+    let entity: v1::LingoEntity = serde_json::from_str(
+        r#"{
+            "related_meta": {
+                "users": [{"id": "ou_1", "title": "Ada"}],
+                "classifications": [{"id": "cls_1"}]
+            },
+            "statistics": {"like_count": 3},
+            "outer_info": {"provider": "catalog", "outer_id": "external_1"},
+            "display_status": {"allow_search": true},
+            "classification": [{"id": "cls_1"}],
+            "images": [{"token": "img_1"}]
+        }"#,
+    )
+    .unwrap();
+    let body = v1::SearchLingoEntityReqBody {
+        classification_filter: Some(v1::ClassificationFilter {
+            include: vec!["cls_1".into()],
+            exclude: vec!["cls_2".into()],
+        }),
+        ..Default::default()
+    };
+
+    assert_eq!(
+        entity.related_meta.unwrap().users[0].title.as_deref(),
+        Some("Ada")
+    );
+    assert_eq!(entity.statistics.unwrap().like_count, Some(3));
+    assert_eq!(
+        entity.outer_info.unwrap().outer_id.as_deref(),
+        Some("external_1")
+    );
+    assert_eq!(entity.display_status.unwrap().allow_search, Some(true));
+    assert_eq!(
+        entity.classification.unwrap()[0].id.as_deref(),
+        Some("cls_1")
+    );
+    assert_eq!(entity.images.unwrap()[0].token.as_deref(), Some("img_1"));
+    assert_eq!(
+        serde_json::to_value(body).unwrap()["classification_filter"]["include"],
+        serde_json::json!(["cls_1"])
+    );
+}
