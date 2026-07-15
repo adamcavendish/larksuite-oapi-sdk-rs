@@ -25,19 +25,19 @@ pub struct LingoEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub update_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub related_meta: Option<serde_json::Value>,
+    pub related_meta: Option<RelatedMeta>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub statistics: Option<serde_json::Value>,
+    pub statistics: Option<Statistics>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub outer_info: Option<serde_json::Value>,
+    pub outer_info: Option<OuterInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub display_status: Option<serde_json::Value>,
+    pub display_status: Option<DisplayStatus>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub schema_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub classification: Option<Vec<serde_json::Value>>,
+    pub classification: Option<Vec<Classification>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub images: Option<Vec<serde_json::Value>>,
+    pub images: Option<Vec<BaikeImage>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -45,7 +45,15 @@ pub struct LingoTerm {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub display_status: Option<serde_json::Value>,
+    pub display_status: Option<DisplayStatus>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ClassificationFilter {
+    #[serde(default)]
+    pub include: Vec<String>,
+    #[serde(default)]
+    pub exclude: Vec<String>,
 }
 
 // ── Request body types ──
@@ -61,15 +69,15 @@ pub struct CreateLingoEntityReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rich_text: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub related_meta: Option<serde_json::Value>,
+    pub related_meta: Option<RelatedMeta>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub outer_info: Option<serde_json::Value>,
+    pub outer_info: Option<OuterInfo>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub schema_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub classification: Option<Vec<serde_json::Value>>,
+    pub classification: Option<Vec<Classification>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub images: Option<Vec<serde_json::Value>>,
+    pub images: Option<Vec<BaikeImage>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -77,7 +85,7 @@ pub struct SearchLingoEntityReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub query: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub classification_filter: Option<serde_json::Value>,
+    pub classification_filter: Option<ClassificationFilter>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sources: Option<Vec<i32>>,
     #[serde(skip_serializing_if = "Option::is_none")]
