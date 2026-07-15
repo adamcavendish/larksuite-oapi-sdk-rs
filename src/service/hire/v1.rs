@@ -6510,7 +6510,7 @@ pub struct Offer {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub salary_plan: Option<ApplicationOfferSalaryPlan>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub customize_info_list: Option<Vec<serde_json::Value>>,
+    pub customize_info_list: Option<Vec<ApplicationOfferCustomValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub salary_currency: Option<IdNameObject>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -7110,13 +7110,13 @@ pub struct LocationDistrict {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RecruitmentConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub offer_apply_schema: Option<serde_json::Value>,
+    pub offer_apply_schema: Option<IdNameObject>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub offer_process_conf: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub rec_process_info: Option<serde_json::Value>,
+    pub rec_process_info: Option<IdNameObject>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub assessment_template: Option<serde_json::Value>,
+    pub assessment_template: Option<IdNameObject>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -7220,9 +7220,9 @@ pub struct CreateOfferReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub basic_info: Option<OfferBasicInfo>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub salary_plan: Option<serde_json::Value>,
+    pub salary_plan: Option<ApplicationOfferSalaryPlan>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub customize_info_list: Option<Vec<serde_json::Value>>,
+    pub customize_info_list: Option<Vec<ApplicationOfferCustomValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -7234,9 +7234,9 @@ pub struct UpdateOfferReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub basic_info: Option<OfferBasicInfo>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub salary_plan: Option<serde_json::Value>,
+    pub salary_plan: Option<ApplicationOfferSalaryPlan>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub customize_info_list: Option<Vec<serde_json::Value>>,
+    pub customize_info_list: Option<Vec<ApplicationOfferCustomValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -7332,9 +7332,9 @@ pub struct OfferData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub basic_info: Option<OfferBasicInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub salary_plan: Option<serde_json::Value>,
+    pub salary_plan: Option<ApplicationOfferSalaryPlan>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub customize_info_list: Option<Vec<serde_json::Value>>,
+    pub customize_info_list: Option<Vec<ApplicationOfferCustomValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
