@@ -4,6 +4,9 @@
 
 ### REST service coverage
 
+- Replaced Go-backed raw CoreHR v1 and Lingo v1 request and response fields
+  with concrete contact, hierarchy, permission, metadata, classification,
+  image, status, and search-filter models.
 - Replaced Go-backed raw Aily, Helpdesk, and Hire v1 request and response
   fields with concrete session, knowledge, ticket, notification, offer, and
   recruitment-configuration models.
