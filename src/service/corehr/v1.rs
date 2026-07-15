@@ -57,7 +57,7 @@ pub struct CustomFieldData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom_api_name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub name: Option<serde_json::Value>,
+    pub name: Option<CorehrName>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -231,11 +231,11 @@ pub struct Employee {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub marital_status: Option<EnumValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub phone_list: Option<Vec<serde_json::Value>>,
+    pub phone_list: Option<Vec<Phone>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub address_list: Option<Vec<serde_json::Value>>,
+    pub address_list: Option<Vec<Address>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub email_list: Option<Vec<serde_json::Value>>,
+    pub email_list: Option<Vec<Email>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -271,7 +271,7 @@ pub struct Employee {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub working_hours_type_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_center_rate: Option<Vec<serde_json::Value>>,
+    pub cost_center_rate: Option<Vec<CorehrSupportCostCenterItem>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub offboarding_date: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -289,7 +289,7 @@ pub struct Department {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_confidential: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub hiberarchy_common: Option<serde_json::Value>,
+    pub hiberarchy_common: Option<HiberarchyCommon>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub effective_date: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -299,7 +299,7 @@ pub struct Department {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub children_count: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub primary_manager: Option<Vec<serde_json::Value>>,
+    pub primary_manager: Option<Vec<I18nText>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom_fields: Option<Vec<ObjectFieldData>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -339,7 +339,7 @@ pub struct Company {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub hiberarchy_common: Option<serde_json::Value>,
+    pub hiberarchy_common: Option<HiberarchyCommon>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nature: Option<EnumValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -377,11 +377,11 @@ pub struct Location {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub hiberarchy_common: Option<serde_json::Value>,
+    pub hiberarchy_common: Option<HiberarchyCommon>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub location_usage: Option<Vec<EnumValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub address: Option<Vec<serde_json::Value>>,
+    pub address: Option<Vec<Address>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub working_hours_type_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2450,11 +2450,21 @@ pub struct PermissionDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role: Option<SecurityGroup>,
     #[serde(default)]
-    pub assigned_organization_list: Vec<serde_json::Value>,
+    pub assigned_organization_list: Vec<Vec<AssignedOrganization>>,
     #[serde(default)]
     pub grantor_rule_list: Vec<PermissionSecurityGroup>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AssignedOrganization {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_name: Option<Name>,
+    #[serde(default)]
+    pub org_id_list: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
