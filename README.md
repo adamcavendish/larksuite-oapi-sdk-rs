@@ -192,6 +192,12 @@ and typed find/replace, dimension, filter, and dropdown payloads. Raw JSON is
 retained only for the open-ended batch-operation and conditional-format
 extension fields.
 
+Task v2, Directory v1, Application v6, IM v2, and CardKit v1 mutation
+resources use Go-shaped request models for their closed API contracts. Raw
+values remain only where the contract is dynamic or not modeled upstream:
+CardKit template variables, Task's file-bearing attachment upload, and the
+legacy Directory user status field.
+
 Hire v1 is a particular focus: catalog, reference, task, website-posting,
 external, agency, job, talent, application, interview, and background-check
 resources provide typed Go-backed responses. Where the Go SDK exposes iterator

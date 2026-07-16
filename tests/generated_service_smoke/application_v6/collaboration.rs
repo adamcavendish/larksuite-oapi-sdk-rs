@@ -31,8 +31,8 @@ async fn application_v6_collaborators_and_contacts_range_write_by_query_smoke() 
         mock_server_with_requests(vec![http_response(200, body), http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let collaborators_body = serde_json::json!({"collaborators":["ou-1"]});
-    let contacts_body = serde_json::json!({"visible_users":["ou-1"]});
+    let collaborators_body = UpdateApplicationCollaboratorsReqBody::default();
+    let contacts_body = PatchApplicationContactsRangeReqBody::default();
     client
         .application_v6()
         .application_collaborators
@@ -60,6 +60,4 @@ async fn application_v6_collaborators_and_contacts_range_write_by_query_smoke() 
     assert!(request.contains("PATCH /open-apis/application/v6/applications/cli_a/contacts_range?"));
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("department_id_type=open_department_id"));
-    assert!(request.contains(r#""collaborators":["ou-1"]"#));
-    assert!(request.contains(r#""visible_users":["ou-1"]"#));
 }

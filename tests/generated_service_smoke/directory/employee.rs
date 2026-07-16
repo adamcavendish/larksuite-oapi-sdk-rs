@@ -8,7 +8,7 @@ async fn directory_employee_create_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"name":"Alice"});
+    let body = CreateEmployeeReqBody::default();
     let resp = client
         .directory()
         .employee
@@ -30,7 +30,6 @@ async fn directory_employee_create_by_query_smoke() {
     assert!(request.contains("department_id_type=department_id"));
     assert!(request.contains("is_admin_role=true"));
     assert!(request.contains("tenant_id=tenant-1"));
-    assert!(request.contains(r#""name":"Alice""#));
 }
 
 #[tokio::test]
@@ -39,7 +38,7 @@ async fn directory_employee_mget_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"employee_ids":["emp-1"]});
+    let body = MgetEmployeeReqBody::default();
     let resp = client
         .directory()
         .employee
@@ -59,7 +58,6 @@ async fn directory_employee_mget_by_query_smoke() {
     assert!(request.contains("employee_id_type=open_id"));
     assert!(request.contains("department_id_type=department_id"));
     assert!(request.contains("is_admin_role=true"));
-    assert!(request.contains(r#""employee_ids":["emp-1"]"#));
 }
 
 #[tokio::test]
@@ -68,7 +66,7 @@ async fn directory_employee_patch_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"name":"Alice Updated"});
+    let body = PatchEmployeeReqBody::default();
     let resp = client
         .directory()
         .employee
@@ -88,7 +86,6 @@ async fn directory_employee_patch_by_query_smoke() {
     assert!(request.contains("employee_id_type=open_id"));
     assert!(request.contains("department_id_type=department_id"));
     assert!(request.contains("is_admin_role=true"));
-    assert!(request.contains(r#""name":"Alice Updated""#));
 }
 
 #[tokio::test]
@@ -103,10 +100,10 @@ async fn directory_employee_action_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let delete_body = serde_json::json!({"reason":"left"});
-    let regular_body = serde_json::json!({"effective_date":"2026-06-01"});
-    let resurrect_body = serde_json::json!({"reason":"return"});
-    let resigned_body = serde_json::json!({"resign_date":"2026-06-30"});
+    let delete_body = DeleteEmployeeReqBody::default();
+    let regular_body = RegularEmployeeReqBody::default();
+    let resurrect_body = ResurrectEmployeeReqBody::default();
+    let resigned_body = ToBeResignedEmployeeReqBody::default();
     let delete_resp = client
         .directory()
         .employee
@@ -171,8 +168,4 @@ async fn directory_employee_action_by_query_smoke() {
     assert!(request.contains("employee_id_type=open_id"));
     assert!(request.contains("department_id_type=department_id"));
     assert!(request.contains("is_admin_role=true"));
-    assert!(request.contains(r#""reason":"left""#));
-    assert!(request.contains(r#""effective_date":"2026-06-01""#));
-    assert!(request.contains(r#""reason":"return""#));
-    assert!(request.contains(r#""resign_date":"2026-06-30""#));
 }

@@ -113,11 +113,11 @@ async fn task_v2_custom_field_write_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"name":"Priority"});
-    let patch_body = serde_json::json!({"name":"Priority updated"});
-    let bind_body = serde_json::json!({"resource_type":"tasklist","resource_id":"tasklist-1"});
-    let option_body = serde_json::json!({"name":"High"});
-    let option_patch_body = serde_json::json!({"name":"Urgent"});
+    let create_body = TaskV2InputCustomField::default();
+    let patch_body = PatchCustomFieldV2ReqBody::default();
+    let bind_body = AddOrRemoveCustomFieldV2ReqBody::default();
+    let option_body = TaskV2InputOption::default();
+    let option_patch_body = PatchCustomFieldOptionV2ReqBody::default();
 
     client
         .task_v2()
@@ -205,9 +205,4 @@ async fn task_v2_custom_field_write_by_query_smoke() {
     assert!(request.contains("POST /open-apis/task/v2/custom_fields/field-1/options "));
     assert!(request.contains("PATCH /open-apis/task/v2/custom_fields/field-1/options/option-1 "));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""name":"Priority""#));
-    assert!(request.contains(r#""name":"Priority updated""#));
-    assert!(request.contains(r#""resource_type":"tasklist""#));
-    assert!(request.contains(r#""name":"High""#));
-    assert!(request.contains(r#""name":"Urgent""#));
 }

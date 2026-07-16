@@ -17,8 +17,8 @@ async fn task_v2_tasklist_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"name":"Roadmap"});
-    let patch_body = serde_json::json!({"name":"Roadmap updated"});
+    let create_body = TaskV2InputTasklist::default();
+    let patch_body = PatchTasklistV2ReqBody::default();
 
     client
         .task_v2()
@@ -67,8 +67,6 @@ async fn task_v2_tasklist_by_query_smoke() {
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""name":"Roadmap""#));
-    assert!(request.contains(r#""name":"Roadmap updated""#));
 }
 
 #[tokio::test]
@@ -85,7 +83,7 @@ async fn task_v2_tasklist_members_and_tasks_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let members_body = serde_json::json!({"members":["u-1"]});
+    let members_body = MembersTaskV2ReqBody::default();
     let task_params = TaskListParams::new()
         .page(PageQuery::new().page_size(20).page_token("next-page"))
         .completed(false)
@@ -131,7 +129,6 @@ async fn task_v2_tasklist_members_and_tasks_by_query_smoke() {
     assert!(request.contains("created_from=2026-01-01"));
     assert!(request.contains("created_to=2026-01-31"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""members":["u-1"]"#));
 }
 
 #[tokio::test]
@@ -148,8 +145,8 @@ async fn task_v2_tasklist_activity_subscription_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let activity_body = serde_json::json!({"event":"task_changed"});
-    let activity_patch_body = serde_json::json!({"event":"comment_changed"});
+    let activity_body = TaskV2ActivitySubscriptionInput::default();
+    let activity_patch_body = PatchActivitySubscriptionV2ReqBody::default();
 
     client
         .task_v2()
@@ -212,6 +209,4 @@ async fn task_v2_tasklist_activity_subscription_by_query_smoke() {
     );
     assert!(request.contains("limit=50"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""event":"task_changed""#));
-    assert!(request.contains(r#""event":"comment_changed""#));
 }

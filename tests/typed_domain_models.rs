@@ -1,7 +1,63 @@
 use larksuite_oapi_sdk_rs::service::{
-    aily::v1 as aily_v1, board::v1 as board_v1, document_ai::v1, docx::v1 as docx_v1,
-    sheets::v3 as sheets_v3,
+    aily::v1 as aily_v1, application::v6 as application_v6, board::v1 as board_v1,
+    cardkit::v1 as cardkit_v1, directory::v1 as directory_v1, document_ai::v1, docx::v1 as docx_v1,
+    im::v2 as im_v2, sheets::v3 as sheets_v3, task::v2 as task_v2,
 };
+
+#[test]
+fn mutation_payload_models_serialize_go_shaped_bodies() {
+    let task = task_v2::PatchTaskV2ReqBody {
+        task: Some(task_v2::TaskV2InputTask {
+            summary: Some("Ship typed mutations".into()),
+            ..Default::default()
+        }),
+        update_fields: Some(vec!["summary".into()]),
+    };
+    let employee = directory_v1::MgetEmployeeReqBody {
+        employee_ids: Some(vec!["emp-1".into()]),
+        required_fields: Some(vec!["name".into()]),
+    };
+    let badge = application_v6::AppBadge {
+        pc: Some(application_v6::ClientBadgeNum {
+            web_app: Some(3),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let tag = im_v2::CreateTagV2ReqBody {
+        create_tag: Some(im_v2::CreateTagV2Input {
+            name: Some("Important".into()),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let card = cardkit_v1::UpdateCardReqBody {
+        card: Some(cardkit_v1::CardContent {
+            r#type: Some("template".into()),
+            data: Some(r#"{"title":"Updated"}"#.into()),
+        }),
+        sequence: Some(2),
+        ..Default::default()
+    };
+
+    assert_eq!(
+        serde_json::to_value(task).unwrap()["task"]["summary"],
+        "Ship typed mutations"
+    );
+    assert_eq!(
+        serde_json::to_value(employee).unwrap()["employee_ids"][0],
+        "emp-1"
+    );
+    assert_eq!(serde_json::to_value(badge).unwrap()["pc"]["web_app"], 3);
+    assert_eq!(
+        serde_json::to_value(tag).unwrap()["create_tag"]["name"],
+        "Important"
+    );
+    assert_eq!(
+        serde_json::to_value(card).unwrap()["card"]["data"],
+        r#"{"title":"Updated"}"#
+    );
+}
 
 #[test]
 fn board_models_deserialize_full_typed_node_graph() {

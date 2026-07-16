@@ -32,6 +32,102 @@ pub struct UpdateCardInstanceReqBody {
     pub template_variable: Option<serde_json::Value>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CardContent {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateCardReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateCardReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub card: Option<CardContent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchUpdateCardReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actions: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct IdConvertCardReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SettingsCardReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub settings: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateCardElementReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_element_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub elements: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateCardElementReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub element: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchCardElementReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub partial_element: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ContentCardElementReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+}
+
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -81,11 +177,11 @@ impl<'a> UpdateCardInstanceQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateCardQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateCardReqBody,
 }
 
 impl<'a> CreateCardQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CreateCardReqBody) -> Self {
         Self { body }
     }
 }
@@ -94,11 +190,11 @@ impl<'a> CreateCardQuery<'a> {
 #[non_exhaustive]
 pub struct UpdateCardQuery<'a> {
     pub card_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a UpdateCardReqBody,
 }
 
 impl<'a> UpdateCardQuery<'a> {
-    pub fn new(card_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(card_id: &'a str, body: &'a UpdateCardReqBody) -> Self {
         Self { card_id, body }
     }
 }
@@ -107,11 +203,11 @@ impl<'a> UpdateCardQuery<'a> {
 #[non_exhaustive]
 pub struct BatchUpdateCardQuery<'a> {
     pub card_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a BatchUpdateCardReqBody,
 }
 
 impl<'a> BatchUpdateCardQuery<'a> {
-    pub fn new(card_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(card_id: &'a str, body: &'a BatchUpdateCardReqBody) -> Self {
         Self { card_id, body }
     }
 }
@@ -119,11 +215,11 @@ impl<'a> BatchUpdateCardQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct IdConvertCardQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a IdConvertCardReqBody,
 }
 
 impl<'a> IdConvertCardQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a IdConvertCardReqBody) -> Self {
         Self { body }
     }
 }
@@ -132,11 +228,11 @@ impl<'a> IdConvertCardQuery<'a> {
 #[non_exhaustive]
 pub struct SettingsCardQuery<'a> {
     pub card_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a SettingsCardReqBody,
 }
 
 impl<'a> SettingsCardQuery<'a> {
-    pub fn new(card_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(card_id: &'a str, body: &'a SettingsCardReqBody) -> Self {
         Self { card_id, body }
     }
 }
@@ -145,11 +241,11 @@ impl<'a> SettingsCardQuery<'a> {
 #[non_exhaustive]
 pub struct CreateCardElementQuery<'a> {
     pub card_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateCardElementReqBody,
 }
 
 impl<'a> CreateCardElementQuery<'a> {
-    pub fn new(card_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(card_id: &'a str, body: &'a CreateCardElementReqBody) -> Self {
         Self { card_id, body }
     }
 }
@@ -159,11 +255,11 @@ impl<'a> CreateCardElementQuery<'a> {
 pub struct UpdateCardElementQuery<'a> {
     pub card_id: &'a str,
     pub element_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a UpdateCardElementReqBody,
 }
 
 impl<'a> UpdateCardElementQuery<'a> {
-    pub fn new(card_id: &'a str, element_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(card_id: &'a str, element_id: &'a str, body: &'a UpdateCardElementReqBody) -> Self {
         Self {
             card_id,
             element_id,
@@ -193,11 +289,11 @@ impl<'a> DeleteCardElementQuery<'a> {
 pub struct PatchCardElementQuery<'a> {
     pub card_id: &'a str,
     pub element_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchCardElementReqBody,
 }
 
 impl<'a> PatchCardElementQuery<'a> {
-    pub fn new(card_id: &'a str, element_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(card_id: &'a str, element_id: &'a str, body: &'a PatchCardElementReqBody) -> Self {
         Self {
             card_id,
             element_id,
@@ -211,11 +307,11 @@ impl<'a> PatchCardElementQuery<'a> {
 pub struct ContentCardElementQuery<'a> {
     pub card_id: &'a str,
     pub element_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a ContentCardElementReqBody,
 }
 
 impl<'a> ContentCardElementQuery<'a> {
-    pub fn new(card_id: &'a str, element_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(card_id: &'a str, element_id: &'a str, body: &'a ContentCardElementReqBody) -> Self {
         Self {
             card_id,
             element_id,
@@ -306,7 +402,7 @@ pub struct CardResource<'a> {
 impl CardResource<'_> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &CreateCardReqBody,
         option: &RequestOption,
     ) -> Result<CreateCardResp, LarkError> {
         self.create_by_query(&CreateCardQuery::new(body), option)
@@ -333,7 +429,7 @@ impl CardResource<'_> {
     pub async fn update(
         &self,
         card_id: &str,
-        body: &serde_json::Value,
+        body: &UpdateCardReqBody,
         option: &RequestOption,
     ) -> Result<UpdateCardResp, LarkError> {
         self.update_by_query(&UpdateCardQuery::new(card_id, body), option)
@@ -361,7 +457,7 @@ impl CardResource<'_> {
     pub async fn batch_update(
         &self,
         card_id: &str,
-        body: &serde_json::Value,
+        body: &BatchUpdateCardReqBody,
         option: &RequestOption,
     ) -> Result<BatchUpdateCardResp, LarkError> {
         self.batch_update_by_query(&BatchUpdateCardQuery::new(card_id, body), option)
@@ -388,7 +484,7 @@ impl CardResource<'_> {
 
     pub async fn id_convert(
         &self,
-        body: &serde_json::Value,
+        body: &IdConvertCardReqBody,
         option: &RequestOption,
     ) -> Result<IdConvertCardResp, LarkError> {
         self.id_convert_by_query(&IdConvertCardQuery::new(body), option)
@@ -415,7 +511,7 @@ impl CardResource<'_> {
     pub async fn settings(
         &self,
         card_id: &str,
-        body: &serde_json::Value,
+        body: &SettingsCardReqBody,
         option: &RequestOption,
     ) -> Result<SettingsCardResp, LarkError> {
         self.settings_by_query(&SettingsCardQuery::new(card_id, body), option)
@@ -449,7 +545,7 @@ impl CardElementResource<'_> {
     pub async fn create(
         &self,
         card_id: &str,
-        body: &serde_json::Value,
+        body: &CreateCardElementReqBody,
         option: &RequestOption,
     ) -> Result<CreateCardElementResp, LarkError> {
         self.create_by_query(&CreateCardElementQuery::new(card_id, body), option)
@@ -478,7 +574,7 @@ impl CardElementResource<'_> {
         &self,
         card_id: &str,
         element_id: &str,
-        body: &serde_json::Value,
+        body: &UpdateCardElementReqBody,
         option: &RequestOption,
     ) -> Result<UpdateCardElementResp, LarkError> {
         self.update_by_query(
@@ -543,7 +639,7 @@ impl CardElementResource<'_> {
         &self,
         card_id: &str,
         element_id: &str,
-        body: &serde_json::Value,
+        body: &PatchCardElementReqBody,
         option: &RequestOption,
     ) -> Result<PatchCardElementResp, LarkError> {
         self.patch_by_query(
@@ -578,7 +674,7 @@ impl CardElementResource<'_> {
         &self,
         card_id: &str,
         element_id: &str,
-        body: &serde_json::Value,
+        body: &ContentCardElementReqBody,
         option: &RequestOption,
     ) -> Result<ContentCardElementResp, LarkError> {
         self.content_by_query(

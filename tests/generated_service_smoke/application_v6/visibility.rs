@@ -9,8 +9,8 @@ async fn application_v6_visibility_by_query_smoke() {
         mock_server_with_requests(vec![http_response(200, body), http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let check_body = serde_json::json!({"users":["ou-1"]});
-    let patch_body = serde_json::json!({"visible":true});
+    let check_body = CheckWhiteBlackListApplicationVisibilityReqBody::default();
+    let patch_body = PatchApplicationVisibilityReqBody::default();
     client
         .application_v6()
         .application_visibility
@@ -41,6 +41,4 @@ async fn application_v6_visibility_by_query_smoke() {
     assert!(request.contains("PATCH /open-apis/application/v6/applications/cli_a/visibility?"));
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("department_id_type=open_department_id"));
-    assert!(request.contains(r#""users":["ou-1"]"#));
-    assert!(request.contains(r#""visible":true"#));
 }

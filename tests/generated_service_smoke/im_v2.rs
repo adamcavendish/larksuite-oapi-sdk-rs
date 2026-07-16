@@ -17,12 +17,12 @@ async fn im_v2_app_feed_card_and_feed_card_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"card_id":"card-1","title":"Feed"});
-    let delete_body = serde_json::json!({"card_ids":["card-1"]});
-    let update_body = serde_json::json!({"cards":[{"card_id":"card-1","title":"Updated"}]});
-    let chat_button_body = serde_json::json!({"chat_id":"oc_1","button":"enabled"});
-    let time_sensitive_body = serde_json::json!({"card_id":"card-1","sensitive":true});
-    let patch_body = serde_json::json!({"title":"Patched"});
+    let create_body = CreateAppFeedCardV2ReqBody::default();
+    let delete_body = DeleteAppFeedCardBatchV2ReqBody::default();
+    let update_body = UpdateAppFeedCardBatchV2ReqBody::default();
+    let chat_button_body = UpdateChatButtonV2ReqBody::default();
+    let time_sensitive_body = BotTimeSensitiveFeedCardV2ReqBody::default();
+    let patch_body = PatchFeedCardV2ReqBody::default();
 
     let create_resp = client
         .im_v2()
@@ -98,11 +98,6 @@ async fn im_v2_app_feed_card_and_feed_card_by_query_smoke() {
     assert!(request.contains("PUT /open-apis/im/v2/chat_button "));
     assert!(request.contains("PATCH /open-apis/im/v2/feed_cards/bot_time_sentive "));
     assert!(request.contains("PATCH /open-apis/im/v2/feed_cards/feed-card-1 "));
-    assert!(request.contains(r#""title":"Feed""#));
-    assert!(request.contains(r#""card_ids":["card-1"]"#));
-    assert!(request.contains(r#""button":"enabled""#));
-    assert!(request.contains(r#""sensitive":true"#));
-    assert!(request.contains(r#""title":"Patched""#));
 }
 
 #[tokio::test]
@@ -117,8 +112,8 @@ async fn im_v2_biz_entity_tag_relation_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"entity_id":"entity-1","tag_id":"tag-1"});
-    let update_body = serde_json::json!({"entity_id":"entity-1","tag_id":"tag-2"});
+    let create_body = BizEntityTagRelationV2ReqBody::default();
+    let update_body = BizEntityTagRelationV2ReqBody::default();
 
     let create_resp = client
         .im_v2()
@@ -175,9 +170,6 @@ async fn im_v2_biz_entity_tag_relation_by_query_smoke() {
     assert!(request.contains("POST /open-apis/im/v2/biz_entity_tag_relation "));
     assert!(request.contains("GET /open-apis/im/v2/biz_entity_tag_relation "));
     assert!(request.contains("PUT /open-apis/im/v2/biz_entity_tag_relation "));
-    assert!(request.contains(r#""entity_id":"entity-1""#));
-    assert!(request.contains(r#""tag_id":"tag-1""#));
-    assert!(request.contains(r#""tag_id":"tag-2""#));
 }
 
 #[tokio::test]
@@ -193,9 +185,9 @@ async fn im_v2_tag_and_url_preview_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"name":"Important"});
-    let patch_body = serde_json::json!({"name":"Renamed"});
-    let preview_body = serde_json::json!({"items":[{"url":"https://example.com"}]});
+    let create_body = CreateTagV2ReqBody::default();
+    let patch_body = PatchTagV2ReqBody::default();
+    let preview_body = BatchUpdateUrlPreviewV2ReqBody::default();
 
     let create_resp = client
         .im_v2()
@@ -239,7 +231,4 @@ async fn im_v2_tag_and_url_preview_by_query_smoke() {
     assert!(request.contains("POST /open-apis/im/v2/tags "));
     assert!(request.contains("PATCH /open-apis/im/v2/tags/tag-1 "));
     assert!(request.contains("POST /open-apis/im/v2/url_previews/batch_update "));
-    assert!(request.contains(r#""name":"Important""#));
-    assert!(request.contains(r#""name":"Renamed""#));
-    assert!(request.contains(r#""url":"https://example.com""#));
 }

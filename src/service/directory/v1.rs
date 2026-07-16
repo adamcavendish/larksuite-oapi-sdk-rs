@@ -24,6 +24,506 @@ pub struct DirectoryUser {
     pub department_ids: Option<Vec<String>>,
 }
 
+// ── Mutation request types ──────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PageCondition {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_size: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FilterCondition {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MultiFilterCondition {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expr: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditions: Option<Vec<FilterCondition>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchOptions {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filter_permission_resource: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub admin_role_permission_scope: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub admin_role_permission_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchDepartmentFilter {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exactly_match_by_name: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<SearchOptions>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchEmployeeFilter {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contain_resigned_employee: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<SearchOptions>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateDepartmentInput {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18nText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leaders: Option<Vec<DepartmentLeader>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hrbps: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order_weight: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18nText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enabled_status: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field_value_map: Option<std::collections::HashMap<String, CustomFieldValue>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field_values: Option<Vec<CustomFieldValue>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_dimension: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateDepartmentInput {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<I18nText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leaders: Option<Vec<DepartmentLeader>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hrbps: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order_weight: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<I18nText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enabled_status: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field_value_map: Option<std::collections::HashMap<String, CustomFieldValue>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field_values: Option<Vec<CustomFieldValue>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpsertUserDepartmentSortInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order_weight_in_deparment: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order_weight_among_deparments: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_main_department: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpsertUserVirtualOrgInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_order_in_departments: Option<Vec<UpsertUserDepartmentSortInfo>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leaders: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DirectoryInviteOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invite_channels: Option<Vec<i32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invite_language: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DirectoryEmployeeTraceInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_invite: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inviter_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invite_option: Option<DirectoryInviteOption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_ip: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SendNotification {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub need_send_notification: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub language: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DirectoryEmployeeInput {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Name>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub personal_email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enterprise_email: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gender: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub residential_address: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_addresses: Option<Vec<ContactAddress>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_order_in_departments: Option<Vec<UpsertUserDepartmentSortInfo>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub background_image_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leader_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dotted_line_leader_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_country_or_region: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_place_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_station: Option<I18nText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extension_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub join_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub staff_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub positions: Option<Vec<Position>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_title_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_level_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_family_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub first_work_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub first_join_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probation_period: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub regularization_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub convert_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract_subject: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resign_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resign_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resign_remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resign_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cancelled_entry_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cancelled_entry_remark: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub birthday: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nationality: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_place: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ethnicity: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub marital_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub politics_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub registered_residence_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub social_security_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provident_fund_number: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_frozen: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub frozen_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field_value_map: Option<std::collections::HashMap<String, CustomFieldValue>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field_values: Option<Vec<CustomFieldValue>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub virtual_org_infos: Option<Vec<UpsertUserVirtualOrgInfo>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateEmployeeOptions {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub geo_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub home_user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_trace_info: Option<DirectoryEmployeeTraceInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enterprise_email_password: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data_source: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subscription_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub need_send_notification: Option<SendNotification>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DirectoryOperator {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResignedEmployeeResourceReceiver {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_chat_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_chat_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub docs_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calendar_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub helpdesk_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub aweme_owner: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub minutes_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub survey_acceptor_employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub anycross_acceptor_employee_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeleteEmployeeOptions {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resigned_employee_resource_receiver: Option<ResignedEmployeeResourceReceiver>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<DirectoryOperator>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResurrectEmployeeOptions {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subscription_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenapiOptions {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_id_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub job_title_id_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_place_id_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_dimension_id_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_set_id_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SetEmployeePreResigned {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resign_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resign_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resign_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resign_remark: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CollaborationRuleReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subjects: Option<CollaborationRuleEntities>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub objects: Option<CollaborationRuleEntities>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateDepartmentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<CreateDepartmentInput>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FilterDepartmentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filter: Option<MultiFilterCondition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_fields: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_request: Option<PageCondition>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MgetDepartmentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_fields: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchDepartmentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department: Option<UpdateDepartmentInput>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchDepartmentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub query: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_request: Option<PageCondition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_fields: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filter: Option<SearchDepartmentFilter>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateEmployeeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee: Option<DirectoryEmployeeInput>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<CreateEmployeeOptions>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeleteEmployeeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<DeleteEmployeeOptions>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FilterEmployeeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filter: Option<MultiFilterCondition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_fields: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_request: Option<PageCondition>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MgetEmployeeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_fields: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchEmployeeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee: Option<DirectoryEmployeeInput>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RegularEmployeeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub openapi_options: Option<OpenapiOptions>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResurrectEmployeeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_order_in_departments: Option<Vec<UpsertUserDepartmentSortInfo>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<ResurrectEmployeeOptions>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchEmployeeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub query: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_request: Option<PageCondition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_fields: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filter: Option<SearchEmployeeFilter>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ToBeResignedEmployeeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee: Option<SetEmployeePreResigned>,
+}
+
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -557,7 +1057,7 @@ pub struct EmployeeBaseEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_registered: Option<bool>,
     #[serde(default)]
-    pub department_path_infos: Vec<serde_json::Value>,
+    pub department_path_infos: Vec<Vec<DepartmentBaseInfo>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resign_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1261,13 +1761,13 @@ pub struct CollaborationRuleResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateCollaborationRuleQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CollaborationRuleReqBody,
     pub target_tenant_key: Option<&'a str>,
     pub tenant_id: Option<&'a str>,
 }
 
 impl<'a> CreateCollaborationRuleQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CollaborationRuleReqBody) -> Self {
         Self {
             body,
             target_tenant_key: None,
@@ -1363,13 +1863,13 @@ impl<'a> ListCollaborationRuleQuery<'a> {
 #[non_exhaustive]
 pub struct UpdateCollaborationRuleQuery<'a> {
     pub collaboration_rule_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a CollaborationRuleReqBody,
     pub target_tenant_key: Option<&'a str>,
     pub tenant_id: Option<&'a str>,
 }
 
 impl<'a> UpdateCollaborationRuleQuery<'a> {
-    pub fn new(collaboration_rule_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(collaboration_rule_id: &'a str, body: &'a CollaborationRuleReqBody) -> Self {
         Self {
             collaboration_rule_id,
             body,
@@ -1392,7 +1892,7 @@ impl<'a> UpdateCollaborationRuleQuery<'a> {
 impl CollaborationRuleResource<'_> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &CollaborationRuleReqBody,
         target_tenant_key: Option<&str>,
         tenant_id: Option<&str>,
         option: &RequestOption,
@@ -1495,7 +1995,7 @@ impl CollaborationRuleResource<'_> {
     pub async fn update(
         &self,
         collaboration_rule_id: &str,
-        body: &serde_json::Value,
+        body: &CollaborationRuleReqBody,
         target_tenant_key: Option<&str>,
         tenant_id: Option<&str>,
         option: &RequestOption,
@@ -1762,7 +2262,7 @@ macro_rules! impl_directory_tenant_setter {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateDepartmentQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateDepartmentReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
@@ -1770,7 +2270,7 @@ pub struct CreateDepartmentQuery<'a> {
 }
 
 impl<'a> CreateDepartmentQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CreateDepartmentReqBody) -> Self {
         Self {
             body,
             employee_id_type: None,
@@ -1815,7 +2315,7 @@ impl<'a> DeleteDepartmentQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct FilterDepartmentQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a FilterDepartmentReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
@@ -1823,7 +2323,7 @@ pub struct FilterDepartmentQuery<'a> {
 }
 
 impl<'a> FilterDepartmentQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a FilterDepartmentReqBody) -> Self {
         Self {
             body,
             employee_id_type: None,
@@ -1840,14 +2340,14 @@ impl<'a> FilterDepartmentQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct MgetDepartmentQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a MgetDepartmentReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
 }
 
 impl<'a> MgetDepartmentQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a MgetDepartmentReqBody) -> Self {
         Self {
             body,
             employee_id_type: None,
@@ -1863,14 +2363,14 @@ impl<'a> MgetDepartmentQuery<'a> {
 #[non_exhaustive]
 pub struct PatchDepartmentQuery<'a> {
     pub department_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchDepartmentReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
 }
 
 impl<'a> PatchDepartmentQuery<'a> {
-    pub fn new(department_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(department_id: &'a str, body: &'a PatchDepartmentReqBody) -> Self {
         Self {
             department_id,
             body,
@@ -1886,7 +2386,7 @@ impl<'a> PatchDepartmentQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct SearchDirectoryDepartmentQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a SearchDepartmentReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
@@ -1894,7 +2394,7 @@ pub struct SearchDirectoryDepartmentQuery<'a> {
 }
 
 impl<'a> SearchDirectoryDepartmentQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a SearchDepartmentReqBody) -> Self {
         Self {
             body,
             employee_id_type: None,
@@ -1911,7 +2411,7 @@ impl<'a> SearchDirectoryDepartmentQuery<'a> {
 impl DepartmentResource<'_> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &CreateDepartmentReqBody,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
@@ -1984,7 +2484,7 @@ impl DepartmentResource<'_> {
 
     pub async fn filter(
         &self,
-        body: &serde_json::Value,
+        body: &FilterDepartmentReqBody,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
@@ -2022,7 +2522,7 @@ impl DepartmentResource<'_> {
 
     pub async fn mget(
         &self,
-        body: &serde_json::Value,
+        body: &MgetDepartmentReqBody,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
@@ -2058,7 +2558,7 @@ impl DepartmentResource<'_> {
     pub async fn patch(
         &self,
         department_id: &str,
-        body: &serde_json::Value,
+        body: &PatchDepartmentReqBody,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
@@ -2097,7 +2597,7 @@ impl DepartmentResource<'_> {
 
     pub async fn search(
         &self,
-        body: &serde_json::Value,
+        body: &SearchDepartmentReqBody,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
@@ -2143,7 +2643,7 @@ pub struct EmployeeResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateDirectoryEmployeeQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateEmployeeReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
@@ -2151,7 +2651,7 @@ pub struct CreateDirectoryEmployeeQuery<'a> {
 }
 
 impl<'a> CreateDirectoryEmployeeQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CreateEmployeeReqBody) -> Self {
         Self {
             body,
             employee_id_type: None,
@@ -2169,7 +2669,7 @@ impl<'a> CreateDirectoryEmployeeQuery<'a> {
 #[non_exhaustive]
 pub struct DeleteDirectoryEmployeeQuery<'a> {
     pub employee_id: &'a str,
-    pub body: Option<&'a serde_json::Value>,
+    pub body: Option<&'a DeleteEmployeeReqBody>,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
@@ -2186,7 +2686,7 @@ impl<'a> DeleteDirectoryEmployeeQuery<'a> {
         }
     }
 
-    pub fn body(mut self, value: impl Into<Option<&'a serde_json::Value>>) -> Self {
+    pub fn body(mut self, value: impl Into<Option<&'a DeleteEmployeeReqBody>>) -> Self {
         self.body = value.into();
         self
     }
@@ -2197,7 +2697,7 @@ impl<'a> DeleteDirectoryEmployeeQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct FilterEmployeeQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a FilterEmployeeReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
@@ -2205,7 +2705,7 @@ pub struct FilterEmployeeQuery<'a> {
 }
 
 impl<'a> FilterEmployeeQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a FilterEmployeeReqBody) -> Self {
         Self {
             body,
             employee_id_type: None,
@@ -2222,14 +2722,14 @@ impl<'a> FilterEmployeeQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct MgetEmployeeQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a MgetEmployeeReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
 }
 
 impl<'a> MgetEmployeeQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a MgetEmployeeReqBody) -> Self {
         Self {
             body,
             employee_id_type: None,
@@ -2245,14 +2745,14 @@ impl<'a> MgetEmployeeQuery<'a> {
 #[non_exhaustive]
 pub struct PatchEmployeeQuery<'a> {
     pub employee_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchEmployeeReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
 }
 
 impl<'a> PatchEmployeeQuery<'a> {
-    pub fn new(employee_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(employee_id: &'a str, body: &'a PatchEmployeeReqBody) -> Self {
         Self {
             employee_id,
             body,
@@ -2269,7 +2769,7 @@ impl<'a> PatchEmployeeQuery<'a> {
 #[non_exhaustive]
 pub struct RegularDirectoryEmployeeQuery<'a> {
     pub employee_id: &'a str,
-    pub body: Option<&'a serde_json::Value>,
+    pub body: Option<&'a RegularEmployeeReqBody>,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
@@ -2286,7 +2786,7 @@ impl<'a> RegularDirectoryEmployeeQuery<'a> {
         }
     }
 
-    pub fn body(mut self, value: impl Into<Option<&'a serde_json::Value>>) -> Self {
+    pub fn body(mut self, value: impl Into<Option<&'a RegularEmployeeReqBody>>) -> Self {
         self.body = value.into();
         self
     }
@@ -2298,7 +2798,7 @@ impl<'a> RegularDirectoryEmployeeQuery<'a> {
 #[non_exhaustive]
 pub struct ResurrectDirectoryEmployeeQuery<'a> {
     pub employee_id: &'a str,
-    pub body: Option<&'a serde_json::Value>,
+    pub body: Option<&'a ResurrectEmployeeReqBody>,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
@@ -2315,7 +2815,7 @@ impl<'a> ResurrectDirectoryEmployeeQuery<'a> {
         }
     }
 
-    pub fn body(mut self, value: impl Into<Option<&'a serde_json::Value>>) -> Self {
+    pub fn body(mut self, value: impl Into<Option<&'a ResurrectEmployeeReqBody>>) -> Self {
         self.body = value.into();
         self
     }
@@ -2326,7 +2826,7 @@ impl<'a> ResurrectDirectoryEmployeeQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct SearchDirectoryEmployeeQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a SearchEmployeeReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
@@ -2334,7 +2834,7 @@ pub struct SearchDirectoryEmployeeQuery<'a> {
 }
 
 impl<'a> SearchDirectoryEmployeeQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a SearchEmployeeReqBody) -> Self {
         Self {
             body,
             employee_id_type: None,
@@ -2352,14 +2852,14 @@ impl<'a> SearchDirectoryEmployeeQuery<'a> {
 #[non_exhaustive]
 pub struct ToBeResignedDirectoryEmployeeQuery<'a> {
     pub employee_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a ToBeResignedEmployeeReqBody,
     pub employee_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
     pub is_admin_role: Option<bool>,
 }
 
 impl<'a> ToBeResignedDirectoryEmployeeQuery<'a> {
-    pub fn new(employee_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(employee_id: &'a str, body: &'a ToBeResignedEmployeeReqBody) -> Self {
         Self {
             employee_id,
             body,
@@ -2375,7 +2875,7 @@ impl<'a> ToBeResignedDirectoryEmployeeQuery<'a> {
 impl EmployeeResource<'_> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &CreateEmployeeReqBody,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
@@ -2414,7 +2914,7 @@ impl EmployeeResource<'_> {
     pub async fn delete(
         &self,
         employee_id: &str,
-        body: Option<&serde_json::Value>,
+        body: Option<&DeleteEmployeeReqBody>,
         employee_id_type: Option<&str>,
         is_admin_role: Option<bool>,
         department_id_type: Option<&str>,
@@ -2456,7 +2956,7 @@ impl EmployeeResource<'_> {
 
     pub async fn filter(
         &self,
-        body: &serde_json::Value,
+        body: &FilterEmployeeReqBody,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
@@ -2494,7 +2994,7 @@ impl EmployeeResource<'_> {
 
     pub async fn mget(
         &self,
-        body: &serde_json::Value,
+        body: &MgetEmployeeReqBody,
         is_admin_role: Option<bool>,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
@@ -2530,7 +3030,7 @@ impl EmployeeResource<'_> {
     pub async fn patch(
         &self,
         employee_id: &str,
-        body: &serde_json::Value,
+        body: &PatchEmployeeReqBody,
         employee_id_type: Option<&str>,
         is_admin_role: Option<bool>,
         department_id_type: Option<&str>,
@@ -2567,7 +3067,7 @@ impl EmployeeResource<'_> {
     pub async fn regular(
         &self,
         employee_id: &str,
-        body: Option<&serde_json::Value>,
+        body: Option<&RegularEmployeeReqBody>,
         is_admin_role: Option<bool>,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
@@ -2613,7 +3113,7 @@ impl EmployeeResource<'_> {
     pub async fn resurrect(
         &self,
         employee_id: &str,
-        body: Option<&serde_json::Value>,
+        body: Option<&ResurrectEmployeeReqBody>,
         employee_id_type: Option<&str>,
         is_admin_role: Option<bool>,
         department_id_type: Option<&str>,
@@ -2658,7 +3158,7 @@ impl EmployeeResource<'_> {
 
     pub async fn search(
         &self,
-        body: &serde_json::Value,
+        body: &SearchEmployeeReqBody,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,
         is_admin_role: Option<bool>,
@@ -2697,7 +3197,7 @@ impl EmployeeResource<'_> {
     pub async fn to_be_resigned(
         &self,
         employee_id: &str,
-        body: &serde_json::Value,
+        body: &ToBeResignedEmployeeReqBody,
         is_admin_role: Option<bool>,
         employee_id_type: Option<&str>,
         department_id_type: Option<&str>,

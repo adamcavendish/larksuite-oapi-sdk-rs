@@ -533,6 +533,300 @@ pub struct ActivitySubscriptionListData {
     pub has_more: Option<bool>,
 }
 
+// ── Mutation request types ──────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2InputComment {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reply_to_comment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2InputOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub insert_before: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub insert_after: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_hidden: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2InputSelectSetting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<Vec<TaskV2InputOption>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2InputCustomField {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
+    pub type_: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_setting: Option<TaskV2NumberSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_setting: Option<TaskV2MemberSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub datetime_setting: Option<TaskV2DatetimeSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub single_select_setting: Option<TaskV2InputSelectSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub multi_select_setting: Option<TaskV2InputSelectSetting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_setting: Option<TaskV2TextSetting>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2InputCustomFieldValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub guid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_value: Option<Vec<TaskV2Member>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub datetime_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub single_select_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub multi_select_value: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2DocxSource {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2InputTask {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub due: Option<TaskV2Due>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub origin: Option<TaskV2Origin>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub members: Option<Vec<TaskV2Member>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub repeat_rule: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_complete: Option<TaskV2CustomComplete>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tasklists: Option<Vec<TaskV2TasklistInfo>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start: Option<TaskV2Start>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reminders: Option<Vec<TaskV2Reminder>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mode: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_milestone: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_fields: Option<Vec<TaskV2InputCustomFieldValue>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub docx_source: Option<TaskV2DocxSource>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub positive_reminders: Option<Vec<TaskV2Reminder>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_task_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_task_progress: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_deliveries: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2InputTasklist {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub members: Option<Vec<TaskV2Member>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner: Option<TaskV2Member>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub archive_tasklist: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchTaskV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task: Option<TaskV2InputTask>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_fields: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchCommentV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<TaskV2InputComment>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_fields: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddOrRemoveCustomFieldV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchCustomFieldV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_field: Option<TaskV2InputCustomField>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_fields: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchCustomFieldOptionV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option: Option<TaskV2InputOption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_fields: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2InputSection {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub insert_before: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub insert_after: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchSectionV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub section: Option<TaskV2InputSection>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_fields: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DependenciesTaskV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dependencies: Option<Vec<TaskV2Dependency>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddMembersTaskV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub members: Option<Vec<TaskV2Member>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MembersTaskV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub members: Option<Vec<TaskV2Member>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RemindersTaskV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reminders: Option<Vec<TaskV2Reminder>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RemoveRemindersTaskV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reminder_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddTasklistTaskV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tasklist_guid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub section_guid: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RemoveTasklistTaskV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tasklist_guid: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SetAncestorTaskV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ancestor_guid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchTasklistV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tasklist: Option<TaskV2InputTasklist>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_fields: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub origin_owner_to_role: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TaskV2ActivitySubscriptionInput {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub guid: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subscribers: Option<Vec<TaskV2Member>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub include_keys: Option<Vec<i32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disabled: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchActivitySubscriptionV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_subscription: Option<TaskV2ActivitySubscriptionInput>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_fields: Option<Vec<String>>,
+}
+
 // ── Params types ───────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -619,12 +913,12 @@ impl<'a> ListTaskV2Query<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct CreateTaskV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a TaskV2InputTask,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateTaskV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a TaskV2InputTask) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -660,12 +954,12 @@ impl<'a> GetTaskV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct PatchTaskV2Query<'a> {
     pub task_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchTaskV2ReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> PatchTaskV2Query<'a> {
-    pub fn new(task_guid: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(task_guid: &'a str, body: &'a PatchTaskV2ReqBody) -> Self {
         Self {
             task_guid,
             body,
@@ -691,25 +985,25 @@ impl<'a> DeleteTaskV2Query<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct TaskBodyV2Query<'a> {
+pub struct TaskBodyV2Query<'a, B> {
     pub task_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a B,
 }
 
-impl<'a> TaskBodyV2Query<'a> {
-    pub fn new(task_guid: &'a str, body: &'a serde_json::Value) -> Self {
+impl<'a, B> TaskBodyV2Query<'a, B> {
+    pub fn new(task_guid: &'a str, body: &'a B) -> Self {
         Self { task_guid, body }
     }
 }
 
-pub type AddMembersTaskV2Query<'a> = TaskBodyV2Query<'a>;
-pub type RemoveMembersTaskV2Query<'a> = TaskBodyV2Query<'a>;
-pub type AddRemindersTaskV2Query<'a> = TaskBodyV2Query<'a>;
-pub type RemoveRemindersTaskV2Query<'a> = TaskBodyV2Query<'a>;
-pub type AddDependenciesTaskV2Query<'a> = TaskBodyV2Query<'a>;
-pub type RemoveDependenciesTaskV2Query<'a> = TaskBodyV2Query<'a>;
-pub type AddTasklistTaskV2Query<'a> = TaskBodyV2Query<'a>;
-pub type RemoveTasklistTaskV2Query<'a> = TaskBodyV2Query<'a>;
+pub type AddMembersTaskV2Query<'a> = TaskBodyV2Query<'a, AddMembersTaskV2ReqBody>;
+pub type RemoveMembersTaskV2Query<'a> = TaskBodyV2Query<'a, MembersTaskV2ReqBody>;
+pub type AddRemindersTaskV2Query<'a> = TaskBodyV2Query<'a, RemindersTaskV2ReqBody>;
+pub type RemoveRemindersTaskV2Query<'a> = TaskBodyV2Query<'a, RemoveRemindersTaskV2ReqBody>;
+pub type AddDependenciesTaskV2Query<'a> = TaskBodyV2Query<'a, DependenciesTaskV2ReqBody>;
+pub type RemoveDependenciesTaskV2Query<'a> = TaskBodyV2Query<'a, DependenciesTaskV2ReqBody>;
+pub type AddTasklistTaskV2Query<'a> = TaskBodyV2Query<'a, AddTasklistTaskV2ReqBody>;
+pub type RemoveTasklistTaskV2Query<'a> = TaskBodyV2Query<'a, RemoveTasklistTaskV2ReqBody>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TasklistsTaskV2Query<'a> {
@@ -734,12 +1028,12 @@ impl<'a> TasklistsTaskV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct CreateTaskSubtaskV2Query<'a> {
     pub task_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a TaskV2InputTask,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateTaskSubtaskV2Query<'a> {
-    pub fn new(task_guid: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(task_guid: &'a str, body: &'a TaskV2InputTask) -> Self {
         Self {
             task_guid,
             body,
@@ -864,12 +1158,12 @@ impl<'a> ListAttachmentV2Query<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct CreateCommentV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a TaskV2InputComment,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateCommentV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a TaskV2InputComment) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -905,12 +1199,12 @@ impl<'a> GetCommentV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct PatchCommentV2Query<'a> {
     pub comment_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchCommentV2ReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> PatchCommentV2Query<'a> {
-    pub fn new(comment_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(comment_id: &'a str, body: &'a PatchCommentV2ReqBody) -> Self {
         Self {
             comment_id,
             body,
@@ -977,12 +1271,12 @@ impl<'a> ListCommentV2Query<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct CreateCustomFieldV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a TaskV2InputCustomField,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateCustomFieldV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a TaskV2InputCustomField) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -1018,12 +1312,12 @@ impl<'a> GetCustomFieldV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct PatchCustomFieldV2Query<'a> {
     pub custom_field_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchCustomFieldV2ReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> PatchCustomFieldV2Query<'a> {
-    pub fn new(custom_field_guid: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(custom_field_guid: &'a str, body: &'a PatchCustomFieldV2ReqBody) -> Self {
         Self {
             custom_field_guid,
             body,
@@ -1078,13 +1372,13 @@ impl<'a> ListCustomFieldV2Query<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct CustomFieldBodyV2Query<'a> {
+pub struct CustomFieldBodyV2Query<'a, B> {
     pub custom_field_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a B,
 }
 
-impl<'a> CustomFieldBodyV2Query<'a> {
-    pub fn new(custom_field_guid: &'a str, body: &'a serde_json::Value) -> Self {
+impl<'a, B> CustomFieldBodyV2Query<'a, B> {
+    pub fn new(custom_field_guid: &'a str, body: &'a B) -> Self {
         Self {
             custom_field_guid,
             body,
@@ -1092,22 +1386,22 @@ impl<'a> CustomFieldBodyV2Query<'a> {
     }
 }
 
-pub type AddCustomFieldV2Query<'a> = CustomFieldBodyV2Query<'a>;
-pub type RemoveCustomFieldV2Query<'a> = CustomFieldBodyV2Query<'a>;
-pub type CreateCustomFieldOptionV2Query<'a> = CustomFieldBodyV2Query<'a>;
+pub type AddCustomFieldV2Query<'a> = CustomFieldBodyV2Query<'a, AddOrRemoveCustomFieldV2ReqBody>;
+pub type RemoveCustomFieldV2Query<'a> = CustomFieldBodyV2Query<'a, AddOrRemoveCustomFieldV2ReqBody>;
+pub type CreateCustomFieldOptionV2Query<'a> = CustomFieldBodyV2Query<'a, TaskV2InputOption>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct PatchCustomFieldOptionV2Query<'a> {
     pub custom_field_guid: &'a str,
     pub option_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchCustomFieldOptionV2ReqBody,
 }
 
 impl<'a> PatchCustomFieldOptionV2Query<'a> {
     pub fn new(
         custom_field_guid: &'a str,
         option_guid: &'a str,
-        body: &'a serde_json::Value,
+        body: &'a PatchCustomFieldOptionV2ReqBody,
     ) -> Self {
         Self {
             custom_field_guid,
@@ -1119,12 +1413,12 @@ impl<'a> PatchCustomFieldOptionV2Query<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct CreateSectionV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a TaskV2InputSection,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateSectionV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a TaskV2InputSection) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -1160,12 +1454,12 @@ impl<'a> GetSectionV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct PatchSectionV2Query<'a> {
     pub section_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchSectionV2ReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> PatchSectionV2Query<'a> {
-    pub fn new(section_guid: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(section_guid: &'a str, body: &'a PatchSectionV2ReqBody) -> Self {
         Self {
             section_guid,
             body,
@@ -1246,12 +1540,12 @@ impl<'a> TasksSectionV2Query<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct CreateTasklistV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a TaskV2InputTasklist,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateTasklistV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a TaskV2InputTasklist) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -1287,12 +1581,12 @@ impl<'a> GetTasklistV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct PatchTasklistV2Query<'a> {
     pub tasklist_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchTasklistV2ReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> PatchTasklistV2Query<'a> {
-    pub fn new(tasklist_guid: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(tasklist_guid: &'a str, body: &'a PatchTasklistV2ReqBody) -> Self {
         Self {
             tasklist_guid,
             body,
@@ -1340,14 +1634,14 @@ impl<'a> ListTasklistV2Query<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct TasklistBodyV2Query<'a> {
+pub struct TasklistBodyV2Query<'a, B> {
     pub tasklist_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a B,
     pub user_id_type: Option<&'a str>,
 }
 
-impl<'a> TasklistBodyV2Query<'a> {
-    pub fn new(tasklist_guid: &'a str, body: &'a serde_json::Value) -> Self {
+impl<'a, B> TasklistBodyV2Query<'a, B> {
+    pub fn new(tasklist_guid: &'a str, body: &'a B) -> Self {
         Self {
             tasklist_guid,
             body,
@@ -1361,8 +1655,8 @@ impl<'a> TasklistBodyV2Query<'a> {
     }
 }
 
-pub type AddMembersTasklistV2Query<'a> = TasklistBodyV2Query<'a>;
-pub type RemoveMembersTasklistV2Query<'a> = TasklistBodyV2Query<'a>;
+pub type AddMembersTasklistV2Query<'a> = TasklistBodyV2Query<'a, MembersTaskV2ReqBody>;
+pub type RemoveMembersTasklistV2Query<'a> = TasklistBodyV2Query<'a, MembersTaskV2ReqBody>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TasksTasklistV2Query<'a> {
@@ -1387,12 +1681,12 @@ impl<'a> TasksTasklistV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct CreateActivitySubscriptionV2Query<'a> {
     pub tasklist_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a TaskV2ActivitySubscriptionInput,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateActivitySubscriptionV2Query<'a> {
-    pub fn new(tasklist_guid: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(tasklist_guid: &'a str, body: &'a TaskV2ActivitySubscriptionInput) -> Self {
         Self {
             tasklist_guid,
             body,
@@ -1432,7 +1726,7 @@ impl<'a> GetActivitySubscriptionV2Query<'a> {
 pub struct PatchActivitySubscriptionV2Query<'a> {
     pub tasklist_guid: &'a str,
     pub activity_subscription_guid: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchActivitySubscriptionV2ReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
@@ -1440,7 +1734,7 @@ impl<'a> PatchActivitySubscriptionV2Query<'a> {
     pub fn new(
         tasklist_guid: &'a str,
         activity_subscription_guid: &'a str,
-        body: &'a serde_json::Value,
+        body: &'a PatchActivitySubscriptionV2ReqBody,
     ) -> Self {
         Self {
             tasklist_guid,
@@ -1586,7 +1880,7 @@ pub struct TaskV2Resource<'a> {
 impl<'a> TaskV2Resource<'a> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &TaskV2InputTask,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateTaskV2Resp, LarkError> {
@@ -1643,7 +1937,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn patch(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &PatchTaskV2ReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchTaskV2Resp, LarkError> {
@@ -1733,7 +2027,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn add_members(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &AddMembersTaskV2ReqBody,
         option: &RequestOption,
     ) -> Result<AddMembersTaskV2Resp, LarkError> {
         let query = AddMembersTaskV2Query::new(task_guid, body);
@@ -1761,7 +2055,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn remove_members(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &MembersTaskV2ReqBody,
         option: &RequestOption,
     ) -> Result<RemoveMembersTaskV2Resp, LarkError> {
         let query = RemoveMembersTaskV2Query::new(task_guid, body);
@@ -1792,7 +2086,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn add_reminders(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &RemindersTaskV2ReqBody,
         option: &RequestOption,
     ) -> Result<AddRemindersTaskV2Resp, LarkError> {
         let query = AddRemindersTaskV2Query::new(task_guid, body);
@@ -1820,7 +2114,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn remove_reminders(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &RemoveRemindersTaskV2ReqBody,
         option: &RequestOption,
     ) -> Result<RemoveRemindersTaskV2Resp, LarkError> {
         let query = RemoveRemindersTaskV2Query::new(task_guid, body);
@@ -1851,7 +2145,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn add_dependencies(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &DependenciesTaskV2ReqBody,
         option: &RequestOption,
     ) -> Result<AddDependenciesTaskV2Resp, LarkError> {
         let query = AddDependenciesTaskV2Query::new(task_guid, body);
@@ -1882,7 +2176,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn remove_dependencies(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &DependenciesTaskV2ReqBody,
         option: &RequestOption,
     ) -> Result<RemoveDependenciesTaskV2Resp, LarkError> {
         let query = RemoveDependenciesTaskV2Query::new(task_guid, body);
@@ -1913,7 +2207,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn add_tasklist(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &AddTasklistTaskV2ReqBody,
         option: &RequestOption,
     ) -> Result<AddTasklistTaskV2Resp, LarkError> {
         let query = AddTasklistTaskV2Query::new(task_guid, body);
@@ -1941,7 +2235,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn remove_tasklist(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &RemoveTasklistTaskV2ReqBody,
         option: &RequestOption,
     ) -> Result<RemoveTasklistTaskV2Resp, LarkError> {
         let query = RemoveTasklistTaskV2Query::new(task_guid, body);
@@ -2000,7 +2294,7 @@ impl<'a> TaskV2Resource<'a> {
     pub async fn create_subtask(
         &self,
         task_guid: &str,
-        body: &serde_json::Value,
+        body: &TaskV2InputTask,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateTaskSubtaskV2Resp, LarkError> {
@@ -2194,7 +2488,7 @@ pub struct CommentV2Resource<'a> {
 impl<'a> CommentV2Resource<'a> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &TaskV2InputComment,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateCommentV2Resp, LarkError> {
@@ -2251,7 +2545,7 @@ impl<'a> CommentV2Resource<'a> {
     pub async fn patch(
         &self,
         comment_id: &str,
-        body: &serde_json::Value,
+        body: &PatchCommentV2ReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchCommentV2Resp, LarkError> {
@@ -2352,7 +2646,7 @@ pub struct CustomFieldV2Resource<'a> {
 impl<'a> CustomFieldV2Resource<'a> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &TaskV2InputCustomField,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateCustomFieldV2Resp, LarkError> {
@@ -2412,7 +2706,7 @@ impl<'a> CustomFieldV2Resource<'a> {
     pub async fn patch(
         &self,
         custom_field_guid: &str,
-        body: &serde_json::Value,
+        body: &PatchCustomFieldV2ReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchCustomFieldV2Resp, LarkError> {
@@ -2484,7 +2778,7 @@ impl<'a> CustomFieldV2Resource<'a> {
     pub async fn add(
         &self,
         custom_field_guid: &str,
-        body: &serde_json::Value,
+        body: &AddOrRemoveCustomFieldV2ReqBody,
         option: &RequestOption,
     ) -> Result<AddCustomFieldV2Resp, LarkError> {
         let query = AddCustomFieldV2Query::new(custom_field_guid, body);
@@ -2515,7 +2809,7 @@ impl<'a> CustomFieldV2Resource<'a> {
     pub async fn remove(
         &self,
         custom_field_guid: &str,
-        body: &serde_json::Value,
+        body: &AddOrRemoveCustomFieldV2ReqBody,
         option: &RequestOption,
     ) -> Result<RemoveCustomFieldV2Resp, LarkError> {
         let query = RemoveCustomFieldV2Query::new(custom_field_guid, body);
@@ -2546,7 +2840,7 @@ impl<'a> CustomFieldV2Resource<'a> {
     pub async fn create_option(
         &self,
         custom_field_guid: &str,
-        body: &serde_json::Value,
+        body: &TaskV2InputOption,
         option: &RequestOption,
     ) -> Result<CreateCustomFieldOptionV2Resp, LarkError> {
         let query = CreateCustomFieldOptionV2Query::new(custom_field_guid, body);
@@ -2578,7 +2872,7 @@ impl<'a> CustomFieldV2Resource<'a> {
         &self,
         custom_field_guid: &str,
         option_guid: &str,
-        body: &serde_json::Value,
+        body: &PatchCustomFieldOptionV2ReqBody,
         req_option: &RequestOption,
     ) -> Result<PatchCustomFieldOptionV2Resp, LarkError> {
         let query = PatchCustomFieldOptionV2Query::new(custom_field_guid, option_guid, body);
@@ -2616,7 +2910,7 @@ pub struct SectionV2Resource<'a> {
 impl<'a> SectionV2Resource<'a> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &TaskV2InputSection,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateSectionV2Resp, LarkError> {
@@ -2673,7 +2967,7 @@ impl<'a> SectionV2Resource<'a> {
     pub async fn patch(
         &self,
         section_guid: &str,
-        body: &serde_json::Value,
+        body: &PatchSectionV2ReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchSectionV2Resp, LarkError> {
@@ -2807,7 +3101,7 @@ pub struct TasklistV2Resource<'a> {
 impl<'a> TasklistV2Resource<'a> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &TaskV2InputTasklist,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateTasklistV2Resp, LarkError> {
@@ -2864,7 +3158,7 @@ impl<'a> TasklistV2Resource<'a> {
     pub async fn patch(
         &self,
         tasklist_guid: &str,
-        body: &serde_json::Value,
+        body: &PatchTasklistV2ReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchTasklistV2Resp, LarkError> {
@@ -2951,7 +3245,7 @@ impl<'a> TasklistV2Resource<'a> {
     pub async fn add_members(
         &self,
         tasklist_guid: &str,
-        body: &serde_json::Value,
+        body: &MembersTaskV2ReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<AddMembersTasklistV2Resp, LarkError> {
@@ -2984,7 +3278,7 @@ impl<'a> TasklistV2Resource<'a> {
     pub async fn remove_members(
         &self,
         tasklist_guid: &str,
-        body: &serde_json::Value,
+        body: &MembersTaskV2ReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<RemoveMembersTasklistV2Resp, LarkError> {
@@ -3052,7 +3346,7 @@ impl<'a> TasklistV2Resource<'a> {
     pub async fn create_activity_subscription(
         &self,
         tasklist_guid: &str,
-        body: &serde_json::Value,
+        body: &TaskV2ActivitySubscriptionInput,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateActivitySubscriptionV2Resp, LarkError> {
@@ -3122,7 +3416,7 @@ impl<'a> TasklistV2Resource<'a> {
         &self,
         tasklist_guid: &str,
         activity_subscription_guid: &str,
-        body: &serde_json::Value,
+        body: &PatchActivitySubscriptionV2ReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchActivitySubscriptionV2Resp, LarkError> {

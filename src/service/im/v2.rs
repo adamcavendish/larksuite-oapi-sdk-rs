@@ -90,6 +90,216 @@ pub struct TagFailureReason {
     pub duplicate_id: Option<String>,
 }
 
+// ── Mutation request types ──────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenAppFeedCardText {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenAppFeedCardUrl {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub android_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ios_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pc_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenAppFeedCardButton {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub multi_url: Option<OpenAppFeedCardUrl>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<OpenAppFeedCardText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub button_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action_map: Option<std::collections::HashMap<String, String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenAppFeedCardButtons {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub buttons: Option<Vec<OpenAppFeedCardButton>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenFeedStatusLabel {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenAppFeedLink {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppFeedNotify {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub close_notify: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_sound_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub with_custom_sound: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenAppFeedCard {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preview: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status_label: Option<OpenFeedStatusLabel>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub buttons: Option<OpenAppFeedCardButtons>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<OpenAppFeedLink>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_sensitive: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notify: Option<AppFeedNotify>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateAppFeedCardV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_feed_card: Option<OpenAppFeedCard>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserOpenAppFeedCardDeleter {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeleteAppFeedCardBatchV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feed_cards: Option<Vec<UserOpenAppFeedCardDeleter>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UserOpenAppFeedCardUpdater {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_feed_card: Option<OpenAppFeedCard>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_fields: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateAppFeedCardBatchV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feed_cards: Option<Vec<UserOpenAppFeedCardUpdater>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BizEntityTagRelationV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_biz_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biz_entity_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateChatButtonV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub buttons: Option<OpenAppFeedCardButtons>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BotTimeSensitiveFeedCardV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_sensitive: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchFeedCardV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_sensitive: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateTagV2Input {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_names: Option<Vec<TagI18nName>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateTagV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_tag: Option<CreateTagV2Input>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchTagV2Input {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n_names: Option<Vec<TagI18nName>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchTagV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub patch_tag: Option<PatchTagV2Input>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchUpdateUrlPreviewV2ReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preview_tokens: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_ids: Option<Vec<String>>,
+}
+
 // ── Response types ─────────────────────────────────────────────────────────────
 
 impl_resp_v2!(CreateAppFeedCardV2Resp, AppFeedCardData);
@@ -108,11 +318,11 @@ impl_resp_v2!(BatchUpdateUrlPreviewV2Resp, ());
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateAppFeedCardV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateAppFeedCardV2ReqBody,
 }
 
 impl<'a> CreateAppFeedCardV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CreateAppFeedCardV2ReqBody) -> Self {
         Self { body }
     }
 }
@@ -120,11 +330,11 @@ impl<'a> CreateAppFeedCardV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct DeleteAppFeedCardBatchV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a DeleteAppFeedCardBatchV2ReqBody,
 }
 
 impl<'a> DeleteAppFeedCardBatchV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a DeleteAppFeedCardBatchV2ReqBody) -> Self {
         Self { body }
     }
 }
@@ -132,11 +342,11 @@ impl<'a> DeleteAppFeedCardBatchV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct UpdateAppFeedCardBatchV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a UpdateAppFeedCardBatchV2ReqBody,
 }
 
 impl<'a> UpdateAppFeedCardBatchV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a UpdateAppFeedCardBatchV2ReqBody) -> Self {
         Self { body }
     }
 }
@@ -144,11 +354,11 @@ impl<'a> UpdateAppFeedCardBatchV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateBizEntityTagRelationV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a BizEntityTagRelationV2ReqBody,
 }
 
 impl<'a> CreateBizEntityTagRelationV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a BizEntityTagRelationV2ReqBody) -> Self {
         Self { body }
     }
 }
@@ -166,11 +376,11 @@ impl GetBizEntityTagRelationV2Query {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct UpdateBizEntityTagRelationV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a BizEntityTagRelationV2ReqBody,
 }
 
 impl<'a> UpdateBizEntityTagRelationV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a BizEntityTagRelationV2ReqBody) -> Self {
         Self { body }
     }
 }
@@ -178,11 +388,11 @@ impl<'a> UpdateBizEntityTagRelationV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct UpdateChatButtonV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a UpdateChatButtonV2ReqBody,
 }
 
 impl<'a> UpdateChatButtonV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a UpdateChatButtonV2ReqBody) -> Self {
         Self { body }
     }
 }
@@ -190,11 +400,11 @@ impl<'a> UpdateChatButtonV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct BotTimeSensitiveFeedCardV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a BotTimeSensitiveFeedCardV2ReqBody,
 }
 
 impl<'a> BotTimeSensitiveFeedCardV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a BotTimeSensitiveFeedCardV2ReqBody) -> Self {
         Self { body }
     }
 }
@@ -203,11 +413,11 @@ impl<'a> BotTimeSensitiveFeedCardV2Query<'a> {
 #[non_exhaustive]
 pub struct PatchFeedCardV2Query<'a> {
     pub feed_card_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchFeedCardV2ReqBody,
 }
 
 impl<'a> PatchFeedCardV2Query<'a> {
-    pub fn new(feed_card_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(feed_card_id: &'a str, body: &'a PatchFeedCardV2ReqBody) -> Self {
         Self { feed_card_id, body }
     }
 }
@@ -215,11 +425,11 @@ impl<'a> PatchFeedCardV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateTagV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateTagV2ReqBody,
 }
 
 impl<'a> CreateTagV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CreateTagV2ReqBody) -> Self {
         Self { body }
     }
 }
@@ -228,11 +438,11 @@ impl<'a> CreateTagV2Query<'a> {
 #[non_exhaustive]
 pub struct PatchTagV2Query<'a> {
     pub tag_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchTagV2ReqBody,
 }
 
 impl<'a> PatchTagV2Query<'a> {
-    pub fn new(tag_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(tag_id: &'a str, body: &'a PatchTagV2ReqBody) -> Self {
         Self { tag_id, body }
     }
 }
@@ -240,11 +450,11 @@ impl<'a> PatchTagV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct BatchUpdateUrlPreviewV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a BatchUpdateUrlPreviewV2ReqBody,
 }
 
 impl<'a> BatchUpdateUrlPreviewV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a BatchUpdateUrlPreviewV2ReqBody) -> Self {
         Self { body }
     }
 }
@@ -284,7 +494,7 @@ pub struct AppFeedCardV2Resource<'a> {
 impl AppFeedCardV2Resource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: CreateAppFeedCardV2ReqBody,
         option: &RequestOption,
     ) -> Result<CreateAppFeedCardV2Resp, LarkError> {
         let query = CreateAppFeedCardV2Query::new(&body);
@@ -318,7 +528,7 @@ pub struct AppFeedCardBatchV2Resource<'a> {
 impl AppFeedCardBatchV2Resource<'_> {
     pub async fn delete(
         &self,
-        body: serde_json::Value,
+        body: DeleteAppFeedCardBatchV2ReqBody,
         option: &RequestOption,
     ) -> Result<DeleteAppFeedCardBatchV2Resp, LarkError> {
         let query = DeleteAppFeedCardBatchV2Query::new(&body);
@@ -344,7 +554,7 @@ impl AppFeedCardBatchV2Resource<'_> {
 
     pub async fn update(
         &self,
-        body: serde_json::Value,
+        body: UpdateAppFeedCardBatchV2ReqBody,
         option: &RequestOption,
     ) -> Result<UpdateAppFeedCardBatchV2Resp, LarkError> {
         let query = UpdateAppFeedCardBatchV2Query::new(&body);
@@ -378,7 +588,7 @@ pub struct BizEntityTagRelationV2Resource<'a> {
 impl BizEntityTagRelationV2Resource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: BizEntityTagRelationV2ReqBody,
         option: &RequestOption,
     ) -> Result<CreateBizEntityTagRelationV2Resp, LarkError> {
         let query = CreateBizEntityTagRelationV2Query::new(&body);
@@ -428,7 +638,7 @@ impl BizEntityTagRelationV2Resource<'_> {
 
     pub async fn update(
         &self,
-        body: serde_json::Value,
+        body: BizEntityTagRelationV2ReqBody,
         option: &RequestOption,
     ) -> Result<UpdateBizEntityTagRelationV2Resp, LarkError> {
         let query = UpdateBizEntityTagRelationV2Query::new(&body);
@@ -462,7 +672,7 @@ pub struct ChatButtonV2Resource<'a> {
 impl ChatButtonV2Resource<'_> {
     pub async fn update(
         &self,
-        body: serde_json::Value,
+        body: UpdateChatButtonV2ReqBody,
         option: &RequestOption,
     ) -> Result<UpdateChatButtonV2Resp, LarkError> {
         let query = UpdateChatButtonV2Query::new(&body);
@@ -496,7 +706,7 @@ pub struct FeedCardV2Resource<'a> {
 impl FeedCardV2Resource<'_> {
     pub async fn bot_time_sensitive(
         &self,
-        body: serde_json::Value,
+        body: BotTimeSensitiveFeedCardV2ReqBody,
         option: &RequestOption,
     ) -> Result<BotTimeSensitiveFeedCardV2Resp, LarkError> {
         let query = BotTimeSensitiveFeedCardV2Query::new(&body);
@@ -523,7 +733,7 @@ impl FeedCardV2Resource<'_> {
     pub async fn patch(
         &self,
         feed_card_id: &str,
-        body: serde_json::Value,
+        body: PatchFeedCardV2ReqBody,
         option: &RequestOption,
     ) -> Result<PatchFeedCardV2Resp, LarkError> {
         let query = PatchFeedCardV2Query::new(feed_card_id, &body);
@@ -558,7 +768,7 @@ pub struct TagV2Resource<'a> {
 impl TagV2Resource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: CreateTagV2ReqBody,
         option: &RequestOption,
     ) -> Result<CreateTagV2Resp, LarkError> {
         let query = CreateTagV2Query::new(&body);
@@ -585,7 +795,7 @@ impl TagV2Resource<'_> {
     pub async fn patch(
         &self,
         tag_id: &str,
-        body: serde_json::Value,
+        body: PatchTagV2ReqBody,
         option: &RequestOption,
     ) -> Result<PatchTagV2Resp, LarkError> {
         let query = PatchTagV2Query::new(tag_id, &body);
@@ -620,7 +830,7 @@ pub struct UrlPreviewV2Resource<'a> {
 impl UrlPreviewV2Resource<'_> {
     pub async fn batch_update(
         &self,
-        body: serde_json::Value,
+        body: BatchUpdateUrlPreviewV2ReqBody,
         option: &RequestOption,
     ) -> Result<BatchUpdateUrlPreviewV2Resp, LarkError> {
         let query = BatchUpdateUrlPreviewV2Query::new(&body);

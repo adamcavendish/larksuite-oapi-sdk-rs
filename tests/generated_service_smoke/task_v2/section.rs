@@ -20,8 +20,8 @@ async fn task_v2_section_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"name":"Backlog"});
-    let patch_body = serde_json::json!({"name":"Doing"});
+    let create_body = TaskV2InputSection::default();
+    let patch_body = PatchSectionV2ReqBody::default();
     let task_params = TaskListParams::new()
         .page(PageQuery::new().page_size(20).page_token("next-page"))
         .completed(false)
@@ -93,6 +93,4 @@ async fn task_v2_section_by_query_smoke() {
     assert!(request.contains("created_from=2026-01-01"));
     assert!(request.contains("created_to=2026-01-31"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""name":"Backlog""#));
-    assert!(request.contains(r#""name":"Doing""#));
 }

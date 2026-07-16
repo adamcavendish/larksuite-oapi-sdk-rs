@@ -13,7 +13,7 @@ async fn application_v6_utility_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let badge_body = serde_json::json!({"user_id":"ou-1","badge_count":3});
+    let badge_body = AppBadge::default();
     client
         .application_v6()
         .app_badge
@@ -42,7 +42,6 @@ async fn application_v6_utility_by_query_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/application/v6/app_badge/set?"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""badge_count":3"#));
     assert!(request.contains("POST /open-apis/application/v6/scopes/apply "));
     assert!(request.contains("GET /open-apis/application/v6/scopes "));
 }

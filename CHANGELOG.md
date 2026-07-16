@@ -4,6 +4,10 @@
 
 ### REST service coverage
 
+- Replaced raw Task v2, Directory v1, Application v6, IM v2, and CardKit v1
+  mutation bodies with Go-shaped request models, including task collaboration,
+  directory employee lifecycle, application configuration, feed-card, tag,
+  and card-element operations.
 - Added typed Sheets v3 range-value, rich-text cell, find/replace, dimension,
   filter, sheet-property, and dropdown-option payloads. Range responses now
   expose structured range and update metadata instead of raw JSON.
