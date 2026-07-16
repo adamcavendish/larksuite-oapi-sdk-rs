@@ -1,5 +1,6 @@
 use larksuite_oapi_sdk_rs::service::{
     aily::v1 as aily_v1, board::v1 as board_v1, document_ai::v1, docx::v1 as docx_v1,
+    sheets::v3 as sheets_v3,
 };
 
 #[test]
@@ -689,5 +690,80 @@ fn docx_vc_and_task_models_use_existing_typed_graphs() {
     assert_eq!(
         serde_json::to_value(task).unwrap()["task"]["summary"],
         "Follow up"
+    );
+}
+
+#[test]
+fn sheets_models_serialize_and_deserialize_typed_value_and_filter_graphs() {
+    let single: sheets_v3::RangeValueData = serde_json::from_str(
+        r#"{
+            "revision": 12,
+            "spreadsheetToken": "sht_1",
+            "valueRange": {
+                "major_dimension": "ROWS",
+                "range": "sheet_1!A1:B1",
+                "values": [["Ada", 3, true]]
+            }
+        }"#,
+    )
+    .unwrap();
+    let rich: sheets_v3::RangeValueData = serde_json::from_str(
+        r#"{
+            "valueRanges": [{
+                "range": "sheet_1!A2",
+                "values": [[[{
+                    "type": "text",
+                    "text": {"text": "Roadmap", "segment_style": {"style": {"bold": true}}}
+                }]]]
+            }]
+        }"#,
+    )
+    .unwrap();
+    let body = sheets_v3::SetRangeValueReqBody {
+        value_range: Some(
+            sheets_v3::PlainTextValueRange {
+                range: Some("sheet_1!A1:B1".into()),
+                values: Some(vec![vec![
+                    Some(sheets_v3::SheetCellValue::Text("Ada".into())),
+                    Some(sheets_v3::SheetCellValue::Number(3.0)),
+                ]]),
+                ..Default::default()
+            }
+            .into(),
+        ),
+    };
+    let filter = sheets_v3::CreateSheetFilterReqBody {
+        range: Some("sheet_1!A1:C10".into()),
+        col: Some("B".into()),
+        condition: Some(sheets_v3::SheetFilterCondition {
+            filter_type: Some("text".into()),
+            compare_type: Some("textEqual".into()),
+            expected: Some(vec!["open".into()]),
+        }),
+    };
+
+    assert_eq!(single.revision, Some(12));
+    assert_eq!(single.spreadsheet_token.as_deref(), Some("sht_1"));
+    assert_eq!(single.value_range.unwrap().values.unwrap()[0].len(), 3);
+    match rich.value_ranges.unwrap().remove(0).values.unwrap()[0][0]
+        .as_ref()
+        .unwrap()
+    {
+        sheets_v3::SheetCellValue::RichText(elements) => assert_eq!(
+            elements[0]
+                .text
+                .as_ref()
+                .and_then(|text| text.text.as_deref()),
+            Some("Roadmap")
+        ),
+        _ => panic!("expected rich-text cell"),
+    }
+    assert_eq!(
+        serde_json::to_value(body).unwrap()["value_range"]["values"][0][0],
+        "Ada"
+    );
+    assert_eq!(
+        serde_json::to_value(filter).unwrap()["condition"]["expected"],
+        serde_json::json!(["open"])
     );
 }

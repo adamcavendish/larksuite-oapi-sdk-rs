@@ -67,6 +67,374 @@ pub struct GridRange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetText {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub segment_style: Option<SegmentStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SegmentStyle {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affected_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style: Option<SegmentStyleStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SegmentStyleStyle {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bold: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub italic: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub strike_through: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub underline: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fore_color: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub font_size: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetMentionUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notify: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub segment_style: Option<SegmentStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetMentionDocument {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub segment_style: Option<SegmentStyle>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetValueElement {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetDateTime {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetFile {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub segment_style: Option<SegmentStyle>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetImage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetLink {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub segment_styles: Option<Vec<SegmentStyle>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetReminder {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notify_date_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notify_user_id: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notify_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notify_strategy: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetFormula {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub formula: Option<String>,
+}
+
+/// A rich-text element in a Sheets cell.
+///
+/// This mirrors the Go SDK's `CellValue` model. A rich-text cell is represented
+/// as a list of these elements, while a plain-text cell uses `SheetCellValue`.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CellValue {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<SheetText>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mention_user: Option<SheetMentionUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mention_document: Option<SheetMentionDocument>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<SheetValueElement>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date_time: Option<SheetDateTime>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file: Option<SheetFile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image: Option<SheetImage>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<SheetLink>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reminder: Option<SheetReminder>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub formula: Option<SheetFormula>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum SheetCellValue {
+    Text(String),
+    Number(f64),
+    Boolean(bool),
+    RichText(Vec<CellValue>),
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PlainTextValueRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub major_dimension: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub values: Option<Vec<Vec<Option<SheetCellValue>>>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RichTextValueRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub major_dimension: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub values: Option<Vec<Vec<Vec<CellValue>>>>,
+}
+
+/// A Sheets value range whose cells can contain either scalar or rich-text data.
+///
+/// The Go SDK exposes separate plain- and rich-text request models. Responses
+/// do not carry a discriminator, so this unified representation preserves both
+/// wire shapes without ambiguous deserialization.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetValueRange {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub major_dimension: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub values: Option<Vec<Vec<Option<SheetCellValue>>>>,
+}
+
+impl From<PlainTextValueRange> for SheetValueRange {
+    fn from(value: PlainTextValueRange) -> Self {
+        Self {
+            major_dimension: value.major_dimension,
+            range: value.range,
+            values: value.values,
+        }
+    }
+}
+
+impl From<RichTextValueRange> for SheetValueRange {
+    fn from(value: RichTextValueRange) -> Self {
+        Self {
+            major_dimension: value.major_dimension,
+            range: value.range,
+            values: value.values.map(|rows| {
+                rows.into_iter()
+                    .map(|row| {
+                        row.into_iter()
+                            .map(|elements| Some(SheetCellValue::RichText(elements)))
+                            .collect()
+                    })
+                    .collect()
+            }),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RangeValueData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision: Option<i64>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "spreadsheetToken"
+    )]
+    pub spreadsheet_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "valueRange")]
+    pub value_range: Option<SheetValueRange>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "valueRanges"
+    )]
+    pub value_ranges: Option<Vec<SheetValueRange>>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "updatedRange"
+    )]
+    pub updated_range: Option<String>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "updatedRows"
+    )]
+    pub updated_rows: Option<i32>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "updatedColumns"
+    )]
+    pub updated_columns: Option<i32>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "updatedCells"
+    )]
+    pub updated_cells: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetProperties {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub row_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub column_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub frozen_row_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub frozen_column_count: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetDimension {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub major_dimension: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FindCondition {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub match_case: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub match_entire_cell: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub search_by_regex: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub include_formulas: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FindSheetReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub find_condition: Option<FindCondition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub find: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MoveDimensionReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<SheetDimension>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub destination_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReplaceSheetReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub find_condition: Option<FindCondition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub find: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub replacement: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetFilterCondition {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filter_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub compare_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetFilterInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filtered_out_rows: Option<Vec<i32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filter_infos: Option<Vec<SheetFilterColumn>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SheetFilterColumn {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub col: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditions: Option<Vec<SheetFilterCondition>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateSheetFilterReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub col: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition: Option<SheetFilterCondition>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateSheetFilterReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub col: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition: Option<SheetFilterCondition>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SheetFilterView {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub filter_view_id: Option<String>,
@@ -111,13 +479,21 @@ pub struct ConditionalFormat {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DataValidationOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_color: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DataValidation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dv_id: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dv_type: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub options: Option<Vec<serde_json::Value>>,
+    pub options: Option<Vec<DataValidationOption>>,
 }
 
 // ── Request body types ──
@@ -145,31 +521,31 @@ pub struct OperateSheetsReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PatchSheetReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub properties: Option<serde_json::Value>,
+    pub properties: Option<SheetProperties>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct SetRangeValueReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value_range: Option<serde_json::Value>,
+    pub value_range: Option<SheetValueRange>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct BatchSetRangeValueReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value_ranges: Option<Vec<serde_json::Value>>,
+    pub value_ranges: Option<Vec<SheetValueRange>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct AppendValueReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value_range: Option<serde_json::Value>,
+    pub value_range: Option<SheetValueRange>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PrependValueReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub value_range: Option<serde_json::Value>,
+    pub value_range: Option<SheetValueRange>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -237,7 +613,7 @@ pub struct SetDataValidationDropdownReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dv_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub options: Option<Vec<serde_json::Value>>,
+    pub options: Option<Vec<DataValidationOption>>,
 }
 
 // ── Response wrappers ──
@@ -328,12 +704,12 @@ impl_resp!(PatchSpreadsheetResp, SpreadsheetData);
 impl_resp!(GetSheetResp, Sheet);
 impl_resp!(QuerySheetResp, SheetListData);
 impl_resp!(OperateSheetsResp, OperateSheetsData);
-impl_resp!(GetRangeValueResp, serde_json::Value);
-impl_resp!(SetRangeValueResp, serde_json::Value);
-impl_resp!(BatchGetRangeValueResp, serde_json::Value);
-impl_resp!(BatchSetRangeValueResp, serde_json::Value);
-impl_resp!(AppendValueResp, serde_json::Value);
-impl_resp!(PrependValueResp, serde_json::Value);
+impl_resp!(GetRangeValueResp, RangeValueData);
+impl_resp!(SetRangeValueResp, RangeValueData);
+impl_resp!(BatchGetRangeValueResp, RangeValueData);
+impl_resp!(BatchSetRangeValueResp, RangeValueData);
+impl_resp!(AppendValueResp, RangeValueData);
+impl_resp!(PrependValueResp, RangeValueData);
 impl_resp!(CreateFilterViewResp, FilterViewData);
 impl_resp!(GetFilterViewResp, FilterViewData);
 impl_resp!(PatchFilterViewResp, FilterViewData);
@@ -352,7 +728,7 @@ impl_resp!(GetSheetFilterResp, SheetFilterData);
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SheetFilterData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub sheet_filter_info: Option<serde_json::Value>,
+    pub sheet_filter_info: Option<SheetFilterInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -539,7 +915,7 @@ impl<'a> SheetResource<'a> {
         &self,
         spreadsheet_token: &str,
         sheet_id: &str,
-        body: &serde_json::Value,
+        body: &FindSheetReqBody,
         option: &RequestOption,
     ) -> Result<FindSheetResp, LarkError> {
         let path =
@@ -560,7 +936,7 @@ impl<'a> SheetResource<'a> {
         &self,
         spreadsheet_token: &str,
         sheet_id: &str,
-        body: &serde_json::Value,
+        body: &MoveDimensionReqBody,
         option: &RequestOption,
     ) -> Result<MoveDimensionSheetResp, LarkError> {
         let path = format!(
@@ -582,7 +958,7 @@ impl<'a> SheetResource<'a> {
         &self,
         spreadsheet_token: &str,
         sheet_id: &str,
-        body: &serde_json::Value,
+        body: &ReplaceSheetReqBody,
         option: &RequestOption,
     ) -> Result<ReplaceSheetResp, LarkError> {
         let path = format!(
@@ -626,7 +1002,7 @@ impl<'a> RangeResource<'a> {
         .query("valueRenderOption", value_render_option)
         .query("dateTimeRenderOption", date_time_render_option)
         .query("user_id_type", user_id_type)
-        .send_response::<serde_json::Value, GetRangeValueResp>()
+        .send_response::<RangeValueData, GetRangeValueResp>()
         .await
     }
 
@@ -646,7 +1022,7 @@ impl<'a> RangeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_response::<serde_json::Value, SetRangeValueResp>()
+        .send_response::<RangeValueData, SetRangeValueResp>()
         .await
     }
 
@@ -672,7 +1048,7 @@ impl<'a> RangeResource<'a> {
         .query("valueRenderOption", value_render_option)
         .query("dateTimeRenderOption", date_time_render_option)
         .query("user_id_type", user_id_type)
-        .send_response::<serde_json::Value, BatchGetRangeValueResp>()
+        .send_response::<RangeValueData, BatchGetRangeValueResp>()
         .await
     }
 
@@ -692,7 +1068,7 @@ impl<'a> RangeResource<'a> {
             option,
         )
         .json_body(body)?
-        .send_response::<serde_json::Value, BatchSetRangeValueResp>()
+        .send_response::<RangeValueData, BatchSetRangeValueResp>()
         .await
     }
 
@@ -715,7 +1091,7 @@ impl<'a> RangeResource<'a> {
         .query("range", range)
         .query("insertDataOption", insert_data_option)
         .json_body(body)?
-        .send_response::<serde_json::Value, AppendValueResp>()
+        .send_response::<RangeValueData, AppendValueResp>()
         .await
     }
 
@@ -736,7 +1112,7 @@ impl<'a> RangeResource<'a> {
         )
         .query("range", range)
         .json_body(body)?
-        .send_response::<serde_json::Value, PrependValueResp>()
+        .send_response::<RangeValueData, PrependValueResp>()
         .await
     }
 
@@ -1276,7 +1652,7 @@ impl<'a> SheetFilterResource<'a> {
         &self,
         spreadsheet_token: &str,
         sheet_id: &str,
-        body: &serde_json::Value,
+        body: &CreateSheetFilterReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!(
@@ -1338,7 +1714,7 @@ impl<'a> SheetFilterResource<'a> {
         &self,
         spreadsheet_token: &str,
         sheet_id: &str,
-        body: &serde_json::Value,
+        body: &UpdateSheetFilterReqBody,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!(

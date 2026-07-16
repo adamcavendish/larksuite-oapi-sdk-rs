@@ -186,9 +186,11 @@ reference SDK defines response data, and unit responses where it does not.
 Their nested response objects follow the Go SDK model graph; raw JSON is kept
 only where the upstream shape is intentionally open-ended.
 
-Legacy response wrappers follow the same rule. The six Sheets range-value
-operations remain raw because the reference Go SDK defines no response models
-for their meaningful, variable-shaped payloads.
+Legacy response wrappers follow the same rule. Sheets range-value operations
+provide typed plain-text and rich-text cells, range metadata, update metadata,
+and typed find/replace, dimension, filter, and dropdown payloads. Raw JSON is
+retained only for the open-ended batch-operation and conditional-format
+extension fields.
 
 Hire v1 is a particular focus: catalog, reference, task, website-posting,
 external, agency, job, talent, application, interview, and background-check
