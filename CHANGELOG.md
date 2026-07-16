@@ -4,6 +4,9 @@
 
 ### REST service coverage
 
+- Added typed Sheets v3 range-value, rich-text cell, find/replace, dimension,
+  filter, sheet-property, and dropdown-option payloads. Range responses now
+  expose structured range and update metadata instead of raw JSON.
 - Replaced Go-backed raw CoreHR v1 and Lingo v1 request and response fields
   with concrete contact, hierarchy, permission, metadata, classification,
   image, status, and search-filter models.

@@ -45,9 +45,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let row_count = values
             .data
             .as_ref()
-            .and_then(|data| data.get("valueRange"))
-            .and_then(|value_range| value_range.get("values"))
-            .and_then(|values| values.as_array())
+            .and_then(|data| data.value_range.as_ref())
+            .and_then(|value_range| value_range.values.as_ref())
             .map(Vec::len)
             .unwrap_or(0);
         println!("range: {range}");
