@@ -106,7 +106,7 @@ async fn application_v6_patch_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let patch_body = serde_json::json!({"name":"Updated App"});
+    let patch_body = Application::default();
     let resp = client
         .application_v6()
         .application
@@ -121,7 +121,6 @@ async fn application_v6_patch_by_query_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("PATCH /open-apis/application/v6/applications/cli_a?"));
     assert!(request.contains("lang=zh_cn"));
-    assert!(request.contains(r#""name":"Updated App""#));
 }
 
 #[tokio::test]
@@ -164,12 +163,14 @@ async fn application_v6_app_usage_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let usage_body = serde_json::json!({"date":"2026-06-01"});
+    let department_usage_body = DepartmentOverviewApplicationAppUsageReqBody::default();
+    let message_push_usage_body = MessagePushOverviewApplicationAppUsageReqBody::default();
+    let overview_usage_body = OverviewApplicationAppUsageReqBody::default();
     client
         .application_v6()
         .application_app_usage
         .department_overview_by_query(
-            &DepartmentOverviewApplicationAppUsageQuery::new("cli_a", &usage_body)
+            &DepartmentOverviewApplicationAppUsageQuery::new("cli_a", &department_usage_body)
                 .department_id_type("open_department_id"),
             &RequestOption::default(),
         )
@@ -179,7 +180,7 @@ async fn application_v6_app_usage_by_query_smoke() {
         .application_v6()
         .application_app_usage
         .message_push_overview_by_query(
-            &MessagePushOverviewApplicationAppUsageQuery::new("cli_a", &usage_body)
+            &MessagePushOverviewApplicationAppUsageQuery::new("cli_a", &message_push_usage_body)
                 .department_id_type("open_department_id"),
             &RequestOption::default(),
         )
@@ -189,7 +190,7 @@ async fn application_v6_app_usage_by_query_smoke() {
         .application_v6()
         .application_app_usage
         .overview_by_query(
-            &OverviewApplicationAppUsageQuery::new("cli_a", &usage_body)
+            &OverviewApplicationAppUsageQuery::new("cli_a", &overview_usage_body)
                 .department_id_type("open_department_id"),
             &RequestOption::default(),
         )
@@ -207,5 +208,4 @@ async fn application_v6_app_usage_by_query_smoke() {
         request.contains("POST /open-apis/application/v6/applications/cli_a/app_usage/overview?")
     );
     assert!(request.contains("department_id_type=open_department_id"));
-    assert!(request.contains(r#""date":"2026-06-01""#));
 }

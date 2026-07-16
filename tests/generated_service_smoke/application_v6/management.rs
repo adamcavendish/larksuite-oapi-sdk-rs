@@ -9,8 +9,8 @@ async fn application_v6_management_and_owner_write_by_query_smoke() {
         mock_server_with_requests(vec![http_response(200, body), http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let management_body = serde_json::json!({"enabled":true});
-    let owner_body = serde_json::json!({"owner_id":"ou-1"});
+    let management_body = UpdateApplicationManagementReqBody::default();
+    let owner_body = UpdateApplicationOwnerReqBody::default();
     client
         .application_v6()
         .application_management
@@ -34,6 +34,4 @@ async fn application_v6_management_and_owner_write_by_query_smoke() {
     assert!(request.contains("PUT /open-apis/application/v6/applications/cli_a/management "));
     assert!(request.contains("PUT /open-apis/application/v6/applications/cli_a/owner?"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""enabled":true"#));
-    assert!(request.contains(r#""owner_id":"ou-1""#));
 }

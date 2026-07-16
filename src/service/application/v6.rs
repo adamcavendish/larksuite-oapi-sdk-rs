@@ -215,6 +215,142 @@ pub struct ListScopeRespData {
     #[serde(default)]
     pub scopes: Vec<Scope>,
 }
+
+// ── Mutation request types ──────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ClientBadgeNum {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub web_app: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gadget: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppBadge {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pc: Option<ClientBadgeNum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile: Option<ClientBadgeNum>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DepartmentOverviewApplicationAppUsageReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cycle_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recursion: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_size: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MessagePushOverviewApplicationAppUsageReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cycle_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OverviewApplicationAppUsageReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cycle_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateApplicationCollaboratorsReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub adds: Option<Vec<AppCollaborator>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub removes: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppContactsRangeIdList {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchApplicationContactsRangeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contacts_range_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_visible_list: Option<AppContactsRangeIdList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub del_visible_list: Option<AppContactsRangeIdList>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateApplicationManagementReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enable: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateApplicationOwnerReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CheckWhiteBlackListApplicationVisibilityReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppVisibilityIdList {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchApplicationVisibilityReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_visible_list: Option<AppVisibilityIdList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub del_visible_list: Option<AppVisibilityIdList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_invisible_list: Option<AppVisibilityIdList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub del_invisible_list: Option<AppVisibilityIdList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_visible_to_all: Option<bool>,
+}
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -785,12 +921,12 @@ pub struct AppBadgeResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct SetAppBadgeQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a AppBadge,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> SetAppBadgeQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a AppBadge) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -807,7 +943,7 @@ impl<'a> AppBadgeResource<'a> {
     /// Set app badge — POST /open-apis/application/v6/app_badge/set
     pub async fn set(
         &self,
-        body: &serde_json::Value,
+        body: &AppBadge,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SetAppBadgeResp, LarkError> {
@@ -977,12 +1113,12 @@ impl<'a> GetApplicationQuery<'a> {
 #[non_exhaustive]
 pub struct PatchApplicationQuery<'a> {
     pub app_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a Application,
     pub lang: Option<&'a str>,
 }
 
 impl<'a> PatchApplicationQuery<'a> {
-    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_id: &'a str, body: &'a Application) -> Self {
         Self {
             app_id,
             body,
@@ -1211,7 +1347,7 @@ impl<'a> ApplicationResource<'a> {
         &self,
         app_id: &str,
         lang: Option<&str>,
-        body: &serde_json::Value,
+        body: &Application,
         option: &RequestOption,
     ) -> Result<PatchApplicationResp, LarkError> {
         let query = PatchApplicationQuery::new(app_id, body).lang(lang);
@@ -1281,14 +1417,14 @@ pub struct ApplicationAppUsageResource<'a> {
 
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
-pub struct ApplicationAppUsageQuery<'a> {
+pub struct ApplicationAppUsageQuery<'a, B> {
     pub app_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a B,
     pub department_id_type: Option<&'a str>,
 }
 
-impl<'a> ApplicationAppUsageQuery<'a> {
-    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+impl<'a, B> ApplicationAppUsageQuery<'a, B> {
+    pub fn new(app_id: &'a str, body: &'a B) -> Self {
         Self {
             app_id,
             body,
@@ -1302,9 +1438,12 @@ impl<'a> ApplicationAppUsageQuery<'a> {
     }
 }
 
-pub type DepartmentOverviewApplicationAppUsageQuery<'a> = ApplicationAppUsageQuery<'a>;
-pub type MessagePushOverviewApplicationAppUsageQuery<'a> = ApplicationAppUsageQuery<'a>;
-pub type OverviewApplicationAppUsageQuery<'a> = ApplicationAppUsageQuery<'a>;
+pub type DepartmentOverviewApplicationAppUsageQuery<'a> =
+    ApplicationAppUsageQuery<'a, DepartmentOverviewApplicationAppUsageReqBody>;
+pub type MessagePushOverviewApplicationAppUsageQuery<'a> =
+    ApplicationAppUsageQuery<'a, MessagePushOverviewApplicationAppUsageReqBody>;
+pub type OverviewApplicationAppUsageQuery<'a> =
+    ApplicationAppUsageQuery<'a, OverviewApplicationAppUsageReqBody>;
 
 impl<'a> ApplicationAppUsageResource<'a> {
     /// DepartmentOverview — POST /open-apis/application/v6/applications/:app_id/app_usage/department_overview
@@ -1313,7 +1452,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
         &self,
         app_id: &str,
         department_id_type: Option<&str>,
-        body: &serde_json::Value,
+        body: &DepartmentOverviewApplicationAppUsageReqBody,
         option: &RequestOption,
     ) -> Result<DepartmentOverviewApplicationAppUsageResp, LarkError> {
         let query = DepartmentOverviewApplicationAppUsageQuery::new(app_id, body)
@@ -1348,7 +1487,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
         &self,
         app_id: &str,
         department_id_type: Option<&str>,
-        body: &serde_json::Value,
+        body: &MessagePushOverviewApplicationAppUsageReqBody,
         option: &RequestOption,
     ) -> Result<MessagePushOverviewApplicationAppUsageResp, LarkError> {
         let query = MessagePushOverviewApplicationAppUsageQuery::new(app_id, body)
@@ -1383,7 +1522,7 @@ impl<'a> ApplicationAppUsageResource<'a> {
         &self,
         app_id: &str,
         department_id_type: Option<&str>,
-        body: &serde_json::Value,
+        body: &OverviewApplicationAppUsageReqBody,
         option: &RequestOption,
     ) -> Result<OverviewApplicationAppUsageResp, LarkError> {
         let query = OverviewApplicationAppUsageQuery::new(app_id, body)
@@ -1530,14 +1669,14 @@ impl<'a> ListApplicationAppVersionQuery<'a> {
 pub struct PatchApplicationAppVersionQuery<'a> {
     pub app_id: &'a str,
     pub version_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a ApplicationAppVersion,
     pub user_id_type: Option<&'a str>,
     pub operator_id: Option<&'a str>,
     pub reject_reason: Option<&'a str>,
 }
 
 impl<'a> PatchApplicationAppVersionQuery<'a> {
-    pub fn new(app_id: &'a str, version_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_id: &'a str, version_id: &'a str, body: &'a ApplicationAppVersion) -> Self {
         Self {
             app_id,
             version_id,
@@ -1694,7 +1833,7 @@ impl<'a> ApplicationAppVersionResource<'a> {
         user_id_type: Option<&str>,
         operator_id: Option<&str>,
         reject_reason: Option<&str>,
-        body: &serde_json::Value,
+        body: &ApplicationAppVersion,
         option: &RequestOption,
     ) -> Result<PatchApplicationAppVersionResp, LarkError> {
         let query = PatchApplicationAppVersionQuery::new(app_id, version_id, body)
@@ -1758,12 +1897,12 @@ impl<'a> GetApplicationCollaboratorsQuery<'a> {
 #[non_exhaustive]
 pub struct UpdateApplicationCollaboratorsQuery<'a> {
     pub app_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a UpdateApplicationCollaboratorsReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> UpdateApplicationCollaboratorsQuery<'a> {
-    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_id: &'a str, body: &'a UpdateApplicationCollaboratorsReqBody) -> Self {
         Self {
             app_id,
             body,
@@ -1815,7 +1954,7 @@ impl<'a> ApplicationCollaboratorsResource<'a> {
         &self,
         app_id: &str,
         user_id_type: Option<&str>,
-        body: &serde_json::Value,
+        body: &UpdateApplicationCollaboratorsReqBody,
         option: &RequestOption,
     ) -> Result<UpdateApplicationCollaboratorsResp, LarkError> {
         let query =
@@ -1854,13 +1993,13 @@ pub struct ApplicationContactsRangeResource<'a> {
 #[non_exhaustive]
 pub struct PatchApplicationContactsRangeQuery<'a> {
     pub app_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchApplicationContactsRangeReqBody,
     pub user_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
 }
 
 impl<'a> PatchApplicationContactsRangeQuery<'a> {
-    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_id: &'a str, body: &'a PatchApplicationContactsRangeReqBody) -> Self {
         Self {
             app_id,
             body,
@@ -1887,7 +2026,7 @@ impl<'a> ApplicationContactsRangeResource<'a> {
         app_id: &str,
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
-        body: &serde_json::Value,
+        body: &PatchApplicationContactsRangeReqBody,
         option: &RequestOption,
     ) -> Result<PatchApplicationContactsRangeResp, LarkError> {
         let query = PatchApplicationContactsRangeQuery::new(app_id, body)
@@ -2125,11 +2264,11 @@ pub struct ApplicationManagementResource<'a> {
 #[non_exhaustive]
 pub struct UpdateApplicationManagementQuery<'a> {
     pub app_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a UpdateApplicationManagementReqBody,
 }
 
 impl<'a> UpdateApplicationManagementQuery<'a> {
-    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_id: &'a str, body: &'a UpdateApplicationManagementReqBody) -> Self {
         Self { app_id, body }
     }
 }
@@ -2139,7 +2278,7 @@ impl<'a> ApplicationManagementResource<'a> {
     pub async fn update(
         &self,
         app_id: &str,
-        body: &serde_json::Value,
+        body: &UpdateApplicationManagementReqBody,
         option: &RequestOption,
     ) -> Result<UpdateApplicationManagementResp, LarkError> {
         self.update_by_query(&UpdateApplicationManagementQuery::new(app_id, body), option)
@@ -2176,12 +2315,12 @@ pub struct ApplicationOwnerResource<'a> {
 #[non_exhaustive]
 pub struct UpdateApplicationOwnerQuery<'a> {
     pub app_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a UpdateApplicationOwnerReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> UpdateApplicationOwnerQuery<'a> {
-    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_id: &'a str, body: &'a UpdateApplicationOwnerReqBody) -> Self {
         Self {
             app_id,
             body,
@@ -2201,7 +2340,7 @@ impl<'a> ApplicationOwnerResource<'a> {
         &self,
         app_id: &str,
         user_id_type: Option<&str>,
-        body: &serde_json::Value,
+        body: &UpdateApplicationOwnerReqBody,
         option: &RequestOption,
     ) -> Result<UpdateApplicationOwnerResp, LarkError> {
         let query = UpdateApplicationOwnerQuery::new(app_id, body).user_id_type(user_id_type);
@@ -2239,13 +2378,13 @@ pub struct ApplicationVisibilityResource<'a> {
 #[non_exhaustive]
 pub struct CheckWhiteBlackListApplicationVisibilityQuery<'a> {
     pub app_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a CheckWhiteBlackListApplicationVisibilityReqBody,
     pub user_id_type: Option<&'a str>,
     pub department_id_type: Option<&'a str>,
 }
 
 impl<'a> CheckWhiteBlackListApplicationVisibilityQuery<'a> {
-    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_id: &'a str, body: &'a CheckWhiteBlackListApplicationVisibilityReqBody) -> Self {
         Self {
             app_id,
             body,
@@ -2269,13 +2408,13 @@ impl<'a> CheckWhiteBlackListApplicationVisibilityQuery<'a> {
 #[non_exhaustive]
 pub struct PatchApplicationVisibilityQuery<'a> {
     pub app_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchApplicationVisibilityReqBody,
     pub department_id_type: Option<&'a str>,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> PatchApplicationVisibilityQuery<'a> {
-    pub fn new(app_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_id: &'a str, body: &'a PatchApplicationVisibilityReqBody) -> Self {
         Self {
             app_id,
             body,
@@ -2302,7 +2441,7 @@ impl<'a> ApplicationVisibilityResource<'a> {
         app_id: &str,
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
-        body: &serde_json::Value,
+        body: &CheckWhiteBlackListApplicationVisibilityReqBody,
         option: &RequestOption,
     ) -> Result<CheckWhiteBlackListApplicationVisibilityResp, LarkError> {
         let query = CheckWhiteBlackListApplicationVisibilityQuery::new(app_id, body)
@@ -2340,7 +2479,7 @@ impl<'a> ApplicationVisibilityResource<'a> {
         app_id: &str,
         department_id_type: Option<&str>,
         user_id_type: Option<&str>,
-        body: &serde_json::Value,
+        body: &PatchApplicationVisibilityReqBody,
         option: &RequestOption,
     ) -> Result<PatchApplicationVisibilityResp, LarkError> {
         let query = PatchApplicationVisibilityQuery::new(app_id, body)

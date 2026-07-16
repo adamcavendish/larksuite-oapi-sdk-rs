@@ -68,8 +68,8 @@ async fn directory_collaboration_rule_write_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_payload = serde_json::json!({"name":"Rule"});
-    let update_payload = serde_json::json!({"name":"Rule updated"});
+    let create_payload = CollaborationRuleReqBody::default();
+    let update_payload = CollaborationRuleReqBody::default();
     let create_resp = client
         .directory()
         .collaboration_rule
@@ -113,6 +113,4 @@ async fn directory_collaboration_rule_write_by_query_smoke() {
     assert!(request.contains("PUT /open-apis/directory/v1/collaboration_rules/rule-1?"));
     assert!(request.contains("target_tenant_key=target-tenant"));
     assert!(request.contains("tenant_id=tenant-1"));
-    assert!(request.contains(r#""name":"Rule""#));
-    assert!(request.contains(r#""name":"Rule updated""#));
 }

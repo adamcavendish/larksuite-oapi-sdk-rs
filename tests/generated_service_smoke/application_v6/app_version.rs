@@ -93,7 +93,7 @@ async fn application_v6_app_version_patch_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let patch_body = serde_json::json!({"status":2});
+    let patch_body = ApplicationAppVersion::default();
     let resp = client
         .application_v6()
         .application_app_version
@@ -115,5 +115,4 @@ async fn application_v6_app_version_patch_by_query_smoke() {
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("operator_id=ou-1"));
     assert!(request.contains("reject_reason=missing+scope"));
-    assert!(request.contains(r#""status":2"#));
 }

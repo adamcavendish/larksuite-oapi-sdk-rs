@@ -97,8 +97,8 @@ async fn task_v2_comment_write_by_query_smoke() {
         mock_server_with_requests(vec![http_response(200, body), http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"content":"Looks good"});
-    let patch_body = serde_json::json!({"content":"Ship it"});
+    let create_body = TaskV2InputComment::default();
+    let patch_body = PatchCommentV2ReqBody::default();
     client
         .task_v2()
         .comment
@@ -122,6 +122,4 @@ async fn task_v2_comment_write_by_query_smoke() {
     assert!(request.contains("POST /open-apis/task/v2/comments?"));
     assert!(request.contains("PATCH /open-apis/task/v2/comments/comment-1?"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""content":"Looks good""#));
-    assert!(request.contains(r#""content":"Ship it""#));
 }

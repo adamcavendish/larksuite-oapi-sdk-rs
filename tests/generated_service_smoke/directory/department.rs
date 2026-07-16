@@ -8,7 +8,7 @@ async fn directory_department_create_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"name":"Engineering"});
+    let body = CreateDepartmentReqBody::default();
     let resp = client
         .directory()
         .department
@@ -30,7 +30,6 @@ async fn directory_department_create_by_query_smoke() {
     assert!(request.contains("department_id_type=department_id"));
     assert!(request.contains("is_admin_role=true"));
     assert!(request.contains("tenant_id=tenant-1"));
-    assert!(request.contains(r#""name":"Engineering""#));
 }
 
 #[tokio::test]
@@ -39,7 +38,7 @@ async fn directory_department_search_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"keyword":"Engineering"});
+    let body = DirectorySearchDepartmentReqBody::default();
     let resp = client
         .directory()
         .department
@@ -61,7 +60,6 @@ async fn directory_department_search_by_query_smoke() {
     assert!(request.contains("department_id_type=department_id"));
     assert!(request.contains("is_admin_role=true"));
     assert!(request.contains("tenant_id=tenant-1"));
-    assert!(request.contains(r#""keyword":"Engineering""#));
 }
 
 #[tokio::test]

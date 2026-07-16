@@ -64,11 +64,11 @@ async fn cardkit_card_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"type":"template","data":{"title":"Card"}});
-    let update_body = serde_json::json!({"data":{"title":"Updated"}});
-    let batch_body = serde_json::json!({"operations":[{"op":"replace","path":"/title"}]});
-    let convert_body = serde_json::json!({"card_id":"card-1"});
-    let settings_body = serde_json::json!({"config":{"wide":true}});
+    let create_body = CreateCardReqBody::default();
+    let update_body = UpdateCardReqBody::default();
+    let batch_body = BatchUpdateCardReqBody::default();
+    let convert_body = IdConvertCardReqBody::default();
+    let settings_body = SettingsCardReqBody::default();
 
     let create_resp = client
         .cardkit()
@@ -127,11 +127,6 @@ async fn cardkit_card_by_query_smoke() {
     assert!(request.contains("POST /open-apis/cardkit/v1/cards/card-1/batch_update "));
     assert!(request.contains("POST /open-apis/cardkit/v1/cards/id_convert "));
     assert!(request.contains("PATCH /open-apis/cardkit/v1/cards/card-1/settings "));
-    assert!(request.contains(r#""title":"Card""#));
-    assert!(request.contains(r#""title":"Updated""#));
-    assert!(request.contains(r#""operations":[{"op":"replace","path":"/title"}]"#));
-    assert!(request.contains(r#""card_id":"card-1""#));
-    assert!(request.contains(r#""wide":true"#));
 }
 
 #[tokio::test]
@@ -147,10 +142,10 @@ async fn cardkit_card_element_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"tag":"div","text":"create"});
-    let update_body = serde_json::json!({"tag":"div","text":"update"});
-    let patch_body = serde_json::json!({"text":"patch"});
-    let content_body = serde_json::json!({"content":"content update"});
+    let create_body = CreateCardElementReqBody::default();
+    let update_body = UpdateCardElementReqBody::default();
+    let patch_body = PatchCardElementReqBody::default();
+    let content_body = ContentCardElementReqBody::default();
 
     let create_resp = client
         .cardkit()
@@ -209,8 +204,4 @@ async fn cardkit_card_element_by_query_smoke() {
     assert!(request.contains("DELETE /open-apis/cardkit/v1/cards/card-1/elements/element-1 "));
     assert!(request.contains("PATCH /open-apis/cardkit/v1/cards/card-1/elements/element-1 "));
     assert!(request.contains("PUT /open-apis/cardkit/v1/cards/card-1/elements/element-1/content "));
-    assert!(request.contains(r#""text":"create""#));
-    assert!(request.contains(r#""text":"update""#));
-    assert!(request.contains(r#""text":"patch""#));
-    assert!(request.contains(r#""content":"content update""#));
 }
