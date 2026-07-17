@@ -43,7 +43,10 @@ async fn docx_document_by_query_smoke() {
         folder_token: Some("folder-1".into()),
         title: Some("Spec".into()),
     };
-    let convert_req = serde_json::json!({"content":"hello"});
+    let convert_req = ConvertDocumentReqBody {
+        content: Some("hello".into()),
+        ..Default::default()
+    };
 
     client
         .docx()

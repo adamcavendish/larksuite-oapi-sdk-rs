@@ -130,7 +130,9 @@ async fn vc_room_mget_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"room_ids":["room-1"]});
+    let body = MgetRoomReqBody {
+        room_ids: Some(vec!["room-1".into()]),
+    };
     let resp = client
         .vc()
         .room
@@ -154,7 +156,10 @@ async fn vc_room_search_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"query":"Boardroom"});
+    let body = SearchRoomReqBody {
+        keyword: Some("Boardroom".into()),
+        ..Default::default()
+    };
     let resp = client
         .vc()
         .room
@@ -169,7 +174,7 @@ async fn vc_room_search_by_query_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/vc/v1/rooms/search?"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""query":"Boardroom""#));
+    assert!(request.contains(r#""keyword":"Boardroom""#));
 }
 
 #[tokio::test]

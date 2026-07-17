@@ -1,7 +1,8 @@
 use larksuite_oapi_sdk_rs::service::{
     aily::v1 as aily_v1, application::v6 as application_v6, board::v1 as board_v1,
     cardkit::v1 as cardkit_v1, directory::v1 as directory_v1, document_ai::v1, docx::v1 as docx_v1,
-    im::v2 as im_v2, sheets::v3 as sheets_v3, task::v2 as task_v2,
+    im::v2 as im_v2, okr::v1 as okr_v1, sheets::v3 as sheets_v3, task::v2 as task_v2,
+    vc::v1 as vc_v1,
 };
 
 #[test]
@@ -56,6 +57,48 @@ fn mutation_payload_models_serialize_go_shaped_bodies() {
     assert_eq!(
         serde_json::to_value(card).unwrap()["card"]["data"],
         r#"{"title":"Updated"}"#
+    );
+}
+
+#[test]
+fn corehr_vc_and_okr_mutation_models_serialize_typed_bodies() {
+    use larksuite_oapi_sdk_rs::service::corehr::v1 as corehr_v1;
+
+    let corehr = corehr_v1::AddEnumOptionCommonDataMetaDataReqBody {
+        object_api_name: Some("employee".into()),
+        enum_field_api_name: Some("grade".into()),
+        enum_field_options: Some(vec![corehr_v1::EnumFieldOption {
+            option_api_name: Some("grade_a".into()),
+            ..Default::default()
+        }]),
+    };
+    let vc = vc_v1::SetHostMeetingReqBody {
+        host_user: Some(vc_v1::MeetingUser {
+            id: Some("ou_host".into()),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let okr = okr_v1::CreateProgressRecordReqBody {
+        target_id: Some("okr_1".into()),
+        progress_rate: Some(okr_v1::ProgressRateNew {
+            percent: Some(50.0),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+
+    assert_eq!(
+        serde_json::to_value(corehr).unwrap()["enum_field_options"][0]["option_api_name"],
+        "grade_a"
+    );
+    assert_eq!(
+        serde_json::to_value(vc).unwrap()["host_user"]["id"],
+        "ou_host"
+    );
+    assert_eq!(
+        serde_json::to_value(okr).unwrap()["progress_rate"]["percent"],
+        50.0
     );
 }
 

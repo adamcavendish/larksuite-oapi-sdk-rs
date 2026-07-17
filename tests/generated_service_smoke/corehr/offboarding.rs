@@ -12,7 +12,10 @@ async fn corehr_offboarding_search_by_query_smoke() {
     let query = SearchCorehrOffboardingQuery::new()
         .user_id_type("open_id")
         .page(PageQuery::new().page_size(20).page_token("next-page"));
-    let body = serde_json::json!({"employment_id": "emp-1"});
+    let body = SearchOffboardingReqBody {
+        employment_ids: Some(vec!["emp-1".into()]),
+        ..Default::default()
+    };
     let resp = client
         .corehr()
         .offboarding
@@ -31,5 +34,5 @@ async fn corehr_offboarding_search_by_query_smoke() {
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
-    assert!(request.contains(r#""employment_id":"emp-1""#));
+    assert!(request.contains(r#""employment_ids":["emp-1"]"#));
 }

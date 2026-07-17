@@ -12,10 +12,7 @@ async fn corehr_company_create_uses_typed_response() {
     let resp = client
         .corehr()
         .company
-        .create(
-            serde_json::json!({"name": [{"text": "Acme"}]}),
-            &RequestOption::default(),
-        )
+        .create(Company::default(), &RequestOption::default())
         .await
         .unwrap();
 
@@ -38,10 +35,7 @@ async fn corehr_job_level_create_uses_typed_response() {
     let resp = client
         .corehr()
         .job_level
-        .create(
-            serde_json::json!({"name": [{"text": "L1"}]}),
-            &RequestOption::default(),
-        )
+        .create(JobLevel::default(), &RequestOption::default())
         .await
         .unwrap();
 

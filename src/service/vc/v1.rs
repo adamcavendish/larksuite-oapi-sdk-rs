@@ -220,6 +220,227 @@ pub struct SetRoomConfigReqBody {
     pub room_status: Option<RoomStatus>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MgetRoomReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchRoomReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_room_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keyword: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_level_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub search_level_name: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_size: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AccessCodeRoomConfigReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub district_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub building_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub floor_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub valid_day: Option<i32>,
+}
+
+pub type SetCheckboardAccessCodeRoomConfigReqBody = AccessCodeRoomConfigReqBody;
+pub type SetRoomAccessCodeRoomConfigReqBody = AccessCodeRoomConfigReqBody;
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MeetingListExportReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_no: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ParticipantListExportReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_no: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ParticipantQualityListExportReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_no: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub join_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResourceReservationListExportReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_level_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub need_topic: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_exclude: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct InviteMeetingReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invitees: Option<Vec<MeetingUser>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct KickoutMeetingReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kickout_users: Option<Vec<MeetingUser>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SetHostMeetingReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub host_user: Option<MeetingUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub old_host_user: Option<MeetingUser>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RecordingPermissionObject {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SetPermissionMeetingRecordingReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permission_objects: Option<Vec<RecordingPermissionObject>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct StartMeetingRecordingReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timezone: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApplyReserveReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_settings: Option<ReserveMeetingSetting>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateReserveReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_settings: Option<ReserveMeetingSetting>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchReserveConfigReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_config: Option<ApprovalConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_config: Option<TimeConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_scope_config: Option<ReserveScopeConfig>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchReserveConfigAdminReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_admin_config: Option<ReserveAdminConfig>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchReserveConfigDisableInformReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disable_inform: Option<DisableInformConfig>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchReserveConfigFormReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserve_form_config: Option<ReserveFormConfig>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DelRoomLevelReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub room_level_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub delete_child: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MgetRoomLevelReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level_ids: Option<Vec<String>>,
+}
+
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -1368,12 +1589,12 @@ impl<'a> ListRoomQuery<'a> {
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct MgetRoomQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a MgetRoomReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> MgetRoomQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a MgetRoomReqBody) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -1389,12 +1610,12 @@ impl<'a> MgetRoomQuery<'a> {
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct SearchRoomQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a SearchRoomReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> SearchRoomQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a SearchRoomReqBody) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -1548,7 +1769,7 @@ impl<'a> RoomResource<'a> {
 
     pub async fn mget(
         &self,
-        body: serde_json::Value,
+        body: MgetRoomReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<MgetRoomResp, LarkError> {
@@ -1576,7 +1797,7 @@ impl<'a> RoomResource<'a> {
 
     pub async fn search(
         &self,
-        body: serde_json::Value,
+        body: SearchRoomReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SearchRoomResp, LarkError> {
@@ -1760,7 +1981,7 @@ impl<'a> RoomConfigResource<'a> {
 
     pub async fn set_checkboard_access_code(
         &self,
-        body: serde_json::Value,
+        body: SetCheckboardAccessCodeRoomConfigReqBody,
         option: &RequestOption,
     ) -> Result<SetCheckboardAccessCodeRoomConfigResp, LarkError> {
         RestRequest::new(
@@ -1777,7 +1998,7 @@ impl<'a> RoomConfigResource<'a> {
 
     pub async fn set_room_access_code(
         &self,
-        body: serde_json::Value,
+        body: SetRoomAccessCodeRoomConfigReqBody,
         option: &RequestOption,
     ) -> Result<SetRoomAccessCodeRoomConfigResp, LarkError> {
         RestRequest::new(
@@ -1914,7 +2135,7 @@ impl<'a> MeetingResource<'a> {
     pub async fn invite(
         &self,
         meeting_id: &str,
-        body: serde_json::Value,
+        body: InviteMeetingReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
@@ -1935,7 +2156,7 @@ impl<'a> MeetingResource<'a> {
     pub async fn kickout(
         &self,
         meeting_id: &str,
-        body: serde_json::Value,
+        body: KickoutMeetingReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
@@ -1956,7 +2177,7 @@ impl<'a> MeetingResource<'a> {
     pub async fn set_host(
         &self,
         meeting_id: &str,
-        body: serde_json::Value,
+        body: SetHostMeetingReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
@@ -2367,7 +2588,7 @@ impl<'a> ExportResource<'a> {
     /// POST /open-apis/vc/v1/exports/meeting_list — 导出会议明细
     pub async fn meeting_list(
         &self,
-        body: serde_json::Value,
+        body: MeetingListExportReqBody,
         option: &RequestOption,
     ) -> Result<ExportMeetingListResp, LarkError> {
         RestRequest::new(
@@ -2385,7 +2606,7 @@ impl<'a> ExportResource<'a> {
     /// POST /open-apis/vc/v1/exports/participant_list — 导出参会人明细
     pub async fn participant_list(
         &self,
-        body: serde_json::Value,
+        body: ParticipantListExportReqBody,
         option: &RequestOption,
     ) -> Result<ExportParticipantListResp, LarkError> {
         RestRequest::new(
@@ -2403,7 +2624,7 @@ impl<'a> ExportResource<'a> {
     /// POST /open-apis/vc/v1/exports/participant_quality_list — 导出参会人会议质量数据
     pub async fn participant_quality_list(
         &self,
-        body: serde_json::Value,
+        body: ParticipantQualityListExportReqBody,
         option: &RequestOption,
     ) -> Result<ExportParticipantQualityListResp, LarkError> {
         RestRequest::new(
@@ -2421,7 +2642,7 @@ impl<'a> ExportResource<'a> {
     /// POST /open-apis/vc/v1/exports/resource_reservation_list — 导出会议室预定数据
     pub async fn resource_reservation_list(
         &self,
-        body: serde_json::Value,
+        body: ResourceReservationListExportReqBody,
         option: &RequestOption,
     ) -> Result<ExportResourceReservationListResp, LarkError> {
         RestRequest::new(
@@ -2504,7 +2725,7 @@ impl<'a> MeetingRecordingResource<'a> {
     pub async fn set_permission(
         &self,
         meeting_id: &str,
-        body: serde_json::Value,
+        body: SetPermissionMeetingRecordingReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<SetPermissionMeetingRecordingResp, LarkError> {
@@ -2526,7 +2747,7 @@ impl<'a> MeetingRecordingResource<'a> {
     pub async fn start(
         &self,
         meeting_id: &str,
-        body: serde_json::Value,
+        body: StartMeetingRecordingReqBody,
         option: &RequestOption,
     ) -> Result<StartMeetingRecordingResp, LarkError> {
         let path = format!("/open-apis/vc/v1/meetings/{meeting_id}/recording/start");
@@ -2570,12 +2791,12 @@ pub struct ReserveResource<'a> {
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct ApplyReserveQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a ApplyReserveReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> ApplyReserveQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a ApplyReserveReqBody) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -2634,12 +2855,12 @@ impl<'a> GetActiveMeetingReserveQuery<'a> {
 #[non_exhaustive]
 pub struct UpdateReserveQuery<'a> {
     pub reserve_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a UpdateReserveReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> UpdateReserveQuery<'a> {
-    pub fn new(reserve_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(reserve_id: &'a str, body: &'a UpdateReserveReqBody) -> Self {
         Self {
             reserve_id,
             body,
@@ -2657,7 +2878,7 @@ impl<'a> ReserveResource<'a> {
     /// POST /open-apis/vc/v1/reserves/apply — 预约会议
     pub async fn apply(
         &self,
-        body: serde_json::Value,
+        body: ApplyReserveReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<ApplyReserveResp, LarkError> {
@@ -2766,7 +2987,7 @@ impl<'a> ReserveResource<'a> {
     pub async fn update(
         &self,
         reserve_id: &str,
-        body: serde_json::Value,
+        body: UpdateReserveReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateReserveResp, LarkError> {
@@ -2827,7 +3048,7 @@ impl<'a> ReserveConfigResource<'a> {
     pub async fn patch(
         &self,
         reserve_config_id: &str,
-        body: serde_json::Value,
+        body: PatchReserveConfigReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchReserveConfigResp, LarkError> {
@@ -2879,7 +3100,7 @@ impl<'a> ReserveConfigAdminResource<'a> {
     pub async fn patch(
         &self,
         reserve_config_id: &str,
-        body: serde_json::Value,
+        body: PatchReserveConfigAdminReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchReserveConfigAdminResp, LarkError> {
@@ -2931,7 +3152,7 @@ impl<'a> ReserveConfigDisableInformResource<'a> {
     pub async fn patch(
         &self,
         reserve_config_id: &str,
-        body: serde_json::Value,
+        body: PatchReserveConfigDisableInformReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchReserveConfigDisableInformResp, LarkError> {
@@ -2983,7 +3204,7 @@ impl<'a> ReserveConfigFormResource<'a> {
     pub async fn patch(
         &self,
         reserve_config_id: &str,
-        body: serde_json::Value,
+        body: PatchReserveConfigFormReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<PatchReserveConfigFormResp, LarkError> {
@@ -3012,7 +3233,7 @@ impl<'a> RoomLevelResource<'a> {
     /// POST /open-apis/vc/v1/room_levels — 创建会议室层级
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: RoomLevel,
         option: &RequestOption,
     ) -> Result<CreateRoomLevelResp, LarkError> {
         RestRequest::new(
@@ -3030,7 +3251,7 @@ impl<'a> RoomLevelResource<'a> {
     /// POST /open-apis/vc/v1/room_levels/del — 删除会议室层级
     pub async fn del(
         &self,
-        body: serde_json::Value,
+        body: DelRoomLevelReqBody,
         option: &RequestOption,
     ) -> Result<DelRoomLevelResp, LarkError> {
         RestRequest::new(
@@ -3088,7 +3309,7 @@ impl<'a> RoomLevelResource<'a> {
     /// POST /open-apis/vc/v1/room_levels/mget — 批量查询会议室层级详情
     pub async fn mget(
         &self,
-        body: serde_json::Value,
+        body: MgetRoomLevelReqBody,
         option: &RequestOption,
     ) -> Result<MgetRoomLevelResp, LarkError> {
         RestRequest::new(
@@ -3107,7 +3328,7 @@ impl<'a> RoomLevelResource<'a> {
     pub async fn patch(
         &self,
         room_level_id: &str,
-        body: serde_json::Value,
+        body: RoomLevel,
         option: &RequestOption,
     ) -> Result<PatchRoomLevelResp, LarkError> {
         let path = format!("/open-apis/vc/v1/room_levels/{room_level_id}");
@@ -3152,7 +3373,7 @@ impl<'a> ScopeConfigResource<'a> {
     /// POST /open-apis/vc/v1/scope_config — 设置会议室配置
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: ScopeConfig,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateScopeConfigResp, LarkError> {

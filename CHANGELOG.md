@@ -4,6 +4,10 @@
 
 ### REST service coverage
 
+- Replaced raw CoreHR v1, VC v1, Docx v1, and OKR v1 JSON mutation payloads
+  with Go-shaped request models. CoreHR now covers organization, metadata,
+  offboarding, leave, calendar, and security-group writes; VC covers room,
+  meeting, export, recording, reservation, and hierarchy writes.
 - Replaced raw Task v2, Directory v1, Application v6, IM v2, and CardKit v1
   mutation bodies with Go-shaped request models, including task collaboration,
   directory employee lifecycle, application configuration, feed-card, tag,

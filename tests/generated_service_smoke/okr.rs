@@ -20,8 +20,11 @@ async fn okr_period_image_and_batch_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"zh_name":"Q1","en_name":"Q1"});
-    let patch_body = serde_json::json!({"zh_name":"Q1 updated"});
+    let create_body = CreatePeriodReqBody {
+        period_rule_id: Some("rule-1".into()),
+        start_month: Some("2026-01".into()),
+    };
+    let patch_body = PatchPeriodReqBody { status: Some(1) };
     let image_body = serde_json::json!({"image":"base64-image"});
     let okr_ids = ["okr-1", "okr-2"];
 
@@ -100,8 +103,9 @@ async fn okr_period_image_and_batch_by_query_smoke() {
     assert!(request.contains("okr_ids=okr-2"));
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("lang=zh_cn"));
-    assert!(request.contains(r#""zh_name":"Q1""#));
-    assert!(request.contains(r#""zh_name":"Q1 updated""#));
+    assert!(request.contains(r#""period_rule_id":"rule-1""#));
+    assert!(request.contains(r#""start_month":"2026-01""#));
+    assert!(request.contains(r#""status":1"#));
     assert!(request.contains(r#""image":"base64-image""#));
 }
 
@@ -118,8 +122,22 @@ async fn okr_progress_record_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"okr_id":"okr-1","progress_rate":50});
-    let update_body = serde_json::json!({"progress_rate":80});
+    let create_body = CreateProgressRecordReqBody {
+        target_id: Some("okr-1".into()),
+        target_type: Some(1),
+        progress_rate: Some(ProgressRateNew {
+            percent: Some(50.0),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let update_body = UpdateProgressRecordReqBody {
+        progress_rate: Some(ProgressRateNew {
+            percent: Some(80.0),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
     let create_resp = client
         .okr()
         .progress_record
@@ -167,9 +185,9 @@ async fn okr_progress_record_by_query_smoke() {
     assert!(request.contains("GET /open-apis/okr/v1/progress_records/progress-1?"));
     assert!(request.contains("PUT /open-apis/okr/v1/progress_records/progress-1?"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""okr_id":"okr-1""#));
-    assert!(request.contains(r#""progress_rate":50"#));
-    assert!(request.contains(r#""progress_rate":80"#));
+    assert!(request.contains(r#""target_id":"okr-1""#));
+    assert!(request.contains(r#""percent":50.0"#));
+    assert!(request.contains(r#""percent":80.0"#));
 }
 
 #[tokio::test]
