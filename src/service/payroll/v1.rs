@@ -1103,12 +1103,13 @@ pub struct DatasourceRecordResource<'a> {
 impl DatasourceRecordResource<'_> {
     pub async fn query(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         page_size: Option<i32>,
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<QueryDatasourceRecordResp, LarkError> {
-        let query = QueryDatasourceRecordQuery::new(body)
+        let body = serde_json::to_value(body)?;
+        let query = QueryDatasourceRecordQuery::new(&body)
             .page(PageQuery::from_parts(page_size, page_token));
         self.query_by_query(&query, option).await
     }
@@ -1133,10 +1134,11 @@ impl DatasourceRecordResource<'_> {
 
     pub async fn save(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<SaveDatasourceRecordResp, LarkError> {
-        let query = SaveDatasourceRecordQuery::new(body);
+        let body = serde_json::to_value(body)?;
+        let query = SaveDatasourceRecordQuery::new(&body);
         self.save_by_query(&query, option).await
     }
 
@@ -1202,10 +1204,11 @@ pub struct PaymentActivityResource<'a> {
 impl PaymentActivityResource<'_> {
     pub async fn archive(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<ArchivePaymentActivityResp, LarkError> {
-        let query = ArchivePaymentActivityQuery::new(body);
+        let body = serde_json::to_value(body)?;
+        let query = ArchivePaymentActivityQuery::new(&body);
         self.archive_by_query(&query, option).await
     }
 
@@ -1321,10 +1324,11 @@ pub struct PaymentDetailResource<'a> {
 impl PaymentDetailResource<'_> {
     pub async fn query(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryPaymentDetailResp, LarkError> {
-        let query = QueryPaymentDetailQuery::new(body);
+        let body = serde_json::to_value(body)?;
+        let query = QueryPaymentDetailQuery::new(&body);
         self.query_by_query(&query, option).await
     }
 

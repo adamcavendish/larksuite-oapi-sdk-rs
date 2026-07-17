@@ -218,9 +218,10 @@ impl DeviceApplyRecordV2Resource<'_> {
     pub async fn update(
         &self,
         device_apply_record_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateDeviceApplyRecordV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = UpdateDeviceApplyRecordV2Query::new(device_apply_record_id, &body);
         self.update_by_query(&query, option).await
     }
@@ -254,9 +255,10 @@ pub struct DeviceRecordV2Resource<'a> {
 impl DeviceRecordV2Resource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateDeviceRecordV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = CreateDeviceRecordV2Query::new(&body);
         self.create_by_query(&query, option).await
     }
@@ -388,9 +390,10 @@ impl DeviceRecordV2Resource<'_> {
     pub async fn update(
         &self,
         device_record_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateDeviceRecordV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = UpdateDeviceRecordV2Query::new(device_record_id, &body);
         self.update_by_query(&query, option).await
     }

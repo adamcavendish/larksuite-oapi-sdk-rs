@@ -4976,6 +4976,21 @@ hire_catalog_iterator!(
 );
 
 #[derive(Debug, Clone)]
+pub struct ReplayableRequestBody(serde_json::Value);
+
+impl ReplayableRequestBody {
+    pub fn from_serializable(body: impl Serialize) -> Result<Self, serde_json::Error> {
+        serde_json::to_value(body).map(Self)
+    }
+}
+
+impl From<serde_json::Value> for ReplayableRequestBody {
+    fn from(value: serde_json::Value) -> Self {
+        Self(value)
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct ListExternalApplicationIterator<'a> {
     config: &'a Config,
     state: PageIteratorState<ExternalApplication>,
@@ -5018,7 +5033,7 @@ pub struct BatchQueryExternalBackgroundCheckIterator<'a> {
     state: PageIteratorState<ExternalBackgroundCheck>,
     page_size: Option<i32>,
     external_application_id: Option<String>,
-    body: serde_json::Value,
+    body: ReplayableRequestBody,
 }
 
 impl_page_iterator_controls!(BatchQueryExternalBackgroundCheckIterator);
@@ -5043,7 +5058,7 @@ impl BatchQueryExternalBackgroundCheckIterator<'_> {
             config: self.config,
         };
         let resp = resource
-            .batch_query_by_query(&query, self.body.clone(), option)
+            .batch_query_by_query(&query, &self.body.0, option)
             .await?;
         let data = resp.data.unwrap_or_default();
         self.state
@@ -5058,7 +5073,7 @@ pub struct BatchQueryExternalInterviewIterator<'a> {
     state: PageIteratorState<ExternalInterview>,
     page_size: Option<i32>,
     external_application_id: Option<String>,
-    body: serde_json::Value,
+    body: ReplayableRequestBody,
 }
 
 impl_page_iterator_controls!(BatchQueryExternalInterviewIterator);
@@ -5083,7 +5098,7 @@ impl BatchQueryExternalInterviewIterator<'_> {
             config: self.config,
         };
         let resp = resource
-            .batch_query_by_query(&query, self.body.clone(), option)
+            .batch_query_by_query(&query, &self.body.0, option)
             .await?;
         let data = resp.data.unwrap_or_default();
         self.state
@@ -5098,7 +5113,7 @@ pub struct BatchQueryExternalOfferIterator<'a> {
     state: PageIteratorState<ExternalOffer>,
     page_size: Option<i32>,
     external_application_id: Option<String>,
-    body: serde_json::Value,
+    body: ReplayableRequestBody,
 }
 
 impl_page_iterator_controls!(BatchQueryExternalOfferIterator);
@@ -5123,7 +5138,7 @@ impl BatchQueryExternalOfferIterator<'_> {
             config: self.config,
         };
         let resp = resource
-            .batch_query_by_query(&query, self.body.clone(), option)
+            .batch_query_by_query(&query, &self.body.0, option)
             .await?;
         let data = resp.data.unwrap_or_default();
         self.state
@@ -5298,7 +5313,7 @@ pub struct SearchTestIterator<'a> {
     state: PageIteratorState<Test>,
     page_size: Option<i32>,
     user_id_type: Option<String>,
-    body: serde_json::Value,
+    body: ReplayableRequestBody,
 }
 
 impl_page_iterator_controls!(SearchTestIterator);
@@ -5320,7 +5335,7 @@ impl SearchTestIterator<'_> {
             config: self.config,
         };
         let resp = resource
-            .search_by_query(&query, self.body.clone(), option)
+            .search_by_query(&query, &self.body.0, option)
             .await?;
         let data = resp.data.unwrap_or_default();
         self.state
@@ -5384,7 +5399,7 @@ pub struct SearchWebsiteJobPostIterator<'a> {
     config: &'a Config,
     state: PageIteratorState<WebsiteJobPost>,
     website_id: String,
-    body: serde_json::Value,
+    body: ReplayableRequestBody,
     page_size: Option<i32>,
     user_id_type: Option<String>,
     department_id_type: Option<String>,
@@ -5415,7 +5430,7 @@ impl SearchWebsiteJobPostIterator<'_> {
             config: self.config,
         };
         let resp = resource
-            .search_by_query(&query, self.body.clone(), option)
+            .search_by_query(&query, &self.body.0, option)
             .await?;
         let data = resp.data.unwrap_or_default();
         self.state
@@ -7647,7 +7662,7 @@ impl<'a> JobResource<'a> {
     pub async fn close(
         &self,
         job_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CloseJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/close");
@@ -7665,7 +7680,7 @@ impl<'a> JobResource<'a> {
 
     pub async fn combined_create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CombinedCreateJobResp, LarkError> {
         RestRequest::new(
@@ -7683,7 +7698,7 @@ impl<'a> JobResource<'a> {
     pub async fn combined_update(
         &self,
         job_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CombinedUpdateJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/combined_update");
@@ -7772,7 +7787,7 @@ impl<'a> JobResource<'a> {
     pub async fn update_config(
         &self,
         job_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateConfigJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/update_config");
@@ -8004,7 +8019,7 @@ impl<'a> TalentResource<'a> {
 
     pub async fn combined_create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CombinedCreateTalentResp, LarkError> {
         RestRequest::new(
@@ -8021,7 +8036,7 @@ impl<'a> TalentResource<'a> {
 
     pub async fn combined_update(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CombinedUpdateTalentResp, LarkError> {
         RestRequest::new(
@@ -8333,7 +8348,7 @@ impl<'a> ApplicationResource<'a> {
     pub async fn cancel_onboard(
         &self,
         application_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CancelOnboardApplicationResp, LarkError> {
         let path = format!("/open-apis/hire/v1/applications/{application_id}/cancel_onboard");
@@ -8386,7 +8401,7 @@ impl<'a> ApplicationResource<'a> {
     pub async fn transfer_onboard(
         &self,
         application_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<TransferOnboardApplicationResp, LarkError> {
         let path = format!("/open-apis/hire/v1/applications/{application_id}/transfer_onboard");
@@ -8841,7 +8856,7 @@ impl<'a> OfferResource<'a> {
     pub async fn intern_offer_status(
         &self,
         offer_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<InternOfferStatusResp, LarkError> {
         let path = format!("/open-apis/hire/v1/offers/{offer_id}/intern_offer_status");
@@ -8999,7 +9014,7 @@ impl<'a> ListByIdJobRequirementQuery<'a> {
 impl<'a> JobRequirementResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
@@ -9038,7 +9053,7 @@ impl<'a> JobRequirementResource<'a> {
     pub async fn update(
         &self,
         job_requirement_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
         option: &RequestOption,
@@ -9112,7 +9127,7 @@ impl<'a> JobRequirementResource<'a> {
 
     pub async fn list_by_id(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ListByIdJobRequirementResp, LarkError> {
         self.list_by_id_by_query(&ListByIdJobRequirementQuery::new(), body, option)
@@ -9122,7 +9137,7 @@ impl<'a> JobRequirementResource<'a> {
     pub async fn list_by_id_by_query(
         &self,
         query: &ListByIdJobRequirementQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ListByIdJobRequirementResp, LarkError> {
         RestRequest::new(
@@ -9184,7 +9199,7 @@ impl<'a> AttachmentResource<'a> {
 
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateAttachmentResp, LarkError> {
         RestRequest::new(
@@ -9518,7 +9533,7 @@ impl EmployeeResource<'_> {
     pub async fn patch(
         &self,
         employee_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchEmployeeResp, LarkError> {
         let path = format!("/open-apis/hire/v1/employees/{employee_id}");
@@ -9629,7 +9644,7 @@ pub struct NoteResource<'a> {
 impl NoteResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateNoteResp, LarkError> {
         RestRequest::new(
@@ -9704,7 +9719,7 @@ impl NoteResource<'_> {
     pub async fn patch(
         &self,
         note_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchNoteResp, LarkError> {
         let path = format!("/open-apis/hire/v1/notes/{note_id}");
@@ -9790,7 +9805,7 @@ impl ReferralResource<'_> {
 
     pub async fn search(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchReferralResp, LarkError> {
         self.search_by_query(&SearchReferralQuery::new(), body, option)
@@ -9800,7 +9815,7 @@ impl ReferralResource<'_> {
     pub async fn search_by_query(
         &self,
         query: &SearchReferralQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchReferralResp, LarkError> {
         RestRequest::new(
@@ -10103,7 +10118,7 @@ impl LocationResource<'_> {
 
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryLocationResp, LarkError> {
         self.query_by_query(&QueryLocationQuery::new(), body, option)
@@ -10113,7 +10128,7 @@ impl LocationResource<'_> {
     pub async fn query_by_query(
         &self,
         query: &QueryLocationQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryLocationResp, LarkError> {
         RestRequest::new(
@@ -10549,7 +10564,7 @@ impl WebsiteJobPostResource<'_> {
     pub async fn search(
         &self,
         website_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchWebsiteJobPostResp, LarkError> {
         let query = SearchWebsiteJobPostQuery::new(website_id);
@@ -10559,7 +10574,7 @@ impl WebsiteJobPostResource<'_> {
     pub async fn search_by_query(
         &self,
         query: &SearchWebsiteJobPostQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchWebsiteJobPostResp, LarkError> {
         let path = format!(
@@ -10585,7 +10600,7 @@ impl WebsiteJobPostResource<'_> {
     pub fn search_by_iterator(
         &self,
         website_id: &str,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
         page_size: Option<i32>,
         user_id_type: Option<&str>,
         department_id_type: Option<&str>,
@@ -10602,14 +10617,14 @@ impl WebsiteJobPostResource<'_> {
     pub fn search_iterator_by_query(
         &self,
         query: &SearchWebsiteJobPostQuery<'_>,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
     ) -> SearchWebsiteJobPostIterator<'_> {
         SearchWebsiteJobPostIterator {
             config: self.config,
             state: PageIteratorState::default()
                 .with_page_token(query.page_token.map(ToOwned::to_owned)),
             website_id: query.website_id.to_owned(),
-            body,
+            body: body.into(),
             page_size: query.page_size,
             user_id_type: query.user_id_type.map(ToOwned::to_owned),
             department_id_type: query.department_id_type.map(ToOwned::to_owned),
@@ -10827,7 +10842,7 @@ impl InterviewerResource<'_> {
     pub async fn patch(
         &self,
         interviewer_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchInterviewerResp, LarkError> {
         let path = format!("/open-apis/hire/v1/interviewers/{interviewer_id}");
@@ -10857,7 +10872,7 @@ macro_rules! external_crud_resource {
         impl $struct_name<'_> {
             pub async fn create(
                 &self,
-                body: serde_json::Value,
+                body: impl Serialize,
                 option: &RequestOption,
             ) -> Result<$create_resp, LarkError> {
                 RestRequest::new(
@@ -10875,7 +10890,7 @@ macro_rules! external_crud_resource {
             pub async fn update(
                 &self,
                 $id_param: &str,
-                body: serde_json::Value,
+                body: impl Serialize,
                 option: &RequestOption,
             ) -> Result<$update_resp, LarkError> {
                 let path = format!("{}/{}", $base_path, $id_param);
@@ -11068,7 +11083,7 @@ external_crud_resource!(
 impl ExternalOfferResource<'_> {
     pub async fn batch_query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalOfferResp, LarkError> {
         self.batch_query_by_query(&BatchQueryExternalOfferQuery::new(), body, option)
@@ -11078,7 +11093,7 @@ impl ExternalOfferResource<'_> {
     pub async fn batch_query_by_query(
         &self,
         query: &BatchQueryExternalOfferQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalOfferResp, LarkError> {
         RestRequest::new(
@@ -11098,7 +11113,7 @@ impl ExternalOfferResource<'_> {
     pub fn batch_query_by_iterator(
         &self,
         page_size: Option<i32>,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
     ) -> BatchQueryExternalOfferIterator<'_> {
         let query = BatchQueryExternalOfferQuery::new().page_size(page_size);
         self.batch_query_iterator_by_query(&query, body)
@@ -11107,7 +11122,7 @@ impl ExternalOfferResource<'_> {
     pub fn batch_query_iterator_by_query(
         &self,
         query: &BatchQueryExternalOfferQuery<'_>,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
     ) -> BatchQueryExternalOfferIterator<'_> {
         BatchQueryExternalOfferIterator {
             config: self.config,
@@ -11115,7 +11130,7 @@ impl ExternalOfferResource<'_> {
                 .with_page_token(query.page_token.map(ToOwned::to_owned)),
             page_size: query.page_size,
             external_application_id: query.external_application_id.map(ToOwned::to_owned),
-            body,
+            body: body.into(),
         }
     }
 }
@@ -11134,7 +11149,7 @@ external_crud_resource!(
 impl ExternalInterviewResource<'_> {
     pub async fn batch_query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalInterviewResp, LarkError> {
         self.batch_query_by_query(&BatchQueryExternalInterviewQuery::new(), body, option)
@@ -11144,7 +11159,7 @@ impl ExternalInterviewResource<'_> {
     pub async fn batch_query_by_query(
         &self,
         query: &BatchQueryExternalInterviewQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalInterviewResp, LarkError> {
         RestRequest::new(
@@ -11164,7 +11179,7 @@ impl ExternalInterviewResource<'_> {
     pub fn batch_query_by_iterator(
         &self,
         page_size: Option<i32>,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
     ) -> BatchQueryExternalInterviewIterator<'_> {
         let query = BatchQueryExternalInterviewQuery::new().page_size(page_size);
         self.batch_query_iterator_by_query(&query, body)
@@ -11173,7 +11188,7 @@ impl ExternalInterviewResource<'_> {
     pub fn batch_query_iterator_by_query(
         &self,
         query: &BatchQueryExternalInterviewQuery<'_>,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
     ) -> BatchQueryExternalInterviewIterator<'_> {
         BatchQueryExternalInterviewIterator {
             config: self.config,
@@ -11181,7 +11196,7 @@ impl ExternalInterviewResource<'_> {
                 .with_page_token(query.page_token.map(ToOwned::to_owned)),
             page_size: query.page_size,
             external_application_id: query.external_application_id.map(ToOwned::to_owned),
-            body,
+            body: body.into(),
         }
     }
 }
@@ -11200,7 +11215,7 @@ external_crud_resource!(
 impl ExternalBackgroundCheckResource<'_> {
     pub async fn batch_query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalBackgroundCheckResp, LarkError> {
         self.batch_query_by_query(&BatchQueryExternalBackgroundCheckQuery::new(), body, option)
@@ -11210,7 +11225,7 @@ impl ExternalBackgroundCheckResource<'_> {
     pub async fn batch_query_by_query(
         &self,
         query: &BatchQueryExternalBackgroundCheckQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryExternalBackgroundCheckResp, LarkError> {
         RestRequest::new(
@@ -11233,7 +11248,7 @@ impl ExternalBackgroundCheckResource<'_> {
     pub fn batch_query_by_iterator(
         &self,
         page_size: Option<i32>,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
     ) -> BatchQueryExternalBackgroundCheckIterator<'_> {
         let query = BatchQueryExternalBackgroundCheckQuery::new().page_size(page_size);
         self.batch_query_iterator_by_query(&query, body)
@@ -11242,7 +11257,7 @@ impl ExternalBackgroundCheckResource<'_> {
     pub fn batch_query_iterator_by_query(
         &self,
         query: &BatchQueryExternalBackgroundCheckQuery<'_>,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
     ) -> BatchQueryExternalBackgroundCheckIterator<'_> {
         BatchQueryExternalBackgroundCheckIterator {
             config: self.config,
@@ -11250,7 +11265,7 @@ impl ExternalBackgroundCheckResource<'_> {
                 .with_page_token(query.page_token.map(ToOwned::to_owned)),
             page_size: query.page_size,
             external_application_id: query.external_application_id.map(ToOwned::to_owned),
-            body,
+            body: body.into(),
         }
     }
 }
@@ -11324,7 +11339,7 @@ pub struct TripartiteAgreementResource<'a> {
 impl TripartiteAgreementResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateTripartiteAgreementResp, LarkError> {
         RestRequest::new(
@@ -11405,7 +11420,7 @@ impl TripartiteAgreementResource<'_> {
     pub async fn update(
         &self,
         tripartite_agreement_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateTripartiteAgreementResp, LarkError> {
         let path = format!("/open-apis/hire/v1/tripartite_agreements/{tripartite_agreement_id}");
@@ -11432,7 +11447,7 @@ impl AdvertisementResource<'_> {
     pub async fn publish(
         &self,
         advertisement_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PublishAdvertisementResp, LarkError> {
         let path = format!("/open-apis/hire/v1/advertisements/{advertisement_id}/publish");
@@ -11576,7 +11591,7 @@ impl<'a> GetAgencyQuery<'a> {
 impl AgencyResource<'_> {
     pub async fn batch_query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryAgencyResp, LarkError> {
         self.batch_query_by_query(&BatchQueryAgencyQuery::new(), body, option)
@@ -11586,7 +11601,7 @@ impl AgencyResource<'_> {
     pub async fn batch_query_by_query(
         &self,
         query: &BatchQueryAgencyQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryAgencyResp, LarkError> {
         RestRequest::new(
@@ -11605,7 +11620,7 @@ impl AgencyResource<'_> {
 
     pub async fn get_agency_account(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<GetAgencyAccountResp, LarkError> {
         self.get_agency_account_by_query(&GetAgencyAccountQuery::new(), body, option)
@@ -11615,7 +11630,7 @@ impl AgencyResource<'_> {
     pub async fn get_agency_account_by_query(
         &self,
         query: &GetAgencyAccountQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<GetAgencyAccountResp, LarkError> {
         RestRequest::new(
@@ -11634,7 +11649,7 @@ impl AgencyResource<'_> {
 
     pub async fn operate_agency_account(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<OperateAgencyAccountResp, LarkError> {
         RestRequest::new(
@@ -11651,7 +11666,7 @@ impl AgencyResource<'_> {
 
     pub async fn protect(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ProtectAgencyResp, LarkError> {
         RestRequest::new(
@@ -11668,7 +11683,7 @@ impl AgencyResource<'_> {
 
     pub async fn protect_search(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ProtectSearchAgencyResp, LarkError> {
         RestRequest::new(
@@ -11748,7 +11763,7 @@ pub struct BackgroundCheckOrderResource<'a> {
 impl BackgroundCheckOrderResource<'_> {
     pub async fn batch_query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryBackgroundCheckOrderResp, LarkError> {
         RestRequest::new(
@@ -11805,7 +11820,7 @@ pub struct DiversityInclusionResource<'a> {
 impl DiversityInclusionResource<'_> {
     pub async fn search(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchDiversityInclusionResp, LarkError> {
         RestRequest::new(
@@ -11830,7 +11845,7 @@ pub struct EcoAccountCustomFieldResource<'a> {
 impl EcoAccountCustomFieldResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateEcoAccountCustomFieldResp, LarkError> {
         RestRequest::new(
@@ -11847,7 +11862,7 @@ impl EcoAccountCustomFieldResource<'_> {
 
     pub async fn batch_delete(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchDeleteEcoAccountCustomFieldResp, LarkError> {
         RestRequest::new(
@@ -11864,7 +11879,7 @@ impl EcoAccountCustomFieldResource<'_> {
 
     pub async fn batch_update(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchUpdateEcoAccountCustomFieldResp, LarkError> {
         RestRequest::new(
@@ -11889,7 +11904,7 @@ pub struct EcoBackgroundCheckResource<'a> {
 impl EcoBackgroundCheckResource<'_> {
     pub async fn cancel(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CancelEcoBackgroundCheckResp, LarkError> {
         RestRequest::new(
@@ -11906,7 +11921,7 @@ impl EcoBackgroundCheckResource<'_> {
 
     pub async fn update_progress(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateProgressEcoBackgroundCheckResp, LarkError> {
         RestRequest::new(
@@ -11923,7 +11938,7 @@ impl EcoBackgroundCheckResource<'_> {
 
     pub async fn update_result(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateResultEcoBackgroundCheckResp, LarkError> {
         RestRequest::new(
@@ -11948,7 +11963,7 @@ pub struct EcoBackgroundCheckCustomFieldResource<'a> {
 impl EcoBackgroundCheckCustomFieldResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateEcoBackgroundCheckCustomFieldResp, LarkError> {
         RestRequest::new(
@@ -11965,7 +11980,7 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
 
     pub async fn batch_delete(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchDeleteEcoBackgroundCheckCustomFieldResp, LarkError> {
         RestRequest::new(
@@ -11982,7 +11997,7 @@ impl EcoBackgroundCheckCustomFieldResource<'_> {
 
     pub async fn batch_update(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchUpdateEcoBackgroundCheckCustomFieldResp, LarkError> {
         RestRequest::new(
@@ -12007,7 +12022,7 @@ pub struct EcoBackgroundCheckPackageResource<'a> {
 impl EcoBackgroundCheckPackageResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateEcoBackgroundCheckPackageResp, LarkError> {
         RestRequest::new(
@@ -12024,7 +12039,7 @@ impl EcoBackgroundCheckPackageResource<'_> {
 
     pub async fn batch_delete(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchDeleteEcoBackgroundCheckPackageResp, LarkError> {
         RestRequest::new(
@@ -12041,7 +12056,7 @@ impl EcoBackgroundCheckPackageResource<'_> {
 
     pub async fn batch_update(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchUpdateEcoBackgroundCheckPackageResp, LarkError> {
         RestRequest::new(
@@ -12067,7 +12082,7 @@ impl EcoExamResource<'_> {
     pub async fn login_info(
         &self,
         exam_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<LoginInfoEcoExamResp, LarkError> {
         let path = format!("/open-apis/hire/v1/eco_exams/{exam_id}/login_info");
@@ -12086,7 +12101,7 @@ impl EcoExamResource<'_> {
     pub async fn update_result(
         &self,
         exam_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateResultEcoExamResp, LarkError> {
         let path = format!("/open-apis/hire/v1/eco_exams/{exam_id}/update_result");
@@ -12112,7 +12127,7 @@ pub struct EcoExamPaperResource<'a> {
 impl EcoExamPaperResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateEcoExamPaperResp, LarkError> {
         RestRequest::new(
@@ -12129,7 +12144,7 @@ impl EcoExamPaperResource<'_> {
 
     pub async fn batch_delete(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchDeleteEcoExamPaperResp, LarkError> {
         RestRequest::new(
@@ -12146,7 +12161,7 @@ impl EcoExamPaperResource<'_> {
 
     pub async fn batch_update(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchUpdateEcoExamPaperResp, LarkError> {
         RestRequest::new(
@@ -12172,7 +12187,7 @@ impl JobManagerResource<'_> {
     pub async fn batch_update(
         &self,
         job_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchUpdateJobManagerResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/managers/batch_update");
@@ -12275,7 +12290,7 @@ impl<'a> SearchJobPublishRecordQuery<'a> {
 impl JobPublishRecordResource<'_> {
     pub async fn search(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchJobPublishRecordResp, LarkError> {
         self.search_by_query(&SearchJobPublishRecordQuery::new(), body, option)
@@ -12285,7 +12300,7 @@ impl JobPublishRecordResource<'_> {
     pub async fn search_by_query(
         &self,
         query: &SearchJobPublishRecordQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchJobPublishRecordResp, LarkError> {
         RestRequest::new(
@@ -12315,7 +12330,7 @@ pub struct ReferralAccountResource<'a> {
 impl ReferralAccountResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateReferralAccountResp, LarkError> {
         RestRequest::new(
@@ -12349,7 +12364,7 @@ impl ReferralAccountResource<'_> {
 
     pub async fn enable(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<EnableReferralAccountResp, LarkError> {
         RestRequest::new(
@@ -12384,7 +12399,7 @@ impl ReferralAccountResource<'_> {
 
     pub async fn reconciliation(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ReconciliationReferralAccountResp, LarkError> {
         RestRequest::new(
@@ -12405,7 +12420,7 @@ impl ReferralAccountResource<'_> {
     pub async fn withdraw(
         &self,
         referral_account_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<WithdrawReferralAccountResp, LarkError> {
         let path = format!("/open-apis/hire/v1/referral_account/{referral_account_id}/withdraw");
@@ -12431,7 +12446,7 @@ pub struct TalentBlocklistResource<'a> {
 impl TalentBlocklistResource<'_> {
     pub async fn change_talent_block(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ChangeTalentBlockResp, LarkError> {
         RestRequest::new(
@@ -12476,7 +12491,7 @@ pub struct TalentOperationLogResource<'a> {
 impl TalentOperationLogResource<'_> {
     pub async fn search(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchTalentOperationLogResp, LarkError> {
         self.search_by_query(&SearchTalentOperationLogQuery::new(), body, option)
@@ -12486,7 +12501,7 @@ impl TalentOperationLogResource<'_> {
     pub async fn search_by_query(
         &self,
         query: &SearchTalentOperationLogQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchTalentOperationLogResp, LarkError> {
         RestRequest::new(
@@ -12514,7 +12529,7 @@ impl TalentPoolResource<'_> {
     pub async fn batch_change_talent_pool(
         &self,
         talent_pool_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchChangeTalentPoolResp, LarkError> {
         let path =
@@ -12534,7 +12549,7 @@ impl TalentPoolResource<'_> {
     pub async fn move_talent(
         &self,
         talent_pool_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<MoveTalentTalentPoolResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talent_pools/{talent_pool_id}/talent_relationship");
@@ -12642,7 +12657,7 @@ impl<'a> SearchTestQuery<'a> {
 impl TestResource<'_> {
     pub async fn search(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchTestResp, LarkError> {
         self.search_by_query(&SearchTestQuery::new(), body, option)
@@ -12652,7 +12667,7 @@ impl TestResource<'_> {
     pub async fn search_by_query(
         &self,
         query: &SearchTestQuery<'_>,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchTestResp, LarkError> {
         RestRequest::new(
@@ -12672,7 +12687,7 @@ impl TestResource<'_> {
     pub fn search_by_iterator(
         &self,
         page_size: Option<i32>,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
     ) -> SearchTestIterator<'_> {
         let query = SearchTestQuery::new().page_size(page_size);
         self.search_iterator_by_query(&query, body)
@@ -12681,7 +12696,7 @@ impl TestResource<'_> {
     pub fn search_iterator_by_query(
         &self,
         query: &SearchTestQuery<'_>,
-        body: serde_json::Value,
+        body: impl Into<ReplayableRequestBody>,
     ) -> SearchTestIterator<'_> {
         SearchTestIterator {
             config: self.config,
@@ -12689,7 +12704,7 @@ impl TestResource<'_> {
                 .with_page_token(query.page_token.map(ToOwned::to_owned)),
             page_size: query.page_size,
             user_id_type: query.user_id_type.map(ToOwned::to_owned),
-            body,
+            body: body.into(),
         }
     }
 }
@@ -12704,7 +12719,7 @@ impl WebsiteDeliveryResource<'_> {
     pub async fn create_by_attachment(
         &self,
         website_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateByAttachmentWebsiteDeliveryResp, LarkError> {
         let path =
@@ -12727,7 +12742,7 @@ impl WebsiteDeliveryResource<'_> {
     pub async fn create_by_resume(
         &self,
         website_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateByResumeWebsiteDeliveryResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/deliveries/create_by_resume");
@@ -12853,7 +12868,7 @@ impl EhrImportTaskResource<'_> {
     pub async fn patch(
         &self,
         ehr_import_task_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchEhrImportTaskResp, LarkError> {
         let path = format!("/open-apis/hire/v1/ehr_import_tasks/{ehr_import_task_id}");
@@ -13002,7 +13017,7 @@ pub struct ExamResource<'a> {
 impl ExamResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateExamResp, LarkError> {
         RestRequest::new(
@@ -13150,7 +13165,7 @@ pub struct ExternalInterviewAssessmentResource<'a> {
 impl ExternalInterviewAssessmentResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateExternalInterviewAssessmentResp, LarkError> {
         RestRequest::new(
@@ -13171,7 +13186,7 @@ impl ExternalInterviewAssessmentResource<'_> {
     pub async fn patch(
         &self,
         external_interview_assessment_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchExternalInterviewAssessmentResp, LarkError> {
         let path = format!(
@@ -13202,7 +13217,7 @@ pub struct ExternalReferralRewardResource<'a> {
 impl ExternalReferralRewardResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateExternalReferralRewardResp, LarkError> {
         RestRequest::new(
@@ -13967,7 +13982,7 @@ impl OfferCustomFieldResource<'_> {
     pub async fn update(
         &self,
         offer_custom_field_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateOfferCustomFieldResp, LarkError> {
         let path = format!("/open-apis/hire/v1/offer_custom_fields/{offer_custom_field_id}");
@@ -14157,7 +14172,7 @@ impl TalentExternalInfoResource<'_> {
     pub async fn create(
         &self,
         talent_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateTalentExternalInfoResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talents/{talent_id}/external_info");
@@ -14176,7 +14191,7 @@ impl TalentExternalInfoResource<'_> {
     pub async fn update(
         &self,
         talent_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateTalentExternalInfoResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talents/{talent_id}/external_info");
@@ -14257,7 +14272,7 @@ impl WebsiteChannelResource<'_> {
     pub async fn create(
         &self,
         website_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateWebsiteChannelResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/channels");
@@ -14327,7 +14342,7 @@ impl WebsiteChannelResource<'_> {
         &self,
         website_id: &str,
         channel_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateWebsiteChannelResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/channels/{channel_id}");
@@ -14381,7 +14396,7 @@ impl WebsiteSiteUserResource<'_> {
     pub async fn create(
         &self,
         website_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateWebsiteSiteUserResp, LarkError> {
         let path = format!("/open-apis/hire/v1/websites/{website_id}/site_users");

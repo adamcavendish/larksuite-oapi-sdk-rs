@@ -1031,11 +1031,12 @@ impl<'a> TaskResource<'a> {
     pub async fn batch_delete_collaborator(
         &self,
         task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchDeleteCollaboratorResp, LarkError> {
-        let query = BatchDeleteCollaboratorQuery::new(task_id, body).user_id_type(user_id_type);
+        let body = serde_json::to_value(body)?;
+        let query = BatchDeleteCollaboratorQuery::new(task_id, &body).user_id_type(user_id_type);
         self.batch_delete_collaborator_by_query(&query, option)
             .await
     }
@@ -1065,11 +1066,12 @@ impl<'a> TaskResource<'a> {
     pub async fn batch_delete_follower(
         &self,
         task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchDeleteFollowerResp, LarkError> {
-        let query = BatchDeleteFollowerQuery::new(task_id, body).user_id_type(user_id_type);
+        let body = serde_json::to_value(body)?;
+        let query = BatchDeleteFollowerQuery::new(task_id, &body).user_id_type(user_id_type);
         self.batch_delete_follower_by_query(&query, option).await
     }
 

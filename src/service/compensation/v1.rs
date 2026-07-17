@@ -691,7 +691,7 @@ pub struct ArchiveResource<'a> {
 impl ArchiveResource<'_> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateArchiveResp, LarkError> {
         RestRequest::new(
@@ -708,7 +708,7 @@ impl ArchiveResource<'_> {
 
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryArchiveResp, LarkError> {
         RestRequest::new(
@@ -841,7 +841,7 @@ pub struct LumpSumPaymentResource<'a> {
 impl LumpSumPaymentResource<'_> {
     pub async fn batch_create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchCreateLumpSumPaymentResp, LarkError> {
         RestRequest::new(
@@ -858,7 +858,7 @@ impl LumpSumPaymentResource<'_> {
 
     pub async fn batch_remove(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchRemoveLumpSumPaymentResp, LarkError> {
         RestRequest::new(
@@ -875,7 +875,7 @@ impl LumpSumPaymentResource<'_> {
 
     pub async fn batch_update(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchUpdateLumpSumPaymentResp, LarkError> {
         RestRequest::new(
@@ -892,7 +892,7 @@ impl LumpSumPaymentResource<'_> {
 
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryLumpSumPaymentResp, LarkError> {
         RestRequest::new(
@@ -909,7 +909,7 @@ impl LumpSumPaymentResource<'_> {
 
     pub async fn query_detail(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryDetailLumpSumPaymentResp, LarkError> {
         RestRequest::new(
@@ -934,7 +934,7 @@ pub struct RecurringPaymentResource<'a> {
 impl RecurringPaymentResource<'_> {
     pub async fn batch_create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchCreateRecurringPaymentResp, LarkError> {
         RestRequest::new(
@@ -951,7 +951,7 @@ impl RecurringPaymentResource<'_> {
 
     pub async fn batch_remove(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchRemoveRecurringPaymentResp, LarkError> {
         RestRequest::new(
@@ -968,7 +968,7 @@ impl RecurringPaymentResource<'_> {
 
     pub async fn batch_update(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchUpdateRecurringPaymentResp, LarkError> {
         RestRequest::new(
@@ -985,7 +985,7 @@ impl RecurringPaymentResource<'_> {
 
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryRecurringPaymentResp, LarkError> {
         RestRequest::new(
@@ -1010,7 +1010,7 @@ pub struct SocialArchiveResource<'a> {
 impl SocialArchiveResource<'_> {
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QuerySocialArchiveResp, LarkError> {
         RestRequest::new(
@@ -1035,7 +1035,7 @@ pub struct SocialArchiveAdjustRecordResource<'a> {
 impl SocialArchiveAdjustRecordResource<'_> {
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QuerySocialArchiveAdjustRecordResp, LarkError> {
         RestRequest::new(
@@ -1099,7 +1099,7 @@ impl SocialPlanResource<'_> {
 
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QuerySocialPlanResp, LarkError> {
         RestRequest::new(

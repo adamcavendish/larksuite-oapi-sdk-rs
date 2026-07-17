@@ -2454,10 +2454,11 @@ impl<'a> AttachmentV2Resource<'a> {
 
     pub async fn upload(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadAttachmentV2Resp, LarkError> {
-        let query = UploadAttachmentV2Query::new(body);
+        let body = serde_json::to_value(body)?;
+        let query = UploadAttachmentV2Query::new(&body);
         self.upload_by_query(&query, option).await
     }
 

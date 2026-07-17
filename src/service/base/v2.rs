@@ -196,9 +196,10 @@ impl AppRoleV2Resource<'_> {
     pub async fn create(
         &self,
         app_token: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateAppRoleV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         self.create_by_query(&CreateAppRoleV2Query::new(app_token, &body), option)
             .await
     }
@@ -255,9 +256,10 @@ impl AppRoleV2Resource<'_> {
         &self,
         app_token: &str,
         role_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateAppRoleV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         self.update_by_query(
             &UpdateAppRoleV2Query::new(app_token, role_id, &body),
             option,

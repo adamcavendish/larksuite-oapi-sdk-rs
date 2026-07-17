@@ -703,9 +703,10 @@ impl<'a> EntityResource<'a> {
 
     pub async fn highlight(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = HighlightEntityQuery::new(&body);
         self.highlight_by_query(&query, option).await
     }
@@ -729,9 +730,10 @@ impl<'a> EntityResource<'a> {
 
     pub async fn extract(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ExtractEntityResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = ExtractEntityQuery::new(&body);
         self.extract_by_query(&query, option).await
     }
@@ -755,9 +757,10 @@ impl<'a> EntityResource<'a> {
 
     pub async fn match_(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<MatchEntityResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = MatchEntityQuery::new(&body);
         self.match_by_query(&query, option).await
     }
@@ -865,10 +868,11 @@ impl<'a> UpdateDraftQuery<'a> {
 impl<'a> DraftResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateDraftResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = CreateDraftQuery::new(&body).user_id_type(user_id_type);
         self.create_by_query(&query, option).await
     }
@@ -894,10 +898,11 @@ impl<'a> DraftResource<'a> {
     pub async fn update(
         &self,
         draft_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateDraftResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = UpdateDraftQuery::new(draft_id, &body).user_id_type(user_id_type);
         self.update_by_query(&query, option).await
     }
@@ -958,9 +963,10 @@ impl<'a> FileResource<'a> {
 
     pub async fn upload(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadFileResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = UploadFileQuery::new(&body);
         self.upload_by_query(&query, option).await
     }

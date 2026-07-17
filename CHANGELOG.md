@@ -4,6 +4,13 @@
 
 ### REST service coverage
 
+- Replaced every remaining direct raw JSON REST request-body parameter with a
+  serializable input across the service clients. Explicit query and iterator
+  transport state continues to retain JSON values where requests must be
+  replayable or API shapes are genuinely dynamic.
+- Replaced the remaining raw Hire v1 request-body parameters with serializable
+  typed inputs. Paginated Hire searches now use a replayable request-body
+  wrapper, preserving safe multi-page request behavior.
 - Replaced raw Hire v1 job-open and talent folder, identity-lookup, onboarding,
   and tagging mutation payloads with Go-shaped request models.
 - Replaced raw CoreHR v1, VC v1, Docx v1, and OKR v1 JSON mutation payloads

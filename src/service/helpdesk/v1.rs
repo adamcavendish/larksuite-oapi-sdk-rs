@@ -1327,7 +1327,7 @@ impl<'a> AgentResource<'a> {
     pub async fn patch(
         &self,
         agent_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchAgentResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}");
@@ -1407,7 +1407,7 @@ impl<'a> AgentSchedulesResource<'a> {
     pub async fn patch(
         &self,
         agent_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchAgentSchedulesResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/agents/{agent_id}/schedules");
@@ -1448,7 +1448,7 @@ impl<'a> ListAgentScheduleQuery<'a> {
 impl<'a> AgentScheduleResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateAgentScheduleResp, LarkError> {
         RestRequest::new(
@@ -1917,7 +1917,7 @@ impl<'a> NotificationResource<'a> {
     pub async fn submit_approve(
         &self,
         notification_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/submit_approve");
@@ -1936,7 +1936,7 @@ impl<'a> NotificationResource<'a> {
     pub async fn execute(
         &self,
         notification_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/helpdesk/v1/notifications/{notification_id}/execute");

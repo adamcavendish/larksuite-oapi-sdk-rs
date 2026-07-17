@@ -1728,9 +1728,10 @@ impl<'a> CreateBadgeImageQuery<'a> {
 impl<'a> BadgeImageResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateBadgeImageResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = CreateBadgeImageQuery::new(&body);
         self.create_by_query(&query, option).await
     }

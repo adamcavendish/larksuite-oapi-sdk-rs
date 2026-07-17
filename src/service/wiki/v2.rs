@@ -549,7 +549,7 @@ impl<'a> SpaceSettingResource<'a> {
     pub async fn update(
         &self,
         space_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let path = format!("/open-apis/wiki/v2/spaces/{space_id}/setting");

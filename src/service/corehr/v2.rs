@@ -3898,7 +3898,7 @@ macro_rules! post_method {
     ($fn_name:ident, $resp:ident, $body:ty, $data:ty, $path:expr) => {
         pub async fn $fn_name(
             &self,
-            body: serde_json::Value,
+            body: impl Serialize,
             option: &RequestOption,
         ) -> Result<$resp, LarkError> {
             RestRequest::new(
@@ -3916,7 +3916,7 @@ macro_rules! post_method {
     ($fn_name:ident, $resp:ident, $data:ty, $path:expr) => {
         pub async fn $fn_name(
             &self,
-            body: serde_json::Value,
+            body: impl Serialize,
             option: &RequestOption,
         ) -> Result<$resp, LarkError> {
             RestRequest::new(
@@ -4321,7 +4321,7 @@ impl CostCenterV2Resource<'_> {
     pub async fn patch(
         &self,
         cost_center_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchCostCenterV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}");
@@ -4361,7 +4361,7 @@ impl CostCenterVersionV2Resource<'_> {
     pub async fn create(
         &self,
         cost_center_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateCostCenterVersionV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/cost_centers/{cost_center_id}/versions");
@@ -4400,7 +4400,7 @@ impl CostCenterVersionV2Resource<'_> {
         &self,
         cost_center_id: &str,
         version_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchCostCenterVersionV2Resp, LarkError> {
         let path =
@@ -4449,7 +4449,7 @@ impl CustomOrgV2Resource<'_> {
     pub async fn patch(
         &self,
         org_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchCustomOrgV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/custom_orgs/{org_id}");
@@ -4562,7 +4562,7 @@ impl DepartmentV2Resource<'_> {
     pub async fn patch(
         &self,
         department_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchDepartmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/departments/{department_id}");
@@ -4708,7 +4708,7 @@ impl EmployeesAdditionalJobV2Resource<'_> {
     pub async fn patch(
         &self,
         additional_job_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchEmployeesAdditionalJobV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/employees/additional_jobs/{additional_job_id}");
@@ -4795,7 +4795,7 @@ impl EmployeesIntlAssignmentV2Resource<'_> {
     pub async fn patch(
         &self,
         international_assignment_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchEmployeesIntlAssignmentV2Resp, LarkError> {
         let path = format!(
@@ -4974,7 +4974,7 @@ impl JobChangeV2Resource<'_> {
     pub async fn revoke(
         &self,
         job_change_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<RevokeJobChangeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/job_changes/{job_change_id}/revoke");
@@ -5059,7 +5059,7 @@ impl JobGradeV2Resource<'_> {
     pub async fn patch(
         &self,
         job_grade_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchJobGradeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/job_grades/{job_grade_id}");
@@ -5134,7 +5134,7 @@ impl LocationV2Resource<'_> {
     pub async fn patch(
         &self,
         location_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchLocationV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}");
@@ -5168,7 +5168,7 @@ impl LocationAddressV2Resource<'_> {
     pub async fn create(
         &self,
         location_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateLocationAddressV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}/addresses");
@@ -5206,7 +5206,7 @@ impl LocationAddressV2Resource<'_> {
         &self,
         location_id: &str,
         address_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchLocationAddressV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/locations/{location_id}/addresses/{address_id}");
@@ -5298,7 +5298,7 @@ impl PathwayV2Resource<'_> {
     pub async fn patch(
         &self,
         pathway_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchPathwayV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pathways/{pathway_id}");
@@ -5332,7 +5332,7 @@ impl PersonV2Resource<'_> {
     pub async fn patch(
         &self,
         person_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchPersonV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/persons/{person_id}");
@@ -5379,7 +5379,7 @@ impl PositionV2Resource<'_> {
     pub async fn patch(
         &self,
         position_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchPositionV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/positions/{position_id}");
@@ -5419,7 +5419,7 @@ impl PreHireV2Resource<'_> {
     pub async fn complete(
         &self,
         pre_hire_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CompletePreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}/complete");
@@ -5462,7 +5462,7 @@ impl PreHireV2Resource<'_> {
     pub async fn patch(
         &self,
         pre_hire_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchPreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}");
@@ -5506,7 +5506,7 @@ impl PreHireV2Resource<'_> {
     pub async fn transit_task(
         &self,
         pre_hire_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<TransitTaskPreHireV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/pre_hires/{pre_hire_id}/transit_task");
@@ -5599,7 +5599,7 @@ impl ProbationAssessmentV2Resource<'_> {
     pub async fn patch(
         &self,
         assessment_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchProbationAssessmentV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/probation/assessments/{assessment_id}");
@@ -5731,7 +5731,7 @@ impl ProcessApproverV2Resource<'_> {
         &self,
         process_id: &str,
         approver_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateProcessApproverV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/approvers/{approver_id}");
@@ -5758,7 +5758,7 @@ impl ProcessExtraV2Resource<'_> {
     pub async fn update(
         &self,
         process_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateProcessExtraV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/extra");
@@ -5811,7 +5811,7 @@ impl ProcessTransferV2Resource<'_> {
     pub async fn update(
         &self,
         process_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateProcessTransferV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/processes/{process_id}/transfer");
@@ -5874,7 +5874,7 @@ impl ProcessRevokeV2Resource<'_> {
     pub async fn update(
         &self,
         process_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateProcessRevokeV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/process_revoke/{process_id}");
@@ -5901,7 +5901,7 @@ impl ProcessWithdrawV2Resource<'_> {
     pub async fn update(
         &self,
         process_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateProcessWithdrawV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/process_withdraw/{process_id}");
@@ -6083,7 +6083,7 @@ impl SignatureFileV2Resource<'_> {
     pub async fn download(
         &self,
         signature_file_id: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<DownloadSignatureFileV2Resp, LarkError> {
         let path = format!("/open-apis/corehr/v2/signature_files/{signature_file_id}/download");

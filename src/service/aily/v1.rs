@@ -778,7 +778,7 @@ impl<'a> DataAssetResource<'a> {
         &self,
         app_id: &str,
         tenant_type: Option<&str>,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadFileDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/upload_file");

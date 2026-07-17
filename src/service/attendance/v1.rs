@@ -1732,7 +1732,7 @@ impl<'a> GroupResource<'a> {
 
     pub async fn search(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchGroupResp, LarkError> {
         RestRequest::new(
@@ -1868,7 +1868,7 @@ impl<'a> ShiftResource<'a> {
 
     pub async fn query(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryShiftResp, LarkError> {
         RestRequest::new(
@@ -2504,7 +2504,7 @@ impl<'a> ArchiveRuleResource<'a> {
 
     pub async fn del_report(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<DelReportArchiveRuleResp, LarkError> {
         RestRequest::new(
@@ -2660,7 +2660,7 @@ pub struct ApprovalInfoProcessResource<'a> {
 impl<'a> ApprovalInfoProcessResource<'a> {
     pub async fn process(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<ProcessApprovalInfoResp, LarkError> {
         RestRequest::new(
@@ -2700,7 +2700,7 @@ impl<'a> FileResource<'a> {
 
     pub async fn upload(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadFileResp, LarkError> {
         RestRequest::new(
@@ -2786,7 +2786,7 @@ impl<'a> UserDailyShiftResource<'a> {
 
     pub async fn batch_create_temp(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         employee_type: &str,
         option: &RequestOption,
     ) -> Result<BatchCreateTempUserDailyShiftResp, LarkError> {
