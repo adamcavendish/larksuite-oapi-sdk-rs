@@ -33,6 +33,254 @@ pub struct ObjectFieldData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AssignedOrganizationWithCode {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_codes: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BpRoleOrganization {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work_location_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EnumFieldOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub option_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<Name>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchAssignedUserReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub management_scope_list: Option<Vec<ManagementScope>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub search_method: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_size: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddRoleAssignAuthorizationReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assigned_organization_items: Option<Vec<Vec<AssignedOrganizationWithCode>>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateRoleAssignAuthorizationReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assigned_organization_items: Option<Vec<Vec<AssignedOrganizationWithCode>>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ConvertCommonDataIdReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddEnumOptionCommonDataMetaDataReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_field_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_field_options: Option<Vec<EnumFieldOption>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EditEnumOptionCommonDataMetaDataReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub object_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_field_api_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enum_field_option: Option<EnumFieldOption>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateJobChangeReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_mode: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_type_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flow_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_info: Option<TransferInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transfer_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initiator_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateLeaveGrantingRecordReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_type_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granting_quantity: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub granting_unit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effective_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiration_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub section_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<Vec<I18n>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QueryOffboardingReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_reason_unique_identifier: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SearchOffboardingReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub apply_initiating_time_start: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub apply_initiating_time_end: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub apply_finished_time_start: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub apply_finished_time_end: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_offboarding_date_start: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_offboarding_date_end: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_date_start: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_date_end: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub statuses: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reasons: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employee_reasons: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub department_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub select_fields: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SubmitOffboardingReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_mode: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub employment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_reason_unique_identifier: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offboarding_reason_explanation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initiator_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_block_list: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_reason_explanation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom_fields: Option<Vec<ObjectFieldData>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct QuerySecurityGroupReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub item_list: Option<Vec<BpRoleOrganization>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at_gte: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at_lte: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SortOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sort_field: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sort_order: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WkOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub count: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sort_options: Option<Vec<SortOption>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkCalendarFilter {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wk_calendar_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wk_calendar_id_gt: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wk_option: Option<WkOption>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub only_enable: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CalendarDateByDateFilter {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wk_calendar_ids: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dates: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub begin_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ids: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ApplicationInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub apply_initiator_id: Option<String>,
@@ -3357,7 +3605,7 @@ impl<'a> CompanyResource<'a> {
 
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: Company,
         option: &RequestOption,
     ) -> Result<CreateCompanyResp, LarkError> {
         RestRequest::new(
@@ -3392,7 +3640,7 @@ impl<'a> CompanyResource<'a> {
     pub async fn patch(
         &self,
         company_id: &str,
-        body: serde_json::Value,
+        body: Company,
         option: &RequestOption,
     ) -> Result<PatchCompanyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/companies/{company_id}");
@@ -3779,7 +4027,7 @@ pub struct AssignedUserResource<'a> {
 impl<'a> AssignedUserResource<'a> {
     pub async fn search(
         &self,
-        body: serde_json::Value,
+        body: SearchAssignedUserReqBody,
         option: &RequestOption,
     ) -> Result<SearchAssignedUserResp, LarkError> {
         RestRequest::new(
@@ -3799,10 +4047,33 @@ pub struct AuthorizationResource<'a> {
     config: &'a Config,
 }
 
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct RemoveRoleAssignAuthorizationQuery<'a> {
+    pub employment_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+    pub role_id: &'a str,
+}
+
+impl<'a> RemoveRoleAssignAuthorizationQuery<'a> {
+    pub fn new(employment_id: &'a str, role_id: &'a str) -> Self {
+        Self {
+            employment_id,
+            user_id_type: None,
+            role_id,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> AuthorizationResource<'a> {
     pub async fn add_role_assign(
         &self,
-        body: serde_json::Value,
+        body: AddRoleAssignAuthorizationReqBody,
         option: &RequestOption,
     ) -> Result<AddRoleAssignAuthorizationResp, LarkError> {
         RestRequest::new(
@@ -3846,7 +4117,19 @@ impl<'a> AuthorizationResource<'a> {
 
     pub async fn remove_role_assign(
         &self,
-        body: serde_json::Value,
+        employment_id: &str,
+        user_id_type: Option<&str>,
+        role_id: &str,
+        option: &RequestOption,
+    ) -> Result<RemoveRoleAssignAuthorizationResp, LarkError> {
+        let query = RemoveRoleAssignAuthorizationQuery::new(employment_id, role_id)
+            .user_id_type(user_id_type);
+        self.remove_role_assign_by_query(&query, option).await
+    }
+
+    pub async fn remove_role_assign_by_query(
+        &self,
+        query: &RemoveRoleAssignAuthorizationQuery<'_>,
         option: &RequestOption,
     ) -> Result<RemoveRoleAssignAuthorizationResp, LarkError> {
         RestRequest::new(
@@ -3856,14 +4139,16 @@ impl<'a> AuthorizationResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(&body)?
+        .query("employment_id", query.employment_id)
+        .query("user_id_type", query.user_id_type)
+        .query("role_id", query.role_id)
         .send_v2_response::<RemoveRoleAssignAuthorizationRespData, RemoveRoleAssignAuthorizationResp>()
         .await
     }
 
     pub async fn update_role_assign(
         &self,
-        body: serde_json::Value,
+        body: UpdateRoleAssignAuthorizationReqBody,
         option: &RequestOption,
     ) -> Result<UpdateRoleAssignAuthorizationResp, LarkError> {
         RestRequest::new(
@@ -3886,7 +4171,7 @@ pub struct CommonDataIdResource<'a> {
 impl<'a> CommonDataIdResource<'a> {
     pub async fn convert(
         &self,
-        body: serde_json::Value,
+        body: ConvertCommonDataIdReqBody,
         option: &RequestOption,
     ) -> Result<ConvertCommonDataIdResp, LarkError> {
         RestRequest::new(
@@ -3909,7 +4194,7 @@ pub struct CommonDataMetaDataResource<'a> {
 impl<'a> CommonDataMetaDataResource<'a> {
     pub async fn add_enum_option(
         &self,
-        body: serde_json::Value,
+        body: AddEnumOptionCommonDataMetaDataReqBody,
         option: &RequestOption,
     ) -> Result<AddEnumOptionCommonDataMetaDataResp, LarkError> {
         RestRequest::new(
@@ -3926,7 +4211,7 @@ impl<'a> CommonDataMetaDataResource<'a> {
 
     pub async fn edit_enum_option(
         &self,
-        body: serde_json::Value,
+        body: EditEnumOptionCommonDataMetaDataReqBody,
         option: &RequestOption,
     ) -> Result<EditEnumOptionCommonDataMetaDataResp, LarkError> {
         RestRequest::new(
@@ -4003,7 +4288,7 @@ impl<'a> ListContractQuery<'a> {
 impl<'a> ContractResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: Contract,
         option: &RequestOption,
     ) -> Result<CreateContractResp, LarkError> {
         RestRequest::new(
@@ -4084,7 +4369,7 @@ impl<'a> ContractResource<'a> {
     pub async fn patch(
         &self,
         contract_id: &str,
-        body: serde_json::Value,
+        body: Contract,
         option: &RequestOption,
     ) -> Result<PatchContractResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/contracts/{contract_id}");
@@ -4275,7 +4560,7 @@ impl<'a> ListEmployeeTypeQuery<'a> {
 impl<'a> EmployeeTypeResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: EmployeeType,
         option: &RequestOption,
     ) -> Result<CreateEmployeeTypeResp, LarkError> {
         RestRequest::new(
@@ -4356,7 +4641,7 @@ impl<'a> EmployeeTypeResource<'a> {
     pub async fn patch(
         &self,
         employee_type_id: &str,
-        body: serde_json::Value,
+        body: EmployeeType,
         option: &RequestOption,
     ) -> Result<PatchEmployeeTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employee_types/{employee_type_id}");
@@ -4380,7 +4665,7 @@ pub struct EmploymentResource<'a> {
 impl<'a> EmploymentResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: EmploymentCreate,
         option: &RequestOption,
     ) -> Result<CreateEmploymentResp, LarkError> {
         RestRequest::new(
@@ -4415,7 +4700,7 @@ impl<'a> EmploymentResource<'a> {
     pub async fn patch(
         &self,
         employment_id: &str,
-        body: serde_json::Value,
+        body: Employment,
         option: &RequestOption,
     ) -> Result<PatchEmploymentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/employments/{employment_id}");
@@ -4491,7 +4776,7 @@ impl<'a> ListJobQuery<'a> {
 impl<'a> JobResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: Job,
         option: &RequestOption,
     ) -> Result<CreateJobResp, LarkError> {
         RestRequest::new(
@@ -4568,7 +4853,7 @@ impl<'a> JobResource<'a> {
     pub async fn patch(
         &self,
         job_id: &str,
-        body: serde_json::Value,
+        body: Job,
         option: &RequestOption,
     ) -> Result<PatchJobResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/jobs/{job_id}");
@@ -4592,7 +4877,7 @@ pub struct JobChangeResource<'a> {
 impl<'a> JobChangeResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: CreateJobChangeReqBody,
         option: &RequestOption,
     ) -> Result<CreateJobChangeResp, LarkError> {
         RestRequest::new(
@@ -4648,7 +4933,7 @@ impl<'a> ListJobDataQuery<'a> {
 impl<'a> JobDataResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: JobData,
         option: &RequestOption,
     ) -> Result<CreateJobDataResp, LarkError> {
         RestRequest::new(
@@ -4729,7 +5014,7 @@ impl<'a> JobDataResource<'a> {
     pub async fn patch(
         &self,
         job_data_id: &str,
-        body: serde_json::Value,
+        body: JobData,
         option: &RequestOption,
     ) -> Result<PatchJobDataResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_datas/{job_data_id}");
@@ -4786,7 +5071,7 @@ impl<'a> ListJobFamilyQuery<'a> {
 impl<'a> JobFamilyResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: JobFamily,
         option: &RequestOption,
     ) -> Result<CreateJobFamilyResp, LarkError> {
         RestRequest::new(
@@ -4867,7 +5152,7 @@ impl<'a> JobFamilyResource<'a> {
     pub async fn patch(
         &self,
         job_family_id: &str,
-        body: serde_json::Value,
+        body: JobFamily,
         option: &RequestOption,
     ) -> Result<PatchJobFamilyResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_families/{job_family_id}");
@@ -4963,7 +5248,7 @@ impl<'a> LeaveResource<'a> {
 
     pub async fn work_calendar(
         &self,
-        body: serde_json::Value,
+        body: WorkCalendarFilter,
         option: &RequestOption,
     ) -> Result<WorkCalendarLeaveResp, LarkError> {
         RestRequest::new(
@@ -4980,7 +5265,7 @@ impl<'a> LeaveResource<'a> {
 
     pub async fn work_calendar_date(
         &self,
-        body: serde_json::Value,
+        body: CalendarDateByDateFilter,
         option: &RequestOption,
     ) -> Result<WorkCalendarDateLeaveResp, LarkError> {
         RestRequest::new(
@@ -5003,7 +5288,7 @@ pub struct LeaveGrantingRecordResource<'a> {
 impl<'a> LeaveGrantingRecordResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: CreateLeaveGrantingRecordReqBody,
         option: &RequestOption,
     ) -> Result<CreateLeaveGrantingRecordResp, LarkError> {
         RestRequest::new(
@@ -5077,7 +5362,7 @@ impl<'a> ListNationalIdTypeQuery<'a> {
 impl<'a> NationalIdTypeResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: NationalIdType,
         option: &RequestOption,
     ) -> Result<CreateNationalIdTypeResp, LarkError> {
         RestRequest::new(
@@ -5158,7 +5443,7 @@ impl<'a> NationalIdTypeResource<'a> {
     pub async fn patch(
         &self,
         national_id_type_id: &str,
-        body: serde_json::Value,
+        body: NationalIdType,
         option: &RequestOption,
     ) -> Result<PatchNationalIdTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/national_id_types/{national_id_type_id}");
@@ -5222,7 +5507,7 @@ impl<'a> SearchOffboardingQuery<'a> {
 pub struct SearchOffboardingIterator<'a> {
     config: &'a Config,
     state: PageIteratorState<Offboarding>,
-    body: serde_json::Value,
+    body: SearchOffboardingReqBody,
     page_size: Option<i32>,
     user_id_type: Option<String>,
 }
@@ -5271,7 +5556,7 @@ impl<'a> SearchOffboardingIterator<'a> {
 impl<'a> OffboardingResource<'a> {
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: QueryOffboardingReqBody,
         option: &RequestOption,
     ) -> Result<QueryOffboardingResp, LarkError> {
         RestRequest::new(
@@ -5288,7 +5573,7 @@ impl<'a> OffboardingResource<'a> {
 
     pub async fn search(
         &self,
-        body: serde_json::Value,
+        body: SearchOffboardingReqBody,
         option: &RequestOption,
     ) -> Result<SearchOffboardingResp, LarkError> {
         self.search_page(None, None, None, body, option).await
@@ -5299,7 +5584,7 @@ impl<'a> OffboardingResource<'a> {
         page_size: Option<i32>,
         page_token: Option<&str>,
         user_id_type: Option<&str>,
-        body: serde_json::Value,
+        body: SearchOffboardingReqBody,
         option: &RequestOption,
     ) -> Result<SearchOffboardingResp, LarkError> {
         let query = SearchOffboardingQuery::new()
@@ -5312,7 +5597,7 @@ impl<'a> OffboardingResource<'a> {
     pub async fn search_by_query(
         &self,
         query: &SearchOffboardingQuery<'_>,
-        body: serde_json::Value,
+        body: SearchOffboardingReqBody,
         option: &RequestOption,
     ) -> Result<SearchOffboardingResp, LarkError> {
         RestRequest::new(
@@ -5331,7 +5616,7 @@ impl<'a> OffboardingResource<'a> {
 
     pub fn search_by_iterator(
         &self,
-        body: serde_json::Value,
+        body: SearchOffboardingReqBody,
         page_size: Option<i32>,
         user_id_type: Option<&str>,
     ) -> SearchOffboardingIterator<'a> {
@@ -5346,7 +5631,7 @@ impl<'a> OffboardingResource<'a> {
 
     pub async fn submit(
         &self,
-        body: serde_json::Value,
+        body: SubmitOffboardingReqBody,
         option: &RequestOption,
     ) -> Result<SubmitOffboardingResp, LarkError> {
         RestRequest::new(
@@ -5369,7 +5654,7 @@ pub struct PersonResource<'a> {
 impl<'a> PersonResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: Person,
         option: &RequestOption,
     ) -> Result<CreatePersonResp, LarkError> {
         RestRequest::new(
@@ -5421,7 +5706,7 @@ impl<'a> PersonResource<'a> {
     pub async fn patch(
         &self,
         person_id: &str,
-        body: serde_json::Value,
+        body: Person,
         option: &RequestOption,
     ) -> Result<PatchPersonResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/persons/{person_id}");
@@ -5559,7 +5844,7 @@ impl<'a> PreHireResource<'a> {
     pub async fn patch(
         &self,
         pre_hire_id: &str,
-        body: serde_json::Value,
+        body: PreHire,
         option: &RequestOption,
     ) -> Result<PatchPreHireResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/pre_hires/{pre_hire_id}");
@@ -5668,7 +5953,7 @@ impl<'a> SecurityGroupResource<'a> {
 
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: QuerySecurityGroupReqBody,
         option: &RequestOption,
     ) -> Result<QuerySecurityGroupResp, LarkError> {
         RestRequest::new(
@@ -5899,7 +6184,7 @@ impl<'a> TransferTypeResource<'a> {
 impl<'a> JobLevelResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: JobLevel,
         option: &RequestOption,
     ) -> Result<CreateJobLevelResp, LarkError> {
         RestRequest::new(
@@ -5934,7 +6219,7 @@ impl<'a> JobLevelResource<'a> {
     pub async fn patch(
         &self,
         job_level_id: &str,
-        body: serde_json::Value,
+        body: JobLevel,
         option: &RequestOption,
     ) -> Result<PatchJobLevelResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/job_levels/{job_level_id}");
@@ -5973,7 +6258,7 @@ impl<'a> CurrencyResource<'a> {
 impl<'a> LocationResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: Location,
         option: &RequestOption,
     ) -> Result<CreateLocationResp, LarkError> {
         RestRequest::new(
@@ -6009,7 +6294,7 @@ impl<'a> LocationResource<'a> {
 impl<'a> DepartmentResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: DepartmentCreate,
         option: &RequestOption,
     ) -> Result<CreateDepartmentResp, LarkError> {
         RestRequest::new(
@@ -6044,7 +6329,7 @@ impl<'a> DepartmentResource<'a> {
     pub async fn patch(
         &self,
         department_id: &str,
-        body: serde_json::Value,
+        body: Department,
         option: &RequestOption,
     ) -> Result<PatchDepartmentResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/departments/{department_id}");
@@ -6064,7 +6349,7 @@ impl<'a> DepartmentResource<'a> {
 impl<'a> WorkingHoursTypeResource<'a> {
     pub async fn create(
         &self,
-        body: serde_json::Value,
+        body: WorkingHoursType,
         option: &RequestOption,
     ) -> Result<CreateWorkingHoursTypeResp, LarkError> {
         RestRequest::new(
@@ -6116,7 +6401,7 @@ impl<'a> WorkingHoursTypeResource<'a> {
     pub async fn patch(
         &self,
         working_hours_type_id: &str,
-        body: serde_json::Value,
+        body: WorkingHoursType,
         option: &RequestOption,
     ) -> Result<PatchWorkingHoursTypeResp, LarkError> {
         let path = format!("/open-apis/corehr/v1/working_hours_types/{working_hours_type_id}");

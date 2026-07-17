@@ -12,7 +12,18 @@ async fn corehr_common_data_metadata_uses_typed_response() {
         .corehr()
         .common_data_meta_data
         .add_enum_option(
-            serde_json::json!({"object_api_name": "employee"}),
+            AddEnumOptionCommonDataMetaDataReqBody {
+                object_api_name: Some("employee".into()),
+                enum_field_api_name: Some("grade".into()),
+                enum_field_options: Some(vec![EnumFieldOption {
+                    option_api_name: Some("grade_a".into()),
+                    active: Some(true),
+                    name: Some(Name {
+                        zh_cn: Some("A".into()),
+                        en_us: Some("A".into()),
+                    }),
+                }]),
+            },
             &RequestOption::default(),
         )
         .await
@@ -30,6 +41,32 @@ async fn corehr_common_data_metadata_uses_typed_response() {
     );
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/corehr/v1/common_data/meta_data/add_enum_option"));
+}
+
+#[tokio::test]
+async fn corehr_remove_role_assign_uses_typed_query() {
+    let body = r#"{"code":0,"msg":"ok","data":{"assign_id":"assign-1"}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let resp = client
+        .corehr()
+        .authorization
+        .remove_role_assign_by_query(
+            &RemoveRoleAssignAuthorizationQuery::new("employment-1", "role-1")
+                .user_id_type("people_corehr_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    assert_eq!(resp.data.unwrap().assign_id.as_deref(), Some("assign-1"));
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/corehr/v1/authorizations/remove_role_assign?"));
+    assert!(request.contains("employment_id=employment-1"));
+    assert!(request.contains("user_id_type=people_corehr_id"));
+    assert!(request.contains("role_id=role-1"));
 }
 
 #[tokio::test]

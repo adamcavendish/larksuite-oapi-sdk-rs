@@ -4,6 +4,7 @@ use common::{http_response, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::req::RequestOption;
+use larksuite_oapi_sdk_rs::service::corehr::v1::SearchOffboardingReqBody;
 
 fn client_for(addr: std::net::SocketAddr) -> LarkClient {
     LarkClient::builder("test_app_id", "test_secret")
@@ -25,7 +26,10 @@ async fn corehr_offboarding_iterator_requests_resume_token() {
         .corehr()
         .offboarding
         .search_by_iterator(
-            serde_json::json!({"employment_ids":["e1"]}),
+            SearchOffboardingReqBody {
+                employment_ids: Some(vec!["e1".into()]),
+                ..Default::default()
+            },
             Some(100),
             None,
         )
@@ -55,7 +59,10 @@ async fn corehr_offboarding_iterator_next_page_token_uses_server_cursor_after_re
         .corehr()
         .offboarding
         .search_by_iterator(
-            serde_json::json!({"employment_ids":["e1"]}),
+            SearchOffboardingReqBody {
+                employment_ids: Some(vec!["e1".into()]),
+                ..Default::default()
+            },
             Some(100),
             None,
         )
@@ -79,7 +86,10 @@ async fn corehr_offboarding_iterator_preserves_token_on_empty_page() {
 
     let client = client_for(addr);
     let mut iter = client.corehr().offboarding.search_by_iterator(
-        serde_json::json!({"employment_ids":["e1"]}),
+        SearchOffboardingReqBody {
+            employment_ids: Some(vec!["e1".into()]),
+            ..Default::default()
+        },
         Some(100),
         None,
     );

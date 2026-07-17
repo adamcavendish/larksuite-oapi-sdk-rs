@@ -209,6 +209,46 @@ pub struct CreateBlockReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ConvertDocumentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchUpdateChatAnnouncementBlockReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub requests: Option<Vec<UpdateBlockReqBody>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchDeleteChatAnnouncementBlockChildrenReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateChatAnnouncementBlockChildrenReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub children: Option<Vec<Block>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateDocumentBlockDescendantReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub children_id: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub index: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub descendants: Option<Vec<Block>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct UpdateTextElementsRequest {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub elements: Vec<TextElement>,
@@ -501,11 +541,11 @@ impl<'a> GetDocumentQuery<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ConvertDocumentQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a ConvertDocumentReqBody,
 }
 
 impl<'a> ConvertDocumentQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a ConvertDocumentReqBody) -> Self {
         Self { body }
     }
 }
@@ -773,13 +813,13 @@ impl<'a> GetChatAnnouncementQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct BatchUpdateChatAnnouncementBlockQuery<'a> {
     pub chat_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a BatchUpdateChatAnnouncementBlockReqBody,
     pub document_revision_id: Option<i64>,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> BatchUpdateChatAnnouncementBlockQuery<'a> {
-    pub fn new(chat_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(chat_id: &'a str, body: &'a BatchUpdateChatAnnouncementBlockReqBody) -> Self {
         Self {
             chat_id,
             body,
@@ -866,12 +906,16 @@ impl<'a> ListChatAnnouncementBlockQuery<'a> {
 pub struct BatchDeleteChatAnnouncementBlockChildrenQuery<'a> {
     pub chat_id: &'a str,
     pub block_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a BatchDeleteChatAnnouncementBlockChildrenReqBody,
     pub document_revision_id: Option<i64>,
 }
 
 impl<'a> BatchDeleteChatAnnouncementBlockChildrenQuery<'a> {
-    pub fn new(chat_id: &'a str, block_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(
+        chat_id: &'a str,
+        block_id: &'a str,
+        body: &'a BatchDeleteChatAnnouncementBlockChildrenReqBody,
+    ) -> Self {
         Self {
             chat_id,
             block_id,
@@ -890,13 +934,17 @@ impl<'a> BatchDeleteChatAnnouncementBlockChildrenQuery<'a> {
 pub struct CreateChatAnnouncementBlockChildrenQuery<'a> {
     pub chat_id: &'a str,
     pub block_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateChatAnnouncementBlockChildrenReqBody,
     pub document_revision_id: Option<i64>,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateChatAnnouncementBlockChildrenQuery<'a> {
-    pub fn new(chat_id: &'a str, block_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(
+        chat_id: &'a str,
+        block_id: &'a str,
+        body: &'a CreateChatAnnouncementBlockChildrenReqBody,
+    ) -> Self {
         Self {
             chat_id,
             block_id,
@@ -957,13 +1005,17 @@ impl<'a> GetChatAnnouncementBlockChildrenQuery<'a> {
 pub struct CreateDocumentBlockDescendantQuery<'a> {
     pub document_id: &'a str,
     pub block_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateDocumentBlockDescendantReqBody,
     pub document_revision_id: Option<i64>,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateDocumentBlockDescendantQuery<'a> {
-    pub fn new(document_id: &'a str, block_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(
+        document_id: &'a str,
+        block_id: &'a str,
+        body: &'a CreateDocumentBlockDescendantReqBody,
+    ) -> Self {
         Self {
             document_id,
             block_id,
@@ -1858,7 +1910,7 @@ impl<'a> DocumentResource<'a> {
 
     pub async fn convert(
         &self,
-        body: &serde_json::Value,
+        body: &ConvertDocumentReqBody,
         option: &RequestOption,
     ) -> Result<ConvertDocumentResp, LarkError> {
         self.convert_by_query(&ConvertDocumentQuery::new(body), option)
@@ -2257,7 +2309,7 @@ impl ChatAnnouncementBlockResource<'_> {
     pub async fn batch_update(
         &self,
         chat_id: &str,
-        body: &serde_json::Value,
+        body: &BatchUpdateChatAnnouncementBlockReqBody,
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
@@ -2376,7 +2428,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         &self,
         chat_id: &str,
         block_id: &str,
-        body: &serde_json::Value,
+        body: &BatchDeleteChatAnnouncementBlockChildrenReqBody,
         document_revision_id: Option<i64>,
         option: &RequestOption,
     ) -> Result<BatchDeleteChatAnnouncementBlockChildrenResp, LarkError> {
@@ -2411,7 +2463,7 @@ impl ChatAnnouncementBlockChildrenResource<'_> {
         &self,
         chat_id: &str,
         block_id: &str,
-        body: &serde_json::Value,
+        body: &CreateChatAnnouncementBlockChildrenReqBody,
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,
@@ -2496,7 +2548,7 @@ impl DocumentBlockDescendantResource<'_> {
         &self,
         document_id: &str,
         block_id: &str,
-        body: &serde_json::Value,
+        body: &CreateDocumentBlockDescendantReqBody,
         document_revision_id: Option<i64>,
         user_id_type: Option<&str>,
         option: &RequestOption,

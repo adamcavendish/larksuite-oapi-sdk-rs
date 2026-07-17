@@ -8,7 +8,11 @@ async fn vc_reserve_apply_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"room_id":"room-1","topic":"Planning"});
+    let body = ApplyReserveReqBody {
+        end_time: Some("1700000100".into()),
+        owner_id: Some("ou_owner".into()),
+        ..Default::default()
+    };
     let resp = client
         .vc()
         .reserve
@@ -23,8 +27,8 @@ async fn vc_reserve_apply_by_query_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/vc/v1/reserves/apply?"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""room_id":"room-1""#));
-    assert!(request.contains(r#""topic":"Planning""#));
+    assert!(request.contains(r#""end_time":"1700000100""#));
+    assert!(request.contains(r#""owner_id":"ou_owner""#));
 }
 
 #[tokio::test]
@@ -77,7 +81,10 @@ async fn vc_reserve_update_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"topic":"Updated Planning"});
+    let body = UpdateReserveReqBody {
+        end_time: Some("1700000200".into()),
+        ..Default::default()
+    };
     let resp = client
         .vc()
         .reserve
@@ -92,7 +99,7 @@ async fn vc_reserve_update_by_query_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("PUT /open-apis/vc/v1/reserves/reserve-1?"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""topic":"Updated Planning""#));
+    assert!(request.contains(r#""end_time":"1700000200""#));
 }
 
 #[tokio::test]

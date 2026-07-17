@@ -14,9 +14,24 @@ async fn docx_chat_announcement_children_and_descendant_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let delete_body = serde_json::json!({"start_index":0,"end_index":1});
-    let create_body = serde_json::json!({"children":[{"block_type":2}]});
-    let descendant_body = serde_json::json!({"block_type":2});
+    let delete_body = BatchDeleteChatAnnouncementBlockChildrenReqBody {
+        start_index: Some(0),
+        end_index: Some(1),
+    };
+    let create_body = CreateChatAnnouncementBlockChildrenReqBody {
+        children: Some(vec![DocxBlock {
+            block_type: Some(2),
+            ..Default::default()
+        }]),
+        ..Default::default()
+    };
+    let descendant_body = CreateDocumentBlockDescendantReqBody {
+        descendants: Some(vec![DocxBlock {
+            block_type: Some(2),
+            ..Default::default()
+        }]),
+        ..Default::default()
+    };
 
     let delete_resp = client
         .docx()
@@ -84,6 +99,6 @@ async fn docx_chat_announcement_children_and_descendant_by_query_smoke() {
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
     assert!(request.contains(r#""start_index":0"#));
-    assert!(request.contains(r#""children":[{"block_type":2}]"#));
+    assert!(request.contains(r#""children":[{"block_type":2"#));
     assert!(request.contains(r#""block_type":2"#));
 }

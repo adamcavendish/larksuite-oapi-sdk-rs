@@ -16,7 +16,9 @@ async fn docx_building_block_and_chat_announcement_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let batch_body = serde_json::json!({"requests":[{"request_id":"r-1"}]});
+    let batch_body = BatchUpdateChatAnnouncementBlockReqBody {
+        requests: Some(vec![UpdateBlockReqBody::default()]),
+    };
 
     let building_block_resp = client
         .docx()
@@ -88,5 +90,5 @@ async fn docx_building_block_and_chat_announcement_by_query_smoke() {
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next-page"));
-    assert!(request.contains(r#""request_id":"r-1""#));
+    assert!(request.contains(r#""requests":[{}]"#));
 }

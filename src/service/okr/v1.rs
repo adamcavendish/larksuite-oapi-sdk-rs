@@ -80,6 +80,48 @@ pub struct OkrKeyResult {
     pub progress_rate: Option<serde_json::Value>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreatePeriodReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period_rule_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_month: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PatchPeriodReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateProgressRecordReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<ContentBlock>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_url_pc: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_url_mobile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate: Option<ProgressRateNew>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateProgressRecordReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<ContentBlock>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub progress_rate: Option<ProgressRateNew>,
+}
+
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -141,11 +183,11 @@ impl<'a> ListPeriodQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreatePeriodQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreatePeriodReqBody,
 }
 
 impl<'a> CreatePeriodQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CreatePeriodReqBody) -> Self {
         Self { body }
     }
 }
@@ -154,11 +196,11 @@ impl<'a> CreatePeriodQuery<'a> {
 #[non_exhaustive]
 pub struct PatchPeriodQuery<'a> {
     pub period_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a PatchPeriodReqBody,
 }
 
 impl<'a> PatchPeriodQuery<'a> {
-    pub fn new(period_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(period_id: &'a str, body: &'a PatchPeriodReqBody) -> Self {
         Self { period_id, body }
     }
 }
@@ -216,12 +258,12 @@ impl<'a> BatchGetOkrQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateProgressRecordQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a CreateProgressRecordReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateProgressRecordQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a CreateProgressRecordReqBody) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -271,12 +313,12 @@ impl<'a> GetProgressRecordQuery<'a> {
 #[non_exhaustive]
 pub struct UpdateProgressRecordQuery<'a> {
     pub progress_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a UpdateProgressRecordReqBody,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> UpdateProgressRecordQuery<'a> {
-    pub fn new(progress_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(progress_id: &'a str, body: &'a UpdateProgressRecordReqBody) -> Self {
         Self {
             progress_id,
             body,
@@ -783,7 +825,7 @@ impl<'a> PeriodResource<'a> {
 
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &CreatePeriodReqBody,
         option: &RequestOption,
     ) -> Result<CreatePeriodResp, LarkError> {
         let query = CreatePeriodQuery::new(body);
@@ -810,7 +852,7 @@ impl<'a> PeriodResource<'a> {
     pub async fn patch(
         &self,
         period_id: &str,
-        body: &serde_json::Value,
+        body: &PatchPeriodReqBody,
         option: &RequestOption,
     ) -> Result<PatchPeriodResp, LarkError> {
         let query = PatchPeriodQuery::new(period_id, body);
@@ -948,7 +990,7 @@ pub struct ProgressRecordResource<'a> {
 impl ProgressRecordResource<'_> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &CreateProgressRecordReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateProgressRecordResp, LarkError> {
@@ -1031,7 +1073,7 @@ impl ProgressRecordResource<'_> {
     pub async fn update(
         &self,
         progress_id: &str,
-        body: &serde_json::Value,
+        body: &UpdateProgressRecordReqBody,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateProgressRecordResp, LarkError> {
