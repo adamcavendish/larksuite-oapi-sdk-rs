@@ -154,7 +154,7 @@ pub struct AuthenExtResource<'a> {
 impl AuthenExtResource<'_> {
     pub async fn access_token(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<AuthenAccessTokenResp, LarkError> {
         RestRequest::new(
@@ -171,7 +171,7 @@ impl AuthenExtResource<'_> {
 
     pub async fn refresh_access_token(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<RefreshAuthenAccessTokenResp, LarkError> {
         RestRequest::new(
@@ -207,7 +207,7 @@ impl DriveExplorerExtResource<'_> {
     pub async fn create_file(
         &self,
         folder_token: &str,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateFileResp, LarkError> {
         let path = format!("/open-apis/drive/explorer/v2/file/{folder_token}");

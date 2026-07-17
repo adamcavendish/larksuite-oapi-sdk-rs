@@ -72,9 +72,10 @@ pub struct NodeV1Resource<'a> {
 impl NodeV1Resource<'_> {
     pub async fn search(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchNodeV1Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         self.search_by_query(&SearchNodeV1Query::new(&body), option)
             .await
     }

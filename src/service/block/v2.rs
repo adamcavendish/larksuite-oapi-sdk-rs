@@ -111,10 +111,11 @@ pub struct EntityResource<'a> {
 impl<'a> EntityResource<'a> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateEntityResp, LarkError> {
-        self.create_by_query(&CreateEntityQuery::new(body), option)
+        let body = serde_json::to_value(body)?;
+        self.create_by_query(&CreateEntityQuery::new(&body), option)
             .await
     }
 
@@ -138,10 +139,11 @@ impl<'a> EntityResource<'a> {
     pub async fn update(
         &self,
         block_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateEntityResp, LarkError> {
-        self.update_by_query(&UpdateEntityQuery::new(block_id, body), option)
+        let body = serde_json::to_value(body)?;
+        self.update_by_query(&UpdateEntityQuery::new(block_id, &body), option)
             .await
     }
 
@@ -171,10 +173,11 @@ pub struct MessageResource<'a> {
 impl<'a> MessageResource<'a> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateMessageResp, LarkError> {
-        self.create_by_query(&CreateMessageQuery::new(body), option)
+        let body = serde_json::to_value(body)?;
+        self.create_by_query(&CreateMessageQuery::new(&body), option)
             .await
     }
 

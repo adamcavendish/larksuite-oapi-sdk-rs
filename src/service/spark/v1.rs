@@ -4,6 +4,7 @@ use crate::error::LarkError;
 use crate::req::{FormDataField, ReqBody, RequestOption};
 use crate::service::common::{DownloadResp, JsonResp, PageQuery, RestRequest};
 use crate::service::go_v397::{GoV397, GoV397Endpoint};
+use serde::Serialize;
 
 pub type CreateAppResp = JsonResp;
 pub type GetAppVisibilityAppResp = JsonResp;
@@ -362,15 +363,16 @@ pub struct AppResource<'a> {
 impl<'a> AppResource<'a> {
     pub async fn create(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateAppResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1Apps,
                 EMPTY_PARAMS,
                 EMPTY_PARAMS,
-                Some(body),
+                Some(&body),
                 option,
             )
             .await
@@ -427,15 +429,16 @@ impl<'a> AppResource<'a> {
     pub async fn patch(
         &self,
         app_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchAppResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PatchSparkV1AppsByAppId,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
-                Some(body),
+                Some(&body),
                 option,
             )
             .await
@@ -444,15 +447,16 @@ impl<'a> AppResource<'a> {
     pub async fn sql_commands(
         &self,
         app_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<SqlCommandsAppResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1AppsByAppIdSqlCommands,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
-                Some(body),
+                Some(&body),
                 option,
             )
             .await
@@ -461,15 +465,16 @@ impl<'a> AppResource<'a> {
     pub async fn update_app_visibility(
         &self,
         app_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateAppVisibilityAppResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PutSparkV1AppsByAppIdAccessScope,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
-                Some(body),
+                Some(&body),
                 option,
             )
             .await
@@ -576,15 +581,16 @@ impl<'a> AppStorageResource<'a> {
     pub async fn upload_complete(
         &self,
         app_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadCompleteAppStorageResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1AppsByAppIdStorageUploadComplete,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
-                Some(body),
+                Some(&body),
                 option,
             )
             .await
@@ -593,15 +599,16 @@ impl<'a> AppStorageResource<'a> {
     pub async fn upload_initialize(
         &self,
         app_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadInitializeAppStorageResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1AppsByAppIdStorageUploadInitialize,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
-                Some(body),
+                Some(&body),
                 option,
             )
             .await
@@ -787,15 +794,16 @@ pub struct DirectoryUserResource<'a> {
 impl<'a> DirectoryUserResource<'a> {
     pub async fn id_convert(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<IdConvertDirectoryUserResp, LarkError> {
+        let body = serde_json::to_value(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1DirectoryUserIdConvert,
                 EMPTY_PARAMS,
                 EMPTY_PARAMS,
-                Some(body),
+                Some(&body),
                 option,
             )
             .await

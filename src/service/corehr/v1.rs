@@ -5724,7 +5724,7 @@ impl<'a> PersonResource<'a> {
 
     pub async fn upload(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadPersonResp, LarkError> {
         RestRequest::new(

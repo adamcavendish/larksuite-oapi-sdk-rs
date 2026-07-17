@@ -146,7 +146,7 @@ impl<'a> OpenapiLogResource<'a> {
 
     pub async fn list_data(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<ListDataOpenapiLogResp, LarkError> {
         RestRequest::new(

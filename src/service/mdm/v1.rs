@@ -217,11 +217,12 @@ pub struct UserAuthDataRelationResource<'a> {
 impl<'a> UserAuthDataRelationResource<'a> {
     pub async fn bind(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let query = BindUserAuthDataRelationQuery::new(body).user_id_type(user_id_type);
+        let body = serde_json::to_value(body)?;
+        let query = BindUserAuthDataRelationQuery::new(&body).user_id_type(user_id_type);
         self.bind_by_query(&query, option).await
     }
 
@@ -245,11 +246,12 @@ impl<'a> UserAuthDataRelationResource<'a> {
 
     pub async fn unbind(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let query = UnbindUserAuthDataRelationQuery::new(body).user_id_type(user_id_type);
+        let body = serde_json::to_value(body)?;
+        let query = UnbindUserAuthDataRelationQuery::new(&body).user_id_type(user_id_type);
         self.unbind_by_query(&query, option).await
     }
 

@@ -916,10 +916,11 @@ pub struct ImageResource<'a> {
 impl ImageResource<'_> {
     pub async fn upload(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadImageResp, LarkError> {
-        let query = UploadImageQuery::new(body);
+        let body = serde_json::to_value(body)?;
+        let query = UploadImageQuery::new(&body);
         self.upload_by_query(&query, option).await
     }
 

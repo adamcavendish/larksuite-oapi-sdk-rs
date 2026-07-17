@@ -915,9 +915,10 @@ macro_rules! post_query {
         impl $struct_name<'_> {
             pub async fn $method(
                 &self,
-                body: serde_json::Value,
+                body: impl Serialize,
                 option: &RequestOption,
             ) -> Result<$resp, LarkError> {
+                let body = serde_json::to_value(body)?;
                 let query = $query_name::new(&body);
                 self.$by_query_method(&query, option).await
             }
@@ -983,9 +984,10 @@ pub struct AdditionalInformationV2Resource<'a> {
 impl AdditionalInformationV2Resource<'_> {
     pub async fn import(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ImportAdditionalInformationV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = ImportAdditionalInformationV2Query::new(&body);
         self.import_by_query(&query, option).await
     }
@@ -1009,9 +1011,10 @@ impl AdditionalInformationV2Resource<'_> {
 
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryAdditionalInformationV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = QueryAdditionalInformationV2Query::new(&body);
         self.query_by_query(&query, option).await
     }
@@ -1054,9 +1057,10 @@ pub struct AdditionalInformationsBatchV2Resource<'a> {
 impl AdditionalInformationsBatchV2Resource<'_> {
     pub async fn delete(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<DeleteAdditionalInformationsBatchV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = DeleteAdditionalInformationsBatchV2Query::new(&body);
         self.delete_by_query(&query, option).await
     }
@@ -1120,9 +1124,10 @@ pub struct MetricDetailV2Resource<'a> {
 impl MetricDetailV2Resource<'_> {
     pub async fn import(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ImportMetricDetailV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = ImportMetricDetailV2Query::new(&body);
         self.import_by_query(&query, option).await
     }
@@ -1146,9 +1151,10 @@ impl MetricDetailV2Resource<'_> {
 
     pub async fn query(
         &self,
-        body: serde_json::Value,
+        body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryMetricDetailV2Resp, LarkError> {
+        let body = serde_json::to_value(body)?;
         let query = QueryMetricDetailV2Query::new(&body);
         self.query_by_query(&query, option).await
     }

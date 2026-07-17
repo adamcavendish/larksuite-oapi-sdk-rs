@@ -395,7 +395,7 @@ impl<'a> ApplicationEnvironmentVariableResource<'a> {
     pub async fn query(
         &self,
         namespace: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryEnvironmentVariableResp, LarkError> {
         let path =
@@ -426,7 +426,7 @@ impl<'a> ApplicationFlowResource<'a> {
         &self,
         namespace: &str,
         flow_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<ExecuteFlowResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/flows/{flow_id}/execute");
@@ -456,7 +456,7 @@ impl<'a> ApplicationFunctionResource<'a> {
         &self,
         namespace: &str,
         function_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<InvokeFunctionResp, LarkError> {
         let path = format!(
@@ -487,7 +487,7 @@ impl<'a> ApplicationObjectResource<'a> {
     pub async fn oql_query(
         &self,
         namespace: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<OqlQueryObjectResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/objects/oql_query");
@@ -508,7 +508,7 @@ impl<'a> ApplicationObjectResource<'a> {
     pub async fn search(
         &self,
         namespace: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchObjectResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/objects/search");
@@ -538,7 +538,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         &self,
         namespace: &str,
         object_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchCreateRecordResp, LarkError> {
         let path = format!(
@@ -562,7 +562,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         &self,
         namespace: &str,
         object_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchDeleteRecordResp, LarkError> {
         let path = format!(
@@ -586,7 +586,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         &self,
         namespace: &str,
         object_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchQueryRecordResp, LarkError> {
         let path = format!(
@@ -610,7 +610,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         &self,
         namespace: &str,
         object_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchUpdateRecordResp, LarkError> {
         let path = format!(
@@ -634,7 +634,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         &self,
         namespace: &str,
         object_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateRecordResp, LarkError> {
         let path = format!(
@@ -682,7 +682,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         namespace: &str,
         object_api_name: &str,
         id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchRecordResp, LarkError> {
         let path = format!(
@@ -707,7 +707,7 @@ impl<'a> ApplicationObjectRecordResource<'a> {
         namespace: &str,
         object_api_name: &str,
         id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryRecordResp, LarkError> {
         let path = format!(
@@ -738,7 +738,7 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
         &self,
         namespace: &str,
         record_permission_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchCreateAuthorizationRecordPermissionResp, LarkError> {
         let path = format!(
@@ -761,7 +761,7 @@ impl<'a> ApplicationRecordPermissionMemberResource<'a> {
         &self,
         namespace: &str,
         record_permission_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchRemoveAuthorizationRecordPermissionResp, LarkError> {
         let path = format!(
@@ -793,7 +793,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
         &self,
         namespace: &str,
         role_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchCreateAuthorizationRoleMemberResp, LarkError> {
         let path = format!(
@@ -817,7 +817,7 @@ impl<'a> ApplicationRoleMemberResource<'a> {
         &self,
         namespace: &str,
         role_api_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<BatchRemoveAuthorizationRoleMemberResp, LarkError> {
         let path = format!(
@@ -867,7 +867,7 @@ impl<'a> ApprovalInstanceResource<'a> {
     pub async fn cancel(
         &self,
         approval_instance_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<CancelApprovalInstanceResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_instances/{approval_instance_id}/cancel");
@@ -895,7 +895,7 @@ impl<'a> ApprovalTaskResource<'a> {
     pub async fn add_assignee(
         &self,
         approval_task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<AddAssigneeApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/add_assignee");
@@ -915,7 +915,7 @@ impl<'a> ApprovalTaskResource<'a> {
     pub async fn agree(
         &self,
         approval_task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<AgreeApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/agree");
@@ -935,7 +935,7 @@ impl<'a> ApprovalTaskResource<'a> {
     pub async fn reject(
         &self,
         approval_task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<RejectApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/reject");
@@ -955,7 +955,7 @@ impl<'a> ApprovalTaskResource<'a> {
     pub async fn transfer(
         &self,
         approval_task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<TransferApprovalTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/approval_tasks/{approval_task_id}/transfer");
@@ -1039,7 +1039,7 @@ impl<'a> UserTaskResource<'a> {
     pub async fn cc(
         &self,
         task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<CcUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/cc");
@@ -1059,7 +1059,7 @@ impl<'a> UserTaskResource<'a> {
     pub async fn chat_group(
         &self,
         task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<ChatGroupUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/chat_group");
@@ -1079,7 +1079,7 @@ impl<'a> UserTaskResource<'a> {
     pub async fn expediting(
         &self,
         task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<ExpeditingUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/expediting");
@@ -1099,7 +1099,7 @@ impl<'a> UserTaskResource<'a> {
     /// POST /open-apis/apaas/v1/user_task/query
     pub async fn query(
         &self,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryUserTaskResp, LarkError> {
         RestRequest::new(
@@ -1118,7 +1118,7 @@ impl<'a> UserTaskResource<'a> {
     pub async fn rollback(
         &self,
         task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<RollbackUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/rollback");
@@ -1138,7 +1138,7 @@ impl<'a> UserTaskResource<'a> {
     pub async fn rollback_points(
         &self,
         task_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<RollbackPointsUserTaskResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/user_tasks/{task_id}/rollback_points");
@@ -1167,7 +1167,7 @@ impl<'a> WorkspaceResource<'a> {
     pub async fn sql_commands(
         &self,
         workspace_id: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<SqlCommandsWorkspaceResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/workspaces/{workspace_id}/sql_commands");
@@ -1271,7 +1271,7 @@ impl<'a> WorkspaceTableResource<'a> {
         &self,
         workspace_id: &str,
         table_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<RecordsBatchUpdateWorkspaceTableResp, LarkError> {
         let path = format!(
@@ -1295,7 +1295,7 @@ impl<'a> WorkspaceTableResource<'a> {
         &self,
         workspace_id: &str,
         table_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<RecordsDeleteWorkspaceTableResp, LarkError> {
         let path =
@@ -1343,7 +1343,7 @@ impl<'a> WorkspaceTableResource<'a> {
         &self,
         workspace_id: &str,
         table_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<RecordsPatchWorkspaceTableResp, LarkError> {
         let path =
@@ -1366,7 +1366,7 @@ impl<'a> WorkspaceTableResource<'a> {
         &self,
         workspace_id: &str,
         table_name: &str,
-        body: &serde_json::Value,
+        body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<RecordsPostWorkspaceTableResp, LarkError> {
         let path =
