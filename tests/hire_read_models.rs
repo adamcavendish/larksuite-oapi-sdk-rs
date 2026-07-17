@@ -9,7 +9,7 @@ use larksuite_oapi_sdk_rs::service::hire::v1::{
     GetByApplicationEmployeeQuery, ListBackgroundCheckOrderQuery, ListEvaluationQuery,
     ListInterviewRecordQuery, ListJobProcessQuery, ListJobSchemaQuery,
     ListOfferApprovalTemplateQuery, ListQuestionnaireQuery, ListTalentTagQuery,
-    ListTripartiteAgreementQuery,
+    ListTripartiteAgreementQuery, OpenJobReqBody,
 };
 use serde_json::json;
 
@@ -377,7 +377,11 @@ async fn hire_application_lifecycle_responses_deserialize_and_preserve_requests(
     let open = client
         .hire()
         .job
-        .open("job-1", json!({}), &RequestOption::default())
+        .open(
+            "job-1",
+            OpenJobReqBody::default(),
+            &RequestOption::default(),
+        )
         .await
         .unwrap();
 

@@ -144,7 +144,14 @@ async fn hire_job_lifecycle_smoke() {
     let open = client
         .hire()
         .job
-        .open("job-1", serde_json::json!({}), &RequestOption::default())
+        .open(
+            "job-1",
+            OpenJobReqBody {
+                is_never_expired: Some(true),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
         .await
         .unwrap();
 
@@ -154,4 +161,5 @@ async fn hire_job_lifecycle_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/close "));
     assert!(request.contains("POST /open-apis/hire/v1/jobs/job-1/open "));
+    assert!(request.contains(r#""is_never_expired":true"#));
 }

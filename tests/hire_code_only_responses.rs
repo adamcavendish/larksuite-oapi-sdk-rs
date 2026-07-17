@@ -4,6 +4,7 @@ use common::{http_response, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::req::RequestOption;
+use larksuite_oapi_sdk_rs::service::hire::v1::{OnboardStatusTalentReqBody, TagTalentReqBody};
 use serde_json::json;
 
 fn client_for(addr: std::net::SocketAddr) -> LarkClient {
@@ -28,7 +29,14 @@ async fn hire_talent_and_job_requirement_code_only_responses_preserve_requests()
     let onboard = client
         .hire()
         .talent
-        .onboard_status("talent-1", json!({"status": 1}), &RequestOption::default())
+        .onboard_status(
+            "talent-1",
+            OnboardStatusTalentReqBody {
+                operation: Some(1),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
         .await
         .unwrap();
     let tag = client
@@ -36,7 +44,10 @@ async fn hire_talent_and_job_requirement_code_only_responses_preserve_requests()
         .talent
         .tag(
             "talent-1",
-            json!({"tag_id_list": ["tag-1"]}),
+            TagTalentReqBody {
+                tag_id_list: Some(vec!["tag-1".into()]),
+                ..Default::default()
+            },
             &RequestOption::default(),
         )
         .await

@@ -38,7 +38,10 @@ async fn hire_utility_test_query_smoke() {
         .unwrap();
     hire.talent
         .batch_get_id(
-            json!({"mobile_list":["13800000000"]}),
+            BatchGetIdTalentReqBody {
+                mobile_number_list: Some(vec!["13800000000".into()]),
+                ..Default::default()
+            },
             &RequestOption::default(),
         )
         .await
@@ -85,7 +88,7 @@ async fn hire_utility_test_query_smoke() {
     );
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("page_token=seed-token"));
-    assert!(request.contains(r#""mobile_list":["13800000000"]"#));
+    assert!(request.contains(r#""mobile_number_list":["13800000000"]"#));
     assert!(request.contains(r#""application_id_list":["app-1"]"#));
     assert!(request.contains(r#""attachment_id":"attachment-1""#));
     assert!(request.contains(r#""resume_id":"resume-1""#));

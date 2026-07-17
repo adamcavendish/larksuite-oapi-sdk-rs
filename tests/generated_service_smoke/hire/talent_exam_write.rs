@@ -21,7 +21,10 @@ async fn hire_talent_write_smoke() {
     let hire = client.hire();
 
     Box::pin(hire.talent.add_to_folder(
-        json!({"talent_id_list":["talent-1"]}),
+        AddToFolderTalentReqBody {
+            talent_id_list: Some(vec!["talent-1".into()]),
+            ..Default::default()
+        },
         &RequestOption::default(),
     ))
     .await
@@ -39,7 +42,10 @@ async fn hire_talent_write_smoke() {
     .await
     .unwrap();
     Box::pin(hire.talent.remove_to_folder(
-        json!({"talent_id_list":["talent-1"]}),
+        RemoveToFolderTalentReqBody {
+            talent_id_list: Some(vec!["talent-1".into()]),
+            ..Default::default()
+        },
         &RequestOption::default(),
     ))
     .await

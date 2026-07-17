@@ -4,6 +4,8 @@
 
 ### REST service coverage
 
+- Replaced raw Hire v1 job-open and talent folder, identity-lookup, onboarding,
+  and tagging mutation payloads with Go-shaped request models.
 - Replaced raw CoreHR v1, VC v1, Docx v1, and OKR v1 JSON mutation payloads
   with Go-shaped request models. CoreHR now covers organization, metadata,
   offboarding, leave, calendar, and security-group writes; VC covers room,

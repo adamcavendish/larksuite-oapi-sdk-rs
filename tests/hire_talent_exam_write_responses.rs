@@ -4,6 +4,9 @@ use common::{http_response, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::req::RequestOption;
+use larksuite_oapi_sdk_rs::service::hire::v1::{
+    AddToFolderTalentReqBody, RemoveToFolderTalentReqBody,
+};
 use serde_json::json;
 
 fn client_for(addr: std::net::SocketAddr) -> LarkClient {
@@ -33,7 +36,10 @@ async fn hire_talent_folder_and_combined_write_responses() {
     let hire = client.hire();
 
     let add_to_folder = Box::pin(hire.talent.add_to_folder(
-        json!({"talent_id_list":["talent-1","talent-2"]}),
+        AddToFolderTalentReqBody {
+            talent_id_list: Some(vec!["talent-1".into(), "talent-2".into()]),
+            ..Default::default()
+        },
         &RequestOption::default(),
     ))
     .await
@@ -57,7 +63,10 @@ async fn hire_talent_folder_and_combined_write_responses() {
     .data
     .unwrap();
     let remove_to_folder = Box::pin(hire.talent.remove_to_folder(
-        json!({"talent_id_list":["talent-1"]}),
+        RemoveToFolderTalentReqBody {
+            talent_id_list: Some(vec!["talent-1".into()]),
+            ..Default::default()
+        },
         &RequestOption::default(),
     ))
     .await

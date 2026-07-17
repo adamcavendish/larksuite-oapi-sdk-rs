@@ -5,7 +5,7 @@ use common::{http_response, mock_server_with_requests};
 use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::common::PageQuery;
-use larksuite_oapi_sdk_rs::service::hire::v1::SearchTestQuery;
+use larksuite_oapi_sdk_rs::service::hire::v1::{BatchGetIdTalentReqBody, SearchTestQuery};
 use serde_json::json;
 
 fn client_for(addr: std::net::SocketAddr) -> LarkClient {
@@ -64,7 +64,10 @@ async fn hire_utility_responses_deserialize_and_send_filters() {
     let talent = hire
         .talent
         .batch_get_id(
-            json!({"mobile_list":["13800000000"]}),
+            BatchGetIdTalentReqBody {
+                mobile_number_list: Some(vec!["13800000000".into()]),
+                ..Default::default()
+            },
             &RequestOption::default(),
         )
         .await
@@ -166,7 +169,7 @@ async fn hire_utility_responses_deserialize_and_send_filters() {
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=seed-token"));
-    assert!(request.contains(r#""mobile_list":["13800000000"]"#));
+    assert!(request.contains(r#""mobile_number_list":["13800000000"]"#));
     assert!(request.contains(r#""application_id_list":["app-1"]"#));
     assert!(request.contains(r#""attachment_id":"attachment-1""#));
     assert!(request.contains(r#""resume_id":"resume-1""#));

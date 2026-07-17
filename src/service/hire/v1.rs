@@ -7259,6 +7259,62 @@ pub struct CreateTalentReqBody {
     pub talent: Option<Talent>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OpenJobReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expiry_time: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_never_expired: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AddToFolderTalentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct BatchGetIdTalentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobile_number_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub identification_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub identification_number_list: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OnboardStatusTalentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operation: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub onboard_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overboard_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RemoveToFolderTalentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub talent_id_list: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TagTalentReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operation: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag_id_list: Option<Vec<String>>,
+}
+
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -7680,7 +7736,7 @@ impl<'a> JobResource<'a> {
     pub async fn open(
         &self,
         job_id: &str,
-        body: serde_json::Value,
+        body: OpenJobReqBody,
         option: &RequestOption,
     ) -> Result<OpenJobResp, LarkError> {
         let path = format!("/open-apis/hire/v1/jobs/{job_id}/open");
@@ -7914,7 +7970,7 @@ impl<'a> TalentResource<'a> {
 
     pub async fn add_to_folder(
         &self,
-        body: serde_json::Value,
+        body: AddToFolderTalentReqBody,
         option: &RequestOption,
     ) -> Result<AddToFolderTalentResp, LarkError> {
         RestRequest::new(
@@ -7931,7 +7987,7 @@ impl<'a> TalentResource<'a> {
 
     pub async fn batch_get_id(
         &self,
-        body: serde_json::Value,
+        body: BatchGetIdTalentReqBody,
         option: &RequestOption,
     ) -> Result<BatchGetIdTalentResp, LarkError> {
         RestRequest::new(
@@ -7983,7 +8039,7 @@ impl<'a> TalentResource<'a> {
     pub async fn onboard_status(
         &self,
         talent_id: &str,
-        body: serde_json::Value,
+        body: OnboardStatusTalentReqBody,
         option: &RequestOption,
     ) -> Result<OnboardStatusTalentResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talents/{talent_id}/onboard_status");
@@ -8001,7 +8057,7 @@ impl<'a> TalentResource<'a> {
 
     pub async fn remove_to_folder(
         &self,
-        body: serde_json::Value,
+        body: RemoveToFolderTalentReqBody,
         option: &RequestOption,
     ) -> Result<RemoveToFolderTalentResp, LarkError> {
         RestRequest::new(
@@ -8019,7 +8075,7 @@ impl<'a> TalentResource<'a> {
     pub async fn tag(
         &self,
         talent_id: &str,
-        body: serde_json::Value,
+        body: TagTalentReqBody,
         option: &RequestOption,
     ) -> Result<TagTalentResp, LarkError> {
         let path = format!("/open-apis/hire/v1/talents/{talent_id}/tag");
