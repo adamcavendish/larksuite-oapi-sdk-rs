@@ -16,14 +16,20 @@ async fn hire_talent_and_job_requirement_code_only_response_smoke() {
 
     Box::pin(hire.talent.onboard_status(
         "talent-1",
-        json!({"status": 1}),
+        OnboardStatusTalentReqBody {
+            operation: Some(1),
+            ..Default::default()
+        },
         &RequestOption::default(),
     ))
     .await
     .unwrap();
     Box::pin(hire.talent.tag(
         "talent-1",
-        json!({"tag_id_list": ["tag-1"]}),
+        TagTalentReqBody {
+            tag_id_list: Some(vec!["tag-1".into()]),
+            ..Default::default()
+        },
         &RequestOption::default(),
     ))
     .await

@@ -563,6 +563,59 @@ fn hire_models_deserialize_offer_configuration_and_salary() {
 }
 
 #[test]
+fn hire_action_models_serialize_typed_bodies() {
+    use larksuite_oapi_sdk_rs::service::hire::v1;
+
+    let open_job = v1::OpenJobReqBody {
+        expiry_time: Some(1_598_844_859),
+        ..Default::default()
+    };
+    let add_to_folder = v1::AddToFolderTalentReqBody {
+        talent_id_list: Some(vec!["talent-1".into()]),
+        folder_id: Some("folder-1".into()),
+    };
+    let batch_get_id = v1::BatchGetIdTalentReqBody {
+        email_list: Some(vec!["talent@example.com".into()]),
+        ..Default::default()
+    };
+    let onboard = v1::OnboardStatusTalentReqBody {
+        operation: Some(1),
+        onboard_time: Some("1676548784889".into()),
+        ..Default::default()
+    };
+    let remove = v1::RemoveToFolderTalentReqBody {
+        talent_id_list: Some(vec!["talent-1".into()]),
+        ..Default::default()
+    };
+    let tag = v1::TagTalentReqBody {
+        operation: Some(1),
+        tag_id_list: Some(vec!["tag-1".into()]),
+    };
+
+    assert_eq!(
+        serde_json::to_value(open_job).unwrap()["expiry_time"],
+        1_598_844_859
+    );
+    assert_eq!(
+        serde_json::to_value(add_to_folder).unwrap()["folder_id"],
+        "folder-1"
+    );
+    assert_eq!(
+        serde_json::to_value(batch_get_id).unwrap()["email_list"][0],
+        "talent@example.com"
+    );
+    assert_eq!(serde_json::to_value(onboard).unwrap()["operation"], 1);
+    assert_eq!(
+        serde_json::to_value(remove).unwrap()["talent_id_list"][0],
+        "talent-1"
+    );
+    assert_eq!(
+        serde_json::to_value(tag).unwrap()["tag_id_list"][0],
+        "tag-1"
+    );
+}
+
+#[test]
 fn corehr_models_deserialize_contact_hierarchy_and_permission_fields() {
     use larksuite_oapi_sdk_rs::service::corehr::v1;
 
