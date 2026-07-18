@@ -19,6 +19,7 @@
 
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::RwLock;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
@@ -55,6 +56,10 @@ const HEADER_SUM: &str = "sum";
 const HEADER_SEQ: &str = "seq";
 const HEADER_MESSAGE_ID: &str = "message_id";
 const HEADER_BIZ_RT: &str = "biz_rt";
+const HEADER_CHANNEL_TAG: &str = "channel_tag";
+
+const QUERY_DEVICE_ID: &str = "device_id";
+const QUERY_SERVICE_ID: &str = "service_id";
 
 // Handshake error header keys (matching Go SDK consts)
 const HEADER_HANDSHAKE_STATUS: &str = "Handshake-Status";
@@ -94,6 +99,19 @@ struct ClientConfig {
     reconnect_nonce: u64,
     #[serde(rename = "PingInterval", default)]
     ping_interval: u64,
+}
+
+#[derive(serde::Deserialize)]
+struct UserBindingResp {
+    code: i64,
+    #[serde(default)]
+    msg: String,
+}
+
+#[derive(serde::Serialize)]
+struct UserBindingReq<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    channel_tag: Option<&'a str>,
 }
 
 // ── ACK response payload ──
@@ -163,16 +181,208 @@ fn make_header(key: &str, value: &str) -> proto::Header {
     }
 }
 
+fn new_ping_frame(service_id: i32, channel_tag: Option<&str>) -> proto::Frame {
+    let mut headers = vec![make_header(HEADER_TYPE, MSG_TYPE_PING)];
+    if let Some(channel_tag) = channel_tag.filter(|tag| !tag.is_empty()) {
+        headers.push(make_header(HEADER_CHANNEL_TAG, channel_tag));
+    }
+    proto::Frame {
+        seq_id: 0,
+        log_id: 0,
+        service: service_id,
+        method: METHOD_CONTROL,
+        headers,
+        payload_encoding: None,
+        payload_type: None,
+        payload: None,
+        log_id_new: None,
+    }
+}
+
+fn append_ws_query_params(
+    raw_url: &str,
+    params: &HashMap<String, String>,
+) -> Result<String, LarkError> {
+    let mut url = url::Url::parse(raw_url)
+        .map_err(|e| LarkError::Event(format!("invalid WebSocket endpoint URL: {e}")))?;
+    if params.is_empty() {
+        return Ok(url.into());
+    }
+
+    let retained = url
+        .query_pairs()
+        .filter(|(key, _)| !params.contains_key(key.as_ref()))
+        .map(|(key, value)| (key.into_owned(), value.into_owned()))
+        .collect::<Vec<_>>();
+    {
+        let mut query = url.query_pairs_mut();
+        query.clear();
+        query.extend_pairs(
+            retained
+                .iter()
+                .map(|(key, value)| (key.as_str(), value.as_str())),
+        );
+        query.extend_pairs(
+            params
+                .iter()
+                .map(|(key, value)| (key.as_str(), value.as_str())),
+        );
+    }
+    Ok(url.into())
+}
+
+fn ws_query_param(raw_url: &str, key: &str) -> Option<String> {
+    url::Url::parse(raw_url)
+        .ok()?
+        .query_pairs()
+        .find_map(|(candidate, value)| (candidate == key).then(|| value.into_owned()))
+}
+
+fn connection_id_from_ws_url(raw_url: &str) -> Option<String> {
+    ws_query_param(raw_url, QUERY_DEVICE_ID)
+}
+
+fn sanitize_ws_url(raw_url: &str) -> String {
+    let Ok(mut url) = url::Url::parse(raw_url) else {
+        return raw_url.to_string();
+    };
+    let retained = url
+        .query_pairs()
+        .map(|(key, value)| {
+            let value = if matches!(key.as_ref(), "access_key" | "ticket") {
+                "<redacted>".to_string()
+            } else {
+                value.into_owned()
+            };
+            (key.into_owned(), value)
+        })
+        .collect::<Vec<_>>();
+    {
+        let mut query = url.query_pairs_mut();
+        query.clear();
+        query.extend_pairs(
+            retained
+                .iter()
+                .map(|(key, value)| (key.as_str(), value.as_str())),
+        );
+    }
+    url.into()
+}
+
 // ── WebSocket client ──
 
 type LifecycleCallback = Arc<dyn Fn() + Send + Sync>;
 type ErrorCallback = Arc<dyn Fn(&LarkError) + Send + Sync>;
+
+/// Controls a running trusted-user WebSocket channel.
+///
+/// Obtain this handle from [`WsClient::control`] before moving the client into
+/// [`WsClient::start`]. It tracks the current connection across reconnects.
+#[derive(Clone)]
+pub struct WsClientControl {
+    config: Arc<Config>,
+    domain: String,
+    headers: HashMap<String, String>,
+    channel_tag: Option<String>,
+    connection_id: Arc<RwLock<Option<String>>>,
+}
+
+impl WsClientControl {
+    /// Return the connected WebSocket's current device ID, if it is ready.
+    pub fn connection_id(&self) -> Option<String> {
+        self.connection_id.read().ok().and_then(|id| id.clone())
+    }
+
+    /// Bind a user access token to the current trusted-user channel.
+    pub async fn attach_user(&self, user_access_token: &str) -> Result<(), LarkError> {
+        self.post_user_binding(user_access_token, "bind_user").await
+    }
+
+    /// Remove a user access token from the current trusted-user channel.
+    pub async fn detach_user(&self, user_access_token: &str) -> Result<(), LarkError> {
+        self.post_user_binding(user_access_token, "unbind_user")
+            .await
+    }
+
+    async fn post_user_binding(
+        &self,
+        user_access_token: &str,
+        action: &str,
+    ) -> Result<(), LarkError> {
+        if user_access_token.is_empty() {
+            return Err(LarkError::IllegalParam(
+                "user_access_token is required".to_string(),
+            ));
+        }
+
+        let connection_id = self.connection_id().ok_or_else(|| {
+            LarkError::IllegalParam("WebSocket connection is not ready".to_string())
+        })?;
+        let mut request_url = url::Url::parse(self.domain.trim_end_matches('/'))
+            .map_err(|e| LarkError::IllegalParam(format!("invalid WebSocket domain: {e}")))?;
+        request_url
+            .path_segments_mut()
+            .map_err(|_| LarkError::IllegalParam("invalid WebSocket domain".to_string()))?
+            .extend([
+                "open-apis",
+                "event",
+                "v1",
+                "connections",
+                &connection_id,
+                action,
+            ]);
+
+        let mut request = self.config.http_client.post(request_url.as_str())?;
+        for (key, value) in &self.headers {
+            request = request
+                .header_str(key, value)
+                .map_err(|e| LarkError::Event(format!("invalid header {key}: {e}")))?;
+        }
+        // Binding credentials and JSON payload semantics must not be overridden
+        // by custom WebSocket bootstrap headers.
+        let request = request
+            .header_str("locale", "zh")
+            .map_err(|e| LarkError::Event(format!("invalid locale header: {e}")))?
+            .header_str("Authorization", &format!("Bearer {user_access_token}"))
+            .map_err(|e| LarkError::IllegalParam(format!("invalid user access token: {e}")))?
+            .header_str("Content-Type", "application/json")
+            .map_err(|e| LarkError::Event(format!("invalid content type header: {e}")))?;
+
+        let response = request
+            .json(&UserBindingReq {
+                channel_tag: self.channel_tag.as_deref(),
+            })
+            .map_err(|e| LarkError::Event(format!("failed to serialize user binding body: {e}")))?
+            .send()
+            .await
+            .map_err(|e| LarkError::Http(e.into_error()))?;
+        let status = response.status();
+        if !status.is_success() {
+            return Err(LarkError::Http(aioduct::Error::Status(status)));
+        }
+        let bytes = response.bytes().await.map_err(LarkError::Http)?;
+        let body: UserBindingResp = serde_json::from_slice(&bytes)?;
+        if body.code != 0 {
+            return Err(crate::resp::CodeError {
+                code: body.code,
+                msg: body.msg,
+                ..Default::default()
+            }
+            .into());
+        }
+
+        Ok(())
+    }
+}
 
 pub struct WsClient {
     config: Arc<Config>,
     dispatcher: Arc<EventDispatcher>,
     domain: String,
     headers: HashMap<String, String>,
+    channel_tag: Option<String>,
+    websocket_query_params: HashMap<String, String>,
+    connection_id: Arc<RwLock<Option<String>>>,
     log_level: Option<tracing::Level>,
     ping_interval: Arc<AtomicU64>,
     reconnect_interval: Arc<AtomicU64>,
@@ -198,6 +408,9 @@ impl WsClient {
             dispatcher: Arc::new(dispatcher),
             domain,
             headers: HashMap::new(),
+            channel_tag: None,
+            websocket_query_params: HashMap::new(),
+            connection_id: Arc::new(RwLock::new(None)),
             log_level,
             ping_interval: Arc::new(AtomicU64::new(120)),
             reconnect_interval: Arc::new(AtomicU64::new(120)),
@@ -235,6 +448,38 @@ impl WsClient {
     pub fn headers(mut self, headers: HashMap<String, String>) -> Self {
         self.headers = headers;
         self
+    }
+
+    /// Set the trusted-user channel tag sent during bootstrap and pings.
+    pub fn channel_tag(mut self, channel_tag: impl Into<String>) -> Self {
+        self.channel_tag = match channel_tag.into() {
+            channel_tag if channel_tag.is_empty() => None,
+            channel_tag => Some(channel_tag),
+        };
+        self
+    }
+
+    /// Add query parameters to the server-provided WebSocket gateway URL.
+    ///
+    /// Entries with empty keys are ignored. Supplied keys replace values from
+    /// the endpoint URL returned by Lark.
+    pub fn websocket_query_params(mut self, params: HashMap<String, String>) -> Self {
+        self.websocket_query_params = params
+            .into_iter()
+            .filter(|(key, _)| !key.is_empty())
+            .collect();
+        self
+    }
+
+    /// Obtain a handle for binding users after this client connects.
+    pub fn control(&self) -> WsClientControl {
+        WsClientControl {
+            config: Arc::clone(&self.config),
+            domain: self.domain.clone(),
+            headers: self.headers.clone(),
+            channel_tag: self.channel_tag.clone(),
+            connection_id: Arc::clone(&self.connection_id),
+        }
     }
 
     /// Set the maximum tracing level emitted by this WebSocket client.
@@ -359,7 +604,7 @@ impl WsClient {
     async fn run_once(&self, was_reconnecting: bool) -> Result<(), LarkError> {
         let (url, service_id) = self.get_ws_url().await?;
         if self.log_enabled(tracing::Level::INFO) {
-            tracing::info!("connecting to ws endpoint: {url}");
+            tracing::info!("connecting to ws endpoint: {}", sanitize_ws_url(&url));
         }
 
         let (ws_stream, resp) = connect_async(&url)
@@ -370,6 +615,8 @@ impl WsClient {
         if resp.status() != http::StatusCode::SWITCHING_PROTOCOLS {
             return Err(self.parse_handshake_error(&resp));
         }
+
+        self.set_connection_id(connection_id_from_ws_url(&url));
 
         if self.log_enabled(tracing::Level::INFO) {
             tracing::info!("ws connected");
@@ -390,22 +637,13 @@ impl WsClient {
         let ping_write = write.clone();
         let ping_interval = self.ping_interval.clone();
         let ping_service_id = service_id;
+        let ping_channel_tag = self.channel_tag.clone();
         let ping_log_level = self.log_level;
         let ping_handle = tokio::spawn(async move {
             loop {
                 let secs = ping_interval.load(Ordering::Relaxed);
                 sleep(Duration::from_secs(secs)).await;
-                let frame = proto::Frame {
-                    seq_id: 0,
-                    log_id: 0,
-                    service: ping_service_id,
-                    method: METHOD_CONTROL,
-                    headers: vec![make_header(HEADER_TYPE, MSG_TYPE_PING)],
-                    payload_encoding: None,
-                    payload_type: None,
-                    payload: None,
-                    log_id_new: None,
-                };
+                let frame = new_ping_frame(ping_service_id, ping_channel_tag.as_deref());
                 let encoded = frame.encode_to_vec();
                 let mut w = ping_write.lock().await;
                 if (*w).send(Message::Binary(encoded.into())).await.is_err() {
@@ -448,6 +686,7 @@ impl WsClient {
         }
 
         ping_handle.abort();
+        self.set_connection_id(None);
         if let Some(ref handler) = self.on_disconnected {
             handler();
         }
@@ -615,6 +854,9 @@ impl WsClient {
             "AppID": self.config.app_id,
             "AppSecret": self.config.app_secret,
         });
+        if let Some(channel_tag) = &self.channel_tag {
+            body["ChannelTag"] = serde_json::Value::String(channel_tag.clone());
+        }
         let mut target_service_header = None;
 
         if let Some(ref provider) = self.config.client_assertion_provider {
@@ -692,24 +934,18 @@ impl WsClient {
             self.apply_config(conf);
         }
 
-        // Extract service_id from URL query params
-        let service_id = data
-            .url
-            .split('?')
-            .nth(1)
-            .and_then(|qs| {
-                qs.split('&').find_map(|pair| {
-                    let (k, v) = pair.split_once('=')?;
-                    if k == "service_id" {
-                        v.parse::<i32>().ok()
-                    } else {
-                        None
-                    }
-                })
-            })
+        let url = append_ws_query_params(&data.url, &self.websocket_query_params)?;
+        let service_id = ws_query_param(&url, QUERY_SERVICE_ID)
+            .and_then(|value| value.parse::<i32>().ok())
             .unwrap_or(0);
 
-        Ok((data.url, service_id))
+        Ok((url, service_id))
+    }
+
+    fn set_connection_id(&self, connection_id: Option<String>) {
+        if let Ok(mut current) = self.connection_id.write() {
+            *current = connection_id;
+        }
     }
 
     fn parse_handshake_error(
@@ -788,6 +1024,19 @@ mod tests {
         assert!(!client.log_enabled(tracing::Level::TRACE));
     }
 
+    #[test]
+    fn trusted_channel_builders_omit_empty_configuration() {
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .channel_tag("")
+        .websocket_query_params(HashMap::from([(String::new(), "ignored".into())]));
+
+        assert_eq!(client.channel_tag, None);
+        assert!(client.websocket_query_params.is_empty());
+    }
+
     #[tokio::test]
     async fn get_ws_url_uses_custom_domain() {
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -812,13 +1061,31 @@ mod tests {
 
         let config = Config::new("app_id", "app_secret");
         let dispatcher = EventDispatcher::new("", "");
-        let client = WsClient::new(config, dispatcher).domain(format!("http://{addr}/"));
+        let client = WsClient::new(config, dispatcher)
+            .domain(format!("http://{addr}/"))
+            .channel_tag("trusted_channel")
+            .websocket_query_params(HashMap::from([
+                ("service_id".into(), "99".into()),
+                ("extra".into(), "value with spaces".into()),
+                (String::new(), "ignored".into()),
+            ]));
 
         let (url, service_id) = client.get_ws_url().await.unwrap();
         handle.await.unwrap();
 
-        assert_eq!(url, "wss://example.test/ws?service_id=42");
-        assert_eq!(service_id, 42);
+        let url = url::Url::parse(&url).unwrap();
+        assert_eq!(
+            url.query_pairs()
+                .find(|(key, _)| key == "service_id")
+                .unwrap()
+                .1,
+            "99"
+        );
+        assert_eq!(
+            url.query_pairs().find(|(key, _)| key == "extra").unwrap().1,
+            "value with spaces"
+        );
+        assert_eq!(service_id, 99);
         assert_eq!(client.ping_interval.load(Ordering::Relaxed), 15);
         assert_eq!(client.reconnect_interval.load(Ordering::Relaxed), 16);
         assert_eq!(client.reconnect_nonce.load(Ordering::Relaxed), 7);
@@ -827,6 +1094,308 @@ mod tests {
         assert!(request.starts_with("POST /callback/ws/endpoint HTTP/1.1"));
         assert!(request.contains(r#""AppID":"app_id""#));
         assert!(request.contains(r#""AppSecret":"app_secret""#));
+        assert!(request.contains(r#""ChannelTag":"trusted_channel""#));
+    }
+
+    #[test]
+    fn ping_frames_include_non_empty_channel_tags_only() {
+        let tagged = new_ping_frame(42, Some("trusted_channel"));
+        assert_eq!(
+            get_header(&tagged.headers, HEADER_CHANNEL_TAG).as_deref(),
+            Some("trusted_channel")
+        );
+
+        let untagged = new_ping_frame(42, Some(""));
+        assert_eq!(get_header(&untagged.headers, HEADER_CHANNEL_TAG), None);
+    }
+
+    #[tokio::test]
+    async fn control_tracks_handshake_connection_and_disconnect() {
+        let ws_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let ws_addr = ws_listener.local_addr().unwrap();
+        let (connected_tx, connected_rx) = tokio::sync::oneshot::channel();
+        let (close_tx, close_rx) = tokio::sync::oneshot::channel();
+        let ws_handle = tokio::spawn(async move {
+            let (stream, _) = ws_listener.accept().await.unwrap();
+            let mut stream = tokio_tungstenite::accept_async(stream).await.unwrap();
+            connected_tx.send(()).unwrap();
+            close_rx.await.unwrap();
+            stream.close(None).await.unwrap();
+        });
+
+        let bootstrap_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let bootstrap_addr = bootstrap_listener.local_addr().unwrap();
+        let bootstrap_handle = tokio::spawn(async move {
+            let (mut stream, _) = bootstrap_listener.accept().await.unwrap();
+            let mut first_byte = [0; 1];
+            stream.read_exact(&mut first_byte).await.unwrap();
+            let body = format!(
+                r#"{{"code":0,"data":{{"URL":"ws://{ws_addr}/?service_id=42&device_id=device%2Fid"}}}}"#
+            );
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+            stream.shutdown().await.unwrap();
+        });
+
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{bootstrap_addr}"))
+        .auto_reconnect(false);
+        let control = client.control();
+        let start = tokio::spawn(client.start());
+
+        connected_rx.await.unwrap();
+        tokio::time::timeout(Duration::from_secs(1), async {
+            while control.connection_id().as_deref() != Some("device/id") {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+        close_tx.send(()).unwrap();
+        start.await.unwrap().unwrap();
+        ws_handle.await.unwrap();
+        bootstrap_handle.await.unwrap();
+        assert_eq!(control.connection_id(), None);
+    }
+
+    #[tokio::test]
+    async fn control_replaces_connection_id_after_reconnect() {
+        let ws_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let ws_addr = ws_listener.local_addr().unwrap();
+        let (first_connected_tx, first_connected_rx) = tokio::sync::oneshot::channel();
+        let (second_connected_tx, second_connected_rx) = tokio::sync::oneshot::channel();
+        let (first_close_tx, first_close_rx) = tokio::sync::oneshot::channel();
+        let (second_close_tx, second_close_rx) = tokio::sync::oneshot::channel();
+        let ws_handle = tokio::spawn(async move {
+            let (stream, _) = ws_listener.accept().await.unwrap();
+            let mut stream = tokio_tungstenite::accept_async(stream).await.unwrap();
+            first_connected_tx.send(()).unwrap();
+            first_close_rx.await.unwrap();
+            stream.close(None).await.unwrap();
+
+            let (stream, _) = ws_listener.accept().await.unwrap();
+            let mut stream = tokio_tungstenite::accept_async(stream).await.unwrap();
+            second_connected_tx.send(()).unwrap();
+            second_close_rx.await.unwrap();
+            stream.close(None).await.unwrap();
+        });
+
+        let bootstrap_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let bootstrap_addr = bootstrap_listener.local_addr().unwrap();
+        let bootstrap_handle = tokio::spawn(async move {
+            for device_id in ["first%2Fid", "second%2Fid"] {
+                let (mut stream, _) = bootstrap_listener.accept().await.unwrap();
+                let mut first_byte = [0; 1];
+                stream.read_exact(&mut first_byte).await.unwrap();
+                let body = format!(
+                    r#"{{"code":0,"data":{{"URL":"ws://{ws_addr}/?service_id=42&device_id={device_id}"}}}}"#
+                );
+                let response = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                    body.len()
+                );
+                stream.write_all(response.as_bytes()).await.unwrap();
+                stream.shutdown().await.unwrap();
+            }
+        });
+
+        let client = Arc::new(
+            WsClient::new(
+                Config::new("app_id", "app_secret"),
+                EventDispatcher::new("", ""),
+            )
+            .domain(format!("http://{bootstrap_addr}")),
+        );
+        let control = client.control();
+
+        let first_run = {
+            let client = Arc::clone(&client);
+            tokio::spawn(async move { client.run_once(false).await })
+        };
+        first_connected_rx.await.unwrap();
+        tokio::time::timeout(Duration::from_secs(1), async {
+            while control.connection_id().as_deref() != Some("first/id") {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+        first_close_tx.send(()).unwrap();
+        first_run.await.unwrap().unwrap();
+        assert_eq!(control.connection_id(), None);
+
+        let second_run = {
+            let client = Arc::clone(&client);
+            tokio::spawn(async move { client.run_once(true).await })
+        };
+        second_connected_rx.await.unwrap();
+        tokio::time::timeout(Duration::from_secs(1), async {
+            while control.connection_id().as_deref() != Some("second/id") {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+        second_close_tx.send(()).unwrap();
+        second_run.await.unwrap().unwrap();
+        ws_handle.await.unwrap();
+        bootstrap_handle.await.unwrap();
+        assert_eq!(control.connection_id(), None);
+    }
+
+    #[tokio::test]
+    async fn user_binding_uses_current_connection_and_channel_configuration() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let requests = Arc::new(StdMutex::new(Vec::new()));
+        let captured = Arc::clone(&requests);
+        let handle = tokio::spawn(async move {
+            for _ in 0..2 {
+                let (mut stream, _) = listener.accept().await.unwrap();
+                let mut buf = [0; 4096];
+                let n = stream.read(&mut buf).await.unwrap();
+                captured
+                    .lock()
+                    .unwrap()
+                    .push(String::from_utf8_lossy(&buf[..n]).into_owned());
+                let body = r#"{"code":0,"msg":"ok"}"#;
+                let response = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                    body.len()
+                );
+                stream.write_all(response.as_bytes()).await.unwrap();
+                stream.shutdown().await.unwrap();
+            }
+        });
+
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{addr}"))
+        .headers(HashMap::from([
+            ("X-Tt-Env".into(), "boe".into()),
+            ("Authorization".into(), "Bearer custom-token".into()),
+            ("Content-Type".into(), "text/plain".into()),
+            ("locale".into(), "en".into()),
+        ]))
+        .channel_tag("trusted_channel");
+        let control = client.control();
+        client.set_connection_id(Some("device/id".into()));
+
+        control.attach_user("user-token").await.unwrap();
+        control.detach_user("user-token").await.unwrap();
+        handle.await.unwrap();
+
+        let requests = requests.lock().unwrap();
+        assert_eq!(requests.len(), 2);
+        assert!(
+            requests[0]
+                .starts_with("POST /open-apis/event/v1/connections/device%2Fid/bind_user HTTP/1.1")
+        );
+        assert!(
+            requests[1].starts_with(
+                "POST /open-apis/event/v1/connections/device%2Fid/unbind_user HTTP/1.1"
+            )
+        );
+        for request in requests.iter() {
+            let request_lowercase = request.to_ascii_lowercase();
+            assert!(request_lowercase.contains("authorization: bearer user-token"));
+            assert!(request_lowercase.contains("x-tt-env: boe"));
+            assert!(request_lowercase.contains("content-type: application/json"));
+            assert!(request_lowercase.contains("locale: zh"));
+            assert!(!request_lowercase.contains("authorization: bearer custom-token"));
+            assert!(!request_lowercase.contains("content-type: text/plain"));
+            assert!(request.contains(r#""channel_tag":"trusted_channel""#));
+        }
+    }
+
+    #[tokio::test]
+    async fn user_binding_maps_nonzero_api_codes() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let handle = tokio::spawn(async move {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut first_byte = [0; 1];
+            stream.read_exact(&mut first_byte).await.unwrap();
+            let body = r#"{"code":1,"msg":"system busy"}"#;
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+            stream.shutdown().await.unwrap();
+        });
+
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{addr}"));
+        let control = client.control();
+        client.set_connection_id(Some("device".into()));
+
+        let err = control.attach_user("user-token").await.unwrap_err();
+        handle.await.unwrap();
+        assert!(
+            matches!(err, LarkError::Api(code_error) if code_error.code == 1 && code_error.msg == "system busy")
+        );
+    }
+
+    #[tokio::test]
+    async fn user_binding_maps_http_errors_before_decoding_the_body() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let handle = tokio::spawn(async move {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut first_byte = [0; 1];
+            stream.read_exact(&mut first_byte).await.unwrap();
+            let body = "<html>bad gateway</html>";
+            let response = format!(
+                "HTTP/1.1 502 Bad Gateway\r\nContent-Type: text/html\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+            stream.shutdown().await.unwrap();
+        });
+
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{addr}"));
+        let control = client.control();
+        client.set_connection_id(Some("device".into()));
+
+        let err = control.attach_user("user-token").await.unwrap_err();
+        handle.await.unwrap();
+        assert!(
+            matches!(err, LarkError::Http(aioduct::Error::Status(status)) if status == http::StatusCode::BAD_GATEWAY)
+        );
+    }
+
+    #[tokio::test]
+    async fn user_binding_rejects_missing_token_and_unready_connection() {
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        );
+        let control = client.control();
+
+        let err = control.attach_user("").await.unwrap_err();
+        assert!(
+            matches!(err, LarkError::IllegalParam(message) if message == "user_access_token is required")
+        );
+        let err = control.attach_user("user-token").await.unwrap_err();
+        assert!(
+            matches!(err, LarkError::IllegalParam(message) if message == "WebSocket connection is not ready")
+        );
     }
 
     // ── Protobuf frame encode/decode roundtrip ──
