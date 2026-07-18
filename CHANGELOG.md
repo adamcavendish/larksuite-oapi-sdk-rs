@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### WebSocket
+
+- Added branch-parity trusted user channels with channel tags, gateway query
+  parameters, connection controls, and explicit user attach/detach operations.
+
 ### REST service coverage
 
 - Replaced public `serde_json::Value` fields, query bodies, request helpers,
