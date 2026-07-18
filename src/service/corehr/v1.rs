@@ -4,7 +4,9 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::service::common::{PageIteratorState, PageQuery, RestRequest};
+use crate::service::common::{
+    PageIteratorState, PageQuery, RestRequest, impl_page_iterator_controls,
+};
 
 // ── Shared sub-types ──
 
@@ -5512,44 +5514,25 @@ pub struct SearchOffboardingIterator<'a> {
     user_id_type: Option<String>,
 }
 
+impl_page_iterator_controls!(SearchOffboardingIterator);
+
 impl<'a> SearchOffboardingIterator<'a> {
-    pub fn limit(mut self, limit: usize) -> Self {
-        self.state = self.state.limit(limit);
-        self
-    }
-
-    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
-        self.state = self.state.with_page_token(Some(page_token.into()));
-        self
-    }
-
-    pub fn next_page_token(&self) -> Option<&str> {
-        self.state.next_page_token()
-    }
-
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Offboarding>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = OffboardingResource {
-            config: self.config,
-        };
-        let resp = Box::pin(resource.search_page(
-            self.page_size,
-            self.state.page_token_for_request(),
-            self.user_id_type.as_deref(),
-            self.body.clone(),
-            option,
-        ))
-        .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = OffboardingResource {
+                config: self.config,
+            };
+            let resp = Box::pin(resource.search_page(
+                self.page_size,
+                page_token,
+                self.user_id_type.as_deref(),
+                self.body.clone(),
+                option,
+            ))
+            .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 

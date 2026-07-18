@@ -272,6 +272,27 @@ pub(crate) struct PageIteratorState<T> {
     emitted: usize,
 }
 
+#[derive(Debug)]
+pub(crate) struct PageIteratorPage<T> {
+    items: Option<Vec<T>>,
+    page_token: Option<String>,
+    has_more: Option<bool>,
+}
+
+impl<T> PageIteratorPage<T> {
+    pub(crate) fn new(
+        items: Option<Vec<T>>,
+        page_token: Option<String>,
+        has_more: Option<bool>,
+    ) -> Self {
+        Self {
+            items,
+            page_token,
+            has_more,
+        }
+    }
+}
+
 impl<T> Default for PageIteratorState<T> {
     fn default() -> Self {
         Self {
@@ -349,7 +370,44 @@ impl<T> PageIteratorState<T> {
         self.exhausted =
             self.items.is_empty() || !has_more.unwrap_or(false) || self.next_page_token.is_none();
     }
+
+    pub(crate) async fn next_page<F, Fut>(&mut self, fetch: F) -> Result<Option<T>, LarkError>
+    where
+        F: FnOnce(Option<String>) -> Fut,
+        Fut: Future<Output = Result<PageIteratorPage<T>, LarkError>>,
+    {
+        if let Some(item) = self.pop() {
+            return Ok(Some(item));
+        }
+        if !self.should_fetch() {
+            return Ok(None);
+        }
+
+        let page_token = self.page_token_for_request().map(ToOwned::to_owned);
+        let page = fetch(page_token).await?;
+        self.accept_page(page.items, page.page_token, page.has_more);
+        Ok(self.pop())
+    }
 }
+
+macro_rules! page_iterator_next {
+    ($state:expr, $page_token:ident, $fetch:block) => {{
+        if let Some(item) = $state.pop() {
+            return Ok(Some(item));
+        }
+        if !$state.should_fetch() {
+            return Ok(None);
+        }
+
+        let $page_token = $state.page_token_for_request();
+        let page: Result<(Option<Vec<_>>, Option<String>, Option<bool>), LarkError> = $fetch;
+        let (items, page_token, has_more) = page?;
+        $state.accept_page(items, page_token, has_more);
+        Ok($state.pop())
+    }};
+}
+
+pub(crate) use page_iterator_next;
 
 macro_rules! impl_page_iterator_controls {
     ($iter:ident) => {
@@ -513,5 +571,89 @@ mod tests {
 
         let data: Vec<u8> = resp.data;
         assert_eq!(data, b"download-bytes");
+    }
+
+    #[tokio::test]
+    async fn page_iterator_reuses_seeded_and_server_tokens() {
+        let mut state = PageIteratorState::default()
+            .with_page_token(Some("seed-token".to_string()))
+            .limit(0);
+
+        let first = state
+            .next_page(|page_token| async move {
+                assert_eq!(page_token.as_deref(), Some("seed-token"));
+                Ok(PageIteratorPage::new(
+                    Some(vec![1, 2]),
+                    Some("next-token".to_string()),
+                    Some(true),
+                ))
+            })
+            .await
+            .unwrap();
+        assert_eq!(first, Some(1));
+
+        let buffered = state
+            .next_page(|_| async { Ok(PageIteratorPage::new(None, None, None)) })
+            .await
+            .unwrap();
+        assert_eq!(buffered, Some(2));
+
+        let second = state
+            .next_page(|page_token| async move {
+                assert_eq!(page_token.as_deref(), Some("next-token"));
+                Ok(PageIteratorPage::new(Some(vec![3]), None, Some(false)))
+            })
+            .await
+            .unwrap();
+        assert_eq!(second, Some(3));
+        assert_eq!(state.next_page_token(), None);
+    }
+
+    #[tokio::test]
+    async fn page_iterator_empty_page_exhausts_without_another_fetch() {
+        let mut state = PageIteratorState::<i32>::default();
+
+        let item = state
+            .next_page(|page_token| async move {
+                assert_eq!(page_token, None);
+                Ok(PageIteratorPage::new(
+                    Some(vec![]),
+                    Some("next-token".to_string()),
+                    Some(true),
+                ))
+            })
+            .await
+            .unwrap();
+        assert_eq!(item, None);
+
+        let item = state
+            .next_page(|_| async { panic!("an exhausted iterator must not fetch another page") })
+            .await
+            .unwrap();
+        assert_eq!(item, None);
+    }
+
+    #[tokio::test]
+    async fn page_iterator_retries_failed_seeded_request() {
+        let mut state =
+            PageIteratorState::<i32>::default().with_page_token(Some("seed-token".to_string()));
+
+        let error = state
+            .next_page(|page_token| async move {
+                assert_eq!(page_token.as_deref(), Some("seed-token"));
+                Err(LarkError::IllegalParam("request failed".to_string()))
+            })
+            .await
+            .unwrap_err();
+        assert!(matches!(error, LarkError::IllegalParam(message) if message == "request failed"));
+
+        let item = state
+            .next_page(|page_token| async move {
+                assert_eq!(page_token.as_deref(), Some("seed-token"));
+                Ok(PageIteratorPage::new(Some(vec![1]), None, Some(false)))
+            })
+            .await
+            .unwrap();
+        assert_eq!(item, Some(1));
     }
 }

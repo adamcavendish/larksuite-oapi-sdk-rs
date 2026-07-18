@@ -5,7 +5,8 @@ use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
 use crate::service::common::{
-    EmptyResp, PageIteratorState, PageQuery, RestRequest, impl_page_iterator_controls,
+    EmptyResp, PageIteratorPage, PageIteratorState, PageQuery, RestRequest,
+    impl_page_iterator_controls,
 };
 
 // ── Domain types ──
@@ -756,28 +757,23 @@ impl_page_iterator_controls!(ListTableIterator);
 
 impl ListTableIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<AppTable>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = AppTableResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                &self.app_token,
-                self.page_size,
-                self.state.page_token_for_request(),
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
+        let config = self.config;
+        let app_token = &self.app_token;
+        let page_size = self.page_size;
         self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+            .next_page(|page_token| async move {
+                let resource = AppTableResource { config };
+                let resp = resource
+                    .list(app_token, page_size, page_token.as_deref(), option)
+                    .await?;
+                let data = resp.data.unwrap_or_default();
+                Ok(PageIteratorPage::new(
+                    Some(data.items),
+                    data.page_token,
+                    data.has_more,
+                ))
+            })
+            .await
     }
 }
 
@@ -798,30 +794,32 @@ impl ListViewIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<AppTableView>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = AppTableViewResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                &self.app_token,
-                &self.table_id,
-                self.page_size,
-                self.state.page_token_for_request(),
-                self.user_id_type.as_deref(),
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
+        let config = self.config;
+        let app_token = &self.app_token;
+        let table_id = &self.table_id;
+        let page_size = self.page_size;
+        let user_id_type = self.user_id_type.as_deref();
         self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+            .next_page(|page_token| async move {
+                let resource = AppTableViewResource { config };
+                let resp = resource
+                    .list(
+                        app_token,
+                        table_id,
+                        page_size,
+                        page_token.as_deref(),
+                        user_id_type,
+                        option,
+                    )
+                    .await?;
+                let data = resp.data.unwrap_or_default();
+                Ok(PageIteratorPage::new(
+                    Some(data.items),
+                    data.page_token,
+                    data.has_more,
+                ))
+            })
+            .await
     }
 }
 
@@ -844,32 +842,36 @@ impl ListFieldIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<AppTableField>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = AppTableFieldResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                &self.app_token,
-                &self.table_id,
-                self.view_id.as_deref(),
-                self.text_field_as_array,
-                self.user_id_type.as_deref(),
-                self.state.page_token_for_request(),
-                self.page_size,
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
+        let config = self.config;
+        let app_token = &self.app_token;
+        let table_id = &self.table_id;
+        let view_id = self.view_id.as_deref();
+        let text_field_as_array = self.text_field_as_array;
+        let user_id_type = self.user_id_type.as_deref();
+        let page_size = self.page_size;
         self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+            .next_page(|page_token| async move {
+                let resource = AppTableFieldResource { config };
+                let resp = resource
+                    .list(
+                        app_token,
+                        table_id,
+                        view_id,
+                        text_field_as_array,
+                        user_id_type,
+                        page_token.as_deref(),
+                        page_size,
+                        option,
+                    )
+                    .await?;
+                let data = resp.data.unwrap_or_default();
+                Ok(PageIteratorPage::new(
+                    Some(data.items),
+                    data.page_token,
+                    data.has_more,
+                ))
+            })
+            .await
     }
 }
 
@@ -895,35 +897,42 @@ impl ListRecordIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<AppTableRecord>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = AppTableRecordResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                &self.app_token,
-                &self.table_id,
-                self.view_id.as_deref(),
-                self.filter.as_deref(),
-                self.sort.as_deref(),
-                self.field_names.as_deref(),
-                self.text_field_as_array,
-                self.user_id_type.as_deref(),
-                self.state.page_token_for_request(),
-                self.page_size,
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
+        let config = self.config;
+        let app_token = &self.app_token;
+        let table_id = &self.table_id;
+        let view_id = self.view_id.as_deref();
+        let filter = self.filter.as_deref();
+        let sort = self.sort.as_deref();
+        let field_names = self.field_names.as_deref();
+        let text_field_as_array = self.text_field_as_array;
+        let user_id_type = self.user_id_type.as_deref();
+        let page_size = self.page_size;
         self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+            .next_page(|page_token| async move {
+                let resource = AppTableRecordResource { config };
+                let resp = resource
+                    .list(
+                        app_token,
+                        table_id,
+                        view_id,
+                        filter,
+                        sort,
+                        field_names,
+                        text_field_as_array,
+                        user_id_type,
+                        page_token.as_deref(),
+                        page_size,
+                        option,
+                    )
+                    .await?;
+                let data = resp.data.unwrap_or_default();
+                Ok(PageIteratorPage::new(
+                    Some(data.items),
+                    data.page_token,
+                    data.has_more,
+                ))
+            })
+            .await
     }
 }
 
@@ -945,31 +954,34 @@ impl SearchRecordIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<AppTableRecord>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = AppTableRecordResource {
-            config: self.config,
-        };
-        let resp = resource
-            .search(
-                &self.app_token,
-                &self.table_id,
-                &self.body,
-                self.user_id_type.as_deref(),
-                self.state.page_token_for_request(),
-                self.page_size,
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
+        let config = self.config;
+        let app_token = &self.app_token;
+        let table_id = &self.table_id;
+        let body = &self.body;
+        let user_id_type = self.user_id_type.as_deref();
+        let page_size = self.page_size;
         self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+            .next_page(|page_token| async move {
+                let resource = AppTableRecordResource { config };
+                let resp = resource
+                    .search(
+                        app_token,
+                        table_id,
+                        body,
+                        user_id_type,
+                        page_token.as_deref(),
+                        page_size,
+                        option,
+                    )
+                    .await?;
+                let data = resp.data.unwrap_or_default();
+                Ok(PageIteratorPage::new(
+                    Some(data.items),
+                    data.page_token,
+                    data.has_more,
+                ))
+            })
+            .await
     }
 }
 
