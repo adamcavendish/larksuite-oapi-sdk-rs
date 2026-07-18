@@ -179,7 +179,7 @@ pub struct Widget {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_read_only: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub option: Option<serde_json::Value>,
+    pub option: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub children: Option<Vec<Widget>>,
 }
@@ -441,7 +441,7 @@ pub struct ExternalInstance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub form_schema_list: Option<Vec<serde_json::Value>>,
+    pub form_schema_list: Option<Vec<crate::JsonValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_resources: Option<Vec<I18nResource>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -779,7 +779,7 @@ pub struct CreateExternalInstanceReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub form_schema_list: Option<Vec<serde_json::Value>>,
+    pub form_schema_list: Option<Vec<crate::JsonValue>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub i18n_resources: Option<Vec<I18nResource>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2295,7 +2295,7 @@ impl<'a> ExternalInstanceResource<'a> {
 
     pub async fn check(
         &self,
-        instances: &serde_json::Value,
+        instances: &crate::JsonValue,
         option: &RequestOption,
     ) -> Result<CheckExternalInstanceResp, LarkError> {
         RestRequest::new(

@@ -122,11 +122,11 @@ impl<'a> ListDeviceRecordV2Query<'a> {
 #[non_exhaustive]
 pub struct UpdateDeviceApplyRecordV2Query<'a> {
     pub device_apply_record_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> UpdateDeviceApplyRecordV2Query<'a> {
-    pub fn new(device_apply_record_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(device_apply_record_id: &'a str, body: &'a crate::JsonValue) -> Self {
         Self {
             device_apply_record_id,
             body,
@@ -137,11 +137,11 @@ impl<'a> UpdateDeviceApplyRecordV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateDeviceRecordV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> CreateDeviceRecordV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -184,11 +184,11 @@ impl MineDeviceRecordV2Query {
 #[non_exhaustive]
 pub struct UpdateDeviceRecordV2Query<'a> {
     pub device_record_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> UpdateDeviceRecordV2Query<'a> {
-    pub fn new(device_record_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(device_record_id: &'a str, body: &'a crate::JsonValue) -> Self {
         Self {
             device_record_id,
             body,
@@ -221,7 +221,7 @@ impl DeviceApplyRecordV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateDeviceApplyRecordV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = UpdateDeviceApplyRecordV2Query::new(device_apply_record_id, &body);
         self.update_by_query(&query, option).await
     }
@@ -258,7 +258,7 @@ impl DeviceRecordV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateDeviceRecordV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = CreateDeviceRecordV2Query::new(&body);
         self.create_by_query(&query, option).await
     }
@@ -393,7 +393,7 @@ impl DeviceRecordV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateDeviceRecordV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = UpdateDeviceRecordV2Query::new(device_record_id, &body);
         self.update_by_query(&query, option).await
     }

@@ -33,7 +33,7 @@ pub struct ReportField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_required: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub option_list: Option<Vec<serde_json::Value>>,
+    pub option_list: Option<Vec<crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -49,7 +49,7 @@ pub struct ReportTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub commit_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub form_contents: Option<Vec<serde_json::Value>>,
+    pub form_contents: Option<Vec<crate::JsonValue>>,
 }
 
 // ── Request body types ──

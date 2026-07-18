@@ -133,7 +133,7 @@ macro_rules! impl_resp {
         pub struct $name {
             pub api_resp: $crate::resp::ApiResp,
             pub code_error: Option<$crate::resp::CodeError>,
-            pub data: Option<serde_json::Value>,
+            pub data: Option<crate::JsonValue>,
         }
         impl $name {
             pub fn success(&self) -> bool {
@@ -141,11 +141,11 @@ macro_rules! impl_resp {
                     && self.code_error.as_ref().is_none_or(|e| e.code == 0)
             }
         }
-        impl $crate::service::common::FromV2Response<serde_json::Value> for $name {
+        impl $crate::service::common::FromV2Response<crate::JsonValue> for $name {
             fn from_v2_response(
                 api_resp: $crate::resp::ApiResp,
                 code_error: Option<$crate::resp::CodeError>,
-                data: Option<serde_json::Value>,
+                data: Option<crate::JsonValue>,
             ) -> Self {
                 Self {
                     api_resp,

@@ -14,8 +14,8 @@ async fn base_v2_app_role_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"name":"Admin"});
-    let update_body = serde_json::json!({"name":"Admin updated"});
+    let create_body = json_value!({"name":"Admin"});
+    let update_body = json_value!({"name":"Admin updated"});
 
     let create_resp = client
         .base_v2()

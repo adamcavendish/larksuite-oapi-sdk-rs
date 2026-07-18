@@ -53,9 +53,9 @@ async fn block_v2_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let entity_body = serde_json::json!({"entity":{"name":"Entity"}});
-    let update_body = serde_json::json!({"entity":{"name":"Entity updated"}});
-    let message_body = serde_json::json!({"message":{"text":"hello"}});
+    let entity_body = json_value!({"entity":{"name":"Entity"}});
+    let update_body = json_value!({"entity":{"name":"Entity updated"}});
+    let message_body = json_value!({"message":{"text":"hello"}});
 
     let create_resp = client
         .block_v2()

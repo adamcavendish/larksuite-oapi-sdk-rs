@@ -14,9 +14,9 @@ pub struct EhrEmployee {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub system_fields: Option<serde_json::Value>,
+    pub system_fields: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub custom_fields: Option<Vec<serde_json::Value>>,
+    pub custom_fields: Option<Vec<crate::JsonValue>>,
 }
 
 // ── Response wrappers ──

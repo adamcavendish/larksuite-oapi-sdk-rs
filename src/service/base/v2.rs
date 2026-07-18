@@ -130,11 +130,11 @@ impl_resp_v2!(UpdateAppRoleV2Resp, AppRoleData);
 #[derive(Debug, Clone, Copy)]
 pub struct CreateAppRoleV2Query<'a> {
     pub app_token: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> CreateAppRoleV2Query<'a> {
-    pub fn new(app_token: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_token: &'a str, body: &'a crate::JsonValue) -> Self {
         Self { app_token, body }
     }
 }
@@ -163,11 +163,11 @@ impl<'a> ListAppRoleV2Query<'a> {
 pub struct UpdateAppRoleV2Query<'a> {
     pub app_token: &'a str,
     pub role_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> UpdateAppRoleV2Query<'a> {
-    pub fn new(app_token: &'a str, role_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_token: &'a str, role_id: &'a str, body: &'a crate::JsonValue) -> Self {
         Self {
             app_token,
             role_id,
@@ -199,7 +199,7 @@ impl AppRoleV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateAppRoleV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         self.create_by_query(&CreateAppRoleV2Query::new(app_token, &body), option)
             .await
     }
@@ -259,7 +259,7 @@ impl AppRoleV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateAppRoleV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         self.update_by_query(
             &UpdateAppRoleV2Query::new(app_token, role_id, &body),
             option,

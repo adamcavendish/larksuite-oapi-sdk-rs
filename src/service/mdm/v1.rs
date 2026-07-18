@@ -102,12 +102,12 @@ impl<'a> UpdateUserDeviceQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct BindUserAuthDataRelationQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> BindUserAuthDataRelationQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -123,12 +123,12 @@ impl<'a> BindUserAuthDataRelationQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct UnbindUserAuthDataRelationQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> UnbindUserAuthDataRelationQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -221,7 +221,7 @@ impl<'a> UserAuthDataRelationResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = BindUserAuthDataRelationQuery::new(&body).user_id_type(user_id_type);
         self.bind_by_query(&query, option).await
     }
@@ -250,7 +250,7 @@ impl<'a> UserAuthDataRelationResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = UnbindUserAuthDataRelationQuery::new(&body).user_id_type(user_id_type);
         self.unbind_by_query(&query, option).await
     }

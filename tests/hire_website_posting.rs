@@ -208,7 +208,10 @@ async fn hire_website_job_post_search_iterator_sends_body_and_resume_token() {
         mock_server_with_requests(vec![http_response(200, page1), http_response(200, page2)]).await;
 
     let client = client_for(addr);
-    let body = json!({"keyword":"engineer","job_type_id_list":["type-1"]});
+    let body = larksuite_oapi_sdk_rs::JsonValue::from(json!({
+        "keyword":"engineer",
+        "job_type_id_list":["type-1"]
+    }));
     let query = SearchWebsiteJobPostQuery::new("site-1")
         .page_size(1)
         .page_token("seed-token")

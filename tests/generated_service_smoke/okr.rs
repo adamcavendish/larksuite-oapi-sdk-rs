@@ -25,7 +25,7 @@ async fn okr_period_image_and_batch_by_query_smoke() {
         start_month: Some("2026-01".into()),
     };
     let patch_body = PatchPeriodReqBody { status: Some(1) };
-    let image_body = serde_json::json!({"image":"base64-image"});
+    let image_body = json_value!({"image":"base64-image"});
     let okr_ids = ["okr-1", "okr-2"];
 
     let period_list_resp = client

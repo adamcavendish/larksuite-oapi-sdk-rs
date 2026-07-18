@@ -191,7 +191,7 @@ async fn hire_application_lifecycle_smoke() {
         .application
         .cancel_onboard(
             "app-1",
-            serde_json::json!({"termination_type": 1}),
+            json_value!({"termination_type": 1}),
             &RequestOption::default(),
         )
         .await

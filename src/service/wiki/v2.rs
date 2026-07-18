@@ -219,7 +219,7 @@ impl_resp!(MoveDocsToWikiResp, MoveDocsToWikiData);
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TaskData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub task: Option<serde_json::Value>,
+    pub task: Option<crate::JsonValue>,
 }
 
 impl_resp!(GetTaskResp, TaskData);

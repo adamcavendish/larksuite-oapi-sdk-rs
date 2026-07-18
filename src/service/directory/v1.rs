@@ -19,7 +19,7 @@ pub struct DirectoryUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mobile: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<serde_json::Value>,
+    pub status: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_ids: Option<Vec<String>>,
 }

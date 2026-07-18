@@ -155,7 +155,7 @@ async fn callback_handler_returns_custom_response() {
 #[tokio::test]
 async fn event_handler_error_returns_500() {
     let dispatcher = EventDispatcher::new("", "").on_event("test.event_v1", |_val| async {
-        Err(larksuite_oapi_sdk_rs::error::LarkError::Event(
+        Err::<(), _>(larksuite_oapi_sdk_rs::error::LarkError::Event(
             "handler failed".to_string(),
         ))
     });
@@ -775,7 +775,7 @@ async fn card_handler_invalid_json_returns_500() {
 #[tokio::test]
 async fn card_handler_error_returns_500() {
     let handler = CardActionHandler::new("", "", |_action: CardAction| async {
-        Err(larksuite_oapi_sdk_rs::error::LarkError::Event(
+        Err::<larksuite_oapi_sdk_rs::JsonValue, _>(larksuite_oapi_sdk_rs::error::LarkError::Event(
             "handler failed".to_string(),
         ))
     })
@@ -976,9 +976,9 @@ async fn card_handler_custom_resp_status_and_body() {
     let handler = CardActionHandler::new_custom("", "", |_action: CardAction| async {
         Ok(CardHandlerResult::Custom(CustomResp {
             status_code: 202,
-            body: serde_json::Map::from_iter([(
+            body: std::collections::BTreeMap::from([(
                 "toast".to_string(),
-                serde_json::json!({ "content": "Updated!" }),
+                serde_json::json!({ "content": "Updated!" }).into(),
             )]),
         }))
     })
@@ -1004,7 +1004,10 @@ async fn card_handler_custom_resp_zero_status_defaults_to_200() {
     let handler = CardActionHandler::new_custom("", "", |_action: CardAction| async {
         Ok(CardHandlerResult::Custom(CustomResp {
             status_code: 0,
-            body: serde_json::Map::from_iter([("msg".to_string(), serde_json::json!("ok"))]),
+            body: std::collections::BTreeMap::from([(
+                "msg".to_string(),
+                serde_json::json!("ok").into(),
+            )]),
         }))
     })
     .skip_sign_verify();
@@ -1023,7 +1026,7 @@ async fn card_handler_custom_resp_zero_status_defaults_to_200() {
 async fn card_handler_custom_json_variant() {
     let handler = CardActionHandler::new_custom("", "", |_action: CardAction| async {
         Ok(CardHandlerResult::Json(
-            serde_json::json!({ "card": "data" }),
+            serde_json::json!({ "card": "data" }).into(),
         ))
     })
     .skip_sign_verify();

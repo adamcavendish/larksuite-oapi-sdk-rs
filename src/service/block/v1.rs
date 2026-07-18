@@ -21,7 +21,7 @@ pub struct Block {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub host_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18n_summary: Option<serde_json::Value>,
+    pub i18n_summary: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -41,9 +41,9 @@ pub struct CreateBlockReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub i18n_summary: Option<serde_json::Value>,
+    pub i18n_summary: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub payload: Option<serde_json::Value>,
+    pub payload: Option<crate::JsonValue>,
 }
 
 // ── Response wrappers ──

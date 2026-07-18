@@ -39,7 +39,7 @@ pub struct Badge {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub show_image: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub badge_image: Option<serde_json::Value>,
+    pub badge_image: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -55,7 +55,7 @@ pub struct BadgeGrant {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time_zone: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub rule_detail: Option<serde_json::Value>,
+    pub rule_detail: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_grant_all: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -75,21 +75,21 @@ pub struct AdminDeptStat {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub space: Option<serde_json::Value>,
+    pub space: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_active: Option<serde_json::Value>,
+    pub user_active: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_total: Option<serde_json::Value>,
+    pub user_total: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_activation: Option<serde_json::Value>,
+    pub user_activation: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub message: Option<serde_json::Value>,
+    pub message: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub docs: Option<serde_json::Value>,
+    pub docs: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub calendar: Option<serde_json::Value>,
+    pub calendar: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub audio_video: Option<serde_json::Value>,
+    pub audio_video: Option<crate::JsonValue>,
 }
 
 // ── Request body types ──
@@ -97,7 +97,7 @@ pub struct AdminDeptStat {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct ResetPasswordReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub password: Option<serde_json::Value>,
+    pub password: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -125,7 +125,7 @@ pub struct CreateBadgeGrantReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub time_zone: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rule_detail: Option<serde_json::Value>,
+    pub rule_detail: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_grant_all: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1716,11 +1716,11 @@ pub struct BadgeImageResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateBadgeImageQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> CreateBadgeImageQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -1731,7 +1731,7 @@ impl<'a> BadgeImageResource<'a> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateBadgeImageResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = CreateBadgeImageQuery::new(&body);
         self.create_by_query(&query, option).await
     }

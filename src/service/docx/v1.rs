@@ -175,9 +175,9 @@ pub struct Block {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting_notes_qa: Option<MeetingNotesQa>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub synced_block: Option<serde_json::Value>,
+    pub synced_block: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub iframe_v2: Option<serde_json::Value>,
+    pub iframe_v2: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -371,41 +371,41 @@ pub struct UpdateBlockReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unmerge_table_cells: Option<UnmergeTableCellsRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_table_column_width: Option<serde_json::Value>,
+    pub update_table_column_width: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub replace_image: Option<ReplaceImageRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub replace_file: Option<ReplaceFileRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_grid: Option<serde_json::Value>,
+    pub update_grid: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub add_grid_column: Option<serde_json::Value>,
+    pub add_grid_column: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub delete_grid_column: Option<serde_json::Value>,
+    pub delete_grid_column: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub update_grid_column_width_ratio: Option<UpdateGridColumnWidthRatioRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_code_block: Option<serde_json::Value>,
+    pub update_code_block: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_iframe: Option<serde_json::Value>,
+    pub update_iframe: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_diagram: Option<serde_json::Value>,
+    pub update_diagram: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_callout: Option<serde_json::Value>,
+    pub update_callout: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_todo: Option<serde_json::Value>,
+    pub update_todo: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_bitable: Option<serde_json::Value>,
+    pub update_bitable: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_quote_container: Option<serde_json::Value>,
+    pub update_quote_container: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub update_synced_block_source: Option<serde_json::Value>,
+    pub update_synced_block_source: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct BatchUpdateBlockReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub requests: Option<Vec<serde_json::Value>>,
+    pub requests: Option<Vec<crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]

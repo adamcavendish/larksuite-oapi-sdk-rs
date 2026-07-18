@@ -190,7 +190,10 @@ async fn hire_test_iterator_pages_and_uses_server_cursor() {
         .user_id_type("open_id");
     let mut iter = hire
         .test
-        .search_iterator_by_query(&query, json!({"application_id_list":["app-1"]}))
+        .search_iterator_by_query(
+            &query,
+            larksuite_oapi_sdk_rs::JsonValue::from(json!({"application_id_list":["app-1"]})),
+        )
         .limit(3);
 
     let first = iter.next(&RequestOption::default()).await.unwrap().unwrap();
@@ -223,7 +226,10 @@ async fn hire_test_iterator_limit_zero_is_unlimited() {
     let hire = client.hire();
     let mut iter = hire
         .test
-        .search_by_iterator(Some(1), json!({"application_id_list":["app-1"]}))
+        .search_by_iterator(
+            Some(1),
+            larksuite_oapi_sdk_rs::JsonValue::from(json!({"application_id_list":["app-1"]})),
+        )
         .limit(0);
 
     let first = iter.next(&RequestOption::default()).await.unwrap().unwrap();

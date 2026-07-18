@@ -572,25 +572,25 @@ fn build_payloads(input: &SendInput) -> Result<SendPayloads, LarkError> {
     if let Some(image_key) = non_empty(input.image_key.as_deref()) {
         return single_json(
             MessageType::IMAGE,
-            serde_json::json!({ "image_key": image_key }),
+            serde_json::json!({ "image_key": image_key }).into(),
         );
     }
     if let Some(audio_key) = non_empty(input.audio_key.as_deref()) {
         return single_json(
             MessageType::AUDIO,
-            serde_json::json!({ "file_key": audio_key }),
+            serde_json::json!({ "file_key": audio_key }).into(),
         );
     }
     if let Some(video_key) = non_empty(input.video_key.as_deref()) {
         return single_json(
             MessageType::MEDIA,
-            serde_json::json!({ "file_key": video_key }),
+            serde_json::json!({ "file_key": video_key }).into(),
         );
     }
     if let Some(file_key) = non_empty(input.file_key.as_deref()) {
         return single_json(
             MessageType::FILE,
-            serde_json::json!({ "file_key": file_key }),
+            serde_json::json!({ "file_key": file_key }).into(),
         );
     }
     if let Some(card) = non_empty(input.card.as_deref()) {
@@ -602,19 +602,19 @@ fn build_payloads(input: &SendInput) -> Result<SendPayloads, LarkError> {
     if let Some(chat_id) = non_empty(input.share_chat_id.as_deref()) {
         return single_json(
             MessageType::SHARE_CHAT,
-            serde_json::json!({ "chat_id": chat_id }),
+            serde_json::json!({ "chat_id": chat_id }).into(),
         );
     }
     if let Some(user_id) = non_empty(input.share_user_id.as_deref()) {
         return single_json(
             MessageType::SHARE_USER,
-            serde_json::json!({ "user_id": user_id }),
+            serde_json::json!({ "user_id": user_id }).into(),
         );
     }
     if let Some(file_key) = non_empty(input.sticker_file_key.as_deref()) {
         return single_json(
             MessageType::STICKER,
-            serde_json::json!({ "file_key": file_key }),
+            serde_json::json!({ "file_key": file_key }).into(),
         );
     }
     if let Some(markdown) = non_empty(input.markdown.as_deref()) {
@@ -655,7 +655,7 @@ fn single(msg_type: &str, content: &str) -> SendPayloads {
     }
 }
 
-fn single_json(msg_type: &str, content: serde_json::Value) -> Result<SendPayloads, LarkError> {
+fn single_json(msg_type: &str, content: crate::JsonValue) -> Result<SendPayloads, LarkError> {
     Ok(SendPayloads::Single {
         msg_type: msg_type.to_string(),
         content: serde_json::to_string(&content)?,

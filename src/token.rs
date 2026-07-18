@@ -279,7 +279,7 @@ impl TokenManager {
         body: &impl Serialize,
     ) -> Result<T, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, path);
-        api_req.body = Some(ReqBody::Json(serde_json::to_value(body)?));
+        api_req.body = Some(ReqBody::json(body)?);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
 
         let option = RequestOption::default();
@@ -304,7 +304,7 @@ impl TokenManager {
         body: &impl Serialize,
     ) -> Result<T, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, url);
-        api_req.body = Some(ReqBody::Json(serde_json::to_value(body)?));
+        api_req.body = Some(ReqBody::json(body)?);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
 
         let option = RequestOption::default();
@@ -435,7 +435,7 @@ impl AppTicketManager {
         };
 
         let mut api_req = ApiReq::new(http::Method::POST, APPLY_APP_TICKET_PATH);
-        api_req.body = Some(ReqBody::Json(serde_json::to_value(&body)?));
+        api_req.body = Some(ReqBody::json(&body)?);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
 
         let option = RequestOption::default();
@@ -640,7 +640,7 @@ pub(crate) async fn token_endpoint<Req: Serialize, Resp: for<'de> Deserialize<'d
     body: &Req,
 ) -> Result<(crate::resp::ApiResp, Resp), LarkError> {
     let mut api_req = ApiReq::new(http::Method::POST, path);
-    api_req.body = Some(ReqBody::Json(serde_json::to_value(body)?));
+    api_req.body = Some(ReqBody::json(body)?);
     api_req.supported_access_token_types = vec![AccessTokenType::None];
 
     let option = RequestOption::default();

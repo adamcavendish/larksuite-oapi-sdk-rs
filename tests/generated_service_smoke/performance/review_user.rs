@@ -15,8 +15,8 @@ async fn performance_v2_review_user_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let query_body = serde_json::json!({"semester_id":"semester-1"});
-    let write_body = serde_json::json!({"user_group_id":"group-1","user_ids":["ou-1"]});
+    let query_body = json_value!({"semester_id":"semester-1"});
+    let write_body = json_value!({"user_group_id":"group-1","user_ids":["ou-1"]});
 
     client
         .performance_v2()

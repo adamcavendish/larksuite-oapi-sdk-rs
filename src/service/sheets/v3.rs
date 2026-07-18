@@ -473,9 +473,9 @@ pub struct ConditionalFormat {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rule_type: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub rule: Option<serde_json::Value>,
+    pub rule: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub attrs: Option<Vec<serde_json::Value>>,
+    pub attrs: Option<Vec<crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -515,7 +515,7 @@ pub struct PatchSpreadsheetReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct OperateSheetsReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub requests: Option<Vec<serde_json::Value>>,
+    pub requests: Option<Vec<crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -633,7 +633,7 @@ pub struct SheetListData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct OperateSheetsData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub replies: Option<Vec<serde_json::Value>>,
+    pub replies: Option<Vec<crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

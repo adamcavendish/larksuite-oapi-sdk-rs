@@ -8,7 +8,7 @@ async fn wiki_v1_node_search_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let request_body = serde_json::json!({"query":"roadmap"});
+    let request_body = json_value!({"query":"roadmap"});
     let resp = client
         .wiki_v1()
         .node

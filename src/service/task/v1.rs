@@ -468,12 +468,12 @@ impl<'a> UncompleteTaskQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct BatchDeleteTaskMemberQuery<'a> {
     pub task_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> BatchDeleteTaskMemberQuery<'a> {
-    pub fn new(task_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(task_id: &'a str, body: &'a crate::JsonValue) -> Self {
         Self {
             task_id,
             body,
@@ -1035,7 +1035,7 @@ impl<'a> TaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchDeleteCollaboratorResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = BatchDeleteCollaboratorQuery::new(task_id, &body).user_id_type(user_id_type);
         self.batch_delete_collaborator_by_query(&query, option)
             .await
@@ -1070,7 +1070,7 @@ impl<'a> TaskResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<BatchDeleteFollowerResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = BatchDeleteFollowerQuery::new(task_id, &body).user_id_type(user_id_type);
         self.batch_delete_follower_by_query(&query, option).await
     }

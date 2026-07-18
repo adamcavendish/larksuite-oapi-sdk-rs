@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -16,12 +16,12 @@ use super::{DispatchPipeline, EventReq, EventResp, PipelineResult, SignAlgorithm
 /// [`CustomResp`] with a custom HTTP status code and body.
 #[derive(Debug, Clone)]
 pub enum CardHandlerResult {
-    Json(serde_json::Value),
+    Json(crate::JsonValue),
     Custom(CustomResp),
 }
 
-impl From<serde_json::Value> for CardHandlerResult {
-    fn from(val: serde_json::Value) -> Self {
+impl From<crate::JsonValue> for CardHandlerResult {
+    fn from(val: crate::JsonValue) -> Self {
         Self::Json(val)
     }
 }
@@ -36,7 +36,7 @@ impl From<CustomResp> for CardHandlerResult {
 #[derive(Debug, Clone)]
 pub struct CustomResp {
     pub status_code: u16,
-    pub body: serde_json::Map<String, serde_json::Value>,
+    pub body: BTreeMap<String, crate::JsonValue>,
 }
 
 pub type CardHandlerFn = Arc<
@@ -81,14 +81,15 @@ pub struct CardAction {
 
 impl CardActionHandler {
     /// Create a card action handler that returns a JSON response with HTTP 200.
-    pub fn new<F, Fut>(
+    pub fn new<F, Fut, T>(
         verification_token: impl Into<String>,
         event_encrypt_key: impl Into<String>,
         handler: F,
     ) -> Self
     where
         F: Fn(CardAction) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<serde_json::Value, LarkError>> + Send + 'static,
+        Fut: Future<Output = Result<T, LarkError>> + Send + 'static,
+        T: Into<crate::JsonValue> + Send + 'static,
     {
         Self {
             pipeline: DispatchPipeline::new(
@@ -101,7 +102,9 @@ impl CardActionHandler {
                     Box<dyn Future<Output = Result<CardHandlerResult, LarkError>> + Send>,
                 > {
                     let fut = handler(action);
-                    Box::pin(async move { fut.await.map(CardHandlerResult::Json) })
+                    Box::pin(
+                        async move { fut.await.map(|value| CardHandlerResult::Json(value.into())) },
+                    )
                 },
             ),
         }
@@ -153,10 +156,10 @@ impl CardActionHandler {
             PipelineResult::Event { body_str, req } => (body_str, req),
         };
 
-        let parsed: serde_json::Value = serde_json::from_str(&body_str)
+        let parsed: crate::JsonValue = serde_json::from_str(&body_str)
             .map_err(|e| LarkError::Event(format!("failed to parse card body: {e}")))?;
 
-        let mut action: CardAction = serde_json::from_value(parsed)
+        let mut action: CardAction = serde_json::from_value(parsed.into())
             .map_err(|e| LarkError::Event(format!("failed to parse card action: {e}")))?;
         action.req = Some(req);
 

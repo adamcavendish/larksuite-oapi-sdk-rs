@@ -693,7 +693,7 @@ async fn send_http_response(
                 );
             }
             Some(ReqBody::Json(v)) => {
-                let redacted = redact_json_for_logging(v);
+                let redacted = redact_json_for_logging(v.as_value());
                 tracing::debug!(
                     method = %api_req.http_method,
                     url = %full_url,

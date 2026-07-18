@@ -14,7 +14,7 @@ async fn ext_drive_explorer_create_file_smoke() {
         .drive_explorer
         .create_file(
             "folder-1",
-            serde_json::json!({"title":"Spec","type":"docx"}),
+            json_value!({"title":"Spec","type":"docx"}),
             &RequestOption::default(),
         )
         .await

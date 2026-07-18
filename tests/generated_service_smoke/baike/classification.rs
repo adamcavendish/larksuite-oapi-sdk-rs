@@ -17,9 +17,9 @@ async fn baike_classification_draft_file_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let draft_create_body = serde_json::json!({"entity_id":"entity-1"});
-    let draft_update_body = serde_json::json!({"entity_id":"entity-1","status":"updated"});
-    let file_upload_body = serde_json::json!({"file_name":"term.png","file":"base64-file"});
+    let draft_create_body = json_value!({"entity_id":"entity-1"});
+    let draft_update_body = json_value!({"entity_id":"entity-1","status":"updated"});
+    let file_upload_body = json_value!({"file_name":"term.png","file":"base64-file"});
 
     let classification_resp = client
         .baike()

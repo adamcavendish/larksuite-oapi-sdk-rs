@@ -115,7 +115,7 @@ mod tests {
         let resp = event_handler(State(dispatcher), req).await;
 
         assert_eq!(resp.status(), 200);
-        let body: serde_json::Value = serde_json::from_slice(&response_body(resp).await).unwrap();
+        let body: crate::JsonValue = serde_json::from_slice(&response_body(resp).await).unwrap();
         assert_eq!(body["challenge"], "challenge-1");
     }
 
@@ -167,7 +167,7 @@ mod tests {
         let resp = card_action_handler(State(handler), req).await;
 
         assert_eq!(resp.status(), 200);
-        let body: serde_json::Value = serde_json::from_slice(&response_body(resp).await).unwrap();
+        let body: crate::JsonValue = serde_json::from_slice(&response_body(resp).await).unwrap();
         assert_eq!(body["ok"], true);
     }
 }

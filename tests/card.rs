@@ -34,7 +34,7 @@ fn test_card_markdown_element() {
 fn test_card_action_button() {
     let action = ActionElement::new().action(larksuite_oapi_sdk_rs::card::button(
         "Click me",
-        serde_json::json!({"action": "click"}),
+        serde_json::json!({"action": "click"}).into(),
     ));
 
     let card = Card::new().element(Element::Action(action));
@@ -161,7 +161,7 @@ fn form_element() {
 
 #[test]
 fn chart_md_element() {
-    let chart = ChartMdElement::new(serde_json::json!({"type": "bar"}))
+    let chart = ChartMdElement::new(serde_json::json!({"type": "bar"}).into())
         .color_theme("dark")
         .height("300px");
     let json = serde_json::to_value(Element::ChartMd(chart)).unwrap();
@@ -175,7 +175,7 @@ fn chart_md_element() {
 fn button_component_with_url_and_type() {
     let btn = ButtonComponent::new(TextObject::plain("Open"))
         .button_type("primary")
-        .value(serde_json::json!({"k": "v"}))
+        .value(serde_json::json!({"k": "v"}).into())
         .url("https://example.com");
     let json = serde_json::to_value(ActionComponent::Button(btn)).unwrap();
     assert_eq!(json["text"]["content"], "Open");
@@ -313,7 +313,7 @@ fn test_template_card_in_callback_card() {
     let card = CallbackCard::template(TemplateCard {
         template_id: Some("tpl_abc123".to_string()),
         template_variable: Some(
-            [("name".to_string(), serde_json::json!("Alice"))]
+            [("name".to_string(), serde_json::json!("Alice").into())]
                 .into_iter()
                 .collect(),
         ),
@@ -402,7 +402,7 @@ fn message_card_action_select_menus() {
             .initial_option("a")
             .option(option_a.clone())
             .option(option_b.clone())
-            .value(serde_json::json!({"scope": "single"})),
+            .value(serde_json::json!({"scope": "single"}).into()),
     );
 
     let multi_menu = MessageCardEmbedSelectMenuMulti::new().base(

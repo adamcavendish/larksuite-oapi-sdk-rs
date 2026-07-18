@@ -605,7 +605,7 @@ mod tests {
         let mut decoder = flate2::read::GzDecoder::new(compressed.as_slice());
         let mut decoded = String::new();
         std::io::Read::read_to_string(&mut decoder, &mut decoded).unwrap();
-        let json: serde_json::Value = serde_json::from_str(&decoded).unwrap();
+        let json: crate::JsonValue = serde_json::from_str(&decoded).unwrap();
         assert_eq!(json["scopes"]["tenant"][0], "im:message:send_as_bot");
         assert_eq!(
             json["events"]["items"]["tenant"][0],
@@ -629,8 +629,8 @@ mod tests {
         let mut decoded = String::new();
         std::io::Read::read_to_string(&mut decoder, &mut decoded).unwrap();
 
-        let json: serde_json::Value = serde_json::from_str(&decoded).unwrap();
-        assert_eq!(json, serde_json::json!({ "preset": false }));
+        let json: crate::JsonValue = serde_json::from_str(&decoded).unwrap();
+        assert_eq!(json, serde_json::json!({ "preset": false }).into());
     }
 
     #[test]

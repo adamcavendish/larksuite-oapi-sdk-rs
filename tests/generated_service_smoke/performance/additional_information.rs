@@ -16,9 +16,9 @@ async fn performance_v2_activity_additional_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let query_body = serde_json::json!({"semester_id":"semester-1"});
-    let import_body = serde_json::json!({"records":[{"user_id":"ou-1"}]});
-    let delete_body = serde_json::json!({"additional_information_ids":["info-1"]});
+    let query_body = json_value!({"semester_id":"semester-1"});
+    let import_body = json_value!({"records":[{"user_id":"ou-1"}]});
+    let delete_body = json_value!({"additional_information_ids":["info-1"]});
 
     client
         .performance_v2()

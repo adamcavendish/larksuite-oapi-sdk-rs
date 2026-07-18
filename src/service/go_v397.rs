@@ -1007,7 +1007,7 @@ impl<'a> GoV397<'a> {
         endpoint: GoV397Endpoint,
         path_params: P,
         query_params: Q,
-        body: Option<&serde_json::Value>,
+        body: Option<&crate::JsonValue>,
         option: &RequestOption,
     ) -> Result<JsonResp, LarkError>
     where

@@ -5,6 +5,14 @@ pub(crate) use super::harness::{
 
 pub(crate) use larksuite_oapi_sdk_rs::FormDataBuilder;
 pub(crate) use larksuite_oapi_sdk_rs::req::RequestOption;
+
+macro_rules! json_value {
+    ($($json:tt)+) => {
+        larksuite_oapi_sdk_rs::JsonValue::from(serde_json::json!($($json)+))
+    };
+}
+
+pub(crate) use json_value;
 pub(crate) use larksuite_oapi_sdk_rs::service::{
     acs::v1::{
         CreateRuleExternalQuery as CreateAcsRuleExternalQuery, CreateRuleExternalReqBody,

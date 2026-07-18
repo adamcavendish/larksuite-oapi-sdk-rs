@@ -25,7 +25,7 @@ async fn spark_app_methods_smoke() {
 
     let client = client_for(addr);
     let option = user_option();
-    let app_body = serde_json::json!({"name":"Demo"});
+    let app_body = json_value!({"name":"Demo"});
     client.spark().app.create(&app_body, &option).await.unwrap();
     client
         .spark()
@@ -72,8 +72,8 @@ async fn spark_app_upload_and_command_methods_smoke() {
 
     let client = client_for(addr);
     let option = user_option();
-    let command_body = serde_json::json!({"sql":"select 1"});
-    let scope_body = serde_json::json!({"visibility":"all"});
+    let command_body = json_value!({"sql":"select 1"});
+    let scope_body = json_value!({"visibility":"all"});
     let icon_body = FormDataBuilder::new()
         .file(
             "file",

@@ -18,18 +18,18 @@ async fn recognition_and_speech_by_query_smoke() {
 
     let client = client_for(addr);
     let face_req = FaceRecognizeReqBody {
-        image: Some(serde_json::json!({"content":"face-bytes"})),
+        image: Some(json_value!({"content":"face-bytes"})),
     };
     let ocr_req = RecognizeBasicImageReqBody {
-        image: Some(serde_json::json!({"content":"ocr-bytes"})),
+        image: Some(json_value!({"content":"ocr-bytes"})),
     };
     let speech_req = RecognizeBasicSpeechReqBody {
-        speech: Some(serde_json::json!({"url":"https://example.test/audio.wav"})),
-        config: Some(serde_json::json!({"language":"en_us"})),
+        speech: Some(json_value!({"url":"https://example.test/audio.wav"})),
+        config: Some(json_value!({"language":"en_us"})),
     };
     let stream_req = RecognizeSpeechStreamReqBody {
-        speech: Some(serde_json::json!({"content":"chunk-1"})),
-        config: Some(serde_json::json!({"stream_id":"stream-1"})),
+        speech: Some(json_value!({"content":"chunk-1"})),
+        config: Some(json_value!({"stream_id":"stream-1"})),
     };
 
     client

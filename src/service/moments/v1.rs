@@ -15,7 +15,7 @@ pub struct Post {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content: Option<serde_json::Value>,
+    pub content: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub create_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

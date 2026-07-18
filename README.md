@@ -102,6 +102,20 @@ same transport behavior for its curated newer-Go-SDK endpoint set. See
 [`examples/raw_api.rs`](examples/raw_api.rs) and
 [`examples/go_v397_endpoint.rs`](examples/go_v397_endpoint.rs).
 
+### Dynamic JSON Values
+
+Closed API contracts use dedicated request and response models. Where the
+upstream contract is intentionally open-ended, the SDK exposes `JsonValue`
+instead of `serde_json::Value`. Construct one from any serializable value or
+convert an existing JSON value at an integration boundary:
+
+```rust
+use larksuite_oapi_sdk_rs::JsonValue;
+
+let value = JsonValue::from(serde_json::json!({"custom_field": "value"}));
+assert_eq!(value["custom_field"], "value");
+```
+
 ### Pagination and Transfers
 
 Supported list and search resources expose `*_by_iterator` helpers. Iterators
@@ -183,18 +197,17 @@ the broader API surface.
 
 Generated V2 response wrappers use Go-shaped top-level data structs when the
 reference SDK defines response data, and unit responses where it does not.
-Their nested response objects follow the Go SDK model graph; raw JSON is kept
-only where the upstream shape is intentionally open-ended.
+Their nested response objects follow the Go SDK model graph; intentionally
+open-ended upstream shapes use `JsonValue`.
 
 Legacy response wrappers follow the same rule. Sheets range-value operations
 provide typed plain-text and rich-text cells, range metadata, update metadata,
-and typed find/replace, dimension, filter, and dropdown payloads. Raw JSON is
-retained only for the open-ended batch-operation and conditional-format
-extension fields.
+and typed find/replace, dimension, filter, and dropdown payloads. Open-ended
+batch-operation and conditional-format extension fields use `JsonValue`.
 
 Task v2, Directory v1, Application v6, IM v2, and CardKit v1 mutation
-resources use Go-shaped request models for their closed API contracts. Raw
-values remain only where the contract is dynamic or not modeled upstream:
+resources use Go-shaped request models for their closed API contracts. Dynamic
+or unmodeled upstream contracts use `JsonValue`, including:
 CardKit template variables, Task's file-bearing attachment upload, and the
 legacy Directory user status field.
 

@@ -44,9 +44,9 @@ async fn baike_entity_by_query_smoke() {
         sources: Some(vec![1]),
         ..Default::default()
     };
-    let highlight_body = serde_json::json!({"text":"Term highlight"});
-    let extract_body = serde_json::json!({"text":"Term extract"});
-    let match_body = serde_json::json!({"text":"Term match"});
+    let highlight_body = json_value!({"text":"Term highlight"});
+    let extract_body = json_value!({"text":"Term extract"});
+    let match_body = json_value!({"text":"Term match"});
 
     let create_resp = Box::pin(client.baike().entity.create_by_query(
         &CreateBaikeEntityQuery::new(&create_body).user_id_type("open_id"),

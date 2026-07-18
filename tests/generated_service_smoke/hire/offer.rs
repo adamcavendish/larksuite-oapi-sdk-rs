@@ -88,7 +88,7 @@ async fn hire_offer_intern_status_smoke() {
         .offer
         .intern_offer_status(
             "offer-1",
-            serde_json::json!({"operation": "offboard"}),
+            json_value!({"operation": "offboard"}),
             &RequestOption::default(),
         )
         .await

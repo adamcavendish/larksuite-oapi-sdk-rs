@@ -11,7 +11,7 @@ use crate::service::common::RestRequest;
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct RecognizeBasicImageReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub image: Option<serde_json::Value>,
+    pub image: Option<crate::JsonValue>,
 }
 
 // ── Response wrappers ──

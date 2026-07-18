@@ -9,7 +9,7 @@ use crate::service::common::{PageQuery, RestRequest};
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MetricTagListData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -899,11 +899,11 @@ macro_rules! post_query {
         #[derive(Debug, Clone, Copy)]
         #[non_exhaustive]
         pub struct $query_name<'a> {
-            pub body: &'a serde_json::Value,
+            pub body: &'a crate::JsonValue,
         }
 
         impl<'a> $query_name<'a> {
-            pub fn new(body: &'a serde_json::Value) -> Self {
+            pub fn new(body: &'a crate::JsonValue) -> Self {
                 Self { body }
             }
         }
@@ -918,7 +918,7 @@ macro_rules! post_query {
                 body: impl Serialize,
                 option: &RequestOption,
             ) -> Result<$resp, LarkError> {
-                let body = serde_json::to_value(body)?;
+                let body = crate::JsonValue::from_serializable(body)?;
                 let query = $query_name::new(&body);
                 self.$by_query_method(&query, option).await
             }
@@ -956,11 +956,11 @@ post_query!(
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct ImportAdditionalInformationV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> ImportAdditionalInformationV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -968,11 +968,11 @@ impl<'a> ImportAdditionalInformationV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct QueryAdditionalInformationV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> QueryAdditionalInformationV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -987,7 +987,7 @@ impl AdditionalInformationV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ImportAdditionalInformationV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = ImportAdditionalInformationV2Query::new(&body);
         self.import_by_query(&query, option).await
     }
@@ -1014,7 +1014,7 @@ impl AdditionalInformationV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryAdditionalInformationV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = QueryAdditionalInformationV2Query::new(&body);
         self.query_by_query(&query, option).await
     }
@@ -1041,11 +1041,11 @@ impl AdditionalInformationV2Resource<'_> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct DeleteAdditionalInformationsBatchV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> DeleteAdditionalInformationsBatchV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -1060,7 +1060,7 @@ impl AdditionalInformationsBatchV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<DeleteAdditionalInformationsBatchV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = DeleteAdditionalInformationsBatchV2Query::new(&body);
         self.delete_by_query(&query, option).await
     }
@@ -1096,11 +1096,11 @@ post_query!(
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct ImportMetricDetailV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> ImportMetricDetailV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -1108,11 +1108,11 @@ impl<'a> ImportMetricDetailV2Query<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct QueryMetricDetailV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> QueryMetricDetailV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -1127,7 +1127,7 @@ impl MetricDetailV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<ImportMetricDetailV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = ImportMetricDetailV2Query::new(&body);
         self.import_by_query(&query, option).await
     }
@@ -1154,7 +1154,7 @@ impl MetricDetailV2Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryMetricDetailV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = QueryMetricDetailV2Query::new(&body);
         self.query_by_query(&query, option).await
     }

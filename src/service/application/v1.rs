@@ -29,19 +29,19 @@ pub struct Application {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub avatar_info: Option<serde_json::Value>,
+    pub avatar_info: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_scene_type: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_desc: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18n: Option<Vec<serde_json::Value>>,
+    pub i18n: Option<Vec<crate::JsonValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub primary_language: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub common_categories: Option<Vec<String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub owner: Option<serde_json::Value>,
+    pub owner: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -55,11 +55,11 @@ pub struct AppVersion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub avatar_info: Option<serde_json::Value>,
+    pub avatar_info: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_desc: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18n: Option<Vec<serde_json::Value>>,
+    pub i18n: Option<Vec<crate::JsonValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub common_categories: Option<Vec<String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -67,7 +67,7 @@ pub struct AppVersion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub scopes: Option<Vec<serde_json::Value>>,
+    pub scopes: Option<Vec<crate::JsonValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub back_home_url: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -75,7 +75,7 @@ pub struct AppVersion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub publish_time: Option<i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub abilities: Option<serde_json::Value>,
+    pub abilities: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

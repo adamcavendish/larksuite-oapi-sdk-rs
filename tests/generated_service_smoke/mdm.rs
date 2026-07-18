@@ -16,8 +16,8 @@ async fn mdm_v1_user_device_and_auth_relation_by_query_smoke() {
 
     let client = client_for(addr);
     let update_body = UpdateDeviceReqBody { status: Some(2) };
-    let bind_body = serde_json::json!({"user_id":"ou-1","device_id":"device-1"});
-    let unbind_body = serde_json::json!({"user_id":"ou-1","device_id":"device-1"});
+    let bind_body = json_value!({"user_id":"ou-1","device_id":"device-1"});
+    let unbind_body = json_value!({"user_id":"ou-1","device_id":"device-1"});
 
     let resp = client
         .mdm()

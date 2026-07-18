@@ -141,7 +141,7 @@ pub struct Participant {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub network: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub quality_avg: Option<serde_json::Value>,
+    pub quality_avg: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub join_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -159,7 +159,7 @@ pub struct MeetingReport {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub total_participant_count: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub active_meeting_per_day: Option<Vec<serde_json::Value>>,
+    pub active_meeting_per_day: Option<Vec<crate::JsonValue>>,
 }
 
 // ── Request body types ──

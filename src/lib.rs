@@ -31,6 +31,7 @@ pub mod error;
 pub mod event;
 pub mod events;
 pub mod http_handler;
+pub mod json;
 pub mod registration;
 pub mod req;
 pub mod resp;
@@ -62,6 +63,7 @@ pub use event::{
     URLPreviewGetResponse,
 };
 pub use http::Method as HttpMethod;
+pub use json::JsonValue;
 pub use req::{
     ApiReq, FormDataBuilder, FormDataField, FormDataValue, PathParams, QueryParams, ReqBody,
     RequestOption,

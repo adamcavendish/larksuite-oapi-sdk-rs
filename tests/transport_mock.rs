@@ -430,7 +430,7 @@ async fn transport_post_json_body() {
     let option = RequestOption::default();
     let mut api_req = ApiReq::new(http::Method::POST, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-    api_req.body = Some(ReqBody::Json(serde_json::json!({"key": "value"})));
+    api_req.body = Some(ReqBody::Json(serde_json::json!({"key": "value"}).into()));
 
     let resp = client.raw_request(&api_req, &option).await.unwrap();
     assert_eq!(resp.status_code, 200);
@@ -446,7 +446,7 @@ async fn transport_put_json_body() {
     let client = client_for(addr);
     let mut api_req = ApiReq::new(http::Method::PUT, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-    api_req.body = Some(ReqBody::Json(serde_json::json!({"updated": true})));
+    api_req.body = Some(ReqBody::Json(serde_json::json!({"updated": true}).into()));
     let resp = client
         .raw_request(&api_req, &RequestOption::default())
         .await
@@ -464,7 +464,7 @@ async fn transport_patch_json_body() {
     let client = client_for(addr);
     let mut api_req = ApiReq::new(http::Method::PATCH, "/open-apis/test");
     api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
-    api_req.body = Some(ReqBody::Json(serde_json::json!({"patched": true})));
+    api_req.body = Some(ReqBody::Json(serde_json::json!({"patched": true}).into()));
     let resp = client
         .raw_request(&api_req, &RequestOption::default())
         .await

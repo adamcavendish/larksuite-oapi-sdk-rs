@@ -23,7 +23,7 @@ pub struct PerWorkplaceAccess {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub workplace_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub workplace_name: Option<Vec<serde_json::Value>>,
+    pub workplace_name: Option<Vec<crate::JsonValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_count: Option<i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

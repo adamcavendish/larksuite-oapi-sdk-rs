@@ -134,9 +134,9 @@ async fn security_device_records_write_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let create_body = serde_json::json!({"device_id":"device-1","status":"active"});
-    let update_body = serde_json::json!({"device_id":"device-1","status":"disabled"});
-    let apply_update_body = serde_json::json!({"status":"approved"});
+    let create_body = json_value!({"device_id":"device-1","status":"active"});
+    let update_body = json_value!({"device_id":"device-1","status":"disabled"});
+    let apply_update_body = json_value!({"status":"approved"});
 
     let create_resp = client
         .security_and_compliance_v2()

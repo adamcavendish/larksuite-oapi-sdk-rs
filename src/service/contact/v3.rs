@@ -927,7 +927,7 @@ impl_resp!(ListWorkCityResp, ListWorkCityRespData);
 
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct CustomAttrListData {
-    pub items: Option<Vec<serde_json::Value>>,
+    pub items: Option<Vec<crate::JsonValue>>,
     pub page_token: Option<String>,
     pub has_more: Option<bool>,
 }

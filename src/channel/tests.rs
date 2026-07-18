@@ -1,7 +1,6 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-use std::{io, thread};
 
 use crate::event::{CardActionTriggerResponse, EventDispatcher, EventReq};
 use crate::events::common::UserId;
@@ -22,48 +21,40 @@ fn client_for(addr: std::net::SocketAddr) -> LarkClient {
         .unwrap()
 }
 
-fn counting_json_server(
+async fn counting_json_server(
     body: &'static str,
 ) -> (
     std::net::SocketAddr,
     Arc<AtomicUsize>,
-    thread::JoinHandle<()>,
+    tokio::task::JoinHandle<()>,
 ) {
-    use std::io::{Read, Write};
-
-    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
-    listener.set_nonblocking(true).unwrap();
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
     let calls = Arc::new(AtomicUsize::new(0));
-    let server_calls = calls.clone();
+    let handle = tokio::spawn({
+        let calls = Arc::clone(&calls);
+        async move {
+            loop {
+                let Ok((mut stream, _)) = listener.accept().await else {
+                    break;
+                };
+                let calls = Arc::clone(&calls);
+                tokio::spawn(async move {
+                    use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-    let handle = thread::spawn(move || {
-        let started_at = Instant::now();
-        let mut last_accept = None;
-        loop {
-            match listener.accept() {
-                Ok((mut stream, _)) => {
-                    server_calls.fetch_add(1, Ordering::SeqCst);
-                    last_accept = Some(Instant::now());
-                    let _ = stream.set_read_timeout(Some(Duration::from_millis(50)));
                     let mut buf = [0; 1024];
-                    let _ = stream.read(&mut buf);
+                    if stream.read(&mut buf).await.is_err() {
+                        return;
+                    }
+                    calls.fetch_add(1, Ordering::SeqCst);
                     let response = format!(
                         "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
                         body.len(),
                         body
                     );
-                    let _ = stream.write_all(response.as_bytes());
-                }
-                Err(err) if err.kind() == io::ErrorKind::WouldBlock => {
-                    if last_accept.is_some_and(|last| last.elapsed() > Duration::from_millis(200))
-                        || started_at.elapsed() > Duration::from_secs(2)
-                    {
-                        break;
-                    }
-                    thread::sleep(Duration::from_millis(10));
-                }
-                Err(_) => break,
+                    let _ = stream.write_all(response.as_bytes()).await;
+                    let _ = stream.shutdown().await;
+                });
             }
         }
     });
@@ -929,7 +920,8 @@ async fn channel_send_retries_format_error_as_text() {
 async fn typed_handlers_and_observer_receive_events() {
     let (addr, _calls, handle) = counting_json_server(
         r#"{"code":0,"msg":"success","bot":{"open_id":"ou_other","app_name":"Bot"}}"#,
-    );
+    )
+    .await;
     let client = client_for(addr);
     let message_called = Arc::new(Mutex::new(false));
     let observed_called = Arc::new(Mutex::new(false));
@@ -965,7 +957,7 @@ async fn typed_handlers_and_observer_receive_events() {
     )
     .await
     .unwrap();
-    handle.join().unwrap();
+    handle.abort();
     assert!(*message_called.lock().unwrap());
     assert!(*observed_called.lock().unwrap());
 }
@@ -974,7 +966,8 @@ async fn typed_handlers_and_observer_receive_events() {
 async fn message_dispatch_fetches_bot_identity_before_policy() {
     let (addr, calls, handle) = counting_json_server(
         r#"{"code":0,"msg":"success","bot":{"open_id":"ou_bot","app_name":"Bot"}}"#,
-    );
+    )
+    .await;
     let client = client_for(addr);
     let message_called = Arc::new(Mutex::new(false));
     let message_flag = message_called.clone();
@@ -1002,7 +995,7 @@ async fn message_dispatch_fetches_bot_identity_before_policy() {
     )
     .await
     .unwrap();
-    handle.join().unwrap();
+    handle.abort();
 
     assert_eq!(calls.load(Ordering::SeqCst), 1);
     assert!(*message_called.lock().unwrap());
@@ -1012,7 +1005,8 @@ async fn message_dispatch_fetches_bot_identity_before_policy() {
 async fn bot_identity_refresh_is_single_flight() {
     let (addr, calls, handle) = counting_json_server(
         r#"{"code":0,"msg":"success","bot":{"open_id":"ou_bot","app_name":"Bot"}}"#,
-    );
+    )
+    .await;
     let client = client_for(addr);
     let state = Arc::new(ChannelState::new(
         ChannelPolicy::default(),
@@ -1035,7 +1029,7 @@ async fn bot_identity_refresh_is_single_flight() {
         let identity = handle.await.unwrap();
         assert_eq!(identity.open_id.as_deref(), Some("ou_bot"));
     }
-    handle.join().unwrap();
+    handle.abort();
 
     assert_eq!(calls.load(Ordering::SeqCst), 1);
 }

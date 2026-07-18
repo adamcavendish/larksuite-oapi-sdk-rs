@@ -104,7 +104,7 @@ struct AckResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     headers: Option<HashMap<String, String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<serde_json::Value>,
+    data: Option<crate::JsonValue>,
 }
 
 // ── Fragment reassembly buffer ──

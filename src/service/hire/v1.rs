@@ -4976,16 +4976,16 @@ hire_catalog_iterator!(
 );
 
 #[derive(Debug, Clone)]
-pub struct ReplayableRequestBody(serde_json::Value);
+pub struct ReplayableRequestBody(crate::JsonValue);
 
 impl ReplayableRequestBody {
     pub fn from_serializable(body: impl Serialize) -> Result<Self, serde_json::Error> {
-        serde_json::to_value(body).map(Self)
+        crate::JsonValue::from_serializable(body).map(Self)
     }
 }
 
-impl From<serde_json::Value> for ReplayableRequestBody {
-    fn from(value: serde_json::Value) -> Self {
+impl From<crate::JsonValue> for ReplayableRequestBody {
+    fn from(value: crate::JsonValue) -> Self {
         Self(value)
     }
 }
@@ -6273,7 +6273,7 @@ pub struct Application {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_website: Option<IdNameObject>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub referral_record: Option<serde_json::Value>,
+    pub referral_record: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub create_time: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -6415,7 +6415,7 @@ pub struct InterviewRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub image_list: Option<Vec<AttachmentV2>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub talent_quality_list: Option<Vec<serde_json::Value>>,
+    pub talent_quality_list: Option<Vec<crate::JsonValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dimension_assessment_list: Option<Vec<InterviewDimensionAssessment>>,
 }
@@ -7205,7 +7205,7 @@ pub struct CreateApplicationReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resume_source_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub referral_record: Option<serde_json::Value>,
+    pub referral_record: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]

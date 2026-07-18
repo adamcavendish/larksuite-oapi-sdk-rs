@@ -36,7 +36,7 @@ async fn personal_settings_system_status_by_query_smoke() {
         }),
     };
     let user_body = BatchOpenSystemStatusReqBody {
-        user_list: Some(vec![serde_json::json!({"user_id":"ou-1"})]),
+        user_list: Some(vec![json_value!({"user_id":"ou-1"})]),
     };
 
     let create = client

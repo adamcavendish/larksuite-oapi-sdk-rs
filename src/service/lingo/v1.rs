@@ -335,11 +335,11 @@ impl<'a> ListClassificationQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct HighlightEntityQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> HighlightEntityQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -347,11 +347,11 @@ impl<'a> HighlightEntityQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct MatchEntityQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> MatchEntityQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -802,7 +802,7 @@ impl<'a> EntityResource<'a> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<HighlightEntityResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = HighlightEntityQuery::new(&body);
         self.highlight_by_query(&query, option).await
     }
@@ -829,7 +829,7 @@ impl<'a> EntityResource<'a> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<MatchEntityResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = MatchEntityQuery::new(&body);
         self.match_by_query(&query, option).await
     }
@@ -893,12 +893,12 @@ pub struct DraftResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateDraftQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> CreateDraftQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self {
             body,
             user_id_type: None,
@@ -915,12 +915,12 @@ impl<'a> CreateDraftQuery<'a> {
 #[non_exhaustive]
 pub struct UpdateDraftQuery<'a> {
     pub draft_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> UpdateDraftQuery<'a> {
-    pub fn new(draft_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(draft_id: &'a str, body: &'a crate::JsonValue) -> Self {
         Self {
             draft_id,
             body,
@@ -941,7 +941,7 @@ impl<'a> DraftResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<CreateDraftResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = CreateDraftQuery::new(&body).user_id_type(user_id_type);
         self.create_by_query(&query, option).await
     }
@@ -971,7 +971,7 @@ impl<'a> DraftResource<'a> {
         user_id_type: Option<&str>,
         option: &RequestOption,
     ) -> Result<UpdateDraftResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = UpdateDraftQuery::new(draft_id, &body).user_id_type(user_id_type);
         self.update_by_query(&query, option).await
     }
@@ -1003,11 +1003,11 @@ pub struct FileResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct UploadFileQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> UploadFileQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -1035,7 +1035,7 @@ impl<'a> FileResource<'a> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadFileResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = UploadFileQuery::new(&body);
         self.upload_by_query(&query, option).await
     }
