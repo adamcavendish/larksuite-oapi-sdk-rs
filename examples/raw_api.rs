@@ -44,11 +44,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let mut req = ApiReq::new(HttpMethod::POST, "/open-apis/im/v1/messages");
         req.query_params.set("receive_id_type", "chat_id");
-        req.body = Some(ReqBody::Json(serde_json::json!({
-            "receive_id": chat_id,
-            "msg_type": "text",
-            "content": "{\"text\":\"Hello from raw API\"}"
-        })));
+        req.body = Some(ReqBody::Json(
+            serde_json::json!({
+                "receive_id": chat_id,
+                "msg_type": "text",
+                "content": "{\"text\":\"Hello from raw API\"}"
+            })
+            .into(),
+        ));
 
         let api_resp = client
             .raw_request_with_token(req, AccessTokenType::Tenant, &option)

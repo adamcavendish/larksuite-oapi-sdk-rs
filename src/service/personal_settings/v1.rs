@@ -15,7 +15,7 @@ pub struct SystemStatus {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub i18n_title: Option<serde_json::Value>,
+    pub i18n_title: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub icon_key: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -23,7 +23,7 @@ pub struct SystemStatus {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub priority: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub sync_setting: Option<serde_json::Value>,
+    pub sync_setting: Option<crate::JsonValue>,
 }
 
 // ── Request body types ──
@@ -37,7 +37,7 @@ pub struct CreateSystemStatusReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct BatchOpenSystemStatusReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_list: Option<Vec<serde_json::Value>>,
+    pub user_list: Option<Vec<crate::JsonValue>>,
 }
 
 // ── Response wrappers ──
@@ -61,7 +61,7 @@ pub struct SystemStatusListData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchOpenData {
     #[serde(default)]
-    pub result_list: Vec<serde_json::Value>,
+    pub result_list: Vec<crate::JsonValue>,
 }
 
 impl_resp!(CreateSystemStatusResp, SystemStatusData);

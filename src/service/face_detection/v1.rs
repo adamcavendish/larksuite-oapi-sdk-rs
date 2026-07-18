@@ -11,7 +11,7 @@ use crate::service::common::RestRequest;
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct RecognizeReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub image: Option<serde_json::Value>,
+    pub image: Option<crate::JsonValue>,
 }
 
 // ── Response wrappers ──
@@ -19,7 +19,7 @@ pub struct RecognizeReqBody {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FaceDetectData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub face_list: Option<Vec<serde_json::Value>>,
+    pub face_list: Option<Vec<crate::JsonValue>>,
 }
 
 impl_resp!(DetectFaceResp, FaceDetectData);

@@ -213,7 +213,7 @@ pub struct Notification {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_list: Option<Vec<NotificationChat>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub msg_i18n_contents: Option<Vec<serde_json::Value>>,
+    pub msg_i18n_contents: Option<Vec<crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -691,7 +691,7 @@ pub struct GetNotificationData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notification: Option<Notification>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub approval_settings: Option<serde_json::Value>,
+    pub approval_settings: Option<crate::JsonValue>,
 }
 
 // ── Additional response data types ──

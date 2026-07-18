@@ -11,7 +11,7 @@ use crate::service::common::RestRequest;
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct RecognizeFileReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub file: Option<serde_json::Value>,
+    pub file: Option<crate::JsonValue>,
 }
 
 // ── Recognition models ──
@@ -595,13 +595,13 @@ pub struct DrivingLicenseData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct NurseQualificationCertificateData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub nurse_qualification_certificate: Option<serde_json::Value>,
+    pub nurse_qualification_certificate: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ContractData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contracts: Option<Vec<serde_json::Value>>,
+    pub contracts: Option<Vec<crate::JsonValue>>,
 }
 
 impl_resp!(RecognizeVatInvoiceResp, VatInvoiceData);

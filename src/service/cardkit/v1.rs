@@ -13,7 +13,7 @@ pub struct CardTemplate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub template_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub template_variable: Option<serde_json::Value>,
+    pub template_variable: Option<crate::JsonValue>,
 }
 
 // ── Request body types ──
@@ -23,13 +23,13 @@ pub struct CreateCardInstanceReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub template_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub template_variable: Option<serde_json::Value>,
+    pub template_variable: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct UpdateCardInstanceReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub template_variable: Option<serde_json::Value>,
+    pub template_variable: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

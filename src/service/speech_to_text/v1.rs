@@ -11,17 +11,17 @@ use crate::service::common::RestRequest;
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct RecognizeBasicSpeechReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub speech: Option<serde_json::Value>,
+    pub speech: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub config: Option<serde_json::Value>,
+    pub config: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct RecognizeSpeechStreamReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub speech: Option<serde_json::Value>,
+    pub speech: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub config: Option<serde_json::Value>,
+    pub config: Option<crate::JsonValue>,
 }
 
 // ── Response wrappers ──

@@ -11,13 +11,13 @@ use crate::service::common::{PageQuery, RestRequest};
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ItemData {
     #[serde(flatten)]
-    pub data: serde_json::Value,
+    pub data: crate::JsonValue,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -4219,7 +4219,7 @@ impl CompanyV2Resource<'_> {
     post_method!(
         active,
         ActiveCompanyV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/companies/active"
     );
@@ -4274,14 +4274,14 @@ impl CostAllocationV2Resource<'_> {
     post_method!(
         remove_version,
         RemoveVersionCostAllocationV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/cost_allocations/remove_version"
     );
     post_method!(
         update_version,
         UpdateVersionCostAllocationV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/cost_allocations/update_version"
     );
@@ -4428,7 +4428,7 @@ impl CustomOrgV2Resource<'_> {
     post_method!(
         active,
         ActiveCustomOrgV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/custom_orgs/active"
     );
@@ -4441,7 +4441,7 @@ impl CustomOrgV2Resource<'_> {
     post_method!(
         delete_org,
         DeleteOrgCustomOrgV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/custom_orgs/delete_org"
     );
@@ -4480,7 +4480,7 @@ impl CustomOrgV2Resource<'_> {
     post_method!(
         update_rule,
         UpdateRuleCustomOrgV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/custom_orgs/update_rule"
     );
@@ -4508,14 +4508,14 @@ impl DefaultCostCenterV2Resource<'_> {
     post_method!(
         remove_version,
         RemoveVersionDefaultCostCenterV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/default_cost_centers/remove_version"
     );
     post_method!(
         update_version,
         UpdateVersionDefaultCostCenterV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/default_cost_centers/update_version"
     );
@@ -5120,7 +5120,7 @@ impl LocationV2Resource<'_> {
     post_method!(
         active,
         ActiveLocationV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/locations/active"
     );
@@ -5239,7 +5239,7 @@ impl OffboardingV2Resource<'_> {
     post_method!(
         revoke,
         RevokeOffboardingV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/offboardings/revoke"
     );
@@ -5261,7 +5261,7 @@ impl PathwayV2Resource<'_> {
     post_method!(
         active,
         ActivePathwayV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/pathways/active"
     );
@@ -5359,7 +5359,7 @@ impl PositionV2Resource<'_> {
     post_method!(
         active,
         ActivePositionV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/positions/active"
     );
@@ -5540,7 +5540,7 @@ impl ProbationV2Resource<'_> {
     post_method!(
         enable_disable_assessment,
         EnableDisableAssessmentProbationV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/probation/enable_disable_assessment"
     );
@@ -5559,7 +5559,7 @@ impl ProbationV2Resource<'_> {
     post_method!(
         withdraw,
         WithdrawProbationV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/probation/withdraw"
     );
@@ -5928,14 +5928,14 @@ impl ReportDetailRowV2Resource<'_> {
     post_method!(
         batch_delete,
         BatchDeleteReportDetailRowV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/report_detail_row/batchDelete"
     );
     post_method!(
         batch_save,
         BatchSaveReportDetailRowV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/report_detail_row/batchSave"
     );
@@ -6605,14 +6605,14 @@ impl WorkforcePlanDetailRowV2Resource<'_> {
     post_method!(
         batch_delete,
         BatchDeleteWorkforcePlanDetailRowV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/workforce_plan_detail_row/batchDelete"
     );
     post_method!(
         batch_save,
         BatchSaveWorkforcePlanDetailRowV2Resp,
-        serde_json::Value,
+        crate::JsonValue,
         (),
         "/open-apis/corehr/v2/workforce_plan_detail_row/batchSave"
     );

@@ -70,11 +70,11 @@ impl_resp!(CreateMessageResp, MessageData);
 
 #[derive(Debug, Clone, Copy)]
 pub struct CreateEntityQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> CreateEntityQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -82,22 +82,22 @@ impl<'a> CreateEntityQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct UpdateEntityQuery<'a> {
     pub block_id: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> UpdateEntityQuery<'a> {
-    pub fn new(block_id: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(block_id: &'a str, body: &'a crate::JsonValue) -> Self {
         Self { block_id, body }
     }
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct CreateMessageQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> CreateMessageQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -114,7 +114,7 @@ impl<'a> EntityResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateEntityResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         self.create_by_query(&CreateEntityQuery::new(&body), option)
             .await
     }
@@ -142,7 +142,7 @@ impl<'a> EntityResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateEntityResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         self.update_by_query(&UpdateEntityQuery::new(block_id, &body), option)
             .await
     }
@@ -176,7 +176,7 @@ impl<'a> MessageResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateMessageResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         self.create_by_query(&CreateMessageQuery::new(&body), option)
             .await
     }

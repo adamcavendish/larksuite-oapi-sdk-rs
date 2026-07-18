@@ -21,7 +21,7 @@ pub struct PayrollRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub currency: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub items: Option<Vec<serde_json::Value>>,
+    pub items: Option<Vec<crate::JsonValue>>,
 }
 
 // ── Response wrappers ──
@@ -279,12 +279,12 @@ impl<'a> ListDatasourceQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct QueryDatasourceRecordQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
     pub page: PageQuery<'a>,
 }
 
 impl<'a> QueryDatasourceRecordQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self {
             body,
             page: PageQuery::new(),
@@ -310,11 +310,11 @@ impl<'a> QueryDatasourceRecordQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct SaveDatasourceRecordQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> SaveDatasourceRecordQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -394,11 +394,11 @@ impl<'a> ListPaymentActivityQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct ArchivePaymentActivityQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> ArchivePaymentActivityQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -448,11 +448,11 @@ impl<'a> ListPaymentActivityDetailQuery<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct QueryPaymentDetailQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> QueryPaymentDetailQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -1108,7 +1108,7 @@ impl DatasourceRecordResource<'_> {
         page_token: Option<&str>,
         option: &RequestOption,
     ) -> Result<QueryDatasourceRecordResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = QueryDatasourceRecordQuery::new(&body)
             .page(PageQuery::from_parts(page_size, page_token));
         self.query_by_query(&query, option).await
@@ -1137,7 +1137,7 @@ impl DatasourceRecordResource<'_> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<SaveDatasourceRecordResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = SaveDatasourceRecordQuery::new(&body);
         self.save_by_query(&query, option).await
     }
@@ -1207,7 +1207,7 @@ impl PaymentActivityResource<'_> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<ArchivePaymentActivityResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = ArchivePaymentActivityQuery::new(&body);
         self.archive_by_query(&query, option).await
     }
@@ -1327,7 +1327,7 @@ impl PaymentDetailResource<'_> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<QueryPaymentDetailResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = QueryPaymentDetailQuery::new(&body);
         self.query_by_query(&query, option).await
     }

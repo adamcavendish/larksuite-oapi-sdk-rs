@@ -74,7 +74,7 @@ async fn payroll_datasource_record_query_by_query_smoke() {
         mock_server_with_requests(vec![http_response(200, body), http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"datasource_id":"ds-1"});
+    let body = json_value!({"datasource_id":"ds-1"});
     let resp = client
         .payroll()
         .datasource_record
@@ -85,7 +85,7 @@ async fn payroll_datasource_record_query_by_query_smoke() {
         )
         .await
         .unwrap();
-    let save_body = serde_json::json!({"datasource_id":"ds-1","record_id":"record-2"});
+    let save_body = json_value!({"datasource_id":"ds-1","record_id":"record-2"});
     client
         .payroll()
         .datasource_record
@@ -131,7 +131,7 @@ async fn payroll_payment_activity_list_by_query_smoke() {
         )
         .await
         .unwrap();
-    let archive_body = serde_json::json!({"payment_activity_id":"activity-1"});
+    let archive_body = json_value!({"payment_activity_id":"activity-1"});
     client
         .payroll()
         .payment_activity
@@ -193,7 +193,7 @@ async fn payroll_payment_detail_query_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let body = serde_json::json!({"payment_activity_id":"act-1"});
+    let body = json_value!({"payment_activity_id":"act-1"});
     let resp = client
         .payroll()
         .payment_detail

@@ -72,9 +72,9 @@ pub struct P1AppOpenV6 {
     #[serde(default)]
     pub tenant_key: String,
     #[serde(default)]
-    pub applicants: Vec<serde_json::Value>,
+    pub applicants: Vec<crate::JsonValue>,
     #[serde(default)]
-    pub installer: serde_json::Value,
+    pub installer: crate::JsonValue,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -174,9 +174,9 @@ pub struct P1P2PChatCreatedV1 {
     #[serde(default)]
     pub chat_id: String,
     #[serde(default)]
-    pub operator: serde_json::Value,
+    pub operator: crate::JsonValue,
     #[serde(default)]
-    pub user: serde_json::Value,
+    pub user: crate::JsonValue,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -206,9 +206,9 @@ pub struct P1GroupSettingUpdatedV1 {
     #[serde(default)]
     pub operator_id: String,
     #[serde(default)]
-    pub after_change: serde_json::Value,
+    pub after_change: crate::JsonValue,
     #[serde(default)]
-    pub before_change: serde_json::Value,
+    pub before_change: crate::JsonValue,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -224,7 +224,7 @@ pub struct P1UserInOutChatV1 {
     #[serde(default)]
     pub operator_id: String,
     #[serde(default)]
-    pub users: Vec<serde_json::Value>,
+    pub users: Vec<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -242,9 +242,9 @@ pub struct P1UserStatusChangedV3 {
     #[serde(default)]
     pub union_id: String,
     #[serde(default)]
-    pub before_status: serde_json::Value,
+    pub before_status: crate::JsonValue,
     #[serde(default)]
-    pub current_status: serde_json::Value,
+    pub current_status: crate::JsonValue,
     #[serde(default)]
     pub change_time: String,
 }
@@ -394,7 +394,7 @@ pub struct P1TripApprovalV4 {
     #[serde(default)]
     pub instance_code: String,
     #[serde(default)]
-    pub trips: Vec<serde_json::Value>,
+    pub trips: Vec<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

@@ -212,11 +212,11 @@ impl<'a> RestRequest<'a> {
     }
 
     pub(crate) async fn send_empty(self) -> Result<EmptyResp, LarkError> {
-        self.send_response::<serde_json::Value, EmptyResp>().await
+        self.send_response::<crate::JsonValue, EmptyResp>().await
     }
 
     pub(crate) async fn send_json(self) -> Result<JsonResp, LarkError> {
-        self.send_v2_response::<serde_json::Value, JsonResp>().await
+        self.send_v2_response::<crate::JsonValue, JsonResp>().await
     }
 
     pub(crate) async fn download(self) -> Result<DownloadResp, LarkError> {
@@ -455,7 +455,7 @@ impl<T> FromV2Response<T> for EmptyRespV2 {
 pub struct JsonResp {
     pub api_resp: ApiResp,
     pub code_error: Option<CodeError>,
-    pub data: Option<serde_json::Value>,
+    pub data: Option<crate::JsonValue>,
 }
 
 impl JsonResp {
@@ -464,11 +464,11 @@ impl JsonResp {
     }
 }
 
-impl FromV2Response<serde_json::Value> for JsonResp {
+impl FromV2Response<crate::JsonValue> for JsonResp {
     fn from_v2_response(
         api_resp: ApiResp,
         code_error: Option<CodeError>,
-        data: Option<serde_json::Value>,
+        data: Option<crate::JsonValue>,
     ) -> Self {
         Self {
             api_resp,
@@ -483,7 +483,7 @@ pub async fn request_json(
     method: http::Method,
     path: impl Into<String>,
     supported_access_token_types: Vec<AccessTokenType>,
-    body: Option<&serde_json::Value>,
+    body: Option<&crate::JsonValue>,
     option: &RequestOption,
 ) -> Result<JsonResp, LarkError> {
     let request = RestRequest::new(config, method, path, supported_access_token_types, option);

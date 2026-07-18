@@ -55,7 +55,7 @@ pub struct AppTableField {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub property: Option<serde_json::Value>,
+    pub property: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<AppTableFieldDescription>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -77,13 +77,13 @@ pub struct AppTableRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub record_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub fields: Option<std::collections::HashMap<String, serde_json::Value>>,
+    pub fields: Option<std::collections::HashMap<String, crate::JsonValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub created_by: Option<serde_json::Value>,
+    pub created_by: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub created_time: Option<i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub last_modified_by: Option<serde_json::Value>,
+    pub last_modified_by: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_modified_time: Option<i64>,
 }
@@ -147,7 +147,7 @@ pub struct CreateFieldReqBody {
     #[serde(skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub property: Option<serde_json::Value>,
+    pub property: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<AppTableFieldDescription>,
 }
@@ -159,7 +159,7 @@ pub struct UpdateFieldReqBody {
     #[serde(skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub property: Option<serde_json::Value>,
+    pub property: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<AppTableFieldDescription>,
 }
@@ -167,13 +167,13 @@ pub struct UpdateFieldReqBody {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct CreateRecordReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub fields: Option<std::collections::HashMap<String, serde_json::Value>>,
+    pub fields: Option<std::collections::HashMap<String, crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct UpdateRecordReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub fields: Option<std::collections::HashMap<String, serde_json::Value>>,
+    pub fields: Option<std::collections::HashMap<String, crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -624,7 +624,7 @@ pub struct BatchUpdateRecordData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BatchDeleteRecordData {
     #[serde(default)]
-    pub records: Vec<serde_json::Value>,
+    pub records: Vec<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

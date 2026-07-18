@@ -232,7 +232,9 @@ async fn hire_external_read_iterators_page_and_preserve_filters() {
         .external_offer
         .batch_query_iterator_by_query(
             &offer_query,
-            json!({"external_offer_id_list":["offer-1","offer-2"]}),
+            larksuite_oapi_sdk_rs::JsonValue::from(json!({
+                "external_offer_id_list":["offer-1","offer-2"]
+            })),
         )
         .limit(2);
 

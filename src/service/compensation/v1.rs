@@ -653,7 +653,7 @@ pub struct SocialPlanScope {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_all: Option<bool>,
     #[serde(default)]
-    pub rules: Vec<serde_json::Value>,
+    pub rules: Vec<crate::JsonValue>,
 }
 // ── Resources ──
 

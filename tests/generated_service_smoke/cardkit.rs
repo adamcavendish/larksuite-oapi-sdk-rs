@@ -15,10 +15,10 @@ async fn cardkit_card_instance_by_query_smoke() {
     let client = client_for(addr);
     let create_request = CreateCardInstanceReqBody {
         template_id: Some("template-1".into()),
-        template_variable: Some(serde_json::json!({"title":"Card"})),
+        template_variable: Some(json_value!({"title":"Card"})),
     };
     let update_request = UpdateCardInstanceReqBody {
-        template_variable: Some(serde_json::json!({"title":"Updated"})),
+        template_variable: Some(json_value!({"title":"Updated"})),
     };
 
     let create_resp = client

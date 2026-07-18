@@ -1076,11 +1076,11 @@ impl<'a> ListTaskSubtaskV2Query<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct UploadAttachmentV2Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> UploadAttachmentV2Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -2457,7 +2457,7 @@ impl<'a> AttachmentV2Resource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadAttachmentV2Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = UploadAttachmentV2Query::new(&body);
         self.upload_by_query(&query, option).await
     }

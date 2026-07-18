@@ -49,7 +49,7 @@ pub struct TranscriptPhrase {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub speaker: Option<MinutesParticipant>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub words: Option<Vec<serde_json::Value>>,
+    pub words: Option<Vec<crate::JsonValue>>,
 }
 
 // ── Response wrappers ──
@@ -83,13 +83,13 @@ impl_resp!(GetTranscriptResp, TranscriptData);
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MinuteMediaData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub media: Option<serde_json::Value>,
+    pub media: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MinuteStatisticsData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub statistics: Option<serde_json::Value>,
+    pub statistics: Option<crate::JsonValue>,
 }
 
 impl_resp!(GetMinuteMediaResp, MinuteMediaData);

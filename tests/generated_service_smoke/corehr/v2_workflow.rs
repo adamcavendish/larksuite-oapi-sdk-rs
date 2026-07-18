@@ -12,7 +12,7 @@ async fn corehr_v2_company_active_uses_code_only_response() {
         .corehr_v2()
         .company
         .active(
-            serde_json::json!({"company_id": "company-1"}),
+            json_value!({"company_id": "company-1"}),
             &RequestOption::default(),
         )
         .await

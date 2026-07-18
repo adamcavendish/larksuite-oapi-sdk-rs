@@ -17,9 +17,7 @@ async fn translation_text_by_query_smoke() {
         source_language: Some("en".into()),
         target_language: Some("zh".into()),
         text: Some("hello".into()),
-        glossary: Some(vec![
-            serde_json::json!({"source":"hello","target":"ni hao"}),
-        ]),
+        glossary: Some(vec![json_value!({"source":"hello","target":"ni hao"})]),
     };
     let detect_body = DetectLanguageReqBody {
         text: Some("bonjour".into()),

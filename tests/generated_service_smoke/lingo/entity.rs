@@ -143,8 +143,8 @@ async fn lingo_entity_write_by_query_smoke() {
         }]),
         ..Default::default()
     };
-    let highlight_body = serde_json::json!({"text":"Term highlight"});
-    let match_body = serde_json::json!({"text":"Term match"});
+    let highlight_body = json_value!({"text":"Term highlight"});
+    let match_body = json_value!({"text":"Term match"});
 
     let create_resp = client
         .lingo()

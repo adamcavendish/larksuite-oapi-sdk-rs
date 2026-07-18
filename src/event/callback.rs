@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use serde::{Deserialize, Serialize};
 
@@ -32,7 +32,7 @@ pub struct CallbackContext {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CallbackAction {
     #[serde(default)]
-    pub value: serde_json::Map<String, serde_json::Value>,
+    pub value: BTreeMap<String, crate::JsonValue>,
     #[serde(default)]
     pub tag: String,
     #[serde(default)]
@@ -42,7 +42,7 @@ pub struct CallbackAction {
     #[serde(default)]
     pub name: String,
     #[serde(default)]
-    pub form_value: serde_json::Map<String, serde_json::Value>,
+    pub form_value: BTreeMap<String, crate::JsonValue>,
     #[serde(default)]
     pub input_value: String,
     #[serde(default)]
@@ -136,7 +136,7 @@ pub struct CallbackCard {
     #[serde(skip_serializing_if = "Option::is_none", rename = "type")]
     pub card_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub data: Option<serde_json::Value>,
+    pub data: Option<crate::JsonValue>,
 }
 
 impl CallbackCard {
@@ -144,7 +144,7 @@ impl CallbackCard {
     pub fn template(card: TemplateCard) -> Self {
         Self {
             card_type: Some("template".to_string()),
-            data: serde_json::to_value(card).ok(),
+            data: crate::JsonValue::from_serializable(card).ok(),
         }
     }
 }
@@ -155,7 +155,7 @@ pub struct TemplateCard {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub template_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub template_variable: Option<HashMap<String, serde_json::Value>>,
+    pub template_variable: Option<HashMap<String, crate::JsonValue>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub template_version_name: Option<String>,
 }

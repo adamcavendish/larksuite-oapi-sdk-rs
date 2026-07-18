@@ -16,8 +16,8 @@
 //! let json = card.to_json();
 //! ```
 
+use crate::JsonValue as Value;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 // ── Template color constants (matching Go SDK) ──
 
@@ -81,7 +81,7 @@ impl Card {
     }
 
     pub fn to_json(&self) -> Value {
-        serde_json::to_value(self).unwrap_or_default()
+        Value::from_serializable(self).unwrap_or_default()
     }
 }
 
@@ -759,7 +759,7 @@ impl MessageCard {
 
     pub fn element(mut self, element: impl Serialize) -> Self {
         self.elements
-            .push(serde_json::to_value(element).unwrap_or_default());
+            .push(Value::from_serializable(element).unwrap_or_default());
         self
     }
 
@@ -774,7 +774,7 @@ impl MessageCard {
     }
 
     pub fn to_json(&self) -> Value {
-        serde_json::to_value(self).unwrap_or_default()
+        Value::from_serializable(self).unwrap_or_default()
     }
 }
 
@@ -1195,7 +1195,7 @@ impl MessageCardAction {
 
     pub fn action(mut self, action: impl Serialize) -> Self {
         self.actions
-            .push(serde_json::to_value(action).unwrap_or_default());
+            .push(Value::from_serializable(action).unwrap_or_default());
         self
     }
 

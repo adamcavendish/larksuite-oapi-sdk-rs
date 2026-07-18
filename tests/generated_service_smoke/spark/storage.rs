@@ -63,7 +63,7 @@ async fn spark_storage_methods_smoke() {
         .app_storage
         .upload_initialize(
             "app-1",
-            &serde_json::json!({"file_name":"spark.txt","file_size":10}),
+            &json_value!({"file_name":"spark.txt","file_size":10}),
             &option,
         )
         .await
@@ -77,11 +77,7 @@ async fn spark_storage_methods_smoke() {
     client
         .spark()
         .app_storage
-        .upload_complete(
-            "app-1",
-            &serde_json::json!({"upload_id":"upload-1"}),
-            &option,
-        )
+        .upload_complete("app-1", &json_value!({"upload_id":"upload-1"}), &option)
         .await
         .unwrap();
 

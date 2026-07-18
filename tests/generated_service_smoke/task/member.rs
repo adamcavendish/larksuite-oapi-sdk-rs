@@ -97,7 +97,7 @@ async fn task_member_by_query_smoke() {
         .task()
         .task
         .batch_delete_collaborator_by_query(
-            &BatchDeleteCollaboratorQuery::new("task-1", &serde_json::json!({"ids":["u-1"]}))
+            &BatchDeleteCollaboratorQuery::new("task-1", &json_value!({"ids":["u-1"]}))
                 .user_id_type("open_id"),
             &RequestOption::default(),
         )
@@ -107,7 +107,7 @@ async fn task_member_by_query_smoke() {
         .task()
         .task
         .batch_delete_follower_by_query(
-            &BatchDeleteFollowerQuery::new("task-1", &serde_json::json!({"ids":["u-2"]}))
+            &BatchDeleteFollowerQuery::new("task-1", &json_value!({"ids":["u-2"]}))
                 .user_id_type("open_id"),
             &RequestOption::default(),
         )

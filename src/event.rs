@@ -155,7 +155,7 @@ pub struct EventV2Body {
     pub req_type: Option<String>,
     pub token: Option<String>,
     #[serde(default)]
-    pub event: serde_json::Value,
+    pub event: crate::JsonValue,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -164,7 +164,7 @@ struct EncryptedBody {
 }
 
 pub type EventHandlerFn = Arc<
-    dyn Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
+    dyn Fn(crate::JsonValue) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
         + Send
         + Sync,
 >;
@@ -177,8 +177,8 @@ pub type CustomizedEventHandlerFn = Arc<
 
 pub type CallbackHandlerFn = Arc<
     dyn Fn(
-            serde_json::Value,
-        ) -> Pin<Box<dyn Future<Output = Result<serde_json::Value, LarkError>> + Send>>
+            crate::JsonValue,
+        ) -> Pin<Box<dyn Future<Output = Result<crate::JsonValue, LarkError>> + Send>>
         + Send
         + Sync,
 >;
@@ -230,7 +230,7 @@ impl DispatchPipeline {
 
         let body_str = decrypt_if_needed(&self.event_encrypt_key, body_str)?;
 
-        let parsed: serde_json::Value = serde_json::from_str(&body_str)
+        let parsed: crate::JsonValue = serde_json::from_str(&body_str)
             .map_err(|e| LarkError::Event(format!("failed to parse body: {e}")))?;
 
         // Check for URL verification in both V2 ("req_type") and card ("type") shapes.
@@ -346,7 +346,7 @@ impl EventDispatcher {
             .clone()
             .unwrap_or_else(|| Arc::new(crate::cache::LocalCache::new()));
 
-        self.on_event("app_ticket", move |val: serde_json::Value| {
+        self.on_event("app_ticket", move |val: crate::JsonValue| {
             let cache = cache.clone();
             async move {
                 let app_id = val
@@ -371,12 +371,12 @@ impl EventDispatcher {
 
     pub fn on_event<F, Fut>(mut self, event_type: impl Into<String>, handler: F) -> Self
     where
-        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
+        F: Fn(crate::JsonValue) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
     {
         let event_type = event_type.into();
         let handler = Arc::new(
-            move |val: serde_json::Value| -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>> {
+            move |val: crate::JsonValue| -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>> {
                 Box::pin(handler(val))
             },
         );
@@ -384,17 +384,21 @@ impl EventDispatcher {
         self
     }
 
-    pub fn on_callback<F, Fut>(mut self, callback_type: impl Into<String>, handler: F) -> Self
+    pub fn on_callback<F, Fut, T>(mut self, callback_type: impl Into<String>, handler: F) -> Self
     where
-        F: Fn(serde_json::Value) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Result<serde_json::Value, LarkError>> + Send + 'static,
+        F: Fn(crate::JsonValue) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<T, LarkError>> + Send + 'static,
+        T: Into<crate::JsonValue> + Send + 'static,
     {
         let callback_type = callback_type.into();
         let handler =
             Arc::new(
-                move |val: serde_json::Value| -> Pin<
-                    Box<dyn Future<Output = Result<serde_json::Value, LarkError>> + Send>,
-                > { Box::pin(handler(val)) },
+                move |val: crate::JsonValue| -> Pin<
+                    Box<dyn Future<Output = Result<crate::JsonValue, LarkError>> + Send>,
+                > {
+                    let fut = handler(val);
+                    Box::pin(async move { fut.await.map(Into::into) })
+                },
             );
         self.callback_handlers.insert(callback_type, handler);
         self
@@ -415,10 +419,10 @@ impl EventDispatcher {
         let callback_type = callback_type.into();
         let handler =
             Arc::new(
-                move |val: serde_json::Value| -> Pin<
-                    Box<dyn Future<Output = Result<serde_json::Value, LarkError>> + Send>,
+                move |val: crate::JsonValue| -> Pin<
+                    Box<dyn Future<Output = Result<crate::JsonValue, LarkError>> + Send>,
                 > {
-                    let req = match serde_json::from_value::<Req>(val) {
+                    let req = match serde_json::from_value::<Req>(val.into()) {
                         Ok(req) => req,
                         Err(e) => {
                             return Box::pin(async move {
@@ -431,7 +435,7 @@ impl EventDispatcher {
                     let fut = handler(req);
                     Box::pin(async move {
                         let resp = fut.await?;
-                        serde_json::to_value(resp).map_err(|e| {
+                        crate::JsonValue::from_serializable(resp).map_err(|e| {
                             LarkError::Event(format!("serialize {response_name} response: {e}"))
                         })
                     })
@@ -538,7 +542,7 @@ impl EventDispatcher {
             .map(|h| h.event_type.as_str())
             .unwrap_or_else(|| {
                 // P1 protocol: event type is in event.type
-                parsed.event["type"].as_str().unwrap_or_default()
+                parsed.event.as_value()["type"].as_str().unwrap_or_default()
             });
 
         if let Some(handler) = self.callback_handlers.get(event_type) {

@@ -27,7 +27,7 @@ pub struct InvokeOpenApiReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub path: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub body: Option<serde_json::Value>,
+    pub body: Option<crate::JsonValue>,
 }
 
 // ── Response wrappers ──
@@ -35,7 +35,7 @@ pub struct InvokeOpenApiReqBody {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct InvokeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub response_body: Option<serde_json::Value>,
+    pub response_body: Option<crate::JsonValue>,
 }
 
 impl_resp!(InvokeOpenApiResp, InvokeData);
@@ -94,7 +94,7 @@ impl_resp_v2!(ListAppResp, ApaasAppListData);
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListSeatActivityData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -104,7 +104,7 @@ pub struct ListSeatActivityData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListSeatAssignmentData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -122,13 +122,13 @@ pub struct QueryUserTaskData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<String>,
     #[serde(default)]
-    pub tasks: Vec<serde_json::Value>,
+    pub tasks: Vec<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RollbackPointsUserTaskData {
     #[serde(default)]
-    pub tasks: Vec<serde_json::Value>,
+    pub tasks: Vec<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -148,13 +148,13 @@ pub struct EnumGetWorkspaceEnumData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub created_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub created_by: Option<serde_json::Value>,
+    pub created_by: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListWorkspaceEnumData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -164,7 +164,7 @@ pub struct ListWorkspaceEnumData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListWorkspaceTableData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -196,7 +196,7 @@ pub struct WorkspaceTableData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(default)]
-    pub columns: Vec<serde_json::Value>,
+    pub columns: Vec<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -270,7 +270,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
     pub async fn audit_log_list(
         &self,
         namespace: &str,
-        body: Option<&serde_json::Value>,
+        body: Option<&crate::JsonValue>,
         option: &RequestOption,
     ) -> Result<AuditLogListResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/audit_log/audit_log_list");
@@ -292,7 +292,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
     pub async fn data_change_log_detail(
         &self,
         namespace: &str,
-        body: Option<&serde_json::Value>,
+        body: Option<&crate::JsonValue>,
         option: &RequestOption,
     ) -> Result<DataChangeLogDetailResp, LarkError> {
         let path = format!(
@@ -318,7 +318,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
     pub async fn data_change_logs_list(
         &self,
         namespace: &str,
-        body: Option<&serde_json::Value>,
+        body: Option<&crate::JsonValue>,
         option: &RequestOption,
     ) -> Result<DataChangeLogsListResp, LarkError> {
         let path =
@@ -343,7 +343,7 @@ impl<'a> ApplicationAuditLogResource<'a> {
     pub async fn get(
         &self,
         namespace: &str,
-        body: Option<&serde_json::Value>,
+        body: Option<&crate::JsonValue>,
         option: &RequestOption,
     ) -> Result<GetAuditLogResp, LarkError> {
         let path = format!("/open-apis/apaas/v1/applications/{namespace}/audit_log");

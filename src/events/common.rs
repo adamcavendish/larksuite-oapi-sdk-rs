@@ -1,7 +1,7 @@
 //! Shared building blocks for typed event payloads.
 //!
 //! Most event modules need the same user-identity struct and the same handler
-//! adapter that turns a typed handler into the raw `serde_json::Value` callback
+//! adapter that turns a typed handler into the raw `crate::JsonValue` callback
 //! the dispatcher stores. They live here so each module re-exports or references
 //! them instead of redefining them.
 
@@ -44,19 +44,19 @@ pub struct UserIdList {
     pub user_id_list: Vec<UserId>,
 }
 
-pub(crate) fn decode_payload<T>(val: serde_json::Value) -> Result<T, LarkError>
+pub(crate) fn decode_payload<T>(val: crate::JsonValue) -> Result<T, LarkError>
 where
     T: for<'de> serde::Deserialize<'de>,
 {
-    serde_json::from_value(val)
+    serde_json::from_value(val.into())
         .map_err(|e| LarkError::Event(format!("failed to deserialize event payload: {e}")))
 }
 
-/// Adapt a typed event handler into the raw `serde_json::Value` callback the
+/// Adapt a typed event handler into the raw `crate::JsonValue` callback the
 /// dispatcher stores. Deserialization failures surface as [`LarkError::Event`].
 pub(crate) fn wrap_handler<T, F, Fut>(
     handler: F,
-) -> impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
+) -> impl Fn(crate::JsonValue) -> Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
 + Send
 + Sync
 + 'static
@@ -65,7 +65,7 @@ where
     F: Fn(T) -> Fut + Send + Sync + 'static,
     Fut: Future<Output = Result<(), LarkError>> + Send + 'static,
 {
-    move |val: serde_json::Value| match decode_payload(val) {
+    move |val: crate::JsonValue| match decode_payload(val) {
         Ok(typed) => {
             Box::pin(handler(typed)) as Pin<Box<dyn Future<Output = Result<(), LarkError>> + Send>>
         }

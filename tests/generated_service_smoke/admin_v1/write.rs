@@ -21,7 +21,7 @@ async fn admin_v1_write_by_query_smoke() {
 
     let client = client_for(addr);
     let reset_body = ResetPasswordReqBody {
-        password: Some(serde_json::json!({"value": "secret-1"})),
+        password: Some(json_value!({"value": "secret-1"})),
         user_id: Some("ou-1".to_string()),
         user_id_type: Some("open_id".to_string()),
     };
@@ -46,7 +46,7 @@ async fn admin_v1_write_by_query_smoke() {
         department_ids: Some(vec!["od-1".to_string()]),
         ..Default::default()
     };
-    let image_create_body = serde_json::json!({"image": "base64-image"});
+    let image_create_body = json_value!({"image": "base64-image"});
 
     let reset_resp = client
         .admin()

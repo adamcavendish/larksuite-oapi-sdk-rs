@@ -31,14 +31,13 @@ impl ApiReq {
 
 #[derive(Debug, Clone)]
 pub enum ReqBody {
-    Json(serde_json::Value),
+    Json(crate::JsonValue),
     FormData(Vec<FormDataField>),
 }
 
 impl ReqBody {
     pub fn json<T: Serialize>(value: &T) -> Result<Self, serde_json::Error> {
-        let v = serde_json::to_value(value)?;
-        Ok(Self::Json(v))
+        Ok(Self::Json(crate::JsonValue::from_serializable(value)?))
     }
 }
 

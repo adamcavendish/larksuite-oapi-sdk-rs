@@ -191,7 +191,7 @@ impl<'a> SparkRecordQuery<'a> {
 pub struct SparkTableMutationQuery<'a> {
     pub app_id: &'a str,
     pub table_name: &'a str,
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
     pub filter: Option<&'a str>,
     pub env: Option<&'a str>,
     pub columns: Option<&'a str>,
@@ -200,7 +200,7 @@ pub struct SparkTableMutationQuery<'a> {
 }
 
 impl<'a> SparkTableMutationQuery<'a> {
-    pub fn new(app_id: &'a str, table_name: &'a str, body: &'a serde_json::Value) -> Self {
+    pub fn new(app_id: &'a str, table_name: &'a str, body: &'a crate::JsonValue) -> Self {
         Self {
             app_id,
             table_name,
@@ -366,7 +366,7 @@ impl<'a> AppResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<CreateAppResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1Apps,
@@ -432,7 +432,7 @@ impl<'a> AppResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<PatchAppResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PatchSparkV1AppsByAppId,
@@ -450,7 +450,7 @@ impl<'a> AppResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<SqlCommandsAppResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1AppsByAppIdSqlCommands,
@@ -468,7 +468,7 @@ impl<'a> AppResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UpdateAppVisibilityAppResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PutSparkV1AppsByAppIdAccessScope,
@@ -584,7 +584,7 @@ impl<'a> AppStorageResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadCompleteAppStorageResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1AppsByAppIdStorageUploadComplete,
@@ -602,7 +602,7 @@ impl<'a> AppStorageResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadInitializeAppStorageResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1AppsByAppIdStorageUploadInitialize,
@@ -797,7 +797,7 @@ impl<'a> DirectoryUserResource<'a> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<IdConvertDirectoryUserResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         GoV397::new(self.config)
             .request_json(
                 GoV397Endpoint::PostSparkV1DirectoryUserIdConvert,

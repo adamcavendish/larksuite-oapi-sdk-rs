@@ -117,7 +117,7 @@ pub struct AcsUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub card_list: Option<Vec<serde_json::Value>>,
+    pub card_list: Option<Vec<crate::JsonValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub feature: Option<Feature>,
 }
@@ -163,7 +163,7 @@ pub struct AcsDevice {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct UpdateUserFaceReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub files: Option<serde_json::Value>,
+    pub files: Option<crate::JsonValue>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -349,7 +349,7 @@ pub struct VisitorData {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct VisitorListData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

@@ -10,7 +10,7 @@ use crate::service::common::{FromV2Response, RestRequest};
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct NodeV1ListData {
     #[serde(default)]
-    pub items: Vec<serde_json::Value>,
+    pub items: Vec<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -44,11 +44,11 @@ impl FromV2Response<NodeV1ListData> for SearchNodeV1Resp {
 }
 
 pub struct SearchNodeV1Query<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> SearchNodeV1Query<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -75,7 +75,7 @@ impl NodeV1Resource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchNodeV1Resp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         self.search_by_query(&SearchNodeV1Query::new(&body), option)
             .await
     }

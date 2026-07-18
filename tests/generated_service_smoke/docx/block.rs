@@ -34,7 +34,7 @@ async fn docx_document_block_by_query_smoke() {
         ..Default::default()
     };
     let batch_body = BatchUpdateBlockReqBody {
-        requests: Some(vec![serde_json::json!({"request_id":"r-1"})]),
+        requests: Some(vec![json_value!({"request_id":"r-1"})]),
     };
     let delete_body = DeleteBlocksReqBody {
         start_index: Some(0),

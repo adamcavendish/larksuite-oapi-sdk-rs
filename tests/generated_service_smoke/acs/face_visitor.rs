@@ -20,7 +20,7 @@ async fn acs_face_visitor_by_query_smoke() {
 
     let client = client_for(addr);
     let face_update_body = UpdateUserFaceReqBody {
-        files: Some(serde_json::json!(["face-bytes"])),
+        files: Some(json_value!(["face-bytes"])),
         file_type: Some("jpg".to_string()),
         file_name: Some("face.jpg".to_string()),
     };

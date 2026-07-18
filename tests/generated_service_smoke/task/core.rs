@@ -31,7 +31,7 @@ async fn task_core_by_query_smoke() {
         }),
         update_fields: Some(vec!["summary".to_string()]),
     };
-    let batch_delete_body = serde_json::json!({"ids":["u-1"]});
+    let batch_delete_body = json_value!({"ids":["u-1"]});
 
     Box::pin(client.task().task.create_by_query(
         &CreateTaskV1Query::new(&create_body).user_id_type("open_id"),

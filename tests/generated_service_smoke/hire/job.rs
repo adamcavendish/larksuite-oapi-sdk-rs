@@ -136,7 +136,7 @@ async fn hire_job_lifecycle_smoke() {
         .job
         .close(
             "job-1",
-            serde_json::json!({"termination_type": 1}),
+            json_value!({"termination_type": 1}),
             &RequestOption::default(),
         )
         .await

@@ -139,7 +139,7 @@ pub struct AttendanceGroup {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remedy_period_custom_date: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub punch_type_config: Option<serde_json::Value>,
+    pub punch_type_config: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub show_cumulative_time: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

@@ -23,7 +23,7 @@ async fn spark_table_record_methods_smoke() {
 
     let client = client_for(addr);
     let option = user_option();
-    let mutation_body = serde_json::json!({"records":"[{\"name\":\"Alice\"}]"});
+    let mutation_body = json_value!({"records":"[{\"name\":\"Alice\"}]"});
     let mutation = SparkTableMutationQuery::new("app-1", "table-1", &mutation_body)
         .columns("name")
         .on_conflict("name")

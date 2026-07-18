@@ -35,10 +35,7 @@ async fn spark_view_and_directory_methods_smoke() {
     client
         .spark()
         .directory_user
-        .id_convert(
-            &serde_json::json!({"id_convert_type":1,"ids":["ou_1"]}),
-            &option,
-        )
+        .id_convert(&json_value!({"id_convert_type":1,"ids":["ou_1"]}), &option)
         .await
         .unwrap();
 

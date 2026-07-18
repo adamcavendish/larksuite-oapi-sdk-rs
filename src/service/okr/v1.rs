@@ -51,7 +51,7 @@ pub struct OkrObjective {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub progress_rate: Option<serde_json::Value>,
+    pub progress_rate: Option<crate::JsonValue>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub score: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -59,9 +59,9 @@ pub struct OkrObjective {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kr_list: Option<Vec<OkrKeyResult>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub aligned_objective_list: Option<Vec<serde_json::Value>>,
+    pub aligned_objective_list: Option<Vec<crate::JsonValue>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub aligning_objective_list: Option<Vec<serde_json::Value>>,
+    pub aligning_objective_list: Option<Vec<crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -77,7 +77,7 @@ pub struct OkrKeyResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kr_weight: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub progress_rate: Option<serde_json::Value>,
+    pub progress_rate: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -218,11 +218,11 @@ impl ListPeriodRuleQuery {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct UploadImageQuery<'a> {
-    pub body: &'a serde_json::Value,
+    pub body: &'a crate::JsonValue,
 }
 
 impl<'a> UploadImageQuery<'a> {
-    pub fn new(body: &'a serde_json::Value) -> Self {
+    pub fn new(body: &'a crate::JsonValue) -> Self {
         Self { body }
     }
 }
@@ -919,7 +919,7 @@ impl ImageResource<'_> {
         body: &impl Serialize,
         option: &RequestOption,
     ) -> Result<UploadImageResp, LarkError> {
-        let body = serde_json::to_value(body)?;
+        let body = crate::JsonValue::from_serializable(body)?;
         let query = UploadImageQuery::new(&body);
         self.upload_by_query(&query, option).await
     }

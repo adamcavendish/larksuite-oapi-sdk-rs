@@ -4,6 +4,10 @@
 
 ### REST service coverage
 
+- Replaced public `serde_json::Value` fields, query bodies, request helpers,
+  event and card payloads with the SDK-owned `JsonValue` wrapper. Closed API
+  contracts remain Go-shaped models; intentionally dynamic JSON now has a
+  stable SDK type.
 - Replaced every remaining direct raw JSON REST request-body parameter with a
   serializable input across the service clients. Explicit query and iterator
   transport state continues to retain JSON values where requests must be

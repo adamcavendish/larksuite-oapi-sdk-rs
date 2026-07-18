@@ -208,7 +208,7 @@ pub struct NormalizedCardAction {
     pub open_chat_id: Option<String>,
     pub action_tag: Option<String>,
     pub action_name: Option<String>,
-    pub action_value: serde_json::Map<String, serde_json::Value>,
+    pub action_value: std::collections::BTreeMap<String, crate::JsonValue>,
 }
 
 impl NormalizedCardAction {
@@ -216,7 +216,7 @@ impl NormalizedCardAction {
         let (action_tag, action_name, action_value) = req
             .action
             .map(|action| (Some(action.tag), Some(action.name), action.value))
-            .unwrap_or_else(|| (None, None, serde_json::Map::new()));
+            .unwrap_or_else(|| (None, None, std::collections::BTreeMap::new()));
         let (open_message_id, open_chat_id) = req
             .context
             .map(|context| (Some(context.open_message_id), Some(context.open_chat_id)))
