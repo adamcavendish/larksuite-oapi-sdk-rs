@@ -951,31 +951,24 @@ impl_page_iterator_controls!(ListDepartmentIterator);
 
 impl ListDepartmentIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Department>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = DepartmentResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                self.user_id_type.as_deref(),
-                self.department_id_type.as_deref(),
-                self.parent_department_id.as_deref(),
-                self.fetch_child,
-                self.page_size,
-                self.state.page_token_for_request(),
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = DepartmentResource {
+                config: self.config,
+            };
+            let resp = resource
+                .list(
+                    self.user_id_type.as_deref(),
+                    self.department_id_type.as_deref(),
+                    self.parent_department_id.as_deref(),
+                    self.fetch_child,
+                    self.page_size,
+                    page_token,
+                    option,
+                )
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
@@ -994,31 +987,24 @@ impl_page_iterator_controls!(ChildrenDepartmentIterator);
 
 impl ChildrenDepartmentIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Department>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = DepartmentResource {
-            config: self.config,
-        };
-        let resp = resource
-            .children(
-                &self.department_id,
-                self.user_id_type.as_deref(),
-                self.department_id_type.as_deref(),
-                self.fetch_child,
-                self.page_size,
-                self.state.page_token_for_request(),
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = DepartmentResource {
+                config: self.config,
+            };
+            let resp = resource
+                .children(
+                    &self.department_id,
+                    self.user_id_type.as_deref(),
+                    self.department_id_type.as_deref(),
+                    self.fetch_child,
+                    self.page_size,
+                    page_token,
+                    option,
+                )
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
@@ -1036,30 +1022,23 @@ impl_page_iterator_controls!(ParentDepartmentIterator);
 
 impl ParentDepartmentIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Department>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = DepartmentResource {
-            config: self.config,
-        };
-        let resp = resource
-            .parent(
-                &self.department_id,
-                self.user_id_type.as_deref(),
-                self.department_id_type.as_deref(),
-                self.state.page_token_for_request(),
-                self.page_size,
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = DepartmentResource {
+                config: self.config,
+            };
+            let resp = resource
+                .parent(
+                    &self.department_id,
+                    self.user_id_type.as_deref(),
+                    self.department_id_type.as_deref(),
+                    page_token,
+                    self.page_size,
+                    option,
+                )
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
@@ -1077,30 +1056,23 @@ impl_page_iterator_controls!(ListUserIterator);
 
 impl ListUserIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<User>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = UserResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                self.user_id_type.as_deref(),
-                self.department_id_type.as_deref(),
-                self.department_id.as_deref(),
-                self.state.page_token_for_request(),
-                self.page_size,
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = UserResource {
+                config: self.config,
+            };
+            let resp = resource
+                .list(
+                    self.user_id_type.as_deref(),
+                    self.department_id_type.as_deref(),
+                    self.department_id.as_deref(),
+                    page_token,
+                    self.page_size,
+                    option,
+                )
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
@@ -1118,30 +1090,23 @@ impl_page_iterator_controls!(FindUserByDepartmentIterator);
 
 impl FindUserByDepartmentIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<User>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = UserResource {
-            config: self.config,
-        };
-        let resp = resource
-            .find_by_department(
-                &self.department_id,
-                self.user_id_type.as_deref(),
-                self.department_id_type.as_deref(),
-                self.page_size,
-                self.state.page_token_for_request(),
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = UserResource {
+                config: self.config,
+            };
+            let resp = resource
+                .find_by_department(
+                    &self.department_id,
+                    self.user_id_type.as_deref(),
+                    self.department_id_type.as_deref(),
+                    self.page_size,
+                    page_token,
+                    option,
+                )
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
@@ -1159,23 +1124,14 @@ impl ListEmployeeTypeEnumIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<EmployeeTypeEnum>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = EmployeeTypeEnumResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(self.state.page_token_for_request(), self.page_size, option)
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = EmployeeTypeEnumResource {
+                config: self.config,
+            };
+            let resp = resource.list(page_token, self.page_size, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
@@ -1190,23 +1146,14 @@ impl_page_iterator_controls!(ListUnitIterator);
 
 impl ListUnitIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Unit>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = UnitResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(self.page_size, self.state.page_token_for_request(), option)
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.unitlist, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = UnitResource {
+                config: self.config,
+            };
+            let resp = resource.list(self.page_size, page_token, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.unitlist, data.page_token, data.has_more))
+        })
     }
 }
 

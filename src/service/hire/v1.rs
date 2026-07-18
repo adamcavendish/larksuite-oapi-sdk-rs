@@ -4902,24 +4902,17 @@ macro_rules! hire_catalog_iterator {
                 &mut self,
                 option: &RequestOption,
             ) -> Result<Option<$item>, LarkError> {
-                if let Some(item) = self.state.pop() {
-                    return Ok(Some(item));
-                }
-                if !self.state.should_fetch() {
-                    return Ok(None);
-                }
-
-                let query = $query::new()
-                    .page_size(self.page_size)
-                    .page_token(self.state.page_token_for_request());
-                let resource = $resource {
-                    config: self.config,
-                };
-                let resp = resource.list_by_query(&query, option).await?;
-                let data = resp.data.unwrap_or_default();
-                self.state
-                    .accept_page(Some(data.items), data.page_token, data.has_more);
-                Ok(self.state.pop())
+                crate::service::common::page_iterator_next!(self.state, page_token, {
+                    let query = $query::new()
+                        .page_size(self.page_size)
+                        .page_token(page_token);
+                    let resource = $resource {
+                        config: self.config,
+                    };
+                    let resp = resource.list_by_query(&query, option).await?;
+                    let data = resp.data.unwrap_or_default();
+                    Ok((Some(data.items), data.page_token, data.has_more))
+                })
             }
         }
     };
@@ -5005,25 +4998,18 @@ impl ListExternalApplicationIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<ExternalApplication>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListExternalApplicationQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .talent_id(self.talent_id.as_deref());
-        let resource = ExternalApplicationResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListExternalApplicationQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .talent_id(self.talent_id.as_deref());
+            let resource = ExternalApplicationResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5043,27 +5029,20 @@ impl BatchQueryExternalBackgroundCheckIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<ExternalBackgroundCheck>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = BatchQueryExternalBackgroundCheckQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .external_application_id(self.external_application_id.as_deref());
-        let resource = ExternalBackgroundCheckResource {
-            config: self.config,
-        };
-        let resp = resource
-            .batch_query_by_query(&query, &self.body.0, option)
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = BatchQueryExternalBackgroundCheckQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .external_application_id(self.external_application_id.as_deref());
+            let resource = ExternalBackgroundCheckResource {
+                config: self.config,
+            };
+            let resp = resource
+                .batch_query_by_query(&query, &self.body.0, option)
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5083,27 +5062,20 @@ impl BatchQueryExternalInterviewIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<ExternalInterview>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = BatchQueryExternalInterviewQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .external_application_id(self.external_application_id.as_deref());
-        let resource = ExternalInterviewResource {
-            config: self.config,
-        };
-        let resp = resource
-            .batch_query_by_query(&query, &self.body.0, option)
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = BatchQueryExternalInterviewQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .external_application_id(self.external_application_id.as_deref());
+            let resource = ExternalInterviewResource {
+                config: self.config,
+            };
+            let resp = resource
+                .batch_query_by_query(&query, &self.body.0, option)
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5123,27 +5095,20 @@ impl BatchQueryExternalOfferIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<ExternalOffer>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = BatchQueryExternalOfferQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .external_application_id(self.external_application_id.as_deref());
-        let resource = ExternalOfferResource {
-            config: self.config,
-        };
-        let resp = resource
-            .batch_query_by_query(&query, &self.body.0, option)
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = BatchQueryExternalOfferQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .external_application_id(self.external_application_id.as_deref());
+            let resource = ExternalOfferResource {
+                config: self.config,
+            };
+            let resp = resource
+                .batch_query_by_query(&query, &self.body.0, option)
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5162,28 +5127,21 @@ impl_page_iterator_controls!(ListEvaluationIterator);
 
 impl ListEvaluationIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Evaluation>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListEvaluationQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .application_id(self.application_id.as_deref())
-            .update_start_time(self.update_start_time.as_deref())
-            .update_end_time(self.update_end_time.as_deref())
-            .user_id_type(self.user_id_type.as_deref());
-        let resource = EvaluationResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListEvaluationQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .application_id(self.application_id.as_deref())
+                .update_start_time(self.update_start_time.as_deref())
+                .update_end_time(self.update_end_time.as_deref())
+                .user_id_type(self.user_id_type.as_deref());
+            let resource = EvaluationResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5203,30 +5161,23 @@ impl ListInterviewRecordIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<InterviewRecord>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let ids = self
-            .ids
-            .as_ref()
-            .map(|values| values.iter().map(String::as_str).collect::<Vec<_>>());
-        let query = ListInterviewRecordQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .ids(ids.as_deref())
-            .user_id_type(self.user_id_type.as_deref());
-        let resource = InterviewRecordResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let ids = self
+                .ids
+                .as_ref()
+                .map(|values| values.iter().map(String::as_str).collect::<Vec<_>>());
+            let query = ListInterviewRecordQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .ids(ids.as_deref())
+                .user_id_type(self.user_id_type.as_deref());
+            let resource = InterviewRecordResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5246,26 +5197,19 @@ impl ListTripartiteAgreementIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<TripartiteAgreementInfo>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListTripartiteAgreementQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .application_id(self.application_id.as_deref())
-            .tripartite_agreement_id(self.tripartite_agreement_id.as_deref());
-        let resource = TripartiteAgreementResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListTripartiteAgreementQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .application_id(self.application_id.as_deref())
+                .tripartite_agreement_id(self.tripartite_agreement_id.as_deref());
+            let resource = TripartiteAgreementResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5281,29 +5225,22 @@ impl_page_iterator_controls!(SearchTalentPoolIterator);
 
 impl SearchTalentPoolIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<TalentPool>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let id_list = self
-            .id_list
-            .as_ref()
-            .map(|values| values.iter().map(String::as_str).collect::<Vec<_>>());
-        let query = SearchTalentPoolQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .id_list(id_list.as_deref());
-        let resource = TalentPoolResource {
-            config: self.config,
-        };
-        let resp = resource.search_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let id_list = self
+                .id_list
+                .as_ref()
+                .map(|values| values.iter().map(String::as_str).collect::<Vec<_>>());
+            let query = SearchTalentPoolQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .id_list(id_list.as_deref());
+            let resource = TalentPoolResource {
+                config: self.config,
+            };
+            let resp = resource.search_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5320,27 +5257,20 @@ impl_page_iterator_controls!(SearchTestIterator);
 
 impl SearchTestIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Test>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = SearchTestQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .user_id_type(self.user_id_type.as_deref());
-        let resource = TestResource {
-            config: self.config,
-        };
-        let resp = resource
-            .search_by_query(&query, &self.body.0, option)
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = SearchTestQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .user_id_type(self.user_id_type.as_deref());
+            let resource = TestResource {
+                config: self.config,
+            };
+            let resp = resource
+                .search_by_query(&query, &self.body.0, option)
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5366,31 +5296,24 @@ impl ListWebsiteJobPostIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<WebsiteJobPost>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListWebsiteJobPostQuery::new(&self.website_id)
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .user_id_type(self.user_id_type.as_deref())
-            .department_id_type(self.department_id_type.as_deref())
-            .job_level_id_type(self.job_level_id_type.as_deref())
-            .update_start_time(self.update_start_time.as_deref())
-            .update_end_time(self.update_end_time.as_deref())
-            .create_start_time(self.create_start_time.as_deref())
-            .create_end_time(self.create_end_time.as_deref());
-        let resource = WebsiteJobPostResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListWebsiteJobPostQuery::new(&self.website_id)
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .user_id_type(self.user_id_type.as_deref())
+                .department_id_type(self.department_id_type.as_deref())
+                .job_level_id_type(self.job_level_id_type.as_deref())
+                .update_start_time(self.update_start_time.as_deref())
+                .update_end_time(self.update_end_time.as_deref())
+                .create_start_time(self.create_start_time.as_deref())
+                .create_end_time(self.create_end_time.as_deref());
+            let resource = WebsiteJobPostResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5413,29 +5336,22 @@ impl SearchWebsiteJobPostIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<WebsiteJobPost>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = SearchWebsiteJobPostQuery::new(&self.website_id)
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .user_id_type(self.user_id_type.as_deref())
-            .department_id_type(self.department_id_type.as_deref())
-            .job_level_id_type(self.job_level_id_type.as_deref());
-        let resource = WebsiteJobPostResource {
-            config: self.config,
-        };
-        let resp = resource
-            .search_by_query(&query, &self.body.0, option)
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = SearchWebsiteJobPostQuery::new(&self.website_id)
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .user_id_type(self.user_id_type.as_deref())
+                .department_id_type(self.department_id_type.as_deref())
+                .job_level_id_type(self.job_level_id_type.as_deref());
+            let resource = WebsiteJobPostResource {
+                config: self.config,
+            };
+            let resp = resource
+                .search_by_query(&query, &self.body.0, option)
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5457,28 +5373,21 @@ impl ListReferralWebsiteJobPostIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<PortalJobPost>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListReferralWebsiteJobPostQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .process_type(self.process_type)
-            .user_id_type(self.user_id_type.as_deref())
-            .department_id_type(self.department_id_type.as_deref())
-            .job_level_id_type(self.job_level_id_type.as_deref());
-        let resource = ReferralWebsiteJobPostResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListReferralWebsiteJobPostQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .process_type(self.process_type)
+                .user_id_type(self.user_id_type.as_deref())
+                .department_id_type(self.department_id_type.as_deref())
+                .job_level_id_type(self.job_level_id_type.as_deref());
+            let resource = ReferralWebsiteJobPostResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5497,25 +5406,18 @@ impl ListTalentFolderIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<TalentFolderForList>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListTalentFolderQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .user_id_type(self.user_id_type.as_deref());
-        let resource = TalentFolderResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListTalentFolderQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .user_id_type(self.user_id_type.as_deref());
+            let resource = TalentFolderResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5533,24 +5435,17 @@ impl ListTerminationReasonIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<TerminationReason>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListTerminationReasonQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request());
-        let resource = TerminationReasonResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListTerminationReasonQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token);
+            let resource = TerminationReasonResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5568,27 +5463,20 @@ impl_page_iterator_controls!(ListTodoIterator);
 
 impl ListTodoIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Todo>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListTodoQuery::new()
-            .page_size(self.page_size.as_deref())
-            .page_token(self.state.page_token_for_request())
-            .user_id(self.user_id.as_deref())
-            .user_id_type(self.user_id_type.as_deref())
-            .type_(self.type_.as_deref());
-        let resource = TodoResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListTodoQuery::new()
+                .page_size(self.page_size.as_deref())
+                .page_token(page_token)
+                .user_id(self.user_id.as_deref())
+                .user_id_type(self.user_id_type.as_deref())
+                .type_(self.type_.as_deref());
+            let resource = TodoResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5608,29 +5496,22 @@ impl_page_iterator_controls!(ListUserRoleIterator);
 
 impl ListUserRoleIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<UserRole>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListUserRoleQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .user_id(self.user_id.as_deref())
-            .role_id(self.role_id.as_deref())
-            .update_start_time(self.update_start_time.as_deref())
-            .update_end_time(self.update_end_time.as_deref())
-            .user_id_type(self.user_id_type.as_deref());
-        let resource = UserRoleResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListUserRoleQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .user_id(self.user_id.as_deref())
+                .role_id(self.role_id.as_deref())
+                .update_start_time(self.update_start_time.as_deref())
+                .update_end_time(self.update_end_time.as_deref())
+                .user_id_type(self.user_id_type.as_deref());
+            let resource = UserRoleResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5653,27 +5534,20 @@ macro_rules! hire_task_iterator {
                 &mut self,
                 option: &RequestOption,
             ) -> Result<Option<$item>, LarkError> {
-                if let Some(item) = self.state.pop() {
-                    return Ok(Some(item));
-                }
-                if !self.state.should_fetch() {
-                    return Ok(None);
-                }
-
-                let query = $query::new()
-                    .page_size(self.page_size)
-                    .page_token(self.state.page_token_for_request())
-                    .user_id(self.user_id.as_deref())
-                    .activity_status(self.activity_status)
-                    .user_id_type(self.user_id_type.as_deref());
-                let resource = $resource {
-                    config: self.config,
-                };
-                let resp = resource.list_by_query(&query, option).await?;
-                let data = resp.data.unwrap_or_default();
-                self.state
-                    .accept_page(Some(data.items), data.page_token, data.has_more);
-                Ok(self.state.pop())
+                crate::service::common::page_iterator_next!(self.state, page_token, {
+                    let query = $query::new()
+                        .page_size(self.page_size)
+                        .page_token(page_token)
+                        .user_id(self.user_id.as_deref())
+                        .activity_status(self.activity_status)
+                        .user_id_type(self.user_id_type.as_deref());
+                    let resource = $resource {
+                        config: self.config,
+                    };
+                    let resp = resource.list_by_query(&query, option).await?;
+                    let data = resp.data.unwrap_or_default();
+                    Ok((Some(data.items), data.page_token, data.has_more))
+                })
             }
         }
     };
@@ -5714,31 +5588,24 @@ impl ListInterviewFeedbackFormIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<InterviewFeedbackForm>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let ids: Vec<&str> = self
-            .interview_feedback_form_ids
-            .iter()
-            .map(String::as_str)
-            .collect();
-        let query = ListInterviewFeedbackFormQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .interview_feedback_form_ids((!ids.is_empty()).then_some(ids.as_slice()))
-            .user_id_type(self.user_id_type.as_deref());
-        let resource = InterviewFeedbackFormResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let ids: Vec<&str> = self
+                .interview_feedback_form_ids
+                .iter()
+                .map(String::as_str)
+                .collect();
+            let query = ListInterviewFeedbackFormQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .interview_feedback_form_ids((!ids.is_empty()).then_some(ids.as_slice()))
+                .user_id_type(self.user_id_type.as_deref());
+            let resource = InterviewFeedbackFormResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5757,25 +5624,18 @@ impl ListInterviewRegistrationSchemaIterator<'_> {
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<InterviewRegistrationSchema>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let query = ListInterviewRegistrationSchemaQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .user_id_type(self.user_id_type.as_deref());
-        let resource = InterviewRegistrationSchemaResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let query = ListInterviewRegistrationSchemaQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .user_id_type(self.user_id_type.as_deref());
+            let resource = InterviewRegistrationSchemaResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 
@@ -5795,30 +5655,23 @@ impl_page_iterator_controls!(ListInterviewerIterator);
 
 impl ListInterviewerIterator<'_> {
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Interviewer>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let user_ids: Vec<&str> = self.user_ids.iter().map(String::as_str).collect();
-        let query = ListInterviewerQuery::new()
-            .page_size(self.page_size)
-            .page_token(self.state.page_token_for_request())
-            .user_ids((!user_ids.is_empty()).then_some(user_ids.as_slice()))
-            .verify_status(self.verify_status)
-            .earliest_update_time(self.earliest_update_time.as_deref())
-            .latest_update_time(self.latest_update_time.as_deref())
-            .user_id_type(self.user_id_type.as_deref());
-        let resource = InterviewerResource {
-            config: self.config,
-        };
-        let resp = resource.list_by_query(&query, option).await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(Some(data.items), data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let user_ids: Vec<&str> = self.user_ids.iter().map(String::as_str).collect();
+            let query = ListInterviewerQuery::new()
+                .page_size(self.page_size)
+                .page_token(page_token)
+                .user_ids((!user_ids.is_empty()).then_some(user_ids.as_slice()))
+                .verify_status(self.verify_status)
+                .earliest_update_time(self.earliest_update_time.as_deref())
+                .latest_update_time(self.latest_update_time.as_deref())
+                .user_id_type(self.user_id_type.as_deref());
+            let resource = InterviewerResource {
+                config: self.config,
+            };
+            let resp = resource.list_by_query(&query, option).await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((Some(data.items), data.page_token, data.has_more))
+        })
     }
 }
 

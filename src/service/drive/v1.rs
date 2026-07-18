@@ -4,7 +4,9 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::service::common::{DownloadResp, EmptyResp, PageIteratorState, PageQuery, RestRequest};
+use crate::service::common::{
+    DownloadResp, EmptyResp, PageIteratorState, PageQuery, RestRequest, impl_page_iterator_controls,
+};
 
 // ── Domain types ──
 
@@ -857,48 +859,29 @@ pub struct FileCommentIterator<'a> {
     page_size: Option<i32>,
 }
 
+impl_page_iterator_controls!(FileCommentIterator);
+
 impl<'a> FileCommentIterator<'a> {
-    pub fn limit(mut self, limit: usize) -> Self {
-        self.state = self.state.limit(limit);
-        self
-    }
-
-    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
-        self.state = self.state.with_page_token(Some(page_token.into()));
-        self
-    }
-
-    pub fn next_page_token(&self) -> Option<&str> {
-        self.state.next_page_token()
-    }
-
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<FileComment>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = FileCommentResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                &self.file_token,
-                &self.file_type,
-                self.is_whole,
-                self.is_solved,
-                self.state.page_token_for_request(),
-                self.page_size,
-                self.user_id_type.as_deref(),
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = FileCommentResource {
+                config: self.config,
+            };
+            let resp = resource
+                .list(
+                    &self.file_token,
+                    &self.file_type,
+                    self.is_whole,
+                    self.is_solved,
+                    page_token,
+                    self.page_size,
+                    self.user_id_type.as_deref(),
+                    option,
+                )
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
@@ -913,50 +896,31 @@ pub struct FileCommentReplyIterator<'a> {
     page_size: Option<i32>,
 }
 
+impl_page_iterator_controls!(FileCommentReplyIterator);
+
 impl<'a> FileCommentReplyIterator<'a> {
-    pub fn limit(mut self, limit: usize) -> Self {
-        self.state = self.state.limit(limit);
-        self
-    }
-
-    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
-        self.state = self.state.with_page_token(Some(page_token.into()));
-        self
-    }
-
-    pub fn next_page_token(&self) -> Option<&str> {
-        self.state.next_page_token()
-    }
-
     pub async fn next(
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<FileCommentReply>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = FileCommentReplyResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                &self.file_token,
-                &self.comment_id,
-                &self.file_type,
-                self.page_size,
-                self.state.page_token_for_request(),
-                self.user_id_type.as_deref(),
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = FileCommentReplyResource {
+                config: self.config,
+            };
+            let resp = resource
+                .list(
+                    &self.file_token,
+                    &self.comment_id,
+                    &self.file_type,
+                    self.page_size,
+                    page_token,
+                    self.user_id_type.as_deref(),
+                    option,
+                )
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
@@ -970,46 +934,27 @@ pub struct FileVersionIterator<'a> {
     page_size: Option<i32>,
 }
 
+impl_page_iterator_controls!(FileVersionIterator);
+
 impl<'a> FileVersionIterator<'a> {
-    pub fn limit(mut self, limit: usize) -> Self {
-        self.state = self.state.limit(limit);
-        self
-    }
-
-    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
-        self.state = self.state.with_page_token(Some(page_token.into()));
-        self
-    }
-
-    pub fn next_page_token(&self) -> Option<&str> {
-        self.state.next_page_token()
-    }
-
     pub async fn next(&mut self, option: &RequestOption) -> Result<Option<Version>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = FileVersionResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                &self.file_token,
-                &self.obj_type,
-                self.page_size,
-                self.state.page_token_for_request(),
-                self.user_id_type.as_deref(),
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = FileVersionResource {
+                config: self.config,
+            };
+            let resp = resource
+                .list(
+                    &self.file_token,
+                    &self.obj_type,
+                    self.page_size,
+                    page_token,
+                    self.user_id_type.as_deref(),
+                    option,
+                )
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
@@ -1023,49 +968,30 @@ pub struct FileViewRecordIterator<'a> {
     page_size: Option<i32>,
 }
 
+impl_page_iterator_controls!(FileViewRecordIterator);
+
 impl<'a> FileViewRecordIterator<'a> {
-    pub fn limit(mut self, limit: usize) -> Self {
-        self.state = self.state.limit(limit);
-        self
-    }
-
-    pub fn page_token(mut self, page_token: impl Into<String>) -> Self {
-        self.state = self.state.with_page_token(Some(page_token.into()));
-        self
-    }
-
-    pub fn next_page_token(&self) -> Option<&str> {
-        self.state.next_page_token()
-    }
-
     pub async fn next(
         &mut self,
         option: &RequestOption,
     ) -> Result<Option<FileViewRecord>, LarkError> {
-        if let Some(item) = self.state.pop() {
-            return Ok(Some(item));
-        }
-        if !self.state.should_fetch() {
-            return Ok(None);
-        }
-
-        let resource = FileViewRecordResource {
-            config: self.config,
-        };
-        let resp = resource
-            .list(
-                &self.file_token,
-                &self.file_type,
-                self.page_size,
-                self.state.page_token_for_request(),
-                self.viewer_id_type.as_deref(),
-                option,
-            )
-            .await?;
-        let data = resp.data.unwrap_or_default();
-        self.state
-            .accept_page(data.items, data.page_token, data.has_more);
-        Ok(self.state.pop())
+        crate::service::common::page_iterator_next!(self.state, page_token, {
+            let resource = FileViewRecordResource {
+                config: self.config,
+            };
+            let resp = resource
+                .list(
+                    &self.file_token,
+                    &self.file_type,
+                    self.page_size,
+                    page_token,
+                    self.viewer_id_type.as_deref(),
+                    option,
+                )
+                .await?;
+            let data = resp.data.unwrap_or_default();
+            Ok((data.items, data.page_token, data.has_more))
+        })
     }
 }
 
