@@ -88,17 +88,22 @@ mod tests {
 
     #[test]
     fn event_req_from_http_preserves_request_uri_headers_and_body() {
-        let req = Request::builder()
+        let mut req = Request::builder()
             .method("POST")
             .uri("/webhook/event?tenant=t1")
             .header("x-request-id", "req-1")
             .body(br#"{"hello":"world"}"#.to_vec())
             .unwrap();
+        req.headers_mut()
+            .append("x-custom", "first".parse().unwrap());
+        req.headers_mut()
+            .append("x-custom", "second".parse().unwrap());
 
         let event_req = event_req_from_http(req);
 
         assert_eq!(event_req.request_uri, "/webhook/event?tenant=t1");
         assert_eq!(event_req.request_id(), "req-1");
+        assert_eq!(event_req.headers["x-custom"], ["first", "second"]);
         assert_eq!(event_req.body, br#"{"hello":"world"}"#);
     }
 
@@ -115,6 +120,21 @@ mod tests {
         assert_eq!(http_resp.status(), 202);
         assert_eq!(http_resp.headers()["x-test"], "ok");
         assert_eq!(http_resp.body(), b"accepted");
+    }
+
+    #[test]
+    fn event_resp_into_http_uses_a_safe_fallback_for_invalid_headers() {
+        let resp = EventResp {
+            status_code: 200,
+            headers: HashMap::from([("X-Test".to_string(), "invalid\nvalue".to_string())]),
+            body: b"accepted".to_vec(),
+        };
+
+        let http_resp = event_resp_into_http(resp);
+
+        assert_eq!(http_resp.status(), 500);
+        assert!(http_resp.headers().is_empty());
+        assert!(http_resp.body().is_empty());
     }
 
     #[tokio::test]

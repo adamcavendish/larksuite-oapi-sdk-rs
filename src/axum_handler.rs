@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::sync::Arc;
 
 use axum::body::Bytes;
@@ -6,7 +5,8 @@ use axum::extract::{Request, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 
-use crate::event::{CardActionHandler, EventDispatcher, EventReq, EventResp};
+use crate::event::{CardActionHandler, EventDispatcher, EventReq};
+use crate::http_handler::{event_req_from_parts, event_resp_into_http};
 
 async fn parse_request(req: Request) -> std::result::Result<EventReq, Response> {
     let (parts, body) = req.into_parts();
@@ -21,46 +21,11 @@ async fn parse_request(req: Request) -> std::result::Result<EventReq, Response> 
                 .into_response()
         })?;
 
-    let headers: HashMap<String, Vec<String>> = parts
-        .headers
-        .iter()
-        .map(|(name, value)| {
-            (
-                name.as_str().to_string(),
-                vec![value.to_str().unwrap_or_default().to_string()],
-            )
-        })
-        .fold(HashMap::new(), |mut acc, (k, v)| {
-            acc.entry(k).or_default().extend(v);
-            acc
-        });
-
-    let request_uri = parts
-        .uri
-        .path_and_query()
-        .map(|pq| pq.as_str().to_string())
-        .unwrap_or_default();
-
-    Ok(EventReq {
-        headers,
-        body: body_bytes.to_vec(),
-        request_uri,
-    })
+    Ok(event_req_from_parts(parts, body_bytes.to_vec()))
 }
 
-fn build_response(event_resp: EventResp) -> Response {
-    let mut builder = axum::http::Response::builder().status(event_resp.status_code);
-    for (k, v) in &event_resp.headers {
-        builder = builder.header(k.as_str(), v.as_str());
-    }
-    builder
-        .body(axum::body::Body::from(event_resp.body))
-        .unwrap_or_else(|_| {
-            axum::http::Response::builder()
-                .status(500)
-                .body(axum::body::Body::empty())
-                .unwrap()
-        })
+fn build_response(event_resp: crate::event::EventResp) -> Response {
+    event_resp_into_http(event_resp).map(axum::body::Body::from)
 }
 
 pub async fn event_handler(
@@ -89,6 +54,7 @@ pub async fn card_action_handler(
 mod tests {
     use super::*;
 
+    use crate::event::EventResp;
     use axum::body::{Body, Bytes};
 
     async fn response_body(resp: Response) -> Bytes {
@@ -169,5 +135,53 @@ mod tests {
         assert_eq!(resp.status(), 200);
         let body: crate::JsonValue = serde_json::from_slice(&response_body(resp).await).unwrap();
         assert_eq!(body["ok"], true);
+    }
+
+    #[tokio::test]
+    async fn parse_request_uses_shared_http_conversion() {
+        let mut req = Request::builder()
+            .method("POST")
+            .uri("/webhook/event?tenant=t1")
+            .body(Body::from(br#"{"hello":"world"}"#.to_vec()))
+            .unwrap();
+        req.headers_mut()
+            .append("x-custom", "first".parse().unwrap());
+        req.headers_mut()
+            .append("x-custom", "second".parse().unwrap());
+
+        let event_req = parse_request(req).await.unwrap();
+
+        assert_eq!(event_req.request_uri, "/webhook/event?tenant=t1");
+        assert_eq!(event_req.headers["x-custom"], ["first", "second"]);
+        assert_eq!(event_req.body, br#"{"hello":"world"}"#);
+    }
+
+    #[tokio::test]
+    async fn build_response_uses_shared_http_materialization() {
+        let response = build_response(EventResp {
+            status_code: 202,
+            headers: std::collections::HashMap::from([("X-Test".to_string(), "ok".to_string())]),
+            body: b"accepted".to_vec(),
+        });
+
+        assert_eq!(response.status(), 202);
+        assert_eq!(response.headers()["x-test"], "ok");
+        assert_eq!(response_body(response).await.as_ref(), b"accepted");
+    }
+
+    #[tokio::test]
+    async fn build_response_preserves_shared_invalid_header_fallback() {
+        let response = build_response(EventResp {
+            status_code: 200,
+            headers: std::collections::HashMap::from([(
+                "X-Test".to_string(),
+                "invalid\nvalue".to_string(),
+            )]),
+            body: b"accepted".to_vec(),
+        });
+
+        assert_eq!(response.status(), 500);
+        assert!(response.headers().is_empty());
+        assert!(response_body(response).await.is_empty());
     }
 }
