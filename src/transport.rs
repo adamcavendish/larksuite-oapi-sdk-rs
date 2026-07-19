@@ -299,29 +299,36 @@ async fn classify_buffered_response(
     config: &Config,
     resp: ApiResp,
 ) -> Result<RequestAttempt<ApiResp>, LarkError> {
-    if is_json_content_type(&resp)
-        && let Some(err) = json_code_error_retry(config, &resp.raw_body).await
-    {
-        return Ok(RequestAttempt::Retry(err));
-    }
-
-    Ok(RequestAttempt::Done(resp))
+    Ok(match response_retry_error(config, &resp).await {
+        Some(err) => RequestAttempt::Retry(err),
+        None => RequestAttempt::Done(resp),
+    })
 }
 
-async fn json_code_error_retry(config: &Config, raw_body: &[u8]) -> Option<LarkError> {
-    let Ok(code_err) = serde_json::from_slice::<CodeError>(raw_body) else {
-        return None;
-    };
+fn response_retry_error<'a>(
+    config: &'a Config,
+    resp: &'a ApiResp,
+) -> BoxFuture<'a, Option<LarkError>> {
+    Box::pin(async move {
+        if !is_json_content_type(resp) || resp.raw_body.is_empty() {
+            return None;
+        }
 
-    if code_err.code == ERR_CODE_APP_TICKET_INVALID {
-        let atm = AppTicketManager::new(config.token_cache.clone());
-        let _ = atm.apply_app_ticket(config).await;
-    }
-    if is_token_invalid_error(code_err.code) {
-        return Some(LarkError::Api(Box::new(code_err)));
-    }
+        let raw_body = &resp.raw_body;
+        let Ok(code_err) = serde_json::from_slice::<CodeError>(raw_body) else {
+            return None;
+        };
 
-    None
+        if code_err.code == ERR_CODE_APP_TICKET_INVALID {
+            let atm = AppTicketManager::new(config.token_cache.clone());
+            let _ = atm.apply_app_ticket(config).await;
+        }
+        if is_token_invalid_error(code_err.code) {
+            return Some(LarkError::Api(Box::new(code_err)));
+        }
+
+        None
+    })
 }
 
 async fn do_request_stream(
@@ -341,14 +348,10 @@ async fn classify_stream_response(
     config: &Config,
     resp: StreamResp,
 ) -> Result<RequestAttempt<StreamResp>, LarkError> {
-    if is_json_content_type(&resp.api_resp)
-        && !resp.api_resp.raw_body.is_empty()
-        && let Some(err) = json_code_error_retry(config, &resp.api_resp.raw_body).await
-    {
-        return Ok(RequestAttempt::Retry(err));
-    }
-
-    Ok(RequestAttempt::Done(resp))
+    Ok(match response_retry_error(config, &resp.api_resp).await {
+        Some(err) => RequestAttempt::Retry(err),
+        None => RequestAttempt::Done(resp),
+    })
 }
 
 enum RequestAttempt<T> {
@@ -535,6 +538,35 @@ pub(crate) async fn raw_send_stream(
     raw_send_stream_inner(config, api_req, option, bearer_token, false).await
 }
 
+struct ReceivedResponse {
+    full_url: String,
+    status_code: u16,
+    header: http::HeaderMap,
+    response: aioduct::Response,
+}
+
+fn receive_response<'a>(
+    config: &'a Config,
+    api_req: &'a ApiReq,
+    option: &'a RequestOption,
+    bearer_token: Option<&'a str>,
+    absolute_url: bool,
+) -> BoxFuture<'a, Result<ReceivedResponse, LarkError>> {
+    Box::pin(async move {
+        let (full_url, response) =
+            send_http_response(config, api_req, option, bearer_token, absolute_url).await?;
+        let status_code = response.status().as_u16();
+        check_status_errors(api_req, status_code, response.headers())?;
+
+        Ok(ReceivedResponse {
+            full_url,
+            status_code,
+            header: response.headers().clone(),
+            response,
+        })
+    })
+}
+
 async fn raw_send_inner(
     config: &Config,
     api_req: &ApiReq,
@@ -542,12 +574,12 @@ async fn raw_send_inner(
     bearer_token: Option<&str>,
     absolute_url: bool,
 ) -> Result<ApiResp, LarkError> {
-    let (full_url, response) =
-        send_http_response(config, api_req, option, bearer_token, absolute_url).await?;
-    let status_code = response.status().as_u16();
-    check_status_errors(api_req, status_code, response.headers())?;
-
-    let header = response.headers().clone();
+    let ReceivedResponse {
+        full_url,
+        status_code,
+        header,
+        response,
+    } = receive_response(config, api_req, option, bearer_token, absolute_url).await?;
     let raw_body = response.bytes().await.map_err(LarkError::Http)?.to_vec();
 
     log_buffered_response(config, &full_url, status_code, &header, &raw_body);
@@ -566,12 +598,12 @@ async fn raw_send_stream_inner(
     bearer_token: Option<&str>,
     absolute_url: bool,
 ) -> Result<StreamResp, LarkError> {
-    let (full_url, response) =
-        send_http_response(config, api_req, option, bearer_token, absolute_url).await?;
-    let status_code = response.status().as_u16();
-    check_status_errors(api_req, status_code, response.headers())?;
-
-    let header = response.headers().clone();
+    let ReceivedResponse {
+        full_url,
+        status_code,
+        header,
+        response,
+    } = receive_response(config, api_req, option, bearer_token, absolute_url).await?;
 
     if !(200..300).contains(&status_code) && is_json_header(&header) {
         let raw_body = response.bytes().await.map_err(LarkError::Http)?.to_vec();
@@ -1027,6 +1059,33 @@ mod tests {
         let url = build_url(&config, &api_req);
         assert!(!url.contains("a/b?c#d e"));
         assert!(url.contains("a%2Fb%3Fc%23d%20e"));
+    }
+
+    #[tokio::test]
+    async fn response_retry_error_requires_buffered_json_token_error() {
+        let config = test_config();
+        let mut header = http::HeaderMap::new();
+        header.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+
+        let token_error = ApiResp {
+            status_code: 401,
+            header: header.clone(),
+            raw_body: format!(
+                r#"{{"code":{ERR_CODE_TENANT_ACCESS_TOKEN_INVALID},"msg":"invalid token"}}"#
+            )
+            .into_bytes(),
+        };
+        assert!(matches!(
+            response_retry_error(&config, &token_error).await,
+            Some(LarkError::Api(_))
+        ));
+
+        let empty_body = ApiResp {
+            status_code: 401,
+            header,
+            raw_body: Vec::new(),
+        };
+        assert!(response_retry_error(&config, &empty_body).await.is_none());
     }
 
     #[test]
