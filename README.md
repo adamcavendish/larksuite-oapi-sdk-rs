@@ -102,6 +102,16 @@ same transport behavior for its curated newer-Go-SDK endpoint set. See
 [`examples/raw_api.rs`](examples/raw_api.rs) and
 [`examples/go_v397_endpoint.rs`](examples/go_v397_endpoint.rs).
 
+The GoV397 endpoint metadata is generated from the Go SDK's `v3.6.1..v3.9.7`
+resource delta. Regenerate it or verify that it is current with a local Go SDK
+checkout:
+
+```sh
+GO_SDK_DIR=/path/to/larksuite-oapi-sdk-go
+go run ./tools/generate_go_v397_metadata.go --go-sdk "$GO_SDK_DIR"
+just go-v397-check "$GO_SDK_DIR"
+```
+
 ### Dynamic JSON Values
 
 Closed API contracts use dedicated request and response models. Where the
