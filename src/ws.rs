@@ -395,6 +395,26 @@ pub struct WsClient {
     on_disconnected: Option<LifecycleCallback>,
 }
 
+struct WsEndpoint {
+    url: String,
+    service_id: i32,
+}
+
+struct WsGateway<'a> {
+    client: &'a WsClient,
+}
+
+struct WsSession<'a> {
+    client: &'a WsClient,
+    service_id: i32,
+    frames: WsFrameHandler<'a>,
+}
+
+struct WsFrameHandler<'a> {
+    client: &'a WsClient,
+    pending_frags: HashMap<String, FragEntry>,
+}
+
 fn ws_log_enabled(log_level: Option<tracing::Level>, level: tracing::Level) -> bool {
     log_level.is_none_or(|max| level <= max)
 }
@@ -602,12 +622,15 @@ impl WsClient {
     }
 
     async fn run_once(&self, was_reconnecting: bool) -> Result<(), LarkError> {
-        let (url, service_id) = self.get_ws_url().await?;
+        let endpoint = WsGateway { client: self }.endpoint().await?;
         if self.log_enabled(tracing::Level::INFO) {
-            tracing::info!("connecting to ws endpoint: {}", sanitize_ws_url(&url));
+            tracing::info!(
+                "connecting to ws endpoint: {}",
+                sanitize_ws_url(&endpoint.url)
+            );
         }
 
-        let (ws_stream, resp) = connect_async(&url)
+        let (ws_stream, resp) = connect_async(&endpoint.url)
             .await
             .map_err(|e| LarkError::Event(format!("ws connect failed: {e}")))?;
 
@@ -616,7 +639,7 @@ impl WsClient {
             return Err(self.parse_handshake_error(&resp));
         }
 
-        self.set_connection_id(connection_id_from_ws_url(&url));
+        self.set_connection_id(connection_id_from_ws_url(&endpoint.url));
 
         if self.log_enabled(tracing::Level::INFO) {
             tracing::info!("ws connected");
@@ -628,318 +651,14 @@ impl WsClient {
             handler();
         }
 
-        let mut pending_frags: HashMap<String, FragEntry> = HashMap::new();
-
-        let (write, mut read) = ws_stream.split();
-        let write = Arc::new(Mutex::new(write));
-
-        // Start ping loop
-        let ping_write = write.clone();
-        let ping_interval = self.ping_interval.clone();
-        let ping_service_id = service_id;
-        let ping_channel_tag = self.channel_tag.clone();
-        let ping_log_level = self.log_level;
-        let ping_handle = tokio::spawn(async move {
-            loop {
-                let secs = ping_interval.load(Ordering::Relaxed);
-                sleep(Duration::from_secs(secs)).await;
-                let frame = new_ping_frame(ping_service_id, ping_channel_tag.as_deref());
-                let encoded = frame.encode_to_vec();
-                let mut w = ping_write.lock().await;
-                if (*w).send(Message::Binary(encoded.into())).await.is_err() {
-                    break;
-                }
-                if ws_log_enabled(ping_log_level, tracing::Level::DEBUG) {
-                    tracing::debug!("ws ping sent");
-                }
-            }
-        });
-
-        while let Some(msg) = read.next().await {
-            let msg = match msg {
-                Ok(m) => m,
-                Err(e) => {
-                    if self.log_enabled(tracing::Level::WARN) {
-                        tracing::warn!("ws recv error: {e}");
-                    }
-                    break;
-                }
-            };
-            match msg {
-                Message::Binary(data) => {
-                    if let Err(e) = self
-                        .handle_binary_message(&data, &mut pending_frags, &write)
-                        .await
-                        && self.log_enabled(tracing::Level::WARN)
-                    {
-                        tracing::warn!("ws frame handling error: {e}");
-                    }
-                }
-                Message::Close(_) => {
-                    if self.log_enabled(tracing::Level::INFO) {
-                        tracing::info!("ws server closed connection");
-                    }
-                    break;
-                }
-                _ => {}
-            }
-        }
-
-        ping_handle.abort();
+        WsSession::new(self, endpoint.service_id)
+            .run(ws_stream)
+            .await;
         self.set_connection_id(None);
         if let Some(ref handler) = self.on_disconnected {
             handler();
         }
         Ok(())
-    }
-
-    async fn handle_binary_message<S>(
-        &self,
-        data: &[u8],
-        pending_frags: &mut HashMap<String, FragEntry>,
-        write: &Arc<Mutex<S>>,
-    ) -> Result<(), LarkError>
-    where
-        S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error> + Unpin,
-    {
-        let frame = proto::Frame::decode(data)
-            .map_err(|e| LarkError::Event(format!("proto frame decode error: {e}")))?;
-
-        match frame.method {
-            METHOD_CONTROL => {
-                let msg_type = get_header(&frame.headers, HEADER_TYPE).unwrap_or_default();
-                match msg_type.as_str() {
-                    MSG_TYPE_PING => {
-                        if self.log_enabled(tracing::Level::DEBUG) {
-                            tracing::debug!("ws ping received, seq={}", frame.seq_id);
-                        }
-                        let pong = proto::Frame {
-                            method: METHOD_CONTROL,
-                            service: frame.service,
-                            seq_id: frame.seq_id,
-                            log_id: frame.log_id,
-                            headers: vec![make_header(HEADER_TYPE, MSG_TYPE_PONG)],
-                            payload_encoding: None,
-                            payload_type: None,
-                            payload: None,
-                            log_id_new: None,
-                        };
-                        let encoded = pong.encode_to_vec();
-                        let mut w = write.lock().await;
-                        let _ = (*w).send(Message::Binary(encoded.into())).await;
-                    }
-                    MSG_TYPE_PONG => {
-                        if self.log_enabled(tracing::Level::DEBUG) {
-                            tracing::debug!("ws pong received");
-                        }
-                        if let Some(payload) = &frame.payload
-                            && !payload.is_empty()
-                            && let Ok(conf) = serde_json::from_slice::<ClientConfig>(payload)
-                        {
-                            if self.log_enabled(tracing::Level::DEBUG) {
-                                tracing::debug!("ws client config updated: {conf:?}");
-                            }
-                            self.apply_config(&conf);
-                        }
-                    }
-                    _ => {
-                        if self.log_enabled(tracing::Level::DEBUG) {
-                            tracing::debug!("ws unknown control type: {msg_type}");
-                        }
-                    }
-                }
-            }
-            METHOD_DATA => {
-                let msg_type = get_header(&frame.headers, HEADER_TYPE).unwrap_or_default();
-
-                // Card frames are not handled (same as Go SDK)
-                if msg_type != MSG_TYPE_EVENT {
-                    return Ok(());
-                }
-
-                let sum = get_header_int(&frame.headers, HEADER_SUM);
-                let seq = get_header_int(&frame.headers, HEADER_SEQ);
-                let msg_id = get_header(&frame.headers, HEADER_MESSAGE_ID).unwrap_or_default();
-
-                let payload = if sum <= 1 {
-                    frame.payload.clone().unwrap_or_default()
-                } else {
-                    // Clean expired entries
-                    pending_frags.retain(|_, v| !v.expired());
-
-                    let entry = pending_frags
-                        .entry(msg_id.clone())
-                        .or_insert_with(|| FragEntry::new(sum as usize));
-                    entry.insert(seq as usize, frame.payload.clone().unwrap_or_default());
-                    if entry.complete() {
-                        match pending_frags.remove(&msg_id) {
-                            Some(e) => e.assemble(),
-                            None => return Ok(()),
-                        }
-                    } else {
-                        return Ok(());
-                    }
-                };
-
-                let start = Instant::now();
-                let status = self.dispatch_event(payload).await;
-                let biz_rt = start.elapsed().as_millis().to_string();
-
-                // Send ACK frame
-                let ack_code = if status { 200u16 } else { 500 };
-                let ack_payload = serde_json::to_vec(&AckResponse {
-                    code: ack_code,
-                    headers: None,
-                    data: None,
-                })
-                .unwrap_or_default();
-
-                let mut ack_headers = frame.headers.clone();
-                ack_headers.push(make_header(HEADER_BIZ_RT, &biz_rt));
-
-                let ack_frame = proto::Frame {
-                    seq_id: frame.seq_id,
-                    log_id: frame.log_id,
-                    service: frame.service,
-                    method: frame.method,
-                    headers: ack_headers,
-                    payload_encoding: frame.payload_encoding.clone(),
-                    payload_type: frame.payload_type.clone(),
-                    payload: Some(ack_payload),
-                    log_id_new: frame.log_id_new.clone(),
-                };
-                let encoded = ack_frame.encode_to_vec();
-                let mut w = write.lock().await;
-                let _ = (*w).send(Message::Binary(encoded.into())).await;
-            }
-            _ => {
-                if self.log_enabled(tracing::Level::DEBUG) {
-                    tracing::debug!("ws unknown method: {}", frame.method);
-                }
-            }
-        }
-
-        Ok(())
-    }
-
-    async fn dispatch_event(&self, payload: Vec<u8>) -> bool {
-        use crate::event::EventReq;
-
-        let req = EventReq {
-            headers: HashMap::new(),
-            body: payload,
-            request_uri: String::new(),
-        };
-
-        let resp = self.dispatcher.handle(req).await;
-        if resp.status_code != 200 {
-            if self.log_enabled(tracing::Level::WARN) {
-                tracing::warn!(
-                    "event dispatch returned {}: {}",
-                    resp.status_code,
-                    String::from_utf8_lossy(&resp.body)
-                );
-            }
-            return false;
-        }
-
-        true
-    }
-
-    async fn get_ws_url(&self) -> Result<(String, i32), LarkError> {
-        let base = self.domain.trim_end_matches('/');
-        let mut url = format!("{base}/callback/ws/endpoint");
-
-        let mut body = serde_json::json!({
-            "AppID": self.config.app_id,
-            "AppSecret": self.config.app_secret,
-        });
-        if let Some(channel_tag) = &self.channel_tag {
-            body["ChannelTag"] = serde_json::Value::String(channel_tag.clone());
-        }
-        let mut target_service_header = None;
-
-        if let Some(ref provider) = self.config.client_assertion_provider {
-            let aud = extract_ws_aud(&self.domain)?;
-            let assertion = provider.retrieve_token(&aud).await.map_err(|e| {
-                LarkError::ClientAssertion(format!("retrieve client assertion token failed: {e}"))
-            })?;
-            if assertion.value.is_empty() {
-                return Err(LarkError::ClientAssertion(
-                    "client assertion token is empty".to_string(),
-                ));
-            }
-            body["AppSecret"] = serde_json::Value::String(String::new());
-            body["ClientAssertion"] = serde_json::Value::String(assertion.value);
-            if let Some(ref target) = assertion.target_info {
-                let target_service = if target.target_service.contains("://") {
-                    target.target_service.clone()
-                } else {
-                    format!("https://{}", target.target_service)
-                };
-                url = format!(
-                    "{}{}/callback/ws/endpoint",
-                    target_service.trim_end_matches('/'),
-                    target.target_prefix
-                );
-                target_service_header = Some(aud);
-            }
-        } else if self.config.app_secret.is_empty() {
-            return Err(LarkError::ClientAssertion(
-                "appSecret and clientAssertionProvider cannot be nil".to_string(),
-            ));
-        }
-
-        let mut req = self
-            .config
-            .http_client
-            .post(&url)?
-            .header_str("locale", "zh")
-            .map_err(|e| LarkError::Event(format!("invalid locale header: {e}")))?;
-
-        // Merge custom headers (Go SDK WithHeaders)
-        for (k, v) in &self.headers {
-            req = req
-                .header_str(k, v)
-                .map_err(|e| LarkError::Event(format!("invalid header {k}: {e}")))?;
-        }
-        if let Some(ref aud) = target_service_header {
-            req = req
-                .header_str(HEADER_X_TARGET_SERVICE, aud)
-                .map_err(|e| LarkError::Event(format!("invalid target service header: {e}")))?;
-        }
-
-        let resp = req
-            .json(&body)
-            .map_err(|e| LarkError::Event(format!("failed to serialize endpoint body: {e}")))?
-            .send()
-            .await
-            .map_err(|e| LarkError::Http(e.into_error()))?;
-
-        let body: WsEndpointResp = resp.json().await?;
-
-        if body.code != 0 {
-            return Err(LarkError::Event(format!(
-                "ws endpoint returned code {}: {}",
-                body.code,
-                body.msg.unwrap_or_default()
-            )));
-        }
-
-        let data = body
-            .data
-            .ok_or_else(|| LarkError::Event("ws endpoint returned no data".to_string()))?;
-
-        if let Some(ref conf) = data.client_config {
-            self.apply_config(conf);
-        }
-
-        let url = append_ws_query_params(&data.url, &self.websocket_query_params)?;
-        let service_id = ws_query_param(&url, QUERY_SERVICE_ID)
-            .and_then(|value| value.parse::<i32>().ok())
-            .unwrap_or(0);
-
-        Ok((url, service_id))
     }
 
     fn set_connection_id(&self, connection_id: Option<String>) {
@@ -981,6 +700,350 @@ impl WsClient {
             FORBIDDEN => LarkError::Event(format!("ws client error: code={code}, msg={msg}")),
             _ => LarkError::Event(format!("ws server error: code={code}, msg={msg}")),
         }
+    }
+}
+
+impl<'a> WsGateway<'a> {
+    async fn endpoint(&self) -> Result<WsEndpoint, LarkError> {
+        let base = self.client.domain.trim_end_matches('/');
+        let mut url = format!("{base}/callback/ws/endpoint");
+
+        let mut body = serde_json::json!({
+            "AppID": self.client.config.app_id,
+            "AppSecret": self.client.config.app_secret,
+        });
+        if let Some(channel_tag) = &self.client.channel_tag {
+            body["ChannelTag"] = serde_json::Value::String(channel_tag.clone());
+        }
+        let mut target_service_header = None;
+
+        if let Some(ref provider) = self.client.config.client_assertion_provider {
+            let aud = extract_ws_aud(&self.client.domain)?;
+            let assertion = provider.retrieve_token(&aud).await.map_err(|e| {
+                LarkError::ClientAssertion(format!("retrieve client assertion token failed: {e}"))
+            })?;
+            if assertion.value.is_empty() {
+                return Err(LarkError::ClientAssertion(
+                    "client assertion token is empty".to_string(),
+                ));
+            }
+            body["AppSecret"] = serde_json::Value::String(String::new());
+            body["ClientAssertion"] = serde_json::Value::String(assertion.value);
+            if let Some(ref target) = assertion.target_info {
+                let target_service = if target.target_service.contains("://") {
+                    target.target_service.clone()
+                } else {
+                    format!("https://{}", target.target_service)
+                };
+                url = format!(
+                    "{}{}/callback/ws/endpoint",
+                    target_service.trim_end_matches('/'),
+                    target.target_prefix
+                );
+                target_service_header = Some(aud);
+            }
+        } else if self.client.config.app_secret.is_empty() {
+            return Err(LarkError::ClientAssertion(
+                "appSecret and clientAssertionProvider cannot be nil".to_string(),
+            ));
+        }
+
+        let mut req = self
+            .client
+            .config
+            .http_client
+            .post(&url)?
+            .header_str("locale", "zh")
+            .map_err(|e| LarkError::Event(format!("invalid locale header: {e}")))?;
+
+        for (key, value) in &self.client.headers {
+            req = req
+                .header_str(key, value)
+                .map_err(|e| LarkError::Event(format!("invalid header {key}: {e}")))?;
+        }
+        if let Some(ref aud) = target_service_header {
+            req = req
+                .header_str(HEADER_X_TARGET_SERVICE, aud)
+                .map_err(|e| LarkError::Event(format!("invalid target service header: {e}")))?;
+        }
+
+        let response = req
+            .json(&body)
+            .map_err(|e| LarkError::Event(format!("failed to serialize endpoint body: {e}")))?
+            .send()
+            .await
+            .map_err(|e| LarkError::Http(e.into_error()))?;
+        let body: WsEndpointResp = response.json().await?;
+
+        if body.code != 0 {
+            return Err(LarkError::Event(format!(
+                "ws endpoint returned code {}: {}",
+                body.code,
+                body.msg.unwrap_or_default()
+            )));
+        }
+
+        let data = body
+            .data
+            .ok_or_else(|| LarkError::Event("ws endpoint returned no data".to_string()))?;
+        if let Some(ref config) = data.client_config {
+            self.client.apply_config(config);
+        }
+
+        let url = append_ws_query_params(&data.url, &self.client.websocket_query_params)?;
+        let service_id = ws_query_param(&url, QUERY_SERVICE_ID)
+            .and_then(|value| value.parse::<i32>().ok())
+            .unwrap_or(0);
+
+        Ok(WsEndpoint { url, service_id })
+    }
+}
+
+impl<'a> WsSession<'a> {
+    fn new(client: &'a WsClient, service_id: i32) -> Self {
+        Self {
+            client,
+            service_id,
+            frames: WsFrameHandler {
+                client,
+                pending_frags: HashMap::new(),
+            },
+        }
+    }
+
+    async fn run<S>(&mut self, ws_stream: tokio_tungstenite::WebSocketStream<S>)
+    where
+        S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin + Send + 'static,
+    {
+        let (write, mut read) = ws_stream.split();
+        let write = Arc::new(Mutex::new(write));
+
+        let ping_write = Arc::clone(&write);
+        let ping_interval = Arc::clone(&self.client.ping_interval);
+        let ping_service_id = self.service_id;
+        let ping_channel_tag = self.client.channel_tag.clone();
+        let ping_log_level = self.client.log_level;
+        let ping_handle = tokio::spawn(async move {
+            loop {
+                let secs = ping_interval.load(Ordering::Relaxed);
+                sleep(Duration::from_secs(secs)).await;
+                let frame = new_ping_frame(ping_service_id, ping_channel_tag.as_deref());
+                let encoded = frame.encode_to_vec();
+                let mut writer = ping_write.lock().await;
+                if (*writer)
+                    .send(Message::Binary(encoded.into()))
+                    .await
+                    .is_err()
+                {
+                    break;
+                }
+                if ws_log_enabled(ping_log_level, tracing::Level::DEBUG) {
+                    tracing::debug!("ws ping sent");
+                }
+            }
+        });
+
+        while let Some(message) = read.next().await {
+            let message = match message {
+                Ok(message) => message,
+                Err(error) => {
+                    if self.client.log_enabled(tracing::Level::WARN) {
+                        tracing::warn!("ws recv error: {error}");
+                    }
+                    break;
+                }
+            };
+            match message {
+                Message::Binary(data) => {
+                    if let Err(error) = self.frames.handle_binary_message(&data, &write).await
+                        && self.client.log_enabled(tracing::Level::WARN)
+                    {
+                        tracing::warn!("ws frame handling error: {error}");
+                    }
+                }
+                Message::Close(_) => {
+                    if self.client.log_enabled(tracing::Level::INFO) {
+                        tracing::info!("ws server closed connection");
+                    }
+                    break;
+                }
+                _ => {}
+            }
+        }
+
+        ping_handle.abort();
+    }
+}
+
+impl<'a> WsFrameHandler<'a> {
+    async fn handle_binary_message<S>(
+        &mut self,
+        data: &[u8],
+        write: &Arc<Mutex<S>>,
+    ) -> Result<(), LarkError>
+    where
+        S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error> + Unpin,
+    {
+        let frame = proto::Frame::decode(data)
+            .map_err(|e| LarkError::Event(format!("proto frame decode error: {e}")))?;
+
+        match frame.method {
+            METHOD_CONTROL => self.handle_control_frame(frame, write).await?,
+            METHOD_DATA => self.handle_data_frame(frame, write).await?,
+            _ => {
+                if self.client.log_enabled(tracing::Level::DEBUG) {
+                    tracing::debug!("ws unknown method: {}", frame.method);
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    async fn handle_control_frame<S>(
+        &self,
+        frame: proto::Frame,
+        write: &Arc<Mutex<S>>,
+    ) -> Result<(), LarkError>
+    where
+        S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error> + Unpin,
+    {
+        let msg_type = get_header(&frame.headers, HEADER_TYPE).unwrap_or_default();
+        match msg_type.as_str() {
+            MSG_TYPE_PING => {
+                if self.client.log_enabled(tracing::Level::DEBUG) {
+                    tracing::debug!("ws ping received, seq={}", frame.seq_id);
+                }
+                let pong = proto::Frame {
+                    method: METHOD_CONTROL,
+                    service: frame.service,
+                    seq_id: frame.seq_id,
+                    log_id: frame.log_id,
+                    headers: vec![make_header(HEADER_TYPE, MSG_TYPE_PONG)],
+                    payload_encoding: None,
+                    payload_type: None,
+                    payload: None,
+                    log_id_new: None,
+                };
+                let encoded = pong.encode_to_vec();
+                let mut writer = write.lock().await;
+                let _ = (*writer).send(Message::Binary(encoded.into())).await;
+            }
+            MSG_TYPE_PONG => {
+                if self.client.log_enabled(tracing::Level::DEBUG) {
+                    tracing::debug!("ws pong received");
+                }
+                if let Some(payload) = &frame.payload
+                    && !payload.is_empty()
+                    && let Ok(config) = serde_json::from_slice::<ClientConfig>(payload)
+                {
+                    if self.client.log_enabled(tracing::Level::DEBUG) {
+                        tracing::debug!("ws client config updated: {config:?}");
+                    }
+                    self.client.apply_config(&config);
+                }
+            }
+            _ => {
+                if self.client.log_enabled(tracing::Level::DEBUG) {
+                    tracing::debug!("ws unknown control type: {msg_type}");
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    async fn handle_data_frame<S>(
+        &mut self,
+        frame: proto::Frame,
+        write: &Arc<Mutex<S>>,
+    ) -> Result<(), LarkError>
+    where
+        S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error> + Unpin,
+    {
+        let Some(payload) = self.event_payload(&frame) else {
+            return Ok(());
+        };
+
+        let start = Instant::now();
+        let status = self.dispatch_event(payload).await;
+        let biz_rt = start.elapsed().as_millis().to_string();
+
+        let ack_payload = serde_json::to_vec(&AckResponse {
+            code: if status { 200 } else { 500 },
+            headers: None,
+            data: None,
+        })
+        .unwrap_or_default();
+        let mut headers = frame.headers.clone();
+        headers.push(make_header(HEADER_BIZ_RT, &biz_rt));
+        let ack = proto::Frame {
+            seq_id: frame.seq_id,
+            log_id: frame.log_id,
+            service: frame.service,
+            method: frame.method,
+            headers,
+            payload_encoding: frame.payload_encoding.clone(),
+            payload_type: frame.payload_type.clone(),
+            payload: Some(ack_payload),
+            log_id_new: frame.log_id_new.clone(),
+        };
+        let encoded = ack.encode_to_vec();
+        let mut writer = write.lock().await;
+        let _ = (*writer).send(Message::Binary(encoded.into())).await;
+
+        Ok(())
+    }
+
+    fn event_payload(&mut self, frame: &proto::Frame) -> Option<Vec<u8>> {
+        if get_header(&frame.headers, HEADER_TYPE).as_deref() != Some(MSG_TYPE_EVENT) {
+            return None;
+        }
+
+        let sum = get_header_int(&frame.headers, HEADER_SUM);
+        if sum <= 1 {
+            return Some(frame.payload.clone().unwrap_or_default());
+        }
+
+        let seq = get_header_int(&frame.headers, HEADER_SEQ);
+        let message_id = get_header(&frame.headers, HEADER_MESSAGE_ID).unwrap_or_default();
+        self.pending_frags.retain(|_, entry| !entry.expired());
+
+        let entry = self
+            .pending_frags
+            .entry(message_id.clone())
+            .or_insert_with(|| FragEntry::new(sum as usize));
+        entry.insert(seq as usize, frame.payload.clone().unwrap_or_default());
+        if entry.complete() {
+            self.pending_frags
+                .remove(&message_id)
+                .map(FragEntry::assemble)
+        } else {
+            None
+        }
+    }
+
+    async fn dispatch_event(&self, payload: Vec<u8>) -> bool {
+        use crate::event::EventReq;
+
+        let req = EventReq {
+            headers: HashMap::new(),
+            body: payload,
+            request_uri: String::new(),
+        };
+        let resp = self.client.dispatcher.handle(req).await;
+        if resp.status_code == 200 {
+            return true;
+        }
+
+        if self.client.log_enabled(tracing::Level::WARN) {
+            tracing::warn!(
+                "event dispatch returned {}: {}",
+                resp.status_code,
+                String::from_utf8_lossy(&resp.body)
+            );
+        }
+        false
     }
 }
 
@@ -1070,10 +1133,10 @@ mod tests {
                 (String::new(), "ignored".into()),
             ]));
 
-        let (url, service_id) = client.get_ws_url().await.unwrap();
+        let endpoint = WsGateway { client: &client }.endpoint().await.unwrap();
         handle.await.unwrap();
 
-        let url = url::Url::parse(&url).unwrap();
+        let url = url::Url::parse(&endpoint.url).unwrap();
         assert_eq!(
             url.query_pairs()
                 .find(|(key, _)| key == "service_id")
@@ -1085,7 +1148,7 @@ mod tests {
             url.query_pairs().find(|(key, _)| key == "extra").unwrap().1,
             "value with spaces"
         );
-        assert_eq!(service_id, 99);
+        assert_eq!(endpoint.service_id, 99);
         assert_eq!(client.ping_interval.load(Ordering::Relaxed), 15);
         assert_eq!(client.reconnect_interval.load(Ordering::Relaxed), 16);
         assert_eq!(client.reconnect_nonce.load(Ordering::Relaxed), 7);
@@ -1505,6 +1568,67 @@ mod tests {
     fn frag_entry_not_expired_immediately() {
         let entry = FragEntry::new(1);
         assert!(!entry.expired());
+    }
+
+    #[test]
+    fn frame_handler_reassembles_fragmented_event_payloads() {
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        );
+        let mut handler = WsFrameHandler {
+            client: &client,
+            pending_frags: HashMap::new(),
+        };
+        let first = proto::Frame {
+            method: METHOD_DATA,
+            headers: vec![
+                make_header(HEADER_TYPE, MSG_TYPE_EVENT),
+                make_header(HEADER_SUM, "2"),
+                make_header(HEADER_SEQ, "0"),
+                make_header(HEADER_MESSAGE_ID, "message-1"),
+            ],
+            payload: Some(b"first-".to_vec()),
+            ..Default::default()
+        };
+        let second = proto::Frame {
+            headers: vec![
+                make_header(HEADER_TYPE, MSG_TYPE_EVENT),
+                make_header(HEADER_SUM, "2"),
+                make_header(HEADER_SEQ, "1"),
+                make_header(HEADER_MESSAGE_ID, "message-1"),
+            ],
+            payload: Some(b"second".to_vec()),
+            ..first.clone()
+        };
+
+        assert_eq!(handler.event_payload(&first), None);
+        assert_eq!(
+            handler.event_payload(&second),
+            Some(b"first-second".to_vec())
+        );
+        assert!(handler.pending_frags.is_empty());
+    }
+
+    #[test]
+    fn frame_handler_ignores_non_event_data_frames() {
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        );
+        let mut handler = WsFrameHandler {
+            client: &client,
+            pending_frags: HashMap::new(),
+        };
+        let frame = proto::Frame {
+            method: METHOD_DATA,
+            headers: vec![make_header(HEADER_TYPE, "card")],
+            payload: Some(b"ignored".to_vec()),
+            ..Default::default()
+        };
+
+        assert_eq!(handler.event_payload(&frame), None);
+        assert!(handler.pending_frags.is_empty());
     }
 
     // ── Header helpers ──
