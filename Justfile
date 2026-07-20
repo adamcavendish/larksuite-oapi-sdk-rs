@@ -48,6 +48,10 @@ test-all:
     cargo nextest run --workspace --all-features
     cargo test --doc --workspace
 
+# Verify the checked-in GoV397 metadata against the Go SDK tags
+go-v397-check go_sdk:
+    go run ./tools/generate_go_v397_metadata.go --go-sdk "{{go_sdk}}" --check
+
 # ---------- Docs ----------
 
 # Build rustdoc (CI mode)
