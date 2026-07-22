@@ -112,6 +112,19 @@ go run ./tools/generate_go_v397_metadata.go --go-sdk "$GO_SDK_DIR"
 just go-v397-check "$GO_SDK_DIR"
 ```
 
+The checked-in Go service contract catalog records the complete Go `v3.9.9`
+resource request surface: source resource, receiver, operation, HTTP method,
+path, token types, and upload behavior. It is a reproducible tooling input for
+future service generation; it does not alter runtime request dispatch or
+generate Rust resource implementations yet. Refresh it or verify that it is
+current with the same Go checkout:
+
+```sh
+GO_SDK_DIR=/path/to/larksuite-oapi-sdk-go
+go run ./tools/generate_go_service_catalog.go --go-sdk "$GO_SDK_DIR" --revision v3.9.9
+just go-service-catalog-check "$GO_SDK_DIR"
+```
+
 ### Dynamic JSON Values
 
 Closed API contracts use dedicated request and response models. Where the

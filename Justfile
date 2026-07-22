@@ -52,6 +52,10 @@ test-all:
 go-v397-check go_sdk:
     go run ./tools/generate_go_v397_metadata.go --go-sdk "{{go_sdk}}" --check
 
+# Verify the checked-in Go service contract catalog against the Go SDK tag
+go-service-catalog-check go_sdk:
+    go run ./tools/generate_go_service_catalog.go --go-sdk "{{go_sdk}}" --check
+
 # ---------- Docs ----------
 
 # Build rustdoc (CI mode)
