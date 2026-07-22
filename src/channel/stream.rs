@@ -1,5 +1,7 @@
 use std::time::{Duration, Instant};
 
+use crate::LarkError;
+
 #[derive(Debug, Clone)]
 pub struct StreamUpdate {
     pub message_id: String,
@@ -42,8 +44,9 @@ impl StreamUpdate {
     }
 }
 
-pub fn text_content(text: &str) -> Result<String, serde_json::Error> {
-    serde_json::to_string(&serde_json::json!({ "text": text }))
+/// Encodes text as the JSON content required by the Lark IM API.
+pub fn text_content(text: &str) -> Result<String, LarkError> {
+    Ok(serde_json::to_string(&serde_json::json!({ "text": text }))?)
 }
 
 pub fn split_text(text: &str, max_chars: usize) -> Vec<String> {

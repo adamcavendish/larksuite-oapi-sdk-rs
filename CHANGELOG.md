@@ -77,6 +77,8 @@
 - Made legacy `MessageCard::element` and `MessageCardAction::action` fallible.
   They now return `LarkError::Json` instead of silently inserting JSON `null`
   for invalid generic elements.
+- Updated public JSON construction helpers to return `LarkError::Json` rather
+  than exposing `serde_json::Error` directly.
 
 ### REST service coverage
 

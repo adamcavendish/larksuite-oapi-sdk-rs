@@ -1,10 +1,23 @@
-use larksuite_oapi_sdk_rs::{JsonValue, ReqBody};
-use serde::Serialize;
+use larksuite_oapi_sdk_rs::{JsonValue, LarkError, ReqBody};
+use serde::{Serialize, Serializer};
 
 #[derive(Serialize)]
 struct DynamicPayload<'a> {
     title: &'a str,
     enabled: bool,
+}
+
+struct FailingSerialize;
+
+impl Serialize for FailingSerialize {
+    fn serialize<S>(&self, _: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        Err(serde::ser::Error::custom(
+            "intentional serialization failure",
+        ))
+    }
 }
 
 #[test]
@@ -39,4 +52,13 @@ fn request_body_json_uses_sdk_dynamic_value() {
     };
     assert_eq!(value["title"], "request");
     assert_eq!(value["enabled"], false);
+}
+
+#[test]
+fn json_value_and_request_body_surface_sdk_json_errors() {
+    let value_err = JsonValue::from_serializable(FailingSerialize).unwrap_err();
+    let body_err = ReqBody::json(&FailingSerialize).unwrap_err();
+
+    assert!(matches!(value_err, LarkError::Json(_)));
+    assert!(matches!(body_err, LarkError::Json(_)));
 }

@@ -4,7 +4,7 @@ use std::path::Path;
 use http::HeaderMap;
 use serde::Serialize;
 
-use crate::AccessTokenType;
+use crate::{AccessTokenType, LarkError};
 
 #[derive(Debug, Clone)]
 pub struct ApiReq {
@@ -36,7 +36,10 @@ pub enum ReqBody {
 }
 
 impl ReqBody {
-    pub fn json<T: Serialize>(value: &T) -> Result<Self, serde_json::Error> {
+    /// Creates a JSON request body.
+    ///
+    /// Returns [`LarkError::Json`] when serialization fails.
+    pub fn json<T: Serialize>(value: &T) -> Result<Self, LarkError> {
         Ok(Self::Json(crate::JsonValue::from_serializable(value)?))
     }
 }

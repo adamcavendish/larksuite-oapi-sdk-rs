@@ -3,6 +3,8 @@
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
 
+use crate::LarkError;
+
 /// A JSON value used where the Lark API intentionally permits an open-ended
 /// payload or response shape.
 ///
@@ -15,8 +17,10 @@ pub struct JsonValue(serde_json::Value);
 
 impl JsonValue {
     /// Creates a JSON value from any serializable Rust value.
-    pub fn from_serializable(value: impl Serialize) -> Result<Self, serde_json::Error> {
-        serde_json::to_value(value).map(Self)
+    ///
+    /// Returns [`LarkError::Json`] when serialization fails.
+    pub fn from_serializable(value: impl Serialize) -> Result<Self, LarkError> {
+        Ok(Self(serde_json::to_value(value)?))
     }
 
     /// Borrows the underlying JSON representation for integration boundaries.

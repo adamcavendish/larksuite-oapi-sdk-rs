@@ -13,6 +13,13 @@ use super::identity::BotIdentityCache;
 use super::state::ChannelState;
 use super::*;
 
+#[test]
+fn text_content_uses_sdk_error_surface() {
+    let content: Result<_, crate::LarkError> = text_content("hello");
+
+    assert_eq!(content.unwrap(), r#"{"text":"hello"}"#);
+}
+
 fn client_for(addr: std::net::SocketAddr) -> LarkClient {
     LarkClient::builder("app_id", "app_secret")
         .base_url(format!("http://{addr}"))
