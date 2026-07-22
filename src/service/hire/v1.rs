@@ -4972,7 +4972,7 @@ hire_catalog_iterator!(
 pub struct ReplayableRequestBody(crate::JsonValue);
 
 impl ReplayableRequestBody {
-    pub fn from_serializable(body: impl Serialize) -> Result<Self, serde_json::Error> {
+    pub fn from_serializable(body: impl Serialize) -> Result<Self, LarkError> {
         crate::JsonValue::from_serializable(body).map(Self)
     }
 }

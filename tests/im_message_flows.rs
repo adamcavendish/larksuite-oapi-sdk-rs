@@ -3,12 +3,27 @@ mod common;
 use common::{http_response, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::LarkClient;
+use larksuite_oapi_sdk_rs::LarkError;
 use larksuite_oapi_sdk_rs::card::{Card, CardHeader, div};
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::im::v1::{
     CreateMessageReqBody, MessageType, PatchMessageReqBody, ReplyMessageReqBody,
     UpdateMessageReqBody,
 };
+use serde::{Serialize, Serializer};
+
+struct FailingSerialize;
+
+impl Serialize for FailingSerialize {
+    fn serialize<S>(&self, _: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        Err(serde::ser::Error::custom(
+            "intentional serialization failure",
+        ))
+    }
+}
 
 fn client_for(addr: std::net::SocketAddr) -> LarkClient {
     LarkClient::builder("test_app_id", "test_secret")
@@ -43,6 +58,19 @@ fn reply_in_thread_body_serializes() {
     assert_eq!(json["msg_type"], "text");
     assert_eq!(json["reply_in_thread"], true);
     assert_eq!(json["content"], r#"{"text":"hello"}"#);
+}
+
+#[test]
+fn interactive_card_helpers_surface_sdk_json_errors() {
+    let create = CreateMessageReqBody::interactive_card("oc_group", FailingSerialize).unwrap_err();
+    let reply = ReplyMessageReqBody::interactive_card(FailingSerialize).unwrap_err();
+    let patch = PatchMessageReqBody::interactive_card(FailingSerialize).unwrap_err();
+    let update = UpdateMessageReqBody::interactive_card(FailingSerialize).unwrap_err();
+
+    assert!(matches!(create, LarkError::Json(_)));
+    assert!(matches!(reply, LarkError::Json(_)));
+    assert!(matches!(patch, LarkError::Json(_)));
+    assert!(matches!(update, LarkError::Json(_)));
 }
 
 #[test]

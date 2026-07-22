@@ -467,7 +467,7 @@ impl CreateMessageReqBody {
     pub fn interactive_card(
         receive_id: impl Into<String>,
         card: impl Serialize,
-    ) -> Result<Self, serde_json::Error> {
+    ) -> Result<Self, LarkError> {
         Ok(Self::interactive_card_content(
             receive_id,
             card_content(card)?,
@@ -505,7 +505,7 @@ impl ReplyMessageReqBody {
         self
     }
 
-    pub fn interactive_card(card: impl Serialize) -> Result<Self, serde_json::Error> {
+    pub fn interactive_card(card: impl Serialize) -> Result<Self, LarkError> {
         Ok(Self::interactive_card_content(card_content(card)?))
     }
 
@@ -531,7 +531,7 @@ pub struct PatchMessageReqBody {
 }
 
 impl PatchMessageReqBody {
-    pub fn interactive_card(card: impl Serialize) -> Result<Self, serde_json::Error> {
+    pub fn interactive_card(card: impl Serialize) -> Result<Self, LarkError> {
         Ok(Self::interactive_card_content(card_content(card)?))
     }
 
@@ -556,7 +556,7 @@ impl UpdateMessageReqBody {
         self
     }
 
-    pub fn interactive_card(card: impl Serialize) -> Result<Self, serde_json::Error> {
+    pub fn interactive_card(card: impl Serialize) -> Result<Self, LarkError> {
         Ok(Self::interactive_card_content(card_content(card)?))
     }
 
@@ -568,8 +568,8 @@ impl UpdateMessageReqBody {
     }
 }
 
-fn card_content(card: impl Serialize) -> Result<String, serde_json::Error> {
-    serde_json::to_string(&card)
+fn card_content(card: impl Serialize) -> Result<String, LarkError> {
+    Ok(serde_json::to_string(&card)?)
 }
 
 #[derive(Debug, Clone, Default, Serialize)]

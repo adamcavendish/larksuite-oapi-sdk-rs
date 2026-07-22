@@ -1,5 +1,7 @@
 use serde_json::{Map, Value, json};
 
+use crate::LarkError;
+
 use super::types::{ChannelMention, ChannelResource};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -85,7 +87,7 @@ pub(super) fn markdown_to_post(
     title: &str,
     markdown: &str,
     mentions: &[ChannelMention],
-) -> Result<String, serde_json::Error> {
+) -> Result<String, LarkError> {
     let mut content = Vec::new();
     let mention_elements: Vec<_> = mentions
         .iter()
@@ -108,12 +110,12 @@ pub(super) fn markdown_to_post(
     }
     content.push(json!([{ "tag": "md", "text": markdown }]));
 
-    serde_json::to_string(&json!({
+    Ok(serde_json::to_string(&json!({
         "zh_cn": {
             "title": title,
             "content": content,
         }
-    }))
+    }))?)
 }
 
 fn text(map: &Map<String, Value>) -> NormalizedContent {
