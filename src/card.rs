@@ -15,6 +15,23 @@
 //!
 //! let json = card.to_json();
 //! ```
+//!
+//! # Legacy message cards
+//!
+//! Legacy [`MessageCard`] composition accepts arbitrary serializable elements,
+//! so insertion is fallible instead of silently replacing invalid values with
+//! JSON `null`:
+//!
+//! ```rust
+//! use larksuite_oapi_sdk_rs::{card::MessageCard, LarkError};
+//!
+//! # fn build_card() -> Result<(), LarkError> {
+//! let card = MessageCard::new()
+//!     .element(serde_json::json!({"tag": "div"}))?;
+//! # let _ = card;
+//! # Ok(())
+//! # }
+//! ```
 
 use crate::JsonValue as Value;
 use serde::{Deserialize, Serialize};
@@ -757,10 +774,9 @@ impl MessageCard {
         self
     }
 
-    pub fn element(mut self, element: impl Serialize) -> Self {
-        self.elements
-            .push(Value::from_serializable(element).unwrap_or_default());
-        self
+    pub fn element(mut self, element: impl Serialize) -> Result<Self, crate::LarkError> {
+        self.elements.push(Value::from_serializable(element)?);
+        Ok(self)
     }
 
     pub fn i18n_elements(mut self, i18n: MessageCardI18nElements) -> Self {
@@ -1193,10 +1209,9 @@ impl MessageCardAction {
         }
     }
 
-    pub fn action(mut self, action: impl Serialize) -> Self {
-        self.actions
-            .push(Value::from_serializable(action).unwrap_or_default());
-        self
+    pub fn action(mut self, action: impl Serialize) -> Result<Self, crate::LarkError> {
+        self.actions.push(Value::from_serializable(action)?);
+        Ok(self)
     }
 
     pub fn actions(mut self, actions: Vec<Value>) -> Self {

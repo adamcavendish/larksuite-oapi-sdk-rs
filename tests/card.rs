@@ -1,9 +1,24 @@
+use larksuite_oapi_sdk_rs::LarkError;
 use larksuite_oapi_sdk_rs::card::{
     ActionComponent, ActionElement, ButtonComponent, Card, CardConfig, CardHeader, ChartMdElement,
     ColumnElement, ColumnSetElement, DatePickerComponent, DivElement, DivField, Element,
     FormElement, ImgElement, MarkdownElement, MultiSelectStaticComponent, NoteElement,
     OverflowComponent, SelectOption, SelectStaticComponent, TextObject, TimePickerComponent,
 };
+use serde::{Serialize, Serializer};
+
+struct FailingSerialize;
+
+impl Serialize for FailingSerialize {
+    fn serialize<S>(&self, _: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        Err(serde::ser::Error::custom(
+            "intentional serialization failure",
+        ))
+    }
+}
 
 #[test]
 fn test_card_to_json_basic() {
@@ -358,6 +373,7 @@ fn message_card_builder() {
         .element(
             serde_json::json!({"tag": "div", "text": {"tag": "plain_text", "content": "world"}}),
         )
+        .unwrap()
         .card_link(MessageCardURL::new("https://example.com"));
 
     let json = card.to_json();
@@ -425,9 +441,11 @@ fn message_card_action_select_menus() {
     let action = MessageCardAction::new()
         .layout(MessageCardActionLayout::Flow)
         .action(static_menu)
+        .unwrap()
         .action(multi_menu)
+        .unwrap()
         .action(person_menu);
-    let card = MessageCard::new().element(action);
+    let card = MessageCard::new().element(action.unwrap()).unwrap();
     let json = card.to_json();
     let element = &json["elements"][0];
 
@@ -455,4 +473,32 @@ fn message_card_action_select_menus() {
     let decoded: MessageCardAction = serde_json::from_value(element.clone()).unwrap();
     assert_eq!(decoded.layout, Some(MessageCardActionLayout::Flow));
     assert_eq!(decoded.actions.len(), 3);
+}
+
+#[test]
+fn message_card_element_propagates_serialization_errors() {
+    use larksuite_oapi_sdk_rs::card::MessageCard;
+
+    let err = MessageCard::new().element(FailingSerialize).unwrap_err();
+
+    assert!(matches!(err, LarkError::Json(_)));
+    assert!(
+        err.to_string()
+            .contains("intentional serialization failure")
+    );
+}
+
+#[test]
+fn message_card_action_propagates_serialization_errors() {
+    use larksuite_oapi_sdk_rs::card::MessageCardAction;
+
+    let err = MessageCardAction::new()
+        .action(FailingSerialize)
+        .unwrap_err();
+
+    assert!(matches!(err, LarkError::Json(_)));
+    assert!(
+        err.to_string()
+            .contains("intentional serialization failure")
+    );
 }
