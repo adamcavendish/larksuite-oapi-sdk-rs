@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Tooling
+
+- Added a reproducible Go `v3.9.9` service contract catalog for future
+  resource-generation work. It records 1,562 request definitions without
+  changing runtime dispatch or generated Rust resource implementations.
+
 ### WebSocket
 
 - Added branch-parity trusted user channels with channel tags, gateway query
