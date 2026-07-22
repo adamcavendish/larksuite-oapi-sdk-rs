@@ -74,6 +74,9 @@
   `wiki_v1()` or `wiki_v2()` explicitly.
 - Updated Hire v1 `IdNameObject.name` to the typed `I18n` API shape and removed
   its non-Go `zh_name` and `en_name` fields.
+- Made legacy `MessageCard::element` and `MessageCardAction::action` fallible.
+  They now return `LarkError::Json` instead of silently inserting JSON `null`
+  for invalid generic elements.
 
 ### REST service coverage
 
