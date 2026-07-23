@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## [0.3.0] - 2026-07-23
+
+### Breaking changes
+
+- Removed the redundant `LarkClient::{do_req, do_req_typed, get, post, put,
+  patch, delete}` methods. Use the explicit `raw_request*` APIs with an
+  `ApiReq` instead.
+- Renamed the public `Client` and `ClientBuilder` types to `LarkClient` and
+  `LarkClientBuilder`. The legacy names are not retained as aliases.
+- Removed the ambiguous `LarkClient::wiki()` compatibility accessor; use
+  `wiki_v1()` or `wiki_v2()` explicitly.
+- Updated Hire v1 `IdNameObject.name` to the typed `I18n` API shape and removed
+  its non-Go `zh_name` and `en_name` fields.
+- Made legacy `MessageCard::element` and `MessageCardAction::action` fallible.
+  They now return `LarkError::Json` instead of silently inserting JSON `null`
+  for invalid generic elements. Public JSON construction helpers now return
+  `LarkError::Json` rather than exposing `serde_json::Error` directly.
+- Marked server-owned typed REST responses, response wrappers, event envelopes,
+  and event payloads `#[non_exhaustive]`. Downstream code can continue to
+  deserialize and read their fields, but must not construct them with struct
+  literals. Caller-owned request, transport-input, callback-reply, and
+  domain-error types remain directly constructible.
+- Replaced public `serde_json::Value` model fields, request helpers, event
+  payloads, and card payloads with the SDK-owned `JsonValue` wrapper. Use
+  `JsonValue` for intentionally dynamic API data.
+
 ### Client
 
 - Removed Marketplace app-ticket background work from synchronous client
@@ -84,27 +110,6 @@
   responses now discard their data bodies explicitly.
 - Replaced Board v1 raw node and theme payloads with the complete Go-shaped
   whiteboard model graph, including typed node creation and PlantUML requests.
-
-## [0.3.0] - 2026-07-12
-
-### Breaking changes
-
-- Removed the redundant `LarkClient::{do_req, do_req_typed, get, post, put,
-  patch, delete}` methods. Use the explicit `raw_request*` APIs with an
-  `ApiReq` instead.
-- Renamed the public `Client` and `ClientBuilder` types to `LarkClient` and
-  `LarkClientBuilder`. The legacy names are not retained as aliases.
-- Removed the ambiguous `LarkClient::wiki()` compatibility accessor; use
-  `wiki_v1()` or `wiki_v2()` explicitly.
-- Updated Hire v1 `IdNameObject.name` to the typed `I18n` API shape and removed
-  its non-Go `zh_name` and `en_name` fields.
-- Made legacy `MessageCard::element` and `MessageCardAction::action` fallible.
-  They now return `LarkError::Json` instead of silently inserting JSON `null`
-  for invalid generic elements.
-- Updated public JSON construction helpers to return `LarkError::Json` rather
-  than exposing `serde_json::Error` directly.
-
-### REST service coverage
 
 - Replaced raw response payloads across CoreHR v1 and v2, APaaS, VC,
   Attendance, Mail, Application v6, and Compensation v1 with Go-shaped

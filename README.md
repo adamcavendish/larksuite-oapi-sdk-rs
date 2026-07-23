@@ -75,10 +75,25 @@ application needs to prewarm the ticket explicitly.
 
 ### Migrating to 0.3
 
-This release intentionally breaks the previous client names: replace `Client`
-with `LarkClient` and `ClientBuilder` with `LarkClientBuilder`. Hire v1
-`IdNameObject.name` is now `Option<I18n>` (`zh_cn` and `en_us`), matching the
-official API shape; its old `zh_name` and `en_name` fields are removed.
+Version 0.3 intentionally makes API-breaking corrections so the public Rust
+surface matches the upstream Lark contracts more closely.
+
+- Replace `Client` with `LarkClient` and `ClientBuilder` with
+  `LarkClientBuilder`. The old names are not aliases.
+- Replace `client.wiki()` with `client.wiki_v1()` or `client.wiki_v2()`.
+- Replace `do_req`, `do_req_typed`, and verb helpers with `raw_request*` and an
+  `ApiReq` when a dedicated typed resource is unavailable.
+- Treat Hire v1 `IdNameObject.name` as `Option<I18n>` with `zh_cn` and `en_us`
+  fields. The old `zh_name` and `en_name` fields are removed.
+- Handle JSON construction failures as `LarkError::Json`. Legacy card element
+  helpers are fallible for the same reason.
+- Use `JsonValue` for intentionally dynamic API data instead of public
+  `serde_json::Value` model fields.
+
+Typed REST responses and incoming event payloads are now `#[non_exhaustive]`.
+Continue to deserialize them and read their public fields as before. Do not use
+struct literals to create server-owned values; build request models, callback
+replies, transport inputs, and domain errors directly as needed.
 
 ## Common Flows
 
