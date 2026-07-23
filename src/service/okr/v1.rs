@@ -9,6 +9,7 @@ use crate::service::common::{EmptyRespV2 as EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrPeriod {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -27,6 +28,7 @@ pub struct OkrPeriod {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -43,6 +45,7 @@ pub struct OkrItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrObjective {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -65,6 +68,7 @@ pub struct OkrObjective {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrKeyResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -125,6 +129,7 @@ pub struct UpdateProgressRecordReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PeriodListData {
     #[serde(default)]
     pub items: Vec<OkrPeriod>,
@@ -135,6 +140,7 @@ pub struct PeriodListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrListData {
     #[serde(default)]
     pub okr_list: Vec<OkrItem>,
@@ -412,6 +418,7 @@ impl<'a> GetUserOkrQuery<'a> {
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UploadImageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_token: Option<String>,
@@ -420,12 +427,14 @@ pub struct UploadImageRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchGetOkrRespData {
     #[serde(default)]
     pub okr_list: Vec<OkrBatch>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreatePeriodRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub period_id: Option<String>,
@@ -436,6 +445,7 @@ pub struct CreatePeriodRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PatchPeriodRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub period_id: Option<String>,
@@ -444,12 +454,14 @@ pub struct PatchPeriodRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListPeriodRuleRespData {
     #[serde(default)]
     pub period_rules: Vec<PeriodRule>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateProgressRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub progress_id: Option<String>,
@@ -462,6 +474,7 @@ pub struct CreateProgressRecordRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetProgressRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub progress_id: Option<String>,
@@ -474,6 +487,7 @@ pub struct GetProgressRecordRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateProgressRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub progress_id: Option<String>,
@@ -486,6 +500,7 @@ pub struct UpdateProgressRecordRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryReviewRespData {
     #[serde(default)]
     pub review_list: Vec<OkrReview>,
@@ -493,12 +508,14 @@ pub struct QueryReviewRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentBlock {
     #[serde(default)]
     pub blocks: Vec<ContentBlockElement>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentBlockElement {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -509,6 +526,7 @@ pub struct ContentBlockElement {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentColor {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub red: Option<i32>,
@@ -521,6 +539,7 @@ pub struct ContentColor {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentDocsLink {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -529,12 +548,14 @@ pub struct ContentDocsLink {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentGallery {
     #[serde(default, rename = "imageList")]
     pub image_list: Vec<ContentImageItem>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentImageItem {
     #[serde(default, rename = "fileToken", skip_serializing_if = "Option::is_none")]
     pub file_token: Option<String>,
@@ -547,12 +568,14 @@ pub struct ContentImageItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentLink {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentList {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -567,6 +590,7 @@ pub struct ContentList {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentParagraph {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub style: Option<ContentParagraphStyle>,
@@ -575,6 +599,7 @@ pub struct ContentParagraph {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentParagraphElement {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -587,18 +612,21 @@ pub struct ContentParagraphElement {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentParagraphStyle {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub list: Option<ContentList>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentPerson {
     #[serde(default, rename = "openId", skip_serializing_if = "Option::is_none")]
     pub open_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentTextRun {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -607,6 +635,7 @@ pub struct ContentTextRun {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentTextStyle {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub bold: Option<bool>,
@@ -625,6 +654,7 @@ pub struct ContentTextStyle {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrBatch {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -641,6 +671,7 @@ pub struct OkrBatch {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseOkrObjective {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -681,6 +712,7 @@ pub struct ResponseOkrObjective {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrObjectiveAlignedObjective {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -691,6 +723,7 @@ pub struct OkrObjectiveAlignedObjective {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrObjectiveAlignedObjectiveOwner {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub open_id: Option<String>,
@@ -699,6 +732,7 @@ pub struct OkrObjectiveAlignedObjectiveOwner {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrObjectiveKr {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -731,6 +765,7 @@ pub struct OkrObjectiveKr {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrObjectiveProgressRate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub percent: Option<i32>,
@@ -739,6 +774,7 @@ pub struct OkrObjectiveProgressRate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrReview {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<OkrObjectiveAlignedObjectiveOwner>,
@@ -747,6 +783,7 @@ pub struct OkrReview {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrReviewPeriod {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub period_id: Option<String>,
@@ -757,6 +794,7 @@ pub struct OkrReviewPeriod {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrReviewPeriodUrl {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -765,6 +803,7 @@ pub struct OkrReviewPeriodUrl {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PeriodRule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub period_rule_id: Option<String>,
@@ -785,6 +824,7 @@ pub struct ProgressRateNew {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ProgressRecordSimplify {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,

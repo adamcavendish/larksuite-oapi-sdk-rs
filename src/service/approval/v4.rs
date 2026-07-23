@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FieldGroup {
     #[serde(default)]
     pub writable: Vec<String>,
@@ -17,6 +18,7 @@ pub struct FieldGroup {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalFile {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -29,6 +31,7 @@ pub struct ApprovalFile {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nResource {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
@@ -39,6 +42,7 @@ pub struct I18nResource {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nResourceText {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
@@ -47,6 +51,7 @@ pub struct I18nResourceText {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExternalInstanceForm {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -55,6 +60,7 @@ pub struct ExternalInstanceForm {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExternalInstanceLink {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc_link: Option<String>,
@@ -63,6 +69,7 @@ pub struct ExternalInstanceLink {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CcNode {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cc_id: Option<String>,
@@ -87,6 +94,7 @@ pub struct CcNode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceComment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -103,6 +111,7 @@ pub struct InstanceComment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ActionConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub action_type: Option<String>,
@@ -117,6 +126,7 @@ pub struct ActionConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExternalInstanceCheckResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub instance_id: Option<String>,
@@ -127,6 +137,7 @@ pub struct ExternalInstanceCheckResponse {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub revert_option: Option<i64>,
@@ -137,6 +148,7 @@ pub struct ApprovalSetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub can_update_viewer: Option<bool>,
@@ -151,6 +163,7 @@ pub struct ApprovalConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalForm {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub form: Option<String>,
@@ -159,6 +172,7 @@ pub struct ApprovalForm {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Widget {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -185,6 +199,7 @@ pub struct Widget {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalNode {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -207,6 +222,7 @@ pub struct ApprovalNode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalApprover {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<String>,
@@ -217,6 +233,7 @@ pub struct ApprovalApprover {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalCcer {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<String>,
@@ -225,6 +242,7 @@ pub struct ApprovalCcer {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalDefinition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_code: Option<String>,
@@ -241,6 +259,7 @@ pub struct ApprovalDefinition {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalViewer {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub viewer_type: Option<String>,
@@ -251,6 +270,7 @@ pub struct ApprovalViewer {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalTimeline {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<String>,
@@ -277,6 +297,7 @@ pub struct ApprovalTimeline {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalInstance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_code: Option<String>,
@@ -333,6 +354,7 @@ pub struct ApprovalInstance {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
@@ -357,6 +379,7 @@ pub struct InstanceTask {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExternalApproval {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_name: Option<String>,
@@ -377,6 +400,7 @@ pub struct ExternalApproval {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExternalConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub biz_name: Option<String>,
@@ -405,6 +429,7 @@ pub struct ExternalConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExternalInstance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_code: Option<String>,
@@ -449,6 +474,7 @@ pub struct ExternalInstance {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExternalInstanceTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
@@ -543,6 +569,7 @@ pub struct CcSearch {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SpecifiedRollback {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -573,6 +600,7 @@ pub struct CommentRequest {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskResubmit {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub approval_code: Option<String>,
@@ -891,6 +919,7 @@ pub struct CancelInstanceReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateApprovalData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_code: Option<String>,
@@ -899,12 +928,14 @@ pub struct CreateApprovalData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateInstanceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub instance_code: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceListData {
     #[serde(default)]
     pub instance_code_list: Vec<String>,
@@ -915,6 +946,7 @@ pub struct InstanceListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CheckExternalInstanceData {
     #[serde(default)]
     pub diff_instance_list: Vec<ExternalInstanceCheckResponse>,
@@ -1313,12 +1345,14 @@ impl<'a> ListExternalTaskQuery<'a> {
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PreviewInstanceRespData {
     #[serde(default)]
     pub preview_nodes: Vec<PreviewNode>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryInstanceRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<i32>,
@@ -1331,6 +1365,7 @@ pub struct QueryInstanceRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchCcInstanceRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<i32>,
@@ -1343,24 +1378,28 @@ pub struct SearchCcInstanceRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateInstanceCommentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub comment_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DeleteInstanceCommentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub comment_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListInstanceCommentRespData {
     #[serde(default)]
     pub comments: Vec<Comment>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RemoveInstanceCommentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub instance_id: Option<String>,
@@ -1369,6 +1408,7 @@ pub struct RemoveInstanceCommentRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryTaskRespData {
     #[serde(default)]
     pub tasks: Vec<Task>,
@@ -1381,6 +1421,7 @@ pub struct QueryTaskRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchTaskRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<i32>,
@@ -1393,6 +1434,7 @@ pub struct SearchTaskRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListExternalTaskRespData {
     #[serde(default)]
     pub data: Vec<ExternalTaskList>,
@@ -1404,6 +1446,7 @@ pub struct ListExternalTaskRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CcSearchItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval: Option<InstanceSearchApproval>,
@@ -1416,6 +1459,7 @@ pub struct CcSearchItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CcSearchNode {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -1432,6 +1476,7 @@ pub struct CcSearchNode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Comment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1454,6 +1499,7 @@ pub struct Comment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CommentAtInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -1464,6 +1510,7 @@ pub struct CommentAtInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CommentReply {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1484,6 +1531,7 @@ pub struct CommentReply {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Count {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub total: Option<i32>,
@@ -1492,6 +1540,7 @@ pub struct Count {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExternalTaskItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1502,6 +1551,7 @@ pub struct ExternalTaskItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExternalTaskList {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub instance_id: Option<String>,
@@ -1518,6 +1568,7 @@ pub struct ExternalTaskList {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceSearchApproval {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
@@ -1534,12 +1585,14 @@ pub struct InstanceSearchApproval {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceSearchApprovalExternal {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub batch_cc_read: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceSearchGroup {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub external_id: Option<String>,
@@ -1548,6 +1601,7 @@ pub struct InstanceSearchGroup {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceSearchItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval: Option<InstanceSearchApproval>,
@@ -1558,6 +1612,7 @@ pub struct InstanceSearchItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceSearchLink {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc_link: Option<String>,
@@ -1566,6 +1621,7 @@ pub struct InstanceSearchLink {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceSearchNode {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
@@ -1590,6 +1646,7 @@ pub struct InstanceSearchNode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PreviewNode {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub node_id: Option<String>,
@@ -1614,6 +1671,7 @@ pub struct PreviewNode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Task {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub topic: Option<String>,
@@ -1654,6 +1712,7 @@ pub struct Task {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskSearchItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval: Option<InstanceSearchApproval>,
@@ -1666,6 +1725,7 @@ pub struct TaskSearchItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskSearchNode {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -1690,6 +1750,7 @@ pub struct TaskSearchNode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskUrls {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub helpdesk: Option<String>,

@@ -7,12 +7,14 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PostStatistics {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub share_count: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MomentsPostCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -29,12 +31,14 @@ pub struct P2MomentsPostCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MomentsPostDeletedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MomentsReactionCreatedV1 {
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     pub type_: Option<String>,
@@ -53,6 +57,7 @@ pub struct P2MomentsReactionCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MomentsReactionDeletedV1 {
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     pub type_: Option<String>,
@@ -69,6 +74,7 @@ pub struct P2MomentsReactionDeletedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MomentsCommentCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
@@ -87,6 +93,7 @@ pub struct P2MomentsCommentCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MomentsCommentDeletedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -95,6 +102,7 @@ pub struct P2MomentsCommentDeletedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MomentsPostStatisticsUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub post_id: Option<String>,

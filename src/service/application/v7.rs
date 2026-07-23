@@ -23,12 +23,14 @@ impl_resp_v2!(
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateAppAvatarUploadRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateApplicationPublishRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version_id: Option<String>,
@@ -59,6 +61,7 @@ pub struct AppAbilityBot {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppAbilityBotI18n {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_key: Option<String>,
@@ -95,6 +98,7 @@ pub struct AppConfigScopeItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppConfigEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subscription_type: Option<String>,
@@ -107,6 +111,7 @@ pub struct AppConfigEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppConfigSecurity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub add: Option<AppConfigSecurityItem>,
@@ -117,6 +122,7 @@ pub struct AppConfigSecurity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppConfigSecurityItem {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub redirect_urls: Vec<String>,
@@ -151,6 +157,7 @@ pub struct AppVisibilityIdList {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppConfigContactsRange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contacts_range_type: Option<String>,
@@ -159,6 +166,7 @@ pub struct AppConfigContactsRange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppContactsRangeIdList {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub user_ids: Vec<String>,
@@ -169,6 +177,7 @@ pub struct AppContactsRangeIdList {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventAndCallbackEncryptStrategy {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub encryption_key: Option<String>,

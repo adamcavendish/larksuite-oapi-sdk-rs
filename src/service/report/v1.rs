@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReportRule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rule_id: Option<String>,
@@ -23,6 +24,7 @@ pub struct ReportRule {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReportField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -37,6 +39,7 @@ pub struct ReportField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReportTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
@@ -87,6 +90,7 @@ pub struct QueryTaskReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RuleListData {
     #[serde(default)]
     pub rules: Vec<ReportRule>,
@@ -97,6 +101,7 @@ pub struct RuleListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskListData {
     #[serde(default)]
     pub items: Vec<ReportTask>,

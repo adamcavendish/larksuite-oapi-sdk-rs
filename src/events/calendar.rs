@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AclScopeEvent {
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     pub type_: Option<String>,
@@ -15,6 +16,7 @@ pub struct AclScopeEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenEventRsvpInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub from_user_id: Option<UserId>,
@@ -37,12 +39,14 @@ impl OpenEventRsvpInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CalendarChangedV4 {
     #[serde(default)]
     pub user_id_list: Vec<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CalendarAclCreatedV4 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acl_id: Option<String>,
@@ -55,6 +59,7 @@ pub struct P2CalendarAclCreatedV4 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CalendarAclDeletedV4 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acl_id: Option<String>,
@@ -67,6 +72,7 @@ pub struct P2CalendarAclDeletedV4 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CalendarEventChangedV4 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub calendar_id: Option<String>,

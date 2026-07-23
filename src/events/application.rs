@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Operator {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub operator_name: Option<String>,
@@ -27,12 +28,14 @@ impl Operator {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct User {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppScope {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub scope: Option<String>,
@@ -45,6 +48,7 @@ pub struct AppScope {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppI18nInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_key: Option<String>,
@@ -57,6 +61,7 @@ pub struct AppI18nInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationAppVersionEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_id: Option<String>,
@@ -93,6 +98,7 @@ pub struct ApplicationAppVersionEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppAbility {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gadget: Option<Gadget>,
@@ -115,6 +121,7 @@ pub struct AppAbility {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Gadget {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub enable_pc_mode: Option<i32>,
@@ -133,6 +140,7 @@ pub struct Gadget {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WebApp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc_url: Option<String>,
@@ -141,18 +149,21 @@ pub struct WebApp {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Bot {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub card_request_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WorkplaceWidget {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub min_lark_version: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Navigate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc: Option<NavigateMeta>,
@@ -161,6 +172,7 @@ pub struct Navigate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NavigateMeta {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
@@ -171,6 +183,7 @@ pub struct NavigateMeta {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CloudDoc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub space_url: Option<String>,
@@ -183,6 +196,7 @@ pub struct CloudDoc {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CloudDocI18nInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_key: Option<String>,
@@ -195,6 +209,7 @@ pub struct CloudDocI18nInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocsBlock {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_type_id: Option<String>,
@@ -207,6 +222,7 @@ pub struct DocsBlock {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BlockI18nInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_key: Option<String>,
@@ -215,6 +231,7 @@ pub struct BlockI18nInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageAction {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc_app_link: Option<String>,
@@ -225,6 +242,7 @@ pub struct MessageAction {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageActionI18nInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_key: Option<String>,
@@ -233,6 +251,7 @@ pub struct MessageActionI18nInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PlusMenu {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc_app_link: Option<String>,
@@ -241,6 +260,7 @@ pub struct PlusMenu {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVersionRemarkEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remark: Option<String>,
@@ -251,6 +271,7 @@ pub struct AppVersionRemarkEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVisibilityEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_all: Option<bool>,
@@ -261,6 +282,7 @@ pub struct AppVisibilityEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVisibleListEvent {
     #[serde(default)]
     pub open_ids: Vec<UserId>,
@@ -269,6 +291,7 @@ pub struct AppVisibleListEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApplicationCreatedV6 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub operator_id: Option<UserId>,
@@ -289,6 +312,7 @@ pub struct P2ApplicationCreatedV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApplicationBotMenuV6 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub operator: Option<Operator>,
@@ -299,6 +323,7 @@ pub struct P2ApplicationBotMenuV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApplicationAppVersionAuditV6 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub operator_id: Option<UserId>,
@@ -317,6 +342,7 @@ pub struct P2ApplicationAppVersionAuditV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApplicationAppVersionPublishApplyV6 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub operator_id: Option<UserId>,
@@ -329,6 +355,7 @@ pub struct P2ApplicationAppVersionPublishApplyV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApplicationAppVersionPublishRevokeV6 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub operator_id: Option<UserId>,
@@ -341,6 +368,7 @@ pub struct P2ApplicationAppVersionPublishRevokeV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApplicationFeedbackCreatedV6 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
@@ -371,6 +399,7 @@ pub struct P2ApplicationFeedbackCreatedV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApplicationFeedbackUpdatedV6 {
     #[serde(default)]
     pub feedback_ids: Vec<String>,
@@ -385,6 +414,7 @@ pub struct P2ApplicationFeedbackUpdatedV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApplicationVisibilityAddedV6 {
     #[serde(default)]
     pub users: Vec<User>,

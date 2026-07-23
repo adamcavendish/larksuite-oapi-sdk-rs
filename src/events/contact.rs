@@ -12,6 +12,7 @@ use crate::service::contact::v3::{
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub open_id: Option<String>,
@@ -90,6 +91,7 @@ impl UserEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OldUserObject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_ids: Option<Vec<String>>,
@@ -98,6 +100,7 @@ pub struct OldUserObject {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DepartmentEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -124,6 +127,7 @@ pub struct DepartmentEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OldDepartmentObject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<DepartmentStatus>,
@@ -132,6 +136,7 @@ pub struct OldDepartmentObject {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserGroup {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_group_id: Option<String>,
@@ -146,6 +151,7 @@ pub struct UserGroup {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Scope {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub departments: Option<Vec<Department>>,
@@ -156,6 +162,7 @@ pub struct Scope {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomAttrEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contact_field_key: Option<Vec<String>>,
@@ -164,6 +171,7 @@ pub struct CustomAttrEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactUserCreatedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object: Option<UserEvent>,
@@ -172,6 +180,7 @@ pub struct P2ContactUserCreatedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactUserUpdatedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object: Option<UserEvent>,
@@ -182,6 +191,7 @@ pub struct P2ContactUserUpdatedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactUserDeletedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object: Option<UserEvent>,
@@ -192,6 +202,7 @@ pub struct P2ContactUserDeletedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactDepartmentCreatedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object: Option<DepartmentEvent>,
@@ -200,6 +211,7 @@ pub struct P2ContactDepartmentCreatedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactDepartmentUpdatedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object: Option<DepartmentEvent>,
@@ -210,6 +222,7 @@ pub struct P2ContactDepartmentUpdatedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactDepartmentDeletedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object: Option<DepartmentEvent>,
@@ -220,6 +233,7 @@ pub struct P2ContactDepartmentDeletedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactScopeUpdatedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub added: Option<Scope>,
@@ -234,6 +248,7 @@ pub struct P2ContactScopeUpdatedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactCustomAttrEventUpdatedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object: Option<CustomAttrEvent>,
@@ -242,12 +257,14 @@ pub struct P2ContactCustomAttrEventUpdatedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactEmployeeTypeEnumCreatedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub new_enum: Option<EmployeeTypeEnum>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactEmployeeTypeEnumUpdatedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub old_enum: Option<EmployeeTypeEnum>,
@@ -256,12 +273,14 @@ pub struct P2ContactEmployeeTypeEnumUpdatedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactEmployeeTypeEnumDeletedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub old_enum: Option<EmployeeTypeEnum>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactEmployeeTypeEnumActivedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub old_enum: Option<EmployeeTypeEnum>,
@@ -270,6 +289,7 @@ pub struct P2ContactEmployeeTypeEnumActivedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ContactEmployeeTypeEnumDeactivatedV3 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub old_enum: Option<EmployeeTypeEnum>,

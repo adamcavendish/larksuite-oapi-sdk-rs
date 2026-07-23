@@ -13,12 +13,14 @@ pub type RecognizeFileReqBody = Vec<FormDataField>;
 // ── Recognition models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BankCard {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<BankCardEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BankCardEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -27,6 +29,7 @@ pub struct BankCardEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BankEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub account_name: Option<String>,
@@ -49,6 +52,7 @@ pub struct BankEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BankInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub bank_type: Option<String>,
@@ -57,6 +61,7 @@ pub struct BankInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BodyEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub address: Option<String>,
@@ -75,6 +80,7 @@ pub struct BodyEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BodyInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub body_type: Option<String>,
@@ -83,6 +89,7 @@ pub struct BodyInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BusinessEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -91,18 +98,21 @@ pub struct BusinessEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BusinessLicense {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<BusinessEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChinesePassport {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<ChinesePassportEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChinesePassportEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -111,6 +121,7 @@ pub struct ChinesePassportEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DrivingEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -119,12 +130,14 @@ pub struct DrivingEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DrivingLicense {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<DrivingEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExtractCopy {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub copy_num: Option<i64>,
@@ -137,6 +150,7 @@ pub struct ExtractCopy {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExtractCurrency {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub currency_name: Option<String>,
@@ -145,6 +159,7 @@ pub struct ExtractCurrency {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExtractPrice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contract_price: Option<f64>,
@@ -155,6 +170,7 @@ pub struct ExtractPrice {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExtractTerm {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub initial_time: Option<String>,
@@ -163,6 +179,7 @@ pub struct ExtractTerm {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExtractTime {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time_start: Option<String>,
@@ -183,6 +200,7 @@ pub struct ExtractTime {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FoodManageEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -191,12 +209,14 @@ pub struct FoodManageEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FoodManageLicense {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<FoodManageEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FoodProduceEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -205,18 +225,21 @@ pub struct FoodProduceEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FoodProduceLicense {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<FoodProduceEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct HealthCertificate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<HealthCertificateEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct HealthCertificateEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -225,12 +248,14 @@ pub struct HealthCertificateEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct HkmMainlandTravelPermit {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<HkmMainlandTravelPermitEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct HkmMainlandTravelPermitEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -239,6 +264,7 @@ pub struct HkmMainlandTravelPermitEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct IdCard {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<IdEntity>>,
@@ -251,6 +277,7 @@ pub struct IdCard {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct IdEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -259,12 +286,14 @@ pub struct IdEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecognizedEntities {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<RecognizedEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecognizedEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -273,6 +302,7 @@ pub struct RecognizedEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Resume {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_md5: Option<String>,
@@ -327,6 +357,7 @@ pub struct Resume {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResumeAward {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub award: Option<String>,
@@ -337,6 +368,7 @@ pub struct ResumeAward {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResumeCareer {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub company: Option<String>,
@@ -359,6 +391,7 @@ pub struct ResumeCareer {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResumeCertificate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -367,6 +400,7 @@ pub struct ResumeCertificate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResumeCompetition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -375,6 +409,7 @@ pub struct ResumeCompetition {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResumeEducation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub school: Option<String>,
@@ -395,6 +430,7 @@ pub struct ResumeEducation {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResumeLanguage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub level: Option<i64>,
@@ -403,6 +439,7 @@ pub struct ResumeLanguage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResumeProject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -421,6 +458,7 @@ pub struct ResumeProject {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaxiEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -429,12 +467,14 @@ pub struct TaxiEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaxiInvoice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<TaxiEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TrainEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -443,18 +483,21 @@ pub struct TrainEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TrainInvoice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<TrainEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TwMainlandTravelPermit {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<TwMainlandTravelPermitEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TwMainlandTravelPermitEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -463,6 +506,7 @@ pub struct TwMainlandTravelPermitEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VatEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -473,6 +517,7 @@ pub struct VatEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct KvEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -481,12 +526,14 @@ pub struct KvEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VatInvoice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<VatEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VehicleEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -495,12 +542,14 @@ pub struct VehicleEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VehicleInvoice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<VehicleInvoiceEntity>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VehicleInvoiceEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -509,6 +558,7 @@ pub struct VehicleInvoiceEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VehicleLicense {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<VehicleEntity>>,
@@ -517,84 +567,98 @@ pub struct VehicleLicense {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VatInvoiceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vat_invoices: Option<Vec<VatInvoice>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BusinessCardData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub business_cards: Option<Vec<RecognizedEntities>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct IdCardData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id_card: Option<IdCard>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BankCardData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub bank_card: Option<BankCard>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VehicleLicenseData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vehicle_license: Option<VehicleLicense>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TrainInvoiceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub train_invoices: Option<Vec<TrainInvoice>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaxiInvoiceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub taxi_invoices: Option<Vec<TaxiInvoice>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct HealthCertificateData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub health_certificate: Option<HealthCertificate>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct HkmMainlandTravelPermitData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hkm_mainland_travel_permit: Option<HkmMainlandTravelPermit>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TwMainlandTravelPermitData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tw_mainland_travel_permit: Option<TwMainlandTravelPermit>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChinesePassportData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chinese_passport: Option<ChinesePassport>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DrivingLicenseData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub driving_license: Option<DrivingLicense>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NurseQualificationCertificateData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nurse_qualification_certificate: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContractData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contracts: Option<Vec<crate::JsonValue>>,
@@ -627,24 +691,28 @@ impl_resp!(RecognizeContractResp, ContractData);
 // ── New data types (v2 pattern) ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FoodManageLicenseData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub food_manage_license: Option<FoodManageLicense>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FoodProduceLicenseData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub food_produce_license: Option<FoodProduceLicense>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VehicleInvoiceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vehicle_invoice: Option<VehicleInvoice>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResumeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resumes: Option<Vec<Resume>>,
@@ -668,6 +736,7 @@ impl_resp_v2!(ParseResumeResp, ResumeData);
 impl_resp_v2!(RecognizeVatInvoiceRespV2, VatInvoiceData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FieldExtractionContractData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_id: Option<String>,
@@ -1091,6 +1160,7 @@ impl<'a> ContractResource<'a> {
 // ── BusinessLicense resource ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BusinessLicenseData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub business_license: Option<BusinessLicense>,

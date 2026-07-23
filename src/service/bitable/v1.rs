@@ -12,6 +12,7 @@ use crate::service::common::{
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct App {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_token: Option<String>,
@@ -26,6 +27,7 @@ pub struct App {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppTable {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub table_id: Option<String>,
@@ -36,6 +38,7 @@ pub struct AppTable {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppTableView {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub view_id: Option<String>,
@@ -48,6 +51,7 @@ pub struct AppTableView {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppTableField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -66,6 +70,7 @@ pub struct AppTableField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppTableFieldDescription {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub disable_sync: Option<bool>,
@@ -74,6 +79,7 @@ pub struct AppTableFieldDescription {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppTableRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub record_id: Option<String>,
@@ -90,6 +96,7 @@ pub struct AppTableRecord {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Dashboard {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<String>,
@@ -198,6 +205,7 @@ pub struct BatchDeleteRecordReqBody {
 // ── Additional domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleTableRole {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub table_perm: Option<i32>,
@@ -214,6 +222,7 @@ pub struct AppRoleTableRole {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleBlockRole {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<String>,
@@ -224,6 +233,7 @@ pub struct AppRoleBlockRole {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRole {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role_name: Option<String>,
@@ -236,6 +246,7 @@ pub struct AppRole {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleMemberId {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<String>,
@@ -244,6 +255,7 @@ pub struct AppRoleMemberId {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_id: Option<String>,
@@ -268,6 +280,7 @@ pub struct AppRoleMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppWorkflow {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub workflow_id: Option<String>,
@@ -278,6 +291,7 @@ pub struct AppWorkflow {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppTableForm {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -294,6 +308,7 @@ pub struct AppTableForm {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppTableFormField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -308,6 +323,7 @@ pub struct AppTableFormField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppTableFormPatchedField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pre_field_id: Option<String>,
@@ -322,6 +338,7 @@ pub struct AppTableFormPatchedField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Sort {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_name: Option<String>,
@@ -330,6 +347,7 @@ pub struct Sort {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Condition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_name: Option<String>,
@@ -340,6 +358,7 @@ pub struct Condition {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChildrenFilter {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub conjunction: Option<String>,
@@ -348,6 +367,7 @@ pub struct ChildrenFilter {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FilterInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub conjunction: Option<String>,
@@ -485,12 +505,14 @@ pub struct PatchAppTableFormFieldReqBody {
 // ── Additional data types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role: Option<AppRole>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleListData {
     #[serde(default)]
     pub items: Vec<AppRole>,
@@ -503,6 +525,7 @@ pub struct AppRoleListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleMemberListData {
     #[serde(default)]
     pub items: Vec<AppRoleMember>,
@@ -515,6 +538,7 @@ pub struct AppRoleMemberListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WorkflowListData {
     #[serde(default)]
     pub workflows: Vec<AppWorkflow>,
@@ -523,12 +547,14 @@ pub struct WorkflowListData {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app: Option<App>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TableData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub table_id: Option<String>,
@@ -539,12 +565,14 @@ pub struct TableData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchCreateTableData {
     #[serde(default)]
     pub table_ids: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TableListData {
     #[serde(default)]
     pub items: Vec<AppTable>,
@@ -557,12 +585,14 @@ pub struct TableListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ViewData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub view: Option<AppTableView>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ViewListData {
     #[serde(default)]
     pub items: Vec<AppTableView>,
@@ -575,12 +605,14 @@ pub struct ViewListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FieldData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field: Option<AppTableField>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FieldListData {
     #[serde(default)]
     pub items: Vec<AppTableField>,
@@ -593,12 +625,14 @@ pub struct FieldListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecordData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub record: Option<AppTableRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecordListData {
     #[serde(default)]
     pub items: Vec<AppTableRecord>,
@@ -611,24 +645,28 @@ pub struct RecordListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchCreateRecordData {
     #[serde(default)]
     pub records: Vec<AppTableRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchUpdateRecordData {
     #[serde(default)]
     pub records: Vec<AppTableRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchDeleteRecordData {
     #[serde(default)]
     pub records: Vec<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DashboardListData {
     #[serde(default)]
     pub dashboards: Vec<Dashboard>,
@@ -639,6 +677,7 @@ pub struct DashboardListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CopyAppDashboardData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<String>,
@@ -647,6 +686,7 @@ pub struct CopyAppDashboardData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchGetRecordData {
     #[serde(default)]
     pub records: Vec<AppTableRecord>,
@@ -657,6 +697,7 @@ pub struct BatchGetRecordData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchRecordData {
     #[serde(default)]
     pub items: Vec<AppTableRecord>,
@@ -669,12 +710,14 @@ pub struct SearchRecordData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FormData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub form: Option<AppTableForm>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FormFieldListData {
     #[serde(default)]
     pub items: Vec<AppTableFormField>,
@@ -687,6 +730,7 @@ pub struct FormFieldListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FormFieldPatchData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field: Option<AppTableFormPatchedField>,
@@ -988,12 +1032,14 @@ impl SearchRecordIterator<'_> {
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CopyAppRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app: Option<ResponseApp>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateAppRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app: Option<ResponseApp>,
@@ -1001,6 +1047,7 @@ pub struct CreateAppRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseApp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_token: Option<String>,

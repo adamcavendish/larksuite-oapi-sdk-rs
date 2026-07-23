@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Space {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -23,6 +24,7 @@ pub struct Space {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Node {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub space_id: Option<String>,
@@ -57,6 +59,7 @@ pub struct Node {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SpaceMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_type: Option<String>,
@@ -153,12 +156,14 @@ pub struct MoveDocsToWikiReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SpaceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub space: Option<Space>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SpaceListData {
     #[serde(default)]
     pub items: Vec<Space>,
@@ -169,12 +174,14 @@ pub struct SpaceListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NodeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub node: Option<Node>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NodeListData {
     #[serde(default)]
     pub items: Vec<Node>,
@@ -185,6 +192,7 @@ pub struct NodeListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MemberListData {
     #[serde(default)]
     pub members: Vec<SpaceMember>,
@@ -205,6 +213,7 @@ impl_resp!(ListNodeResp, NodeListData);
 impl_resp!(ListMemberResp, MemberListData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MoveDocsToWikiData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wiki_token: Option<String>,
@@ -217,6 +226,7 @@ pub struct MoveDocsToWikiData {
 impl_resp!(MoveDocsToWikiResp, MoveDocsToWikiData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task: Option<crate::JsonValue>,

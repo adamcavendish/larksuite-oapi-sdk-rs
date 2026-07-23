@@ -432,6 +432,7 @@ macro_rules! impl_page_iterator_controls {
 pub(crate) use impl_page_iterator_controls;
 
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct EmptyResp {
     pub api_resp: ApiResp,
     pub code_error: CodeError,
@@ -453,6 +454,7 @@ impl<T> FromRawResponse<T> for EmptyResp {
 }
 
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct DownloadResp {
     pub api_resp: ApiResp,
     pub file_name: Option<String>,
@@ -460,6 +462,7 @@ pub struct DownloadResp {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub struct DownloadStreamResp {
     /// HTTP metadata available before the body is consumed.
     ///
@@ -485,6 +488,7 @@ impl DownloadBody {
 }
 
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct EmptyRespV2 {
     pub api_resp: ApiResp,
     pub code_error: Option<CodeError>,
@@ -510,6 +514,7 @@ impl<T> FromV2Response<T> for EmptyRespV2 {
 }
 
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct JsonResp {
     pub api_resp: ApiResp,
     pub code_error: Option<CodeError>,

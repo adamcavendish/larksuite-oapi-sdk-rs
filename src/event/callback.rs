@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 /// Operator info for card action trigger and URL preview callbacks.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CallbackOperator {
     #[serde(default)]
     pub tenant_key: Option<String>,
@@ -17,6 +18,7 @@ pub struct CallbackOperator {
 
 /// Context for card action trigger and URL preview callbacks.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CallbackContext {
     #[serde(default)]
     pub url: String,
@@ -30,6 +32,7 @@ pub struct CallbackContext {
 
 /// Action detail for card action trigger callbacks.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CallbackAction {
     #[serde(default)]
     pub value: BTreeMap<String, crate::JsonValue>,
@@ -53,6 +56,7 @@ pub struct CallbackAction {
 
 /// Request payload for `card.action.trigger` callbacks.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CardActionTriggerRequest {
     #[serde(default)]
     pub operator: Option<CallbackOperator>,
@@ -171,6 +175,7 @@ pub struct CardActionTriggerResponse {
 
 /// Request payload for `url.preview.get` callbacks.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct URLPreviewGetRequest {
     #[serde(default)]
     pub operator: Option<CallbackOperator>,

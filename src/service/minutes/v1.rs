@@ -9,6 +9,7 @@ use crate::service::common::{PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MinutesInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub minutes_token: Option<String>,
@@ -25,6 +26,7 @@ pub struct MinutesInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MinutesParticipant {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -33,12 +35,14 @@ pub struct MinutesParticipant {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MinutesTranscript {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub phrases: Option<Vec<TranscriptPhrase>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TranscriptPhrase {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pid: Option<String>,
@@ -55,12 +59,14 @@ pub struct TranscriptPhrase {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MinutesInfoData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub minutes: Option<MinutesInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ParticipantListData {
     #[serde(default)]
     pub participants: Vec<MinutesParticipant>,
@@ -71,6 +77,7 @@ pub struct ParticipantListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TranscriptData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub transcript: Option<MinutesTranscript>,
@@ -81,12 +88,14 @@ impl_resp!(ListParticipantResp, ParticipantListData);
 impl_resp!(GetTranscriptResp, TranscriptData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MinuteMediaData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub media: Option<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MinuteStatisticsData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub statistics: Option<crate::JsonValue>,

@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SessionInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sid: Option<String>,
@@ -49,6 +50,7 @@ pub struct LogoutSessionReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SessionListData {
     #[serde(default)]
     pub session_list: Vec<SessionInfo>,

@@ -9,6 +9,7 @@ use crate::service::common::RestRequest;
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OutboundIp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ip_list: Option<Vec<String>>,

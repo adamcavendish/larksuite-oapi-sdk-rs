@@ -10,6 +10,7 @@ use crate::service::common::RestRequest;
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Board {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub whiteboard_id: Option<String>,
@@ -22,6 +23,7 @@ pub struct Board {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuthInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub session_key: Option<String>,
@@ -42,6 +44,7 @@ pub struct AuthInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BorderRadius {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub top_left: Option<i32>,
@@ -54,12 +57,14 @@ pub struct BorderRadius {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ClientInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub client_ip: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompositeShape {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub r#type: Option<String>,
@@ -74,6 +79,7 @@ pub struct CompositeShape {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Connector {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_object: Option<ConnectorAttachedObject>,
@@ -100,6 +106,7 @@ pub struct Connector {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ConnectorAttachedObject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -110,12 +117,14 @@ pub struct ConnectorAttachedObject {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ConnectorCaption {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub data: Vec<Text>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ConnectorInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub attached_object: Option<ConnectorAttachedObject>,
@@ -126,12 +135,14 @@ pub struct ConnectorInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Cube {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub control_point: Option<Point>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DepartmentId {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -140,6 +151,7 @@ pub struct DepartmentId {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FillGradient {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub r#type: Option<String>,
@@ -150,6 +162,7 @@ pub struct FillGradient {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GradientStop {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub position: Option<f64>,
@@ -158,6 +171,7 @@ pub struct GradientStop {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Head {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -184,12 +198,14 @@ pub struct Head {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Image {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Lifeline {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub size: Option<f64>,
@@ -198,12 +214,14 @@ pub struct Lifeline {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MindMap {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MindMapNode {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_id: Option<String>,
@@ -220,6 +238,7 @@ pub struct MindMapNode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MindMapRoot {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub layout: Option<String>,
@@ -238,6 +257,7 @@ pub struct MindMapRoot {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Paint {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub r#type: Option<String>,
@@ -250,6 +270,7 @@ pub struct Paint {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Pie {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_radial_line_angle: Option<f64>,
@@ -262,6 +283,7 @@ pub struct Pie {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Point {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub x: Option<f64>,
@@ -270,12 +292,14 @@ pub struct Point {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RichText {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub paragraphs: Vec<RichTextParagraph>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RichTextElement {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub element_type: Option<i32>,
@@ -290,6 +314,7 @@ pub struct RichTextElement {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RichTextElementLink {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub herf: Option<String>,
@@ -300,6 +325,7 @@ pub struct RichTextElementLink {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RichTextElementMentionDoc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub doc_url: Option<String>,
@@ -308,6 +334,7 @@ pub struct RichTextElementMentionDoc {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RichTextElementMentionUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -316,6 +343,7 @@ pub struct RichTextElementMentionUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RichTextElementText {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -324,6 +352,7 @@ pub struct RichTextElementText {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RichTextElementTextStyle {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub font_weight: Option<String>,
@@ -342,6 +371,7 @@ pub struct RichTextElementTextStyle {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RichTextParagraph {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub paragraph_type: Option<i32>,
@@ -356,12 +386,14 @@ pub struct RichTextParagraph {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Section {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Shadow {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
@@ -376,6 +408,7 @@ pub struct Shadow {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct StickyNote {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -384,6 +417,7 @@ pub struct StickyNote {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Style {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fill_color: Option<String>,
@@ -422,6 +456,7 @@ pub struct Style {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Svg {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub svg_code: Option<String>,
@@ -432,6 +467,7 @@ pub struct Svg {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Syntax {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub syntax_type: Option<i32>,
@@ -442,6 +478,7 @@ pub struct Syntax {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Table {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meta: Option<TableMeta>,
@@ -452,6 +489,7 @@ pub struct Table {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TableCell {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub row_index: Option<i32>,
@@ -468,6 +506,7 @@ pub struct TableCell {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TableCellMergeInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub row_span: Option<i32>,
@@ -476,6 +515,7 @@ pub struct TableCellMergeInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TableMeta {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub row_num: Option<i32>,
@@ -528,6 +568,7 @@ pub struct Text {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Trapezoid {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub top_length: Option<f64>,
@@ -602,6 +643,7 @@ pub struct CreateBoardReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BoardData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub whiteboard: Option<Board>,
@@ -653,6 +695,7 @@ impl_resp!(CreateBoardResp, BoardData);
 impl_resp!(GetBoardResp, BoardData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ThemeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub theme: Option<String>,
@@ -662,6 +705,7 @@ impl_resp!(ThemeWhiteboardResp, ThemeData);
 impl_resp!(UpdateThemeWhiteboardResp, ());
 
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct DownloadAsImageWhiteboardResp {
     pub api_resp: ApiResp,
     pub file_name: Option<String>,
@@ -675,6 +719,7 @@ impl DownloadAsImageWhiteboardResp {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WhiteboardNodeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub node: Option<WhiteboardNode>,
@@ -684,6 +729,7 @@ impl_resp!(CreateWhiteboardNodeResp, WhiteboardNodeData);
 impl_resp!(CreatePlantumlWhiteboardNodeResp, WhiteboardNodeData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchDeleteWhiteboardNodeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub client_token: Option<String>,
@@ -692,6 +738,7 @@ pub struct BatchDeleteWhiteboardNodeData {
 impl_resp!(BatchDeleteWhiteboardNodeResp, BatchDeleteWhiteboardNodeData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WhiteboardNodeListData {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub nodes: Vec<WhiteboardNode>,

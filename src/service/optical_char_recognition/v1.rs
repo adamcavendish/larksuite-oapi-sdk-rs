@@ -17,6 +17,7 @@ pub struct RecognizeBasicImageReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OcrData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recognition_text: Option<String>,

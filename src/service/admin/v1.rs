@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AdminUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -27,6 +28,7 @@ pub struct AdminUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Badge {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -43,6 +45,7 @@ pub struct Badge {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BadgeGrant {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -67,6 +70,7 @@ pub struct BadgeGrant {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AdminDeptStat {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
@@ -139,12 +143,14 @@ pub struct CreateBadgeGrantReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BadgeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub badge: Option<Badge>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BadgeListData {
     #[serde(default)]
     pub items: Vec<Badge>,
@@ -155,12 +161,14 @@ pub struct BadgeListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BadgeGrantData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub grant: Option<BadgeGrant>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BadgeGrantListData {
     #[serde(default)]
     pub items: Vec<BadgeGrant>,
@@ -171,6 +179,7 @@ pub struct BadgeGrantListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DeptStatListData {
     #[serde(default)]
     pub items: Vec<AdminDeptStat>,
@@ -200,6 +209,7 @@ impl_resp_v2!(ListAdminDeptStatResp, ListAdminDeptStatRespData);
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListAdminUserStatRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
@@ -210,6 +220,7 @@ pub struct ListAdminUserStatRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListAuditInfoRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
@@ -220,12 +231,14 @@ pub struct ListAuditInfoRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateBadgeImageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub image_key: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListAdminDeptStatRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
@@ -237,6 +250,7 @@ pub struct ListAdminDeptStatRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseAdminDeptStat {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
@@ -327,6 +341,7 @@ pub struct ResponseAdminDeptStat {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AdminUserStat {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
@@ -397,12 +412,14 @@ pub struct AdminUserStat {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApiAuditCommonDrawers {
     #[serde(default)]
     pub common_draw_info_list: Vec<ApiAuditDrawerInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApiAuditDrawerInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub info_key: Option<String>,
@@ -417,6 +434,7 @@ pub struct ApiAuditDrawerInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditAndroidContext {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub udid: Option<String>,
@@ -461,6 +479,7 @@ pub struct AuditAndroidContext {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditContext {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub terminal_type: Option<i32>,
@@ -475,6 +494,7 @@ pub struct AuditContext {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mc: Option<String>,
@@ -487,6 +507,7 @@ pub struct AuditDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditEventExtend {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub comment_type: Option<String>,
@@ -511,6 +532,7 @@ pub struct AuditEventExtend {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event_id: Option<String>,
@@ -553,6 +575,7 @@ pub struct AuditInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditIosContext {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub udid: Option<String>,
@@ -587,6 +610,7 @@ pub struct AuditIosContext {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditObjectDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub clone_source: Option<String>,
@@ -625,6 +649,7 @@ pub struct AuditObjectDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditObjectEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object_type: Option<String>,
@@ -639,6 +664,7 @@ pub struct AuditObjectEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditPcContext {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub udid: Option<String>,
@@ -659,6 +685,7 @@ pub struct AuditPcContext {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditRecipientDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub permission_action_type: Option<String>,
@@ -673,6 +700,7 @@ pub struct AuditRecipientDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditRecipientEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recipient_type: Option<String>,
@@ -683,6 +711,7 @@ pub struct AuditRecipientEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuditWebContext {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_agent: Option<String>,
@@ -691,6 +720,7 @@ pub struct AuditWebContext {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18n {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -701,6 +731,7 @@ pub struct I18n {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OperatorDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub operator_name: Option<OperatorName>,
@@ -709,6 +740,7 @@ pub struct OperatorDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OperatorName {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default_name: Option<String>,

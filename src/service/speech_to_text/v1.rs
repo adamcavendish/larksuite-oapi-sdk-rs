@@ -27,12 +27,14 @@ pub struct RecognizeSpeechStreamReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecognizeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recognition_text: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct StreamRecognizeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stream_id: Option<String>,

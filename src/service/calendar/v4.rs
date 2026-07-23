@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Calendar {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub calendar_id: Option<String>,
@@ -33,6 +34,7 @@ pub struct Calendar {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TimeInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
@@ -43,6 +45,7 @@ pub struct TimeInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventLocation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -55,6 +58,7 @@ pub struct EventLocation {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventAttendee {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub attendee_id: Option<String>,
@@ -89,6 +93,7 @@ pub struct EventAttendee {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AttendeeChatMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rsvp_status: Option<String>,
@@ -105,6 +110,7 @@ pub struct AttendeeChatMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AttendeeResourceCustomization {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub index_key: Option<String>,
@@ -115,6 +121,7 @@ pub struct AttendeeResourceCustomization {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AttendeeResourceCustomizationOption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub option_key: Option<String>,
@@ -123,6 +130,7 @@ pub struct AttendeeResourceCustomizationOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CalendarEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event_id: Option<String>,
@@ -171,6 +179,7 @@ pub struct CalendarEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Vchat {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vc_type: Option<String>,
@@ -187,6 +196,7 @@ pub struct Vchat {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingSettings {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub owner_id: Option<String>,
@@ -211,12 +221,14 @@ pub struct MeetingSettings {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Reminder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub minutes: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventOrganizer {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -225,6 +237,7 @@ pub struct EventOrganizer {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CalendarAcl {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acl_id: Option<String>,
@@ -235,6 +248,7 @@ pub struct CalendarAcl {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AclScope {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<String>,
@@ -243,6 +257,7 @@ pub struct AclScope {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TimeZone {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub timezone_id: Option<String>,
@@ -259,6 +274,7 @@ pub struct TimeZone {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExchangeBinding {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub exchange_binding_id: Option<String>,
@@ -275,6 +291,7 @@ pub struct ExchangeBinding {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CalendarSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pre_pull_minutes: Option<i32>,
@@ -283,6 +300,7 @@ pub struct CalendarSetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FreeBusyEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_time: Option<String>,
@@ -291,6 +309,7 @@ pub struct FreeBusyEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TimeoffEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub timeoff_event_id: Option<String>,
@@ -309,6 +328,7 @@ pub struct TimeoffEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Instance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event_id: Option<String>,
@@ -349,6 +369,7 @@ pub struct Instance {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserCalendar {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub calendar: Option<Calendar>,
@@ -357,6 +378,7 @@ pub struct UserCalendar {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Freebusy {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_time: Option<String>,
@@ -367,6 +389,7 @@ pub struct Freebusy {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserFreebusy {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub freebusy_items: Option<Vec<Freebusy>>,
@@ -375,6 +398,7 @@ pub struct UserFreebusy {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventSearchFilter {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_time: Option<TimeInfo>,
@@ -623,6 +647,7 @@ pub struct CreateTimeoffEventReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CalendarListData {
     #[serde(default)]
     pub calendar_list: Vec<Calendar>,
@@ -635,12 +660,14 @@ pub struct CalendarListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CalendarEventData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event: Option<CalendarEvent>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CalendarEventListData {
     #[serde(default)]
     pub items: Vec<CalendarEvent>,
@@ -653,6 +680,7 @@ pub struct CalendarEventListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AttendeeListData {
     #[serde(default)]
     pub items: Vec<EventAttendee>,
@@ -663,6 +691,7 @@ pub struct AttendeeListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AclListData {
     #[serde(default)]
     pub acls: Vec<CalendarAcl>,
@@ -673,6 +702,7 @@ pub struct AclListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TimeZoneListData {
     #[serde(default)]
     pub timezone_list: Vec<TimeZone>,
@@ -683,18 +713,21 @@ pub struct TimeZoneListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FreeBusyData {
     #[serde(default)]
     pub free_busy: std::collections::HashMap<String, Vec<FreeBusyEvent>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MgetCalendarData {
     #[serde(default)]
     pub calendars: Vec<Calendar>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchCalendarData {
     #[serde(default)]
     pub items: Vec<Calendar>,
@@ -703,24 +736,28 @@ pub struct SearchCalendarData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubscribeCalendarData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub calendar: Option<Calendar>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PrimarysCalendarData {
     #[serde(default)]
     pub calendars: Vec<UserCalendar>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstanceViewData {
     #[serde(default)]
     pub items: Vec<Instance>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InstancesData {
     #[serde(default)]
     pub items: Vec<Instance>,
@@ -731,6 +768,7 @@ pub struct InstancesData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchEventData {
     #[serde(default)]
     pub items: Vec<CalendarEvent>,
@@ -739,6 +777,7 @@ pub struct SearchEventData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatMemberListData {
     #[serde(default)]
     pub items: Vec<AttendeeChatMember>,
@@ -749,6 +788,7 @@ pub struct ChatMemberListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingChatData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting_chat_id: Option<String>,
@@ -757,18 +797,21 @@ pub struct MeetingChatData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingMinuteData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub doc_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchFreeBusyData {
     #[serde(default)]
     pub freebusy_lists: Vec<UserFreebusy>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CaldavConfData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub password: Option<String>,
@@ -781,6 +824,7 @@ pub struct CaldavConfData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TimeoffEventData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub timeoff_event_id: Option<String>,

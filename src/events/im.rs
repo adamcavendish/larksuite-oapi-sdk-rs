@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MessageReceiveV1 {
     #[serde(default)]
     pub sender: MessageSender,
@@ -15,6 +16,7 @@ pub struct P2MessageReceiveV1 {
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageSender {
     #[serde(default)]
     pub sender_id: Option<UserId>,
@@ -39,6 +41,7 @@ impl MessageSender {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Mention {
     #[serde(default)]
     pub key: String,
@@ -67,6 +70,7 @@ impl Mention {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventMessageReader {
     #[serde(default)]
     pub reader_id: Option<UserId>,
@@ -91,12 +95,14 @@ impl EventMessageReader {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Emoji {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub emoji_type: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nNames {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -107,6 +113,7 @@ pub struct I18nNames {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatMemberUser {
     #[serde(default)]
     pub name: String,
@@ -131,6 +138,7 @@ impl ChatMemberUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListEventModerator {
     #[serde(default)]
     pub tenant_key: String,
@@ -153,6 +161,7 @@ impl ListEventModerator {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ModeratorList {
     #[serde(default)]
     pub added_member_list: Vec<ListEventModerator>,
@@ -161,6 +170,7 @@ pub struct ModeratorList {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RestrictedModeSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<bool>,
@@ -173,6 +183,7 @@ pub struct RestrictedModeSetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatChange {
     #[serde(default)]
     pub avatar: String,
@@ -209,6 +220,7 @@ pub struct ChatChange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Message {
     #[serde(default)]
     pub message_id: String,
@@ -235,6 +247,7 @@ pub struct Message {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MessageReadV1 {
     #[serde(default)]
     pub reader: EventMessageReader,
@@ -243,6 +256,7 @@ pub struct P2MessageReadV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MessageRecalledV1 {
     #[serde(default)]
     pub message_id: String,
@@ -255,6 +269,7 @@ pub struct P2MessageRecalledV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ChatMemberUserAddedV1 {
     #[serde(default)]
     pub chat_id: String,
@@ -273,6 +288,7 @@ pub struct P2ChatMemberUserAddedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ChatMemberUserDeletedV1 {
     #[serde(default)]
     pub chat_id: String,
@@ -291,6 +307,7 @@ pub struct P2ChatMemberUserDeletedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ChatMemberUserWithdrawnV1 {
     #[serde(default)]
     pub chat_id: String,
@@ -309,6 +326,7 @@ pub struct P2ChatMemberUserWithdrawnV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ChatDisbandedV1 {
     #[serde(default)]
     pub chat_id: String,
@@ -325,6 +343,7 @@ pub struct P2ChatDisbandedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ChatUpdatedV1 {
     #[serde(default)]
     pub chat_id: String,
@@ -343,6 +362,7 @@ pub struct P2ChatUpdatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MessageReactionCreatedV1 {
     #[serde(default)]
     pub message_id: String,
@@ -359,6 +379,7 @@ pub struct P2MessageReactionCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MessageReactionDeletedV1 {
     #[serde(default)]
     pub message_id: String,
@@ -375,6 +396,7 @@ pub struct P2MessageReactionDeletedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ChatAccessEventBotP2pChatEnteredV1 {
     #[serde(default)]
     pub chat_id: String,
@@ -387,6 +409,7 @@ pub struct P2ChatAccessEventBotP2pChatEnteredV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ChatMemberBotAddedV1 {
     #[serde(default)]
     pub chat_id: String,
@@ -403,6 +426,7 @@ pub struct P2ChatMemberBotAddedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ChatMemberBotDeletedV1 {
     #[serde(default)]
     pub chat_id: String,

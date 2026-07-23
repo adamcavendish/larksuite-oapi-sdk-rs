@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DepartmentId {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -15,6 +16,7 @@ pub struct DepartmentId {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18n {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -23,6 +25,7 @@ pub struct I18n {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EcoAccountCustomFieldEventData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
@@ -31,6 +34,7 @@ pub struct EcoAccountCustomFieldEventData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EcoBackgroundCheckCreateEventMobile {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
@@ -39,6 +43,7 @@ pub struct EcoBackgroundCheckCreateEventMobile {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EcoBackgroundCheckCreateEventCandidateInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -53,6 +58,7 @@ pub struct EcoBackgroundCheckCreateEventCandidateInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EcoBackgroundCheckCreateEventContactInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -63,6 +69,7 @@ pub struct EcoBackgroundCheckCreateEventContactInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EcoBackgroundCheckCreateEventCustomKv {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
@@ -71,6 +78,7 @@ pub struct EcoBackgroundCheckCreateEventCustomKv {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EcoExamCreateEventMobile {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
@@ -79,6 +87,7 @@ pub struct EcoExamCreateEventMobile {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EcoExamCreateEventCandidateInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -89,6 +98,7 @@ pub struct EcoExamCreateEventCandidateInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Cash {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub currency_type: Option<String>,
@@ -97,6 +107,7 @@ pub struct Cash {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BonusAmount {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub bonus_type: Option<i32>,
@@ -109,6 +120,7 @@ pub struct BonusAmount {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Assets {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub confirmed_bonus: Option<BonusAmount>,
@@ -117,6 +129,7 @@ pub struct Assets {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentTag {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -131,6 +144,7 @@ pub struct TalentTag {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationStageInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -143,6 +157,7 @@ pub struct ApplicationStageInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireOfferStatusChangedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub offer_id: Option<String>,
@@ -151,6 +166,7 @@ pub struct P2HireOfferStatusChangedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireApplicationStageChangedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub application_id: Option<String>,
@@ -163,6 +179,7 @@ pub struct P2HireApplicationStageChangedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireEhrImportTaskImportedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
@@ -181,12 +198,14 @@ pub struct P2HireEhrImportTaskImportedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireApplicationDeletedV1 {
     #[serde(default)]
     pub application_ids: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireEcoAccountCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub scope: Option<i32>,
@@ -201,6 +220,7 @@ pub struct P2HireEcoAccountCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireEcoBackgroundCheckCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub background_check_id: Option<String>,
@@ -221,6 +241,7 @@ pub struct P2HireEcoBackgroundCheckCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireEcoBackgroundCheckCanceledV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub background_check_id: Option<String>,
@@ -229,6 +250,7 @@ pub struct P2HireEcoBackgroundCheckCanceledV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireEcoExamCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub exam_id: Option<String>,
@@ -245,6 +267,7 @@ pub struct P2HireEcoExamCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireEhrImportTaskForInternshipOfferImportedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
@@ -265,6 +288,7 @@ pub struct P2HireEhrImportTaskForInternshipOfferImportedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireReferralAccountAssetsUpdateV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub account_id: Option<String>,
@@ -275,12 +299,14 @@ pub struct P2HireReferralAccountAssetsUpdateV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireTalentDeletedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub talent_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HireTalentTagSubscriptionV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub talent_id: Option<String>,

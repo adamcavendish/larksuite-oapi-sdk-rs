@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2AccessRecordCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_record_id: Option<String>,
@@ -23,6 +24,7 @@ pub struct P2AccessRecordCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2AcsUserUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,

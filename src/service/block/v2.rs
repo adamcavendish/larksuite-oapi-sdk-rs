@@ -9,6 +9,7 @@ use crate::service::common::RestRequest;
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Entity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<String>,
@@ -39,6 +40,7 @@ pub struct Entity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Message {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub body: Option<String>,
@@ -53,12 +55,14 @@ pub struct Message {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EntityData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entity: Option<Entity>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message: Option<Message>,

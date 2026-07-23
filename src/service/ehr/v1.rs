@@ -10,6 +10,7 @@ use crate::service::common::{PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EhrEmployee {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -22,6 +23,7 @@ pub struct EhrEmployee {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EmployeeListData {
     #[serde(default)]
     pub items: Vec<EhrEmployee>,
@@ -34,6 +36,7 @@ pub struct EmployeeListData {
 impl_resp!(ListEhrEmployeeResp, EmployeeListData);
 
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct GetAttachmentResp {
     pub api_resp: ApiResp,
     pub file_name: Option<String>,

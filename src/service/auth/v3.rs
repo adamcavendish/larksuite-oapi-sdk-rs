@@ -53,6 +53,7 @@ pub struct InternalTenantAccessTokenReqBody {
 // ── Response types (no data wrapper — token returned at top level) ──
 
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct RawTokenResp {
     pub api_resp: ApiResp,
     pub code_error: CodeError,

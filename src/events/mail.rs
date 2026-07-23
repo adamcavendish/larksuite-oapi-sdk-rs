@@ -7,12 +7,14 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Subscriber {
     #[serde(default)]
     pub user_ids: Vec<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2UserMailboxEventMessageReceivedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mail_address: Option<String>,

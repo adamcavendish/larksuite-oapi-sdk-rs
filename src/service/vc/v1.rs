@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Room {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_id: Option<String>,
@@ -33,6 +34,7 @@ pub struct Room {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomStatus {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<bool>,
@@ -55,6 +57,7 @@ pub struct RoomStatus {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Device {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_id: Option<String>,
@@ -69,6 +72,7 @@ pub struct Device {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_background: Option<String>,
@@ -83,6 +87,7 @@ pub struct RoomConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Meeting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -121,6 +126,7 @@ pub struct MeetingUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Participant {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub open_id: Option<String>,
@@ -151,6 +157,7 @@ pub struct Participant {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingReport {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub total_meeting_count: Option<String>,
@@ -350,6 +357,7 @@ pub struct SetHostMeetingReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecordingPermissionObject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -444,12 +452,14 @@ pub struct MgetRoomLevelReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room: Option<Room>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomListData {
     #[serde(default)]
     pub rooms: Vec<Room>,
@@ -460,18 +470,21 @@ pub struct RoomListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomConfigData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_config: Option<RoomConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<Meeting>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingListData {
     #[serde(default)]
     pub meeting_briefs: Vec<Meeting>,
@@ -482,6 +495,7 @@ pub struct MeetingListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ParticipantListData {
     #[serde(default)]
     pub participants: Vec<Participant>,
@@ -492,6 +506,7 @@ pub struct ParticipantListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingReportData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting_report: Option<MeetingReport>,
@@ -509,12 +524,14 @@ impl_resp!(GetMeetingReportResp, MeetingReportData);
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MgetRoomRespData {
     #[serde(default)]
     pub items: Vec<ResponseRoom>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchRoomRespData {
     #[serde(default)]
     pub rooms: Vec<ResponseRoom>,
@@ -525,18 +542,21 @@ pub struct SearchRoomRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SetCheckboardAccessCodeRoomConfigRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_code: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SetRoomAccessCodeRoomConfigRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_code: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryRoomConfigRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_background: Option<String>,
@@ -551,6 +571,7 @@ pub struct QueryRoomConfigRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListAlertRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
@@ -561,6 +582,7 @@ pub struct ListAlertRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetExportRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<i32>,
@@ -573,12 +595,14 @@ pub struct GetExportRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetMeetingRecordingRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recording: Option<MeetingRecording>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplyReserveRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reserve: Option<Reserve>,
@@ -587,18 +611,21 @@ pub struct ApplyReserveRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetReserveRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reserve: Option<Reserve>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetActiveMeetingReserveRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<ResponseMeeting>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateReserveRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reserve: Option<Reserve>,
@@ -607,6 +634,7 @@ pub struct UpdateReserveRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveScopeReserveConfigRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approve_config: Option<ApprovalConfig>,
@@ -617,36 +645,42 @@ pub struct ReserveScopeReserveConfigRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetReserveConfigAdminRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reserve_admin_config: Option<ReserveAdminConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetReserveConfigDisableInformRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub disable_inform: Option<DisableInformConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetReserveConfigFormRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reserve_form_config: Option<ReserveFormConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateRoomLevelRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_level: Option<RoomLevel>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetRoomLevelRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_level: Option<RoomLevel>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListRoomLevelRespData {
     #[serde(default)]
     pub items: Vec<RoomLevel>,
@@ -657,18 +691,21 @@ pub struct ListRoomLevelRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MgetRoomLevelRespData {
     #[serde(default)]
     pub items: Vec<RoomLevel>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchRoomLevelRespData {
     #[serde(default)]
     pub level_ids: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetScopeConfigRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub current_config: Option<ScopeConfig>,
@@ -677,6 +714,7 @@ pub struct GetScopeConfigRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetMeetingListRespData {
     #[serde(default)]
     pub meeting_list: Vec<MeetingInfo>,
@@ -687,6 +725,7 @@ pub struct GetMeetingListRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetParticipantListRespData {
     #[serde(default)]
     pub participants: Vec<ResponseParticipant>,
@@ -697,6 +736,7 @@ pub struct GetParticipantListRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetParticipantQualityListRespData {
     #[serde(default)]
     pub participant_quality_list: Vec<ParticipantQuality>,
@@ -707,6 +747,7 @@ pub struct GetParticipantQualityListRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetResourceReservationListRespData {
     #[serde(default)]
     pub room_reservation_list: Vec<RoomMeetingReservation>,
@@ -718,6 +759,7 @@ pub struct GetResourceReservationListRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Alert {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub alert_id: Option<String>,
@@ -752,6 +794,7 @@ pub struct Alert {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_switch: Option<i32>,
@@ -764,6 +807,7 @@ pub struct ApprovalConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Conditions {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom_key: Option<String>,
@@ -772,6 +816,7 @@ pub struct Conditions {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Contact {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contact_type: Option<i32>,
@@ -780,6 +825,7 @@ pub struct Contact {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomList {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom_type: Option<i32>,
@@ -798,12 +844,14 @@ pub struct CustomList {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseDevice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DisableInformConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub if_cover_child_scope: Option<bool>,
@@ -816,6 +864,7 @@ pub struct DisableInformConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseMeeting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -852,6 +901,7 @@ pub struct ResponseMeeting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingAbility {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub use_video: Option<bool>,
@@ -868,6 +918,7 @@ pub struct MeetingAbility {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting_id: Option<String>,
@@ -924,6 +975,7 @@ pub struct MeetingInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingParticipant {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -946,6 +998,7 @@ pub struct MeetingParticipant {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingRecording {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -958,6 +1011,7 @@ pub struct MeetingRecording {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseMeetingUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -966,6 +1020,7 @@ pub struct ResponseMeetingUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Options {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -976,6 +1031,7 @@ pub struct Options {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseParticipant {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub participant_name: Option<String>,
@@ -1036,6 +1092,7 @@ pub struct ResponseParticipant {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ParticipantQuality {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub network: Option<QualityNetwork>,
@@ -1050,6 +1107,7 @@ pub struct ParticipantQuality {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PstnSipInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nickname: Option<String>,
@@ -1058,6 +1116,7 @@ pub struct PstnSipInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QualityAudio {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time: Option<String>,
@@ -1080,6 +1139,7 @@ pub struct QualityAudio {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QualityCpuUsage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time: Option<String>,
@@ -1094,6 +1154,7 @@ pub struct QualityCpuUsage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QualityNetwork {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time: Option<String>,
@@ -1114,6 +1175,7 @@ pub struct QualityNetwork {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QualityVideoSharing {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time: Option<String>,
@@ -1140,6 +1202,7 @@ pub struct QualityVideoSharing {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Reserve {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1164,6 +1227,7 @@ pub struct Reserve {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveActionPermission {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub permission: Option<i32>,
@@ -1172,6 +1236,7 @@ pub struct ReserveActionPermission {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveAdminConfig {
     #[serde(default)]
     pub depts: Vec<SubscribeDepartment>,
@@ -1180,6 +1245,7 @@ pub struct ReserveAdminConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveAssignHost {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_type: Option<i32>,
@@ -1188,12 +1254,14 @@ pub struct ReserveAssignHost {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveCallSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub callee: Option<ReserveCallee>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveCallee {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1204,12 +1272,14 @@ pub struct ReserveCallee {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveCorrectionCheckInfo {
     #[serde(default)]
     pub invalid_host_id_list: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveFormConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub if_cover_child_scope: Option<bool>,
@@ -1226,6 +1296,7 @@ pub struct ReserveFormConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveMeetingSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub topic: Option<String>,
@@ -1246,6 +1317,7 @@ pub struct ReserveMeetingSetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReservePermissionChecker {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub check_field: Option<i32>,
@@ -1256,6 +1328,7 @@ pub struct ReservePermissionChecker {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveScopeConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub if_cover_child_scope: Option<bool>,
@@ -1268,6 +1341,7 @@ pub struct ReserveScopeConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReservedRoom {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_id: Option<String>,
@@ -1276,6 +1350,7 @@ pub struct ReservedRoom {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseRoom {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_id: Option<String>,
@@ -1300,6 +1375,7 @@ pub struct ResponseRoom {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseRoomConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_background: Option<String>,
@@ -1330,6 +1406,7 @@ pub struct RoomDigitalSignage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomDigitalSignageMaterial {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1352,6 +1429,7 @@ pub struct RoomDigitalSignageMaterial {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomLevel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_level_id: Option<String>,
@@ -1368,6 +1446,7 @@ pub struct RoomLevel {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomMeetingReservation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_id: Option<String>,
@@ -1408,6 +1487,7 @@ pub struct RoomMeetingReservation {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseRoomStatus {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<bool>,
@@ -1428,6 +1508,7 @@ pub struct ResponseRoomStatus {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ScopeConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub scope_type: Option<i32>,
@@ -1438,6 +1519,7 @@ pub struct ScopeConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubscribeDepartment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -1446,6 +1528,7 @@ pub struct SubscribeDepartment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubscribeUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -1454,6 +1537,7 @@ pub struct SubscribeUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TimeConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub if_cover_child_scope: Option<bool>,

@@ -83,6 +83,7 @@ impl EventResp {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventHeader {
     #[serde(default)]
     pub event_id: String,
@@ -100,6 +101,7 @@ pub struct EventHeader {
 
 /// P1 (v1.0 protocol) event header.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventV1Header {
     #[serde(default)]
     pub app_id: String,
@@ -115,6 +117,7 @@ pub struct EventV1Header {
 
 /// P2 (v2.0 protocol) event base with schema and header.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventV2Base {
     #[serde(default)]
     pub schema: String,
@@ -135,6 +138,7 @@ impl EventV2Base {
 
 /// P1 (v1.0 protocol) event body base fields.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventBase {
     #[serde(default)]
     pub ts: String,
@@ -147,6 +151,7 @@ pub struct EventBase {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventV2Body {
     pub schema: Option<String>,
     pub header: Option<EventHeader>,

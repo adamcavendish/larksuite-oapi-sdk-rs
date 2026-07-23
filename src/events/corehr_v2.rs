@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OrganizationDomainEventData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -25,6 +26,7 @@ pub struct OrganizationDomainEventData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EmployeeDomainEventData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -41,6 +43,7 @@ pub struct EmployeeDomainEventData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OnboardingTaskChange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub after_status: Option<String>,
@@ -49,12 +52,14 @@ pub struct OnboardingTaskChange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OnboardingFlowChange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub after_status: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -63,6 +68,7 @@ pub struct I18nV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OnboardingFlow {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -71,6 +77,7 @@ pub struct OnboardingFlow {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApprovalGroupsUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_group_id: Option<String>,
@@ -143,6 +150,7 @@ id_field_changes_event!(P2PathwayUpdatedV2, pathway_id);
 id_field_changes_event!(P2PositionUpdatedV2, position_id);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CompanyUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub company_id: Option<String>,
@@ -153,6 +161,7 @@ pub struct P2CompanyUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2LocationUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub location_id: Option<String>,
@@ -163,6 +172,7 @@ pub struct P2LocationUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CustomOrgCreatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub org_id: Option<String>,
@@ -171,6 +181,7 @@ pub struct P2CustomOrgCreatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CustomOrgDeletedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub org_id: Option<String>,
@@ -179,6 +190,7 @@ pub struct P2CustomOrgDeletedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CustomOrgUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub org_id: Option<String>,
@@ -189,6 +201,7 @@ pub struct P2CustomOrgUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2EmployeeDomainEventV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event_type: Option<i32>,
@@ -211,6 +224,7 @@ pub struct P2EmployeeDomainEventV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2JobChangeStatusUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub employment_id: Option<String>,
@@ -239,6 +253,7 @@ pub struct P2JobChangeStatusUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2JobChangeUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub employment_id: Option<String>,
@@ -269,6 +284,7 @@ pub struct P2JobChangeUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2OffboardingChecklistUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub employment_id: Option<String>,
@@ -283,6 +299,7 @@ pub struct P2OffboardingChecklistUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2OffboardingStatusUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub employment_id: Option<String>,
@@ -297,6 +314,7 @@ pub struct P2OffboardingStatusUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2OffboardingUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tenant_id: Option<String>,
@@ -323,6 +341,7 @@ pub struct P2OffboardingUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2PreHireOnboardingTaskChangedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tenant_id: Option<String>,
@@ -339,6 +358,7 @@ pub struct P2PreHireOnboardingTaskChangedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ProbationUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub employment_id: Option<String>,
@@ -349,6 +369,7 @@ pub struct P2ProbationUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ProcessUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub process_id: Option<String>,
@@ -363,6 +384,7 @@ pub struct P2ProcessUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ProcessApproverUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub process_id: Option<String>,
@@ -385,6 +407,7 @@ pub struct P2ProcessApproverUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ProcessCcUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub process_id: Option<String>,
@@ -397,6 +420,7 @@ pub struct P2ProcessCcUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ProcessNodeUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub flow_definition_id: Option<String>,
@@ -415,6 +439,7 @@ pub struct P2ProcessNodeUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ProcessStatusUpdateV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub process_id: Option<String>,
@@ -429,6 +454,7 @@ pub struct P2ProcessStatusUpdateV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ProcessCommentInfoUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub process_id: Option<String>,
@@ -439,6 +465,7 @@ pub struct P2ProcessCommentInfoUpdatedV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2SignatureFileStatusUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub signature_file_id: Option<String>,

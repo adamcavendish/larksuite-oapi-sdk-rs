@@ -9,6 +9,7 @@ use crate::service::common::RestRequest;
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocsDocument {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub document_id: Option<String>,
@@ -19,6 +20,7 @@ pub struct DocsDocument {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocsMeta {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub doc_token: Option<String>,
@@ -41,12 +43,14 @@ pub struct DocsMeta {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocumentData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub document: Option<DocsDocument>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetaData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub doc_metas: Option<Vec<DocsMeta>>,
@@ -56,6 +60,7 @@ impl_resp!(GetDocumentResp, DocumentData);
 impl_resp!(BatchGetDocumentMetaResp, MetaData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContentData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,

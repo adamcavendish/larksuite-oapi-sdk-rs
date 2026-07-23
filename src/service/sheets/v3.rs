@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Spreadsheet {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub spreadsheet_token: Option<String>,
@@ -23,6 +24,7 @@ pub struct Spreadsheet {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Sheet {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sheet_id: Option<String>,
@@ -41,6 +43,7 @@ pub struct Sheet {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetGridProperties {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub frozen_row_count: Option<i32>,
@@ -53,6 +56,7 @@ pub struct SheetGridProperties {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GridRange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sheet_id: Option<String>,
@@ -67,6 +71,7 @@ pub struct GridRange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetText {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -75,6 +80,7 @@ pub struct SheetText {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SegmentStyle {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub affected_text: Option<String>,
@@ -83,6 +89,7 @@ pub struct SegmentStyle {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SegmentStyleStyle {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub bold: Option<bool>,
@@ -99,6 +106,7 @@ pub struct SegmentStyleStyle {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetMentionUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -111,6 +119,7 @@ pub struct SheetMentionUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetMentionDocument {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
@@ -125,18 +134,21 @@ pub struct SheetMentionDocument {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetValueElement {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub value: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetDateTime {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date_time: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetFile {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_token: Option<String>,
@@ -147,12 +159,14 @@ pub struct SheetFile {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetImage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub image_token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetLink {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -163,6 +177,7 @@ pub struct SheetLink {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetReminder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notify_date_time: Option<String>,
@@ -175,6 +190,7 @@ pub struct SheetReminder {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetFormula {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub formula: Option<String>,
@@ -185,6 +201,7 @@ pub struct SheetFormula {
 /// This mirrors the Go SDK's `CellValue` model. A rich-text cell is represented
 /// as a list of these elements, while a plain-text cell uses `SheetCellValue`.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CellValue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -230,6 +247,7 @@ pub struct PlainTextValueRange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RichTextValueRange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub major_dimension: Option<String>,
@@ -283,6 +301,7 @@ impl From<RichTextValueRange> for SheetValueRange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RangeValueData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub revision: Option<i64>,
@@ -327,6 +346,7 @@ pub struct RangeValueData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetProperties {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub row_count: Option<i32>,
@@ -399,6 +419,7 @@ pub struct SheetFilterCondition {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetFilterInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub range: Option<String>,
@@ -409,6 +430,7 @@ pub struct SheetFilterInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetFilterColumn {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub col: Option<String>,
@@ -435,6 +457,7 @@ pub struct UpdateSheetFilterReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetFilterView {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub filter_view_id: Option<String>,
@@ -445,6 +468,7 @@ pub struct SheetFilterView {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetFilterViewCondition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub condition_id: Option<String>,
@@ -457,6 +481,7 @@ pub struct SheetFilterViewCondition {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Chart {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chart_id: Option<String>,
@@ -465,6 +490,7 @@ pub struct Chart {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ConditionalFormat {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cf_id: Option<String>,
@@ -479,6 +505,7 @@ pub struct ConditionalFormat {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataValidationOption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub option_value: Option<String>,
@@ -487,6 +514,7 @@ pub struct DataValidationOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataValidation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dv_id: Option<i32>,
@@ -619,48 +647,56 @@ pub struct SetDataValidationDropdownReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SpreadsheetData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub spreadsheet: Option<Spreadsheet>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetListData {
     #[serde(default)]
     pub sheets: Vec<Sheet>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OperateSheetsData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub replies: Option<Vec<crate::JsonValue>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FilterViewData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub filter_view: Option<SheetFilterView>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FilterViewListData {
     #[serde(default)]
     pub items: Vec<SheetFilterView>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FilterViewConditionData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub condition: Option<SheetFilterViewCondition>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FilterViewConditionListData {
     #[serde(default)]
     pub items: Vec<SheetFilterViewCondition>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ConditionalFormatListData {
     #[serde(default)]
     pub sheet_conditional_formats: Vec<ConditionalFormat>,
@@ -671,12 +707,14 @@ pub struct ConditionalFormatListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataValidationListData {
     #[serde(default)]
     pub items: Vec<DataValidation>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FindReplaceResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub matched_cells: Option<Vec<String>>,
@@ -687,12 +725,14 @@ pub struct FindReplaceResult {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FindSheetData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub find_result: Option<FindReplaceResult>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReplaceSheetData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub replace_result: Option<FindReplaceResult>,
@@ -726,12 +766,14 @@ impl_resp!(ReplaceSheetResp, ReplaceSheetData);
 impl_resp!(GetSheetFilterResp, SheetFilterData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SheetFilterData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sheet_filter_info: Option<SheetFilterInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FloatImage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub float_image_id: Option<String>,
@@ -750,12 +792,14 @@ pub struct FloatImage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FloatImageData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub float_image: Option<FloatImage>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FloatImageQueryData {
     #[serde(default)]
     pub items: Vec<FloatImage>,

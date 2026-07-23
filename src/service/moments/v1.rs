@@ -9,6 +9,7 @@ use crate::service::common::{PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Post {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub post_id: Option<String>,
@@ -27,6 +28,7 @@ pub struct Post {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PostListData {
     #[serde(default)]
     pub items: Vec<Post>,
@@ -39,6 +41,7 @@ pub struct PostListData {
 impl_resp!(ListPostResp, PostListData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PostGetData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub post: Option<Post>,

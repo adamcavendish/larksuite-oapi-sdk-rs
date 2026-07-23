@@ -7,6 +7,7 @@ use crate::req::RequestOption;
 use crate::service::common::RestRequest;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuthenAccessTokenRespBody {
     #[serde(default)]
     pub access_token: String,
@@ -47,6 +48,7 @@ pub struct AuthenAccessTokenRespBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RefreshAuthenAccessTokenRespBody {
     #[serde(default)]
     pub access_token: String,
@@ -85,6 +87,7 @@ pub struct RefreshAuthenAccessTokenRespBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AuthenUserInfoRespBody {
     #[serde(default)]
     pub name: String,
@@ -122,6 +125,7 @@ impl_resp!(
 impl_resp!(AuthenUserInfoResp, AuthenUserInfoRespBody);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateFileRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DeviceRecordEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_record_id: Option<String>,
@@ -55,6 +56,7 @@ pub struct DeviceRecordEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DeviceChangeEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_record_id: Option<String>,
@@ -103,6 +105,7 @@ pub struct DeviceChangeEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2SecurityAndComplianceDeviceApplyRecordDeviceApplyEventV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_apply_record_id: Option<String>,
@@ -121,6 +124,7 @@ pub struct P2SecurityAndComplianceDeviceApplyRecordDeviceApplyEventV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2SecurityAndComplianceDeviceRecordDeviceChangeEventV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_record_id: Option<String>,

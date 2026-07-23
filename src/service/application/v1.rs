@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Application {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_id: Option<String>,
@@ -45,6 +46,7 @@ pub struct Application {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVersion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_id: Option<String>,
@@ -79,6 +81,7 @@ pub struct AppVersion {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppUsage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub activate_regular_users: Option<i32>,
@@ -101,12 +104,14 @@ pub struct CheckUserIsInAppBlacklistReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app: Option<Application>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppListData {
     #[serde(default)]
     pub app_list: Vec<Application>,
@@ -117,12 +122,14 @@ pub struct AppListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVersionData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_version: Option<AppVersion>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVersionListData {
     #[serde(default)]
     pub items: Vec<AppVersion>,
@@ -133,12 +140,14 @@ pub struct AppVersionListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppUsageData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub overview: Option<AppUsage>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CheckBlacklistData {
     #[serde(default)]
     pub user_list: Vec<String>,

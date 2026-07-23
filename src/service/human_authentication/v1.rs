@@ -21,6 +21,7 @@ pub struct CreateIdentityReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct IdentityData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub verify_uid: Option<String>,

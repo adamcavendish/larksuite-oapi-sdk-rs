@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CompensationArchiveChangedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub operate_type: Option<String>,

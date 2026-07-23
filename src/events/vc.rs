@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingEventUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<UserId>,
@@ -31,6 +32,7 @@ impl MeetingEventUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingSecuritySetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub security_level: Option<i32>,
@@ -45,12 +47,14 @@ pub struct MeetingSecuritySetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingWebinarSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub webinar_type: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingEventMeeting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -79,12 +83,14 @@ pub struct MeetingEventMeeting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Device {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomStatusEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<bool>,
@@ -105,6 +111,7 @@ pub struct RoomStatusEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_id: Option<String>,
@@ -129,6 +136,7 @@ pub struct RoomEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomLevel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_level_id: Option<String>,
@@ -145,12 +153,14 @@ pub struct RoomLevel {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubscribeUserEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubscribeDepartment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -159,6 +169,7 @@ pub struct SubscribeDepartment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalConfigEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_switch: Option<i32>,
@@ -171,6 +182,7 @@ pub struct ApprovalConfigEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReserveScopeConfigEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub allow_all_users: Option<i32>,
@@ -181,6 +193,7 @@ pub struct ReserveScopeConfigEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TimeConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub if_cover_child_scope: Option<bool>,
@@ -199,6 +212,7 @@ pub struct TimeConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingStartedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -207,6 +221,7 @@ pub struct P2VcMeetingStartedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingEndedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -215,6 +230,7 @@ pub struct P2VcMeetingEndedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingJoinedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -223,6 +239,7 @@ pub struct P2VcMeetingJoinedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingLeftV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -235,6 +252,7 @@ pub struct P2VcMeetingLeftV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingAllMeetingStartedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -243,6 +261,7 @@ pub struct P2VcMeetingAllMeetingStartedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingAllMeetingEndedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -251,6 +270,7 @@ pub struct P2VcMeetingAllMeetingEndedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingParticipantMeetingEndedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -261,6 +281,7 @@ pub struct P2VcMeetingParticipantMeetingEndedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingRecordingStartedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -269,6 +290,7 @@ pub struct P2VcMeetingRecordingStartedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingRecordingEndedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -277,6 +299,7 @@ pub struct P2VcMeetingRecordingEndedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingRecordingReadyV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -287,6 +310,7 @@ pub struct P2VcMeetingRecordingReadyV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingShareStartedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -295,6 +319,7 @@ pub struct P2VcMeetingShareStartedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingShareEndedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -303,30 +328,35 @@ pub struct P2VcMeetingShareEndedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcRoomCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room: Option<RoomEvent>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcRoomDeletedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room: Option<RoomEvent>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcRoomUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room: Option<RoomEvent>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcRoomLevelCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_level: Option<RoomLevel>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcRoomLevelDeletedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_level_id: Option<String>,
@@ -335,12 +365,14 @@ pub struct P2VcRoomLevelDeletedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcRoomLevelUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_level: Option<RoomLevel>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcReserveConfigUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub scope_id: Option<String>,

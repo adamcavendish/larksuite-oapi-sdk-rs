@@ -9,6 +9,7 @@ use crate::service::common::{PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingRoom {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_id: Option<String>,
@@ -33,6 +34,7 @@ pub struct MeetingRoom {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Building {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub building_id: Option<String>,
@@ -49,12 +51,14 @@ pub struct Building {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room: Option<MeetingRoom>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RoomListData {
     #[serde(default)]
     pub rooms: Vec<MeetingRoom>,
@@ -65,6 +69,7 @@ pub struct RoomListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BuildingListData {
     #[serde(default)]
     pub buildings: Vec<Building>,
