@@ -14,6 +14,7 @@ impl_resp_v2!(RecommendApplicationResp, RecommendApplicationRespData);
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FavouriteApplicationRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
@@ -26,6 +27,7 @@ pub struct FavouriteApplicationRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecommendApplicationRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
@@ -41,6 +43,7 @@ pub struct RecommendApplicationRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Application {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_id: Option<String>,
@@ -57,6 +60,7 @@ pub struct Application {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenMethod {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,

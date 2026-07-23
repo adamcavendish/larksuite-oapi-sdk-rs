@@ -9,6 +9,7 @@ use crate::service::common::{PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PayrollRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub record_id: Option<String>,
@@ -27,6 +28,7 @@ pub struct PayrollRecord {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecordListData {
     #[serde(default)]
     pub items: Vec<PayrollRecord>,
@@ -460,6 +462,7 @@ impl<'a> QueryPaymentDetailQuery<'a> {
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListAcctItemRespData {
     #[serde(default)]
     pub items: Vec<AcctItem>,
@@ -470,6 +473,7 @@ pub struct ListAcctItemRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListCostAllocationDetailRespData {
     #[serde(default)]
     pub cost_allocation_report_datas: Vec<CostAllocationReportData>,
@@ -484,6 +488,7 @@ pub struct ListCostAllocationDetailRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListCostAllocationPlanRespData {
     #[serde(default)]
     pub items: Vec<CostAllocationPlan>,
@@ -494,6 +499,7 @@ pub struct ListCostAllocationPlanRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListCostAllocationReportRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pay_period: Option<String>,
@@ -508,6 +514,7 @@ pub struct ListCostAllocationReportRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListDatasourceRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
@@ -518,6 +525,7 @@ pub struct ListDatasourceRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryDatasourceRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
@@ -528,12 +536,14 @@ pub struct QueryDatasourceRecordRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SaveDatasourceRecordRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub affect_counts: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListPaygroupRespData {
     #[serde(default)]
     pub items: Vec<Paygroup>,
@@ -544,6 +554,7 @@ pub struct ListPaygroupRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListPaymentActivityRespData {
     #[serde(default)]
     pub payment_activitys: Vec<PaymentActivity>,
@@ -554,6 +565,7 @@ pub struct ListPaymentActivityRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListPaymentActivityDetailRespData {
     #[serde(default)]
     pub payment_activity_details: Vec<PaymentActivityDetail>,
@@ -562,6 +574,7 @@ pub struct ListPaymentActivityDetailRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryPaymentDetailRespData {
     #[serde(default)]
     pub payment_details: Vec<PaymentDetail>,
@@ -571,6 +584,7 @@ pub struct QueryPaymentDetailRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AccountingItemValue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub original_value: Option<String>,
@@ -579,6 +593,7 @@ pub struct AccountingItemValue {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AcctItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -595,6 +610,7 @@ pub struct AcctItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CalculationActivity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub calculation_activity_id: Option<String>,
@@ -603,6 +619,7 @@ pub struct CalculationActivity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompensationCost {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub compensation_cost_value: Option<String>,
@@ -611,6 +628,7 @@ pub struct CompensationCost {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompensationCostItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub number_of_individuals_for_payment: Option<i32>,
@@ -619,6 +637,7 @@ pub struct CompensationCostItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CostAllocationPlan {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -633,6 +652,7 @@ pub struct CostAllocationPlan {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CostAllocationReportData {
     #[serde(default)]
     pub data_summary_dimensions: Vec<DataSummaryDimension>,
@@ -643,6 +663,7 @@ pub struct CostAllocationReportData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CostItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -653,6 +674,7 @@ pub struct CostItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CountryRegion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -661,6 +683,7 @@ pub struct CountryRegion {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataSummaryDimension {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dimension_level: Option<i32>,
@@ -679,6 +702,7 @@ pub struct DataSummaryDimension {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Datasource {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
@@ -695,6 +719,7 @@ pub struct Datasource {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DatasourceField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
@@ -711,6 +736,7 @@ pub struct DatasourceField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DatasourceRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub active_status: Option<i32>,
@@ -719,6 +745,7 @@ pub struct DatasourceRecord {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DatasourceRecordField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_code: Option<String>,
@@ -729,6 +756,7 @@ pub struct DatasourceRecordField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Dimension {
     #[serde(default)]
     pub i18n_names: Vec<I18nContent>,
@@ -739,6 +767,7 @@ pub struct Dimension {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DimensionValueLookupInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -749,6 +778,7 @@ pub struct DimensionValueLookupInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EnumObject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub enum_value_id: Option<String>,
@@ -757,6 +787,7 @@ pub struct EnumObject {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18n {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -765,6 +796,7 @@ pub struct I18n {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nContent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
@@ -775,6 +807,7 @@ pub struct I18nContent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Paygroup {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pay_group_id: Option<String>,
@@ -791,6 +824,7 @@ pub struct Paygroup {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PaymentAccountingItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -805,6 +839,7 @@ pub struct PaymentAccountingItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PaymentActivity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub activity_id: Option<String>,
@@ -823,6 +858,7 @@ pub struct PaymentActivity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PaymentActivityDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub employee_id: Option<String>,
@@ -831,6 +867,7 @@ pub struct PaymentActivityDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PaymentDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub employee_id: Option<String>,
@@ -841,6 +878,7 @@ pub struct PaymentDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SegmentValue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_time: Option<String>,

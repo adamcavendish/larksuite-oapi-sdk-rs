@@ -9,6 +9,7 @@ use crate::service::common::RestRequest;
 // ── Response data types ───────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppFeedCardData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub failed_cards: Option<Vec<FailedAppFeedCard>>,
@@ -17,6 +18,7 @@ pub struct AppFeedCardData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FailedAppFeedCard {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub biz_id: Option<String>,
@@ -27,12 +29,14 @@ pub struct FailedAppFeedCard {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BizEntityTagRelationData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tag_info_with_bind_versions: Option<Vec<TagInfoWithBindVersion>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TagInfoWithBindVersion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tag_info: Option<TagInfo>,
@@ -41,6 +45,7 @@ pub struct TagInfoWithBindVersion {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateTagData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -49,6 +54,7 @@ pub struct CreateTagData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PatchTagData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tag_info: Option<TagInfo>,
@@ -57,6 +63,7 @@ pub struct PatchTagData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TagInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -77,6 +84,7 @@ pub struct TagInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TagI18nName {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
@@ -85,6 +93,7 @@ pub struct TagI18nName {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TagFailureReason {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub duplicate_id: Option<String>,
@@ -93,12 +102,14 @@ pub struct TagFailureReason {
 // ── Mutation request types ──────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenAppFeedCardText {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenAppFeedCardUrl {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -111,6 +122,7 @@ pub struct OpenAppFeedCardUrl {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenAppFeedCardButton {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub multi_url: Option<OpenAppFeedCardUrl>,
@@ -125,12 +137,14 @@ pub struct OpenAppFeedCardButton {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenAppFeedCardButtons {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub buttons: Option<Vec<OpenAppFeedCardButton>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenFeedStatusLabel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -139,12 +153,14 @@ pub struct OpenFeedStatusLabel {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenAppFeedLink {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub link: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppFeedNotify {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub close_notify: Option<bool>,
@@ -155,6 +171,7 @@ pub struct AppFeedNotify {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenAppFeedCard {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub biz_id: Option<String>,
@@ -185,6 +202,7 @@ pub struct CreateAppFeedCardV2ReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserOpenAppFeedCardDeleter {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub biz_id: Option<String>,
@@ -199,6 +217,7 @@ pub struct DeleteAppFeedCardBatchV2ReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserOpenAppFeedCardUpdater {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_feed_card: Option<OpenAppFeedCard>,
@@ -275,6 +294,7 @@ pub struct CreateTagV2ReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PatchTagV2Input {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,

@@ -12,6 +12,7 @@ use crate::service::common::{
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserId {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -37,6 +38,7 @@ impl UserId {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
+#[non_exhaustive]
 pub struct MessageType(pub String);
 
 impl MessageType {
@@ -79,6 +81,7 @@ impl From<MessageType> for String {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nNames {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -89,12 +92,14 @@ pub struct I18nNames {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Emoji {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub emoji_type: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Operator {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub operator_id: Option<String>,
@@ -103,6 +108,7 @@ pub struct Operator {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Sender {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -135,12 +141,14 @@ impl Sender {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageBody {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Mention {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
@@ -175,6 +183,7 @@ impl Mention {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Message {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message_id: Option<String>,
@@ -207,6 +216,7 @@ pub struct Message {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageReaction {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reaction_id: Option<String>,
@@ -219,6 +229,7 @@ pub struct MessageReaction {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Pin {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message_id: Option<String>,
@@ -233,6 +244,7 @@ pub struct Pin {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReadUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id_type: Option<String>,
@@ -245,6 +257,7 @@ pub struct ReadUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchMessageSendProgress {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub valid_user_ids_count: Option<i64>,
@@ -255,6 +268,7 @@ pub struct BatchMessageSendProgress {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchMessageRecallProgress {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recall: Option<bool>,
@@ -263,6 +277,7 @@ pub struct BatchMessageRecallProgress {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchMessageReadUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub read_count: Option<String>,
@@ -271,6 +286,7 @@ pub struct BatchMessageReadUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListChat {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_id: Option<String>,
@@ -295,6 +311,7 @@ pub struct ListChat {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_id_type: Option<String>,
@@ -307,6 +324,7 @@ pub struct ListMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListModerator {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id_type: Option<String>,
@@ -317,12 +335,14 @@ pub struct ListModerator {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatManagers {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub manager_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RestrictedModeSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<bool>,
@@ -335,6 +355,7 @@ pub struct RestrictedModeSetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatTabConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub icon_key: Option<String>,
@@ -343,6 +364,7 @@ pub struct ChatTabConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatTabContent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -355,6 +377,7 @@ pub struct ChatTabContent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatTab {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tab_id: Option<String>,
@@ -369,6 +392,7 @@ pub struct ChatTab {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatTopNotice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub action_type: Option<String>,
@@ -377,6 +401,7 @@ pub struct ChatTopNotice {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatMenuItemRedirectLink {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub common_url: Option<String>,
@@ -391,6 +416,7 @@ pub struct ChatMenuItemRedirectLink {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatMenuItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub action_type: Option<String>,
@@ -405,6 +431,7 @@ pub struct ChatMenuItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatMenuSecondLevel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_menu_second_level_id: Option<String>,
@@ -413,6 +440,7 @@ pub struct ChatMenuSecondLevel {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatMenuTopLevel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_menu_top_level_id: Option<String>,
@@ -423,12 +451,14 @@ pub struct ChatMenuTopLevel {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatMenuTree {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_menu_top_levels: Option<Vec<ChatMenuTopLevel>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nContent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -437,6 +467,7 @@ pub struct I18nContent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FollowUp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -807,6 +838,7 @@ pub struct ForwardThreadReqBody {
 // ── Response data types ──
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct MessageRespData {
     pub message_id: Option<String>,
     pub root_id: Option<String>,
@@ -825,11 +857,13 @@ pub struct MessageRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetMessageRespData {
     pub items: Option<Vec<Message>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListMessageRespData {
     pub has_more: Option<bool>,
     pub page_token: Option<String>,
@@ -837,12 +871,14 @@ pub struct ListMessageRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct MergeForwardMessageRespData {
     pub message: Option<Message>,
     pub invalid_message_id_list: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ReadUsersMessageRespData {
     pub items: Option<Vec<ReadUser>>,
     pub has_more: Option<bool>,
@@ -850,11 +886,13 @@ pub struct ReadUsersMessageRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UrgentMessageRespData {
     pub invalid_user_id_list: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateMessageReactionRespData {
     pub reaction_id: Option<String>,
     pub operator: Option<Operator>,
@@ -863,6 +901,7 @@ pub struct CreateMessageReactionRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct DeleteMessageReactionRespData {
     pub reaction_id: Option<String>,
     pub operator: Option<Operator>,
@@ -871,6 +910,7 @@ pub struct DeleteMessageReactionRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListMessageReactionRespData {
     pub items: Option<Vec<MessageReaction>>,
     pub has_more: Option<bool>,
@@ -878,22 +918,26 @@ pub struct ListMessageReactionRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetProgressBatchMessageRespData {
     pub batch_message_send_progress: Option<BatchMessageSendProgress>,
     pub batch_message_recall_progress: Option<BatchMessageRecallProgress>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ReadUserBatchMessageRespData {
     pub read_user: Option<BatchMessageReadUser>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreatePinRespData {
     pub pin: Option<Pin>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListPinRespData {
     pub items: Option<Vec<Pin>>,
     pub has_more: Option<bool>,
@@ -901,6 +945,7 @@ pub struct ListPinRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateChatRespData {
     pub chat_id: Option<String>,
     pub avatar: Option<String>,
@@ -933,6 +978,7 @@ pub struct CreateChatRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetChatRespData {
     pub chat_id: Option<String>,
     pub avatar: Option<String>,
@@ -970,6 +1016,7 @@ pub struct GetChatRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct LinkChatRespData {
     pub share_link: Option<String>,
     pub expire_time: Option<String>,
@@ -977,6 +1024,7 @@ pub struct LinkChatRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListChatRespData {
     pub items: Option<Vec<ListChat>>,
     pub page_token: Option<String>,
@@ -984,12 +1032,14 @@ pub struct ListChatRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateChatMembersRespData {
     pub invalid_id_list: Option<Vec<String>>,
     pub not_existed_id_list: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetChatMembersRespData {
     pub items: Option<Vec<ListMember>>,
     pub page_token: Option<String>,
@@ -998,16 +1048,19 @@ pub struct GetChatMembersRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct IsInChatChatMembersRespData {
     pub is_in_chat: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateChatManagersRespData {
     pub chat_managers: Option<Vec<ChatManagers>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetChatAnnouncementRespData {
     pub content: Option<String>,
     pub revision: Option<String>,
@@ -1020,6 +1073,7 @@ pub struct GetChatAnnouncementRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetChatModerationRespData {
     pub moderation_setting: Option<String>,
     pub items: Option<Vec<ListModerator>>,
@@ -1028,26 +1082,31 @@ pub struct GetChatModerationRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ChatTabsRespData {
     pub chat_tabs: Option<Vec<ChatTab>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct PatchChatMenuItemRespData {
     pub chat_menu_item: Option<ChatMenuItem>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ChatMenuTreeRespData {
     pub menu_tree: Option<ChatMenuTree>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateFileRespData {
     pub file_key: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateImageRespData {
     pub image_key: Option<String>,
 }

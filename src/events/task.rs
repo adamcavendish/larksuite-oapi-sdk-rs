@@ -9,6 +9,7 @@ pub use crate::events::common::{UserId, UserIdList};
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2TaskUpdateTenantV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id_list: Option<UserIdList>,
@@ -21,6 +22,7 @@ pub struct P2TaskUpdateTenantV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2TaskUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
@@ -29,6 +31,7 @@ pub struct P2TaskUpdatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2TaskCommentUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
@@ -41,6 +44,7 @@ pub struct P2TaskCommentUpdatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2TaskUpdateUserAccessV2Data {
     #[serde(default)]
     pub event_types: Vec<String>,
@@ -49,6 +53,7 @@ pub struct P2TaskUpdateUserAccessV2Data {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2TaskUpdateUserAccessV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event: Option<P2TaskUpdateUserAccessV2Data>,

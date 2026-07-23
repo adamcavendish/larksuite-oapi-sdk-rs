@@ -17,6 +17,7 @@ pub struct RecognizeReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FaceDetectData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub face_list: Option<Vec<crate::JsonValue>>,

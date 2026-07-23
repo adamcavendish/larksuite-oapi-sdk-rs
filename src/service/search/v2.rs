@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Acl {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access: Option<String>,
@@ -19,6 +20,7 @@ pub struct Acl {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nMeta {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -29,6 +31,7 @@ pub struct I18nMeta {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SchemaFieldAnswerOption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_searchable: Option<bool>,
@@ -37,6 +40,7 @@ pub struct SchemaFieldAnswerOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SchemaSearchOptions {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub enable_semantic_match: Option<bool>,
@@ -51,6 +55,7 @@ pub struct SchemaSearchOptions {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SchemaDisplayFieldMapping {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub display_field: Option<String>,
@@ -59,6 +64,7 @@ pub struct SchemaDisplayFieldMapping {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TimeRange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start: Option<i64>,
@@ -97,6 +103,7 @@ pub struct DocFilter {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WikiFilter {
     #[serde(default)]
     pub creator_ids: Vec<String>,
@@ -127,6 +134,7 @@ pub struct WikiFilter {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocMeta {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub doc_types: Option<String>,
@@ -157,6 +165,7 @@ pub struct DocMeta {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocResUnit {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title_highlighted: Option<String>,
@@ -169,6 +178,7 @@ pub struct DocResUnit {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataSource {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -201,6 +211,7 @@ pub struct DataSource {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -235,6 +246,7 @@ pub struct DataRecordContent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Schema {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -267,6 +279,7 @@ pub struct SchemaProperty {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SchemaDisplay {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub card_key: Option<String>,
@@ -399,12 +412,14 @@ pub struct SearchDocWikiReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataSourceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub data_source: Option<DataSource>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataSourceListData {
     #[serde(default)]
     pub items: Vec<DataSource>,
@@ -415,12 +430,14 @@ pub struct DataSourceListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataRecordData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub record: Option<DataRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchMessageData {
     #[serde(default)]
     pub items: Vec<String>,
@@ -431,6 +448,7 @@ pub struct SearchMessageData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchAppData {
     #[serde(default)]
     pub items: Vec<String>,
@@ -441,6 +459,7 @@ pub struct SearchAppData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SchemaData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub schema: Option<Schema>,
@@ -741,6 +760,7 @@ impl<'a> PatchSchemaQuery<'a> {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchDocWikiData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub total: Option<i32>,

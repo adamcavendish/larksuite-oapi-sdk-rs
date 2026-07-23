@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CardTemplate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub template_id: Option<String>,
@@ -131,6 +132,7 @@ pub struct ContentCardElementReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CardInstanceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub instance_id: Option<String>,
@@ -323,12 +325,14 @@ impl<'a> ContentCardElementQuery<'a> {
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateCardRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub card_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct IdConvertCardRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub card_id: Option<String>,

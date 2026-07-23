@@ -17,6 +17,7 @@ pub struct Feature {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Property {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
@@ -63,6 +64,7 @@ pub struct OpeningTimePeriodExternal {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpeningTimeValidDayExternal {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_day: Option<i32>,
@@ -113,6 +115,7 @@ pub struct User {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AcsUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -123,6 +126,7 @@ pub struct AcsUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AccessRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_record_id: Option<String>,
@@ -143,6 +147,7 @@ pub struct AccessRecord {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AcsDevice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_id: Option<String>,
@@ -185,12 +190,14 @@ pub struct CreateVisitorReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AcsUserData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user: Option<AcsUser>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AcsUserListData {
     #[serde(default)]
     pub items: Vec<AcsUser>,
@@ -201,6 +208,7 @@ pub struct AcsUserListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AccessRecordListData {
     #[serde(default)]
     pub items: Vec<AccessRecord>,
@@ -211,6 +219,7 @@ pub struct AccessRecordListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DeviceListData {
     #[serde(default)]
     pub items: Vec<AcsDevice>,
@@ -309,36 +318,42 @@ impl<'a> ListAccessRecordQuery<'a> {
 // ── New data types (v2 pattern) ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateRuleExternalData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rule_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetRuleExternalData {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub rules: Vec<Rule>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AccessRecordAccessPhotoData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_content: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserFaceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_content: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VisitorData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub visitor_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VisitorListData {
     #[serde(default)]
     pub items: Vec<crate::JsonValue>,

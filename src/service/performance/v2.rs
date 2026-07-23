@@ -7,6 +7,7 @@ use crate::req::RequestOption;
 use crate::service::common::{PageQuery, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricTagListData {
     #[serde(default)]
     pub items: Vec<crate::JsonValue>,
@@ -43,12 +44,14 @@ impl_resp_v2!(QueryUserInfoV2Resp, QueryUserInfoV2RespData);
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryActivityV2RespData {
     #[serde(default)]
     pub activities: Vec<Activity>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ImportAdditionalInformationV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub import_record_id: Option<String>,
@@ -57,6 +60,7 @@ pub struct ImportAdditionalInformationV2RespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryAdditionalInformationV2RespData {
     #[serde(default)]
     pub additional_informations: Vec<AdditionalInformation>,
@@ -67,6 +71,7 @@ pub struct QueryAdditionalInformationV2RespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryIndicatorV2RespData {
     #[serde(default)]
     pub indicators: Vec<Indicator>,
@@ -77,12 +82,14 @@ pub struct QueryIndicatorV2RespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ImportMetricDetailV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub import_record_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryMetricDetailV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub semester_id: Option<String>,
@@ -91,12 +98,14 @@ pub struct QueryMetricDetailV2RespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryMetricFieldV2RespData {
     #[serde(default)]
     pub items: Vec<MetricField>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryMetricLibV2RespData {
     #[serde(default)]
     pub items: Vec<MetricInLibrary>,
@@ -107,6 +116,7 @@ pub struct QueryMetricLibV2RespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryMetricTemplateV2RespData {
     #[serde(default)]
     pub items: Vec<MetricTemplate>,
@@ -117,6 +127,7 @@ pub struct QueryMetricTemplateV2RespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryQuestionV2RespData {
     #[serde(default)]
     pub tag_based_questions: Vec<Question>,
@@ -127,12 +138,14 @@ pub struct QueryQuestionV2RespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryReviewDataV2RespData {
     #[serde(default)]
     pub datas: Vec<ReviewProfile>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryReviewTemplateV2RespData {
     #[serde(default)]
     pub review_templates: Vec<ReviewTemplate>,
@@ -143,6 +156,7 @@ pub struct QueryReviewTemplateV2RespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryRevieweeV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub semester_id: Option<String>,
@@ -155,12 +169,14 @@ pub struct QueryRevieweeV2RespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WriteUserGroupUserRelV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub data: Option<WriteUserGroupScopeData>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryUserInfoV2RespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub semester_id: Option<String>,
@@ -170,6 +186,7 @@ pub struct QueryUserInfoV2RespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Activity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -194,6 +211,7 @@ pub struct Activity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AdditionalInformation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item_id: Option<String>,
@@ -210,6 +228,7 @@ pub struct AdditionalInformation {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CooperationProject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -224,6 +243,7 @@ pub struct CooperationProject {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CooperationRole {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reviewer_role: Option<CooperationUserRole>,
@@ -232,6 +252,7 @@ pub struct CooperationRole {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CooperationUserRole {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role_id: Option<String>,
@@ -240,6 +261,7 @@ pub struct CooperationUserRole {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomMetricConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default_formula_id: Option<String>,
@@ -250,6 +272,7 @@ pub struct CustomMetricConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Department {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -258,6 +281,7 @@ pub struct Department {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DirectProjectLeaderRecordInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reviewer_id: Option<User>,
@@ -270,6 +294,7 @@ pub struct DirectProjectLeaderRecordInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Field {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -290,6 +315,7 @@ pub struct Field {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Formula {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub formula_id: Option<String>,
@@ -300,6 +326,7 @@ pub struct Formula {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18n {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -308,6 +335,7 @@ pub struct I18n {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Indicator {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -320,6 +348,7 @@ pub struct Indicator {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct IndicatorOption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -330,6 +359,7 @@ pub struct IndicatorOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InvitedReviewRecordInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reviewer_id: Option<User>,
@@ -348,6 +378,7 @@ pub struct InvitedReviewRecordInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct JobFamily {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -356,6 +387,7 @@ pub struct JobFamily {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct JobLevel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -364,6 +396,7 @@ pub struct JobLevel {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct KeyresultData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub keyresult_id: Option<String>,
@@ -376,6 +409,7 @@ pub struct KeyresultData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -384,6 +418,7 @@ pub struct MetricData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub metric_id: Option<String>,
@@ -404,6 +439,7 @@ pub struct MetricDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricDimension {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub group_id: Option<String>,
@@ -424,6 +460,7 @@ pub struct MetricDimension {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -434,6 +471,7 @@ pub struct MetricField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricFieldInDetails {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -444,6 +482,7 @@ pub struct MetricFieldInDetails {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricFieldInLibrary {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -456,6 +495,7 @@ pub struct MetricFieldInLibrary {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricFieldInTemplate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -468,6 +508,7 @@ pub struct MetricFieldInTemplate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricGroup {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub group_id: Option<String>,
@@ -476,6 +517,7 @@ pub struct MetricGroup {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricInLibrary {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub metric_id: Option<String>,
@@ -500,6 +542,7 @@ pub struct MetricInLibrary {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricInTemplate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub group_id: Option<String>,
@@ -524,6 +567,7 @@ pub struct MetricInTemplate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricReviewRuleConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max: Option<String>,
@@ -532,6 +576,7 @@ pub struct MetricReviewRuleConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricTag {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tag_id: Option<String>,
@@ -546,6 +591,7 @@ pub struct MetricTag {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetricTemplate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -570,6 +616,7 @@ pub struct MetricTemplate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ObjectiveData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub objective_id: Option<String>,
@@ -584,6 +631,7 @@ pub struct ObjectiveData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Question {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub question_id: Option<String>,
@@ -594,6 +642,7 @@ pub struct Question {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReviewDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -634,6 +683,7 @@ pub struct ReviewDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReviewProfile {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<User>,
@@ -648,6 +698,7 @@ pub struct ReviewProfile {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReviewRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub progress: Option<i32>,
@@ -662,6 +713,7 @@ pub struct ReviewRecord {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReviewStage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stage_id: Option<String>,
@@ -678,6 +730,7 @@ pub struct ReviewStage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReviewTemplate {
     #[serde(default)]
     pub templates: Vec<Template>,
@@ -694,6 +747,7 @@ pub struct ReviewTemplate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReviewUnit {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unit_id: Option<String>,
@@ -704,6 +758,7 @@ pub struct ReviewUnit {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Reviewee {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reviewee_user_id: Option<User>,
@@ -714,6 +769,7 @@ pub struct Reviewee {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RevieweeMetric {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reviewee_user_id: Option<User>,
@@ -726,6 +782,7 @@ pub struct RevieweeMetric {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RevieweeStageStatus {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stage_id: Option<String>,
@@ -736,6 +793,7 @@ pub struct RevieweeStageStatus {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubIndicator {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -752,6 +810,7 @@ pub struct SubIndicator {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TagItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -760,6 +819,7 @@ pub struct TagItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TagText {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tag_text_id: Option<String>,
@@ -770,6 +830,7 @@ pub struct TagText {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Template {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub template_id: Option<String>,
@@ -784,6 +845,7 @@ pub struct Template {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Unit {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unit_id: Option<String>,
@@ -794,6 +856,7 @@ pub struct Unit {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct User {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub open_id: Option<String>,
@@ -802,6 +865,7 @@ pub struct User {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<User>,
@@ -816,6 +880,7 @@ pub struct UserInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WriteUserGroupScopeData {
     #[serde(default)]
     pub success_user_ids: Vec<String>,
@@ -824,6 +889,7 @@ pub struct WriteUserGroupScopeData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WriteUserGroupScopeFailUserData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,

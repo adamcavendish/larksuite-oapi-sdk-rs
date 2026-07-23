@@ -47,6 +47,7 @@ pub struct Task {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskDue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time: Option<String>,
@@ -57,6 +58,7 @@ pub struct TaskDue {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -67,6 +69,7 @@ pub struct TaskMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Reminder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -79,6 +82,7 @@ pub struct Reminder {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Href {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -87,6 +91,7 @@ pub struct Href {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskOrigin {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub platform_i18n_name: Option<String>,
@@ -95,6 +100,7 @@ pub struct TaskOrigin {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Comment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -207,12 +213,14 @@ pub struct UpdateReminderReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task: Option<Task>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskListData {
     #[serde(default)]
     pub items: Vec<Task>,
@@ -223,12 +231,14 @@ pub struct TaskListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CommentData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub comment: Option<Comment>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CommentListData {
     #[serde(default)]
     pub items: Vec<Comment>,
@@ -239,12 +249,14 @@ pub struct CommentListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FollowerData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub follower: Option<TaskMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MemberListData {
     #[serde(default)]
     pub items: Vec<TaskMember>,
@@ -255,18 +267,21 @@ pub struct MemberListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CollaboratorData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub collaborator: Option<TaskMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReminderData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reminder: Option<Reminder>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReminderListData {
     #[serde(default)]
     pub items: Vec<Reminder>,
@@ -277,12 +292,14 @@ pub struct ReminderListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchDeleteCollaboratorData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub collaborators: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchDeleteFollowerData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub followers: Option<Vec<String>>,

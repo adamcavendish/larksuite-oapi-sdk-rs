@@ -8,6 +8,7 @@ use crate::resp::{ApiResp, CodeError};
 use crate::service::common::{FromV2Response, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NodeV1ListData {
     #[serde(default)]
     pub items: Vec<crate::JsonValue>,
@@ -17,6 +18,7 @@ pub struct NodeV1ListData {
     pub has_more: Option<bool>,
 }
 
+#[non_exhaustive]
 pub struct SearchNodeV1Resp {
     pub api_resp: ApiResp,
     pub code_error: Option<CodeError>,

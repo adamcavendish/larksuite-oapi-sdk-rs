@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2SearchDataSourceCreatedV1 {
     #[serde(default)]
     pub data_source_id: String,
@@ -13,12 +14,14 @@ pub struct P2SearchDataSourceCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2SearchDataSourceDeletedV1 {
     #[serde(default)]
     pub data_source_id: String,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2SearchDataSourceUpdatedV1 {
     #[serde(default)]
     pub data_source_id: String,

@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GeneratedSource {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_type: Option<String>,
@@ -15,6 +16,7 @@ pub struct GeneratedSource {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MinuteGeneratedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub minute_token: Option<String>,

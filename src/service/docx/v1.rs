@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Document {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub document_id: Option<String>,
@@ -23,6 +24,7 @@ pub struct Document {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocumentCover {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -33,6 +35,7 @@ pub struct DocumentCover {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocumentDisplaySetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub show_authors: Option<bool>,
@@ -181,6 +184,7 @@ pub struct Block {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BuildingBlock {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -419,18 +423,21 @@ pub struct DeleteBlocksReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocumentData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub document: Option<Document>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BlockData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block: Option<Block>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BlockListData {
     #[serde(default)]
     pub items: Vec<Block>,
@@ -441,6 +448,7 @@ pub struct BlockListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateBlockData {
     #[serde(default)]
     pub children: Vec<Block>,
@@ -449,6 +457,7 @@ pub struct CreateBlockData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateBlockData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block: Option<Block>,
@@ -457,6 +466,7 @@ pub struct UpdateBlockData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchUpdateBlockData {
     #[serde(default)]
     pub blocks: Vec<Block>,
@@ -465,12 +475,14 @@ pub struct BatchUpdateBlockData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BuildingBlockData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub building_block: Option<BuildingBlock>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetDocumentRawContentData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -1039,6 +1051,7 @@ impl<'a> CreateDocumentBlockDescendantQuery<'a> {
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetChatAnnouncementRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub revision_id: Option<i32>,
@@ -1063,6 +1076,7 @@ pub struct GetChatAnnouncementRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchUpdateChatAnnouncementBlockRespData {
     #[serde(default)]
     pub blocks: Vec<ResponseBlock>,
@@ -1073,12 +1087,14 @@ pub struct BatchUpdateChatAnnouncementBlockRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetChatAnnouncementBlockRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block: Option<ResponseBlock>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListChatAnnouncementBlockRespData {
     #[serde(default)]
     pub items: Vec<ResponseBlock>,
@@ -1089,6 +1105,7 @@ pub struct ListChatAnnouncementBlockRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchDeleteChatAnnouncementBlockChildrenRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub revision_id: Option<i32>,
@@ -1097,6 +1114,7 @@ pub struct BatchDeleteChatAnnouncementBlockChildrenRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateChatAnnouncementBlockChildrenRespData {
     #[serde(default)]
     pub children: Vec<ResponseBlock>,
@@ -1107,6 +1125,7 @@ pub struct CreateChatAnnouncementBlockChildrenRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetChatAnnouncementBlockChildrenRespData {
     #[serde(default)]
     pub items: Vec<ResponseBlock>,
@@ -1117,6 +1136,7 @@ pub struct GetChatAnnouncementBlockChildrenRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateDocumentBlockDescendantRespData {
     #[serde(default)]
     pub children: Vec<ResponseBlock>,
@@ -1129,6 +1149,7 @@ pub struct CreateDocumentBlockDescendantRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ConvertDocumentRespData {
     #[serde(default)]
     pub first_level_block_ids: Vec<String>,
@@ -1140,6 +1161,7 @@ pub struct ConvertDocumentRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AddOns {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub component_id: Option<String>,
@@ -1150,15 +1172,19 @@ pub struct AddOns {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Agenda {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgendaItem {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgendaItemContent {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgendaItemTitle {
     #[serde(default)]
     pub elements: Vec<AgendaTitleElement>,
@@ -1167,6 +1193,7 @@ pub struct AgendaItemTitle {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgendaTitleElement {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text_run: Option<TextRun>,
@@ -1187,9 +1214,11 @@ pub struct AgendaTitleElement {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AiTemplate {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Bitable {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -1198,6 +1227,7 @@ pub struct Bitable {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseBlock {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<String>,
@@ -1324,6 +1354,7 @@ pub struct ResponseBlock {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BlockIdRelation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub temporary_block_id: Option<String>,
@@ -1332,6 +1363,7 @@ pub struct BlockIdRelation {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BlockIdToImageUrl {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<String>,
@@ -1340,6 +1372,7 @@ pub struct BlockIdToImageUrl {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Board {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -1352,6 +1385,7 @@ pub struct Board {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Callout {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub background_color: Option<i32>,
@@ -1364,12 +1398,14 @@ pub struct Callout {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Caption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatCard {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_id: Option<String>,
@@ -1378,15 +1414,18 @@ pub struct ChatCard {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Diagram {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub diagram_type: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Divider {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Equation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -1395,6 +1434,7 @@ pub struct Equation {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct File {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -1405,24 +1445,28 @@ pub struct File {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Grid {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub column_size: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GridColumn {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub width_ratio: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Iframe {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub component: Option<IframeComponent>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct IframeComponent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub iframe_type: Option<i32>,
@@ -1431,6 +1475,7 @@ pub struct IframeComponent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Image {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub width: Option<i32>,
@@ -1447,6 +1492,7 @@ pub struct Image {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InlineBlock {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<String>,
@@ -1455,6 +1501,7 @@ pub struct InlineBlock {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InlineFile {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_token: Option<String>,
@@ -1465,6 +1512,7 @@ pub struct InlineFile {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InlineLinkPreview {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
@@ -1477,6 +1525,7 @@ pub struct InlineLinkPreview {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Isv {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub component_id: Option<String>,
@@ -1485,6 +1534,7 @@ pub struct Isv {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct JiraIssue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1493,12 +1543,14 @@ pub struct JiraIssue {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Link {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct LinkPreview {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -1507,9 +1559,11 @@ pub struct LinkPreview {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MeetingNotesQa {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MentionDoc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -1526,6 +1580,7 @@ pub struct MentionDoc {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MentionUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -1534,12 +1589,14 @@ pub struct MentionUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Mindnote {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ObjectiveIdWithKrId {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub objective_id: Option<String>,
@@ -1548,6 +1605,7 @@ pub struct ObjectiveIdWithKrId {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Okr {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub okr_id: Option<String>,
@@ -1566,6 +1624,7 @@ pub struct Okr {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrKeyResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kr_id: Option<String>,
@@ -1586,6 +1645,7 @@ pub struct OkrKeyResult {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrObjective {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub objective_id: Option<String>,
@@ -1606,9 +1666,11 @@ pub struct OkrObjective {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrProgress {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrProgressRate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mode: Option<String>,
@@ -1627,6 +1689,7 @@ pub struct OkrProgressRate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OkrVisibleSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub progress_fill_area_visible: Option<bool>,
@@ -1637,6 +1700,7 @@ pub struct OkrVisibleSetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Project {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
@@ -1649,9 +1713,11 @@ pub struct Project {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QuoteContainer {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReferenceBase {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -1662,6 +1728,7 @@ pub struct ReferenceBase {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReferenceSynced {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_document_id: Option<String>,
@@ -1670,6 +1737,7 @@ pub struct ReferenceSynced {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Reminder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub create_user_id: Option<String>,
@@ -1686,6 +1754,7 @@ pub struct Reminder {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Sheet {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -1696,6 +1765,7 @@ pub struct Sheet {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SourceSynced {
     #[serde(default)]
     pub elements: Vec<TextElement>,
@@ -1704,12 +1774,14 @@ pub struct SourceSynced {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubPageList {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wiki_token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Table {
     #[serde(default)]
     pub cells: Vec<String>,
@@ -1718,9 +1790,11 @@ pub struct Table {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TableCell {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TableMergeInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub row_span: Option<i32>,
@@ -1729,6 +1803,7 @@ pub struct TableMergeInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TableProperty {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub row_size: Option<i32>,
@@ -1745,6 +1820,7 @@ pub struct TableProperty {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Task {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
@@ -1753,6 +1829,7 @@ pub struct Task {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Text {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub style: Option<TextStyle>,
@@ -1783,6 +1860,7 @@ pub struct TextElement {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TextElementStyle {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub bold: Option<bool>,
@@ -1813,6 +1891,7 @@ pub struct TextRun {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TextStyle {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub align: Option<i32>,
@@ -1833,18 +1912,22 @@ pub struct TextStyle {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Undefined {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UndefinedElement {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct View {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub view_type: Option<i32>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WikiCatalog {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wiki_token: Option<String>,

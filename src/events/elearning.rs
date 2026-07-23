@@ -5,12 +5,14 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CourseRegistrationData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub course_id: Option<String>,
@@ -37,6 +39,7 @@ pub struct CourseRegistrationData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CourseRegistrationDeletedData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub course_id: Option<String>,
@@ -45,18 +48,21 @@ pub struct CourseRegistrationDeletedData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CourseRegistrationCreatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event: Option<CourseRegistrationData>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CourseRegistrationDeletedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event: Option<CourseRegistrationDeletedData>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2CourseRegistrationUpdatedV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event: Option<CourseRegistrationData>,

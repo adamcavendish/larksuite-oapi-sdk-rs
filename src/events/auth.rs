@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2UserAccessTokenRevokedV4Data {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub revoke_token_type: Option<String>,
@@ -17,6 +18,7 @@ pub struct P2UserAccessTokenRevokedV4Data {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2UserAccessTokenRevokedV4 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event: Option<P2UserAccessTokenRevokedV4Data>,

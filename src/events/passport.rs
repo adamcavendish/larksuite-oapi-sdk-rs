@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2PassportSessionCreatedV1 {
     #[serde(default)]
     pub session_id: String,
@@ -17,6 +18,7 @@ pub struct P2PassportSessionCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2PassportSessionDeletedV1 {
     #[serde(default)]
     pub session_id: String,

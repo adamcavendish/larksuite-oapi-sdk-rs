@@ -14,6 +14,7 @@ pub use super::shared::{
 // ── Response data types ───────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Attachment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_id: Option<String>,
@@ -28,6 +29,7 @@ pub struct Attachment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Ability {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<I18n>,
@@ -36,6 +38,7 @@ pub struct Ability {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AbilityAssessment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -46,6 +49,7 @@ pub struct AbilityAssessment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecommendedJobLevel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub lower_limit_job_level_name: Option<I18n>,
@@ -54,6 +58,7 @@ pub struct RecommendedJobLevel {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DimensionOption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -66,6 +71,7 @@ pub struct DimensionOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QuestionAssessment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub question_type: Option<i32>,
@@ -80,6 +86,7 @@ pub struct QuestionAssessment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DimensionAssessment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub interview_feedback_form_dimension_id: Option<String>,
@@ -106,6 +113,7 @@ pub struct DimensionAssessment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ModuleAssessment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub interview_feedback_form_module_id: Option<String>,
@@ -122,6 +130,7 @@ pub struct ModuleAssessment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecordScore {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub score: Option<f64>,
@@ -130,6 +139,7 @@ pub struct RecordScore {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InterviewRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -150,6 +160,7 @@ pub struct InterviewRecord {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentCustomizedOption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
@@ -158,6 +169,7 @@ pub struct TalentCustomizedOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentCustomizedTimeRange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_time: Option<String>,
@@ -166,6 +178,7 @@ pub struct TalentCustomizedTimeRange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentCustomizedAttachment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_id: Option<String>,
@@ -178,6 +191,7 @@ pub struct TalentCustomizedAttachment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentCustomizedValue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -196,6 +210,7 @@ pub struct TalentCustomizedValue {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentCustomizedDataChild {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object_id: Option<String>,
@@ -208,6 +223,7 @@ pub struct TalentCustomizedDataChild {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompositeTalentCustomizedData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub module_id: Option<String>,
@@ -220,6 +236,7 @@ pub struct CompositeTalentCustomizedData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompositeTalentBasicInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -313,6 +330,7 @@ composite_talent_text_section!(CompositeTalentWorksInfo {
 });
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompositeTalentEducationInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub degree: Option<i32>,
@@ -335,6 +353,7 @@ pub struct CompositeTalentEducationInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompositeTalentLanguageInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub language: Option<i32>,
@@ -345,6 +364,7 @@ pub struct CompositeTalentLanguageInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompositeTalentSnsInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sns_type: Option<i32>,
@@ -355,6 +375,7 @@ pub struct CompositeTalentSnsInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentResumeAttachment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -367,6 +388,7 @@ pub struct TalentResumeAttachment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentFolder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -379,6 +401,7 @@ pub struct TalentFolder {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentTag {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -391,6 +414,7 @@ pub struct TalentTag {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentSimilar {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_similar_talent: Option<bool>,
@@ -399,6 +423,7 @@ pub struct TalentSimilar {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentBlock {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub blocked_time: Option<String>,
@@ -409,6 +434,7 @@ pub struct TalentBlock {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentPool {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -421,6 +447,7 @@ pub struct TalentPool {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentNote {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -441,6 +468,7 @@ pub struct TalentNote {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompositeTalent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub talent_id: Option<String>,
@@ -497,12 +525,14 @@ pub struct CompositeTalent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InterviewRecordData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub interview_record: Option<InterviewRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InterviewRecordListData {
     #[serde(default)]
     pub items: Vec<InterviewRecord>,
@@ -513,6 +543,7 @@ pub struct InterviewRecordListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TalentV2Data {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub talent: Option<CompositeTalent>,

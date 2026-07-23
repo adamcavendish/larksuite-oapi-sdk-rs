@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct StageChange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stage_id: Option<String>,
@@ -17,6 +18,7 @@ pub struct StageChange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReviewDataChange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
@@ -29,6 +31,7 @@ pub struct ReviewDataChange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OpenResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
@@ -41,12 +44,14 @@ pub struct OpenResult {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ReviewDataChangedV2 {
     #[serde(default)]
     pub items: Vec<ReviewDataChange>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2StageTaskOpenResultV2 {
     #[serde(default)]
     pub items: Vec<OpenResult>,

@@ -11,6 +11,7 @@ use crate::service::common::{
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nContent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
@@ -19,6 +20,7 @@ pub struct I18nContent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DepartmentI18nName {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -29,12 +31,14 @@ pub struct DepartmentI18nName {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DepartmentStatus {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_deleted: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DepartmentLeader {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub leader_type: Option<i32>,
@@ -43,6 +47,7 @@ pub struct DepartmentLeader {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Department {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -79,6 +84,7 @@ pub struct Department {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AvatarInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub avatar_72: Option<String>,
@@ -91,6 +97,7 @@ pub struct AvatarInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserStatus {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_frozen: Option<bool>,
@@ -105,6 +112,7 @@ pub struct UserStatus {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NotificationOption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub channels: Option<Vec<String>>,
@@ -113,6 +121,7 @@ pub struct NotificationOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomAttrGenericUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -121,6 +130,7 @@ pub struct CustomAttrGenericUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserCustomAttrValue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -141,6 +151,7 @@ pub struct UserCustomAttrValue {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserCustomAttr {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<String>,
@@ -151,6 +162,7 @@ pub struct UserCustomAttr {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserPosition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub position_code: Option<String>,
@@ -167,6 +179,7 @@ pub struct UserPosition {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserOrder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -179,6 +192,7 @@ pub struct UserOrder {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserAssignInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subscription_id: Option<String>,
@@ -195,6 +209,7 @@ pub struct UserAssignInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DepartmentDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -203,6 +218,7 @@ pub struct DepartmentDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct User {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub union_id: Option<String>,
@@ -287,6 +303,7 @@ pub struct User {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserContactInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -305,6 +322,7 @@ pub struct UserDepartmentInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResourceAcceptor {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub type_: Option<i32>,
@@ -313,6 +331,7 @@ pub struct ResourceAcceptor {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EmployeeTypeEnum {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub enum_id: Option<String>,
@@ -329,6 +348,7 @@ pub struct EmployeeTypeEnum {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FunctionalRole {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role_id: Option<String>,
@@ -337,6 +357,7 @@ pub struct FunctionalRole {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FunctionalRoleMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -347,6 +368,7 @@ pub struct FunctionalRoleMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FunctionalRoleMemberResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -355,6 +377,7 @@ pub struct FunctionalRoleMemberResult {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct JobFamily {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -373,6 +396,7 @@ pub struct JobFamily {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct JobLevel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -391,6 +415,7 @@ pub struct JobLevel {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct JobTitle {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub job_title_id: Option<String>,
@@ -403,6 +428,7 @@ pub struct JobTitle {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Unit {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unit_id: Option<String>,
@@ -413,6 +439,7 @@ pub struct Unit {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UnitDepartment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unit_id: Option<String>,
@@ -421,6 +448,7 @@ pub struct UnitDepartment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Memberlist {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_id: Option<String>,
@@ -431,6 +459,7 @@ pub struct Memberlist {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MemberResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_id: Option<String>,
@@ -439,6 +468,7 @@ pub struct MemberResult {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Group {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -457,6 +487,7 @@ pub struct Group {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WorkCity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub work_city_id: Option<String>,
@@ -637,32 +668,39 @@ pub struct UnbindDepartmentUnitReqBody {
 // ── Response wrappers (macro) ──
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateDepartmentRespData {
     pub department: Option<Department>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetDepartmentRespData {
     pub department: Option<Department>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct PatchDepartmentRespData {
     pub department: Option<Department>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateDepartmentRespData {
     pub department: Option<Department>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListDepartmentRespData {
     pub has_more: Option<bool>,
     pub page_token: Option<String>,
     pub items: Option<Vec<Department>>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchDepartmentRespData {
     pub items: Option<Vec<Department>>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct SearchDepartmentRespData {
     pub items: Option<Vec<Department>>,
     pub page_token: Option<String>,
@@ -670,45 +708,55 @@ pub struct SearchDepartmentRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateUserRespData {
     pub user: Option<User>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetUserRespData {
     pub user: Option<User>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct PatchUserRespData {
     pub user: Option<User>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateUserRespData {
     pub user: Option<User>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListUserRespData {
     pub has_more: Option<bool>,
     pub page_token: Option<String>,
     pub items: Option<Vec<User>>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchUserRespData {
     pub items: Option<Vec<User>>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchGetIdUserRespData {
     pub user_list: Option<Vec<UserContactInfo>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateEmployeeTypeEnumRespData {
     pub employee_type_enum: Option<EmployeeTypeEnum>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateEmployeeTypeEnumRespData {
     pub employee_type_enum: Option<EmployeeTypeEnum>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListEmployeeTypeEnumRespData {
     pub items: Option<Vec<EmployeeTypeEnum>>,
     pub has_more: Option<bool>,
@@ -716,57 +764,69 @@ pub struct ListEmployeeTypeEnumRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateFunctionalRoleRespData {
     pub role_id: Option<String>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchCreateFunctionalRoleMemberRespData {
     pub results: Option<Vec<FunctionalRoleMemberResult>>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchDeleteFunctionalRoleMemberRespData {
     pub result: Option<Vec<FunctionalRoleMemberResult>>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetFunctionalRoleMemberRespData {
     pub member: Option<FunctionalRoleMember>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListFunctionalRoleMemberRespData {
     pub members: Option<Vec<FunctionalRoleMember>>,
     pub page_token: Option<String>,
     pub has_more: Option<bool>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ScopesFunctionalRoleMemberRespData {
     pub results: Option<Vec<FunctionalRoleMemberResult>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateGroupRespData {
     pub group_id: Option<String>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetGroupRespData {
     pub group: Option<Group>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct MemberBelongGroupRespData {
     pub group_list: Option<Vec<String>>,
     pub page_token: Option<String>,
     pub has_more: Option<bool>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct SimplelistGroupRespData {
     pub grouplist: Option<Vec<Group>>,
     pub page_token: Option<String>,
     pub has_more: Option<bool>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchAddGroupMemberRespData {
     pub results: Option<Vec<MemberResult>>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct SimplelistGroupMemberRespData {
     pub memberlist: Option<Vec<Memberlist>>,
     pub page_token: Option<String>,
@@ -774,18 +834,22 @@ pub struct SimplelistGroupMemberRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateJobFamilyRespData {
     pub job_family: Option<JobFamily>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetJobFamilyRespData {
     pub job_family: Option<JobFamily>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateJobFamilyRespData {
     pub job_family: Option<JobFamily>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListJobFamilyRespData {
     pub items: Option<Vec<JobFamily>>,
     pub page_token: Option<String>,
@@ -793,18 +857,22 @@ pub struct ListJobFamilyRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateJobLevelRespData {
     pub job_level: Option<JobLevel>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetJobLevelRespData {
     pub job_level: Option<JobLevel>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateJobLevelRespData {
     pub job_level: Option<JobLevel>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListJobLevelRespData {
     pub items: Option<Vec<JobLevel>>,
     pub page_token: Option<String>,
@@ -812,10 +880,12 @@ pub struct ListJobLevelRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetJobTitleRespData {
     pub job_title: Option<JobTitle>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListJobTitleRespData {
     pub items: Option<Vec<JobTitle>>,
     pub page_token: Option<String>,
@@ -823,6 +893,7 @@ pub struct ListJobTitleRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListScopeRespData {
     pub department_ids: Option<Vec<String>>,
     pub user_ids: Option<Vec<String>>,
@@ -832,20 +903,24 @@ pub struct ListScopeRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateUnitRespData {
     pub unit_id: Option<String>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetUnitRespData {
     pub unit: Option<Unit>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListUnitRespData {
     pub unitlist: Option<Vec<Unit>>,
     pub has_more: Option<bool>,
     pub page_token: Option<String>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListDepartmentUnitRespData {
     pub departmentlist: Option<Vec<UnitDepartment>>,
     pub has_more: Option<bool>,
@@ -853,10 +928,12 @@ pub struct ListDepartmentUnitRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetWorkCityRespData {
     pub work_city: Option<WorkCity>,
 }
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListWorkCityRespData {
     pub items: Option<Vec<WorkCity>>,
     pub page_token: Option<String>,
@@ -926,6 +1003,7 @@ impl_resp!(GetWorkCityResp, GetWorkCityRespData);
 impl_resp!(ListWorkCityResp, ListWorkCityRespData);
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CustomAttrListData {
     pub items: Option<Vec<crate::JsonValue>>,
     pub page_token: Option<String>,

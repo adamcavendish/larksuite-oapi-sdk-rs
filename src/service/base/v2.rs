@@ -7,6 +7,7 @@ use crate::req::RequestOption;
 use crate::service::common::{PageQuery, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TableRole {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub table_perm: Option<i32>,
@@ -34,6 +35,7 @@ pub struct TableRole {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BlockRole {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<String>,
@@ -44,6 +46,7 @@ pub struct BlockRole {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecRule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub conditions: Option<Vec<RecRuleCondition>>,
@@ -60,6 +63,7 @@ pub struct RecRule {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OtherRecRule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub conditions: Option<Vec<RecRuleCondition>>,
@@ -70,6 +74,7 @@ pub struct OtherRecRule {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecRuleCondition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_name: Option<String>,
@@ -82,6 +87,7 @@ pub struct RecRuleCondition {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ConditionGroup {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub condition_type: Option<i32>,
@@ -92,6 +98,7 @@ pub struct ConditionGroup {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role_name: Option<String>,
@@ -106,12 +113,14 @@ pub struct AppRoleV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role: Option<AppRoleV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRoleListData {
     #[serde(default)]
     pub items: Vec<AppRoleV2>,

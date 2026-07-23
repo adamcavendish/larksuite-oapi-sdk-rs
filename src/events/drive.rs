@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableFieldAction {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub action: Option<String>,
@@ -19,6 +20,7 @@ pub struct BitableTableFieldAction {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableFieldActionValue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -33,6 +35,7 @@ pub struct BitableTableFieldActionValue {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableFieldActionValueProperty {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub formatter: Option<String>,
@@ -61,6 +64,7 @@ pub struct BitableTableFieldActionValueProperty {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableFieldActionValuePropertyAutoSerial {
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     pub type_: Option<String>,
@@ -69,6 +73,7 @@ pub struct BitableTableFieldActionValuePropertyAutoSerial {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableFieldActionValuePropertyAutoSerialOption {
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     pub type_: Option<String>,
@@ -77,6 +82,7 @@ pub struct BitableTableFieldActionValuePropertyAutoSerialOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableFieldActionValuePropertyOption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -87,6 +93,7 @@ pub struct BitableTableFieldActionValuePropertyOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableRecordAction {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub record_id: Option<String>,
@@ -99,6 +106,7 @@ pub struct BitableTableRecordAction {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableRecordActionField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_id: Option<String>,
@@ -109,12 +117,14 @@ pub struct BitableTableRecordActionField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableRecordActionFieldIdentity {
     #[serde(default)]
     pub users: Vec<BitableTableRecordActionFieldIdentityUser>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BitableTableRecordActionFieldIdentityUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
@@ -127,6 +137,7 @@ pub struct BitableTableRecordActionFieldIdentityUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Notice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -143,6 +154,7 @@ pub struct Notice {
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFileBitableFieldChangedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -163,6 +175,7 @@ pub struct P2DriveFileBitableFieldChangedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFileBitableRecordChangedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -183,6 +196,7 @@ pub struct P2DriveFileBitableRecordChangedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFileCreatedInFolderV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -197,6 +211,7 @@ pub struct P2DriveFileCreatedInFolderV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFileDeletedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -209,6 +224,7 @@ pub struct P2DriveFileDeletedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFileEditedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -223,6 +239,7 @@ pub struct P2DriveFileEditedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFilePermissionMemberAddedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -241,6 +258,7 @@ pub struct P2DriveFilePermissionMemberAddedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFilePermissionMemberAppliedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -265,6 +283,7 @@ pub struct P2DriveFilePermissionMemberAppliedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFilePermissionMemberRemovedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -283,6 +302,7 @@ pub struct P2DriveFilePermissionMemberRemovedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFileReadV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -295,6 +315,7 @@ pub struct P2DriveFileReadV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFileTitleUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -307,6 +328,7 @@ pub struct P2DriveFileTitleUpdatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveFileTrashedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_type: Option<String>,
@@ -319,6 +341,7 @@ pub struct P2DriveFileTrashedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2DriveNoticeCommentAddV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notice_meta: Option<Notice>,

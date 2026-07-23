@@ -10,6 +10,7 @@ use crate::service::common::{FromRawResponse, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Avatar {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub avatar_origin: Option<String>,
@@ -25,6 +26,7 @@ pub struct Avatar {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ProductI18nName {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -35,6 +37,7 @@ pub struct ProductI18nName {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Tenant {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -51,6 +54,7 @@ pub struct Tenant {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TenantAssignInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subscription_id: Option<String>,
@@ -73,11 +77,13 @@ pub struct TenantAssignInfo {
 // ── Response types ──
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct QueryTenantRespData {
     pub tenant: Option<Tenant>,
 }
 
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct QueryTenantResp {
     pub api_resp: ApiResp,
     pub code_error: CodeError,
@@ -101,11 +107,13 @@ impl FromRawResponse<QueryTenantRespData> for QueryTenantResp {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct QueryTenantProductAssignInfoRespData {
     pub assign_info_list: Option<Vec<TenantAssignInfo>>,
 }
 
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct QueryTenantProductAssignInfoResp {
     pub api_resp: ApiResp,
     pub code_error: CodeError,

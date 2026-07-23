@@ -11,6 +11,7 @@ use crate::service::common::{
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ExportTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_extension: Option<String>,
@@ -33,6 +34,7 @@ pub struct ExportTask {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ShortcutInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_type: Option<String>,
@@ -41,6 +43,7 @@ pub struct ShortcutInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct File {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -63,6 +66,7 @@ pub struct File {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Property {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
@@ -71,6 +75,7 @@ pub struct Property {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReferEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub refer_token: Option<String>,
@@ -79,24 +84,28 @@ pub struct ReferEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TextRun {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocsLink {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Person {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReplyElement {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<String>,
@@ -109,18 +118,21 @@ pub struct ReplyElement {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReplyContent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub elements: Option<Vec<ReplyElement>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReplyExtra {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub image_list: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FileCommentReply {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<ReplyContent>,
@@ -137,12 +149,14 @@ pub struct FileCommentReply {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReplyList {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub replies: Option<Vec<FileCommentReply>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FileComment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub comment_id: Option<String>,
@@ -171,6 +185,7 @@ pub struct FileComment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FileStatistics {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub uv: Option<i64>,
@@ -189,6 +204,7 @@ pub struct FileStatistics {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FileViewRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub viewer_id: Option<String>,
@@ -201,6 +217,7 @@ pub struct FileViewRecord {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FileSubscription {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subscription_id: Option<String>,
@@ -213,6 +230,7 @@ pub struct FileSubscription {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Version {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -237,6 +255,7 @@ pub struct Version {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ImportTaskMountPoint {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mount_type: Option<i32>,
@@ -245,6 +264,7 @@ pub struct ImportTaskMountPoint {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ImportTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket: Option<String>,
@@ -271,6 +291,7 @@ pub struct ImportTask {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TmpDownloadUrl {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_token: Option<String>,
@@ -279,6 +300,7 @@ pub struct TmpDownloadUrl {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BaseMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_type: Option<String>,
@@ -293,6 +315,7 @@ pub struct BaseMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Member {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_type: Option<String>,
@@ -313,6 +336,7 @@ pub struct Member {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Owner {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_type: Option<String>,
@@ -321,6 +345,7 @@ pub struct Owner {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RequestDoc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub doc_token: Option<String>,
@@ -329,6 +354,7 @@ pub struct RequestDoc {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Meta {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub doc_token: Option<String>,
@@ -351,6 +377,7 @@ pub struct Meta {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MetaFailed {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -359,6 +386,7 @@ pub struct MetaFailed {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PermissionPublicV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub external_access: Option<bool>,
@@ -513,42 +541,50 @@ pub struct DeletePermissionMemberReqBody {
 // ── Response data types ──
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateExportTaskRespData {
     pub ticket: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetExportTaskRespData {
     pub result: Option<ExportTask>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CopyFileRespData {
     pub file: Option<File>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateFolderFileRespData {
     pub token: Option<String>,
     pub url: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateShortcutFileRespData {
     pub succ_shortcut_node: Option<File>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct DeleteFileRespData {
     pub task_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetSubscribeFileRespData {
     pub is_subscribe: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListFileRespData {
     pub files: Option<Vec<File>>,
     pub next_page_token: Option<String>,
@@ -556,21 +592,25 @@ pub struct ListFileRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct MoveFileRespData {
     pub task_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct TaskCheckFileRespData {
     pub status: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UploadAllFileRespData {
     pub file_token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UploadPrepareFileRespData {
     pub upload_id: Option<String>,
     pub block_size: Option<i64>,
@@ -578,16 +618,19 @@ pub struct UploadPrepareFileRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UploadFinishFileRespData {
     pub file_token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchQueryFileCommentRespData {
     pub items: Option<Vec<FileComment>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListFileCommentRespData {
     pub has_more: Option<bool>,
     pub page_token: Option<String>,
@@ -595,6 +638,7 @@ pub struct ListFileCommentRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListFileCommentReplyRespData {
     pub items: Option<Vec<FileCommentReply>>,
     pub page_token: Option<String>,
@@ -602,6 +646,7 @@ pub struct ListFileCommentReplyRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetFileStatisticsRespData {
     pub file_token: Option<String>,
     pub file_type: Option<String>,
@@ -609,6 +654,7 @@ pub struct GetFileStatisticsRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct FileSubscriptionRespData {
     pub subscription_id: Option<String>,
     pub subscription_type: Option<String>,
@@ -617,6 +663,7 @@ pub struct FileSubscriptionRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListFileViewRecordRespData {
     pub items: Option<Vec<FileViewRecord>>,
     pub page_token: Option<String>,
@@ -624,6 +671,7 @@ pub struct ListFileViewRecordRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateFileVersionRespData {
     pub name: Option<String>,
     pub version: Option<String>,
@@ -638,6 +686,7 @@ pub struct CreateFileVersionRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListFileVersionRespData {
     pub items: Option<Vec<Version>>,
     pub page_token: Option<String>,
@@ -645,26 +694,31 @@ pub struct ListFileVersionRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreateImportTaskRespData {
     pub ticket: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetImportTaskRespData {
     pub result: Option<ImportTask>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchGetTmpDownloadUrlMediaRespData {
     pub tmp_download_urls: Option<Vec<TmpDownloadUrl>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UploadAllMediaRespData {
     pub file_token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UploadPrepareMediaRespData {
     pub upload_id: Option<String>,
     pub block_size: Option<i64>,
@@ -672,52 +726,62 @@ pub struct UploadPrepareMediaRespData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UploadFinishMediaRespData {
     pub file_token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchQueryMetaRespData {
     pub metas: Option<Vec<Meta>>,
     pub failed_list: Option<Vec<MetaFailed>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct AuthPermissionMemberRespData {
     pub auth_result: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct BatchCreatePermissionMemberRespData {
     pub members: Option<Vec<BaseMember>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreatePermissionMemberRespData {
     pub member: Option<BaseMember>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ListPermissionMemberRespData {
     pub items: Option<Vec<Member>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UpdatePermissionMemberRespData {
     pub member: Option<BaseMember>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct GetPermissionPublicV1RespData {
     pub permission_public: Option<PermissionPublicV1>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct CreatePermissionPublicPasswordRespData {
     pub password: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct UpdatePermissionPublicPasswordRespData {
     pub password: Option<String>,
 }

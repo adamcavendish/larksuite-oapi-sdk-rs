@@ -9,6 +9,7 @@ use crate::service::common::{PageQuery, RestRequest};
 // ── Domain types ──────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -81,6 +82,7 @@ pub struct TaskV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AttachmentV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -103,6 +105,7 @@ pub struct AttachmentV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CommentV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -123,6 +126,7 @@ pub struct CommentV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomFieldV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -151,6 +155,7 @@ pub struct CustomFieldV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomFieldOptionV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -163,6 +168,7 @@ pub struct CustomFieldOptionV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SectionV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -183,6 +189,7 @@ pub struct SectionV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TasklistV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -205,6 +212,7 @@ pub struct TasklistV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ActivitySubscriptionV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -219,6 +227,7 @@ pub struct ActivitySubscriptionV2 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2Member {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -231,6 +240,7 @@ pub struct TaskV2Member {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2Due {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub timestamp: Option<String>,
@@ -239,6 +249,7 @@ pub struct TaskV2Due {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2Reminder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -247,6 +258,7 @@ pub struct TaskV2Reminder {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2I18nText {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub en_us: Option<String>,
@@ -275,6 +287,7 @@ pub struct TaskV2I18nText {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2Href {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -283,6 +296,7 @@ pub struct TaskV2Href {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2Origin {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub platform_i18n_name: Option<TaskV2I18nText>,
@@ -291,6 +305,7 @@ pub struct TaskV2Origin {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2TasklistInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tasklist_guid: Option<String>,
@@ -299,6 +314,7 @@ pub struct TaskV2TasklistInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2CustomComplete {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc: Option<TaskV2CustomCompleteItem>,
@@ -309,6 +325,7 @@ pub struct TaskV2CustomComplete {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2CustomCompleteItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub href: Option<String>,
@@ -317,6 +334,7 @@ pub struct TaskV2CustomCompleteItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2Start {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub timestamp: Option<String>,
@@ -325,6 +343,7 @@ pub struct TaskV2Start {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2CustomFieldValue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -347,6 +366,7 @@ pub struct TaskV2CustomFieldValue {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2Dependency {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<String>,
@@ -355,6 +375,7 @@ pub struct TaskV2Dependency {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2Assignee {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -363,6 +384,7 @@ pub struct TaskV2Assignee {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2ResourceRef {
     #[serde(default, skip_serializing_if = "Option::is_none", rename = "type")]
     pub type_: Option<String>,
@@ -371,6 +393,7 @@ pub struct TaskV2ResourceRef {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2NumberSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub format: Option<String>,
@@ -385,27 +408,32 @@ pub struct TaskV2NumberSetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2MemberSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub multi: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2DatetimeSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub format: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2SelectSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub options: Option<Vec<CustomFieldOptionV2>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2TextSetting {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TasklistV2Summary {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -416,12 +444,14 @@ pub struct TasklistV2Summary {
 // ── Response data types ──────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2Data {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task: Option<TaskV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2ListData {
     #[serde(default)]
     pub items: Vec<TaskV2>,
@@ -432,12 +462,14 @@ pub struct TaskV2ListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AttachmentData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub attachment: Option<AttachmentV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AttachmentListData {
     #[serde(default)]
     pub items: Vec<AttachmentV2>,
@@ -448,12 +480,14 @@ pub struct AttachmentListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CommentV2Data {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub comment: Option<CommentV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CommentV2ListData {
     #[serde(default)]
     pub items: Vec<CommentV2>,
@@ -464,12 +498,14 @@ pub struct CommentV2ListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomFieldData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom_field: Option<CustomFieldV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomFieldListData {
     #[serde(default)]
     pub items: Vec<CustomFieldV2>,
@@ -480,18 +516,21 @@ pub struct CustomFieldListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomFieldOptionData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub option: Option<CustomFieldOptionV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SectionData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub section: Option<SectionV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SectionListData {
     #[serde(default)]
     pub items: Vec<SectionV2>,
@@ -502,12 +541,14 @@ pub struct SectionListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TasklistData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tasklist: Option<TasklistV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TasklistListData {
     #[serde(default)]
     pub items: Vec<TasklistV2>,
@@ -518,12 +559,14 @@ pub struct TasklistListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ActivitySubscriptionData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub activity_subscription: Option<ActivitySubscriptionV2>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ActivitySubscriptionListData {
     #[serde(default)]
     pub items: Vec<ActivitySubscriptionV2>,
@@ -536,6 +579,7 @@ pub struct ActivitySubscriptionListData {
 // ── Mutation request types ──────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2InputComment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -548,6 +592,7 @@ pub struct TaskV2InputComment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2InputOption {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -562,12 +607,14 @@ pub struct TaskV2InputOption {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2InputSelectSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub options: Option<Vec<TaskV2InputOption>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2InputCustomField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resource_type: Option<String>,
@@ -592,6 +639,7 @@ pub struct TaskV2InputCustomField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2InputCustomFieldValue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -610,6 +658,7 @@ pub struct TaskV2InputCustomFieldValue {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2DocxSource {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -664,6 +713,7 @@ pub struct TaskV2InputTask {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2InputTasklist {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -718,6 +768,7 @@ pub struct PatchCustomFieldOptionV2ReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2InputSection {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -806,6 +857,7 @@ pub struct PatchTasklistV2ReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TaskV2ActivitySubscriptionInput {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,

@@ -105,6 +105,7 @@ macro_rules! card_locale_struct {
 macro_rules! impl_resp {
     ($name:ident, $data:ty) => {
         #[derive(Debug, Clone)]
+        #[non_exhaustive]
         pub struct $name {
             pub api_resp: $crate::resp::ApiResp,
             pub code_error: $crate::resp::CodeError,
@@ -130,6 +131,7 @@ macro_rules! impl_resp {
     };
     ($name:ident) => {
         #[derive(Debug, Clone)]
+        #[non_exhaustive]
         pub struct $name {
             pub api_resp: $crate::resp::ApiResp,
             pub code_error: Option<$crate::resp::CodeError>,
@@ -160,6 +162,7 @@ macro_rules! impl_resp {
 macro_rules! impl_resp_v2 {
     ($name:ident, $data:ty) => {
         #[derive(Debug, Clone)]
+        #[non_exhaustive]
         pub struct $name {
             pub api_resp: $crate::resp::ApiResp,
             pub code_error: Option<$crate::resp::CodeError>,

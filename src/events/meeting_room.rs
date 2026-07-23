@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MeetingRoomCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_name: Option<String>,
@@ -13,6 +14,7 @@ pub struct P2MeetingRoomCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MeetingRoomUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_name: Option<String>,
@@ -21,6 +23,7 @@ pub struct P2MeetingRoomUpdatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MeetingRoomDeletedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_name: Option<String>,
@@ -29,6 +32,7 @@ pub struct P2MeetingRoomDeletedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2MeetingRoomStatusChangedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub room_name: Option<String>,

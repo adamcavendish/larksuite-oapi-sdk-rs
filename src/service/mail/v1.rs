@@ -9,6 +9,7 @@ use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Mailgroup {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mailgroup_id: Option<String>,
@@ -43,6 +44,7 @@ pub struct MailgroupMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PublicMailbox {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub public_mailbox_id: Option<String>,
@@ -163,6 +165,7 @@ pub struct CreateUserMailboxAliasReqBody {
 // ── Domain types for alias / manager / permission_member resources ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EmailAlias {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub primary_email: Option<String>,
@@ -171,12 +174,14 @@ pub struct EmailAlias {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailgroupManager {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailgroupPermissionMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub permission_member_id: Option<String>,
@@ -193,12 +198,14 @@ pub struct MailgroupPermissionMember {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailgroupData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mailgroup: Option<Mailgroup>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailgroupListData {
     #[serde(default)]
     pub items: Vec<Mailgroup>,
@@ -209,12 +216,14 @@ pub struct MailgroupListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailgroupMemberData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member: Option<MailgroupMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailgroupMemberListData {
     #[serde(default)]
     pub items: Vec<MailgroupMember>,
@@ -225,12 +234,14 @@ pub struct MailgroupMemberListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PublicMailboxData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub public_mailbox: Option<PublicMailbox>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PublicMailboxListData {
     #[serde(default)]
     pub items: Vec<PublicMailbox>,
@@ -241,12 +252,14 @@ pub struct PublicMailboxListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PublicMailboxMemberData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member: Option<PublicMailboxMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PublicMailboxMemberListData {
     #[serde(default)]
     pub items: Vec<PublicMailboxMember>,
@@ -257,12 +270,14 @@ pub struct PublicMailboxMemberListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailgroupPermissionMemberData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub permission_member: Option<MailgroupPermissionMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailgroupPermissionMemberListData {
     #[serde(default)]
     pub items: Vec<MailgroupPermissionMember>,
@@ -273,6 +288,7 @@ pub struct MailgroupPermissionMemberListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailgroupManagerListData {
     #[serde(default)]
     pub items: Vec<MailgroupManager>,
@@ -657,12 +673,14 @@ impl<'a> GetPublicMailboxMemberQuery<'a> {
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetUserMailboxMessageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message: Option<Message>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetByCardUserMailboxMessageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub owner_info: Option<UserInfo>,
@@ -673,6 +691,7 @@ pub struct GetByCardUserMailboxMessageRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListUserMailboxMessageRespData {
     #[serde(default)]
     pub items: Vec<String>,
@@ -683,6 +702,7 @@ pub struct ListUserMailboxMessageRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SendUserMailboxMessageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message_id: Option<String>,
@@ -691,6 +711,7 @@ pub struct SendUserMailboxMessageRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DownloadUrlUserMailboxMessageAttachmentRespData {
     #[serde(default)]
     pub download_urls: Vec<ResponseAttachmentDownloadUrlItem>,
@@ -701,24 +722,28 @@ pub struct DownloadUrlUserMailboxMessageAttachmentRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateUserMailboxFolderRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub folder: Option<ResponseFolder>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListUserMailboxFolderRespData {
     #[serde(default)]
     pub items: Vec<ResponseFolder>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateUserMailboxMailContactRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mail_contact: Option<ResponseMailContact>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListUserMailboxMailContactRespData {
     #[serde(default)]
     pub items: Vec<ResponseMailContact>,
@@ -729,42 +754,49 @@ pub struct ListUserMailboxMailContactRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateUserMailboxRuleRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rule: Option<ResponseRule>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListUserMailboxRuleRespData {
     #[serde(default)]
     pub items: Vec<ResponseRule>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchCreateMailgroupMemberRespData {
     #[serde(default)]
     pub items: Vec<ResponseMailgroupMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchCreatePublicMailboxMemberRespData {
     #[serde(default)]
     pub items: Vec<ResponsePublicMailboxMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateMailgroupAliasRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mailgroup_alias: Option<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListMailgroupAliasRespData {
     #[serde(default)]
     pub items: Vec<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateMailgroupPermissionMemberRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub permission_member_id: Option<String>,
@@ -779,42 +811,49 @@ pub struct CreateMailgroupPermissionMemberRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchCreateMailgroupPermissionMemberRespData {
     #[serde(default)]
     pub items: Vec<ResponseMailgroupPermissionMember>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreatePublicMailboxAliasRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub public_mailbox_alias: Option<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListPublicMailboxAliasRespData {
     #[serde(default)]
     pub items: Vec<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryUserRespData {
     #[serde(default)]
     pub user_list: Vec<User>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateUserMailboxAliasRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_mailbox_alias: Option<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListUserMailboxAliasRespData {
     #[serde(default)]
     pub items: Vec<ResponseEmailAlias>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubscriptionUserMailboxEventRespData {
     #[serde(default)]
     pub event_types: Vec<i32>,
@@ -822,6 +861,7 @@ pub struct SubscriptionUserMailboxEventRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseAttachment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub body: Option<String>,
@@ -838,6 +878,7 @@ pub struct ResponseAttachment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AttachmentDownloadFailedReason {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub attachment_id: Option<String>,
@@ -846,6 +887,7 @@ pub struct AttachmentDownloadFailedReason {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseAttachmentDownloadUrlItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub attachment_id: Option<String>,
@@ -854,6 +896,7 @@ pub struct ResponseAttachmentDownloadUrlItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseEmailAlias {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub primary_email: Option<String>,
@@ -862,6 +905,7 @@ pub struct ResponseEmailAlias {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseFolder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -878,6 +922,7 @@ pub struct ResponseFolder {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseMailAddress {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mail_address: Option<String>,
@@ -886,6 +931,7 @@ pub struct ResponseMailAddress {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseMailContact {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -908,6 +954,7 @@ pub struct ResponseMailContact {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseMailgroupMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_id: Option<String>,
@@ -922,6 +969,7 @@ pub struct ResponseMailgroupMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseMailgroupPermissionMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub permission_member_id: Option<String>,
@@ -936,6 +984,7 @@ pub struct ResponseMailgroupPermissionMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Message {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub raw: Option<String>,
@@ -986,6 +1035,7 @@ pub struct Message {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponsePublicMailboxMember {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member_id: Option<String>,
@@ -996,6 +1046,7 @@ pub struct ResponsePublicMailboxMember {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseRule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1012,12 +1063,14 @@ pub struct ResponseRule {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseRuleAction {
     #[serde(default)]
     pub items: Vec<ResponseRuleActionItem>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseRuleActionItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<i32>,
@@ -1026,6 +1079,7 @@ pub struct ResponseRuleActionItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseRuleCondition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub match_type: Option<i32>,
@@ -1034,6 +1088,7 @@ pub struct ResponseRuleCondition {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ResponseRuleConditionItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<i32>,
@@ -1044,6 +1099,7 @@ pub struct ResponseRuleConditionItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SecurityLevel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_risk: Option<bool>,
@@ -1064,6 +1120,7 @@ pub struct SecurityLevel {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct User {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub email: Option<String>,
@@ -1074,6 +1131,7 @@ pub struct User {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -1851,6 +1909,7 @@ impl<'a> PublicMailboxMemberResource<'a> {
 // ── Domain types for new resources ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailAddress {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mail_address: Option<String>,
@@ -1859,6 +1918,7 @@ pub struct MailAddress {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Attachment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub body: Option<String>,
@@ -1875,6 +1935,7 @@ pub struct Attachment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AttachmentDownloadUrlItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub attachment_id: Option<String>,
@@ -1883,6 +1944,7 @@ pub struct AttachmentDownloadUrlItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailMessage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub raw: Option<String>,
@@ -1915,6 +1977,7 @@ pub struct MailMessage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Folder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1931,6 +1994,7 @@ pub struct Folder {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MailContact {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -1953,6 +2017,7 @@ pub struct MailContact {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RuleConditionItem {
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
     pub type_: Option<i32>,
@@ -1963,6 +2028,7 @@ pub struct RuleConditionItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RuleCondition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub match_type: Option<i32>,
@@ -1971,6 +2037,7 @@ pub struct RuleCondition {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RuleActionItem {
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
     pub type_: Option<i32>,
@@ -1979,12 +2046,14 @@ pub struct RuleActionItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RuleAction {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub items: Option<Vec<RuleActionItem>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Rule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,

@@ -14,6 +14,7 @@ use crate::error::LarkError;
 
 /// User identity carried by most events, matching the Go SDK `UserId` shape.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserId {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -39,6 +40,7 @@ impl UserId {
 
 /// A list of user identities, used by events that target multiple users.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserIdList {
     #[serde(default)]
     pub user_id_list: Vec<UserId>,

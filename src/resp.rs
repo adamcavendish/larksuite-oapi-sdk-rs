@@ -96,6 +96,7 @@ pub struct CodeErrorInfo {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CodeErrorDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
@@ -104,6 +105,7 @@ pub struct CodeErrorDetail {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CodeErrorPermissionViolation {
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     pub violation_type: Option<String>,
@@ -114,6 +116,7 @@ pub struct CodeErrorPermissionViolation {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CodeErrorFieldViolation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field: Option<String>,
@@ -124,6 +127,7 @@ pub struct CodeErrorFieldViolation {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CodeErrorHelp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -133,6 +137,7 @@ pub struct CodeErrorHelp {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(bound(deserialize = "T: serde::de::DeserializeOwned"))]
+#[non_exhaustive]
 pub struct RawResponse<T> {
     #[serde(flatten)]
     pub code_error: CodeError,

@@ -29,12 +29,14 @@ impl_resp_v2!(
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetCollaborationTenantRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_tenant: Option<CollaborationTenant>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListCollaborationTenantRespData {
     #[serde(default)]
     pub target_tenant_list: Vec<CollaborationTenant>,
@@ -45,6 +47,7 @@ pub struct ListCollaborationTenantRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VisibleOrganizationCollaborationTenantRespData {
     #[serde(default)]
     pub collaboration_entity_list: Vec<CollaborationEntity>,
@@ -55,12 +58,14 @@ pub struct VisibleOrganizationCollaborationTenantRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetCollaborationTenantCollaborationDepartmentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_department: Option<CollaborationDepartment>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetCollaborationTenantCollaborationUserRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_user: Option<CollaborationUser>,
@@ -68,6 +73,7 @@ pub struct GetCollaborationTenantCollaborationUserRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AvatarInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub avatar_72: Option<String>,
@@ -80,6 +86,7 @@ pub struct AvatarInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CollaborationDepartment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub open_department_id: Option<String>,
@@ -98,6 +105,7 @@ pub struct CollaborationDepartment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CollaborationDepartmentId {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -106,6 +114,7 @@ pub struct CollaborationDepartmentId {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CollaborationDepartmentLeader {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub leader_type: Option<i32>,
@@ -114,6 +123,7 @@ pub struct CollaborationDepartmentLeader {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CollaborationEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub collaboration_entity_type: Option<String>,
@@ -150,6 +160,7 @@ pub struct CollaborationEntity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CollaborationTenant {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tenant_key: Option<String>,
@@ -174,6 +185,7 @@ pub struct CollaborationTenant {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CollaborationUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub open_id: Option<String>,
@@ -208,6 +220,7 @@ pub struct CollaborationUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CollaborationUserId {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -218,6 +231,7 @@ pub struct CollaborationUserId {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomAttrGenericUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -226,6 +240,7 @@ pub struct CustomAttrGenericUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nName {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -236,6 +251,7 @@ pub struct I18nName {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserCustomAttr {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -246,6 +262,7 @@ pub struct UserCustomAttr {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserCustomAttrValue {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -266,6 +283,7 @@ pub struct UserCustomAttrValue {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserStatus {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_frozen: Option<bool>,

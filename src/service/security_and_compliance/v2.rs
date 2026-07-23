@@ -7,6 +7,7 @@ use crate::req::RequestOption;
 use crate::service::common::{PageQuery, RestRequest};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DeviceRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_record_id: Option<String>,
@@ -63,12 +64,14 @@ pub struct DeviceRecord {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DeviceRecordData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_record: Option<DeviceRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DeviceRecordListData {
     #[serde(default)]
     pub items: Vec<DeviceRecord>,
@@ -79,12 +82,14 @@ pub struct DeviceRecordListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateDeviceRecordData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_record_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MineDeviceRecordData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub device_record_id: Option<String>,

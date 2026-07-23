@@ -9,6 +9,7 @@ use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct LingoEntity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -95,12 +96,14 @@ pub struct SearchLingoEntityReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EntityData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entity: Option<LingoEntity>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EntityListData {
     #[serde(default)]
     pub entities: Vec<LingoEntity>,
@@ -359,18 +362,21 @@ impl<'a> MatchEntityQuery<'a> {
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct HighlightEntityRespData {
     #[serde(default)]
     pub phrases: Vec<Phrase>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MatchEntityRespData {
     #[serde(default)]
     pub results: Vec<MatchInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListClassificationRespData {
     #[serde(default)]
     pub items: Vec<Classification>,
@@ -381,24 +387,28 @@ pub struct ListClassificationRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateDraftRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub draft: Option<Draft>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UpdateDraftRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub draft: Option<Draft>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UploadFileRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListRepoRespData {
     #[serde(default)]
     pub items: Vec<Repo>,
@@ -406,18 +416,21 @@ pub struct ListRepoRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Abbreviation {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BaikeImage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Classification {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -430,6 +443,7 @@ pub struct Classification {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DisplayStatus {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub allow_highlight: Option<bool>,
@@ -438,6 +452,7 @@ pub struct DisplayStatus {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Draft {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub draft_id: Option<String>,
@@ -446,6 +461,7 @@ pub struct Draft {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Entity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -480,6 +496,7 @@ pub struct Entity {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nClsName {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub language: Option<i32>,
@@ -488,6 +505,7 @@ pub struct I18nClsName {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nEntryDesc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub language: Option<i32>,
@@ -498,6 +516,7 @@ pub struct I18nEntryDesc {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MatchInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entity_id: Option<String>,
@@ -506,6 +525,7 @@ pub struct MatchInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OuterInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub provider: Option<String>,
@@ -514,6 +534,7 @@ pub struct OuterInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Phrase {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -524,6 +545,7 @@ pub struct Phrase {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Referer {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -534,6 +556,7 @@ pub struct Referer {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RelatedMeta {
     #[serde(default)]
     pub users: Vec<Referer>,
@@ -554,6 +577,7 @@ pub struct RelatedMeta {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Repo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -562,6 +586,7 @@ pub struct Repo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Span {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start: Option<i32>,
@@ -570,6 +595,7 @@ pub struct Span {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Statistics {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub like_count: Option<i32>,
@@ -578,6 +604,7 @@ pub struct Statistics {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Term {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,

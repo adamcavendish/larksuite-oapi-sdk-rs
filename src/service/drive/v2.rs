@@ -9,6 +9,7 @@ use crate::service::common::{PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FileLike {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -21,6 +22,7 @@ pub struct FileLike {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PermissionPublicV2 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub external_access_entity: Option<String>,
@@ -65,6 +67,7 @@ pub struct PatchPermissionPublicV2ReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FileLikeListData {
     #[serde(default)]
     pub files: Vec<FileLike>,

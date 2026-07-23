@@ -9,6 +9,7 @@ use crate::service::common::RestRequest;
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApaasApp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub namespace: Option<String>,
@@ -33,6 +34,7 @@ pub struct InvokeOpenApiReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct InvokeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub response_body: Option<crate::JsonValue>,
@@ -92,6 +94,7 @@ impl_resp_v2!(ViewsGetWorkspaceViewResp, WorkspaceRecordsData);
 impl_resp_v2!(ListAppResp, ApaasAppListData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListSeatActivityData {
     #[serde(default)]
     pub items: Vec<crate::JsonValue>,
@@ -102,6 +105,7 @@ pub struct ListSeatActivityData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListSeatAssignmentData {
     #[serde(default)]
     pub items: Vec<crate::JsonValue>,
@@ -112,12 +116,14 @@ pub struct ListSeatAssignmentData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChatGroupUserTaskData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryUserTaskData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<String>,
@@ -126,18 +132,21 @@ pub struct QueryUserTaskData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RollbackPointsUserTaskData {
     #[serde(default)]
     pub tasks: Vec<crate::JsonValue>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SqlCommandsWorkspaceData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub result: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EnumGetWorkspaceEnumData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -152,6 +161,7 @@ pub struct EnumGetWorkspaceEnumData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListWorkspaceEnumData {
     #[serde(default)]
     pub items: Vec<crate::JsonValue>,
@@ -162,6 +172,7 @@ pub struct ListWorkspaceEnumData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListWorkspaceTableData {
     #[serde(default)]
     pub items: Vec<crate::JsonValue>,
@@ -172,12 +183,14 @@ pub struct ListWorkspaceTableData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecordIdsData {
     #[serde(default)]
     pub record_ids: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WorkspaceRecordsData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub items: Option<String>,
@@ -190,6 +203,7 @@ pub struct WorkspaceRecordsData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WorkspaceTableData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -200,6 +214,7 @@ pub struct WorkspaceTableData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApaasAppListData {
     #[serde(default)]
     pub items: Vec<ApaasApp>,

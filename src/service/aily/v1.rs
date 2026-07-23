@@ -11,6 +11,7 @@ use crate::service::common::{EmptyResp, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AilySession {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -23,6 +24,7 @@ pub struct AilySession {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AilyMessage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -41,6 +43,7 @@ pub struct AilyMessage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AilyRun {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -61,6 +64,7 @@ pub struct AilyRun {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAsset {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -79,6 +83,7 @@ pub struct DataAsset {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetTag {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -91,6 +96,7 @@ pub struct DataAssetTag {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Skill {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -103,6 +109,7 @@ pub struct Skill {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RunError {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
@@ -111,6 +118,7 @@ pub struct RunError {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AilyMention {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entity_id: Option<String>,
@@ -125,6 +133,7 @@ pub struct AilyMention {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetFile {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -133,12 +142,14 @@ pub struct DataAssetFile {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AilyKnowledgeMessage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AilyKnowledgeAskProcessData {
     #[serde(default)]
     pub chart_dsls: Vec<String>,
@@ -149,6 +160,7 @@ pub struct AilyKnowledgeAskProcessData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AilyKnowledgeFaq {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub question: Option<String>,
@@ -157,12 +169,14 @@ pub struct AilyKnowledgeFaq {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Channel {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variables: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SkillGlobalVariable {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub query: Option<String>,
@@ -173,6 +187,7 @@ pub struct SkillGlobalVariable {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetKnowledgeChunkSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rule_type: Option<String>,
@@ -199,6 +214,7 @@ pub struct DataAssetImportKnowledgeFile {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetImportKnowledgeLarkDoc {
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     pub type_: Option<String>,
@@ -211,6 +227,7 @@ pub struct DataAssetImportKnowledgeLarkDoc {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetImportKnowledgeWikiSubDoc {
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     pub type_: Option<String>,
@@ -221,6 +238,7 @@ pub struct DataAssetImportKnowledgeWikiSubDoc {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetImportKnowledgeWiki {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub space_id: Option<String>,
@@ -231,6 +249,7 @@ pub struct DataAssetImportKnowledgeWiki {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetImportKnowledgeHelpdesk {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub helpdesk_id: Option<String>,
@@ -329,18 +348,21 @@ pub struct StartSkillReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SessionData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub session: Option<AilySession>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message: Option<AilyMessage>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageListData {
     #[serde(default)]
     pub messages: Vec<AilyMessage>,
@@ -351,12 +373,14 @@ pub struct MessageListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RunData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub run: Option<AilyRun>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RunListData {
     #[serde(default)]
     pub runs: Vec<AilyRun>,
@@ -367,12 +391,14 @@ pub struct RunListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub data_asset: Option<DataAsset>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetListData {
     #[serde(default)]
     pub items: Vec<DataAsset>,
@@ -383,12 +409,14 @@ pub struct DataAssetListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UploadFileData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_info: Option<DataAssetFile>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DataAssetTagListData {
     #[serde(default)]
     pub items: Vec<DataAssetTag>,
@@ -399,6 +427,7 @@ pub struct DataAssetTagListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AskKnowledgeData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
@@ -415,12 +444,14 @@ pub struct AskKnowledgeData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SkillData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub skill: Option<Skill>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SkillListData {
     #[serde(default)]
     pub skills: Vec<Skill>,
@@ -431,6 +462,7 @@ pub struct SkillListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct StartSkillData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub output: Option<String>,

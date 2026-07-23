@@ -9,6 +9,7 @@ use crate::service::common::{PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WorkplaceAccessData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
@@ -19,6 +20,7 @@ pub struct WorkplaceAccessData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PerWorkplaceAccess {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub workplace_id: Option<String>,
@@ -31,6 +33,7 @@ pub struct PerWorkplaceAccess {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BlockAccessData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
@@ -47,6 +50,7 @@ pub struct BlockAccessData {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WorkplaceAccessListData {
     #[serde(default)]
     pub items: Vec<WorkplaceAccessData>,
@@ -57,6 +61,7 @@ pub struct WorkplaceAccessListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BlockAccessListData {
     #[serde(default)]
     pub items: Vec<BlockAccessData>,

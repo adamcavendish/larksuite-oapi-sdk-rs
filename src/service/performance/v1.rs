@@ -9,6 +9,7 @@ use crate::service::common::{PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReviewTemplate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub template_id: Option<String>,
@@ -21,6 +22,7 @@ pub struct ReviewTemplate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ReviewActivity {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub activity_id: Option<String>,
@@ -37,6 +39,7 @@ pub struct ReviewActivity {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ActivityListData {
     #[serde(default)]
     pub items: Vec<ReviewActivity>,

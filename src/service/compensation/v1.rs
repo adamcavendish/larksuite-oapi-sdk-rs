@@ -9,6 +9,7 @@ use crate::service::common::RestRequest;
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CompensationPlan {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub plan_id: Option<String>,
@@ -23,6 +24,7 @@ pub struct CompensationPlan {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PlanListData {
     #[serde(default)]
     pub items: Vec<CompensationPlan>,
@@ -84,6 +86,7 @@ impl_resp_v2!(QuerySocialPlanResp, QuerySocialPlanRespData);
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateArchiveRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unique_id: Option<String>,
@@ -92,6 +95,7 @@ pub struct CreateArchiveRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryArchiveRespData {
     #[serde(default)]
     pub items: Vec<ArchiveDetail>,
@@ -102,6 +106,7 @@ pub struct QueryArchiveRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListChangeReasonRespData {
     #[serde(default)]
     pub items: Vec<ChangeReason>,
@@ -112,6 +117,7 @@ pub struct ListChangeReasonRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListIndicatorRespData {
     #[serde(default)]
     pub items: Vec<Indicator>,
@@ -122,6 +128,7 @@ pub struct ListIndicatorRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListItemRespData {
     #[serde(default)]
     pub items: Vec<Item>,
@@ -132,6 +139,7 @@ pub struct ListItemRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListItemCategoryRespData {
     #[serde(default)]
     pub items: Vec<ItemCategory>,
@@ -142,24 +150,28 @@ pub struct ListItemCategoryRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchCreateLumpSumPaymentRespData {
     #[serde(default)]
     pub operate_results: Vec<LumpSumPaymentOperateResult>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchRemoveLumpSumPaymentRespData {
     #[serde(default)]
     pub operate_results: Vec<LumpSumPaymentOperateResult>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchUpdateLumpSumPaymentRespData {
     #[serde(default)]
     pub operate_results: Vec<LumpSumPaymentOperateResult>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryLumpSumPaymentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
@@ -170,6 +182,7 @@ pub struct QueryLumpSumPaymentRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryDetailLumpSumPaymentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
@@ -180,24 +193,28 @@ pub struct QueryDetailLumpSumPaymentRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchCreateRecurringPaymentRespData {
     #[serde(default)]
     pub operate_results: Vec<RecurringPaymentOperateResult>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchRemoveRecurringPaymentRespData {
     #[serde(default)]
     pub operate_results: Vec<RecurringPaymentOperateResult>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchUpdateRecurringPaymentRespData {
     #[serde(default)]
     pub operate_results: Vec<RecurringPaymentOperateResult>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QueryRecurringPaymentRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
@@ -208,24 +225,28 @@ pub struct QueryRecurringPaymentRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QuerySocialArchiveRespData {
     #[serde(default)]
     pub archives: Vec<SocialArchive>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QuerySocialArchiveAdjustRecordRespData {
     #[serde(default)]
     pub records: Vec<SocialArchiveAdjustRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListSocialInsuranceRespData {
     #[serde(default)]
     pub items: Vec<SocialInsurance>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListSocialPlanRespData {
     #[serde(default)]
     pub plans: Vec<SocialPlan>,
@@ -236,6 +257,7 @@ pub struct ListSocialPlanRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct QuerySocialPlanRespData {
     #[serde(default)]
     pub plans: Vec<SocialPlan>,
@@ -243,6 +265,7 @@ pub struct QuerySocialPlanRespData {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ArchiveDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -277,6 +300,7 @@ pub struct ArchiveDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ArchiveIndicator {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub indicator_id: Option<String>,
@@ -287,6 +311,7 @@ pub struct ArchiveIndicator {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ArchiveItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item_id: Option<String>,
@@ -297,6 +322,7 @@ pub struct ArchiveItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ChangeReason {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -313,6 +339,7 @@ pub struct ChangeReason {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18n {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -321,6 +348,7 @@ pub struct I18n {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18nContent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
@@ -329,6 +357,7 @@ pub struct I18nContent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Indicator {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -343,6 +372,7 @@ pub struct Indicator {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Item {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -369,6 +399,7 @@ pub struct Item {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ItemCategory {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -379,6 +410,7 @@ pub struct ItemCategory {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct LumpSumPayment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -423,6 +455,7 @@ pub struct LumpSumPayment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct LumpSumPaymentDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -457,6 +490,7 @@ pub struct LumpSumPaymentDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct LumpSumPaymentOperateResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -469,6 +503,7 @@ pub struct LumpSumPaymentOperateResult {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecurringPayment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -497,6 +532,7 @@ pub struct RecurringPayment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecurringPaymentOperateResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -509,6 +545,7 @@ pub struct RecurringPaymentOperateResult {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SocialArchive {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -517,6 +554,7 @@ pub struct SocialArchive {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SocialArchiveAdjustRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -529,6 +567,7 @@ pub struct SocialArchiveAdjustRecord {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SocialArchiveDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<I18n>,
@@ -561,6 +600,7 @@ pub struct SocialArchiveDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SocialArchiveItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub insurance_id: Option<String>,
@@ -581,6 +621,7 @@ pub struct SocialArchiveItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SocialInsurance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -595,6 +636,7 @@ pub struct SocialInsurance {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SocialPlan {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub plan_id: Option<String>,
@@ -617,6 +659,7 @@ pub struct SocialPlan {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SocialPlanItemDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item_id: Option<String>,
@@ -633,6 +676,7 @@ pub struct SocialPlanItemDetail {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SocialPlanItemSetting {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub lower_limit: Option<String>,
@@ -649,6 +693,7 @@ pub struct SocialPlanItemSetting {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SocialPlanScope {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_all: Option<bool>,

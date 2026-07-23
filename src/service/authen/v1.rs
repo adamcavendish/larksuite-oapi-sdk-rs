@@ -11,6 +11,7 @@ use crate::transport;
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserAccessTokenInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_token: Option<String>,
@@ -53,6 +54,7 @@ pub struct UserAccessTokenInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TokenInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_token: Option<String>,
@@ -69,6 +71,7 @@ pub struct TokenInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -343,6 +346,7 @@ impl<'a> RefreshAccessTokenResource<'a> {
 
 /// Successful OAuth token response data.
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[non_exhaustive]
 pub struct AccessTokenRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub access_token: Option<String>,
@@ -359,6 +363,7 @@ pub struct AccessTokenRespData {
 }
 
 /// OAuth token response wrapping the raw HTTP response and parsed data.
+#[non_exhaustive]
 pub struct AccessTokenResp {
     pub api_resp: crate::resp::ApiResp,
     pub data: Option<AccessTokenRespData>,

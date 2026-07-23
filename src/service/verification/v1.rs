@@ -9,6 +9,7 @@ use crate::service::common::RestRequest;
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VerificationTask {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
@@ -21,6 +22,7 @@ pub struct VerificationTask {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VerificationDetail {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub verification_type: Option<i32>,
@@ -51,6 +53,7 @@ pub struct CreateVerificationTaskReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VerificationTaskData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub task: Option<VerificationTask>,
@@ -60,6 +63,7 @@ impl_resp!(CreateVerificationTaskResp, VerificationTaskData);
 impl_resp!(GetVerificationTaskResp, VerificationTaskData);
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct VerificationData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub verification: Option<VerificationDetail>,

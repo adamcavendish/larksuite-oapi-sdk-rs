@@ -585,6 +585,7 @@ pub struct ResendAppTicketRequest {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct AppTokenResponse {
     #[serde(default)]
     pub code: i64,
@@ -603,6 +604,7 @@ impl AppTokenResponse {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct TenantTokenResponse {
     #[serde(default)]
     pub code: i64,
@@ -621,6 +623,7 @@ impl TenantTokenResponse {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
 pub struct ResendAppTicketResponse {
     #[serde(default)]
     pub code: i64,

@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::events::common::UserId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomizedFieldDisplayItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -25,6 +26,7 @@ pub struct CustomizedFieldDisplayItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18n {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -35,6 +37,7 @@ pub struct I18n {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Comments {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -51,6 +54,7 @@ pub struct Comments {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -69,6 +73,7 @@ pub struct TicketUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketUserEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<UserId>,
@@ -81,6 +86,7 @@ pub struct TicketUserEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket_id: Option<String>,
@@ -117,6 +123,7 @@ pub struct TicketEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketEventUpdateInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stage: Option<i32>,
@@ -127,6 +134,7 @@ pub struct TicketEventUpdateInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Ticket {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket_id: Option<String>,
@@ -183,6 +191,7 @@ pub struct Ticket {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketMessageContent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -195,6 +204,7 @@ pub struct TicketMessageContent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HelpdeskNotificationApproveV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notification_id: Option<String>,
@@ -205,6 +215,7 @@ pub struct P2HelpdeskNotificationApproveV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HelpdeskTicketCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket_id: Option<String>,
@@ -235,6 +246,7 @@ pub struct P2HelpdeskTicketCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HelpdeskTicketUpdatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object: Option<TicketEvent>,
@@ -243,6 +255,7 @@ pub struct P2HelpdeskTicketUpdatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2HelpdeskTicketMessageCreatedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket_message_id: Option<String>,

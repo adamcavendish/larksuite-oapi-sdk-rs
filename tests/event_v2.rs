@@ -1524,13 +1524,11 @@ fn event_v1_header_serde() {
 #[test]
 fn event_v2_base_tenant_key() {
     use larksuite_oapi_sdk_rs::event::{EventHeader, EventV2Base};
-    let base = EventV2Base {
-        schema: "2.0".to_string(),
-        header: Some(EventHeader {
-            tenant_key: "tenant_abc".to_string(),
-            ..Default::default()
-        }),
-    };
+    let mut header = EventHeader::default();
+    header.tenant_key = "tenant_abc".to_string();
+    let mut base = EventV2Base::default();
+    base.schema = "2.0".to_string();
+    base.header = Some(header);
     assert_eq!(base.tenant_key(), "tenant_abc");
 
     let empty = EventV2Base::default();

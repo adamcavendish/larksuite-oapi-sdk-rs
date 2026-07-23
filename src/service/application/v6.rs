@@ -93,6 +93,7 @@ impl_resp_v2!(ListScopeResp, ListScopeRespData);
 // ── Generated response data ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListAppRecommendRuleRespData {
     #[serde(default)]
     pub rules: Vec<AppRecommendRule>,
@@ -103,6 +104,7 @@ pub struct ListAppRecommendRuleRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContactsRangeConfigurationApplicationRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contacts_range: Option<ApplicationAppContactsRange>,
@@ -113,12 +115,14 @@ pub struct ContactsRangeConfigurationApplicationRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetApplicationRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app: Option<Application>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListApplicationRespData {
     #[serde(default)]
     pub app_list: Vec<Application>,
@@ -131,6 +135,7 @@ pub struct ListApplicationRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UnderauditlistApplicationRespData {
     #[serde(default)]
     pub items: Vec<Application>,
@@ -141,6 +146,7 @@ pub struct UnderauditlistApplicationRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DepartmentOverviewApplicationAppUsageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
@@ -151,30 +157,35 @@ pub struct DepartmentOverviewApplicationAppUsageRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessagePushOverviewApplicationAppUsageRespData {
     #[serde(default)]
     pub items: Vec<ApplicationAppUsage>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct OverviewApplicationAppUsageRespData {
     #[serde(default)]
     pub items: Vec<ApplicationAppUsage>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ContactsRangeSuggestApplicationAppVersionRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contacts_range: Option<ApplicationAppContactsRange>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetApplicationAppVersionRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_version: Option<ApplicationAppVersion>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListApplicationAppVersionRespData {
     #[serde(default)]
     pub items: Vec<ApplicationAppVersion>,
@@ -185,12 +196,14 @@ pub struct ListApplicationAppVersionRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetApplicationCollaboratorsRespData {
     #[serde(default)]
     pub collaborators: Vec<AppCollaborator>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListApplicationFeedbackRespData {
     #[serde(default)]
     pub feedback_list: Vec<ApplicationFeedback>,
@@ -201,6 +214,7 @@ pub struct ListApplicationFeedbackRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CheckWhiteBlackListApplicationVisibilityRespData {
     #[serde(default)]
     pub user_visibility_list: Vec<ApplicationVisibilityUserWhiteBlackInfo>,
@@ -211,6 +225,7 @@ pub struct CheckWhiteBlackListApplicationVisibilityRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListScopeRespData {
     #[serde(default)]
     pub scopes: Vec<Scope>,
@@ -287,6 +302,7 @@ pub struct UpdateApplicationCollaboratorsReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppContactsRangeIdList {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_ids: Option<Vec<String>>,
@@ -329,6 +345,7 @@ pub struct CheckWhiteBlackListApplicationVisibilityReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVisibilityIdList {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_ids: Option<Vec<String>>,
@@ -354,6 +371,7 @@ pub struct PatchApplicationVisibilityReqBody {
 // ── Generated nested response models ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppAbility {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gadget: Option<Gadget>,
@@ -376,6 +394,7 @@ pub struct AppAbility {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppCollaborator {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
@@ -384,6 +403,7 @@ pub struct AppCollaborator {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppConfigSecurityItem {
     #[serde(default)]
     pub redirect_urls: Vec<String>,
@@ -400,6 +420,7 @@ pub struct AppConfigSecurityItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppI18nInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_key: Option<String>,
@@ -412,6 +433,7 @@ pub struct AppI18nInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRecommendRule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -428,6 +450,7 @@ pub struct AppRecommendRule {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRecommendRuleItemInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item_id: Option<String>,
@@ -450,6 +473,7 @@ pub struct AppRecommendRuleItemInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRecommendRuleItemInfoI18nName {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -464,6 +488,7 @@ pub struct AppRecommendRuleItemInfoI18nName {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppRecommendRuleVisibilityInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_all: Option<bool>,
@@ -476,6 +501,7 @@ pub struct AppRecommendRuleVisibilityInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppScope {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub scope: Option<String>,
@@ -488,6 +514,7 @@ pub struct AppScope {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVersionRemark {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remark: Option<String>,
@@ -498,6 +525,7 @@ pub struct AppVersionRemark {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVisibility {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_all: Option<bool>,
@@ -508,6 +536,7 @@ pub struct AppVisibility {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppVisibleList {
     #[serde(default)]
     pub open_ids: Vec<String>,
@@ -518,6 +547,7 @@ pub struct AppVisibleList {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Application {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_id: Option<String>,
@@ -576,6 +606,7 @@ pub struct Application {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationAppContactsRange {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contacts_scope_type: Option<String>,
@@ -584,6 +615,7 @@ pub struct ApplicationAppContactsRange {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationAppUsage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub metric_name: Option<String>,
@@ -592,6 +624,7 @@ pub struct ApplicationAppUsage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationAppVersion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_id: Option<String>,
@@ -630,6 +663,7 @@ pub struct ApplicationAppVersion {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationDepartmentAppUsage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -644,6 +678,7 @@ pub struct ApplicationDepartmentAppUsage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationFeedback {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub feedback_id: Option<String>,
@@ -680,6 +715,7 @@ pub struct ApplicationFeedback {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationOwner {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#type: Option<i32>,
@@ -698,6 +734,7 @@ pub struct ApplicationOwner {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationVisibilityDepartmentWhiteBlackInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -708,6 +745,7 @@ pub struct ApplicationVisibilityDepartmentWhiteBlackInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationVisibilityGroupWhiteBlackInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub group_id: Option<String>,
@@ -718,6 +756,7 @@ pub struct ApplicationVisibilityGroupWhiteBlackInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApplicationVisibilityUserWhiteBlackInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -730,6 +769,7 @@ pub struct ApplicationVisibilityUserWhiteBlackInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BlockI18nInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_key: Option<String>,
@@ -738,12 +778,14 @@ pub struct BlockI18nInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Bot {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub card_request_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Callback {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub callback_type: Option<String>,
@@ -754,6 +796,7 @@ pub struct Callback {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CallbackInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub callback_type: Option<String>,
@@ -764,6 +807,7 @@ pub struct CallbackInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CloudDoc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub space_url: Option<String>,
@@ -776,6 +820,7 @@ pub struct CloudDoc {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CloudDocI18nInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_key: Option<String>,
@@ -788,6 +833,7 @@ pub struct CloudDocI18nInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocsBlock {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_type_id: Option<String>,
@@ -800,6 +846,7 @@ pub struct DocsBlock {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Event {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub event_type: Option<String>,
@@ -810,6 +857,7 @@ pub struct Event {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EventAndCallbackEncryptStrategy {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub encryption_key: Option<String>,
@@ -818,6 +866,7 @@ pub struct EventAndCallbackEncryptStrategy {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Gadget {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub enable_pc_mode: Option<i32>,
@@ -836,6 +885,7 @@ pub struct Gadget {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageAction {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc_app_link: Option<String>,
@@ -846,6 +896,7 @@ pub struct MessageAction {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct MessageActionI18nInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub i18n_key: Option<String>,
@@ -854,6 +905,7 @@ pub struct MessageActionI18nInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Navigate {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc: Option<NavigateMeta>,
@@ -862,6 +914,7 @@ pub struct Navigate {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NavigateMeta {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
@@ -872,6 +925,7 @@ pub struct NavigateMeta {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct PlusMenu {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc_app_link: Option<String>,
@@ -880,6 +934,7 @@ pub struct PlusMenu {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Scope {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub scope_name: Option<String>,
@@ -890,6 +945,7 @@ pub struct Scope {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubscribedEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subscription_type: Option<String>,
@@ -900,6 +956,7 @@ pub struct SubscribedEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WebApp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pc_url: Option<String>,
@@ -908,6 +965,7 @@ pub struct WebApp {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WorkplaceWidget {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub min_lark_version: Option<String>,

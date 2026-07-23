@@ -9,6 +9,7 @@ use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Ticket {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket_id: Option<String>,
@@ -63,6 +64,7 @@ pub struct Ticket {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -83,6 +85,7 @@ pub struct TicketUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketMessage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message_id: Option<String>,
@@ -101,6 +104,7 @@ pub struct TicketMessage {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgentInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
@@ -119,6 +123,7 @@ pub struct AgentInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Category {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub category_id: Option<String>,
@@ -139,6 +144,7 @@ pub struct Category {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Faq {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub faq_id: Option<String>,
@@ -169,6 +175,7 @@ pub struct Faq {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Notification {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notification_id: Option<String>,
@@ -217,6 +224,7 @@ pub struct Notification {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Comment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -233,6 +241,7 @@ pub struct Comment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct I18n {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zh_cn: Option<String>,
@@ -243,6 +252,7 @@ pub struct I18n {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomizedFieldDisplayItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -261,6 +271,7 @@ pub struct CustomizedFieldDisplayItem {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Richtext {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -269,6 +280,7 @@ pub struct Richtext {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NotificationDepartment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub department_id: Option<String>,
@@ -277,6 +289,7 @@ pub struct NotificationDepartment {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NotificationChat {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_id: Option<String>,
@@ -285,6 +298,7 @@ pub struct NotificationChat {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserQueryFaqInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -293,6 +307,7 @@ pub struct UserQueryFaqInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct HelpdeskEvent {
     #[serde(default, rename = "type", skip_serializing_if = "Option::is_none")]
     pub type_: Option<String>,
@@ -377,6 +392,7 @@ pub struct CreateNotificationReqBody {
 // ── Additional domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgentSkillRule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -393,6 +409,7 @@ pub struct AgentSkillRule {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgentSkill {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -411,6 +428,7 @@ pub struct AgentSkill {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketCustomizedField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket_customized_field_id: Option<String>,
@@ -445,6 +463,7 @@ pub struct TicketCustomizedField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct UserCustomizedField {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_customized_field_id: Option<String>,
@@ -475,6 +494,7 @@ pub struct UserCustomizedField {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BotMessage {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub msg_type: Option<String>,
@@ -555,12 +575,14 @@ pub struct ListTicketCustomizedFieldReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket: Option<Ticket>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketListData {
     #[serde(default)]
     pub tickets: Vec<Ticket>,
@@ -569,6 +591,7 @@ pub struct TicketListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct TicketMessageListData {
     #[serde(default)]
     pub messages: Vec<TicketMessage>,
@@ -577,12 +600,14 @@ pub struct TicketMessageListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgentListData {
     #[serde(default)]
     pub agents: Vec<AgentInfo>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgentUser {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -599,6 +624,7 @@ pub struct AgentUser {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct WeekdaySchedule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_time: Option<String>,
@@ -609,6 +635,7 @@ pub struct WeekdaySchedule {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgentSkillLessInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -619,6 +646,7 @@ pub struct AgentSkillLessInfo {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgentSchedule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<i32>,
@@ -631,42 +659,49 @@ pub struct AgentSchedule {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AgentEmailData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agents: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetAgentSchedulesData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_schedule: Option<AgentSchedule>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListAgentScheduleData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_schedules: Option<Vec<AgentSchedule>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CategoryData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub category: Option<Category>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CategoryListData {
     #[serde(default)]
     pub categories: Vec<Category>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FaqData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub faq: Option<Faq>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct FaqListData {
     #[serde(default)]
     pub items: Vec<Faq>,
@@ -679,6 +714,7 @@ pub struct FaqListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct NotificationData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notification_id: Option<String>,
@@ -687,6 +723,7 @@ pub struct NotificationData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetNotificationData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notification: Option<Notification>,
@@ -697,36 +734,42 @@ pub struct GetNotificationData {
 // ── Additional response data types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateAgentSkillRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_skill_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetAgentSkillRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_skill: Option<AgentSkill>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListAgentSkillRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_skills: Option<Vec<AgentSkill>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListAgentSkillRuleRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rules: Option<Vec<AgentSkillRule>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateBotMessageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SearchFaqRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
@@ -737,12 +780,14 @@ pub struct SearchFaqRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SubmitApproveNotificationRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_access: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct StartServiceTicketRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chat_id: Option<String>,
@@ -751,6 +796,7 @@ pub struct StartServiceTicketRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CustomizedFieldsTicketRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_customized_fields: Option<Vec<UserCustomizedField>>,
@@ -759,6 +805,7 @@ pub struct CustomizedFieldsTicketRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetTicketCustomizedFieldRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ticket_customized_field_id: Option<String>,
@@ -793,6 +840,7 @@ pub struct GetTicketCustomizedFieldRespData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ListTicketCustomizedFieldRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,

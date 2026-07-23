@@ -43,12 +43,14 @@ pub struct BatchOpenSystemStatusReqBody {
 // ── Response wrappers ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SystemStatusData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub system_status: Option<SystemStatus>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SystemStatusListData {
     #[serde(default)]
     pub items: Vec<SystemStatus>,
@@ -59,6 +61,7 @@ pub struct SystemStatusListData {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct BatchOpenData {
     #[serde(default)]
     pub result_list: Vec<crate::JsonValue>,

@@ -52,6 +52,7 @@ pub struct CardActionHandler {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CardAction {
     #[serde(default)]
     pub open_id: String,

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 // ── Event payload types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ApprovalEvent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_id: Option<String>,
@@ -25,6 +26,7 @@ pub struct ApprovalEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2ApprovalUpdatedV4 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub object: Option<ApprovalEvent>,

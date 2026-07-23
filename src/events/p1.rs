@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 // ── P1 payload types ──────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct AppTicketEvent {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -18,6 +19,7 @@ pub struct AppTicketEvent {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1OrderPaidV6 {
     #[serde(default)]
     pub app_id: String,
@@ -48,6 +50,7 @@ pub struct P1OrderPaidV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1AppUninstalledV6 {
     #[serde(default)]
     pub app_id: String,
@@ -56,6 +59,7 @@ pub struct P1AppUninstalledV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1AppStatusChangedV6 {
     #[serde(default)]
     pub app_id: String,
@@ -66,6 +70,7 @@ pub struct P1AppStatusChangedV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1AppOpenV6 {
     #[serde(default)]
     pub app_id: String,
@@ -78,6 +83,7 @@ pub struct P1AppOpenV6 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1MessageReceiveV1 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -112,6 +118,7 @@ pub struct P1MessageReceiveV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1MessageReadV1 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -126,6 +133,7 @@ pub struct P1MessageReadV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1AddBotV1 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -148,6 +156,7 @@ pub struct P1AddBotV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1RemoveBotV1 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -164,6 +173,7 @@ pub struct P1RemoveBotV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1P2PChatCreatedV1 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -180,6 +190,7 @@ pub struct P1P2PChatCreatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1ChatDisbandV1 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -194,6 +205,7 @@ pub struct P1ChatDisbandV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1GroupSettingUpdatedV1 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -212,6 +224,7 @@ pub struct P1GroupSettingUpdatedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1UserInOutChatV1 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -228,6 +241,7 @@ pub struct P1UserInOutChatV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1UserStatusChangedV3 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -250,6 +264,7 @@ pub struct P1UserStatusChangedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1UserChangedV3 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -266,6 +281,7 @@ pub struct P1UserChangedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1DepartmentChangedV3 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -278,6 +294,7 @@ pub struct P1DepartmentChangedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1ContactScopeChangedV3 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -288,6 +305,7 @@ pub struct P1ContactScopeChangedV3 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1ThirdPartyMeetingRoomChangedV1 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -302,6 +320,7 @@ pub struct P1ThirdPartyMeetingRoomChangedV1 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1LeaveApprovalV4 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -322,6 +341,7 @@ pub struct P1LeaveApprovalV4 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1WorkApprovalV4 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -342,6 +362,7 @@ pub struct P1WorkApprovalV4 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1ShiftApprovalV4 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -362,6 +383,7 @@ pub struct P1ShiftApprovalV4 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1RemedyApprovalV4 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -380,6 +402,7 @@ pub struct P1RemedyApprovalV4 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1TripApprovalV4 {
     #[serde(rename = "type", default)]
     pub event_type: String,
@@ -398,6 +421,7 @@ pub struct P1TripApprovalV4 {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P1OutApprovalV4 {
     #[serde(rename = "type", default)]
     pub event_type: String,
