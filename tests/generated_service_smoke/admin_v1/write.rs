@@ -46,7 +46,15 @@ async fn admin_v1_write_by_query_smoke() {
         department_ids: Some(vec!["od-1".to_string()]),
         ..Default::default()
     };
-    let image_create_body = json_value!({"image": "base64-image"});
+    let image_create_body = FormDataBuilder::new()
+        .file(
+            "image_file",
+            "badge.png",
+            b"badge-image".to_vec(),
+            Some("image/png"),
+        )
+        .field("image_type", "1")
+        .build();
 
     let reset_resp = client
         .admin()
@@ -133,6 +141,8 @@ async fn admin_v1_write_by_query_smoke() {
     assert!(request.contains("PUT /open-apis/admin/v1/badges/badge-1"));
     assert!(request.contains(r#""name":"Mentor updated""#));
     assert!(request.contains("POST /open-apis/admin/v1/badges/badge-1/grants?"));
+    assert!(request.contains("name=\"image_file\""));
+    assert!(request.contains("badge-image"));
     assert!(request.contains("DELETE /open-apis/admin/v1/badges/badge-1/grants/grant-1"));
     assert!(request.contains("PUT /open-apis/admin/v1/badges/badge-1/grants/grant-1?"));
     assert!(request.contains("user_id_type=open_id"));
@@ -140,5 +150,5 @@ async fn admin_v1_write_by_query_smoke() {
     assert!(request.contains(r#""user_ids":["ou-1"]"#));
     assert!(request.contains(r#""department_ids":["od-1"]"#));
     assert!(request.contains("POST /open-apis/admin/v1/badge_images"));
-    assert!(request.contains(r#""image":"base64-image""#));
+    assert!(request.contains("name=\"image_type\""));
 }

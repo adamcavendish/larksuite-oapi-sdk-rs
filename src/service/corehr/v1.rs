@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::RequestOption;
+use crate::req::{FormDataField, RequestOption};
 use crate::service::common::{
     PageIteratorState, PageQuery, RestRequest, impl_page_iterator_controls,
 };
@@ -5546,7 +5546,7 @@ impl<'a> OffboardingResource<'a> {
             self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/offboardings/query",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .json_body(&body)?
@@ -5587,7 +5587,7 @@ impl<'a> OffboardingResource<'a> {
             self.config,
             http::Method::POST,
             "/open-apis/corehr/v1/offboardings/search",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .page_query(query.page_query())
@@ -5707,7 +5707,7 @@ impl<'a> PersonResource<'a> {
 
     pub async fn upload(
         &self,
-        body: impl Serialize,
+        body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<UploadPersonResp, LarkError> {
         RestRequest::new(
@@ -5717,7 +5717,7 @@ impl<'a> PersonResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(&body)?
+        .form_body(body)
         .send_v2_response::<UploadPersonRespData, UploadPersonResp>()
         .await
     }
@@ -6135,7 +6135,7 @@ impl<'a> TransferReasonResource<'a> {
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/transfer_reasons/query",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .send_v2_response::<TransferReasonListData, QueryTransferReasonResp>()
@@ -6153,7 +6153,7 @@ impl<'a> TransferTypeResource<'a> {
             self.config,
             http::Method::GET,
             "/open-apis/corehr/v1/transfer_types/query",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .send_v2_response::<TransferTypeListData, QueryTransferTypeResp>()

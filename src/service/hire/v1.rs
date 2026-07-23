@@ -7594,7 +7594,7 @@ impl<'a> JobResource<'a> {
             self.config,
             http::Method::GET,
             path,
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .send_v2_response::<GetDetailJobRespData, GetDetailJobResp>()
@@ -8104,7 +8104,7 @@ impl<'a> ApplicationResource<'a> {
             self.config,
             http::Method::GET,
             path,
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .query("user_id_type", query.user_id_type)
@@ -8425,7 +8425,7 @@ impl<'a> InterviewResource<'a> {
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interviews",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .page_query(query.page_query())
@@ -9050,11 +9050,7 @@ impl<'a> AttachmentResource<'a> {
         .await
     }
 
-    pub async fn create(
-        &self,
-        body: impl Serialize,
-        option: &RequestOption,
-    ) -> Result<CreateAttachmentResp, LarkError> {
+    pub async fn create(&self, option: &RequestOption) -> Result<CreateAttachmentResp, LarkError> {
         RestRequest::new(
             self.config,
             http::Method::POST,
@@ -9062,7 +9058,7 @@ impl<'a> AttachmentResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(&body)?
+        .file_upload()
         .send_v2_response::<CreateAttachmentRespData, CreateAttachmentResp>()
         .await
     }
@@ -9454,7 +9450,7 @@ impl EvaluationResource<'_> {
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/evaluations",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .page_query(query.page_query())
@@ -12819,7 +12815,7 @@ impl EvaluationTaskResource<'_> {
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/evaluation_tasks",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .page_query(query.page_query())
@@ -13546,7 +13542,7 @@ impl InterviewTaskResource<'_> {
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/interview_tasks",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .page_query(query.page_query())

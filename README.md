@@ -164,6 +164,10 @@ expose response metadata before the body is consumed. See
 [`examples/im_upload_download.rs`](examples/im_upload_download.rs) and
 [`examples/im_stream_download.rs`](examples/im_stream_download.rs).
 
+Endpoints that accept binary content take `Vec<FormDataField>` values. Build
+them with `FormDataBuilder` so files and accompanying text fields are encoded
+as `multipart/form-data`.
+
 ### App Registration
 
 The `registration` module mirrors the Go SDK device-code flow. It opens a QR or

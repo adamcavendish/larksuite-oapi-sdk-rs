@@ -80,14 +80,11 @@ async fn hire_write_utility_responses_deserialize_and_preserve_requests() {
     .unwrap()
     .note
     .unwrap();
-    let attachment = Box::pin(hire.attachment.create(
-        json!({"file_name":"resume.pdf","file_content":"base64"}),
-        &RequestOption::default(),
-    ))
-    .await
-    .unwrap()
-    .data
-    .unwrap();
+    let attachment = Box::pin(hire.attachment.create(&RequestOption::default()))
+        .await
+        .unwrap()
+        .data
+        .unwrap();
     let created_channel = Box::pin(hire.website_channel.create(
         "website-1",
         json!({"channel_name":"Campus"}),
@@ -141,7 +138,6 @@ async fn hire_write_utility_responses_deserialize_and_preserve_requests() {
     assert!(request.contains(r#""verify_status":1"#));
     assert!(request.contains(r#""talent_id":"talent-1""#));
     assert!(request.contains(r#""content":"patched""#));
-    assert!(request.contains(r#""file_name":"resume.pdf""#));
     assert!(request.contains(r#""channel_name":"Campus""#));
     assert!(request.contains(r#""channel_name":"Campus Updated""#));
 }

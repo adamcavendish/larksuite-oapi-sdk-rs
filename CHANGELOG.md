@@ -18,6 +18,10 @@
 
 ### REST service coverage
 
+- Aligned the implemented Go service request contracts for multipart uploads
+  and tenant/user token capabilities. Document AI and upload resources now use
+  `FormDataField` bodies instead of JSON placeholders; the parity baseline has
+  no remaining request metadata mismatches.
 - Replaced public `serde_json::Value` fields, query bodies, request helpers,
   event and card payloads with the SDK-owned `JsonValue` wrapper. Closed API
   contracts remain Go-shaped models; intentionally dynamic JSON now has a

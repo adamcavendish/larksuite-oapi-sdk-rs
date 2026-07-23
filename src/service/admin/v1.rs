@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::RequestOption;
+use crate::req::{FormDataField, RequestOption};
 use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
@@ -1716,11 +1716,11 @@ pub struct BadgeImageResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct CreateBadgeImageQuery<'a> {
-    pub body: &'a crate::JsonValue,
+    pub body: &'a [FormDataField],
 }
 
 impl<'a> CreateBadgeImageQuery<'a> {
-    pub fn new(body: &'a crate::JsonValue) -> Self {
+    pub fn new(body: &'a [FormDataField]) -> Self {
         Self { body }
     }
 }
@@ -1728,10 +1728,9 @@ impl<'a> CreateBadgeImageQuery<'a> {
 impl<'a> BadgeImageResource<'a> {
     pub async fn create(
         &self,
-        body: impl Serialize,
+        body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<CreateBadgeImageResp, LarkError> {
-        let body = crate::JsonValue::from_serializable(body)?;
         let query = CreateBadgeImageQuery::new(&body);
         self.create_by_query(&query, option).await
     }
@@ -1748,7 +1747,7 @@ impl<'a> BadgeImageResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(query.body)?
+        .form_body(query.body.to_vec())
         .send_v2_response::<CreateBadgeImageRespData, CreateBadgeImageResp>()
         .await
     }

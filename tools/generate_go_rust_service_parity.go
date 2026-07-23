@@ -311,8 +311,12 @@ func endpointFromRustCall(sourceFile, function string, line int, prefix string, 
 		Method:     strings.ToUpper(methodMatch[1]),
 		Path:       path,
 		TokenTypes: rustTokenTypes(args[3]),
-		FileUpload: strings.Contains(nextStatement(suffix), ".file_upload()"),
+		FileUpload: rustFileUpload(nextStatement(suffix)),
 	}, ""
+}
+
+func rustFileUpload(statement string) bool {
+	return strings.Contains(statement, ".file_upload()") || strings.Contains(statement, ".form_body(")
 }
 
 func rustPath(expression, prefix string) (string, bool) {

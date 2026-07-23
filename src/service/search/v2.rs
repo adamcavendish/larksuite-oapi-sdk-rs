@@ -1348,7 +1348,7 @@ impl<'a> DocWikiResource<'a> {
             self.config,
             http::Method::POST,
             "/open-apis/search/v2/doc_wiki/search",
-            vec![AccessTokenType::User],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .json_body(query.body)?

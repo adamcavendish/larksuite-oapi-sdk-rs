@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::RequestOption;
+use crate::req::{FormDataField, RequestOption};
 use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
@@ -1974,7 +1974,7 @@ impl<'a> RecordResource<'a> {
             self.config,
             http::Method::POST,
             "/open-apis/attendance/v1/user_tasks/query",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .query("employee_type", query.employee_type)
@@ -2700,7 +2700,7 @@ impl<'a> FileResource<'a> {
 
     pub async fn upload(
         &self,
-        body: &impl Serialize,
+        body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<UploadFileResp, LarkError> {
         RestRequest::new(
@@ -2710,7 +2710,7 @@ impl<'a> FileResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<UploadFileRespData, UploadFileResp>()
         .await
     }

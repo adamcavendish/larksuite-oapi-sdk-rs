@@ -92,7 +92,14 @@ async fn task_v2_attachment_upload_by_query_smoke() {
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
 
     let client = client_for(addr);
-    let upload_body = json_value!({"file_token":"file-1"});
+    let upload_body = FormDataBuilder::new()
+        .file(
+            "file",
+            "spec.pdf",
+            b"spec-bytes".to_vec(),
+            Some("application/pdf"),
+        )
+        .build();
     let resp = client
         .task_v2()
         .attachment
@@ -106,5 +113,6 @@ async fn task_v2_attachment_upload_by_query_smoke() {
     assert!(resp.success());
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/task/v2/attachments/upload "));
-    assert!(request.contains(r#""file_token":"file-1""#));
+    assert!(request.contains("name=\"file\""));
+    assert!(request.contains("spec-bytes"));
 }

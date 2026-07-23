@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::RequestOption;
+use crate::req::{FormDataField, RequestOption};
 use crate::service::common::{EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
@@ -160,15 +160,7 @@ pub struct AcsDevice {
 
 // ── Request body types ──
 
-#[derive(Debug, Clone, Default, Serialize)]
-pub struct UpdateUserFaceReqBody {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub files: Option<crate::JsonValue>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub file_type: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub file_name: Option<String>,
-}
+pub type UpdateUserFaceReqBody = Vec<FormDataField>;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateRuleExternalReqBody {
@@ -855,12 +847,12 @@ impl<'a> GetUserFaceQuery<'a> {
 #[non_exhaustive]
 pub struct UpdateUserFaceQuery<'a> {
     pub user_id: &'a str,
-    pub body: &'a UpdateUserFaceReqBody,
+    pub body: &'a [FormDataField],
     pub user_id_type: Option<&'a str>,
 }
 
 impl<'a> UpdateUserFaceQuery<'a> {
-    pub fn new(user_id: &'a str, body: &'a UpdateUserFaceReqBody) -> Self {
+    pub fn new(user_id: &'a str, body: &'a [FormDataField]) -> Self {
         Self {
             user_id,
             body,
@@ -932,7 +924,7 @@ impl UserFaceResource<'_> {
             option,
         )
         .query("user_id_type", query.user_id_type)
-        .json_body(query.body)?
+        .form_body(query.body.to_vec())
         .send_v2_response::<(), UpdateUserFaceResp>()
         .await
     }

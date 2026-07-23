@@ -19,7 +19,15 @@ async fn baike_classification_draft_file_by_query_smoke() {
     let client = client_for(addr);
     let draft_create_body = json_value!({"entity_id":"entity-1"});
     let draft_update_body = json_value!({"entity_id":"entity-1","status":"updated"});
-    let file_upload_body = json_value!({"file_name":"term.png","file":"base64-file"});
+    let file_upload_body = FormDataBuilder::new()
+        .file(
+            "file",
+            "term.png",
+            b"file-bytes".to_vec(),
+            Some("image/png"),
+        )
+        .field("file_name", "term.png")
+        .build();
 
     let classification_resp = client
         .baike()
@@ -73,6 +81,6 @@ async fn baike_classification_draft_file_by_query_smoke() {
     assert!(request.contains("user_id_type=open_id"));
     assert!(request.contains(r#""entity_id":"entity-1""#));
     assert!(request.contains(r#""status":"updated""#));
-    assert!(request.contains(r#""file_name":"term.png""#));
-    assert!(request.contains(r#""file":"base64-file""#));
+    assert!(request.contains("name=\"file_name\""));
+    assert!(request.contains("file-bytes"));
 }

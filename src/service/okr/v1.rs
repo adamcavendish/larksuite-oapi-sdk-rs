@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::RequestOption;
+use crate::req::{FormDataField, RequestOption};
 use crate::service::common::{EmptyRespV2 as EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
@@ -218,11 +218,11 @@ impl ListPeriodRuleQuery {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct UploadImageQuery<'a> {
-    pub body: &'a crate::JsonValue,
+    pub body: &'a [FormDataField],
 }
 
 impl<'a> UploadImageQuery<'a> {
-    pub fn new(body: &'a crate::JsonValue) -> Self {
+    pub fn new(body: &'a [FormDataField]) -> Self {
         Self { body }
     }
 }
@@ -916,10 +916,9 @@ pub struct ImageResource<'a> {
 impl ImageResource<'_> {
     pub async fn upload(
         &self,
-        body: &impl Serialize,
+        body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<UploadImageResp, LarkError> {
-        let body = crate::JsonValue::from_serializable(body)?;
         let query = UploadImageQuery::new(&body);
         self.upload_by_query(&query, option).await
     }
@@ -936,7 +935,7 @@ impl ImageResource<'_> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .json_body(query.body)?
+        .form_body(query.body.to_vec())
         .send_v2_response::<UploadImageRespData, UploadImageResp>()
         .await
     }

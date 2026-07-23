@@ -1664,7 +1664,7 @@ impl<'a> CalendarEventResource<'a> {
             self.config,
             http::Method::POST,
             path,
-            vec![AccessTokenType::User],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .send_empty()
@@ -1681,7 +1681,7 @@ impl<'a> CalendarEventResource<'a> {
             self.config,
             http::Method::POST,
             path,
-            vec![AccessTokenType::User],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .send_empty()

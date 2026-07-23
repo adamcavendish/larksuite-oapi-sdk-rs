@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::RequestOption;
+use crate::req::{FormDataField, RequestOption};
 use crate::service::common::{EmptyResp, RestRequest};
 
 // ── Domain types ──
@@ -778,7 +778,7 @@ impl<'a> DataAssetResource<'a> {
         &self,
         app_id: &str,
         tenant_type: Option<&str>,
-        body: &impl Serialize,
+        body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<UploadFileDataAssetResp, LarkError> {
         let path = format!("/open-apis/aily/v1/apps/{app_id}/data_assets/upload_file");
@@ -790,7 +790,7 @@ impl<'a> DataAssetResource<'a> {
             option,
         )
         .query("tenant_type", tenant_type)
-        .json_body(body)?
+        .form_body(body)
         .send_response::<UploadFileData, UploadFileDataAssetResp>()
         .await
     }

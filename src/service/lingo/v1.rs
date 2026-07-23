@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::RequestOption;
+use crate::req::{FormDataField, RequestOption};
 use crate::service::common::{DownloadResp, EmptyResp, PageQuery, RestRequest};
 
 // ── Domain types ──
@@ -1003,11 +1003,11 @@ pub struct FileResource<'a> {
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct UploadFileQuery<'a> {
-    pub body: &'a crate::JsonValue,
+    pub body: &'a [FormDataField],
 }
 
 impl<'a> UploadFileQuery<'a> {
-    pub fn new(body: &'a crate::JsonValue) -> Self {
+    pub fn new(body: &'a [FormDataField]) -> Self {
         Self { body }
     }
 }
@@ -1032,10 +1032,9 @@ impl<'a> FileResource<'a> {
 
     pub async fn upload(
         &self,
-        body: impl Serialize,
+        body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<UploadFileResp, LarkError> {
-        let body = crate::JsonValue::from_serializable(body)?;
         let query = UploadFileQuery::new(&body);
         self.upload_by_query(&query, option).await
     }
@@ -1052,7 +1051,7 @@ impl<'a> FileResource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .json_body(query.body)?
+        .form_body(query.body.to_vec())
         .send_v2_response::<UploadFileRespData, UploadFileResp>()
         .await
     }
