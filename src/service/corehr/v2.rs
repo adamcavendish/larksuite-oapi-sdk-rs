@@ -3894,42 +3894,27 @@ impl<'a> V2<'a> {
 
 // ── Macro for simple post/get/delete/patch methods ────────────────────────────
 
-macro_rules! post_method {
-    ($fn_name:ident, $resp:ident, $body:ty, $data:ty, $path:expr) => {
+macro_rules! post_method_with_tokens {
+    ($fn_name:ident, $resp:ident, $data:ty, $path:expr, $token_types:expr) => {
         pub async fn $fn_name(
             &self,
             body: impl Serialize,
             option: &RequestOption,
         ) -> Result<$resp, LarkError> {
-            RestRequest::new(
-                self.config,
-                http::Method::POST,
-                $path,
-                vec![AccessTokenType::Tenant],
-                option,
-            )
-            .json_body(&body)?
-            .send_v2_response::<$data, $resp>()
-            .await
+            RestRequest::new(self.config, http::Method::POST, $path, $token_types, option)
+                .json_body(&body)?
+                .send_v2_response::<$data, $resp>()
+                .await
         }
     };
+}
+
+macro_rules! post_method {
+    ($fn_name:ident, $resp:ident, $body:ty, $data:ty, $path:expr) => {
+        post_method_with_tokens!($fn_name, $resp, $data, $path, vec![AccessTokenType::Tenant]);
+    };
     ($fn_name:ident, $resp:ident, $data:ty, $path:expr) => {
-        pub async fn $fn_name(
-            &self,
-            body: impl Serialize,
-            option: &RequestOption,
-        ) -> Result<$resp, LarkError> {
-            RestRequest::new(
-                self.config,
-                http::Method::POST,
-                $path,
-                vec![AccessTokenType::Tenant],
-                option,
-            )
-            .json_body(&body)?
-            .send_v2_response::<$data, $resp>()
-            .await
-        }
+        post_method_with_tokens!($fn_name, $resp, $data, $path, vec![AccessTokenType::Tenant]);
     };
 }
 
@@ -4552,11 +4537,12 @@ impl DepartmentV2Resource<'_> {
         .await
     }
 
-    post_method!(
+    post_method_with_tokens!(
         parents,
         ParentsDepartmentV2Resp,
         ParentsDepartmentV2RespData,
-        "/open-apis/corehr/v2/departments/parents"
+        "/open-apis/corehr/v2/departments/parents",
+        vec![AccessTokenType::Tenant, AccessTokenType::User]
     );
 
     pub async fn patch(
@@ -4602,17 +4588,19 @@ impl DepartmentV2Resource<'_> {
         QueryTimelineDepartmentV2RespData,
         "/open-apis/corehr/v2/departments/query_timeline"
     );
-    post_method!(
+    post_method_with_tokens!(
         search,
         SearchDepartmentV2Resp,
         ListData,
-        "/open-apis/corehr/v2/departments/search"
+        "/open-apis/corehr/v2/departments/search",
+        vec![AccessTokenType::Tenant, AccessTokenType::User]
     );
-    post_method!(
+    post_method_with_tokens!(
         tree,
         TreeDepartmentV2Resp,
         TreeDepartmentV2RespData,
-        "/open-apis/corehr/v2/departments/tree"
+        "/open-apis/corehr/v2/departments/tree",
+        vec![AccessTokenType::Tenant, AccessTokenType::User]
     );
 }
 
@@ -4990,11 +4978,12 @@ impl JobChangeV2Resource<'_> {
         .await
     }
 
-    post_method!(
+    post_method_with_tokens!(
         search,
         SearchJobChangeV2Resp,
         ListData,
-        "/open-apis/corehr/v2/job_changes/search"
+        "/open-apis/corehr/v2/job_changes/search",
+        vec![AccessTokenType::Tenant, AccessTokenType::User]
     );
 }
 
@@ -6581,17 +6570,19 @@ pub struct WorkforcePlanDetailV2Resource<'a> {
 }
 
 impl WorkforcePlanDetailV2Resource<'_> {
-    post_method!(
+    post_method_with_tokens!(
         batch,
         BatchWorkforcePlanDetailV2Resp,
         BatchWorkforcePlanDetailV2RespData,
-        "/open-apis/corehr/v2/workforce_plan_details/batch"
+        "/open-apis/corehr/v2/workforce_plan_details/batch",
+        vec![AccessTokenType::Tenant, AccessTokenType::User]
     );
-    post_method!(
+    post_method_with_tokens!(
         batch_v2,
         BatchV2WorkforcePlanDetailV2Resp,
         BatchV2WorkforcePlanDetailV2RespData,
-        "/open-apis/corehr/v2/workforce_plan_details/batch_v2"
+        "/open-apis/corehr/v2/workforce_plan_details/batch_v2",
+        vec![AccessTokenType::Tenant, AccessTokenType::User]
     );
 }
 

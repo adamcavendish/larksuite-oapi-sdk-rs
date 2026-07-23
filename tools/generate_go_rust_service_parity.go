@@ -88,6 +88,12 @@ var functionStart = regexp.MustCompile(`(?m)^\s*(pub(\([^)]*\))?\s+)?(async\s+)?
 var methodPattern = regexp.MustCompile(`http::Method::([A-Za-z]+)`)
 var tokenPattern = regexp.MustCompile(`AccessTokenType::([A-Za-z]+)`)
 var pathVariablePattern = regexp.MustCompile(`(?s)let\s+(mut\s+)?path\s*=\s*(.*?);`)
+var macroInvocationStart = regexp.MustCompile(`(?m)^\s*(post_method|post_method_with_tokens|get_method|post_query|external_crud_resource)!\s*\(`)
+
+type sourceRange struct {
+	start int
+	end   int
+}
 
 func main() {
 	goCatalogPath := flag.String("go-catalog", defaultCatalog, "path to the generated Go service contract catalog")
@@ -254,7 +260,11 @@ func excludedServiceFile(path string) bool {
 func extractRustContracts(sourceFile, source string) ([]rustEndpoint, []unparsedRustRequest) {
 	var contracts []rustEndpoint
 	var unparsed []unparsedRustRequest
+	macroDefinitions := macroRuleRanges(source)
 	for _, match := range functionStart.FindAllStringSubmatchIndex(source, -1) {
+		if inSourceRanges(match[0], macroDefinitions) {
+			continue
+		}
 		function := source[match[8]:match[9]]
 		open := strings.Index(source[match[1]:], "{")
 		if open < 0 {
@@ -289,7 +299,115 @@ func extractRustContracts(sourceFile, source string) ([]rustEndpoint, []unparsed
 			offset = closeCall + 1
 		}
 	}
+	macroContracts, macroUnparsed := extractSupportedMacroContracts(sourceFile, source, macroDefinitions)
+	contracts = append(contracts, macroContracts...)
+	unparsed = append(unparsed, macroUnparsed...)
 	return contracts, unparsed
+}
+
+func macroRuleRanges(source string) []sourceRange {
+	starts := regexp.MustCompile(`macro_rules!\s+[A-Za-z_][A-Za-z0-9_]*\s*`).FindAllStringIndex(source, -1)
+	ranges := make([]sourceRange, 0, len(starts))
+	for _, match := range starts {
+		open := strings.Index(source[match[1]:], "{")
+		if open < 0 {
+			continue
+		}
+		open += match[1]
+		close, ok := matchingDelimiter(source, open, '{', '}')
+		if ok {
+			ranges = append(ranges, sourceRange{start: match[0], end: close + 1})
+		}
+	}
+	return ranges
+}
+
+func inSourceRanges(offset int, ranges []sourceRange) bool {
+	for _, sourceRange := range ranges {
+		if sourceRange.start <= offset && offset < sourceRange.end {
+			return true
+		}
+	}
+	return false
+}
+
+func extractSupportedMacroContracts(sourceFile, source string, macroDefinitions []sourceRange) ([]rustEndpoint, []unparsedRustRequest) {
+	var contracts []rustEndpoint
+	var unparsed []unparsedRustRequest
+	for _, match := range macroInvocationStart.FindAllStringSubmatchIndex(source, -1) {
+		if inSourceRanges(match[0], macroDefinitions) {
+			continue
+		}
+		name := source[match[2]:match[3]]
+		open := strings.LastIndex(source[match[0]:match[1]], "(") + match[0]
+		close, ok := matchingDelimiter(source, open, '(', ')')
+		line := lineNumber(source, match[0])
+		if !ok {
+			unparsed = append(unparsed, unparsedRustRequest{sourceFile, name, line, "unclosed supported macro invocation"})
+			continue
+		}
+		args := splitTopLevel(source[open+1 : close])
+		parsed, reason := contractsFromSupportedMacro(sourceFile, name, line, args)
+		if reason != "" {
+			unparsed = append(unparsed, unparsedRustRequest{sourceFile, name, line, reason})
+			continue
+		}
+		contracts = append(contracts, parsed...)
+	}
+	return contracts, unparsed
+}
+
+func contractsFromSupportedMacro(sourceFile, name string, line int, args []string) ([]rustEndpoint, string) {
+	contract := func(function, method, path string, tokenTypes []string) rustEndpoint {
+		return rustEndpoint{
+			SourceFile: sourceFile,
+			Function:   function,
+			Line:       line,
+			Method:     method,
+			Path:       normalizePath(path),
+			TokenTypes: tokenTypes,
+		}
+	}
+
+	switch name {
+	case "post_method", "get_method", "post_query":
+		if len(args) == 0 {
+			return nil, "supported macro invocation has no arguments"
+		}
+		path, ok := rustString(args[len(args)-1])
+		if !ok {
+			return nil, "non-literal supported macro request path"
+		}
+		method := "POST"
+		if name == "get_method" {
+			method = "GET"
+		}
+		return []rustEndpoint{contract(strings.TrimSpace(args[0]), method, path, []string{"Tenant"})}, ""
+	case "post_method_with_tokens":
+		if len(args) != 5 {
+			return nil, "token-aware post macro invocation has an unexpected argument count"
+		}
+		path, ok := rustString(args[3])
+		if !ok {
+			return nil, "non-literal token-aware post macro request path"
+		}
+		return []rustEndpoint{contract(strings.TrimSpace(args[0]), "POST", path, rustTokenTypes(args[4]))}, ""
+	case "external_crud_resource":
+		if len(args) < 2 {
+			return nil, "external CRUD macro invocation has fewer than two arguments"
+		}
+		basePath, ok := rustString(args[1])
+		if !ok {
+			return nil, "non-literal external CRUD macro base path"
+		}
+		return []rustEndpoint{
+			contract("create", "POST", basePath, []string{"Tenant"}),
+			contract("update", "PUT", basePath+"/{}", []string{"Tenant"}),
+			contract("delete", "DELETE", basePath+"/{}", []string{"Tenant"}),
+		}, ""
+	default:
+		return nil, "unsupported macro invocation"
+	}
 }
 
 func endpointFromRustCall(sourceFile, function string, line int, prefix string, args []string, suffix string) (rustEndpoint, string) {
