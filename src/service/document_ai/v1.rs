@@ -3,16 +3,12 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::RequestOption;
+use crate::req::{FormDataField, RequestOption};
 use crate::service::common::RestRequest;
 
 // ── Request body types ──
 
-#[derive(Debug, Clone, Default, Serialize)]
-pub struct RecognizeFileReqBody {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub file: Option<crate::JsonValue>,
-}
+pub type RecognizeFileReqBody = Vec<FormDataField>;
 
 // ── Recognition models ──
 
@@ -702,7 +698,7 @@ pub struct AiResource<'a> {
 impl<'a> AiResource<'a> {
     pub async fn recognize_vat_invoice(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVatInvoiceResp, LarkError> {
         RestRequest::new(
@@ -712,14 +708,14 @@ impl<'a> AiResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_response::<VatInvoiceData, RecognizeVatInvoiceResp>()
         .await
     }
 
     pub async fn recognize_business_card(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBusinessCardResp, LarkError> {
         RestRequest::new(
@@ -729,14 +725,14 @@ impl<'a> AiResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_response::<BusinessCardData, RecognizeBusinessCardResp>()
         .await
     }
 
     pub async fn recognize_id_card(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeIdCardResp, LarkError> {
         RestRequest::new(
@@ -746,14 +742,14 @@ impl<'a> AiResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_response::<IdCardData, RecognizeIdCardResp>()
         .await
     }
 
     pub async fn recognize_bank_card(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBankCardResp, LarkError> {
         RestRequest::new(
@@ -763,14 +759,14 @@ impl<'a> AiResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_response::<BankCardData, RecognizeBankCardResp>()
         .await
     }
 
     pub async fn recognize_vehicle_license(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVehicleLicenseResp, LarkError> {
         RestRequest::new(
@@ -780,14 +776,14 @@ impl<'a> AiResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_response::<VehicleLicenseData, RecognizeVehicleLicenseResp>()
         .await
     }
 
     pub async fn recognize_train_invoice(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeTrainInvoiceResp, LarkError> {
         RestRequest::new(
@@ -797,14 +793,14 @@ impl<'a> AiResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_response::<TrainInvoiceData, RecognizeTrainInvoiceResp>()
         .await
     }
 
     pub async fn recognize_taxi_invoice(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeTaxiInvoiceResp, LarkError> {
         RestRequest::new(
@@ -814,14 +810,14 @@ impl<'a> AiResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_response::<TaxiInvoiceData, RecognizeTaxiInvoiceResp>()
         .await
     }
 
     pub async fn recognize_contract(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeContractResp, LarkError> {
         RestRequest::new(
@@ -831,7 +827,7 @@ impl<'a> AiResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_response::<ContractData, RecognizeContractResp>()
         .await
     }
@@ -846,7 +842,7 @@ pub struct ChinesePassportResource<'a> {
 impl<'a> ChinesePassportResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeChinesePassportRespV2, LarkError> {
         RestRequest::new(
@@ -856,7 +852,7 @@ impl<'a> ChinesePassportResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<ChinesePassportData, RecognizeChinesePassportRespV2>()
         .await
     }
@@ -869,7 +865,7 @@ pub struct DrivingLicenseResource<'a> {
 impl<'a> DrivingLicenseResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeDrivingLicenseRespV2, LarkError> {
         RestRequest::new(
@@ -879,7 +875,7 @@ impl<'a> DrivingLicenseResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<DrivingLicenseData, RecognizeDrivingLicenseRespV2>()
         .await
     }
@@ -892,7 +888,7 @@ pub struct FoodManageLicenseResource<'a> {
 impl<'a> FoodManageLicenseResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeFoodManageLicenseResp, LarkError> {
         RestRequest::new(
@@ -902,7 +898,7 @@ impl<'a> FoodManageLicenseResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<FoodManageLicenseData, RecognizeFoodManageLicenseResp>()
         .await
     }
@@ -915,7 +911,7 @@ pub struct FoodProduceLicenseResource<'a> {
 impl<'a> FoodProduceLicenseResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeFoodProduceLicenseResp, LarkError> {
         RestRequest::new(
@@ -925,7 +921,7 @@ impl<'a> FoodProduceLicenseResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<FoodProduceLicenseData, RecognizeFoodProduceLicenseResp>()
         .await
     }
@@ -938,7 +934,7 @@ pub struct HealthCertificateResource<'a> {
 impl<'a> HealthCertificateResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeHealthCertificateRespV2, LarkError> {
         RestRequest::new(
@@ -948,7 +944,7 @@ impl<'a> HealthCertificateResource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<HealthCertificateData, RecognizeHealthCertificateRespV2>()
         .await
     }
@@ -961,7 +957,7 @@ pub struct HkmMainlandTravelPermitResource<'a> {
 impl<'a> HkmMainlandTravelPermitResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeHkmMainlandTravelPermitRespV2, LarkError> {
         RestRequest::new(
@@ -971,7 +967,7 @@ impl<'a> HkmMainlandTravelPermitResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<HkmMainlandTravelPermitData, RecognizeHkmMainlandTravelPermitRespV2>()
         .await
     }
@@ -984,7 +980,7 @@ pub struct TwMainlandTravelPermitResource<'a> {
 impl<'a> TwMainlandTravelPermitResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeTwMainlandTravelPermitRespV2, LarkError> {
         RestRequest::new(
@@ -994,7 +990,7 @@ impl<'a> TwMainlandTravelPermitResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<TwMainlandTravelPermitData, RecognizeTwMainlandTravelPermitRespV2>()
         .await
     }
@@ -1007,7 +1003,7 @@ pub struct VehicleInvoiceResource<'a> {
 impl<'a> VehicleInvoiceResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVehicleInvoiceResp, LarkError> {
         RestRequest::new(
@@ -1017,7 +1013,7 @@ impl<'a> VehicleInvoiceResource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<VehicleInvoiceData, RecognizeVehicleInvoiceResp>()
         .await
     }
@@ -1030,7 +1026,7 @@ pub struct ResumeResource<'a> {
 impl<'a> ResumeResource<'a> {
     pub async fn parse(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<ParseResumeResp, LarkError> {
         RestRequest::new(
@@ -1040,7 +1036,7 @@ impl<'a> ResumeResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<ResumeData, ParseResumeResp>()
         .await
     }
@@ -1053,7 +1049,7 @@ pub struct VatInvoiceResource<'a> {
 impl<'a> VatInvoiceResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeVatInvoiceRespV2, LarkError> {
         RestRequest::new(
@@ -1063,7 +1059,7 @@ impl<'a> VatInvoiceResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<VatInvoiceData, RecognizeVatInvoiceRespV2>()
         .await
     }
@@ -1076,7 +1072,7 @@ pub struct ContractResource<'a> {
 impl<'a> ContractResource<'a> {
     pub async fn field_extraction(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<FieldExtractionContractResp, LarkError> {
         RestRequest::new(
@@ -1086,7 +1082,7 @@ impl<'a> ContractResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_response::<FieldExtractionContractData, FieldExtractionContractResp>()
         .await
     }
@@ -1109,7 +1105,7 @@ pub struct BusinessLicenseResource<'a> {
 impl<'a> BusinessLicenseResource<'a> {
     pub async fn recognize(
         &self,
-        body: &RecognizeFileReqBody,
+        body: RecognizeFileReqBody,
         option: &RequestOption,
     ) -> Result<RecognizeBusinessLicenseResp, LarkError> {
         RestRequest::new(
@@ -1119,7 +1115,7 @@ impl<'a> BusinessLicenseResource<'a> {
             vec![AccessTokenType::Tenant],
             option,
         )
-        .json_body(body)?
+        .form_body(body)
         .send_v2_response::<BusinessLicenseData, RecognizeBusinessLicenseResp>()
         .await
     }

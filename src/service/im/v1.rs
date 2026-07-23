@@ -1603,7 +1603,7 @@ impl<'a> MessageResource<'a> {
             self.config,
             http::Method::GET,
             "/open-apis/im/v1/messages",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
         .query("container_id_type", query.container_id_type)
@@ -1651,7 +1651,7 @@ impl<'a> MessageResource<'a> {
             self.config,
             http::Method::POST,
             path,
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .query("receive_id_type", receive_id_type)
@@ -2010,7 +2010,7 @@ impl<'a> MessageResourceDownload<'a> {
             self.config,
             http::Method::GET,
             path,
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
         .query("type", query.resource_type)
@@ -2254,7 +2254,7 @@ impl<'a> FileResource<'a> {
             self.config,
             http::Method::POST,
             "/open-apis/im/v1/files",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .form_body(fields)
@@ -2309,7 +2309,7 @@ impl<'a> ImageResource<'a> {
             self.config,
             http::Method::POST,
             "/open-apis/im/v1/images",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .form_body(fields)
@@ -2441,7 +2441,7 @@ impl<'a> ChatResource<'a> {
             self.config,
             http::Method::POST,
             "/open-apis/im/v1/chats",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .query("user_id_type", user_id_type)
@@ -3336,7 +3336,7 @@ impl<'a> ThreadResource<'a> {
             self.config,
             http::Method::POST,
             path,
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .query("receive_id_type", receive_id_type)

@@ -19,11 +19,16 @@ async fn acs_face_visitor_by_query_smoke() {
     .await;
 
     let client = client_for(addr);
-    let face_update_body = UpdateUserFaceReqBody {
-        files: Some(json_value!(["face-bytes"])),
-        file_type: Some("jpg".to_string()),
-        file_name: Some("face.jpg".to_string()),
-    };
+    let face_update_body: UpdateUserFaceReqBody = FormDataBuilder::new()
+        .file(
+            "files",
+            "face.jpg",
+            b"face-bytes".to_vec(),
+            Some("image/jpeg"),
+        )
+        .field("file_type", "jpg")
+        .field("file_name", "face.jpg")
+        .build();
     let visitor_create_body = CreateVisitorReqBody {
         user: Some(UserExternal {
             user_name: Some("Visitor".into()),
@@ -92,7 +97,8 @@ async fn acs_face_visitor_by_query_smoke() {
     assert!(request.contains("DELETE /open-apis/acs/v1/visitors/visitor-1?"));
     assert!(request.contains("is_cropped=true"));
     assert!(request.contains("user_id_type=open_id"));
-    assert!(request.contains(r#""file_type":"jpg""#));
-    assert!(request.contains(r#""file_name":"face.jpg""#));
+    assert!(request.contains("name=\"file_type\""));
+    assert!(request.contains("name=\"file_name\""));
+    assert!(request.contains("face-bytes"));
     assert!(request.contains(r#""user_name":"Visitor""#));
 }

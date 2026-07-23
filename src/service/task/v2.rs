@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
-use crate::req::RequestOption;
+use crate::req::{FormDataField, RequestOption};
 use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──────────────────────────────────────────────────────────────
@@ -1076,11 +1076,11 @@ impl<'a> ListTaskSubtaskV2Query<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct UploadAttachmentV2Query<'a> {
-    pub body: &'a crate::JsonValue,
+    pub body: &'a [FormDataField],
 }
 
 impl<'a> UploadAttachmentV2Query<'a> {
-    pub fn new(body: &'a crate::JsonValue) -> Self {
+    pub fn new(body: &'a [FormDataField]) -> Self {
         Self { body }
     }
 }
@@ -2454,10 +2454,9 @@ impl<'a> AttachmentV2Resource<'a> {
 
     pub async fn upload(
         &self,
-        body: &impl Serialize,
+        body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<UploadAttachmentV2Resp, LarkError> {
-        let body = crate::JsonValue::from_serializable(body)?;
         let query = UploadAttachmentV2Query::new(&body);
         self.upload_by_query(&query, option).await
     }
@@ -2474,7 +2473,7 @@ impl<'a> AttachmentV2Resource<'a> {
             vec![AccessTokenType::Tenant, AccessTokenType::User],
             option,
         )
-        .json_body(query.body)?
+        .form_body(query.body.to_vec())
         .send_v2_response::<AttachmentData, UploadAttachmentV2Resp>()
         .await
     }

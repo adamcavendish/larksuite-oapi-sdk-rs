@@ -25,7 +25,11 @@ async fn okr_period_image_and_batch_by_query_smoke() {
         start_month: Some("2026-01".into()),
     };
     let patch_body = PatchPeriodReqBody { status: Some(1) };
-    let image_body = json_value!({"image":"base64-image"});
+    let image_body = FormDataBuilder::new()
+        .file("data", "okr.png", b"okr-image".to_vec(), Some("image/png"))
+        .field("target_id", "okr-1")
+        .field("target_type", "1")
+        .build();
     let okr_ids = ["okr-1", "okr-2"];
 
     let period_list_resp = client
@@ -106,7 +110,8 @@ async fn okr_period_image_and_batch_by_query_smoke() {
     assert!(request.contains(r#""period_rule_id":"rule-1""#));
     assert!(request.contains(r#""start_month":"2026-01""#));
     assert!(request.contains(r#""status":1"#));
-    assert!(request.contains(r#""image":"base64-image""#));
+    assert!(request.contains("name=\"data\""));
+    assert!(request.contains("okr-image"));
 }
 
 #[tokio::test]

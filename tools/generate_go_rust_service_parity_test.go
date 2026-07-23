@@ -33,6 +33,33 @@ impl MessageResource<'_> {
 	}
 }
 
+func TestExtractRustContractsRecognizesFormBodyAsFileUpload(t *testing.T) {
+	source := `
+impl FileResource<'_> {
+    pub async fn upload(&self, fields: Vec<FormDataField>, option: &RequestOption) -> Result<(), LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/im/v1/files",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .form_body(fields)
+        .send()
+        .await
+    }
+}
+`
+
+	contracts, unparsed := extractRustContracts("src/service/im/v1.rs", source)
+	if len(unparsed) != 0 || len(contracts) != 1 {
+		t.Fatalf("contracts = %#v, unparsed = %#v", contracts, unparsed)
+	}
+	if !contracts[0].FileUpload {
+		t.Fatalf("contract metadata = %#v", contracts[0])
+	}
+}
+
 func TestExtractRustContractsParsesFormattedPath(t *testing.T) {
 	source := `
 impl DataSourceResource<'_> {
