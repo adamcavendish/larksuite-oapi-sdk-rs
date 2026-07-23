@@ -96,8 +96,8 @@ async fn builder_defaults() {
     assert_eq!(config.max_retries(), 2);
 }
 
-#[tokio::test]
-async fn builder_marketplace() {
+#[test]
+fn builder_marketplace() {
     let client = LarkClient::builder("app", "secret")
         .marketplace()
         .build()

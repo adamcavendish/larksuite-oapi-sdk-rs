@@ -103,8 +103,6 @@ impl LarkClientBuilder {
             .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
             .timeout(config.req_timeout)
             .build()?;
-        let client = LarkClient { config };
-        client.resend_app_ticket_if_marketplace();
-        Ok(client)
+        Ok(LarkClient { config })
     }
 }
