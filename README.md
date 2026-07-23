@@ -125,6 +125,19 @@ go run ./tools/generate_go_service_catalog.go --go-sdk "$GO_SDK_DIR" --revision 
 just go-service-catalog-check "$GO_SDK_DIR"
 ```
 
+`tools/go_rust_service_parity.json` compares that Go catalog with Rust's
+literal and `format!`-based `RestRequest` wiring, plus the GoV397 bridge. It
+classifies typed matches, bridge matches, metadata mismatches, missing Go
+contracts, and parameterized Rust macro calls that cannot yet be resolved from
+source alone. The report is a deterministic review baseline, not a claim that
+every Go endpoint is implemented by Rust. Regenerate or verify it after either
+catalog or request-wiring changes:
+
+```sh
+go run ./tools/generate_go_rust_service_parity.go
+just go-rust-service-parity-check
+```
+
 ### Dynamic JSON Values
 
 Closed API contracts use dedicated request and response models. Where the

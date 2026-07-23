@@ -56,6 +56,10 @@ go-v397-check go_sdk:
 go-service-catalog-check go_sdk:
     go run ./tools/generate_go_service_catalog.go --go-sdk "{{go_sdk}}" --check
 
+# Verify the checked-in Go-to-Rust service parity report
+go-rust-service-parity-check:
+    go run ./tools/generate_go_rust_service_parity.go --check
+
 # ---------- Docs ----------
 
 # Build rustdoc (CI mode)
