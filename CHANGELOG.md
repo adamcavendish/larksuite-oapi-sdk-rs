@@ -13,6 +13,8 @@
 - Extended the parity extractor to cover CoreHR, Performance, and Hire local
   request macros. The v3.9.9 baseline now resolves all 1,562 Go request
   contracts without missing, mismatched, or unresolved entries.
+- Added CI enforcement for GoV397 metadata, the Go service catalog, and the
+  Go-to-Rust parity report against the pinned Go v3.9.9 reference.
 
 ### WebSocket
 

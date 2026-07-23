@@ -60,6 +60,14 @@ go-service-catalog-check go_sdk:
 go-rust-service-parity-check:
     go run ./tools/generate_go_rust_service_parity.go --check
 
+# Verify Go tooling tests and all checked-in Go contract artifacts
+go-contract-provenance-check go_sdk:
+    go test tools/generate_go_service_catalog.go tools/generate_go_service_catalog_test.go
+    go test tools/generate_go_rust_service_parity.go tools/generate_go_rust_service_parity_test.go
+    just go-v397-check "{{go_sdk}}"
+    just go-service-catalog-check "{{go_sdk}}"
+    just go-rust-service-parity-check
+
 # ---------- Docs ----------
 
 # Build rustdoc (CI mode)

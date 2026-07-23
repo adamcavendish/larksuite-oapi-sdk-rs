@@ -139,6 +139,11 @@ go run ./tools/generate_go_rust_service_parity.go
 just go-rust-service-parity-check
 ```
 
+CI runs `just go-contract-provenance-check` against a full-history checkout of
+the pinned Go `v3.9.9` reference. That gate also runs both Go extractor test
+suites and verifies the GoV397 metadata and full service catalog before
+accepting the Rust parity report.
+
 ### Dynamic JSON Values
 
 Closed API contracts use dedicated request and response models. Where the
