@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Client
+
+- Removed Marketplace app-ticket background work from synchronous client
+  construction. Marketplace clients now build outside Tokio; tickets remain
+  available through lazy acquisition or explicit `resend_app_ticket` calls.
+
 ### Tooling
 
 - Added a reproducible Go `v3.9.9` service contract catalog for future

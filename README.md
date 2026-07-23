@@ -69,6 +69,10 @@ cache, custom headers, marketplace mode, helpdesk credentials, or a JWT client
 assertion provider. See [`examples/client_config.rs`](examples/client_config.rs)
 for the complete setup.
 
+Marketplace clients can be constructed outside a Tokio runtime. Their app ticket
+is acquired lazily on first use; call `LarkClient::resend_app_ticket` when an
+application needs to prewarm the ticket explicitly.
+
 ### Migrating to 0.3
 
 This release intentionally breaks the previous client names: replace `Client`
