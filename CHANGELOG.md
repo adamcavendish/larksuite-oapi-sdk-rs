@@ -9,7 +9,10 @@
   changing runtime dispatch or generated Rust resource implementations.
 - Added a deterministic Go-to-Rust request parity report. It distinguishes
   typed and GoV397 bridge coverage from metadata mismatches, missing contracts,
-  and parameterized macro calls that need explicit handling before generation.
+  and unsupported request templates that need explicit extractor support.
+- Extended the parity extractor to cover CoreHR, Performance, and Hire local
+  request macros. The v3.9.9 baseline now resolves all 1,562 Go request
+  contracts without missing, mismatched, or unresolved entries.
 
 ### WebSocket
 

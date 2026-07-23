@@ -126,12 +126,13 @@ just go-service-catalog-check "$GO_SDK_DIR"
 ```
 
 `tools/go_rust_service_parity.json` compares that Go catalog with Rust's
-literal and `format!`-based `RestRequest` wiring, plus the GoV397 bridge. It
-classifies typed matches, bridge matches, metadata mismatches, missing Go
-contracts, and parameterized Rust macro calls that cannot yet be resolved from
-source alone. The report is a deterministic review baseline, not a claim that
-every Go endpoint is implemented by Rust. Regenerate or verify it after either
-catalog or request-wiring changes:
+literal and `format!`-based `RestRequest` wiring, supported local
+macro-generated request methods, and the GoV397 bridge. It classifies typed
+matches, bridge matches, metadata mismatches, missing Go contracts, and any
+unsupported request templates that need explicit extractor support. The report
+is a deterministic request-contract baseline, not a generator for Rust
+resource implementations. Regenerate or verify it after either catalog or
+request-wiring changes:
 
 ```sh
 go run ./tools/generate_go_rust_service_parity.go
