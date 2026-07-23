@@ -1,0 +1,2909 @@
+{
+  "schema_version": 1,
+  "go_catalog_sha256": "83efd29b6a96dd0bb870c05482e3405b783a906411bd66f1241e6682e2f87b75",
+  "summary": {
+    "go_contracts": 1562,
+    "rust_direct_contracts": 1424,
+    "go_v397_bridge_contracts": 114,
+    "typed_matches": 1282,
+    "bridge_matches": 103,
+    "metadata_mismatches": 54,
+    "missing_contracts": 123,
+    "unparsed_rust_requests": 1
+  },
+  "metadata_mismatches": [
+    {
+      "contract": {
+        "resource_file": "service/acs/v1/resource.go",
+        "receiver": "userFace",
+        "operation": "Update",
+        "method": "PUT",
+        "path": "/open-apis/acs/v1/users/:user_id/face",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/acs/v1.rs",
+          "function": "update_by_query",
+          "line": 927,
+          "method": "PUT",
+          "path": "/open-apis/acs/v1/users/{}/face",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/admin/v1/resource.go",
+        "receiver": "badgeImage",
+        "operation": "Create",
+        "method": "POST",
+        "path": "/open-apis/admin/v1/badge_images",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/admin/v1.rs",
+          "function": "create_by_query",
+          "line": 1744,
+          "method": "POST",
+          "path": "/open-apis/admin/v1/badge_images",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/aily/v1/resource.go",
+        "receiver": "appDataAsset",
+        "operation": "UploadFile",
+        "method": "POST",
+        "path": "/open-apis/aily/v1/apps/:app_id/data_assets/upload_file",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/aily/v1.rs",
+          "function": "upload_file",
+          "line": 785,
+          "method": "POST",
+          "path": "/open-apis/aily/v1/apps/{}/data_assets/upload_file",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/attendance/v1/resource.go",
+        "receiver": "file",
+        "operation": "Upload",
+        "method": "POST",
+        "path": "/open-apis/attendance/v1/files/upload",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/attendance/v1.rs",
+          "function": "upload",
+          "line": 2706,
+          "method": "POST",
+          "path": "/open-apis/attendance/v1/files/upload",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/attendance/v1/resource.go",
+        "receiver": "userTask",
+        "operation": "Query",
+        "method": "POST",
+        "path": "/open-apis/attendance/v1/user_tasks/query",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/attendance/v1.rs",
+          "function": "query_by_query",
+          "line": 1973,
+          "method": "POST",
+          "path": "/open-apis/attendance/v1/user_tasks/query",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        },
+        {
+          "source_file": "src/service/attendance/v1.rs",
+          "function": "query",
+          "line": 3057,
+          "method": "POST",
+          "path": "/open-apis/attendance/v1/user_tasks/query",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/baike/v1/resource.go",
+        "receiver": "file",
+        "operation": "Upload",
+        "method": "POST",
+        "path": "/open-apis/baike/v1/files/upload",
+        "token_types": [
+          "Tenant",
+          "User"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/baike/v1.rs",
+          "function": "upload_by_query",
+          "line": 979,
+          "method": "POST",
+          "path": "/open-apis/baike/v1/files/upload",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/calendar/v4/resource.go",
+        "receiver": "calendarEvent",
+        "operation": "Subscription",
+        "method": "POST",
+        "path": "/open-apis/calendar/v4/calendars/:calendar_id/events/subscription",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/calendar/v4.rs",
+          "function": "subscription",
+          "line": 1663,
+          "method": "POST",
+          "path": "/open-apis/calendar/v4/calendars/{}/events/subscription",
+          "token_types": [
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/calendar/v4/resource.go",
+        "receiver": "calendarEvent",
+        "operation": "Unsubscription",
+        "method": "POST",
+        "path": "/open-apis/calendar/v4/calendars/:calendar_id/events/unsubscription",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/calendar/v4.rs",
+          "function": "unsubscription",
+          "line": 1680,
+          "method": "POST",
+          "path": "/open-apis/calendar/v4/calendars/{}/events/unsubscription",
+          "token_types": [
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/corehr/v1/resource.go",
+        "receiver": "offboarding",
+        "operation": "Query",
+        "method": "POST",
+        "path": "/open-apis/corehr/v1/offboardings/query",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/corehr/v1.rs",
+          "function": "query",
+          "line": 5545,
+          "method": "POST",
+          "path": "/open-apis/corehr/v1/offboardings/query",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/corehr/v1/resource.go",
+        "receiver": "offboarding",
+        "operation": "Search",
+        "method": "POST",
+        "path": "/open-apis/corehr/v1/offboardings/search",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/corehr/v1.rs",
+          "function": "search_by_query",
+          "line": 5586,
+          "method": "POST",
+          "path": "/open-apis/corehr/v1/offboardings/search",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/corehr/v1/resource.go",
+        "receiver": "person",
+        "operation": "Upload",
+        "method": "POST",
+        "path": "/open-apis/corehr/v1/persons/upload",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/corehr/v1.rs",
+          "function": "upload",
+          "line": 5713,
+          "method": "POST",
+          "path": "/open-apis/corehr/v1/persons/upload",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/corehr/v1/resource.go",
+        "receiver": "transferReason",
+        "operation": "Query",
+        "method": "GET",
+        "path": "/open-apis/corehr/v1/transfer_reasons/query",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/corehr/v1.rs",
+          "function": "query",
+          "line": 6134,
+          "method": "GET",
+          "path": "/open-apis/corehr/v1/transfer_reasons/query",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/corehr/v1/resource.go",
+        "receiver": "transferType",
+        "operation": "Query",
+        "method": "GET",
+        "path": "/open-apis/corehr/v1/transfer_types/query",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/corehr/v1.rs",
+          "function": "query",
+          "line": 6152,
+          "method": "GET",
+          "path": "/open-apis/corehr/v1/transfer_types/query",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "bankCard",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/bank_card/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize_bank_card",
+          "line": 759,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/bank_card/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "businessCard",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/business_card/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize_business_card",
+          "line": 725,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/business_card/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "businessLicense",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/business_license/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 1115,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/business_license/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "chinesePassport",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/chinese_passport/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 852,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/chinese_passport/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "contract",
+        "operation": "FieldExtraction",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/contract/field_extraction",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "field_extraction",
+          "line": 1082,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/contract/field_extraction",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "drivingLicense",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/driving_license/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 875,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/driving_license/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "foodManageLicense",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/food_manage_license/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 898,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/food_manage_license/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "foodProduceLicense",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/food_produce_license/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 921,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/food_produce_license/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "healthCertificate",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/health_certificate/recognize",
+        "token_types": [
+          "Tenant",
+          "User"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 944,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/health_certificate/recognize",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "hkmMainlandTravelPermit",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/hkm_mainland_travel_permit/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 967,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/hkm_mainland_travel_permit/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "idCard",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/id_card/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize_id_card",
+          "line": 742,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/id_card/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "resume",
+        "operation": "Parse",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/resume/parse",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "parse",
+          "line": 1036,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/resume/parse",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "taxiInvoice",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/taxi_invoice/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize_taxi_invoice",
+          "line": 810,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/taxi_invoice/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "trainInvoice",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/train_invoice/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize_train_invoice",
+          "line": 793,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/train_invoice/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "twMainlandTravelPermit",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/tw_mainland_travel_permit/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 990,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/tw_mainland_travel_permit/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "vatInvoice",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/vat_invoice/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize_vat_invoice",
+          "line": 708,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/vat_invoice/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        },
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 1059,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/vat_invoice/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "vehicleInvoice",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/vehicle_invoice/recognize",
+        "token_types": [
+          "Tenant",
+          "User"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize",
+          "line": 1013,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/vehicle_invoice/recognize",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/document_ai/v1/resource.go",
+        "receiver": "vehicleLicense",
+        "operation": "Recognize",
+        "method": "POST",
+        "path": "/open-apis/document_ai/v1/vehicle_license/recognize",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/document_ai/v1.rs",
+          "function": "recognize_vehicle_license",
+          "line": 776,
+          "method": "POST",
+          "path": "/open-apis/document_ai/v1/vehicle_license/recognize",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/drive/v1/resource.go",
+        "receiver": "file",
+        "operation": "UploadAll",
+        "method": "POST",
+        "path": "/open-apis/drive/v1/files/upload_all",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/drive/v1.rs",
+          "function": "upload_all",
+          "line": 1409,
+          "method": "POST",
+          "path": "/open-apis/drive/v1/files/upload_all",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/drive/v1/resource.go",
+        "receiver": "file",
+        "operation": "UploadPart",
+        "method": "POST",
+        "path": "/open-apis/drive/v1/files/upload_part",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/drive/v1.rs",
+          "function": "upload_part",
+          "line": 1431,
+          "method": "POST",
+          "path": "/open-apis/drive/v1/files/upload_part",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/drive/v1/resource.go",
+        "receiver": "media",
+        "operation": "UploadAll",
+        "method": "POST",
+        "path": "/open-apis/drive/v1/medias/upload_all",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/drive/v1.rs",
+          "function": "upload_all",
+          "line": 2405,
+          "method": "POST",
+          "path": "/open-apis/drive/v1/medias/upload_all",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/drive/v1/resource.go",
+        "receiver": "media",
+        "operation": "UploadPart",
+        "method": "POST",
+        "path": "/open-apis/drive/v1/medias/upload_part",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/drive/v1.rs",
+          "function": "upload_part",
+          "line": 2427,
+          "method": "POST",
+          "path": "/open-apis/drive/v1/medias/upload_part",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/hire/v1/resource.go",
+        "receiver": "application",
+        "operation": "Get",
+        "method": "GET",
+        "path": "/open-apis/hire/v1/applications/:application_id",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/hire/v1.rs",
+          "function": "get_by_query",
+          "line": 8103,
+          "method": "GET",
+          "path": "/open-apis/hire/v1/applications/{}",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/hire/v1/resource.go",
+        "receiver": "attachment",
+        "operation": "Create",
+        "method": "POST",
+        "path": "/open-apis/hire/v1/attachments",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/hire/v1.rs",
+          "function": "create",
+          "line": 9058,
+          "method": "POST",
+          "path": "/open-apis/hire/v1/attachments",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/hire/v1/resource.go",
+        "receiver": "evaluation",
+        "operation": "List",
+        "method": "GET",
+        "path": "/open-apis/hire/v1/evaluations",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/hire/v1.rs",
+          "function": "list_by_query",
+          "line": 9453,
+          "method": "GET",
+          "path": "/open-apis/hire/v1/evaluations",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/hire/v1/resource.go",
+        "receiver": "evaluationTask",
+        "operation": "List",
+        "method": "GET",
+        "path": "/open-apis/hire/v1/evaluation_tasks",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/hire/v1.rs",
+          "function": "list_by_query",
+          "line": 12818,
+          "method": "GET",
+          "path": "/open-apis/hire/v1/evaluation_tasks",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/hire/v1/resource.go",
+        "receiver": "interview",
+        "operation": "List",
+        "method": "GET",
+        "path": "/open-apis/hire/v1/interviews",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/hire/v1.rs",
+          "function": "list_by_query",
+          "line": 8424,
+          "method": "GET",
+          "path": "/open-apis/hire/v1/interviews",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/hire/v1/resource.go",
+        "receiver": "interviewTask",
+        "operation": "List",
+        "method": "GET",
+        "path": "/open-apis/hire/v1/interview_tasks",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/hire/v1.rs",
+          "function": "list_by_query",
+          "line": 13545,
+          "method": "GET",
+          "path": "/open-apis/hire/v1/interview_tasks",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/hire/v1/resource.go",
+        "receiver": "job",
+        "operation": "GetDetail",
+        "method": "GET",
+        "path": "/open-apis/hire/v1/jobs/:job_id/get_detail",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/hire/v1.rs",
+          "function": "get_detail",
+          "line": 7593,
+          "method": "GET",
+          "path": "/open-apis/hire/v1/jobs/{}/get_detail",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/hire/v2/resource.go",
+        "receiver": "talent",
+        "operation": "Get",
+        "method": "GET",
+        "path": "/open-apis/hire/v2/talents/:talent_id",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/hire/v2.rs",
+          "function": "get_by_query",
+          "line": 723,
+          "method": "GET",
+          "path": "/open-apis/hire/v2/talents/{}",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/im/v1/resource.go",
+        "receiver": "chat",
+        "operation": "Create",
+        "method": "POST",
+        "path": "/open-apis/im/v1/chats",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/im/v1.rs",
+          "function": "create",
+          "line": 2440,
+          "method": "POST",
+          "path": "/open-apis/im/v1/chats",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/im/v1/resource.go",
+        "receiver": "file",
+        "operation": "Create",
+        "method": "POST",
+        "path": "/open-apis/im/v1/files",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/im/v1.rs",
+          "function": "create",
+          "line": 2253,
+          "method": "POST",
+          "path": "/open-apis/im/v1/files",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/im/v1/resource.go",
+        "receiver": "image",
+        "operation": "Create",
+        "method": "POST",
+        "path": "/open-apis/im/v1/images",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/im/v1.rs",
+          "function": "create",
+          "line": 2308,
+          "method": "POST",
+          "path": "/open-apis/im/v1/images",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/im/v1/resource.go",
+        "receiver": "message",
+        "operation": "Forward",
+        "method": "POST",
+        "path": "/open-apis/im/v1/messages/:message_id/forward",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/im/v1.rs",
+          "function": "forward",
+          "line": 1650,
+          "method": "POST",
+          "path": "/open-apis/im/v1/messages/{}/forward",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/im/v1/resource.go",
+        "receiver": "message",
+        "operation": "List",
+        "method": "GET",
+        "path": "/open-apis/im/v1/messages",
+        "token_types": [
+          "Tenant",
+          "User"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/im/v1.rs",
+          "function": "list_by_query",
+          "line": 1602,
+          "method": "GET",
+          "path": "/open-apis/im/v1/messages",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/im/v1/resource.go",
+        "receiver": "messageResource",
+        "operation": "Get",
+        "method": "GET",
+        "path": "/open-apis/im/v1/messages/:message_id/resources/:file_key",
+        "token_types": [
+          "Tenant",
+          "User"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/im/v1.rs",
+          "function": "request",
+          "line": 2009,
+          "method": "GET",
+          "path": "/open-apis/im/v1/messages/{}/resources/{}",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/im/v1/resource.go",
+        "receiver": "thread",
+        "operation": "Forward",
+        "method": "POST",
+        "path": "/open-apis/im/v1/threads/:thread_id/forward",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/im/v1.rs",
+          "function": "forward",
+          "line": 3335,
+          "method": "POST",
+          "path": "/open-apis/im/v1/threads/{}/forward",
+          "token_types": [
+            "Tenant"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/lingo/v1/resource.go",
+        "receiver": "file",
+        "operation": "Upload",
+        "method": "POST",
+        "path": "/open-apis/lingo/v1/files/upload",
+        "token_types": [
+          "Tenant",
+          "User"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/lingo/v1.rs",
+          "function": "upload_by_query",
+          "line": 1048,
+          "method": "POST",
+          "path": "/open-apis/lingo/v1/files/upload",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/okr/v1/resource.go",
+        "receiver": "image",
+        "operation": "Upload",
+        "method": "POST",
+        "path": "/open-apis/okr/v1/images/upload",
+        "token_types": [
+          "Tenant",
+          "User"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/okr/v1.rs",
+          "function": "upload_by_query",
+          "line": 932,
+          "method": "POST",
+          "path": "/open-apis/okr/v1/images/upload",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/search/v2/resource.go",
+        "receiver": "docWiki",
+        "operation": "Search",
+        "method": "POST",
+        "path": "/open-apis/search/v2/doc_wiki/search",
+        "token_types": [
+          "User",
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "rust": [
+        {
+          "source_file": "src/service/search/v2.rs",
+          "function": "search_by_query",
+          "line": 1347,
+          "method": "POST",
+          "path": "/open-apis/search/v2/doc_wiki/search",
+          "token_types": [
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    },
+    {
+      "contract": {
+        "resource_file": "service/task/v2/resource.go",
+        "receiver": "attachment",
+        "operation": "Upload",
+        "method": "POST",
+        "path": "/open-apis/task/v2/attachments/upload",
+        "token_types": [
+          "Tenant",
+          "User"
+        ],
+        "file_upload": true
+      },
+      "rust": [
+        {
+          "source_file": "src/service/task/v2.rs",
+          "function": "upload_by_query",
+          "line": 2470,
+          "method": "POST",
+          "path": "/open-apis/task/v2/attachments/upload",
+          "token_types": [
+            "Tenant",
+            "User"
+          ],
+          "file_upload": false
+        }
+      ],
+      "bridge": null
+    }
+  ],
+  "missing_contracts": [
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "approvalGroups",
+      "operation": "OpenQueryDepartmentChangeListByIds",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/approval_groups/open_query_department_change_list_by_ids",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "approvalGroups",
+      "operation": "OpenQueryJobChangeListByIds",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/approval_groups/open_query_job_change_list_by_ids",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "approvalGroups",
+      "operation": "OpenQueryPositionChangeListByIds",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/approval_groups/open_query_position_change_list_by_ids",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoBank",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/banks/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoBankBranch",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/bank_branchs/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoCity",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/cities/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoCountryRegion",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/country_regions/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoCountryRegionSubdivision",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/country_region_subdivisions/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoCurrency",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/currencies/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoDistrict",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/districts/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoLanguage",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/languages/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoNationality",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/nationalities/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "basicInfoTimeZone",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/basic_info/time_zones/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "bp",
+      "operation": "GetByDepartment",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/bps/get_by_department",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "company",
+      "operation": "Active",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/companies/active",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "company",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/companies/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "company",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/companies/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "contract",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/contracts/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "costAllocation",
+      "operation": "BatchQuery",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/cost_allocations/batch_query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "costAllocation",
+      "operation": "CreateVersion",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/cost_allocations/create_version",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "costAllocation",
+      "operation": "RemoveVersion",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/cost_allocations/remove_version",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "costAllocation",
+      "operation": "UpdateVersion",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/cost_allocations/update_version",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "costCenter",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/cost_centers",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "costCenter",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/cost_centers/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "costCenter",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/cost_centers/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "customOrg",
+      "operation": "Active",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/custom_orgs/active",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "customOrg",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/custom_orgs",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "customOrg",
+      "operation": "DeleteOrg",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/custom_orgs/delete_org",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "customOrg",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/custom_orgs/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "customOrg",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/custom_orgs/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "customOrg",
+      "operation": "UpdateRule",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/custom_orgs/update_rule",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "defaultCostCenter",
+      "operation": "BatchQuery",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/default_cost_centers/batch_query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "defaultCostCenter",
+      "operation": "CreateVersion",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/default_cost_centers/create_version",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "defaultCostCenter",
+      "operation": "RemoveVersion",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/default_cost_centers/remove_version",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "defaultCostCenter",
+      "operation": "UpdateVersion",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/default_cost_centers/update_version",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "department",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/departments/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "department",
+      "operation": "Parents",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/departments/parents",
+      "token_types": [
+        "Tenant",
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "department",
+      "operation": "QueryMultiTimeline",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/departments/query_multi_timeline",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "department",
+      "operation": "QueryOperationLogs",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/departments/query_operation_logs",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "department",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/departments/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "department",
+      "operation": "QueryTimeline",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/departments/query_timeline",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "department",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/departments/search",
+      "token_types": [
+        "Tenant",
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "department",
+      "operation": "Tree",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/departments/tree",
+      "token_types": [
+        "Tenant",
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "employee",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/employees/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "employee",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/employees",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "employee",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/employees/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "employeesAdditionalJob",
+      "operation": "Batch",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/employees/additional_jobs/batch",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "employeesAdditionalJob",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/employees/additional_jobs",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "employeesBp",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/employees/bps/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "employeesInternationalAssignment",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/employees/international_assignments",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "employeesJobData",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/employees/job_datas/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "employeesJobData",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/employees/job_datas/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "enum",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/enums/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "job",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/jobs/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "job",
+      "operation": "QueryMultiTimeline",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/jobs/query_multi_timeline",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "job",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/jobs/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobChange",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/job_changes",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobChange",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/job_changes/search",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobFamily",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/job_families/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobFamily",
+      "operation": "QueryMultiTimeline",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/job_families/query_multi_timeline",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobFamily",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/job_families/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobGrade",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/job_grades",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobGrade",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/job_grades/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobGrade",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/job_grades/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobLevel",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/job_levels/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "jobLevel",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/job_levels/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "location",
+      "operation": "Active",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/locations/active",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "location",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/locations/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "location",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/locations/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "offboarding",
+      "operation": "Edit",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/offboardings/edit",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "offboarding",
+      "operation": "Revoke",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/offboardings/revoke",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "offboarding",
+      "operation": "SubmitV2",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/offboardings/submit_v2",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "pathway",
+      "operation": "Active",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/pathways/active",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "pathway",
+      "operation": "BatchGet",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/pathways/batch_get",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "pathway",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/pathways",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "person",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/persons",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "position",
+      "operation": "Active",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/positions/active",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "position",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/positions",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "position",
+      "operation": "DelPosition",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/positions/del_position",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "position",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/positions/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "position",
+      "operation": "QueryRecentChange",
+      "method": "GET",
+      "path": "/open-apis/corehr/v2/positions/query_recent_change",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "preHire",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/pre_hires",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "preHire",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/pre_hires/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "preHire",
+      "operation": "RestoreFlowInstance",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/pre_hires/restore_flow_instance",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "preHire",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/pre_hires/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "preHire",
+      "operation": "TransformOnboardingTask",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/pre_hires/transform_onboarding_task",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "preHire",
+      "operation": "WithdrawOnboarding",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/pre_hires/withdraw_onboarding",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "probation",
+      "operation": "EnableDisableAssessment",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/probation/enable_disable_assessment",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "probation",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/probation/search",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "probation",
+      "operation": "Submit",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/probation/submit",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "probation",
+      "operation": "Withdraw",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/probation/withdraw",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "probationAssessment",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/probation/assessments",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "reportDetailRow",
+      "operation": "BatchDelete",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/report_detail_row/batchDelete",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "reportDetailRow",
+      "operation": "BatchSave",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/report_detail_row/batchSave",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "signatureFile",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/signature_files/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "signatureFile",
+      "operation": "Terminate",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/signature_files/terminate",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "workforcePlanDetail",
+      "operation": "Batch",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/workforce_plan_details/batch",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "workforcePlanDetail",
+      "operation": "BatchV2",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/workforce_plan_details/batch_v2",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "workforcePlanDetailRow",
+      "operation": "BatchDelete",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/workforce_plan_detail_row/batchDelete",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/corehr/v2/resource.go",
+      "receiver": "workforcePlanDetailRow",
+      "operation": "BatchSave",
+      "method": "POST",
+      "path": "/open-apis/corehr/v2/workforce_plan_detail_row/batchSave",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalApplication",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/hire/v1/external_applications",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalApplication",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/hire/v1/external_applications/:external_application_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalApplication",
+      "operation": "Update",
+      "method": "PUT",
+      "path": "/open-apis/hire/v1/external_applications/:external_application_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalBackgroundCheck",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/hire/v1/external_background_checks",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalBackgroundCheck",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/hire/v1/external_background_checks/:external_background_check_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalBackgroundCheck",
+      "operation": "Update",
+      "method": "PUT",
+      "path": "/open-apis/hire/v1/external_background_checks/:external_background_check_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalInterview",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/hire/v1/external_interviews",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalInterview",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/hire/v1/external_interviews/:external_interview_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalInterview",
+      "operation": "Update",
+      "method": "PUT",
+      "path": "/open-apis/hire/v1/external_interviews/:external_interview_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalOffer",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/hire/v1/external_offers",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalOffer",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/hire/v1/external_offers/:external_offer_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/hire/v1/resource.go",
+      "receiver": "externalOffer",
+      "operation": "Update",
+      "method": "PUT",
+      "path": "/open-apis/hire/v1/external_offers/:external_offer_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "activity",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/activity/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "indicator",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/indicators/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "metricField",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/metric_fields/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "metricLib",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/metric_libs/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "metricTemplate",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/metric_templates/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "question",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/questions/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "reviewData",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/review_datas/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "reviewTemplate",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/review_templates/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "reviewee",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/reviewees/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "userGroupUserRel",
+      "operation": "Write",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/user_group_user_rels/write",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/performance/v2/resource.go",
+      "receiver": "userInfo",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/performance/v2/user_info/query",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    }
+  ],
+  "unparsed_rust_requests": [
+    {
+      "source_file": "src/service/hire/v1.rs",
+      "function": "create",
+      "line": 10731,
+      "reason": "non-literal request path"
+    }
+  ]
+}
