@@ -352,6 +352,39 @@ fn normalizes_post_content_v2_and_rich_text_fallback() {
 }
 
 #[test]
+fn normalizes_root_post_content_with_one_image_resource() {
+    let event: P2MessageReceiveV1 = serde_json::from_value(serde_json::json!({
+        "sender": {},
+        "message": {
+            "message_id": "om_post",
+            "message_type": "post",
+            "content": serde_json::to_string(&serde_json::json!({
+                "title": "",
+                "content": [[
+                    {"tag": "text", "text": "Inspect this image"},
+                    {"tag": "img", "image_key": "img_v2_test"}
+                ]],
+                "content_v2": [[
+                    {"tag": "text", "text": "Inspect this image"},
+                    {"tag": "img", "image_key": "img_v2_test"}
+                ]]
+            })).unwrap()
+        }
+    }))
+    .unwrap();
+    let message = NormalizedMessage::from_event(event);
+
+    assert_eq!(
+        message.text.as_deref(),
+        Some("Inspect this image![image](img_v2_test)")
+    );
+    assert_eq!(
+        message.resources,
+        vec![ChannelResource::new("image", "img_v2_test")]
+    );
+}
+
+#[test]
 fn rejects_duplicate_messages() {
     let state = ChannelState::new(
         ChannelPolicy::default().require_mention(false),
