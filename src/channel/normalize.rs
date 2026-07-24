@@ -427,29 +427,37 @@ fn todo(map: &Map<String, Value>) -> NormalizedContent {
 }
 
 fn post(map: &Map<String, Value>) -> NormalizedContent {
-    let lang = map
-        .get("zh_cn")
-        .or_else(|| map.get("en_us"))
-        .or_else(|| map.values().find(|v| v.is_object()));
-    let Some(lang) = lang.and_then(Value::as_object) else {
+    // Receive events may place the post document directly at the root instead of under a locale.
+    let post = if map.contains_key("title")
+        || map.contains_key("content")
+        || map.contains_key("content_v2")
+    {
+        Some(map)
+    } else {
+        map.get("zh_cn")
+            .or_else(|| map.get("en_us"))
+            .or_else(|| map.values().find(|value| value.is_object()))
+            .and_then(Value::as_object)
+    };
+    let Some(post) = post else {
         return NormalizedContent {
             text: Some("[post]".into()),
             resources: Vec::new(),
         };
     };
 
-    if let Some(content_v2) = lang.get("content_v2").and_then(Value::as_array)
+    if let Some(content_v2) = post.get("content_v2").and_then(Value::as_array)
         && !content_v2.is_empty()
     {
         return render_content_v2(content_v2);
     }
 
     let mut parts = Vec::new();
-    if let Some(title) = string_field(lang, "title").filter(|s| !s.is_empty()) {
+    if let Some(title) = string_field(post, "title").filter(|s| !s.is_empty()) {
         parts.push(format!("**{title}**"));
     }
     let mut resources = Vec::new();
-    if let Some(content) = lang.get("content") {
+    if let Some(content) = post.get("content") {
         let (body, body_resources) = render_rich_text_blocks(content);
         if !body.is_empty() {
             parts.push(body);
