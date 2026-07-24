@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## [0.3.1] - 2026-07-24
+
+### Channel
+
+- Fixed rich-post receive-event normalization when `title`, `content`, and
+  `content_v2` are placed at the root instead of under a locale. Root-level
+  images are now exposed as channel resources, and matching `content` and
+  `content_v2` images are emitted once.
+
 ## [0.3.0] - 2026-07-23
 
 ### Breaking changes
@@ -411,6 +420,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.1
 [0.3.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.0
 [0.2.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.2
 [0.2.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.1

@@ -29,7 +29,7 @@ optional WebSocket and Axum integration.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.3.0"
+larksuite-oapi-sdk-rs = "0.3.1"
 ```
 
 The minimum supported Rust version is 1.95.0.
@@ -280,7 +280,7 @@ for a runnable callback response and the API documentation for card builders.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.3.0", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.3.1", features = ["ws", "axum"] }
 ```
 
 ## API Coverage
