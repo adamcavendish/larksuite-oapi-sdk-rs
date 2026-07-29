@@ -226,14 +226,13 @@ async fn application_v7_app_slash_command_lifecycle_smoke() {
         tenant_access_token: Some("tenant-token".to_string()),
         ..RequestOption::default()
     };
-    let description = AppSlashCommandDescription::new("Send a greeting")
-        .i18n(
-            AppSlashCommandI18n::new()
-                .insert("en_us", "Send a greeting")
-                .insert("zh_cn", "发送一句问候"),
-        )
+    let description = AppSlashCommandDescription::new("Send a greeting").i18n(
+        AppSlashCommandI18n::new()
+            .insert("en_us", "Send a greeting")
+            .insert("zh_cn", "发送一句问候"),
+    );
+    let create_body = CreateAppSlashCommandReqBody::new("greet", description.clone())
         .icon(AppSlashCommandIcon::new("skill_outlined"));
-    let create_body = CreateAppSlashCommandReqBody::new("greet", description.clone());
 
     let created = client
         .application_v7()
@@ -247,7 +246,9 @@ async fn application_v7_app_slash_command_lifecycle_smoke() {
         .list(&option)
         .await
         .unwrap();
-    let patch_body = PatchAppSlashCommandReqBody::new().description(description);
+    let patch_body = PatchAppSlashCommandReqBody::new()
+        .description(description)
+        .icon(AppSlashCommandIcon::new("skill_outlined"));
     let patched = client
         .application_v7()
         .app_slash_command
@@ -316,5 +317,10 @@ async fn application_v7_app_slash_command_lifecycle_smoke() {
     assert!(request.contains("content-type: application/json"));
     assert!(request.contains(r#""command":"greet""#));
     assert!(!request.contains(r#""command":"/greet""#));
-    assert!(request.contains(r#""icon":{"icon_key":"skill_outlined"}"#));
+    assert_eq!(
+        request
+            .matches(r#""icon":{"icon_key":"skill_outlined"}"#)
+            .count(),
+        3
+    );
 }
