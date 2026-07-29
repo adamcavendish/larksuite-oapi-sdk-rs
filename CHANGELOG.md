@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.3.2] - 2026-07-29
+
 ### Application
 
 - Added typed Application v7 slash-command create, list, update, and delete
@@ -426,6 +428,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.2
 [0.3.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.1
 [0.3.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.0
 [0.2.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.2.2
