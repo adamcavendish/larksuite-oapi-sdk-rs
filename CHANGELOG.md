@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Channel
+
+- Added strict `Channel::reply` and `Channel::reply_in_thread` helpers that
+  never fall back to a top-level send. High-level channel sends now accept
+  Lark idempotency UUIDs and derive unique UUIDs for split messages.
+
 ## [0.3.3] - 2026-07-29
 
 ### Application

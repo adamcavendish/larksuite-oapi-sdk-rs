@@ -928,6 +928,177 @@ async fn channel_send_text_chunks_long_messages() {
 }
 
 #[tokio::test]
+async fn channel_send_passes_uuid_and_derives_keys_for_chunks() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_chunk_1","chat_id":"oc_group"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_chunk_2","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let text = format!("{}b", "a".repeat(20_000));
+
+    channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                text: Some(text),
+                uuid: Some("delivery-42".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 2);
+    assert!(requests[0].contains(r#""uuid":"delivery-42-1""#));
+    assert!(requests[1].contains(r#""uuid":"delivery-42-2""#));
+}
+
+#[tokio::test]
+async fn channel_reply_in_thread_stays_on_reply_endpoint() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_reply","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let result = channel
+        .reply_in_thread(
+            "om_parent",
+            &SendInput {
+                text: Some("topic reply".into()),
+                uuid: Some("delivery-43".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_reply");
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 1);
+    assert!(requests[0].contains("POST /open-apis/im/v1/messages/om_parent/reply"));
+    assert!(requests[0].contains(r#""reply_in_thread":true"#));
+    assert!(requests[0].contains(r#""uuid":"delivery-43""#));
+    assert!(!requests[0].contains("POST /open-apis/im/v1/messages?"));
+}
+
+#[tokio::test]
+async fn channel_strict_reply_never_falls_back_to_top_level_send() {
+    let (addr, _handle, requests) =
+        mock_json_server_with_requests(vec![r#"{"code":230020,"msg":"reply target unavailable"}"#])
+            .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let err = channel
+        .reply(
+            "om_missing",
+            &SendInput {
+                text: Some("must remain a reply".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap_err();
+
+    assert!(err.to_string().contains("230020"));
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 1);
+    assert!(requests[0].contains("POST /open-apis/im/v1/messages/om_missing/reply"));
+    assert!(!requests[0].contains("POST /open-apis/im/v1/messages?"));
+}
+
+#[tokio::test]
+async fn channel_strict_reply_rejects_ambiguous_target_without_request() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"unused"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let err = channel
+        .reply(
+            "om_parent",
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                text: Some("ambiguous".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap_err();
+
+    assert!(err.to_string().contains("must not set receive_id"));
+    assert!(requests.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn channel_send_rejects_invalid_or_ambiguous_uuids_without_request() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"unused"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let empty = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                text: Some("hello".into()),
+                uuid: Some(String::new()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap_err();
+    assert!(empty.to_string().contains("must not be empty"));
+
+    let too_long = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                text: Some("hello".into()),
+                uuid: Some("a".repeat(51)),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap_err();
+    assert!(too_long.to_string().contains("at most 50"));
+
+    let split = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                text: Some(format!("{}b", "a".repeat(20_000))),
+                uuid: Some("a".repeat(49)),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap_err();
+    assert!(
+        split
+            .to_string()
+            .contains("leave room for the derived -1 suffix")
+    );
+    assert!(requests.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
 async fn channel_send_retries_format_error_as_text() {
     let (addr, _handle, requests) = mock_json_server_with_requests(vec![
         r#"{"code":230001,"msg":"format error"}"#,
@@ -942,6 +1113,7 @@ async fn channel_send_retries_format_error_as_text() {
             &SendInput {
                 chat_id: Some("oc_group".into()),
                 markdown: Some("fallback **text**".into()),
+                uuid: Some("format-1".into()),
                 ..Default::default()
             },
             &RequestOption::default(),
@@ -954,6 +1126,8 @@ async fn channel_send_retries_format_error_as_text() {
     assert!(request_dump.contains(r#""msg_type":"post""#));
     assert!(request_dump.contains(r#""msg_type":"text""#));
     assert!(request_dump.contains("fallback **text**"));
+    assert!(request_dump.contains(r#""uuid":"format-1""#));
+    assert!(request_dump.contains(r#""uuid":"format-1-fallback""#));
 }
 
 #[tokio::test]
