@@ -64,10 +64,12 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
     },
     application::v7::{
         AppAbilityBot, AppAbilityWeb, AppConfigCallback, AppConfigScope, AppConfigScopeItem,
-        AppI18nInfo, CreateAppAvatarUploadQuery, CreateApplicationPublishQuery,
-        CreateApplicationPublishReqBody, PatchApplicationAbilityQuery,
-        PatchApplicationAbilityReqBody, PatchApplicationBaseQuery, PatchApplicationBaseReqBody,
-        PatchApplicationConfigQuery, PatchApplicationConfigReqBody,
+        AppI18nInfo, AppSlashCommandDescription, AppSlashCommandI18n, AppSlashCommandIcon,
+        CreateAppAvatarUploadQuery, CreateAppSlashCommandReqBody, CreateApplicationPublishQuery,
+        CreateApplicationPublishReqBody, DeleteAppSlashCommandQuery, PatchAppSlashCommandQuery,
+        PatchAppSlashCommandReqBody, PatchApplicationAbilityQuery, PatchApplicationAbilityReqBody,
+        PatchApplicationBaseQuery, PatchApplicationBaseReqBody, PatchApplicationConfigQuery,
+        PatchApplicationConfigReqBody,
     },
     approval::v4::{
         CcSearch, GetApprovalQuery, GetExternalApprovalQuery, GetInstanceQuery, InstanceSearch,

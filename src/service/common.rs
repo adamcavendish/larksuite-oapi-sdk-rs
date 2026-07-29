@@ -141,6 +141,11 @@ impl<'a> RestRequest<'a> {
         self
     }
 
+    pub(crate) fn path_param(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+        self.api_req.path_params.set(key, value);
+        self
+    }
+
     pub(crate) fn query_values<I, T>(mut self, key: &str, values: Option<I>) -> Self
     where
         I: IntoIterator<Item = T>,

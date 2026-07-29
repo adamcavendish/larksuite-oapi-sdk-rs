@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Application
+
+- Added typed Application v7 slash-command create, list, update, and delete
+  resources with tenant-token transport and typed descriptions, locale maps,
+  and icons.
+
 ## [0.3.1] - 2026-07-24
 
 ### Channel

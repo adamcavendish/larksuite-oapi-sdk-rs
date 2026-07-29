@@ -205,3 +205,116 @@ async fn application_v7_publish_create_by_query_smoke() {
     assert!(request.contains(r#""pc_default_ability":"web_app""#));
     assert!(request.contains(r#""version":"1.1.1""#));
 }
+
+#[tokio::test]
+async fn application_v7_app_slash_command_lifecycle_smoke() {
+    let create = r#"{"code":0,"msg":"ok","data":{"command_id":"cmd-1"}}"#;
+    let list = r#"{"code":0,"msg":"ok","data":{"items":[{"command_id":"cmd-1","command":"greet","description":{"default_value":"Send a greeting","i18n":{"en_us":"Send a greeting","zh_cn":"发送一句问候"}},"icon":{"icon_key":"skill_outlined"},"update_time":"1716963953"}]}}"#;
+    let empty = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let duplicate = r#"{"code":40000000,"msg":"command already exists"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, create),
+        http_response(200, list),
+        http_response(200, empty),
+        http_response(200, empty),
+        http_response(200, duplicate),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..RequestOption::default()
+    };
+    let description = AppSlashCommandDescription::new("Send a greeting")
+        .i18n(
+            AppSlashCommandI18n::new()
+                .insert("en_us", "Send a greeting")
+                .insert("zh_cn", "发送一句问候"),
+        )
+        .icon(AppSlashCommandIcon::new("skill_outlined"));
+    let create_body = CreateAppSlashCommandReqBody::new("greet", description.clone());
+
+    let created = client
+        .application_v7()
+        .app_slash_command
+        .create(&create_body, &option)
+        .await
+        .unwrap();
+    let listed = client
+        .application_v7()
+        .app_slash_command
+        .list(&option)
+        .await
+        .unwrap();
+    let patch_body = PatchAppSlashCommandReqBody::new().description(description);
+    let patched = client
+        .application_v7()
+        .app_slash_command
+        .patch_by_query(
+            &PatchAppSlashCommandQuery::new("cmd/a?b", &patch_body),
+            &option,
+        )
+        .await
+        .unwrap();
+    let deleted = client
+        .application_v7()
+        .app_slash_command
+        .delete_by_query(&DeleteAppSlashCommandQuery::new("cmd/a?b"), &option)
+        .await
+        .unwrap();
+    let duplicate = client
+        .application_v7()
+        .app_slash_command
+        .create(&create_body, &option)
+        .await
+        .unwrap_err();
+
+    assert!(created.success());
+    assert_eq!(
+        created
+            .data
+            .as_ref()
+            .and_then(|data| data.command_id.as_deref()),
+        Some("cmd-1")
+    );
+    assert!(listed.success());
+    let command = listed.data.as_ref().unwrap().items.first().unwrap();
+    assert_eq!(command.command.as_deref(), Some("greet"));
+    assert_eq!(
+        command
+            .description
+            .as_ref()
+            .and_then(|description| description.i18n.as_ref())
+            .and_then(|i18n| i18n.values.get("zh_cn"))
+            .map(String::as_str),
+        Some("发送一句问候")
+    );
+    assert_eq!(
+        command
+            .icon
+            .as_ref()
+            .and_then(|icon| icon.icon_key.as_deref()),
+        Some("skill_outlined")
+    );
+    assert!(patched.success());
+    assert!(deleted.success());
+    assert!(matches!(
+        duplicate,
+        larksuite_oapi_sdk_rs::LarkError::Api(_)
+    ));
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/application/v7/app_slash_commands "));
+    assert!(request.contains("GET /open-apis/application/v7/app_slash_commands "));
+    assert!(request.contains("PATCH /open-apis/application/v7/app_slash_commands/cmd%2Fa%3Fb "));
+    assert!(request.contains("DELETE /open-apis/application/v7/app_slash_commands/cmd%2Fa%3Fb "));
+    assert!(
+        request.contains("authorization: Bearer tenant-token"),
+        "{request}"
+    );
+    assert!(request.contains("content-type: application/json"));
+    assert!(request.contains(r#""command":"greet""#));
+    assert!(!request.contains(r#""command":"/greet""#));
+    assert!(request.contains(r#""icon":{"icon_key":"skill_outlined"}"#));
+}
