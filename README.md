@@ -29,7 +29,7 @@ optional WebSocket and Axum integration.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.3.2"
+larksuite-oapi-sdk-rs = "0.3.3"
 ```
 
 The minimum supported Rust version is 1.95.0.
@@ -175,10 +175,13 @@ registered without the leading `/`; Feishu displays that prefix in the client.
 The application must enable its bot capability and obtain
 `application:app_slash_command:read` and
 `application:app_slash_command:write` before calling the APIs.
+Set a command icon with the request body's top-level `.icon(...)` builder;
+Feishu ignores an icon nested under `description`.
 
 ```rust,no_run
 use larksuite_oapi_sdk_rs::service::application::v7::{
-    AppSlashCommandDescription, AppSlashCommandI18n, CreateAppSlashCommandReqBody,
+    AppSlashCommandDescription, AppSlashCommandI18n, AppSlashCommandIcon,
+    CreateAppSlashCommandReqBody,
 };
 use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
@@ -188,7 +191,8 @@ let body = CreateAppSlashCommandReqBody::new(
     "greet",
     AppSlashCommandDescription::new("Send a greeting")
         .i18n(AppSlashCommandI18n::new().insert("en_us", "Send a greeting")),
-);
+)
+.icon(AppSlashCommandIcon::new("skill_outlined"));
 let command = client
     .application_v7()
     .app_slash_command
@@ -321,7 +325,7 @@ for a runnable callback response and the API documentation for card builders.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.3.2", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.3.3", features = ["ws", "axum"] }
 ```
 
 ## API Coverage

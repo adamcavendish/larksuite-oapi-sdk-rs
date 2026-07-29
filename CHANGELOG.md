@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## [0.3.3] - 2026-07-29
+
+### Application
+
+- Fixed Application v7 slash-command create and update requests to send icons
+  at the API-required top level instead of under `description`.
+
 ## [0.3.2] - 2026-07-29
 
 ### Application
@@ -428,6 +435,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.3]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.3
 [0.3.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.2
 [0.3.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.1
 [0.3.0]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.0

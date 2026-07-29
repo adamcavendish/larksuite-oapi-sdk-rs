@@ -320,6 +320,8 @@ pub struct CreateAppSlashCommandReqBody {
     pub command: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<AppSlashCommandDescription>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<AppSlashCommandIcon>,
 }
 
 impl CreateAppSlashCommandReqBody {
@@ -327,6 +329,7 @@ impl CreateAppSlashCommandReqBody {
         Self {
             command: Some(command.into()),
             description: Some(description),
+            icon: None,
         }
     }
 
@@ -339,6 +342,11 @@ impl CreateAppSlashCommandReqBody {
         self.description = Some(value);
         self
     }
+
+    pub fn icon(mut self, value: AppSlashCommandIcon) -> Self {
+        self.icon = Some(value);
+        self
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -346,6 +354,8 @@ impl CreateAppSlashCommandReqBody {
 pub struct PatchAppSlashCommandReqBody {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<AppSlashCommandDescription>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<AppSlashCommandIcon>,
 }
 
 impl PatchAppSlashCommandReqBody {
@@ -355,6 +365,11 @@ impl PatchAppSlashCommandReqBody {
 
     pub fn description(mut self, value: AppSlashCommandDescription) -> Self {
         self.description = Some(value);
+        self
+    }
+
+    pub fn icon(mut self, value: AppSlashCommandIcon) -> Self {
+        self.icon = Some(value);
         self
     }
 }
@@ -1000,5 +1015,25 @@ mod tests {
         assert!(config.scope.is_some());
         assert!(config.visibility.is_some());
         assert!(config.callback.is_some());
+    }
+
+    #[test]
+    fn slash_command_request_icons_serialize_at_top_level() {
+        let description = AppSlashCommandDescription::new("Send a greeting")
+            .i18n(AppSlashCommandI18n::new().insert("en_us", "Send a greeting"));
+        let create = CreateAppSlashCommandReqBody::new("greet", description.clone())
+            .icon(AppSlashCommandIcon::new("skill_outlined"));
+        let patch = PatchAppSlashCommandReqBody::new()
+            .description(description)
+            .icon(AppSlashCommandIcon::new("skill_outlined"));
+
+        for body in [
+            serde_json::to_value(create).unwrap(),
+            serde_json::to_value(patch).unwrap(),
+        ] {
+            assert_eq!(body["icon"]["icon_key"], "skill_outlined");
+            assert_eq!(body["description"]["i18n"]["en_us"], "Send a greeting");
+            assert!(body["description"].get("icon").is_none());
+        }
     }
 }

@@ -38,9 +38,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let body = CreateAppSlashCommandReqBody::new(
         command,
         AppSlashCommandDescription::new(description.clone())
-            .i18n(AppSlashCommandI18n::new().insert("en_us", description))
-            .icon(AppSlashCommandIcon::new("skill_outlined")),
+            .i18n(AppSlashCommandI18n::new().insert("en_us", description)),
     );
+    let body = body.icon(AppSlashCommandIcon::new("skill_outlined"));
     let created = client
         .application_v7()
         .app_slash_command
