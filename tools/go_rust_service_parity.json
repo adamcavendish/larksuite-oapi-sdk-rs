@@ -3,7 +3,7 @@
   "go_catalog_sha256": "83efd29b6a96dd0bb870c05482e3405b783a906411bd66f1241e6682e2f87b75",
   "summary": {
     "go_contracts": 1562,
-    "rust_direct_contracts": 1545,
+    "rust_direct_contracts": 1549,
     "go_v397_bridge_contracts": 114,
     "typed_matches": 1460,
     "bridge_matches": 102,

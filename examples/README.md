@@ -38,6 +38,7 @@ Most examples use this shape:
 | `bitable_records` | Bitable v1 | List tables, views, and records with `PageQuery`; use `*_by_iterator` for lazy scans | `APP_ID`, `APP_SECRET`, `APP_TOKEN`, `TABLE_ID`, optional `VIEW_ID` | `cargo run --example bitable_records` |
 | `sheets_read` | Sheets v3 | Fetch spreadsheet metadata and read a range | `APP_ID`, `APP_SECRET`, `SPREADSHEET_TOKEN`, optional `SHEET_RANGE` | `cargo run --example sheets_read` |
 | `application_v6` | Application v6 | List and get applications with `lang` and `user_id_type` | `APP_ID`, `APP_SECRET`, optional `APPLICATION_APP_ID` | `cargo run --example application_v6` |
+| `app_slash_commands` | Application v7 | List slash commands and optionally create one | `APP_ID`, `APP_SECRET`, optional `SLASH_COMMAND`, `SLASH_COMMAND_DESCRIPTION` | `cargo run --example app_slash_commands` |
 | `calendar_events` | Calendar v4 | List calendars and events with pagination/time filters | `APP_ID`, `APP_SECRET`, `CALENDAR_ID`, optional `START_TIME`, `END_TIME` | `cargo run --example calendar_events` |
 | `go_v397_endpoint` | Go v3.97 bridge | Call a bridged endpoint that has not been promoted to a dedicated Rust resource | `APP_ID`, `APP_SECRET`, `NOTE_ID` | `cargo run --example go_v397_endpoint` |
 

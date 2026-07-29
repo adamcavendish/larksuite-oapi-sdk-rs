@@ -135,8 +135,12 @@ The checked-in Go service contract catalog records the complete Go `v3.9.9`
 resource request surface: source resource, receiver, operation, HTTP method,
 path, token types, and upload behavior. It is a reproducible tooling input for
 future service generation; it does not alter runtime request dispatch or
-generate Rust resource implementations yet. Refresh it or verify that it is
-current with the same Go checkout:
+generate Rust resource implementations yet.
+
+It intentionally does not cover newer documented platform APIs that the pinned
+Go SDK has not generated, such as Application v7 slash commands.
+
+Refresh it or verify that it is current with the same Go checkout:
 
 ```sh
 GO_SDK_DIR=/path/to/larksuite-oapi-sdk-go
@@ -162,6 +166,43 @@ CI runs `just go-contract-provenance-check` against a full-history checkout of
 the pinned Go `v3.9.9` reference. That gate also runs both Go extractor test
 suites and verifies the GoV397 metadata and full service catalog before
 accepting the Rust parity report.
+
+### Slash Commands
+
+Application v7 supports creating, listing, updating, and deleting slash
+commands through `client.application_v7().app_slash_command`. Commands are
+registered without the leading `/`; Feishu displays that prefix in the client.
+The application must enable its bot capability and obtain
+`application:app_slash_command:read` and
+`application:app_slash_command:write` before calling the APIs.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::service::application::v7::{
+    AppSlashCommandDescription, AppSlashCommandI18n, CreateAppSlashCommandReqBody,
+};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
+
+# async fn run() -> Result<(), Box<dyn std::error::Error>> {
+let client = LarkClient::builder("app_id", "app_secret").build()?;
+let body = CreateAppSlashCommandReqBody::new(
+    "greet",
+    AppSlashCommandDescription::new("Send a greeting")
+        .i18n(AppSlashCommandI18n::new().insert("en_us", "Send a greeting")),
+);
+let command = client
+    .application_v7()
+    .app_slash_command
+    .create(&body, &RequestOption::default())
+    .await?;
+# Ok(())
+# }
+```
+
+Command registration is separate from message handling: use the standard IM
+event dispatcher or `channel` feature to execute the message text sent by a
+user. Client command menus can take several minutes to refresh. See
+[`examples/app_slash_commands.rs`](examples/app_slash_commands.rs) for a
+list-first runnable example.
 
 ### Dynamic JSON Values
 

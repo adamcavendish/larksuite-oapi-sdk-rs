@@ -9,6 +9,14 @@ use crate::service::go_v397::GoV397;
 
 impl_resp_v2!(CreateAppAvatarUploadResp, CreateAppAvatarUploadRespData);
 
+impl_resp_v2!(CreateAppSlashCommandResp, CreateAppSlashCommandRespData);
+
+impl_resp_v2!(ListAppSlashCommandResp, ListAppSlashCommandRespData);
+
+impl_resp_v2!(PatchAppSlashCommandResp, PatchAppSlashCommandRespData);
+
+impl_resp_v2!(DeleteAppSlashCommandResp, DeleteAppSlashCommandRespData);
+
 impl_resp_v2!(PatchApplicationAbilityResp, ());
 
 impl_resp_v2!(PatchApplicationBaseResp, ());
@@ -31,11 +39,114 @@ pub struct CreateAppAvatarUploadRespData {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[non_exhaustive]
+pub struct CreateAppSlashCommandRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub command_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ListAppSlashCommandRespData {
+    #[serde(default)]
+    pub items: Vec<AppSlashCommand>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct PatchAppSlashCommandRespData {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct DeleteAppSlashCommandRespData {}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CreateApplicationPublishRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct AppSlashCommand {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub command_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub command: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<AppSlashCommandDescription>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<AppSlashCommandIcon>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppSlashCommandDescription {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub i18n: Option<AppSlashCommandI18n>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<AppSlashCommandIcon>,
+}
+
+impl AppSlashCommandDescription {
+    pub fn new(default_value: impl Into<String>) -> Self {
+        Self::default_value(default_value)
+    }
+
+    pub fn default_value(default_value: impl Into<String>) -> Self {
+        Self {
+            default_value: Some(default_value.into()),
+            ..Default::default()
+        }
+    }
+
+    pub fn i18n(mut self, value: AppSlashCommandI18n) -> Self {
+        self.i18n = Some(value);
+        self
+    }
+
+    pub fn icon(mut self, value: AppSlashCommandIcon) -> Self {
+        self.icon = Some(value);
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppSlashCommandI18n {
+    #[serde(flatten)]
+    pub values: std::collections::BTreeMap<String, String>,
+}
+
+impl AppSlashCommandI18n {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn insert(mut self, locale: impl Into<String>, value: impl Into<String>) -> Self {
+        self.values.insert(locale.into(), value.into());
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AppSlashCommandIcon {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon_key: Option<String>,
+}
+
+impl AppSlashCommandIcon {
+    pub fn new(icon_key: impl Into<String>) -> Self {
+        Self {
+            icon_key: Some(icon_key.into()),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -200,6 +311,89 @@ pub struct AppConfigCallback {
 #[non_exhaustive]
 pub struct CreateAppAvatarUploadQuery {
     pub body: Vec<FormDataField>,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct CreateAppSlashCommandReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub command: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<AppSlashCommandDescription>,
+}
+
+impl CreateAppSlashCommandReqBody {
+    pub fn new(command: impl Into<String>, description: AppSlashCommandDescription) -> Self {
+        Self {
+            command: Some(command.into()),
+            description: Some(description),
+        }
+    }
+
+    pub fn command(mut self, value: impl Into<String>) -> Self {
+        self.command = Some(value.into());
+        self
+    }
+
+    pub fn description(mut self, value: AppSlashCommandDescription) -> Self {
+        self.description = Some(value);
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct PatchAppSlashCommandReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<AppSlashCommandDescription>,
+}
+
+impl PatchAppSlashCommandReqBody {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn description(mut self, value: AppSlashCommandDescription) -> Self {
+        self.description = Some(value);
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct CreateAppSlashCommandQuery<'a> {
+    pub body: &'a CreateAppSlashCommandReqBody,
+}
+
+impl<'a> CreateAppSlashCommandQuery<'a> {
+    pub fn new(body: &'a CreateAppSlashCommandReqBody) -> Self {
+        Self { body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct PatchAppSlashCommandQuery<'a> {
+    pub command_id: &'a str,
+    pub body: &'a PatchAppSlashCommandReqBody,
+}
+
+impl<'a> PatchAppSlashCommandQuery<'a> {
+    pub fn new(command_id: &'a str, body: &'a PatchAppSlashCommandReqBody) -> Self {
+        Self { command_id, body }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct DeleteAppSlashCommandQuery<'a> {
+    pub command_id: &'a str,
+}
+
+impl<'a> DeleteAppSlashCommandQuery<'a> {
+    pub fn new(command_id: &'a str) -> Self {
+        Self { command_id }
+    }
 }
 
 impl CreateAppAvatarUploadQuery {
@@ -459,6 +653,108 @@ pub struct AppAvatarUploadResource<'a> {
     config: &'a Config,
 }
 
+pub struct AppSlashCommandResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> AppSlashCommandResource<'a> {
+    /// Create an app slash command — POST /open-apis/application/v7/app_slash_commands
+    pub async fn create(
+        &self,
+        body: &CreateAppSlashCommandReqBody,
+        option: &RequestOption,
+    ) -> Result<CreateAppSlashCommandResp, LarkError> {
+        self.create_by_query(&CreateAppSlashCommandQuery::new(body), option)
+            .await
+    }
+
+    pub async fn create_by_query(
+        &self,
+        query: &CreateAppSlashCommandQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateAppSlashCommandResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/application/v7/app_slash_commands",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(query.body)?
+        .send_v2_response::<CreateAppSlashCommandRespData, CreateAppSlashCommandResp>()
+        .await
+    }
+
+    /// List app slash commands — GET /open-apis/application/v7/app_slash_commands
+    pub async fn list(&self, option: &RequestOption) -> Result<ListAppSlashCommandResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/application/v7/app_slash_commands",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .send_v2_response::<ListAppSlashCommandRespData, ListAppSlashCommandResp>()
+        .await
+    }
+
+    /// Update an app slash command — PATCH /open-apis/application/v7/app_slash_commands/{command_id}
+    pub async fn patch(
+        &self,
+        command_id: &str,
+        body: &PatchAppSlashCommandReqBody,
+        option: &RequestOption,
+    ) -> Result<PatchAppSlashCommandResp, LarkError> {
+        self.patch_by_query(&PatchAppSlashCommandQuery::new(command_id, body), option)
+            .await
+    }
+
+    pub async fn patch_by_query(
+        &self,
+        query: &PatchAppSlashCommandQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<PatchAppSlashCommandResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/application/v7/app_slash_commands/:command_id",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .path_param("command_id", query.command_id)
+        .json_body(query.body)?
+        .send_v2_response::<PatchAppSlashCommandRespData, PatchAppSlashCommandResp>()
+        .await
+    }
+
+    /// Delete an app slash command — DELETE /open-apis/application/v7/app_slash_commands/{command_id}
+    pub async fn delete(
+        &self,
+        command_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteAppSlashCommandResp, LarkError> {
+        self.delete_by_query(&DeleteAppSlashCommandQuery::new(command_id), option)
+            .await
+    }
+
+    pub async fn delete_by_query(
+        &self,
+        query: &DeleteAppSlashCommandQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<DeleteAppSlashCommandResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            "/open-apis/application/v7/app_slash_commands/:command_id",
+            vec![AccessTokenType::Tenant],
+            option,
+        )
+        .path_param("command_id", query.command_id)
+        .send_v2_response::<DeleteAppSlashCommandRespData, DeleteAppSlashCommandResp>()
+        .await
+    }
+}
+
 impl<'a> AppAvatarUploadResource<'a> {
     /// Upload app avatar — POST /open-apis/application/v7/app_avatar/upload
     pub async fn create(
@@ -648,6 +944,7 @@ impl<'a> ApplicationPublishResource<'a> {
 
 pub struct V7<'a> {
     pub app_avatar_upload: AppAvatarUploadResource<'a>,
+    pub app_slash_command: AppSlashCommandResource<'a>,
     pub application_ability: ApplicationAbilityResource<'a>,
     pub application_base: ApplicationBaseResource<'a>,
     pub application_config: ApplicationConfigResource<'a>,
@@ -659,6 +956,7 @@ impl<'a> V7<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             app_avatar_upload: AppAvatarUploadResource { config },
+            app_slash_command: AppSlashCommandResource { config },
             application_ability: ApplicationAbilityResource { config },
             application_base: ApplicationBaseResource { config },
             application_config: ApplicationConfigResource { config },
