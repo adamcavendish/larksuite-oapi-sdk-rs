@@ -89,30 +89,31 @@ impl<'a> Channel<'a> {
     ) -> Result<SendResult, LarkError> {
         let (receive_id_type, receive_id) = resolve_target(input)?;
         let mut input = input.clone();
+        validate_uuid(input.uuid.as_deref())?;
         Box::pin(self.prepare_uploads(&mut input, option)).await?;
+        let route = SendRoute {
+            receive_id_type: &receive_id_type,
+            receive_id: &receive_id,
+            reply_message_id: input.reply_message_id.as_deref(),
+        };
 
         match build_payloads(&input)? {
             SendPayloads::Single { msg_type, content } => {
-                Box::pin(self.send_one_with_fallback(
-                    &receive_id_type,
-                    &receive_id,
-                    &msg_type,
-                    &content,
-                    &input,
-                    option,
-                ))
-                .await
+                Box::pin(self.send_one_with_fallback(route, &msg_type, &content, &input, option))
+                    .await
             }
             SendPayloads::Chunks(chunks) => {
+                let total = chunks.len();
                 let mut chunk_ids = Vec::new();
                 let mut chat_id = None;
-                for (msg_type, content) in chunks {
+                for (index, (msg_type, content)) in chunks.into_iter().enumerate() {
+                    let mut chunk_input = input.clone();
+                    chunk_input.uuid = payload_uuid(input.uuid.as_deref(), index, total, false)?;
                     let result = Box::pin(self.send_one_with_fallback(
-                        &receive_id_type,
-                        &receive_id,
+                        route,
                         &msg_type,
                         &content,
-                        &input,
+                        &chunk_input,
                         option,
                     ))
                     .await?;
@@ -135,6 +136,32 @@ impl<'a> Channel<'a> {
                 })
             }
         }
+    }
+
+    /// Reply to a message without ever retrying it as a top-level message.
+    ///
+    /// The API's default reply behavior applies. In particular, replying to a
+    /// message already in a topic remains in that topic.
+    pub async fn reply(
+        &self,
+        message_id: &str,
+        input: &SendInput,
+        option: &RequestOption,
+    ) -> Result<SendResult, LarkError> {
+        self.send_strict_reply(message_id, input, None, option)
+            .await
+    }
+
+    /// Reply to a message in its topic without ever retrying it as a top-level
+    /// message.
+    pub async fn reply_in_thread(
+        &self,
+        message_id: &str,
+        input: &SendInput,
+        option: &RequestOption,
+    ) -> Result<SendResult, LarkError> {
+        self.send_strict_reply(message_id, input, Some(true), option)
+            .await
     }
 
     pub async fn send_text_with_fallback(
@@ -431,28 +458,26 @@ impl<'a> Channel<'a> {
 
     async fn send_one_with_fallback(
         &self,
-        receive_id_type: &str,
-        receive_id: &str,
+        route: SendRoute<'_>,
         msg_type: &str,
         content: &str,
         input: &SendInput,
         option: &RequestOption,
     ) -> Result<SendResult, LarkError> {
         match self
-            .send_one(
-                receive_id_type,
-                receive_id,
-                msg_type,
-                content,
-                input.reply_message_id.as_deref(),
-                option,
-            )
+            .send_one(route, msg_type, content, input.uuid.as_deref(), option)
             .await
         {
             Ok(result) => Ok(result),
-            Err(err) if is_reply_target_gone(&err) && input.reply_message_id.is_some() => {
-                self.send_one(receive_id_type, receive_id, msg_type, content, None, option)
-                    .await
+            Err(err) if is_reply_target_gone(&err) && route.reply_message_id.is_some() => {
+                self.send_one(
+                    route.without_reply(),
+                    msg_type,
+                    content,
+                    input.uuid.as_deref(),
+                    option,
+                )
+                .await
             }
             Err(err) if is_format_error(&err) && msg_type != MessageType::TEXT => {
                 let fallback = input.markdown.as_deref().or(input.text.as_deref());
@@ -463,12 +488,12 @@ impl<'a> Channel<'a> {
                         fallback
                     );
                     let content = text_content(&fallback_text)?;
+                    let fallback_uuid = fallback_uuid(input.uuid.as_deref())?;
                     self.send_one(
-                        receive_id_type,
-                        receive_id,
+                        route,
                         MessageType::TEXT,
                         &content,
-                        input.reply_message_id.as_deref(),
+                        fallback_uuid.as_deref(),
                         option,
                     )
                     .await
@@ -482,47 +507,27 @@ impl<'a> Channel<'a> {
 
     async fn send_one(
         &self,
-        receive_id_type: &str,
-        receive_id: &str,
+        route: SendRoute<'_>,
         msg_type: &str,
         content: &str,
-        reply_message_id: Option<&str>,
+        uuid: Option<&str>,
         option: &RequestOption,
     ) -> Result<SendResult, LarkError> {
-        if let Some(message_id) = reply_message_id.filter(|id| !id.is_empty()) {
-            let resp = self
-                .message_resource()
-                .reply(
-                    message_id,
-                    &ReplyMessageReqBody {
-                        content: Some(content.to_string()),
-                        msg_type: Some(msg_type.to_string()),
-                        reply_in_thread: None,
-                        uuid: None,
-                    },
-                    option,
-                )
-                .await?;
-            if !resp.success() {
-                return Err(LarkError::Api(Box::new(resp.code_error)));
-            }
-            let data = resp.data.unwrap_or_default();
-            return Ok(SendResult {
-                message_id: data.message_id.unwrap_or_default(),
-                chat_id: data.chat_id,
-                chunk_ids: Vec::new(),
-            });
+        if let Some(message_id) = route.reply_message_id.filter(|id| !id.is_empty()) {
+            return self
+                .send_reply_one(message_id, msg_type, content, None, uuid, option)
+                .await;
         }
 
         let resp = self
             .message_resource()
             .create(
-                receive_id_type,
+                route.receive_id_type,
                 &CreateMessageReqBody {
-                    receive_id: Some(receive_id.to_string()),
+                    receive_id: Some(route.receive_id.to_string()),
                     msg_type: Some(msg_type.to_string()),
                     content: Some(content.to_string()),
-                    uuid: None,
+                    uuid: uuid.map(str::to_string),
                 },
                 option,
             )
@@ -536,6 +541,116 @@ impl<'a> Channel<'a> {
             chat_id: data.chat_id,
             chunk_ids: Vec::new(),
         })
+    }
+
+    async fn send_strict_reply(
+        &self,
+        message_id: &str,
+        input: &SendInput,
+        reply_in_thread: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<SendResult, LarkError> {
+        validate_strict_reply_input(message_id, input)?;
+        let mut input = input.clone();
+        validate_uuid(input.uuid.as_deref())?;
+        Box::pin(self.prepare_uploads(&mut input, option)).await?;
+
+        match build_payloads(&input)? {
+            SendPayloads::Single { msg_type, content } => {
+                self.send_reply_one(
+                    message_id,
+                    &msg_type,
+                    &content,
+                    reply_in_thread,
+                    input.uuid.as_deref(),
+                    option,
+                )
+                .await
+            }
+            SendPayloads::Chunks(chunks) => {
+                let total = chunks.len();
+                let mut chunk_ids = Vec::new();
+                let mut chat_id = None;
+                for (index, (msg_type, content)) in chunks.into_iter().enumerate() {
+                    let uuid = payload_uuid(input.uuid.as_deref(), index, total, false)?;
+                    let result = self
+                        .send_reply_one(
+                            message_id,
+                            &msg_type,
+                            &content,
+                            reply_in_thread,
+                            uuid.as_deref(),
+                            option,
+                        )
+                        .await?;
+                    if chat_id.is_none() {
+                        chat_id = result.chat_id.clone();
+                    }
+                    chunk_ids.push(result.message_id);
+                }
+                let message_id = chunk_ids.first().cloned().ok_or_else(|| {
+                    LarkError::IllegalParam("channel reply produced no chunks".into())
+                })?;
+                Ok(SendResult {
+                    message_id,
+                    chunk_ids: if chunk_ids.len() > 1 {
+                        chunk_ids
+                    } else {
+                        Vec::new()
+                    },
+                    chat_id,
+                })
+            }
+        }
+    }
+
+    async fn send_reply_one(
+        &self,
+        message_id: &str,
+        msg_type: &str,
+        content: &str,
+        reply_in_thread: Option<bool>,
+        uuid: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<SendResult, LarkError> {
+        let resp = self
+            .message_resource()
+            .reply(
+                message_id,
+                &ReplyMessageReqBody {
+                    content: Some(content.to_string()),
+                    msg_type: Some(msg_type.to_string()),
+                    reply_in_thread,
+                    uuid: uuid.map(str::to_string),
+                },
+                option,
+            )
+            .await?;
+        if !resp.success() {
+            return Err(LarkError::Api(Box::new(resp.code_error)));
+        }
+        let data = resp.data.unwrap_or_default();
+        Ok(SendResult {
+            message_id: data.message_id.unwrap_or_default(),
+            chat_id: data.chat_id,
+            chunk_ids: Vec::new(),
+        })
+    }
+}
+
+#[derive(Clone, Copy)]
+struct SendRoute<'a> {
+    receive_id_type: &'a str,
+    receive_id: &'a str,
+    reply_message_id: Option<&'a str>,
+}
+
+impl SendRoute<'_> {
+    fn without_reply(self) -> Self {
+        Self {
+            reply_message_id: None,
+            ..self
+        }
     }
 }
 
@@ -561,6 +676,71 @@ fn resolve_target(input: &SendInput) -> Result<(String, String), LarkError> {
     Err(LarkError::IllegalParam(
         "ReceiveID, ChatID, or UserID must be provided".into(),
     ))
+}
+
+fn validate_strict_reply_input(message_id: &str, input: &SendInput) -> Result<(), LarkError> {
+    if message_id.is_empty() {
+        return Err(LarkError::IllegalParam("message_id is required".into()));
+    }
+    if input.receive_id.is_some() || input.chat_id.is_some() || input.user_id.is_some() {
+        return Err(LarkError::IllegalParam(
+            "strict channel replies must not set receive_id, chat_id, or user_id".into(),
+        ));
+    }
+    if input.reply_message_id.is_some() {
+        return Err(LarkError::IllegalParam(
+            "strict channel replies use the message_id argument instead of reply_message_id".into(),
+        ));
+    }
+    Ok(())
+}
+
+fn validate_uuid(uuid: Option<&str>) -> Result<(), LarkError> {
+    let Some(uuid) = uuid else {
+        return Ok(());
+    };
+    if uuid.is_empty() {
+        return Err(LarkError::IllegalParam(
+            "channel uuid must not be empty".into(),
+        ));
+    }
+    if uuid.chars().count() > 50 {
+        return Err(LarkError::IllegalParam(
+            "channel uuid must be at most 50 characters".into(),
+        ));
+    }
+    Ok(())
+}
+
+fn payload_uuid(
+    uuid: Option<&str>,
+    index: usize,
+    total: usize,
+    fallback: bool,
+) -> Result<Option<String>, LarkError> {
+    validate_uuid(uuid)?;
+    let Some(uuid) = uuid else {
+        return Ok(None);
+    };
+    if total == 1 && !fallback {
+        return Ok(Some(uuid.to_string()));
+    }
+
+    let suffix = if fallback {
+        "-fallback".to_string()
+    } else {
+        format!("-{}", index + 1)
+    };
+    if uuid.chars().count() + suffix.chars().count() > 50 {
+        return Err(LarkError::IllegalParam(format!(
+            "channel uuid must leave room for the derived {suffix} suffix"
+        )));
+    }
+    Ok(Some(format!("{uuid}{suffix}")))
+}
+
+fn fallback_uuid(uuid: Option<&str>) -> Result<Option<String>, LarkError> {
+    payload_uuid(uuid, 0, 1, true)
 }
 
 enum SendPayloads {

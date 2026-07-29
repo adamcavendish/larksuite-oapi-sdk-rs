@@ -365,6 +365,12 @@ pub struct SendInput {
     pub user_id: Option<String>,
     pub msg_type: Option<String>,
     pub reply_message_id: Option<String>,
+    /// Optional Lark idempotency key for this send operation.
+    ///
+    /// A single payload uses this value unchanged. Multi-payload sends derive
+    /// distinct keys from it because Lark requires a different UUID when the
+    /// message content changes.
+    pub uuid: Option<String>,
     pub text: Option<String>,
     pub markdown: Option<String>,
     pub title: Option<String>,

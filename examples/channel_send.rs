@@ -16,6 +16,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             chat_id: Some(chat_id),
             markdown: Some("**Hello from channel send**".into()),
             title: Some("Rust SDK".into()),
+            uuid: std::env::var("MESSAGE_UUID").ok(),
             ..Default::default()
         },
         &RequestOption::default(),

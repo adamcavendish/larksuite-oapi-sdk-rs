@@ -309,6 +309,40 @@ Use the optional `axum` feature for Axum HTTP adapters. The optional `channel`
 feature builds on WebSocket and IM APIs with message normalization, send helpers,
 upload inputs, and runtime policy controls.
 
+### Channel Replies
+
+`Channel::send` preserves its existing convenience behavior: a reply whose
+target has disappeared may be retried as a top-level send. For workflows that
+must never escape a thread, use `Channel::reply` or `Channel::reply_in_thread`.
+Both methods only call the reply endpoint and return its API error unchanged.
+Leave `receive_id`, `chat_id`, `user_id`, and `reply_message_id` empty because
+the method's `message_id` identifies the reply target. Set `uuid` to opt into
+Lark's one-hour idempotency window; the channel helper derives distinct UUIDs
+for automatically split messages, so the supplied UUID must leave room for a
+`-N` suffix.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::channel::{Channel, SendInput};
+use larksuite_oapi_sdk_rs::{EventDispatcher, LarkClient, RequestOption};
+
+# async fn run() -> Result<(), Box<dyn std::error::Error>> {
+let client = LarkClient::builder("APP_ID", "APP_SECRET").build()?;
+let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+channel
+    .reply_in_thread(
+        "om_parent_message",
+        &SendInput {
+            markdown: Some("A reply that stays in the topic".into()),
+            uuid: Some("order-42-status".into()),
+            ..Default::default()
+        },
+        &RequestOption::default(),
+    )
+    .await?;
+# Ok(())
+# }
+```
+
 ### Cards
 
 The `card` module builds interactive Lark cards, and `CardActionHandler`

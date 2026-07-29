@@ -23,7 +23,7 @@ Most examples use this shape:
 | `event_handler` | Event dispatcher | Handle encrypted HTTP callback events | none for compilation | `cargo run --example event_handler` |
 | `card_action_handler` | Card callbacks | Handle an interactive card callback and return a toast JSON body | none for compilation | `cargo run --example card_action_handler` |
 | `ws_client` | WebSocket events | Receive events through WebSocket long connections; optionally attach a trusted user channel | `APP_ID`, `APP_SECRET`, optional `WS_CHANNEL_TAG`, `USER_ACCESS_TOKEN` | `cargo run --features ws --example ws_client` |
-| `channel_send` | Channel helpers | Send markdown through channel helpers | `APP_ID`, `APP_SECRET`, `CHAT_ID` | `cargo run --features channel --example channel_send` |
+| `channel_send` | Channel helpers | Send markdown through channel helpers with an optional idempotency UUID | `APP_ID`, `APP_SECRET`, `CHAT_ID`, optional `MESSAGE_UUID` | `cargo run --features channel --example channel_send` |
 | `channel_normalize` | Channel helpers | Normalize incoming channel messages | `APP_ID`, `APP_SECRET` | `cargo run --features channel --example channel_normalize` |
 
 ## Generated service examples
