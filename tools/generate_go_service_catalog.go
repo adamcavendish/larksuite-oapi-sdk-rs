@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	defaultRevision = "v3.9.9"
+	defaultRevision = "v3.9.10"
 	defaultOutput   = "tools/go_service_catalog.json"
 )
 

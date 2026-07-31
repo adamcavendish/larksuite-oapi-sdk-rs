@@ -8580,7 +8580,7 @@ impl<'a> ApplicationResource<'a> {
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/applications",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .page_query(query.page_query())
@@ -8625,7 +8625,7 @@ impl<'a> ApplicationResource<'a> {
             self.config,
             http::Method::GET,
             path,
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .send_v2_response::<GetDetailApplicationRespData, GetDetailApplicationResp>()
@@ -10279,7 +10279,7 @@ impl JobProcessResource<'_> {
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/job_processes",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .page_query(query.page_query())
@@ -12921,7 +12921,7 @@ impl TestResource<'_> {
             self.config,
             http::Method::POST,
             "/open-apis/hire/v1/tests/search",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .page_query(query.page_query())
@@ -14116,7 +14116,7 @@ impl MinutesResource<'_> {
             self.config,
             http::Method::GET,
             "/open-apis/hire/v1/minutes",
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .page_query(query.page_query())

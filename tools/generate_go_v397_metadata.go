@@ -19,7 +19,7 @@ import (
 
 const (
 	defaultFrom   = "v3.6.1"
-	defaultTo     = "v3.9.7"
+	defaultTo     = "v3.9.10"
 	defaultOutput = "src/service/go_v397_metadata.rs"
 )
 
@@ -234,6 +234,9 @@ func endpointFromFunction(resourceFile string, function *ast.FuncDecl) (endpoint
 	if !hasPath || !hasMethod || !hasTokens {
 		return endpoint{}, false, fmt.Errorf("incomplete endpoint metadata in %s function %s", resourceFile, function.Name.Name)
 	}
+	if len(result.tokens) == 0 {
+		return endpoint{}, false, nil
+	}
 	return result, true, nil
 }
 
@@ -275,7 +278,9 @@ func accessTokenTypes(expression ast.Expr) ([]string, bool) {
 	}
 	tokens := make([]string, 0, len(list.Elts))
 	for _, element := range list.Elts {
-		switch selectorName(element) {
+		switch expressionName(element) {
+		case "AccessTokenTypeApp":
+			tokens = append(tokens, "App")
 		case "AccessTokenTypeTenant":
 			tokens = append(tokens, "Tenant")
 		case "AccessTokenTypeUser":
@@ -284,10 +289,18 @@ func accessTokenTypes(expression ast.Expr) ([]string, bool) {
 			return nil, false
 		}
 	}
-	if len(tokens) == 0 {
-		return nil, false
-	}
 	return tokens, true
+}
+
+func expressionName(expression ast.Expr) string {
+	if name := selectorName(expression); name != "" {
+		return name
+	}
+	identifier, ok := expression.(*ast.Ident)
+	if !ok {
+		return ""
+	}
+	return identifier.Name
 }
 
 func endpointName(endpoint endpoint) string {

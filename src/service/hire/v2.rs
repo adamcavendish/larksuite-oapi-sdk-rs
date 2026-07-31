@@ -682,7 +682,7 @@ impl InterviewRecordV2Resource<'_> {
             self.config,
             http::Method::GET,
             path,
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .query("user_id_type", query.user_id_type)
