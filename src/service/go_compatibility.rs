@@ -4,10 +4,22 @@ use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::{JsonResp, RestRequest};
 
-include!("go_v397_metadata.rs");
+include!("go_compatibility_metadata.rs");
+
+/// Deprecated name for [`GoCompatibility`].
+#[deprecated(note = "use GoCompatibility")]
+pub type GoV397<'a> = GoCompatibility<'a>;
+
+/// Deprecated name for [`GoCompatibilityEndpoint`].
+#[deprecated(note = "use GoCompatibilityEndpoint")]
+pub type GoV397Endpoint = GoCompatibilityEndpoint;
+
+/// Deprecated name for [`GoCompatibilityEndpointMeta`].
+#[deprecated(note = "use GoCompatibilityEndpointMeta")]
+pub type GoV397EndpointMeta = GoCompatibilityEndpointMeta;
 
 fn build_api_req<P, Q, PK, PV, QK, QV>(
-    meta: &GoV397EndpointMeta,
+    meta: &GoCompatibilityEndpointMeta,
     path_params: P,
     query_params: Q,
     body: Option<ReqBody>,
@@ -32,18 +44,18 @@ where
     api_req
 }
 
-pub struct GoV397<'a> {
+pub struct GoCompatibility<'a> {
     config: &'a Config,
 }
 
-impl<'a> GoV397<'a> {
+impl<'a> GoCompatibility<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self { config }
     }
 
     pub async fn request<P, Q, PK, PV, QK, QV>(
         &self,
-        endpoint: GoV397Endpoint,
+        endpoint: GoCompatibilityEndpoint,
         path_params: P,
         query_params: Q,
         body: Option<ReqBody>,
@@ -71,7 +83,7 @@ impl<'a> GoV397<'a> {
 
     pub async fn request_json<P, Q, PK, PV, QK, QV>(
         &self,
-        endpoint: GoV397Endpoint,
+        endpoint: GoCompatibilityEndpoint,
         path_params: P,
         query_params: Q,
         body: Option<&crate::JsonValue>,
@@ -102,7 +114,7 @@ mod tests {
 
     #[test]
     fn request_builder_preserves_repeated_query_params() {
-        let meta = GoV397Endpoint::GetAilyV1AppStats.meta();
+        let meta = GoCompatibilityEndpoint::GetAilyV1AppStats.meta();
         let api_req = build_api_req(
             &meta,
             std::iter::empty::<(&str, &str)>(),
@@ -118,8 +130,8 @@ mod tests {
 
     #[test]
     fn generated_endpoint_metadata_is_valid() {
-        assert_eq!(GoV397Endpoint::ALL.len(), 183);
-        for endpoint in GoV397Endpoint::ALL {
+        assert_eq!(GoCompatibilityEndpoint::ALL.len(), 183);
+        for endpoint in GoCompatibilityEndpoint::ALL {
             let meta = endpoint.meta();
             assert!(meta.path.starts_with("/open-apis/"));
             assert!(!meta.supported_access_token_types.is_empty());
@@ -128,7 +140,7 @@ mod tests {
 
     #[test]
     fn v3_9_10_bridge_endpoints_preserve_contract_metadata() {
-        let bot_search = GoV397Endpoint::PostBotV4BotSearch.meta();
+        let bot_search = GoCompatibilityEndpoint::PostBotV4BotSearch.meta();
         assert_eq!(bot_search.method, http::Method::POST);
         assert_eq!(bot_search.path, "/open-apis/bot/v4/bot/search");
         assert_eq!(
@@ -136,12 +148,21 @@ mod tests {
             &[AccessTokenType::User]
         );
 
-        let okr_cycles = GoV397Endpoint::GetOkrV2Cycles.meta();
+        let okr_cycles = GoCompatibilityEndpoint::GetOkrV2Cycles.meta();
         assert_eq!(okr_cycles.method, http::Method::GET);
         assert_eq!(okr_cycles.path, "/open-apis/okr/v2/cycles");
         assert_eq!(
             okr_cycles.supported_access_token_types,
             &[AccessTokenType::User, AccessTokenType::Tenant]
         );
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn legacy_names_remain_usable() {
+        let endpoint: GoV397Endpoint = GoV397Endpoint::PostBotV4BotSearch;
+        let _: GoV397EndpointMeta = endpoint.meta();
+        let _: Option<GoV397<'static>> = None;
+        let _: crate::service::go_v397::GoV397Endpoint = endpoint;
     }
 }

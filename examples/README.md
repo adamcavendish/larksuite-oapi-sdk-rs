@@ -40,7 +40,7 @@ Most examples use this shape:
 | `application_v6` | Application v6 | List and get applications with `lang` and `user_id_type` | `APP_ID`, `APP_SECRET`, optional `APPLICATION_APP_ID` | `cargo run --example application_v6` |
 | `app_slash_commands` | Application v7 | List slash commands and optionally create one | `APP_ID`, `APP_SECRET`, optional `SLASH_COMMAND`, `SLASH_COMMAND_DESCRIPTION` | `cargo run --example app_slash_commands` |
 | `calendar_events` | Calendar v4 | List calendars and events with pagination/time filters | `APP_ID`, `APP_SECRET`, `CALENDAR_ID`, optional `START_TIME`, `END_TIME` | `cargo run --example calendar_events` |
-| `go_v397_endpoint` | Go v3.97 bridge | Call a bridged endpoint that has not been promoted to a dedicated Rust resource | `APP_ID`, `APP_SECRET`, `NOTE_ID` | `cargo run --example go_v397_endpoint` |
+| `go_compatibility_endpoint` | Go compatibility bridge | Call a bridged endpoint that has not been promoted to a dedicated Rust resource | `APP_ID`, `APP_SECRET`, `NOTE_ID` | `cargo run --example go_compatibility_endpoint` |
 
 ## Mapping from Go SDK samples
 
@@ -58,17 +58,17 @@ Use this table when translating code from the official Go SDK sample tree.
 | `sample/ws/sample.go` | `ws_client` | Build a dispatcher, then start `client.ws_client(dispatcher)` with the `ws` feature |
 | `sample/card/card.go` | `card_action_handler`, card builder APIs | Use `CardActionHandler` for callbacks and `larksuite_oapi_sdk_rs::card` for message JSON |
 | `sample/channel/main.go` | `channel_send`, `channel_normalize` | Use the `channel` feature for higher-level send and normalized receive flows |
-| `sample/apiall/...` | generated service smoke tests, `go_v397_endpoint` | Keep broad generated API coverage in tests; use `go_v397` for endpoints not promoted to Rust resources |
+| `sample/apiall/...` | generated service smoke tests, `go_compatibility_endpoint` | Keep broad generated API coverage in tests; use `go_compatibility` for endpoints not promoted to Rust resources |
 
-## Typed resources vs GoV397Endpoint
+## Typed resources vs GoCompatibilityEndpoint
 
 Prefer dedicated typed resources when they exist. For example, use
 `client.im().message.list_by_query(...)` for IM messages and
 `client.drive().file.list_by_query(...)` for Drive files. These APIs expose
 named request body structs, query structs, and typed response data.
 
-Use `client.go_v397()` only for newer Go SDK endpoints that are bridged in this
-crate but do not yet have a dedicated typed Rust resource. The bridge preserves
-SDK token handling while accepting path parameters, query parameters, and an
+Use `client.go_compatibility()` only for newer Go SDK endpoints that are bridged
+in this crate but do not yet have a dedicated typed Rust resource. The bridge
+preserves SDK token handling while accepting path parameters, query parameters, and an
 optional JSON body. Prefer read-only endpoints while learning the bridge, then
 move to mutating endpoints once the path and token mode are confirmed.

@@ -116,19 +116,20 @@ remain as compatibility adapters where they were already public.
 
 For an endpoint without a generated Rust resource, use `ApiReq` through the raw
 request APIs. Token selection, request IDs, retries, and error handling remain
-the same as for typed resources. The `client.go_v397()` bridge provides the
-same transport behavior for its curated newer-Go-SDK endpoint set. See
+the same as for typed resources. The `client.go_compatibility()` bridge provides
+the same transport behavior for its curated newer-Go-SDK endpoint set. See
 [`examples/raw_api.rs`](examples/raw_api.rs) and
-[`examples/go_v397_endpoint.rs`](examples/go_v397_endpoint.rs).
+[`examples/go_compatibility_endpoint.rs`](examples/go_compatibility_endpoint.rs).
 
-The GoV397 endpoint metadata is generated from the Go SDK's `v3.6.1..v3.9.10`
-resource delta. Regenerate it or verify that it is current with a local Go SDK
-checkout:
+The GoCompatibility endpoint metadata is generated from the Go SDK's
+`v3.6.1..v3.9.10` resource delta. `GoV397*` names and `go_v397()` accessors
+remain as deprecated aliases. Regenerate the metadata or verify that it is
+current with a local Go SDK checkout:
 
 ```sh
 GO_SDK_DIR=/path/to/larksuite-oapi-sdk-go
-go run ./tools/generate_go_v397_metadata.go --go-sdk "$GO_SDK_DIR"
-just go-v397-check "$GO_SDK_DIR"
+go run ./tools/generate_go_compatibility_metadata.go --go-sdk "$GO_SDK_DIR"
+just go-compatibility-check "$GO_SDK_DIR"
 ```
 
 The checked-in Go service contract catalog records the complete Go `v3.9.10`
@@ -150,7 +151,7 @@ just go-service-catalog-check "$GO_SDK_DIR"
 
 `tools/go_rust_service_parity.json` compares that Go catalog with Rust's
 literal and `format!`-based `RestRequest` wiring, supported local
-macro-generated request methods, and the GoV397 bridge. It classifies typed
+macro-generated request methods, and the GoCompatibility bridge. It classifies
 matches, bridge matches, metadata mismatches, missing Go contracts, and any
 unsupported request templates that need explicit extractor support. The report
 is a deterministic request-contract baseline, not a generator for Rust
@@ -164,7 +165,7 @@ just go-rust-service-parity-check
 
 CI runs `just go-contract-provenance-check` against a full-history checkout of
 the pinned Go `v3.9.10` reference. That gate also runs both Go extractor test
-suites and verifies the GoV397 metadata and full service catalog before
+suites and verifies the GoCompatibility metadata and full service catalog before
 accepting the Rust parity report.
 
 ### Slash Commands

@@ -3,7 +3,7 @@ use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{FormDataField, ReqBody, RequestOption};
 use crate::service::common::{DownloadResp, JsonResp, PageQuery, RestRequest};
-use crate::service::go_v397::{GoV397, GoV397Endpoint};
+use crate::service::go_compatibility::{GoCompatibility, GoCompatibilityEndpoint};
 use serde::Serialize;
 
 pub type CreateAppResp = JsonResp;
@@ -367,9 +367,9 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateAppResp, LarkError> {
         let body = crate::JsonValue::from_serializable(body)?;
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PostSparkV1Apps,
+                GoCompatibilityEndpoint::PostSparkV1Apps,
                 EMPTY_PARAMS,
                 EMPTY_PARAMS,
                 Some(&body),
@@ -383,9 +383,9 @@ impl<'a> AppResource<'a> {
         app_id: &str,
         option: &RequestOption,
     ) -> Result<GetAppVisibilityAppResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::GetSparkV1AppsByAppIdAccessScope,
+                GoCompatibilityEndpoint::GetSparkV1AppsByAppIdAccessScope,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 None,
@@ -399,9 +399,9 @@ impl<'a> AppResource<'a> {
         body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<IconAppResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request(
-                GoV397Endpoint::PostSparkV1Icon,
+                GoCompatibilityEndpoint::PostSparkV1Icon,
                 EMPTY_PARAMS,
                 EMPTY_PARAMS,
                 Some(ReqBody::FormData(body)),
@@ -415,9 +415,9 @@ impl<'a> AppResource<'a> {
         query: &SparkPageQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListAppResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::GetSparkV1Apps,
+                GoCompatibilityEndpoint::GetSparkV1Apps,
                 EMPTY_PARAMS,
                 query.as_pairs(),
                 None,
@@ -433,9 +433,9 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<PatchAppResp, LarkError> {
         let body = crate::JsonValue::from_serializable(body)?;
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PatchSparkV1AppsByAppId,
+                GoCompatibilityEndpoint::PatchSparkV1AppsByAppId,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 Some(&body),
@@ -451,9 +451,9 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<SqlCommandsAppResp, LarkError> {
         let body = crate::JsonValue::from_serializable(body)?;
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PostSparkV1AppsByAppIdSqlCommands,
+                GoCompatibilityEndpoint::PostSparkV1AppsByAppIdSqlCommands,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 Some(&body),
@@ -469,9 +469,9 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<UpdateAppVisibilityAppResp, LarkError> {
         let body = crate::JsonValue::from_serializable(body)?;
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PutSparkV1AppsByAppIdAccessScope,
+                GoCompatibilityEndpoint::PutSparkV1AppsByAppIdAccessScope,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 Some(&body),
@@ -486,9 +486,9 @@ impl<'a> AppResource<'a> {
         body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<UploadHtmlCodeAndReleaseAppResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request(
-                GoV397Endpoint::PostSparkV1AppsByAppIdUploadAndReleaseHtmlCode,
+                GoCompatibilityEndpoint::PostSparkV1AppsByAppIdUploadAndReleaseHtmlCode,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 Some(ReqBody::FormData(body)),
@@ -509,9 +509,9 @@ impl<'a> AppEnumResource<'a> {
         enum_name: &str,
         option: &RequestOption,
     ) -> Result<GetEnumDetailAppEnumResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::GetSparkV1AppsByAppIdEnumsByEnumName,
+                GoCompatibilityEndpoint::GetSparkV1AppsByAppIdEnumsByEnumName,
                 [("app_id", app_id), ("enum_name", enum_name)],
                 EMPTY_PARAMS,
                 None,
@@ -525,9 +525,9 @@ impl<'a> AppEnumResource<'a> {
         app_id: &str,
         option: &RequestOption,
     ) -> Result<GetEnumListAppEnumResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::GetSparkV1AppsByAppIdEnums,
+                GoCompatibilityEndpoint::GetSparkV1AppsByAppIdEnums,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 None,
@@ -567,9 +567,9 @@ impl<'a> AppStorageResource<'a> {
         body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<UploadAppStorageResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request(
-                GoV397Endpoint::PostSparkV1AppsByAppIdStorageUpload,
+                GoCompatibilityEndpoint::PostSparkV1AppsByAppIdStorageUpload,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 Some(ReqBody::FormData(body)),
@@ -585,9 +585,9 @@ impl<'a> AppStorageResource<'a> {
         option: &RequestOption,
     ) -> Result<UploadCompleteAppStorageResp, LarkError> {
         let body = crate::JsonValue::from_serializable(body)?;
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PostSparkV1AppsByAppIdStorageUploadComplete,
+                GoCompatibilityEndpoint::PostSparkV1AppsByAppIdStorageUploadComplete,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 Some(&body),
@@ -603,9 +603,9 @@ impl<'a> AppStorageResource<'a> {
         option: &RequestOption,
     ) -> Result<UploadInitializeAppStorageResp, LarkError> {
         let body = crate::JsonValue::from_serializable(body)?;
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PostSparkV1AppsByAppIdStorageUploadInitialize,
+                GoCompatibilityEndpoint::PostSparkV1AppsByAppIdStorageUploadInitialize,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 Some(&body),
@@ -620,9 +620,9 @@ impl<'a> AppStorageResource<'a> {
         body: Vec<FormDataField>,
         option: &RequestOption,
     ) -> Result<UploadPartAppStorageResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request(
-                GoV397Endpoint::PostSparkV1AppsByAppIdStorageUploadPart,
+                GoCompatibilityEndpoint::PostSparkV1AppsByAppIdStorageUploadPart,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 Some(ReqBody::FormData(body)),
@@ -642,9 +642,9 @@ impl<'a> AppTableResource<'a> {
         query: &SparkTableMutationQuery<'_>,
         option: &RequestOption,
     ) -> Result<BatchUpdateTableRecordsAppTableResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PatchSparkV1AppsByAppIdTablesByTableNameRecordsBatchUpdate,
+                GoCompatibilityEndpoint::PatchSparkV1AppsByAppIdTablesByTableNameRecordsBatchUpdate,
                 query.path_pairs(),
                 query.query_pairs(),
                 Some(query.body),
@@ -658,9 +658,9 @@ impl<'a> AppTableResource<'a> {
         query: &SparkTableMutationQuery<'_>,
         option: &RequestOption,
     ) -> Result<DeleteTableRecordsAppTableResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::DeleteSparkV1AppsByAppIdTablesByTableNameRecords,
+                GoCompatibilityEndpoint::DeleteSparkV1AppsByAppIdTablesByTableNameRecords,
                 query.path_pairs(),
                 query.query_pairs(),
                 Some(query.body),
@@ -675,9 +675,9 @@ impl<'a> AppTableResource<'a> {
         table_name: &str,
         option: &RequestOption,
     ) -> Result<GetTableDetailAppTableResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::GetSparkV1AppsByAppIdTablesByTableName,
+                GoCompatibilityEndpoint::GetSparkV1AppsByAppIdTablesByTableName,
                 [("app_id", app_id), ("table_name", table_name)],
                 EMPTY_PARAMS,
                 None,
@@ -691,9 +691,9 @@ impl<'a> AppTableResource<'a> {
         app_id: &str,
         option: &RequestOption,
     ) -> Result<GetTableListAppTableResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::GetSparkV1AppsByAppIdTables,
+                GoCompatibilityEndpoint::GetSparkV1AppsByAppIdTables,
                 [("app_id", app_id)],
                 EMPTY_PARAMS,
                 None,
@@ -707,9 +707,9 @@ impl<'a> AppTableResource<'a> {
         query: &SparkRecordQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetTableRecordListAppTableResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::GetSparkV1AppsByAppIdTablesByTableNameRecords,
+                GoCompatibilityEndpoint::GetSparkV1AppsByAppIdTablesByTableNameRecords,
                 query.path_pairs(),
                 query.query_pairs(),
                 None,
@@ -723,9 +723,9 @@ impl<'a> AppTableResource<'a> {
         query: &SparkTableMutationQuery<'_>,
         option: &RequestOption,
     ) -> Result<PatchTableRecordsAppTableResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PatchSparkV1AppsByAppIdTablesByTableNameRecords,
+                GoCompatibilityEndpoint::PatchSparkV1AppsByAppIdTablesByTableNameRecords,
                 query.path_pairs(),
                 query.query_pairs(),
                 Some(query.body),
@@ -739,9 +739,9 @@ impl<'a> AppTableResource<'a> {
         query: &SparkTableMutationQuery<'_>,
         option: &RequestOption,
     ) -> Result<PostTableRecordsAppTableResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PostSparkV1AppsByAppIdTablesByTableNameRecords,
+                GoCompatibilityEndpoint::PostSparkV1AppsByAppIdTablesByTableNameRecords,
                 query.path_pairs(),
                 query.query_pairs(),
                 Some(query.body),
@@ -775,9 +775,9 @@ impl<'a> AppViewResource<'a> {
         query: &SparkViewRecordQuery<'_>,
         option: &RequestOption,
     ) -> Result<GetViewRecordListAppViewResp, LarkError> {
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::GetSparkV1AppsByAppIdViewsByViewNameRecords,
+                GoCompatibilityEndpoint::GetSparkV1AppsByAppIdViewsByViewNameRecords,
                 query.path_pairs(),
                 query.query_pairs(),
                 None,
@@ -798,9 +798,9 @@ impl<'a> DirectoryUserResource<'a> {
         option: &RequestOption,
     ) -> Result<IdConvertDirectoryUserResp, LarkError> {
         let body = crate::JsonValue::from_serializable(body)?;
-        GoV397::new(self.config)
+        GoCompatibility::new(self.config)
             .request_json(
-                GoV397Endpoint::PostSparkV1DirectoryUserIdConvert,
+                GoCompatibilityEndpoint::PostSparkV1DirectoryUserIdConvert,
                 EMPTY_PARAMS,
                 EMPTY_PARAMS,
                 Some(&body),
@@ -833,7 +833,13 @@ impl<'a> V1<'a> {
         }
     }
 
-    pub fn go_v397(&self) -> GoV397<'a> {
-        GoV397::new(self.config)
+    pub fn go_compatibility(&self) -> GoCompatibility<'a> {
+        GoCompatibility::new(self.config)
+    }
+
+    /// Deprecated name for [`Self::go_compatibility`].
+    #[deprecated(note = "use go_compatibility")]
+    pub fn go_v397(&self) -> GoCompatibility<'a> {
+        self.go_compatibility()
     }
 }

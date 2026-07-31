@@ -69,7 +69,11 @@ pub use req::{
     RequestOption,
 };
 pub use resp::{ApiResp, CodeError, CodeErrorInfo, RawResponse};
-pub use service::go_v397::{GoV397, GoV397Endpoint, GoV397EndpointMeta};
+pub use service::go_compatibility::{
+    GoCompatibility, GoCompatibilityEndpoint, GoCompatibilityEndpointMeta,
+};
+#[allow(deprecated)]
+pub use service::go_compatibility::{GoV397, GoV397Endpoint, GoV397EndpointMeta};
 pub use token::{
     AppTicketManager, AppTokenResponse, ClientAssertionProvider, MarketplaceAppTokenReq,
     MarketplaceTenantTokenReq, ResendAppTicketRequest, ResendAppTicketResponse,

@@ -77,8 +77,14 @@ impl LarkClient {
         service::ext::ExtService::new(&self.config)
     }
 
-    pub fn go_v397(&self) -> service::go_v397::GoV397<'_> {
-        service::go_v397::GoV397::new(&self.config)
+    pub fn go_compatibility(&self) -> service::go_compatibility::GoCompatibility<'_> {
+        service::go_compatibility::GoCompatibility::new(&self.config)
+    }
+
+    /// Deprecated name for [`Self::go_compatibility`].
+    #[deprecated(note = "use go_compatibility")]
+    pub fn go_v397(&self) -> service::go_compatibility::GoCompatibility<'_> {
+        self.go_compatibility()
     }
 
     /// Create a [`WsClient`](crate::ws::WsClient) that shares this client's token cache.

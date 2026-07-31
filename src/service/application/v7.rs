@@ -5,7 +5,7 @@ use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{FormDataBuilder, FormDataField, RequestOption};
 use crate::service::common::RestRequest;
-use crate::service::go_v397::GoV397;
+use crate::service::go_compatibility::GoCompatibility;
 
 impl_resp_v2!(CreateAppAvatarUploadResp, CreateAppAvatarUploadRespData);
 
@@ -980,8 +980,14 @@ impl<'a> V7<'a> {
         }
     }
 
-    pub fn go_v397(&self) -> GoV397<'a> {
-        GoV397::new(self.config)
+    pub fn go_compatibility(&self) -> GoCompatibility<'a> {
+        GoCompatibility::new(self.config)
+    }
+
+    /// Deprecated name for [`Self::go_compatibility`].
+    #[deprecated(note = "use go_compatibility")]
+    pub fn go_v397(&self) -> GoCompatibility<'a> {
+        self.go_compatibility()
     }
 }
 
