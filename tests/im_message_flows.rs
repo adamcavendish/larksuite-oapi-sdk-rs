@@ -61,6 +61,20 @@ fn reply_in_thread_body_serializes() {
 }
 
 #[test]
+fn message_request_uuid_builders_serialize() {
+    let create = CreateMessageReqBody::default().uuid("create-uuid");
+    let reply = ReplyMessageReqBody::default()
+        .reply_in_thread(true)
+        .uuid("reply-uuid");
+
+    let create_json = serde_json::to_value(create).unwrap();
+    let reply_json = serde_json::to_value(reply).unwrap();
+    assert_eq!(create_json["uuid"], "create-uuid");
+    assert_eq!(reply_json["uuid"], "reply-uuid");
+    assert_eq!(reply_json["reply_in_thread"], true);
+}
+
+#[test]
 fn interactive_card_helpers_surface_sdk_json_errors() {
     let create = CreateMessageReqBody::interactive_card("oc_group", FailingSerialize).unwrap_err();
     let reply = ReplyMessageReqBody::interactive_card(FailingSerialize).unwrap_err();

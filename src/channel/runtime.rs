@@ -1,13 +1,15 @@
 use std::path::Path;
 use std::sync::Arc;
 
+use serde::Serialize;
+
 use crate::event::EventDispatcher;
 use crate::events::im::P2MessageReceiveV1;
 use crate::service::common::{DownloadResp, EmptyResp};
 use crate::service::im::v1::{
     CreateFileResp, CreateImageResp, CreateMessageReqBody, CreateMessageResp, FileResource,
     ImageResource, MessageResource, MessageResourceDownload, MessageType, PatchMessageReqBody,
-    ReplyMessageReqBody, ReplyMessageResp,
+    ReplyMessageReqBody, ReplyMessageResp, UpdateMessageReqBody,
 };
 use crate::ws::WsClient;
 use crate::{LarkClient, LarkError, RequestOption};
@@ -214,14 +216,33 @@ impl<'a> Channel<'a> {
         text: &str,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
-        self.message_resource()
-            .patch(
+        let response = self
+            .message_resource()
+            .update(
                 message_id,
-                &PatchMessageReqBody {
+                &UpdateMessageReqBody {
+                    msg_type: Some(MessageType::TEXT.to_string()),
                     content: Some(text_content(text)?),
                 },
                 option,
             )
+            .await?;
+
+        Ok(EmptyResp {
+            api_resp: response.api_resp,
+            code_error: response.code_error,
+        })
+    }
+
+    pub async fn edit_card(
+        &self,
+        message_id: &str,
+        card: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let body = PatchMessageReqBody::interactive_card(card)?;
+        self.message_resource()
+            .patch(message_id, &body, option)
             .await
     }
 
