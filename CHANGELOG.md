@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.3.4] - 2026-07-31
+
 ### Channel
 
 - Added strict `Channel::reply` and `Channel::reply_in_thread` helpers that
@@ -447,6 +449,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.4]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.4
 [0.3.3]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.3
 [0.3.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.2
 [0.3.1]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.1
