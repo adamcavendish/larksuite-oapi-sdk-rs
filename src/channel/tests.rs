@@ -989,6 +989,53 @@ async fn channel_reply_in_thread_stays_on_reply_endpoint() {
 }
 
 #[tokio::test]
+async fn channel_edit_text_uses_message_update_contract() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_text"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let response = channel
+        .edit_text("om_text", "updated text", &RequestOption::default())
+        .await
+        .unwrap();
+
+    assert!(response.success());
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 1);
+    assert!(requests[0].contains("PUT /open-apis/im/v1/messages/om_text"));
+    assert!(requests[0].contains(r#""msg_type":"text""#));
+    assert!(requests[0].contains(r#"\"text\":\"updated text\""#));
+    assert!(!requests[0].contains("PATCH /open-apis/im/v1/messages/om_text"));
+}
+
+#[tokio::test]
+async fn channel_edit_card_uses_message_patch_contract() {
+    let (addr, _handle, requests) =
+        mock_json_server_with_requests(vec![r#"{"code":0,"msg":"ok","data":{}}"#]).await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let response = channel
+        .edit_card(
+            "om_card",
+            serde_json::json!({ "header": { "title": "Updated" } }),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(response.success());
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 1);
+    assert!(requests[0].contains("PATCH /open-apis/im/v1/messages/om_card"));
+    assert!(requests[0].contains("Updated"));
+    assert!(!requests[0].contains(r#"\"msg_type\""#));
+}
+
+#[tokio::test]
 async fn channel_strict_reply_never_falls_back_to_top_level_send() {
     let (addr, _handle, requests) =
         mock_json_server_with_requests(vec![r#"{"code":230020,"msg":"reply target unavailable"}"#])

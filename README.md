@@ -343,6 +343,35 @@ channel
 # }
 ```
 
+### Channel Message Updates
+
+Use `Channel::edit_text` to update a text message. It uses Lark's text/post
+update operation. Use `Channel::edit_card` only for interactive cards; it uses
+the separate card patch operation.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::card::{Card, CardHeader, div};
+use larksuite_oapi_sdk_rs::channel::Channel;
+use larksuite_oapi_sdk_rs::{EventDispatcher, LarkClient, RequestOption};
+
+# async fn run() -> Result<(), Box<dyn std::error::Error>> {
+let client = LarkClient::builder("APP_ID", "APP_SECRET").build()?;
+let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+channel
+    .edit_text("om_text_message", "Updated status", &RequestOption::default())
+    .await?;
+channel
+    .edit_card(
+        "om_card_message",
+        Card::new().header(CardHeader::new("Done")).element(div("Complete")),
+        &RequestOption::default(),
+    )
+    .await?;
+# Ok(())
+# }
+```
+
 ### Cards
 
 The `card` module builds interactive Lark cards, and `CardActionHandler`

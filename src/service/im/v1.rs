@@ -495,6 +495,11 @@ impl CreateMessageReqBody {
         self
     }
 
+    pub fn uuid(mut self, uuid: impl Into<String>) -> Self {
+        self.uuid = Some(uuid.into());
+        self
+    }
+
     pub fn interactive_card(
         receive_id: impl Into<String>,
         card: impl Serialize,
@@ -533,6 +538,11 @@ pub struct ReplyMessageReqBody {
 impl ReplyMessageReqBody {
     pub fn msg_type(mut self, msg_type: impl Into<MessageType>) -> Self {
         self.msg_type = Some(msg_type.into().into());
+        self
+    }
+
+    pub fn uuid(mut self, uuid: impl Into<String>) -> Self {
+        self.uuid = Some(uuid.into());
         self
     }
 
