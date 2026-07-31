@@ -48,9 +48,13 @@ test-all:
     cargo nextest run --workspace --all-features
     cargo test --doc --workspace
 
-# Verify the checked-in GoV397 metadata against the Go SDK tags
+# Verify the checked-in Go compatibility metadata against the Go SDK tags
+go-compatibility-check go_sdk:
+    go run ./tools/generate_go_compatibility_metadata.go --go-sdk "{{go_sdk}}" --check
+
+# Deprecated alias for go-compatibility-check.
 go-v397-check go_sdk:
-    go run ./tools/generate_go_v397_metadata.go --go-sdk "{{go_sdk}}" --check
+    just go-compatibility-check "{{go_sdk}}"
 
 # Verify the checked-in Go service contract catalog against the Go SDK tag
 go-service-catalog-check go_sdk:
@@ -62,10 +66,10 @@ go-rust-service-parity-check:
 
 # Verify Go tooling tests and all checked-in Go contract artifacts
 go-contract-provenance-check go_sdk:
-    go test tools/generate_go_v397_metadata.go tools/generate_go_v397_metadata_test.go
+    go test tools/generate_go_compatibility_metadata.go tools/generate_go_compatibility_metadata_test.go
     go test tools/generate_go_service_catalog.go tools/generate_go_service_catalog_test.go
     go test tools/generate_go_rust_service_parity.go tools/generate_go_rust_service_parity_test.go
-    just go-v397-check "{{go_sdk}}"
+    just go-compatibility-check "{{go_sdk}}"
     just go-service-catalog-check "{{go_sdk}}"
     just go-rust-service-parity-check
 

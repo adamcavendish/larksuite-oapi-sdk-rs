@@ -202,6 +202,9 @@ func TestCurrentParityBaselineHasNoUnresolvedContracts(t *testing.T) {
 	if err := json.Unmarshal(generated, &report); err != nil {
 		t.Fatal(err)
 	}
+	if report.SchemaVersion != 2 {
+		t.Fatalf("schema version = %d, want 2", report.SchemaVersion)
+	}
 	if report.Summary.MetadataMismatches != 0 || report.Summary.MissingContracts != 0 || report.Summary.UnparsedRustRequests != 0 {
 		t.Fatalf("parity summary = %#v", report.Summary)
 	}

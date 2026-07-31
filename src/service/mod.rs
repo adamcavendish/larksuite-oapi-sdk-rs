@@ -28,7 +28,9 @@ pub mod ehr;
 pub mod event;
 pub mod ext;
 pub mod face_detection;
-pub mod go_v397;
+pub mod go_compatibility;
+#[deprecated(note = "use crate::service::go_compatibility")]
+pub use go_compatibility as go_v397;
 pub mod helpdesk;
 pub mod hire;
 pub mod human_authentication;

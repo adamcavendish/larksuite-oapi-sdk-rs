@@ -1,4 +1,4 @@
-use larksuite_oapi_sdk_rs::service::go_v397::GoV397Endpoint;
+use larksuite_oapi_sdk_rs::service::go_compatibility::GoCompatibilityEndpoint;
 use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
@@ -10,8 +10,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = LarkClient::builder(app_id, app_secret).build()?;
     let option = RequestOption::default();
 
-    let resp = Box::pin(client.go_v397().request_json(
-        GoV397Endpoint::GetVcV1NotesByNoteId,
+    let resp = Box::pin(client.go_compatibility().request_json(
+        GoCompatibilityEndpoint::GetVcV1NotesByNoteId,
         [("note_id", note_id.as_str())],
         [("user_id_type", "open_id")],
         None,

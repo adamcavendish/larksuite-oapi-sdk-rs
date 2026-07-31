@@ -8,6 +8,12 @@
   never fall back to a top-level send. High-level channel sends now accept
   Lark idempotency UUIDs and derive unique UUIDs for split messages.
 
+### Compatibility
+
+- Renamed the version-bound `GoV397*` compatibility bridge to
+  `GoCompatibility*` and `go_compatibility()`. The prior type names, module
+  path, and accessors remain available as deprecated aliases.
+
 ## [0.3.3] - 2026-07-29
 
 ### Application

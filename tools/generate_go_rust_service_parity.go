@@ -65,14 +65,14 @@ type metadataMismatch struct {
 }
 
 type paritySummary struct {
-	GoContracts           int `json:"go_contracts"`
-	RustDirectContracts   int `json:"rust_direct_contracts"`
-	GoV397BridgeContracts int `json:"go_v397_bridge_contracts"`
-	TypedMatches          int `json:"typed_matches"`
-	BridgeMatches         int `json:"bridge_matches"`
-	MetadataMismatches    int `json:"metadata_mismatches"`
-	MissingContracts      int `json:"missing_contracts"`
-	UnparsedRustRequests  int `json:"unparsed_rust_requests"`
+	GoContracts                    int `json:"go_contracts"`
+	RustDirectContracts            int `json:"rust_direct_contracts"`
+	GoCompatibilityBridgeContracts int `json:"go_compatibility_bridge_contracts"`
+	TypedMatches                   int `json:"typed_matches"`
+	BridgeMatches                  int `json:"bridge_matches"`
+	MetadataMismatches             int `json:"metadata_mismatches"`
+	MissingContracts               int `json:"missing_contracts"`
+	UnparsedRustRequests           int `json:"unparsed_rust_requests"`
 }
 
 type parityReport struct {
@@ -147,7 +147,7 @@ func generate(goCatalogPath, rustSDK string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	bridge, err := goV397Contracts(rustSDK)
+	bridge, err := goCompatibilityContracts(rustSDK)
 	if err != nil {
 		return nil, err
 	}
@@ -155,12 +155,12 @@ func generate(goCatalogPath, rustSDK string) ([]byte, error) {
 	directByRoute := contractsByRoute(direct)
 	bridgeByRoute := contractsByRoute(bridge)
 	report := parityReport{
-		SchemaVersion:   1,
+		SchemaVersion:   2,
 		GoCatalogSHA256: sha256Hex(goCatalogBytes),
 		Summary: paritySummary{
-			GoContracts:           len(catalog.Endpoints),
-			RustDirectContracts:   len(direct),
-			GoV397BridgeContracts: len(bridge),
+			GoContracts:                    len(catalog.Endpoints),
+			RustDirectContracts:            len(direct),
+			GoCompatibilityBridgeContracts: len(bridge),
 		},
 		UnparsedRustRequests: unparsed,
 	}
@@ -254,7 +254,7 @@ func rustServiceContracts(rustSDK string) ([]rustEndpoint, []unparsedRustRequest
 
 func excludedServiceFile(path string) bool {
 	name := filepath.Base(path)
-	return name == "common.rs" || name == "go_v397.rs" || name == "go_v397_metadata.rs" || name == "mod.rs"
+	return name == "common.rs" || name == "go_compatibility.rs" || name == "go_compatibility_metadata.rs" || name == "mod.rs"
 }
 
 func extractRustContracts(sourceFile, source string) ([]rustEndpoint, []unparsedRustRequest) {
@@ -507,23 +507,23 @@ func rustTokenTypes(expression string) []string {
 	return tokens
 }
 
-func goV397Contracts(rustSDK string) ([]rustEndpoint, error) {
-	path := filepath.Join(rustSDK, "src", "service", "go_v397_metadata.rs")
+func goCompatibilityContracts(rustSDK string) ([]rustEndpoint, error) {
+	path := filepath.Join(rustSDK, "src", "service", "go_compatibility_metadata.rs")
 	source, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("read GoV397 metadata: %w", err)
+		return nil, fmt.Errorf("read GoCompatibility metadata: %w", err)
 	}
-	blocks := regexp.MustCompile(`(?s)Self::[A-Za-z0-9_]+ => GoV397EndpointMeta \{(.*?)\n            \},`).FindAllStringSubmatch(string(source), -1)
+	blocks := regexp.MustCompile(`(?s)Self::[A-Za-z0-9_]+ => GoCompatibilityEndpointMeta \{(.*?)\n            \},`).FindAllStringSubmatch(string(source), -1)
 	contracts := make([]rustEndpoint, 0, len(blocks))
 	for _, block := range blocks {
 		methodMatch := methodPattern.FindStringSubmatch(block[1])
 		pathMatch := regexp.MustCompile(`path: "([^"]+)"`).FindStringSubmatch(block[1])
 		if len(methodMatch) != 2 || len(pathMatch) != 2 {
-			return nil, errors.New("incomplete GoV397 endpoint metadata")
+			return nil, errors.New("incomplete GoCompatibility endpoint metadata")
 		}
 		contracts = append(contracts, rustEndpoint{
-			SourceFile: "src/service/go_v397_metadata.rs",
-			Function:   "GoV397Endpoint",
+			SourceFile: "src/service/go_compatibility_metadata.rs",
+			Function:   "GoCompatibilityEndpoint",
 			Method:     strings.ToUpper(methodMatch[1]),
 			Path:       normalizePath(pathMatch[1]),
 			TokenTypes: rustTokenTypes(block[1]),
@@ -531,7 +531,7 @@ func goV397Contracts(rustSDK string) ([]rustEndpoint, error) {
 		})
 	}
 	if len(contracts) == 0 {
-		return nil, errors.New("no GoV397 endpoint metadata found")
+		return nil, errors.New("no GoCompatibility endpoint metadata found")
 	}
 	return contracts, nil
 }
