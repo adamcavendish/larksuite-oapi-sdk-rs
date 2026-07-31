@@ -62,6 +62,7 @@ go-rust-service-parity-check:
 
 # Verify Go tooling tests and all checked-in Go contract artifacts
 go-contract-provenance-check go_sdk:
+    go test tools/generate_go_v397_metadata.go tools/generate_go_v397_metadata_test.go
     go test tools/generate_go_service_catalog.go tools/generate_go_service_catalog_test.go
     go test tools/generate_go_rust_service_parity.go tools/generate_go_rust_service_parity_test.go
     just go-v397-check "{{go_sdk}}"

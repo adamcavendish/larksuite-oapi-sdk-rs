@@ -121,7 +121,7 @@ same transport behavior for its curated newer-Go-SDK endpoint set. See
 [`examples/raw_api.rs`](examples/raw_api.rs) and
 [`examples/go_v397_endpoint.rs`](examples/go_v397_endpoint.rs).
 
-The GoV397 endpoint metadata is generated from the Go SDK's `v3.6.1..v3.9.7`
+The GoV397 endpoint metadata is generated from the Go SDK's `v3.6.1..v3.9.10`
 resource delta. Regenerate it or verify that it is current with a local Go SDK
 checkout:
 
@@ -131,7 +131,7 @@ go run ./tools/generate_go_v397_metadata.go --go-sdk "$GO_SDK_DIR"
 just go-v397-check "$GO_SDK_DIR"
 ```
 
-The checked-in Go service contract catalog records the complete Go `v3.9.9`
+The checked-in Go service contract catalog records the complete Go `v3.9.10`
 resource request surface: source resource, receiver, operation, HTTP method,
 path, token types, and upload behavior. It is a reproducible tooling input for
 future service generation; it does not alter runtime request dispatch or
@@ -144,7 +144,7 @@ Refresh it or verify that it is current with the same Go checkout:
 
 ```sh
 GO_SDK_DIR=/path/to/larksuite-oapi-sdk-go
-go run ./tools/generate_go_service_catalog.go --go-sdk "$GO_SDK_DIR" --revision v3.9.9
+go run ./tools/generate_go_service_catalog.go --go-sdk "$GO_SDK_DIR" --revision v3.9.10
 just go-service-catalog-check "$GO_SDK_DIR"
 ```
 
@@ -163,7 +163,7 @@ just go-rust-service-parity-check
 ```
 
 CI runs `just go-contract-provenance-check` against a full-history checkout of
-the pinned Go `v3.9.9` reference. That gate also runs both Go extractor test
+the pinned Go `v3.9.10` reference. That gate also runs both Go extractor test
 suites and verifies the GoV397 metadata and full service catalog before
 accepting the Rust parity report.
 

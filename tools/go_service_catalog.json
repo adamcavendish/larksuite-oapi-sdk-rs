@@ -2,11 +2,11 @@
   "schema_version": 1,
   "source": {
     "sdk": "larksuite-oapi-sdk-go",
-    "revision": "v3.9.9",
-    "commit": "ff207b774541a195f0a98c5bfda1507905e45431",
+    "revision": "v3.9.10",
+    "commit": "8dfbfff01d210b20ec9473bf383d38d1b54aa37b",
     "glob": "service/*/*/resource.go"
   },
-  "endpoint_count": 1562,
+  "endpoint_count": 1631,
   "endpoints": [
     {
       "resource_file": "service/acs/v1/resource.go",
@@ -313,6 +313,113 @@
       "path": "/open-apis/admin/v1/password/reset",
       "token_types": [
         "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/aily/v1/resource.go",
+      "receiver": "agentAgentArtifact",
+      "operation": "Get",
+      "method": "GET",
+      "path": "/open-apis/aily/v1/agents/:agent_id/artifacts/:agent_artifact_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/aily/v1/resource.go",
+      "receiver": "agentAgentAttachment",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/aily/v1/agents/:agent_id/attachments",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": true
+    },
+    {
+      "resource_file": "service/aily/v1/resource.go",
+      "receiver": "agentAgentChat",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/aily/v1/agents/:agent_id/chats",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/aily/v1/resource.go",
+      "receiver": "agentAgentChat",
+      "operation": "Get",
+      "method": "GET",
+      "path": "/open-apis/aily/v1/agents/:agent_id/chats/:agent_chat_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/aily/v1/resource.go",
+      "receiver": "agentAgentChatSession",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/aily/v1/agents/:agent_id/sessions",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/aily/v1/resource.go",
+      "receiver": "agentAgentChatSession",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/aily/v1/agents/:agent_id/sessions/:agent_chat_session_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/aily/v1/resource.go",
+      "receiver": "agentAgentChatSession",
+      "operation": "Get",
+      "method": "GET",
+      "path": "/open-apis/aily/v1/agents/:agent_id/sessions/:agent_chat_session_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/aily/v1/resource.go",
+      "receiver": "agentAgentChatSession",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/aily/v1/agents/:agent_id/sessions",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/aily/v1/resource.go",
+      "receiver": "agentAgentVisibility",
+      "operation": "Check",
+      "method": "POST",
+      "path": "/open-apis/aily/v1/agents/:agent_id/agent_visibility/check",
+      "token_types": [
+        "User"
       ],
       "file_upload": false
     },
@@ -915,6 +1022,17 @@
       "operation": "List",
       "method": "GET",
       "path": "/open-apis/apaas/v1/seat_assignments",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/apaas/v1/resource.go",
+      "receiver": "tenantAppMetrics",
+      "operation": "Query",
+      "method": "POST",
+      "path": "/open-apis/apaas/v1/tenant_app_metrics/query",
       "token_types": [
         "User"
       ],
@@ -1593,6 +1711,17 @@
     {
       "resource_file": "service/approval/v4/resource.go",
       "receiver": "instance",
+      "operation": "AddCc",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/instances/add_cc",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "instance",
       "operation": "AddSign",
       "method": "POST",
       "path": "/open-apis/approval/v4/instances/add_sign",
@@ -1637,11 +1766,33 @@
     {
       "resource_file": "service/approval/v4/resource.go",
       "receiver": "instance",
+      "operation": "Detail",
+      "method": "GET",
+      "path": "/open-apis/approval/v4/instances/detail",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "instance",
       "operation": "Get",
       "method": "GET",
       "path": "/open-apis/approval/v4/instances/:instance_id",
       "token_types": [
         "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "instance",
+      "operation": "Initiated",
+      "method": "GET",
+      "path": "/open-apis/approval/v4/instances/initiated",
+      "token_types": [
+        "User"
       ],
       "file_upload": false
     },
@@ -1681,6 +1832,28 @@
     {
       "resource_file": "service/approval/v4/resource.go",
       "receiver": "instance",
+      "operation": "Recall",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/instances/recall",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "instance",
+      "operation": "Remind",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/instances/remind",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "instance",
       "operation": "SearchCc",
       "method": "POST",
       "path": "/open-apis/approval/v4/instances/search_cc",
@@ -1697,6 +1870,28 @@
       "path": "/open-apis/approval/v4/instances/specified_rollback",
       "token_types": [
         "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "instance",
+      "operation": "Subscription",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/instances/subscription",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "instance",
+      "operation": "Unsubscription",
+      "method": "DELETE",
+      "path": "/open-apis/approval/v4/instances/subscription",
+      "token_types": [
+        "User"
       ],
       "file_upload": false
     },
@@ -1747,6 +1942,17 @@
     {
       "resource_file": "service/approval/v4/resource.go",
       "receiver": "task",
+      "operation": "AddSign",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/tasks/add_sign",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "task",
       "operation": "Approve",
       "method": "POST",
       "path": "/open-apis/approval/v4/tasks/approve",
@@ -1758,11 +1964,55 @@
     {
       "resource_file": "service/approval/v4/resource.go",
       "receiver": "task",
+      "operation": "Forward",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/tasks/forward",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "task",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/approval/v4/tasks",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "task",
+      "operation": "Pass",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/tasks/pass",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "task",
       "operation": "Query",
       "method": "GET",
       "path": "/open-apis/approval/v4/tasks/query",
       "token_types": [
         "Tenant",
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "task",
+      "operation": "Refuse",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/tasks/refuse",
+      "token_types": [
         "User"
       ],
       "file_upload": false
@@ -1792,6 +2042,17 @@
     {
       "resource_file": "service/approval/v4/resource.go",
       "receiver": "task",
+      "operation": "Rollback",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/tasks/rollback",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "task",
       "operation": "Search",
       "method": "POST",
       "path": "/open-apis/approval/v4/tasks/search",
@@ -1803,11 +2064,33 @@
     {
       "resource_file": "service/approval/v4/resource.go",
       "receiver": "task",
+      "operation": "Subscription",
+      "method": "POST",
+      "path": "/open-apis/approval/v4/tasks/subscription",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "task",
       "operation": "Transfer",
       "method": "POST",
       "path": "/open-apis/approval/v4/tasks/transfer",
       "token_types": [
         "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/approval/v4/resource.go",
+      "receiver": "task",
+      "operation": "Unsubscription",
+      "method": "DELETE",
+      "path": "/open-apis/approval/v4/tasks/subscription",
+      "token_types": [
+        "User"
       ],
       "file_upload": false
     },
@@ -3239,6 +3522,17 @@
       "path": "/open-apis/board/v1/whiteboards/:whiteboard_id/nodes",
       "token_types": [
         "Tenant",
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/bot/v4/resource.go",
+      "receiver": "bot",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/bot/v4/bot/search",
+      "token_types": [
         "User"
       ],
       "file_upload": false
@@ -9356,6 +9650,17 @@
     },
     {
       "resource_file": "service/event/v1/resource.go",
+      "receiver": "connection",
+      "operation": "Get",
+      "method": "GET",
+      "path": "/open-apis/event/v1/connection",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/event/v1/resource.go",
       "receiver": "outboundIp",
       "operation": "List",
       "method": "GET",
@@ -10044,6 +10349,7 @@
       "method": "GET",
       "path": "/open-apis/hire/v1/applications/:application_id/get_detail",
       "token_types": [
+        "User",
         "Tenant"
       ],
       "file_upload": false
@@ -10055,6 +10361,7 @@
       "method": "GET",
       "path": "/open-apis/hire/v1/applications",
       "token_types": [
+        "User",
         "Tenant"
       ],
       "file_upload": false
@@ -10963,6 +11270,7 @@
       "method": "GET",
       "path": "/open-apis/hire/v1/job_processes",
       "token_types": [
+        "User",
         "Tenant"
       ],
       "file_upload": false
@@ -11095,6 +11403,7 @@
       "method": "GET",
       "path": "/open-apis/hire/v1/minutes",
       "token_types": [
+        "User",
         "Tenant"
       ],
       "file_upload": false
@@ -11690,6 +11999,7 @@
       "method": "POST",
       "path": "/open-apis/hire/v1/tests/search",
       "token_types": [
+        "User",
         "Tenant"
       ],
       "file_upload": false
@@ -11899,6 +12209,7 @@
       "method": "GET",
       "path": "/open-apis/hire/v2/interview_records/:interview_record_id",
       "token_types": [
+        "User",
         "Tenant"
       ],
       "file_upload": false
@@ -12491,6 +12802,17 @@
     {
       "resource_file": "service/im/v1/resource.go",
       "receiver": "message",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/im/v1/messages/search",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/im/v1/resource.go",
+      "receiver": "message",
       "operation": "Update",
       "method": "PUT",
       "path": "/open-apis/im/v1/messages/:message_id",
@@ -12702,6 +13024,18 @@
       "method": "PUT",
       "path": "/open-apis/im/v2/biz_entity_tag_relation",
       "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/im/v2/resource.go",
+      "receiver": "chat",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/im/v2/chats/search",
+      "token_types": [
+        "User",
         "Tenant"
       ],
       "file_upload": false
@@ -13203,6 +13537,17 @@
     },
     {
       "resource_file": "service/mail/v1/resource.go",
+      "receiver": "multiEntity",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/mail/v1/multi_entity/search",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/mail/v1/resource.go",
       "receiver": "publicMailbox",
       "operation": "Create",
       "method": "POST",
@@ -13425,6 +13770,28 @@
     },
     {
       "resource_file": "service/mail/v1/resource.go",
+      "receiver": "userMailbox",
+      "operation": "Profile",
+      "method": "GET",
+      "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/profile",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/mail/v1/resource.go",
+      "receiver": "userMailbox",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/search",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/mail/v1/resource.go",
       "receiver": "userMailboxAlias",
       "operation": "Create",
       "method": "POST",
@@ -13453,6 +13820,17 @@
       "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/aliases",
       "token_types": [
         "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/mail/v1/resource.go",
+      "receiver": "userMailboxDraft",
+      "operation": "CancelScheduledSend",
+      "method": "POST",
+      "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/messages/:message_id/cancel_scheduled_send",
+      "token_types": [
+        "User"
       ],
       "file_upload": false
     },
@@ -13833,6 +14211,17 @@
     {
       "resource_file": "service/mail/v1/resource.go",
       "receiver": "userMailboxMessage",
+      "operation": "SendStatus",
+      "method": "GET",
+      "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/messages/:message_id/send_status",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/mail/v1/resource.go",
+      "receiver": "userMailboxMessage",
       "operation": "Trash",
       "method": "POST",
       "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/messages/:message_id/trash",
@@ -13910,6 +14299,41 @@
       "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/rules/:rule_id",
       "token_types": [
         "Tenant",
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/mail/v1/resource.go",
+      "receiver": "userMailboxSentMessage",
+      "operation": "GetRecallDetail",
+      "method": "GET",
+      "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/messages/:message_id/recall",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/mail/v1/resource.go",
+      "receiver": "userMailboxSentMessage",
+      "operation": "Recall",
+      "method": "POST",
+      "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/messages/:message_id/recall",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/mail/v1/resource.go",
+      "receiver": "userMailboxSetting",
+      "operation": "GetSignatures",
+      "method": "GET",
+      "path": "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/settings/signatures",
+      "token_types": [
         "User"
       ],
       "file_upload": false
@@ -14121,8 +14545,7 @@
       "method": "GET",
       "path": "/open-apis/minutes/v1/minutes/:minute_token/artifacts",
       "token_types": [
-        "User",
-        "Tenant"
+        "User"
       ],
       "file_upload": false
     },
@@ -14358,11 +14781,322 @@
       "file_upload": false
     },
     {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrAlignment",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/okr/v2/alignments/:alignment_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrAlignment",
+      "operation": "Get",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/alignments/:alignment_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrCategory",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/categories",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrCycle",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/cycles",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrCycle",
+      "operation": "ObjectivesPosition",
+      "method": "PUT",
+      "path": "/open-apis/okr/v2/cycles/:cycle_id/objectives_position",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrCycle",
+      "operation": "ObjectivesWeight",
+      "method": "PUT",
+      "path": "/open-apis/okr/v2/cycles/:cycle_id/objectives_weight",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrCycleObjective",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/okr/v2/cycles/:cycle_id/objectives",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrCycleObjective",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/cycles/:cycle_id/objectives",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrIndicator",
+      "operation": "Patch",
+      "method": "PATCH",
+      "path": "/open-apis/okr/v2/indicators/:indicator_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrKeyResult",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/okr/v2/key_results/:key_result_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrKeyResult",
+      "operation": "Get",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/key_results/:key_result_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrKeyResult",
+      "operation": "Patch",
+      "method": "PATCH",
+      "path": "/open-apis/okr/v2/key_results/:key_result_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrKeyResultIndicator",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/key_results/:key_result_id/indicators",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrKeyResultProgress",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/key_results/:key_result_id/progresses",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjective",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/okr/v2/objectives/:objective_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjective",
+      "operation": "Get",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/objectives/:objective_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjective",
+      "operation": "KeyResultsPosition",
+      "method": "PUT",
+      "path": "/open-apis/okr/v2/objectives/:objective_id/key_results_position",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjective",
+      "operation": "KeyResultsWeight",
+      "method": "PUT",
+      "path": "/open-apis/okr/v2/objectives/:objective_id/key_results_weight",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjective",
+      "operation": "Patch",
+      "method": "PATCH",
+      "path": "/open-apis/okr/v2/objectives/:objective_id",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjectiveAlignment",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/okr/v2/objectives/:objective_id/alignments",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjectiveAlignment",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/objectives/:objective_id/alignments",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjectiveIndicator",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/objectives/:objective_id/indicators",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjectiveKeyResult",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/okr/v2/objectives/:objective_id/key_results",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjectiveKeyResult",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/objectives/:objective_id/key_results",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/okr/v2/resource.go",
+      "receiver": "okrObjectiveProgress",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/okr/v2/objectives/:objective_id/progresses",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
       "resource_file": "service/optical_char_recognition/v1/resource.go",
       "receiver": "image",
       "operation": "BasicRecognize",
       "method": "POST",
       "path": "/open-apis/optical_char_recognition/v1/image/basic_recognize",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/passport/v1/resource.go",
+      "receiver": "password",
+      "operation": "Update",
+      "method": "PUT",
+      "path": "/open-apis/passport/v1/password",
       "token_types": [
         "Tenant"
       ],
@@ -16500,6 +17234,17 @@
     {
       "resource_file": "service/task/v2/resource.go",
       "receiver": "task",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/task/v2/tasks/search",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/task/v2/resource.go",
+      "receiver": "task",
       "operation": "SetAncestorTask",
       "method": "POST",
       "path": "/open-apis/task/v2/tasks/:task_guid/set_ancestor_task",
@@ -16648,6 +17393,17 @@
       "path": "/open-apis/task/v2/tasklists/:tasklist_guid/remove_members",
       "token_types": [
         "Tenant",
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/task/v2/resource.go",
+      "receiver": "tasklist",
+      "operation": "Search",
+      "method": "POST",
+      "path": "/open-apis/task/v2/tasklists/search",
+      "token_types": [
         "User"
       ],
       "file_upload": false
@@ -16835,6 +17591,30 @@
       "method": "GET",
       "path": "/open-apis/vc/v1/alerts",
       "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/vc/v1/resource.go",
+      "receiver": "bot",
+      "operation": "Events",
+      "method": "GET",
+      "path": "/open-apis/vc/v1/bots/events",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/vc/v1/resource.go",
+      "receiver": "bot",
+      "operation": "UserActiveMeeting",
+      "method": "GET",
+      "path": "/open-apis/vc/v1/bots/user_active_meeting",
+      "token_types": [
+        "User",
         "Tenant"
       ],
       "file_upload": false
@@ -17076,6 +17856,28 @@
       "operation": "Get",
       "method": "GET",
       "path": "/open-apis/vc/v1/notes/:note_id",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/vc/v1/resource.go",
+      "receiver": "note",
+      "operation": "Subscription",
+      "method": "POST",
+      "path": "/open-apis/vc/v1/notes/subscription",
+      "token_types": [
+        "User"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/vc/v1/resource.go",
+      "receiver": "note",
+      "operation": "Unsubscription",
+      "method": "POST",
+      "path": "/open-apis/vc/v1/notes/unsubscription",
       "token_types": [
         "User"
       ],

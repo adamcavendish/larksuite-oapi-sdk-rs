@@ -118,11 +118,30 @@ mod tests {
 
     #[test]
     fn generated_endpoint_metadata_is_valid() {
-        assert_eq!(GoV397Endpoint::ALL.len(), 114);
+        assert_eq!(GoV397Endpoint::ALL.len(), 183);
         for endpoint in GoV397Endpoint::ALL {
             let meta = endpoint.meta();
             assert!(meta.path.starts_with("/open-apis/"));
             assert!(!meta.supported_access_token_types.is_empty());
         }
+    }
+
+    #[test]
+    fn v3_9_10_bridge_endpoints_preserve_contract_metadata() {
+        let bot_search = GoV397Endpoint::PostBotV4BotSearch.meta();
+        assert_eq!(bot_search.method, http::Method::POST);
+        assert_eq!(bot_search.path, "/open-apis/bot/v4/bot/search");
+        assert_eq!(
+            bot_search.supported_access_token_types,
+            &[AccessTokenType::User]
+        );
+
+        let okr_cycles = GoV397Endpoint::GetOkrV2Cycles.meta();
+        assert_eq!(okr_cycles.method, http::Method::GET);
+        assert_eq!(okr_cycles.path, "/open-apis/okr/v2/cycles");
+        assert_eq!(
+            okr_cycles.supported_access_token_types,
+            &[AccessTokenType::User, AccessTokenType::Tenant]
+        );
     }
 }
