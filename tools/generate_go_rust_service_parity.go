@@ -266,6 +266,12 @@ func extractRustContracts(sourceFile, source string) ([]rustEndpoint, []unparsed
 			continue
 		}
 		function := source[match[8]:match[9]]
+		// The local `request` helper in OKR v2 centralizes the shared user/tenant token set for the
+		// generated OKR v2 resource. Its own RestRequest construction has a
+		// variable method, while every caller carries literal contract metadata.
+		if sourceFile == "src/service/okr/v2.rs" && function == "request" {
+			continue
+		}
 		open := strings.Index(source[match[1]:], "{")
 		if open < 0 {
 			continue
@@ -298,11 +304,58 @@ func extractRustContracts(sourceFile, source string) ([]rustEndpoint, []unparsed
 			}
 			offset = closeCall + 1
 		}
+		if sourceFile == "src/service/okr/v2.rs" {
+			for offset := 0; ; {
+				index := strings.Index(body[offset:], "request(")
+				if index < 0 {
+					break
+				}
+				callStart := offset + index
+				argsStart := callStart + len("request")
+				closeCall, ok := matchingDelimiter(body, argsStart, '(', ')')
+				line := lineNumber(source, open+callStart)
+				if !ok {
+					unparsed = append(unparsed, unparsedRustRequest{sourceFile, function, line, "unclosed OKR v2 request helper call"})
+					break
+				}
+				args := splitTopLevel(body[argsStart+1 : closeCall])
+				endpoint, reason := endpointFromOkrV2Call(sourceFile, function, line, body[:callStart], args, body[closeCall:])
+				if reason != "" {
+					unparsed = append(unparsed, unparsedRustRequest{sourceFile, function, line, reason})
+				} else {
+					contracts = append(contracts, endpoint)
+				}
+				offset = closeCall + 1
+			}
+		}
 	}
 	macroContracts, macroUnparsed := extractSupportedMacroContracts(sourceFile, source, macroDefinitions)
 	contracts = append(contracts, macroContracts...)
 	unparsed = append(unparsed, macroUnparsed...)
 	return contracts, unparsed
+}
+
+func endpointFromOkrV2Call(sourceFile, function string, line int, prefix string, args []string, suffix string) (rustEndpoint, string) {
+	if len(args) < 4 {
+		return rustEndpoint{}, "OKR v2 request helper has fewer than four arguments"
+	}
+	methodMatch := methodPattern.FindStringSubmatch(args[1])
+	if len(methodMatch) != 2 {
+		return rustEndpoint{}, "non-literal OKR v2 HTTP method"
+	}
+	path, ok := rustPath(args[2], prefix)
+	if !ok {
+		return rustEndpoint{}, "non-literal OKR v2 request path"
+	}
+	return rustEndpoint{
+		SourceFile: sourceFile,
+		Function:   function,
+		Line:       line,
+		Method:     strings.ToUpper(methodMatch[1]),
+		Path:       path,
+		TokenTypes: []string{"Tenant", "User"},
+		FileUpload: rustFileUpload(nextStatement(suffix)),
+	}, ""
 }
 
 func macroRuleRanges(source string) []sourceRange {

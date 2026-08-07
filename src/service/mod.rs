@@ -14,6 +14,7 @@ pub mod base;
 pub mod bitable;
 pub mod block;
 pub mod board;
+pub mod bot;
 pub mod calendar;
 pub mod cardkit;
 pub mod compensation;

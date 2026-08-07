@@ -90,6 +90,33 @@ impl DataSourceResource<'_> {
 	}
 }
 
+func TestExtractRustContractsParsesOkrV2RequestHelper(t *testing.T) {
+	source := `
+fn request<'a>(config: &'a Config, method: http::Method, path: impl Into<String>, option: &'a RequestOption) -> RestRequest<'a> {
+    RestRequest::new(config, method, path, vec![AccessTokenType::User, AccessTokenType::Tenant], option)
+}
+impl OkrCategoryResource<'_> {
+    pub async fn list(&self, option: &RequestOption) -> Result<(), LarkError> {
+        request(self.config, http::Method::GET, "/open-apis/okr/v2/categories", option)
+            .send()
+            .await
+    }
+}
+`
+
+	contracts, unparsed := extractRustContracts("src/service/okr/v2.rs", source)
+	if len(unparsed) != 0 || len(contracts) != 1 {
+		t.Fatalf("contracts = %#v, unparsed = %#v", contracts, unparsed)
+	}
+	contract := contracts[0]
+	if contract.Function != "list" || contract.Method != "GET" || contract.Path != "/open-apis/okr/v2/categories" {
+		t.Fatalf("contract = %#v", contract)
+	}
+	if !equalTokenTypes(contract.TokenTypes, []string{"Tenant", "User"}) {
+		t.Fatalf("token types = %#v", contract.TokenTypes)
+	}
+}
+
 func TestExtractRustContractsSkipsMacroDefinitions(t *testing.T) {
 	source := `
 macro_rules! external_resource {

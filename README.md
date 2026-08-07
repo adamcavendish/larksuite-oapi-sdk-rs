@@ -107,6 +107,7 @@ replies, transport inputs, and domain errors directly as needed.
 | Create or update an app by device code | [`examples/app_registration.rs`](examples/app_registration.rs) |
 | Run a WebSocket event client | [`examples/ws_client.rs`](examples/ws_client.rs) with `ws` enabled |
 | Send and normalize channel messages | [`examples/channel_send.rs`](examples/channel_send.rs) and [`examples/channel_normalize.rs`](examples/channel_normalize.rs) with `channel` enabled |
+| Search bots or work with OKRs | [`examples/bot_search.rs`](examples/bot_search.rs) and [`examples/okr_v2.rs`](examples/okr_v2.rs) |
 
 ### Raw Requests and the Go Bridge
 
