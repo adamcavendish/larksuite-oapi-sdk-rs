@@ -14,6 +14,7 @@ impl LarkClient {
     service_accessor!(auth, auth, v3, V3);
     service_accessor!(authen, authen, v1, V1);
     service_accessor!(bitable, bitable, v1, V1);
+    service_accessor!(bot_v4, bot, v4, V4);
     service_accessor!(calendar, calendar, v4, V4);
     service_accessor!(contact, contact, v3, V3);
     service_accessor!(corehr, corehr, v1, V1);
@@ -37,6 +38,7 @@ impl LarkClient {
     service_accessor!(mail, mail, v1, V1);
     service_accessor!(minutes, minutes, v1, V1);
     service_accessor!(okr, okr, v1, V1);
+    service_accessor!(okr_v2, okr, v2, V2);
     service_accessor!(translation, translation, v1, V1);
     service_accessor!(search, search, v2, V2);
     service_accessor!(vc, vc, v1, V1);
