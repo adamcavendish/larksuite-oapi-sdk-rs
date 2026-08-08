@@ -1,7 +1,9 @@
 use std::sync::{Arc, Mutex};
 
 use larksuite_oapi_sdk_rs::event::{EventDispatcher, EventReq};
+use larksuite_oapi_sdk_rs::events::approval::{P2InstanceStatusChangedV4, P2TaskStatusChangedV4};
 use larksuite_oapi_sdk_rs::events::im::P2MessageReceiveV1;
+use larksuite_oapi_sdk_rs::events::vc::P2VcNoteGeneratedV1;
 
 fn make_event_req(event_type: &str, event_payload: serde_json::Value) -> EventReq {
     let body = serde_json::json!({
@@ -76,6 +78,77 @@ async fn test_event_dispatch_calls_handler() {
     let resp = dispatcher.handle(req).await;
     assert_eq!(resp.status_code, 200);
     assert_eq!(received.lock().unwrap().as_deref(), Some("om_xyz"));
+}
+
+#[tokio::test]
+async fn typed_v3910_event_handlers_dispatch() {
+    let received = Arc::new(Mutex::new(Vec::new()));
+
+    let instance_received = Arc::clone(&received);
+    let task_received = Arc::clone(&received);
+    let note_received = Arc::clone(&received);
+    let dispatcher = EventDispatcher::new("", "")
+        .on_p2_approval_instance_status_changed_v4(move |event: P2InstanceStatusChangedV4| {
+            let received = Arc::clone(&instance_received);
+            async move {
+                received.lock().unwrap().push(
+                    event
+                        .event
+                        .and_then(|data| data.instance_code)
+                        .unwrap_or_default(),
+                );
+                Ok(())
+            }
+        })
+        .on_p2_approval_task_status_changed_v4(move |event: P2TaskStatusChangedV4| {
+            let received = Arc::clone(&task_received);
+            async move {
+                received.lock().unwrap().push(
+                    event
+                        .event
+                        .and_then(|data| data.task_id)
+                        .unwrap_or_default(),
+                );
+                Ok(())
+            }
+        })
+        .on_p2_vc_note_generated_v1(move |event: P2VcNoteGeneratedV1| {
+            let received = Arc::clone(&note_received);
+            async move {
+                received.lock().unwrap().push(
+                    event
+                        .event
+                        .and_then(|data| data.note_id)
+                        .unwrap_or_default(),
+                );
+                Ok(())
+            }
+        });
+
+    for (event_type, event_payload) in [
+        (
+            "approval.instance.status_changed_v4",
+            serde_json::json!({ "event": { "instance_code": "instance_1" } }),
+        ),
+        (
+            "approval.task.status_changed_v4",
+            serde_json::json!({ "event": { "task_id": "task_1" } }),
+        ),
+        (
+            "vc.note.generated_v1",
+            serde_json::json!({ "event": { "note_id": "note_1" } }),
+        ),
+    ] {
+        let resp = dispatcher
+            .handle(make_event_req(event_type, event_payload))
+            .await;
+        assert_eq!(resp.status_code, 200);
+    }
+
+    assert_eq!(
+        received.lock().unwrap().as_slice(),
+        ["instance_1", "task_1", "note_1"]
+    );
 }
 
 #[tokio::test]

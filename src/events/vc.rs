@@ -282,6 +282,22 @@ pub struct P2VcMeetingParticipantMeetingEndedV1 {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[non_exhaustive]
+pub struct P2VcNoteGeneratedV1Data {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subscriber_ids: Option<Vec<UserId>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct P2VcNoteGeneratedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event: Option<P2VcNoteGeneratedV1Data>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct P2VcMeetingRecordingStartedV1 {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub meeting: Option<MeetingEventMeeting>,
@@ -403,6 +419,8 @@ event_handlers! {
         : "vc.meeting.all_meeting_ended_v1",
     on_p2_vc_meeting_participant_meeting_ended_v1 => P2VcMeetingParticipantMeetingEndedV1
         : "vc.meeting.participant_meeting_ended_v1",
+    on_p2_vc_note_generated_v1 => P2VcNoteGeneratedV1
+        : "vc.note.generated_v1",
     on_p2_vc_meeting_recording_started_v1 => P2VcMeetingRecordingStartedV1
         : "vc.meeting.recording_started_v1",
     on_p2_vc_meeting_recording_ended_v1 => P2VcMeetingRecordingEndedV1
