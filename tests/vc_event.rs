@@ -1,7 +1,7 @@
 use larksuite_oapi_sdk_rs::events::vc::{
     P2VcMeetingLeftV1, P2VcMeetingParticipantMeetingEndedV1, P2VcMeetingRecordingReadyV1,
-    P2VcMeetingStartedV1, P2VcReserveConfigUpdatedV1, P2VcRoomCreatedV1, P2VcRoomLevelDeletedV1,
-    P2VcRoomLevelUpdatedV1, P2VcRoomUpdatedV1,
+    P2VcMeetingStartedV1, P2VcNoteGeneratedV1, P2VcReserveConfigUpdatedV1, P2VcRoomCreatedV1,
+    P2VcRoomLevelDeletedV1, P2VcRoomLevelUpdatedV1, P2VcRoomUpdatedV1,
 };
 
 #[test]
@@ -236,4 +236,24 @@ fn vc_event_structs_accept_empty_and_null_payloads() {
     }))
     .unwrap();
     assert!(room.room.is_none());
+}
+
+#[test]
+fn vc_note_generated_event_is_typed() {
+    let event: P2VcNoteGeneratedV1 = serde_json::from_value(serde_json::json!({
+        "event": {
+            "note_id": "note_1",
+            "subscriber_ids": [{ "open_id": "ou_subscriber" }]
+        }
+    }))
+    .unwrap();
+    let data = event.event.as_ref().unwrap();
+    assert_eq!(data.note_id.as_deref(), Some("note_1"));
+    assert_eq!(
+        data.subscriber_ids.as_ref().unwrap()[0].open_id(),
+        Some("ou_subscriber")
+    );
+
+    let empty: P2VcNoteGeneratedV1 = serde_json::from_value(serde_json::json!({})).unwrap();
+    assert!(empty.event.is_none());
 }
