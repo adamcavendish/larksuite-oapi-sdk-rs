@@ -1,0 +1,3246 @@
+{
+  "schema_version": 1,
+  "source": {
+    "sdk": "larksuite-oapi-sdk-go",
+    "revision": "v3.9.10",
+    "commit": "8dfbfff01d210b20ec9473bf383d38d1b54aa37b",
+    "glob": "event/dispatcher/*_event_dispatch.go"
+  },
+  "registration_count": 215,
+  "event_key_count": 223,
+  "events": [
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "acs.access_record.created_v1"
+      ],
+      "family": "acs",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/acs_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2AccessRecordCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/acs/v1",
+        "payload": "P2AccessRecordCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "acs.user.updated_v1"
+      ],
+      "family": "acs",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/acs_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2UserUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/acs/v1",
+        "payload": "P2UserUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "application.application.app_version.audit_v6"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/application_v6_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2ApplicationAppVersionAuditV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P2ApplicationAppVersionAuditV6"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "application.application.app_version.publish_apply_v6"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/application_v6_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2ApplicationAppVersionPublishApplyV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P2ApplicationAppVersionPublishApplyV6"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "application.application.app_version.publish_revoke_v6"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/application_v6_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2ApplicationAppVersionPublishRevokeV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P2ApplicationAppVersionPublishRevokeV6"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "application.application.created_v6"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/application_v6_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2ApplicationCreatedV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P2ApplicationCreatedV6"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "application.application.feedback.created_v6"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/application_v6_event_dispatch.go",
+        "line": 82,
+        "method": "OnP2ApplicationFeedbackCreatedV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P2ApplicationFeedbackCreatedV6"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "application.application.feedback.updated_v6"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/application_v6_event_dispatch.go",
+        "line": 96,
+        "method": "OnP2ApplicationFeedbackUpdatedV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P2ApplicationFeedbackUpdatedV6"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "application.application.visibility.added_v6"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/application_v6_event_dispatch.go",
+        "line": 108,
+        "method": "OnP2ApplicationVisibilityAddedV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P2ApplicationVisibilityAddedV6"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "application.bot.menu_v6"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/application_v6_event_dispatch.go",
+        "line": 122,
+        "method": "OnP2BotMenuV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P2BotMenuV6"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "approval.approval.updated_v4"
+      ],
+      "family": "approval",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/approval_v4_event_dispatch.go",
+        "line": 24,
+        "method": "OnP2ApprovalUpdatedV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/approval/v4",
+        "payload": "P2ApprovalUpdatedV4"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "approval.instance.status_changed_v4"
+      ],
+      "family": "approval",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/approval_v4_event_dispatch.go",
+        "line": 38,
+        "method": "OnP2InstanceStatusChangedV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/approval/v4",
+        "payload": "P2InstanceStatusChangedV4"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "approval.task.status_changed_v4"
+      ],
+      "family": "approval",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/approval_v4_event_dispatch.go",
+        "line": 52,
+        "method": "OnP2TaskStatusChangedV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/approval/v4",
+        "payload": "P2TaskStatusChangedV4"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "auth.user_access_token.revoked_v4"
+      ],
+      "family": "auth",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/auth_v4_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2UserAccessTokenRevokedV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/auth/v4",
+        "payload": "P2UserAccessTokenRevokedV4"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "calendar.calendar.acl.created_v4"
+      ],
+      "family": "calendar",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/calendar_v4_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2CalendarAclCreatedV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/calendar/v4",
+        "payload": "P2CalendarAclCreatedV4"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "calendar.calendar.acl.deleted_v4"
+      ],
+      "family": "calendar",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/calendar_v4_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2CalendarAclDeletedV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/calendar/v4",
+        "payload": "P2CalendarAclDeletedV4"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "calendar.calendar.changed_v4"
+      ],
+      "family": "calendar",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/calendar_v4_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2CalendarChangedV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/calendar/v4",
+        "payload": "P2CalendarChangedV4"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "calendar.calendar.event.changed_v4"
+      ],
+      "family": "calendar",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/calendar_v4_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2CalendarEventChangedV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/calendar/v4",
+        "payload": "P2CalendarEventChangedV4"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "compensation.archive.changed_v1"
+      ],
+      "family": "compensation",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/compensation_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2ArchiveChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/compensation/v1",
+        "payload": "P2ArchiveChangedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.custom_attr_event.updated_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2CustomAttrEventUpdatedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2CustomAttrEventUpdatedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.department.created_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2DepartmentCreatedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2DepartmentCreatedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.department.deleted_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2DepartmentDeletedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2DepartmentDeletedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.department.updated_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2DepartmentUpdatedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2DepartmentUpdatedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.employee_type_enum.actived_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 82,
+        "method": "OnP2EmployeeTypeEnumActivedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2EmployeeTypeEnumActivedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.employee_type_enum.created_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 96,
+        "method": "OnP2EmployeeTypeEnumCreatedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2EmployeeTypeEnumCreatedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.employee_type_enum.deactivated_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 110,
+        "method": "OnP2EmployeeTypeEnumDeactivatedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2EmployeeTypeEnumDeactivatedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.employee_type_enum.deleted_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 124,
+        "method": "OnP2EmployeeTypeEnumDeletedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2EmployeeTypeEnumDeletedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.employee_type_enum.updated_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 138,
+        "method": "OnP2EmployeeTypeEnumUpdatedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2EmployeeTypeEnumUpdatedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.scope.updated_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 152,
+        "method": "OnP2ScopeUpdatedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2ScopeUpdatedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.user.created_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 166,
+        "method": "OnP2UserCreatedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2UserCreatedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.user.deleted_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 180,
+        "method": "OnP2UserDeletedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2UserDeletedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "contact.user.updated_v3"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/contact_v3_event_dispatch.go",
+        "line": 194,
+        "method": "OnP2UserUpdatedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P2UserUpdatedV3"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.common_data.id.user_mapping_changed_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2CommonDataIdUserMappingChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2CommonDataIdUserMappingChangedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.common_data.meta_data.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2CommonDataMetaDataUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2CommonDataMetaDataUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.contract.created_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2ContractCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2ContractCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.contract.deleted_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2ContractDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2ContractDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.contract.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 82,
+        "method": "OnP2ContractUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2ContractUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.department.created_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 96,
+        "method": "OnP2DepartmentCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2DepartmentCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.department.deleted_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 110,
+        "method": "OnP2DepartmentDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2DepartmentDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.department.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 124,
+        "method": "OnP2DepartmentUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2DepartmentUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.employment.converted_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 138,
+        "method": "OnP2EmploymentConvertedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2EmploymentConvertedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.employment.created_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 152,
+        "method": "OnP2EmploymentCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2EmploymentCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.employment.deleted_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 166,
+        "method": "OnP2EmploymentDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2EmploymentDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.employment.resigned_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 180,
+        "method": "OnP2EmploymentResignedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2EmploymentResignedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.employment.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 194,
+        "method": "OnP2EmploymentUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2EmploymentUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_change.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 250,
+        "method": "OnP2JobChangeUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2JobChangeUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job.created_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 208,
+        "method": "OnP2JobCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2JobCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_data.changed_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 264,
+        "method": "OnP2JobDataChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2JobDataChangedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_data.created_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 278,
+        "method": "OnP2JobDataCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2JobDataCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_data.deleted_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 292,
+        "method": "OnP2JobDataDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2JobDataDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_data.employed_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 306,
+        "method": "OnP2JobDataEmployedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2JobDataEmployedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_data.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 320,
+        "method": "OnP2JobDataUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2JobDataUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job.deleted_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 222,
+        "method": "OnP2JobDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2JobDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 236,
+        "method": "OnP2JobUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2JobUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.offboarding.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 334,
+        "method": "OnP2OffboardingUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2OffboardingUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.org_role_authorization.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 348,
+        "method": "OnP2OrgRoleAuthorizationUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2OrgRoleAuthorizationUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.person.created_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 362,
+        "method": "OnP2PersonCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2PersonCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.person.deleted_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 376,
+        "method": "OnP2PersonDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2PersonDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.person.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 390,
+        "method": "OnP2PersonUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2PersonUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.pre_hire.updated_v1"
+      ],
+      "family": "corehr",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v1_event_dispatch.go",
+        "line": 404,
+        "method": "OnP2PreHireUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v1",
+        "payload": "P2PreHireUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.approval_groups.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2ApprovalGroupsUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2ApprovalGroupsUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.company.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2CompanyCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2CompanyCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.company.deleted_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2CompanyDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2CompanyDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.company.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2CompanyUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2CompanyUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.cost_center.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 82,
+        "method": "OnP2CostCenterCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2CostCenterCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.cost_center.deleted_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 96,
+        "method": "OnP2CostCenterDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2CostCenterDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.cost_center.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 110,
+        "method": "OnP2CostCenterUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2CostCenterUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.custom_org.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 124,
+        "method": "OnP2CustomOrgCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2CustomOrgCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.custom_org.deleted_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 138,
+        "method": "OnP2CustomOrgDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2CustomOrgDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.custom_org.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 152,
+        "method": "OnP2CustomOrgUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2CustomOrgUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.department.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 166,
+        "method": "OnP2DepartmentCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2DepartmentCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.department.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 180,
+        "method": "OnP2DepartmentUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2DepartmentUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.employee.domain_event_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 194,
+        "method": "OnP2EmployeeDomainEventV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2EmployeeDomainEventV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_change.status_updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 208,
+        "method": "OnP2JobChangeStatusUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobChangeStatusUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_change.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 222,
+        "method": "OnP2JobChangeUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobChangeUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_family.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 236,
+        "method": "OnP2JobFamilyCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobFamilyCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_family.deleted_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 250,
+        "method": "OnP2JobFamilyDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobFamilyDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_family.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 264,
+        "method": "OnP2JobFamilyUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobFamilyUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_grade.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 278,
+        "method": "OnP2JobGradeCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobGradeCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_grade.deleted_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 292,
+        "method": "OnP2JobGradeDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobGradeDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_grade.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 306,
+        "method": "OnP2JobGradeUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobGradeUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_level.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 320,
+        "method": "OnP2JobLevelCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobLevelCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_level.deleted_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 334,
+        "method": "OnP2JobLevelDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobLevelDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.job_level.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 348,
+        "method": "OnP2JobLevelUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2JobLevelUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.location.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 362,
+        "method": "OnP2LocationCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2LocationCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.location.deleted_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 376,
+        "method": "OnP2LocationDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2LocationDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.location.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 390,
+        "method": "OnP2LocationUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2LocationUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.offboarding.checklist_updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 404,
+        "method": "OnP2OffboardingChecklistUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2OffboardingChecklistUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.offboarding.status_updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 418,
+        "method": "OnP2OffboardingStatusUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2OffboardingStatusUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.offboarding.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 432,
+        "method": "OnP2OffboardingUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2OffboardingUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.pathway.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 446,
+        "method": "OnP2PathwayCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2PathwayCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.pathway.deleted_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 460,
+        "method": "OnP2PathwayDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2PathwayDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.pathway.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 474,
+        "method": "OnP2PathwayUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2PathwayUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.position.created_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 488,
+        "method": "OnP2PositionCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2PositionCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.position.deleted_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 502,
+        "method": "OnP2PositionDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2PositionDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.position.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 516,
+        "method": "OnP2PositionUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2PositionUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.pre_hire.onboarding_task_changed_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 530,
+        "method": "OnP2PreHireOnboardingTaskChangedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2PreHireOnboardingTaskChangedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.probation.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 544,
+        "method": "OnP2ProbationUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2ProbationUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.process.approver.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 572,
+        "method": "OnP2ProcessApproverUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2ProcessApproverUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.process.cc.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 586,
+        "method": "OnP2ProcessCcUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2ProcessCcUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.process_comment_info.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 628,
+        "method": "OnP2ProcessCommentInfoUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2ProcessCommentInfoUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.process.node.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 600,
+        "method": "OnP2ProcessNodeUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2ProcessNodeUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.process.status.update_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 614,
+        "method": "OnP2ProcessStatusUpdateV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2ProcessStatusUpdateV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.process.updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 558,
+        "method": "OnP2ProcessUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2ProcessUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "corehr.signature_file.status_updated_v2"
+      ],
+      "family": "corehr",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/corehr_v2_event_dispatch.go",
+        "line": 642,
+        "method": "OnP2SignatureFileStatusUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/corehr/v2",
+        "payload": "P2SignatureFileStatusUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.bitable_field_changed_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2FileBitableFieldChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FileBitableFieldChangedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.bitable_record_changed_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2FileBitableRecordChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FileBitableRecordChangedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.created_in_folder_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2FileCreatedInFolderV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FileCreatedInFolderV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.deleted_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 66,
+        "method": "OnP2FileDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FileDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.edit_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 78,
+        "method": "OnP2FileEditV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FileEditV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.permission_member_added_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 90,
+        "method": "OnP2FilePermissionMemberAddedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FilePermissionMemberAddedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.permission_member_applied_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 104,
+        "method": "OnP2FilePermissionMemberAppliedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FilePermissionMemberAppliedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.permission_member_removed_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 116,
+        "method": "OnP2FilePermissionMemberRemovedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FilePermissionMemberRemovedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.read_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 128,
+        "method": "OnP2FileReadV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FileReadV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.title_updated_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 140,
+        "method": "OnP2FileTitleUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FileTitleUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.file.trashed_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 152,
+        "method": "OnP2FileTrashedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2FileTrashedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "drive.notice.comment_add_v1"
+      ],
+      "family": "drive",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/drive_v1_event_dispatch.go",
+        "line": 166,
+        "method": "OnP2NoticeCommentAddV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/drive/v1",
+        "payload": "P2NoticeCommentAddV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "elearning.course_registration.created_v2"
+      ],
+      "family": "elearning",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/elearning_v2_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2CourseRegistrationCreatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/elearning/v2",
+        "payload": "P2CourseRegistrationCreatedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "elearning.course_registration.deleted_v2"
+      ],
+      "family": "elearning",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/elearning_v2_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2CourseRegistrationDeletedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/elearning/v2",
+        "payload": "P2CourseRegistrationDeletedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "elearning.course_registration.updated_v2"
+      ],
+      "family": "elearning",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/elearning_v2_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2CourseRegistrationUpdatedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/elearning/v2",
+        "payload": "P2CourseRegistrationUpdatedV2"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "add_bot"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 162,
+        "method": "OnP1AddBotV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P1AddBotV1"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "app_open"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 237,
+        "method": "OnP1AppOpenV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P1AppOpenV6"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "app_status_change"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 54,
+        "method": "OnP1AppStatusChangedV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P1AppStatusChangedV6"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "app_uninstalled"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 42,
+        "method": "OnP1AppUninstalledV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P1AppUninstalledV6"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "chat_disband"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 210,
+        "method": "OnP1ChatDisbandV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P1ChatDisbandV1"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "contact_scope_change"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 150,
+        "method": "OnP1ContactScopeChangedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P1ContactScopeChangedV3"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "dept_add",
+        "dept_delete",
+        "dept_update"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 126,
+        "method": "OnP1DepartmentChangedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P1DepartmentChangedV3"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "group_setting_update"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 222,
+        "method": "OnP1GroupSettingUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P1GroupSettingUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "leave_approvalV2"
+      ],
+      "family": "approval",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 285,
+        "method": "OnP1LeaveApprovalV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/approval/v4",
+        "payload": "P1LeaveApprovalV4"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "message_read"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 66,
+        "method": "OnP1MessageReadV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P1MessageReadV1"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "message"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 78,
+        "method": "OnP1MessageReceiveV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P1MessageReceiveV1"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "order_paid"
+      ],
+      "family": "application",
+      "version": "v6",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 30,
+        "method": "OnP1OrderPaidV6",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/application/v6",
+        "payload": "P1OrderPaidV6"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "out_approval"
+      ],
+      "family": "approval",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 345,
+        "method": "OnP1OutApprovalV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/approval/v4",
+        "payload": "P1OutApprovalV4"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "p2p_chat_create"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 249,
+        "method": "OnP1P2PChatCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P1P2PChatCreatedV1"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "remedy_approval"
+      ],
+      "family": "approval",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 321,
+        "method": "OnP1RemedyApprovalV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/approval/v4",
+        "payload": "P1RemedyApprovalV4"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "remove_bot"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 174,
+        "method": "OnP1RemoveAddBotV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P1RemoveBotV1"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "shift_approval"
+      ],
+      "family": "approval",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 309,
+        "method": "OnP1ShiftApprovalV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/approval/v4",
+        "payload": "P1ShiftApprovalV4"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "third_party_meeting_room_event_created",
+        "third_party_meeting_room_event_deleted",
+        "third_party_meeting_room_event_updated"
+      ],
+      "family": "meeting_room",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 261,
+        "method": "OnP1ThirdPartyMeetingRoomChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/meeting_room/v1",
+        "payload": "P1ThirdPartyMeetingRoomChangedV1"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "trip_approval"
+      ],
+      "family": "approval",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 333,
+        "method": "OnP1TripApprovalV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/approval/v4",
+        "payload": "P1TripApprovalV4"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "user_add",
+        "user_leave",
+        "user_update"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 102,
+        "method": "OnP1UserChangedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P1UserChangedV3"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "add_user_to_chat",
+        "remove_user_from_chat",
+        "revoke_add_user_from_chat"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 186,
+        "method": "OnP1UserInOutChatV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P1UserInOutChatV1"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "user_status_change"
+      ],
+      "family": "contact",
+      "version": "v3",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 90,
+        "method": "OnP1UserStatusChangedV3",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3",
+        "payload": "P1UserStatusChangedV3"
+      }
+    },
+    {
+      "protocol": "p1",
+      "event_keys": [
+        "work_approval"
+      ],
+      "family": "approval",
+      "version": "v4",
+      "go": {
+        "dispatcher_file": "event/dispatcher/ext_event_dispatch.go",
+        "line": 297,
+        "method": "OnP1WorkApprovalV4",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/approval/v4",
+        "payload": "P1WorkApprovalV4"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "helpdesk.notification.approve_v1"
+      ],
+      "family": "helpdesk",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/helpdesk_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2NotificationApproveV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/helpdesk/v1",
+        "payload": "P2NotificationApproveV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "helpdesk.ticket.created_v1"
+      ],
+      "family": "helpdesk",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/helpdesk_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2TicketCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/helpdesk/v1",
+        "payload": "P2TicketCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "helpdesk.ticket_message.created_v1"
+      ],
+      "family": "helpdesk",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/helpdesk_v1_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2TicketMessageCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/helpdesk/v1",
+        "payload": "P2TicketMessageCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "helpdesk.ticket.updated_v1"
+      ],
+      "family": "helpdesk",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/helpdesk_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2TicketUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/helpdesk/v1",
+        "payload": "P2TicketUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.application.deleted_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2ApplicationDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2ApplicationDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.application.stage_changed_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2ApplicationStageChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2ApplicationStageChangedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.eco_account.created_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2EcoAccountCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2EcoAccountCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.eco_background_check.canceled_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2EcoBackgroundCheckCanceledV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2EcoBackgroundCheckCanceledV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.eco_background_check.created_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 82,
+        "method": "OnP2EcoBackgroundCheckCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2EcoBackgroundCheckCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.eco_exam.created_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 96,
+        "method": "OnP2EcoExamCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2EcoExamCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.ehr_import_task_for_internship_offer.imported_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 124,
+        "method": "OnP2EhrImportTaskForInternshipOfferImportedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2EhrImportTaskForInternshipOfferImportedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.ehr_import_task.imported_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 110,
+        "method": "OnP2EhrImportTaskImportedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2EhrImportTaskImportedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.offer.status_changed_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 138,
+        "method": "OnP2OfferStatusChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2OfferStatusChangedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.referral_account.assets_update_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 152,
+        "method": "OnP2ReferralAccountAssetsUpdateV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2ReferralAccountAssetsUpdateV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.talent.deleted_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 166,
+        "method": "OnP2TalentDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2TalentDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "hire.talent.tag_subscription_v1"
+      ],
+      "family": "hire",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/hire_v1_event_dispatch.go",
+        "line": 180,
+        "method": "OnP2TalentTagSubscriptionV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/hire/v1",
+        "payload": "P2TalentTagSubscriptionV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.chat.access_event.bot_p2p_chat_entered_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2ChatAccessEventBotP2pChatEnteredV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2ChatAccessEventBotP2pChatEnteredV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.chat.disbanded_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2ChatDisbandedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2ChatDisbandedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.chat.member.bot.added_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2ChatMemberBotAddedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2ChatMemberBotAddedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.chat.member.bot.deleted_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 82,
+        "method": "OnP2ChatMemberBotDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2ChatMemberBotDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.chat.member.user.added_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 96,
+        "method": "OnP2ChatMemberUserAddedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2ChatMemberUserAddedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.chat.member.user.deleted_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 110,
+        "method": "OnP2ChatMemberUserDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2ChatMemberUserDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.chat.member.user.withdrawn_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 124,
+        "method": "OnP2ChatMemberUserWithdrawnV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2ChatMemberUserWithdrawnV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.chat.updated_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2ChatUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2ChatUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.message.reaction.created_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 180,
+        "method": "OnP2MessageReactionCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2MessageReactionCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.message.reaction.deleted_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 194,
+        "method": "OnP2MessageReactionDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2MessageReactionDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.message.message_read_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 138,
+        "method": "OnP2MessageReadV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2MessageReadV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.message.recalled_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 152,
+        "method": "OnP2MessageRecalledV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2MessageRecalledV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "im.message.receive_v1"
+      ],
+      "family": "im",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/im_v1_event_dispatch.go",
+        "line": 166,
+        "method": "OnP2MessageReceiveV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/im/v1",
+        "payload": "P2MessageReceiveV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "mail.user_mailbox.event.message_received_v1"
+      ],
+      "family": "mail",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/mail_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2UserMailboxEventMessageReceivedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/mail/v1",
+        "payload": "P2UserMailboxEventMessageReceivedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "meeting_room.meeting_room.created_v1"
+      ],
+      "family": "meeting_room",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/meeting_room_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2MeetingRoomCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/meeting_room/v1",
+        "payload": "P2MeetingRoomCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "meeting_room.meeting_room.deleted_v1"
+      ],
+      "family": "meeting_room",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/meeting_room_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2MeetingRoomDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/meeting_room/v1",
+        "payload": "P2MeetingRoomDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "meeting_room.meeting_room.status_changed_v1"
+      ],
+      "family": "meeting_room",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/meeting_room_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2MeetingRoomStatusChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/meeting_room/v1",
+        "payload": "P2MeetingRoomStatusChangedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "meeting_room.meeting_room.updated_v1"
+      ],
+      "family": "meeting_room",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/meeting_room_v1_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2MeetingRoomUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/meeting_room/v1",
+        "payload": "P2MeetingRoomUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "minutes.minute.generated_v1"
+      ],
+      "family": "minutes",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/minutes_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2MinuteGeneratedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/minutes/v1",
+        "payload": "P2MinuteGeneratedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "moments.comment.created_v1"
+      ],
+      "family": "moments",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/moments_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2CommentCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/moments/v1",
+        "payload": "P2CommentCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "moments.comment.deleted_v1"
+      ],
+      "family": "moments",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/moments_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2CommentDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/moments/v1",
+        "payload": "P2CommentDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "moments.post.created_v1"
+      ],
+      "family": "moments",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/moments_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2PostCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/moments/v1",
+        "payload": "P2PostCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "moments.post.deleted_v1"
+      ],
+      "family": "moments",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/moments_v1_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2PostDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/moments/v1",
+        "payload": "P2PostDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "moments.post_statistics.updated_v1"
+      ],
+      "family": "moments",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/moments_v1_event_dispatch.go",
+        "line": 82,
+        "method": "OnP2PostStatisticsUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/moments/v1",
+        "payload": "P2PostStatisticsUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "moments.reaction.created_v1"
+      ],
+      "family": "moments",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/moments_v1_event_dispatch.go",
+        "line": 96,
+        "method": "OnP2ReactionCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/moments/v1",
+        "payload": "P2ReactionCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "moments.reaction.deleted_v1"
+      ],
+      "family": "moments",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/moments_v1_event_dispatch.go",
+        "line": 110,
+        "method": "OnP2ReactionDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/moments/v1",
+        "payload": "P2ReactionDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "payroll.payment_activity.approved_v1"
+      ],
+      "family": "payroll",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/payroll_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2PaymentActivityApprovedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/payroll/v1",
+        "payload": "P2PaymentActivityApprovedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "payroll.payment_activity.status_changed_v1"
+      ],
+      "family": "payroll",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/payroll_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2PaymentActivityStatusChangedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/payroll/v1",
+        "payload": "P2PaymentActivityStatusChangedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "performance.review_data.changed_v2"
+      ],
+      "family": "performance",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/performance_v2_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2ReviewDataChangedV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/performance/v2",
+        "payload": "P2ReviewDataChangedV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "performance.stage_task.open_result_v2"
+      ],
+      "family": "performance",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/performance_v2_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2StageTaskOpenResultV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/performance/v2",
+        "payload": "P2StageTaskOpenResultV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "security_and_compliance.device_apply_record.device_apply_event_v2"
+      ],
+      "family": "security_and_compliance",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/security_and_compliance_v2_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2DeviceApplyRecordDeviceApplyEventV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/security_and_compliance/v2",
+        "payload": "P2DeviceApplyRecordDeviceApplyEventV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "security_and_compliance.device_record.device_change_event_v2"
+      ],
+      "family": "security_and_compliance",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/security_and_compliance_v2_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2DeviceRecordDeviceChangeEventV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/security_and_compliance/v2",
+        "payload": "P2DeviceRecordDeviceChangeEventV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "task.task.comment.updated_v1"
+      ],
+      "family": "task",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/task_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2TaskCommentUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/task/v1",
+        "payload": "P2TaskCommentUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "task.task.update_tenant_v1"
+      ],
+      "family": "task",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/task_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2TaskUpdateTenantV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/task/v1",
+        "payload": "P2TaskUpdateTenantV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "task.task.updated_v1"
+      ],
+      "family": "task",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/task_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2TaskUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/task/v1",
+        "payload": "P2TaskUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "task.task.update_user_access_v2"
+      ],
+      "family": "task",
+      "version": "v2",
+      "go": {
+        "dispatcher_file": "event/dispatcher/task_v2_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2TaskUpdateUserAccessV2",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/task/v2",
+        "payload": "P2TaskUpdateUserAccessV2"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.all_meeting_ended_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 26,
+        "method": "OnP2MeetingAllMeetingEndedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingAllMeetingEndedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.all_meeting_started_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2MeetingAllMeetingStartedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingAllMeetingStartedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.meeting_ended_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 82,
+        "method": "OnP2MeetingEndedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingEndedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.join_meeting_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2MeetingJoinMeetingV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingJoinMeetingV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.leave_meeting_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2MeetingLeaveMeetingV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingLeaveMeetingV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.participant_meeting_ended_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 110,
+        "method": "OnP2MeetingParticipantMeetingEndedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingParticipantMeetingEndedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.recording_ended_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 124,
+        "method": "OnP2MeetingRecordingEndedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingRecordingEndedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.recording_ready_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 138,
+        "method": "OnP2MeetingRecordingReadyV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingRecordingReadyV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.recording_started_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 152,
+        "method": "OnP2MeetingRecordingStartedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingRecordingStartedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.share_ended_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 166,
+        "method": "OnP2MeetingShareEndedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingShareEndedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.share_started_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 180,
+        "method": "OnP2MeetingShareStartedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingShareStartedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.meeting_started_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 96,
+        "method": "OnP2MeetingStartedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2MeetingStartedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.note.generated_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 194,
+        "method": "OnP2NoteGeneratedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2NoteGeneratedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.reserve_config.updated_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 208,
+        "method": "OnP2ReserveConfigUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2ReserveConfigUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.room.created_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 222,
+        "method": "OnP2RoomCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2RoomCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.room.deleted_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 236,
+        "method": "OnP2RoomDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2RoomDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.room_level.created_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 264,
+        "method": "OnP2RoomLevelCreatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2RoomLevelCreatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.room_level.deleted_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 278,
+        "method": "OnP2RoomLevelDeletedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2RoomLevelDeletedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.room_level.updated_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 292,
+        "method": "OnP2RoomLevelUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2RoomLevelUpdatedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.room.updated_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 250,
+        "method": "OnP2RoomUpdatedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2RoomUpdatedV1"
+      }
+    }
+  ]
+}

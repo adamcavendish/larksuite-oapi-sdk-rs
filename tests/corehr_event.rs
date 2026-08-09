@@ -1,3 +1,4 @@
+use larksuite_oapi_sdk_rs::EventDispatcher;
 use larksuite_oapi_sdk_rs::events::corehr::{
     P2CommonDataIdUserMappingChangedV1, P2DepartmentDeletedV1, P2DepartmentUpdatedV1,
     P2EmploymentCreatedV1, P2EmploymentUpdatedV1, P2JobChangeUpdatedV1, P2OffboardingUpdatedV1,
@@ -128,4 +129,14 @@ fn corehr_v1_event_structs_accept_empty_and_null_payloads() {
     }))
     .unwrap();
     assert!(employment.target_user_id.is_none());
+}
+
+#[test]
+#[allow(deprecated)]
+fn deprecated_corehr_registration_aliases_delegate_to_canonical_routes() {
+    let _dispatcher = EventDispatcher::new("", "")
+        .on_p2_corehr_employee_created_v1(|_| async { Ok(()) })
+        .on_p2_corehr_employee_updated_v1(|_| async { Ok(()) })
+        .on_p2_corehr_employee_offboarding_v1(|_| async { Ok(()) })
+        .on_p2_corehr_job_changed_v1(|_| async { Ok(()) });
 }

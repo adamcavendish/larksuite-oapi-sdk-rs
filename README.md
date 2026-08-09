@@ -169,6 +169,21 @@ the pinned Go `v3.9.10` reference. That gate also runs both Go extractor test
 suites and verifies the GoCompatibility metadata and full service catalog before
 accepting the Rust parity report.
 
+The checked-in Go event catalog records every typed P1 and P2 webhook route in
+the same pinned Go revision. `tools/go_rust_event_parity.json` compares each
+Go event key with the Rust `event_handlers!` registrations. It fails for a
+missing, duplicate, or wrong-protocol Rust registration and reports Rust-only
+routes without treating them as failures. It intentionally does not compare
+payload field shapes. Regenerate or verify the catalog and report with:
+
+```sh
+GO_SDK_DIR=/path/to/larksuite-oapi-sdk-go
+go run ./tools/generate_go_event_catalog.go --go-sdk "$GO_SDK_DIR"
+go run ./tools/generate_go_rust_event_parity.go
+just go-event-catalog-check "$GO_SDK_DIR"
+just go-rust-event-parity-check
+```
+
 ### Slash Commands
 
 Application v7 supports creating, listing, updating, and deleting slash
