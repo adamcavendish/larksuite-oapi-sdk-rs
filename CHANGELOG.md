@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+## [0.3.5] - 2026-08-09
+
+### REST service coverage
+
+- Added typed Bot v4 search and OKR v2 resources, including token-aware
+  pagination, wire-contract coverage, and runnable examples.
+
+### Events
+
+- Added typed Go v3.9.10 Approval and VC webhook handlers, including approval
+  instance/task status changes and VC note generation.
+
+### WebSocket
+
+- Fixed long-connection callback ACKs to preserve successful typed callback
+  responses, including card-action toasts and replacement-card data.
+
+### Tooling
+
+- Added deterministic Go P1/P2 typed webhook parity verification to prevent
+  missing typed event routes.
+
 ## [0.3.4] - 2026-07-31
 
 ### Channel
@@ -449,6 +471,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.5]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.5
 [0.3.4]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.4
 [0.3.3]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.3
 [0.3.2]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.2
