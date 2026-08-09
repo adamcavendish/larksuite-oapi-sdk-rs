@@ -1063,6 +1063,78 @@ async fn channel_strict_reply_never_falls_back_to_top_level_send() {
 }
 
 #[tokio::test]
+async fn channel_send_falls_back_when_its_reply_target_is_gone() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":230020,"msg":"reply target unavailable"}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_sent","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let result = channel
+        .send(
+            &SendInput {
+                chat_id: Some("oc_group".into()),
+                reply_message_id: Some("om_missing".into()),
+                text: Some("fall back to the chat".into()),
+                uuid: Some("delivery-44".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_sent");
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 2);
+    assert!(requests[0].contains("POST /open-apis/im/v1/messages/om_missing/reply"));
+    assert!(requests[0].contains(r#""uuid":"delivery-44""#));
+    assert!(requests[1].contains("POST /open-apis/im/v1/messages?receive_id_type=chat_id"));
+    assert!(requests[1].contains(r#""receive_id":"oc_group""#));
+    assert!(requests[1].contains(r#""uuid":"delivery-44""#));
+}
+
+#[tokio::test]
+async fn channel_strict_reply_chunks_keep_reply_routing_and_derived_uuids() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_chunk_1","chat_id":"oc_group"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_chunk_2","chat_id":"oc_group"}}"#,
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+
+    let result = channel
+        .reply(
+            "om_parent",
+            &SendInput {
+                text: Some(format!("{}b", "a".repeat(20_000))),
+                uuid: Some("delivery-45".into()),
+                ..Default::default()
+            },
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(result.message_id, "om_chunk_1");
+    assert_eq!(result.chunk_ids, vec!["om_chunk_1", "om_chunk_2"]);
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 2);
+    assert!(requests[0].contains("POST /open-apis/im/v1/messages/om_parent/reply"));
+    assert!(requests[1].contains("POST /open-apis/im/v1/messages/om_parent/reply"));
+    assert!(requests[0].contains(r#""uuid":"delivery-45-1""#));
+    assert!(requests[1].contains(r#""uuid":"delivery-45-2""#));
+    assert!(
+        !requests
+            .iter()
+            .any(|request| request.contains("POST /open-apis/im/v1/messages?"))
+    );
+}
+
+#[tokio::test]
 async fn channel_strict_reply_rejects_ambiguous_target_without_request() {
     let (addr, _handle, requests) = mock_json_server_with_requests(vec![
         r#"{"code":0,"msg":"ok","data":{"message_id":"unused"}}"#,
