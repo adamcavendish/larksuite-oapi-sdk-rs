@@ -62,6 +62,34 @@ pub struct EventResp {
     pub body: Vec<u8>,
 }
 
+pub(crate) enum DispatchOutcome {
+    Event(EventResp),
+    Callback(EventResp),
+}
+
+impl DispatchOutcome {
+    #[cfg(feature = "ws")]
+    pub(crate) fn response(&self) -> &EventResp {
+        match self {
+            Self::Event(response) | Self::Callback(response) => response,
+        }
+    }
+
+    #[cfg(feature = "ws")]
+    pub(crate) fn callback_body(&self) -> Option<&[u8]> {
+        match self {
+            Self::Callback(response) => Some(&response.body),
+            Self::Event(_) => None,
+        }
+    }
+
+    fn into_response(self) -> EventResp {
+        match self {
+            Self::Event(response) | Self::Callback(response) => response,
+        }
+    }
+}
+
 impl EventResp {
     pub fn success(body: impl Serialize) -> Self {
         let body_bytes = serde_json::to_vec(&body).unwrap_or_default();
@@ -523,18 +551,27 @@ impl EventDispatcher {
     }
 
     pub async fn handle(&self, req: EventReq) -> EventResp {
+        self.dispatch(req).await.into_response()
+    }
+
+    #[cfg(feature = "ws")]
+    pub(crate) async fn dispatch_for_ws(&self, req: EventReq) -> DispatchOutcome {
+        self.dispatch(req).await
+    }
+
+    async fn dispatch(&self, req: EventReq) -> DispatchOutcome {
         match self.do_handle(req).await {
-            Ok(resp) => resp,
+            Ok(outcome) => outcome,
             Err(e) => {
                 tracing::error!("event handler error: {e}");
-                EventResp::error(500, &e.to_string())
+                DispatchOutcome::Event(EventResp::error(500, &e.to_string()))
             }
         }
     }
 
-    async fn do_handle(&self, req: EventReq) -> Result<EventResp, LarkError> {
+    async fn do_handle(&self, req: EventReq) -> Result<DispatchOutcome, LarkError> {
         let (body_str, req) = match self.pipeline.process(req)? {
-            PipelineResult::Challenge(resp) => return Ok(resp),
+            PipelineResult::Challenge(resp) => return Ok(DispatchOutcome::Event(resp)),
             PipelineResult::Event { body_str, req } => (body_str, req),
         };
 
@@ -553,24 +590,30 @@ impl EventDispatcher {
         if let Some(handler) = self.callback_handlers.get(event_type) {
             let event_data = parsed.event.clone();
             let resp_data = handler(event_data).await?;
-            return Ok(EventResp::success(resp_data));
+            return Ok(DispatchOutcome::Callback(EventResp::success(resp_data)));
         }
 
         if let Some(handler) = self.customized_event_handlers.get(event_type) {
             handler(req, parsed).await?;
-            return Ok(EventResp::success(serde_json::json!({ "msg": "success" })));
+            return Ok(DispatchOutcome::Event(EventResp::success(
+                serde_json::json!({ "msg": "success" }),
+            )));
         }
 
         if let Some(handler) = self.event_handlers.get(event_type) {
             let event_data = parsed.event.clone();
             handler(event_data).await?;
-            return Ok(EventResp::success(serde_json::json!({ "msg": "success" })));
+            return Ok(DispatchOutcome::Event(EventResp::success(
+                serde_json::json!({ "msg": "success" }),
+            )));
         }
 
         tracing::warn!("no handler registered for event type: {event_type}");
-        Ok(EventResp::success(serde_json::json!({
-            "msg": format!("no handler for event type: {event_type}")
-        })))
+        Ok(DispatchOutcome::Event(EventResp::success(
+            serde_json::json!(
+                { "msg": format!("no handler for event type: {event_type}") }
+            ),
+        )))
     }
 }
 

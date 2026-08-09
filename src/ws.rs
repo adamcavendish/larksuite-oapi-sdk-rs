@@ -23,6 +23,7 @@ use std::sync::RwLock;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
+use base64::Engine as _;
 use futures_util::{SinkExt as _, StreamExt as _};
 use prost::Message as ProstMessage;
 use tokio::sync::Mutex;
@@ -122,7 +123,7 @@ struct AckResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     headers: Option<HashMap<String, String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<crate::JsonValue>,
+    data: Option<String>,
 }
 
 // ── Fragment reassembly buffer ──
@@ -966,13 +967,21 @@ impl<'a> WsFrameHandler<'a> {
         };
 
         let start = Instant::now();
-        let status = self.dispatch_event(payload).await;
+        let outcome = self.dispatch_event(payload).await;
         let biz_rt = start.elapsed().as_millis().to_string();
+        let response = outcome.response();
 
         let ack_payload = serde_json::to_vec(&AckResponse {
-            code: if status { 200 } else { 500 },
+            code: if response.status_code == 200 {
+                200
+            } else {
+                500
+            },
             headers: None,
-            data: None,
+            data: (response.status_code == 200)
+                .then(|| outcome.callback_body())
+                .flatten()
+                .map(|body| base64::engine::general_purpose::STANDARD.encode(body)),
         })
         .unwrap_or_default();
         let mut headers = frame.headers.clone();
@@ -1023,7 +1032,7 @@ impl<'a> WsFrameHandler<'a> {
         }
     }
 
-    async fn dispatch_event(&self, payload: Vec<u8>) -> bool {
+    async fn dispatch_event(&self, payload: Vec<u8>) -> crate::event::DispatchOutcome {
         use crate::event::EventReq;
 
         let req = EventReq {
@@ -1031,19 +1040,17 @@ impl<'a> WsFrameHandler<'a> {
             body: payload,
             request_uri: String::new(),
         };
-        let resp = self.client.dispatcher.handle(req).await;
-        if resp.status_code == 200 {
-            return true;
-        }
+        let outcome = self.client.dispatcher.dispatch_for_ws(req).await;
+        let response = outcome.response();
 
-        if self.client.log_enabled(tracing::Level::WARN) {
+        if response.status_code != 200 && self.client.log_enabled(tracing::Level::WARN) {
             tracing::warn!(
                 "event dispatch returned {}: {}",
-                resp.status_code,
-                String::from_utf8_lossy(&resp.body)
+                response.status_code,
+                String::from_utf8_lossy(&response.body)
             );
         }
-        false
+        outcome
     }
 }
 
@@ -1067,9 +1074,96 @@ fn extract_ws_aud(raw_url: &str) -> Result<String, LarkError> {
 mod tests {
     use super::*;
 
+    use std::pin::Pin;
     use std::sync::{Arc, Mutex as StdMutex};
+    use std::task::{Context, Poll};
 
+    use futures_util::Sink;
     use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
+
+    struct CapturingSink(Arc<StdMutex<Vec<Message>>>);
+
+    impl Sink<Message> for CapturingSink {
+        type Error = tokio_tungstenite::tungstenite::Error;
+
+        fn poll_ready(
+            self: Pin<&mut Self>,
+            _cx: &mut Context<'_>,
+        ) -> Poll<Result<(), Self::Error>> {
+            Poll::Ready(Ok(()))
+        }
+
+        fn start_send(self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+            self.0.lock().unwrap().push(item);
+            Ok(())
+        }
+
+        fn poll_flush(
+            self: Pin<&mut Self>,
+            _cx: &mut Context<'_>,
+        ) -> Poll<Result<(), Self::Error>> {
+            Poll::Ready(Ok(()))
+        }
+
+        fn poll_close(
+            self: Pin<&mut Self>,
+            _cx: &mut Context<'_>,
+        ) -> Poll<Result<(), Self::Error>> {
+            Poll::Ready(Ok(()))
+        }
+    }
+
+    fn card_action_event_frame() -> proto::Frame {
+        proto::Frame {
+            seq_id: 7,
+            log_id: 11,
+            service: 42,
+            method: METHOD_DATA,
+            headers: vec![
+                make_header(HEADER_TYPE, MSG_TYPE_EVENT),
+                make_header(HEADER_SUM, "1"),
+            ],
+            payload: Some(
+                serde_json::to_vec(&serde_json::json!({
+                    "schema": "2.0",
+                    "header": {
+                        "event_id": "ev_trigger",
+                        "event_type": "card.action.trigger",
+                        "app_id": "cli_test",
+                        "tenant_key": "t1",
+                        "create_time": "0"
+                    },
+                    "event": {
+                        "action": { "tag": "button", "value": {} },
+                        "token": "tok",
+                        "host": "lark",
+                        "delivery_type": "push"
+                    }
+                }))
+                .unwrap(),
+            ),
+            ..Default::default()
+        }
+    }
+
+    async fn acknowledge_event(client: &WsClient, event: proto::Frame) -> serde_json::Value {
+        let mut handler = WsFrameHandler {
+            client,
+            pending_frags: HashMap::new(),
+        };
+        let sent = Arc::new(StdMutex::new(Vec::new()));
+        let writer = Arc::new(Mutex::new(CapturingSink(Arc::clone(&sent))));
+
+        handler.handle_data_frame(event, &writer).await.unwrap();
+
+        let sent = sent.lock().unwrap();
+        assert_eq!(sent.len(), 1);
+        let Message::Binary(frame) = &sent[0] else {
+            panic!("expected binary ACK frame");
+        };
+        let ack = proto::Frame::decode(frame.as_ref()).unwrap();
+        serde_json::from_slice(ack.payload.as_deref().unwrap()).unwrap()
+    }
 
     // ── Builder/config tests ──
 
@@ -1525,6 +1619,58 @@ mod tests {
             get_header(&decoded.headers, HEADER_TYPE).as_deref(),
             Some(MSG_TYPE_PING)
         );
+    }
+
+    #[tokio::test]
+    async fn frame_handler_acknowledges_typed_callback_responses() {
+        use crate::event::{CardActionTriggerResponse, Toast};
+        use base64::Engine as _;
+
+        let dispatcher = EventDispatcher::new("", "")
+            .skip_sign_verify()
+            .on_card_action_trigger(|_| async {
+                Ok(CardActionTriggerResponse {
+                    toast: Some(Toast::new("Proposal accepted").toast_type("success")),
+                    card: None,
+                })
+            });
+        let client = WsClient::new(Config::new("app_id", "app_secret"), dispatcher);
+        let ack_payload = acknowledge_event(&client, card_action_event_frame()).await;
+        assert_eq!(ack_payload["code"], 200);
+        let callback_body = base64::engine::general_purpose::STANDARD
+            .decode(ack_payload["data"].as_str().expect("callback ACK data"))
+            .unwrap();
+        let callback_body: serde_json::Value = serde_json::from_slice(&callback_body).unwrap();
+        assert_eq!(callback_body["toast"]["type"], "success");
+        assert_eq!(callback_body["toast"]["content"], "Proposal accepted");
+    }
+
+    #[tokio::test]
+    async fn frame_handler_omits_data_for_ordinary_events() {
+        let dispatcher = EventDispatcher::new("", "")
+            .skip_sign_verify()
+            .on_event("card.action.trigger", |_| async { Ok(()) });
+        let client = WsClient::new(Config::new("app_id", "app_secret"), dispatcher);
+
+        let ack_payload = acknowledge_event(&client, card_action_event_frame()).await;
+
+        assert_eq!(ack_payload, serde_json::json!({ "code": 200 }));
+    }
+
+    #[tokio::test]
+    async fn frame_handler_omits_data_when_callback_fails() {
+        use crate::event::CardActionTriggerResponse;
+
+        let dispatcher = EventDispatcher::new("", "")
+            .skip_sign_verify()
+            .on_card_action_trigger(|_| async {
+                Err::<CardActionTriggerResponse, _>(LarkError::Event("handler failed".into()))
+            });
+        let client = WsClient::new(Config::new("app_id", "app_secret"), dispatcher);
+
+        let ack_payload = acknowledge_event(&client, card_action_event_frame()).await;
+
+        assert_eq!(ack_payload, serde_json::json!({ "code": 500 }));
     }
 
     // ── Fragment reassembly ──
