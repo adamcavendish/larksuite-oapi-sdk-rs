@@ -302,16 +302,50 @@ event_handlers! {
         : "corehr.person.updated_v1",
     on_p2_corehr_pre_hire_updated_v1 => P2PreHireUpdatedV1
         : "corehr.pre_hire.updated_v1",
+}
+
+impl crate::event::EventDispatcher {
     #[deprecated(note = "use on_p2_corehr_employment_created_v1 instead")]
-    on_p2_corehr_employee_created_v1 => P2EmploymentCreatedV1
-        : "corehr.employment.created_v1",
+    pub fn on_p2_corehr_employee_created_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2EmploymentCreatedV1) -> Fut + Send + Sync + 'static,
+        Fut: std::future::Future<Output = std::result::Result<(), crate::error::LarkError>>
+            + Send
+            + 'static,
+    {
+        self.on_p2_corehr_employment_created_v1(handler)
+    }
+
     #[deprecated(note = "use on_p2_corehr_employment_updated_v1 instead")]
-    on_p2_corehr_employee_updated_v1 => P2EmploymentUpdatedV1
-        : "corehr.employment.updated_v1",
+    pub fn on_p2_corehr_employee_updated_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2EmploymentUpdatedV1) -> Fut + Send + Sync + 'static,
+        Fut: std::future::Future<Output = std::result::Result<(), crate::error::LarkError>>
+            + Send
+            + 'static,
+    {
+        self.on_p2_corehr_employment_updated_v1(handler)
+    }
+
     #[deprecated(note = "use on_p2_corehr_offboarding_updated_v1 instead")]
-    on_p2_corehr_employee_offboarding_v1 => P2OffboardingUpdatedV1
-        : "corehr.offboarding.updated_v1",
+    pub fn on_p2_corehr_employee_offboarding_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2OffboardingUpdatedV1) -> Fut + Send + Sync + 'static,
+        Fut: std::future::Future<Output = std::result::Result<(), crate::error::LarkError>>
+            + Send
+            + 'static,
+    {
+        self.on_p2_corehr_offboarding_updated_v1(handler)
+    }
+
     #[deprecated(note = "use on_p2_corehr_job_change_updated_v1 instead")]
-    on_p2_corehr_job_changed_v1 => P2JobChangeUpdatedV1
-        : "corehr.job_change.updated_v1",
+    pub fn on_p2_corehr_job_changed_v1<F, Fut>(self, handler: F) -> Self
+    where
+        F: Fn(P2JobChangeUpdatedV1) -> Fut + Send + Sync + 'static,
+        Fut: std::future::Future<Output = std::result::Result<(), crate::error::LarkError>>
+            + Send
+            + 'static,
+    {
+        self.on_p2_corehr_job_change_updated_v1(handler)
+    }
 }

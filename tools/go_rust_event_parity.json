@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "go_event_catalog_sha256": "db00099637ca04ad3f4840efacb60f6572e737ba54b57b1d0792473c21683239",
+  "summary": {
+    "go_typed_event_keys": 223,
+    "rust_typed_event_keys": 230,
+    "matched_event_keys": 223,
+    "missing_go_event_keys": 0,
+    "duplicate_rust_event_keys": 0,
+    "protocol_mismatches": 0,
+    "rust_only_event_keys": 7
+  },
+  "missing_go_event_keys": null,
+  "duplicate_rust_event_keys": null,
+  "protocol_mismatches": null,
+  "rust_only_event_keys": [
+    {
+      "source_file": "src/events/apaas.rs",
+      "line": 25,
+      "method": "on_p2_apaas_workspace_record_change_v1",
+      "payload": "P2ApaasWorkspaceRecordChangeV1",
+      "protocol": "p2",
+      "event_key": "apaas.workspace.record_change_v1"
+    },
+    {
+      "source_file": "src/events/p1.rs",
+      "line": 502,
+      "method": "on_app_ticket_event",
+      "payload": "AppTicketEvent",
+      "protocol": "p1",
+      "event_key": "app_ticket"
+    },
+    {
+      "source_file": "src/events/passport.rs",
+      "line": 36,
+      "method": "on_p2_passport_session_created_v1",
+      "payload": "P2PassportSessionCreatedV1",
+      "protocol": "p2",
+      "event_key": "passport.session.created_v1"
+    },
+    {
+      "source_file": "src/events/passport.rs",
+      "line": 38,
+      "method": "on_p2_passport_session_deleted_v1",
+      "payload": "P2PassportSessionDeletedV1",
+      "protocol": "p2",
+      "event_key": "passport.session.deleted_v1"
+    },
+    {
+      "source_file": "src/events/search.rs",
+      "line": 35,
+      "method": "on_p2_search_data_source_created_v1",
+      "payload": "P2SearchDataSourceCreatedV1",
+      "protocol": "p2",
+      "event_key": "search.data_source.created_v1"
+    },
+    {
+      "source_file": "src/events/search.rs",
+      "line": 37,
+      "method": "on_p2_search_data_source_deleted_v1",
+      "payload": "P2SearchDataSourceDeletedV1",
+      "protocol": "p2",
+      "event_key": "search.data_source.deleted_v1"
+    },
+    {
+      "source_file": "src/events/search.rs",
+      "line": 39,
+      "method": "on_p2_search_data_source_updated_v1",
+      "payload": "P2SearchDataSourceUpdatedV1",
+      "protocol": "p2",
+      "event_key": "search.data_source.updated_v1"
+    }
+  ]
+}

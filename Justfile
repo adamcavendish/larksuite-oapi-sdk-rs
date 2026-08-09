@@ -60,18 +60,30 @@ go-v397-check go_sdk:
 go-service-catalog-check go_sdk:
     go run ./tools/generate_go_service_catalog.go --go-sdk "{{go_sdk}}" --check
 
+# Verify the checked-in Go typed webhook catalog against the Go SDK tag
+go-event-catalog-check go_sdk:
+    go run ./tools/generate_go_event_catalog.go --go-sdk "{{go_sdk}}" --check
+
 # Verify the checked-in Go-to-Rust service parity report
 go-rust-service-parity-check:
     go run ./tools/generate_go_rust_service_parity.go --check
+
+# Verify the checked-in Go-to-Rust typed webhook parity report
+go-rust-event-parity-check:
+    go run ./tools/generate_go_rust_event_parity.go --check
 
 # Verify Go tooling tests and all checked-in Go contract artifacts
 go-contract-provenance-check go_sdk:
     go test tools/generate_go_compatibility_metadata.go tools/generate_go_compatibility_metadata_test.go
     go test tools/generate_go_service_catalog.go tools/generate_go_service_catalog_test.go
+    go test tools/generate_go_event_catalog.go tools/generate_go_event_catalog_test.go
     go test tools/generate_go_rust_service_parity.go tools/generate_go_rust_service_parity_test.go
+    go test tools/generate_go_rust_event_parity.go tools/generate_go_rust_event_parity_test.go
     just go-compatibility-check "{{go_sdk}}"
     just go-service-catalog-check "{{go_sdk}}"
+    just go-event-catalog-check "{{go_sdk}}"
     just go-rust-service-parity-check
+    just go-rust-event-parity-check
 
 # ---------- Docs ----------
 
