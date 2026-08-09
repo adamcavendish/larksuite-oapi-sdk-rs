@@ -27,7 +27,7 @@ WebSocket, Axum, and channel integration.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.3.4"
+larksuite-oapi-sdk-rs = "0.3.5"
 ```
 
 The minimum supported Rust version is 1.95.0.
@@ -119,7 +119,7 @@ literals to create server-owned values.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.3.4", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.3.5", features = ["ws", "axum"] }
 ```
 
 ## API Coverage
