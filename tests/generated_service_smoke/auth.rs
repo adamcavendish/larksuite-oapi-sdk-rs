@@ -180,3 +180,52 @@ async fn authen_v1_by_query_smoke() {
     assert!(request.contains(r#""refresh_token":"oidc-refresh-1""#));
     assert!(request.contains(r#""refresh_token":"refresh-1""#));
 }
+
+#[tokio::test]
+async fn authen_oauth_v2_uses_open_api_base_url() {
+    let token_body = r#"{"code":0,"access_token":"user-token","refresh_token":"refresh-token","token_type":"Bearer","expires_in":7200,"scope":"scope-a"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, token_body),
+        http_response(200, token_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let option = RequestOption::default();
+
+    client
+        .authen()
+        .oauth
+        .retrieve_by_authorization_code(
+            "authorization-code",
+            Some("https://example.com/oauth/callback"),
+            Some("pkce-verifier"),
+            Some("requested-at-authorization"),
+            &option,
+        )
+        .await
+        .unwrap();
+    client
+        .authen()
+        .oauth
+        .refresh("refresh-token", Some("scope-a"), &option)
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert_eq!(
+        request
+            .matches("POST /open-apis/authen/v2/oauth/token ")
+            .count(),
+        2
+    );
+    assert!(request.contains(r#""grant_type":"authorization_code""#));
+    assert!(request.contains(r#""code":"authorization-code""#));
+    assert!(request.contains(r#""redirect_uri":"https://example.com/oauth/callback""#));
+    assert!(request.contains(r#""code_verifier":"pkce-verifier""#));
+    assert!(!request.contains("requested-at-authorization"));
+    assert!(request.contains(r#""grant_type":"refresh_token""#));
+    assert!(request.contains(r#""refresh_token":"refresh-token""#));
+    assert!(request.contains(r#""scope":"scope-a""#));
+    assert!(request.contains("content-type: application/json; charset=utf-8"));
+}

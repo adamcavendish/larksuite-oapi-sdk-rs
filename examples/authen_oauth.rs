@@ -1,4 +1,4 @@
-use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
+use larksuite_oapi_sdk_rs::{LARK_BASE_URL, LarkClient, RequestOption};
 
 fn print_token_summary(label: &str, token: Option<&str>, expires_in: Option<i64>) {
     let token_len = token.map(str::len).unwrap_or(0);
@@ -17,15 +17,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app_secret = std::env::var("APP_SECRET").expect("APP_SECRET env var required");
     let auth_code = std::env::var("AUTH_CODE").expect("AUTH_CODE env var required");
     let redirect_uri = std::env::var("REDIRECT_URI").ok();
+    let code_verifier = std::env::var("CODE_VERIFIER").ok();
     let refresh_token = std::env::var("REFRESH_TOKEN").ok();
 
-    let client = LarkClient::builder(app_id, app_secret).build()?;
+    let mut client_builder = LarkClient::builder(app_id, app_secret);
+    if std::env::var("LARK_REGION").as_deref() == Ok("lark") {
+        client_builder = client_builder.base_url(LARK_BASE_URL);
+    }
+    let client = client_builder.build()?;
     let option = RequestOption::default();
 
     let token = client
         .authen()
         .oauth
-        .retrieve_by_authorization_code(&auth_code, redirect_uri.as_deref(), None, None, &option)
+        .retrieve_by_authorization_code(
+            &auth_code,
+            redirect_uri.as_deref(),
+            code_verifier.as_deref(),
+            None,
+            &option,
+        )
         .await?;
 
     let token_data = token.data.as_ref();
