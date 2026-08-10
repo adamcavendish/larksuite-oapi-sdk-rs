@@ -689,6 +689,21 @@ async fn send_http_response(
                 LarkError::IllegalParam(format!("failed to serialize json body: {e}"))
             })?;
         }
+        Some(ReqBody::UrlEncoded(fields)) => {
+            let body = url::form_urlencoded::Serializer::new(String::new())
+                .extend_pairs(
+                    fields
+                        .iter()
+                        .map(|(key, value)| (key.as_str(), value.as_str())),
+                )
+                .finish();
+            builder = builder
+                .header(
+                    http::header::CONTENT_TYPE,
+                    http::HeaderValue::from_static("application/x-www-form-urlencoded"),
+                )
+                .body(body.into_bytes());
+        }
         Some(ReqBody::FormData(fields)) => {
             let mut form = aioduct::Multipart::new();
             for field in fields {
@@ -730,6 +745,22 @@ async fn send_http_response(
                     method = %api_req.http_method,
                     url = %full_url,
                     body = %redacted,
+                    "lark.request"
+                );
+            }
+            Some(ReqBody::UrlEncoded(_)) if sensitive_endpoint => {
+                tracing::debug!(
+                    method = %api_req.http_method,
+                    url = %full_url,
+                    body = "<omitted sensitive token request>",
+                    "lark.request"
+                );
+            }
+            Some(ReqBody::UrlEncoded(_)) => {
+                tracing::debug!(
+                    method = %api_req.http_method,
+                    url = %full_url,
+                    body = "<urlencoded>",
                     "lark.request"
                 );
             }
@@ -895,6 +926,8 @@ fn is_sensitive_log_endpoint(raw_url: &str) -> bool {
         path.as_str(),
         crate::constants::OAUTH_TOKEN_URL_PATH
             | crate::constants::USER_OAUTH_TOKEN_URL_PATH
+            | crate::constants::DEVICE_AUTHORIZATION_URL_PATH
+            | crate::constants::TOKEN_REVOCATION_URL_PATH
             | crate::constants::APP_ACCESS_TOKEN_INTERNAL_URL_PATH
             | crate::constants::APP_ACCESS_TOKEN_URL_PATH
             | crate::constants::TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH

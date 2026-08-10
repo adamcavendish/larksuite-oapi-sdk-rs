@@ -229,3 +229,46 @@ async fn authen_oauth_v2_uses_open_api_base_url() {
     assert!(request.contains(r#""scope":"scope-a""#));
     assert!(request.contains("content-type: application/json; charset=utf-8"));
 }
+
+#[tokio::test]
+async fn authen_device_oauth_uses_urlencoded_accounts_endpoints() {
+    let device_body = r#"{"device_code":"device-code","user_code":"USER-CODE","verification_uri":"https://accounts.example.test/device","verification_uri_complete":"https://accounts.example.test/device?user_code=USER-CODE","expires_in":600,"interval":5}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, device_body),
+        http_response(200, ""),
+    ])
+    .await;
+    let client = client_for(addr);
+
+    let device = client
+        .authen()
+        .oauth
+        .request_device_authorization(
+            Some("offline_access contact:user.base:readonly"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(device.device_code, "device-code");
+    client
+        .authen()
+        .oauth
+        .revoke_token(
+            "refresh-token",
+            Some("refresh_token"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /oauth/v1/device_authorization "));
+    assert!(request.contains("POST /oauth/v1/revoke "));
+    assert!(request.contains("content-type: application/x-www-form-urlencoded"));
+    assert!(request.contains("authorization: Basic "));
+    assert!(request.contains("client_id=test_app"));
+    assert!(request.contains("scope=offline_access+contact%3Auser.base%3Areadonly"));
+    assert!(request.contains("client_secret=test_secret"));
+    assert!(request.contains("token=refresh-token"));
+    assert!(request.contains("token_type_hint=refresh_token"));
+}
