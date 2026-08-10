@@ -73,7 +73,7 @@ for the complete setup.
 | --- | --- |
 | Call a typed REST endpoint | [`examples/send_message.rs`](examples/send_message.rs) or [generated examples](examples/README.md) |
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
-| Exchange or refresh OAuth tokens | [`examples/authen_oauth.rs`](examples/authen_oauth.rs) |
+| Exchange or refresh OAuth tokens | [`examples/authen_oauth.rs`](examples/authen_oauth.rs) and [OAuth SSO guide](docs/oauth-sso.md) |
 | Receive webhook events | [`examples/event_handler.rs`](examples/event_handler.rs) |
 | Handle interactive card callbacks | [`examples/card_action_handler.rs`](examples/card_action_handler.rs) |
 | Run a WebSocket event client | [`examples/ws_client.rs`](examples/ws_client.rs) with `ws` enabled |
@@ -86,6 +86,8 @@ for the complete setup.
   requests, the compatibility bridge, and deterministic Go-to-Rust checks.
 - [Events, WebSockets, and channels](docs/events-and-channels.md): webhook
   dispatch, long connections, trusted user channels, replies, and updates.
+- [OAuth SSO](docs/oauth-sso.md): Feishu and Lark browser login, PKCE, token
+  refresh, and application-owned session handling.
 - [Documentation index](docs/README.md): detailed guides and runnable examples.
 
 ## Migration from 0.2

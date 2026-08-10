@@ -894,6 +894,7 @@ fn is_sensitive_log_endpoint(raw_url: &str) -> bool {
     matches!(
         path.as_str(),
         crate::constants::OAUTH_TOKEN_URL_PATH
+            | crate::constants::USER_OAUTH_TOKEN_URL_PATH
             | crate::constants::APP_ACCESS_TOKEN_INTERNAL_URL_PATH
             | crate::constants::APP_ACCESS_TOKEN_URL_PATH
             | crate::constants::TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH
@@ -1092,6 +1093,9 @@ mod tests {
     fn detects_sensitive_token_log_endpoints() {
         assert!(is_sensitive_log_endpoint(
             "https://open.feishu.cn/oauth/v3/token"
+        ));
+        assert!(is_sensitive_log_endpoint(
+            "https://open.larksuite.com/open-apis/authen/v2/oauth/token"
         ));
         assert!(is_sensitive_log_endpoint(
             "https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal?x=1"

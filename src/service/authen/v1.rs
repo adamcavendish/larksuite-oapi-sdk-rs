@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
-use crate::constants::{AccessTokenType, HEADER_X_TARGET_SERVICE};
+use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::RestRequest;
-use crate::token;
 use crate::transport;
 
 // ── Domain types ──
@@ -429,7 +428,7 @@ impl<'a> AccessToken<'a> {
         code: &str,
         redirect_uri: Option<&str>,
         code_verifier: Option<&str>,
-        scope: Option<&str>,
+        _scope: Option<&str>,
         option: &RequestOption,
     ) -> Result<AccessTokenResp, LarkError> {
         let body = OAuthTokenRequestBody {
@@ -437,7 +436,6 @@ impl<'a> AccessToken<'a> {
             code: Some(code.to_string()),
             redirect_uri: redirect_uri.map(|s| s.to_string()),
             code_verifier: code_verifier.map(|s| s.to_string()),
-            scope: scope.map(|s| s.to_string()),
             ..Default::default()
         };
         self.do_oauth_request(&body, option).await
@@ -464,60 +462,29 @@ impl<'a> AccessToken<'a> {
         body: &OAuthTokenRequestBody,
         option: &RequestOption,
     ) -> Result<AccessTokenResp, LarkError> {
-        let oauth_base_url = token::resolve_oauth_base_url(self.config);
-        let mut request_url = format!(
+        let request_url = format!(
             "{}{}",
-            oauth_base_url.trim_end_matches('/'),
-            crate::constants::OAUTH_TOKEN_URL_PATH
+            self.config.base_url.trim_end_matches('/'),
+            crate::constants::USER_OAUTH_TOKEN_URL_PATH
         );
         let mut request_option = option.clone();
 
         let mut body = body.clone();
         body.client_id = Some(self.config.app_id.clone());
-
-        if let Some(provider) = self.config.client_assertion_provider() {
-            let aud = token::extract_aud_from_url(&oauth_base_url)?;
-            let assertion = provider.retrieve_token(&aud).await.map_err(|e| {
-                LarkError::ClientAssertion(format!("retrieve client assertion token failed: {e}"))
-            })?;
-            if assertion.value.is_empty() {
-                return Err(LarkError::ClientAssertion(
-                    "client assertion token is empty".to_string(),
-                ));
-            }
-            body.client_assertion_type =
-                Some(crate::constants::CLIENT_ASSERTION_TYPE_JWT_BEARER.to_string());
-            if let Some(ref target) = assertion.target_info {
-                let target_service = if target.target_service.contains("://") {
-                    target.target_service.clone()
-                } else {
-                    format!("https://{}", target.target_service)
-                };
-                request_url = format!(
-                    "{}{}{}",
-                    target_service.trim_end_matches('/'),
-                    target.target_prefix,
-                    crate::constants::OAUTH_TOKEN_URL_PATH
-                );
-                let headers = request_option
-                    .headers
-                    .get_or_insert_with(http::HeaderMap::new);
-                headers.insert(
-                    HEADER_X_TARGET_SERVICE,
-                    http::HeaderValue::from_str(&aud).map_err(|e| {
-                        LarkError::ClientAssertion(format!("invalid target service header: {e}"))
-                    })?,
-                );
-            }
-            body.client_assertion = Some(assertion.value);
-        } else if !self.config.app_secret.is_empty() {
-            body.client_secret = Some(self.config.app_secret.clone());
-        } else {
-            return Err(LarkError::ClientAssertion(
-                "AppSecret and ClientAssertionProvider cannot both be empty for AccessToken APIs"
-                    .to_string(),
+        if self.config.app_secret.is_empty() {
+            return Err(LarkError::IllegalParam(
+                "AppSecret must be configured for user OAuth access-token APIs".to_string(),
             ));
         }
+        body.client_secret = Some(self.config.app_secret.clone());
+
+        let headers = request_option
+            .headers
+            .get_or_insert_with(http::HeaderMap::new);
+        headers.insert(
+            http::header::CONTENT_TYPE,
+            http::HeaderValue::from_static("application/json; charset=utf-8"),
+        );
 
         let mut api_req = ApiReq::new(http::Method::POST, &request_url);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
@@ -581,10 +548,6 @@ struct OAuthTokenRequestBody {
     client_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     client_secret: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    client_assertion_type: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    client_assertion: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     code: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
