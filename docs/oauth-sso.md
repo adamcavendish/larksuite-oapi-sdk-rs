@@ -80,6 +80,52 @@ let user = client.authen().user_info.get(&user_option).await?;
 # }
 ```
 
+## Device authorization flow
+
+For CLI, terminal, or TV-style applications, request a device code and direct the user to
+`verification_uri_complete` (or `verification_uri` with `user_code`). The SDK polls at the
+server-provided interval and returns once the user approves, denies, or the code expires.
+
+```rust,no_run
+# async fn device_login(client: &larksuite_oapi_sdk_rs::LarkClient) -> Result<(), larksuite_oapi_sdk_rs::LarkError> {
+use larksuite_oapi_sdk_rs::RequestOption;
+
+let device = client
+    .authen()
+    .oauth
+    .request_device_authorization(
+        Some("offline_access contact:user.base:readonly"),
+        &RequestOption::default(),
+    )
+    .await?;
+
+println!("Open {}", device.verification_uri_complete);
+let token = client
+    .authen()
+    .oauth
+    .poll_device_token(&device, &RequestOption::default())
+    .await?;
+# let _ = token;
+# Ok(())
+# }
+```
+
+Revoke a token when the local session is disconnected:
+
+```rust,no_run
+# async fn revoke(client: &larksuite_oapi_sdk_rs::LarkClient, refresh_token: &str) -> Result<(), larksuite_oapi_sdk_rs::LarkError> {
+client
+    .authen()
+    .oauth
+    .revoke_token(refresh_token, Some("refresh_token"), &Default::default())
+    .await?;
+# Ok(())
+# }
+```
+
+The SDK maps the standard Feishu and Lark Open API bases to their matching Accounts hosts. A
+custom `base_url` remains unchanged, so proxies and mock servers can serve both endpoints.
+
 ## Maintainer live Feishu verification
 
 The ignored live test exchanges a freshly authorized code and immediately refreshes the

@@ -32,6 +32,7 @@ impl ApiReq {
 #[derive(Debug, Clone)]
 pub enum ReqBody {
     Json(crate::JsonValue),
+    UrlEncoded(Vec<(String, String)>),
     FormData(Vec<FormDataField>),
 }
 

@@ -20,6 +20,10 @@ pub const TENANT_ACCESS_TOKEN_URL_PATH: &str = "/open-apis/auth/v3/tenant_access
 pub const OAUTH_TOKEN_URL_PATH: &str = "/oauth/v3/token";
 /// OAuth v2 endpoint for user authorization-code and refresh-token flows.
 pub const USER_OAUTH_TOKEN_URL_PATH: &str = "/open-apis/authen/v2/oauth/token";
+/// OAuth 2.0 device authorization endpoint path.
+pub const DEVICE_AUTHORIZATION_URL_PATH: &str = "/oauth/v1/device_authorization";
+/// OAuth 2.0 token revocation endpoint path.
+pub const TOKEN_REVOCATION_URL_PATH: &str = "/oauth/v1/revoke";
 pub const APPLY_APP_TICKET_PATH: &str = "/open-apis/auth/v3/app_ticket/resend";
 
 pub const ERR_CODE_APP_TICKET_INVALID: i64 = 10012;
