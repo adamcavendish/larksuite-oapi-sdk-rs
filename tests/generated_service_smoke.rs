@@ -326,6 +326,8 @@ mod security_and_compliance;
 mod sheets;
 #[path = "generated_service_smoke/spark/app.rs"]
 mod spark_app;
+#[path = "generated_service_smoke/spark/db_sync.rs"]
+mod spark_db_sync;
 #[path = "generated_service_smoke/spark/metadata.rs"]
 mod spark_metadata;
 #[path = "generated_service_smoke/spark/record.rs"]

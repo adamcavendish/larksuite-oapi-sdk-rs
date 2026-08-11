@@ -446,8 +446,8 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         },
     },
     spark::v1::{
-        DownloadAppStorageQuery, SparkPageQuery, SparkRecordQuery, SparkTableMutationQuery,
-        SparkViewRecordQuery,
+        DownloadAppStorageQuery, ListDbSyncQuery, SparkPageQuery, SparkRecordQuery,
+        SparkTableMutationQuery, SparkViewRecordQuery,
     },
     speech_to_text::v1::{
         FileRecognizeSpeechQuery, RecognizeBasicSpeechReqBody, RecognizeSpeechStreamReqBody,
