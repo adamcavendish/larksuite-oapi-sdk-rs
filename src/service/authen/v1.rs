@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::{
-    AccessTokenType, DEVICE_AUTHORIZATION_URL_PATH, FEISHU_BASE_URL, FEISHU_OAUTH_BASE_URL,
-    LARK_BASE_URL, LARK_OAUTH_BASE_URL, TOKEN_REVOCATION_URL_PATH, USER_OAUTH_TOKEN_URL_PATH,
+    AccessTokenType, DEVICE_AUTHORIZATION_URL_PATH, ERR_CODE_DEVICE_AUTHORIZATION_PENDING,
+    FEISHU_BASE_URL, FEISHU_OAUTH_BASE_URL, LARK_BASE_URL, LARK_OAUTH_BASE_URL,
+    TOKEN_REVOCATION_URL_PATH, USER_OAUTH_TOKEN_URL_PATH,
 };
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
@@ -571,6 +572,9 @@ impl<'a> AccessToken<'a> {
             {
                 Ok(token) => return Ok(token),
                 Err(error) => {
+                    if is_device_authorization_pending(&error) {
+                        continue;
+                    }
                     let message = error.to_string();
                     if message.contains("authorization_pending") {
                         continue;
@@ -864,6 +868,13 @@ fn oauth_response_error(operation: &str, response: &OAuthErrorResponse) -> LarkE
     }))
 }
 
+fn is_device_authorization_pending(error: &LarkError) -> bool {
+    matches!(
+        error,
+        LarkError::Api(error) if error.code == ERR_CODE_DEVICE_AUTHORIZATION_PENDING
+    )
+}
+
 pub struct UserInfoResource<'a> {
     config: &'a Config,
 }
@@ -931,5 +942,15 @@ mod device_oauth_tests {
             oauth_accounts_base_url("https://oauth.example.test/"),
             "https://oauth.example.test"
         );
+    }
+
+    #[test]
+    fn treats_feishu_pending_api_code_as_a_retryable_device_flow_state() {
+        let error = LarkError::Api(Box::new(crate::resp::CodeError {
+            code: ERR_CODE_DEVICE_AUTHORIZATION_PENDING,
+            ..Default::default()
+        }));
+
+        assert!(is_device_authorization_pending(&error));
     }
 }
