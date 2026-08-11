@@ -27,6 +27,8 @@ pub const TOKEN_REVOCATION_URL_PATH: &str = "/oauth/v1/revoke";
 pub const APPLY_APP_TICKET_PATH: &str = "/open-apis/auth/v3/app_ticket/resend";
 
 pub const ERR_CODE_APP_TICKET_INVALID: i64 = 10012;
+/// Feishu authen v2 device-flow response while user authorization is pending.
+pub const ERR_CODE_DEVICE_AUTHORIZATION_PENDING: i64 = 20094;
 pub const ERR_CODE_ACCESS_TOKEN_INVALID: i64 = 99991671;
 pub const ERR_CODE_APP_ACCESS_TOKEN_INVALID: i64 = 99991664;
 pub const ERR_CODE_TENANT_ACCESS_TOKEN_INVALID: i64 = 99991663;
