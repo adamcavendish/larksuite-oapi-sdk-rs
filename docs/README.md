@@ -10,4 +10,6 @@ examples, features, and coverage.
   dispatch, long connections, trusted user channels, replies, and updates.
 - [OAuth SSO](oauth-sso.md) covers Feishu and Lark browser authorization,
   authorization-code exchange, refresh-token rotation, and user identity lookup.
+- [Spark db sync](spark-db-sync.md) covers user-token Base-to-database sync
+  previews, task lifecycle operations, and opt-in live verification.
 - [Examples](../examples/README.md) contains runnable service workflows.

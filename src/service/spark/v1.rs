@@ -29,6 +29,13 @@ pub type PatchTableRecordsAppTableResp = JsonResp;
 pub type PostTableRecordsAppTableResp = JsonResp;
 pub type GetViewRecordListAppViewResp = JsonResp;
 pub type IdConvertDirectoryUserResp = JsonResp;
+pub type CreateDbSyncResp = JsonResp;
+pub type ListDbSyncResp = JsonResp;
+pub type GetDbSyncResp = JsonResp;
+pub type UpdateDbSyncResp = JsonResp;
+pub type EnableDbSyncResp = JsonResp;
+pub type DisableDbSyncResp = JsonResp;
+pub type DeleteDbSyncResp = JsonResp;
 
 const EMPTY_PARAMS: [(&str, &str); 0] = [];
 
@@ -62,6 +69,65 @@ impl<'a> SparkPageQuery<'a> {
             pairs.push(("page_token", page_token.to_string()));
         }
         pairs
+    }
+}
+
+/// Query parameters for listing Base-to-database sync tasks.
+///
+/// The sync configuration itself remains open-ended JSON because the upstream
+/// CLI is the current contract source and the API is not yet present in the
+/// pinned Go SDK catalog.
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListDbSyncQuery<'a> {
+    pub app_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub mode: Option<&'a str>,
+    pub status: Option<&'a str>,
+    pub table_name: Option<&'a str>,
+    pub env: Option<&'a str>,
+}
+
+impl<'a> ListDbSyncQuery<'a> {
+    pub fn new(app_id: &'a str) -> Self {
+        Self {
+            app_id,
+            page: PageQuery::new(),
+            mode: None,
+            status: None,
+            table_name: None,
+            env: None,
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn mode(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.mode = value.into();
+        self
+    }
+
+    pub fn status(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.status = value.into();
+        self
+    }
+
+    pub fn table_name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.table_name = value.into();
+        self
+    }
+
+    pub fn env(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.env = value.into();
+        self
     }
 }
 
@@ -358,6 +424,158 @@ impl<'a> SparkViewRecordQuery<'a> {
 
 pub struct AppResource<'a> {
     config: &'a Config,
+}
+
+/// Base-to-database sync task operations.
+///
+/// All endpoints currently require a user access token. Request and response
+/// schemas are deliberately represented as serializable/generic JSON until an
+/// authoritative OpenAPI schema is published by an SDK catalog.
+pub struct DbSyncResource<'a> {
+    config: &'a Config,
+}
+
+impl<'a> DbSyncResource<'a> {
+    pub async fn create(
+        &self,
+        app_id: &str,
+        body: &impl Serialize,
+        option: &RequestOption,
+    ) -> Result<CreateDbSyncResp, LarkError> {
+        let body = crate::JsonValue::from_serializable(body)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/db/sync_create",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    pub async fn list(
+        &self,
+        query: &ListDbSyncQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListDbSyncResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/spark/v1/apps/:app_id/db/sync_list",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", query.app_id)
+        .page_query(query.page)
+        .query("mode", query.mode)
+        .query("status", query.status)
+        .query("table", query.table_name)
+        .query("env", query.env)
+        .send_json()
+        .await
+    }
+
+    pub async fn get(
+        &self,
+        app_id: &str,
+        task_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetDbSyncResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/spark/v1/apps/:app_id/db/sync_task",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .query("task_id", task_id)
+        .send_json()
+        .await
+    }
+
+    pub async fn update(
+        &self,
+        app_id: &str,
+        body: &impl Serialize,
+        option: &RequestOption,
+    ) -> Result<UpdateDbSyncResp, LarkError> {
+        let body = crate::JsonValue::from_serializable(body)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            "/open-apis/spark/v1/apps/:app_id/db/sync_update",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    pub async fn enable(
+        &self,
+        app_id: &str,
+        task_id: &str,
+        option: &RequestOption,
+    ) -> Result<EnableDbSyncResp, LarkError> {
+        let body = crate::JsonValue::from_serializable(serde_json::json!({ "task_id": task_id }))?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/db/sync_enable",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    pub async fn disable(
+        &self,
+        app_id: &str,
+        task_id: &str,
+        option: &RequestOption,
+    ) -> Result<DisableDbSyncResp, LarkError> {
+        let body = crate::JsonValue::from_serializable(serde_json::json!({ "task_id": task_id }))?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/db/sync_disable",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    pub async fn delete(
+        &self,
+        app_id: &str,
+        task_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteDbSyncResp, LarkError> {
+        let body = crate::JsonValue::from_serializable(serde_json::json!({ "task_id": task_id }))?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/db/sync_del",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
 }
 
 impl<'a> AppResource<'a> {
@@ -812,6 +1030,7 @@ impl<'a> DirectoryUserResource<'a> {
 
 pub struct V1<'a> {
     pub app: AppResource<'a>,
+    pub db_sync: DbSyncResource<'a>,
     pub app_enum: AppEnumResource<'a>,
     pub app_storage: AppStorageResource<'a>,
     pub app_table: AppTableResource<'a>,
@@ -824,6 +1043,7 @@ impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             app: AppResource { config },
+            db_sync: DbSyncResource { config },
             app_enum: AppEnumResource { config },
             app_storage: AppStorageResource { config },
             app_table: AppTableResource { config },
