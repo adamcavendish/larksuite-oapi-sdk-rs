@@ -69,6 +69,7 @@ impl LarkClient {
     service_accessor!(docs, docs, v1, V1);
     service_accessor!(apaas, apaas, v1, V1);
     service_accessor!(base_v2, base, v2, V2);
+    service_accessor!(base_v3, base, v3, V3);
     service_accessor!(block, block, v1, V1);
     service_accessor!(block_v2, block, v2, V2);
     service_accessor!(board, board, v1, V1);

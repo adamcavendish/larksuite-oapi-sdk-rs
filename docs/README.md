@@ -12,4 +12,6 @@ examples, features, and coverage.
   authorization-code exchange, refresh-token rotation, and user identity lookup.
 - [Spark db sync](spark-db-sync.md) covers user-token Base-to-database sync
   previews, task lifecycle operations, and opt-in live verification.
+- [Base v3 record reads](base-v3-records.md) covers CLI-aligned Base record
+  list/search operations and their read-only live verification.
 - [Examples](../examples/README.md) contains runnable service workflows.
