@@ -111,7 +111,10 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         UpdateDraftQuery as UpdateBaikeDraftQuery, UpdateEntityQuery as UpdateBaikeEntityQuery,
         UploadFileQuery as UploadBaikeFileQuery,
     },
-    base::v2::{CreateAppRoleV2Query, ListAppRoleV2Query, UpdateAppRoleV2Query},
+    base::{
+        v2::{CreateAppRoleV2Query, ListAppRoleV2Query, UpdateAppRoleV2Query},
+        v3::ListRecordQuery as ListBaseV3RecordQuery,
+    },
     bitable::v1::{
         ListAppRoleMemberQuery, ListAppRoleQuery, ListAppWorkflowQuery, ListDashboardQuery,
         ListFieldQuery, ListFormFieldQuery, ListRecordQuery, ListTableQuery, ListViewQuery,
