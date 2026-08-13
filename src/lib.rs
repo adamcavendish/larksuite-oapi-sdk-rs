@@ -14,6 +14,8 @@
 //! - **Event dispatch** — webhook and WebSocket event routing via [`EventDispatcher`].
 //! - **Typed events** — 200+ typed event structs under [`events`].
 //! - **Card builder** — interactive Lark card construction via [`card`].
+//! - **Channel messaging** — feature-gated (`messaging`) high-level send, reply, edit, upload, and download operations via [`channel::ChannelMessaging`].
+//! - **Channel runtime** — feature-gated (`channel`) inbound event normalization and policy handling; enables `messaging` and `ws`.
 //! - **WebSocket client** — feature-gated (`ws`) persistent long-connection event stream via [`ws::WsClient`].
 //! - **Axum adapter** — feature-gated (`axum`) integration for HTTP servers.
 
@@ -21,7 +23,7 @@
 mod macros;
 pub mod cache;
 pub mod card;
-#[cfg(feature = "channel")]
+#[cfg(feature = "messaging")]
 pub mod channel;
 pub mod client;
 pub mod config;

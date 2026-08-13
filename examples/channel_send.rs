@@ -1,5 +1,5 @@
-use larksuite_oapi_sdk_rs::channel::{Channel, SendInput};
-use larksuite_oapi_sdk_rs::{EventDispatcher, LarkClient, RequestOption};
+use larksuite_oapi_sdk_rs::channel::SendInput;
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -8,13 +8,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let chat_id = std::env::var("CHAT_ID").expect("CHAT_ID env var required");
 
     let client = LarkClient::builder(app_id, app_secret).build()?;
-    let dispatcher = EventDispatcher::new("", "");
-    let channel = Channel::builder(&client, dispatcher).build();
+    let messaging = client.channel_messaging();
 
-    let sent = Box::pin(channel.send(
+    let sent = Box::pin(messaging.send(
         &SendInput {
             chat_id: Some(chat_id),
-            markdown: Some("**Hello from channel send**".into()),
+            markdown: Some("**Hello from channel messaging**".into()),
             title: Some("Rust SDK".into()),
             uuid: std::env::var("MESSAGE_UUID").ok(),
             ..Default::default()

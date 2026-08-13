@@ -1,29 +1,56 @@
 use std::path::Path;
 
+use serde::Serialize;
+
+use crate::service::common::{DownloadResp, EmptyResp};
 use crate::service::im::v1::{
-    CreateFileResp, CreateImageResp, CreateMessageReqBody, FileResource, ImageResource,
-    MessageResource, MessageType, ReplyMessageReqBody,
+    CreateFileResp, CreateImageResp, CreateMessageReqBody, CreateMessageResp, FileResource,
+    ImageResource, MessageResource, MessageResourceDownload, MessageType, PatchMessageReqBody,
+    ReplyMessageReqBody, ReplyMessageResp, UpdateMessageReqBody,
 };
 use crate::{LarkClient, LarkError, RequestOption};
 
+use super::composition::{compose_mentions_text_prefix, markdown_to_post};
 use super::duration::{infer_audio_duration_ms, infer_video_duration_ms};
-use super::normalize::{compose_mentions_text_prefix, markdown_to_post};
 use super::safety::{fetch_source_url, file_name_from_url};
-use super::stream::{split_markdown, text_content};
-use super::types::{MediaKind, ReceiveIdType, SendInput, SendResult, UploadInput, UploadResult};
+use super::stream::{StreamUpdate, split_markdown, text_content};
+use super::types::{
+    MediaKind, ReceiveIdType, SendInput, SendResult, SendTarget, UploadInput, UploadResult,
+};
 
 const DEFAULT_TEXT_CHUNK_LIMIT: usize = 20_000;
 
-pub(super) struct Delivery<'a> {
+/// High-level channel message and message-resource operations.
+pub struct ChannelMessaging<'a> {
     client: &'a LarkClient,
 }
 
-impl<'a> Delivery<'a> {
-    pub(super) fn new(client: &'a LarkClient) -> Self {
+impl<'a> ChannelMessaging<'a> {
+    pub(crate) fn new(client: &'a LarkClient) -> Self {
         Self { client }
     }
 
-    pub(super) async fn send(
+    pub async fn send_text(
+        &self,
+        target: &SendTarget,
+        text: &str,
+        option: &RequestOption,
+    ) -> Result<CreateMessageResp, LarkError> {
+        self.message_resource()
+            .create(
+                &target.receive_id_type,
+                &CreateMessageReqBody {
+                    receive_id: Some(target.receive_id.clone()),
+                    msg_type: Some(MessageType::TEXT.to_string()),
+                    content: Some(text_content(text)?),
+                    uuid: None,
+                },
+                option,
+            )
+            .await
+    }
+
+    pub async fn send(
         &self,
         input: &SendInput,
         option: &RequestOption,
@@ -74,7 +101,182 @@ impl<'a> Delivery<'a> {
         }
     }
 
-    pub(super) async fn reply(
+    /// Reply to a message without retrying it as a top-level message.
+    pub async fn reply(
+        &self,
+        message_id: &str,
+        input: &SendInput,
+        option: &RequestOption,
+    ) -> Result<SendResult, LarkError> {
+        self.reply_with_threading(message_id, input, None, option)
+            .await
+    }
+
+    /// Reply to a message in its topic without retrying it as a top-level message.
+    pub async fn reply_in_thread(
+        &self,
+        message_id: &str,
+        input: &SendInput,
+        option: &RequestOption,
+    ) -> Result<SendResult, LarkError> {
+        self.reply_with_threading(message_id, input, Some(true), option)
+            .await
+    }
+
+    pub async fn send_text_with_fallback(
+        &self,
+        targets: &[SendTarget],
+        text: &str,
+        option: &RequestOption,
+    ) -> Result<CreateMessageResp, LarkError> {
+        let mut last_error = None;
+        let mut last_api_error = None;
+        for target in targets {
+            match self.send_text(target, text, option).await {
+                Ok(resp) if resp.success() => return Ok(resp),
+                Ok(resp) => last_api_error = Some(resp.code_error.clone()),
+                Err(err) => last_error = Some(err),
+            }
+        }
+        if let Some(code_error) = last_api_error {
+            return Err(LarkError::Api(Box::new(code_error)));
+        }
+        Err(last_error.unwrap_or_else(|| {
+            LarkError::IllegalParam("send_text_with_fallback requires at least one target".into())
+        }))
+    }
+
+    pub async fn reply_text(
+        &self,
+        message_id: &str,
+        text: &str,
+        reply_in_thread: bool,
+        option: &RequestOption,
+    ) -> Result<ReplyMessageResp, LarkError> {
+        self.message_resource()
+            .reply(
+                message_id,
+                &ReplyMessageReqBody {
+                    content: Some(text_content(text)?),
+                    msg_type: Some(MessageType::TEXT.to_string()),
+                    reply_in_thread: Some(reply_in_thread),
+                    uuid: None,
+                },
+                option,
+            )
+            .await
+    }
+
+    pub async fn edit_text(
+        &self,
+        message_id: &str,
+        text: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let response = self
+            .message_resource()
+            .update(
+                message_id,
+                &UpdateMessageReqBody {
+                    msg_type: Some(MessageType::TEXT.to_string()),
+                    content: Some(text_content(text)?),
+                },
+                option,
+            )
+            .await?;
+
+        Ok(EmptyResp {
+            api_resp: response.api_resp,
+            code_error: response.code_error,
+        })
+    }
+
+    pub async fn edit_card(
+        &self,
+        message_id: &str,
+        card: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let body = PatchMessageReqBody::interactive_card(card)?;
+        self.message_resource()
+            .patch(message_id, &body, option)
+            .await
+    }
+
+    pub async fn send_markdown_chunks(
+        &self,
+        target: &SendTarget,
+        markdown: &str,
+        max_chars: usize,
+        option: &RequestOption,
+    ) -> Result<Vec<CreateMessageResp>, LarkError> {
+        let mut responses = Vec::new();
+        for chunk in split_markdown(markdown, max_chars) {
+            responses.push(self.send_text(target, &chunk, option).await?);
+        }
+        Ok(responses)
+    }
+
+    pub async fn upload_image(
+        &self,
+        image_type: &str,
+        data: Vec<u8>,
+        option: &RequestOption,
+    ) -> Result<CreateImageResp, LarkError> {
+        self.image_resource().create(image_type, data, option).await
+    }
+
+    pub async fn upload_file(
+        &self,
+        file_type: &str,
+        file_name: &str,
+        duration: Option<i64>,
+        data: Vec<u8>,
+        option: &RequestOption,
+    ) -> Result<CreateFileResp, LarkError> {
+        self.file_resource()
+            .create(file_type, file_name, duration, data, option)
+            .await
+    }
+
+    pub async fn download_message_resource(
+        &self,
+        message_id: &str,
+        file_key: &str,
+        resource_type: &str,
+        option: &RequestOption,
+    ) -> Result<DownloadResp, LarkError> {
+        self.message_resource_download()
+            .get(message_id, file_key, resource_type, option)
+            .await
+    }
+
+    pub async fn download_file(
+        &self,
+        message_id: &str,
+        file_key: &str,
+        media_type: &str,
+        option: &RequestOption,
+    ) -> Result<DownloadResp, LarkError> {
+        self.download_message_resource(message_id, file_key, media_type, option)
+            .await
+    }
+
+    pub async fn flush_stream_text(
+        &self,
+        stream: &mut StreamUpdate,
+        option: &RequestOption,
+    ) -> Result<Option<EmptyResp>, LarkError> {
+        if !stream.should_flush() {
+            return Ok(None);
+        }
+        let content = stream.pending_content();
+        let resp = self.edit_text(&stream.message_id, &content, option).await?;
+        stream.mark_flushed();
+        Ok(Some(resp))
+    }
+
+    async fn reply_with_threading(
         &self,
         message_id: &str,
         input: &SendInput,
@@ -400,34 +602,16 @@ impl<'a> Delivery<'a> {
         self.client.im().message
     }
 
+    fn message_resource_download(&self) -> MessageResourceDownload<'_> {
+        self.client.im().message_resource
+    }
+
     fn file_resource(&self) -> FileResource<'_> {
         self.client.im().file
     }
 
     fn image_resource(&self) -> ImageResource<'_> {
         self.client.im().image
-    }
-
-    async fn upload_image(
-        &self,
-        image_type: &str,
-        data: Vec<u8>,
-        option: &RequestOption,
-    ) -> Result<CreateImageResp, LarkError> {
-        self.image_resource().create(image_type, data, option).await
-    }
-
-    async fn upload_file(
-        &self,
-        file_type: &str,
-        file_name: &str,
-        duration: Option<i64>,
-        data: Vec<u8>,
-        option: &RequestOption,
-    ) -> Result<CreateFileResp, LarkError> {
-        self.file_resource()
-            .create(file_type, file_name, duration, data, option)
-            .await
     }
 }
 

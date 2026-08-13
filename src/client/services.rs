@@ -2,6 +2,12 @@ use super::LarkClient;
 use crate::service;
 
 impl LarkClient {
+    /// Access high-level outbound channel messaging operations.
+    #[cfg(feature = "messaging")]
+    pub fn channel_messaging(&self) -> crate::channel::ChannelMessaging<'_> {
+        crate::channel::ChannelMessaging::new(self)
+    }
+
     service_accessor!(admin, admin, v1, V1);
     service_accessor!(acs, acs, v1, V1);
     service_accessor!(aily, aily, v1, V1);

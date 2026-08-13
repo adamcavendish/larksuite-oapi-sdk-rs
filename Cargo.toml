@@ -12,7 +12,8 @@ categories = ["api-bindings", "web-programming::http-client"]
 
 [features]
 axum = ["dep:axum"]
-channel = ["ws"]
+messaging = []
+channel = ["messaging", "ws"]
 ws = ["dep:tokio-tungstenite", "dep:prost", "dep:futures-util", "dep:prost-build"]
 
 [dependencies]
@@ -54,7 +55,7 @@ required-features = ["ws"]
 
 [[example]]
 name = "channel_send"
-required-features = ["channel"]
+required-features = ["messaging"]
 
 [[example]]
 name = "channel_normalize"
