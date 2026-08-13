@@ -1,14 +1,20 @@
+#[cfg(feature = "channel")]
 use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "channel")]
 use crate::event::CardActionTriggerRequest;
 use crate::events::common::UserId;
+#[cfg(feature = "channel")]
 use crate::events::im::P2MessageReceiveV1;
 
+#[cfg(feature = "channel")]
 use super::identity::BotIdentity;
+#[cfg(feature = "channel")]
 use super::normalize::parse_content;
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChannelSender {
     pub sender_type: String,
@@ -16,6 +22,7 @@ pub struct ChannelSender {
     pub user_id: Option<UserId>,
 }
 
+#[cfg(feature = "channel")]
 impl ChannelSender {
     pub(super) fn matches_any(&self, ids: &HashSet<String>) -> bool {
         self.user_id.as_ref().is_some_and(|user| {
@@ -36,6 +43,7 @@ pub struct ChannelMention {
     pub is_bot: bool,
 }
 
+#[cfg(feature = "channel")]
 impl ChannelMention {
     pub(super) fn is_mention_all(&self) -> bool {
         let mentioned_type = self.mentioned_type.to_ascii_lowercase();
@@ -65,6 +73,7 @@ impl ChannelMention {
     }
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NormalizedMessage {
     pub message_id: String,
@@ -85,6 +94,7 @@ pub struct NormalizedMessage {
     pub resources: Vec<ChannelResource>,
 }
 
+#[cfg(feature = "channel")]
 impl NormalizedMessage {
     pub fn from_event(event: P2MessageReceiveV1) -> Self {
         let normalized = parse_content(&event.message.message_type, &event.message.content);
@@ -143,6 +153,7 @@ impl NormalizedMessage {
     }
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ChannelResource {
     #[serde(rename = "type")]
@@ -156,6 +167,7 @@ pub struct ChannelResource {
     pub cover_image_key: String,
 }
 
+#[cfg(feature = "channel")]
 impl ChannelResource {
     pub fn new(resource_type: impl Into<String>, file_key: impl Into<String>) -> Self {
         Self {
@@ -166,12 +178,14 @@ impl ChannelResource {
     }
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ReactionAction {
     Created,
     Deleted,
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NormalizedReaction {
     pub action: ReactionAction,
@@ -183,12 +197,14 @@ pub struct NormalizedReaction {
     pub action_time: String,
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BotMembershipAction {
     Added,
     Deleted,
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BotMembership {
     pub action: BotMembershipAction,
@@ -199,6 +215,7 @@ pub struct BotMembership {
     pub name: String,
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct NormalizedCardAction {
     pub operator_open_id: Option<String>,
@@ -211,6 +228,7 @@ pub struct NormalizedCardAction {
     pub action_value: std::collections::BTreeMap<String, crate::JsonValue>,
 }
 
+#[cfg(feature = "channel")]
 impl NormalizedCardAction {
     pub fn from_request(req: CardActionTriggerRequest) -> Self {
         let (action_tag, action_name, action_value) = req
@@ -245,6 +263,7 @@ impl NormalizedCardAction {
     }
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RejectReason {
     Duplicate,
@@ -258,6 +277,7 @@ pub enum RejectReason {
     SenderNotAllowed,
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RejectEvent {
     pub reason: RejectReason,
@@ -265,6 +285,7 @@ pub struct RejectEvent {
     pub detail: String,
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ChannelEvent {
     Message(Box<NormalizedMessage>),
@@ -274,6 +295,7 @@ pub enum ChannelEvent {
     Rejected(RejectEvent),
 }
 
+#[cfg(feature = "channel")]
 #[derive(Debug, Clone)]
 pub enum ChannelDecision<T> {
     Accepted(T),

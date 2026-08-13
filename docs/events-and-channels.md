@@ -39,27 +39,29 @@ task.await??;
 # }
 ```
 
-Use the optional `axum` feature for Axum HTTP adapters. The optional `channel`
-feature builds on WebSocket and IM APIs with message normalization, send helpers,
-upload inputs, and runtime policy controls.
+Use the optional `axum` feature for Axum HTTP adapters. The optional `messaging`
+feature provides outbound send, reply, update, upload, and download operations
+without WebSocket dependencies. The optional `channel` feature adds inbound
+message normalization and runtime policy controls and enables both `messaging`
+and `ws`.
 
 ## Replies
 
-`Channel::send` preserves convenience behavior: a reply whose target has
+`ChannelMessaging::send` preserves convenience behavior: a reply whose target has
 disappeared may retry as a top-level send. For workflows that must never escape
-a thread, use `Channel::reply` or `Channel::reply_in_thread`. Both methods only
-call the reply endpoint and return its error unchanged. Set `uuid` to opt into
-Lark's one-hour idempotency window; automatic split messages derive distinct
-UUIDs, so the supplied UUID must leave room for a `-N` suffix.
+a thread, use `ChannelMessaging::reply` or `ChannelMessaging::reply_in_thread`.
+Both methods only call the reply endpoint and return its error unchanged. Set
+`uuid` to opt into Lark's one-hour idempotency window; automatic split messages
+derive distinct UUIDs, so the supplied UUID must leave room for a `-N` suffix.
 
 ```rust,no_run
-use larksuite_oapi_sdk_rs::channel::{Channel, SendInput};
-use larksuite_oapi_sdk_rs::{EventDispatcher, LarkClient, RequestOption};
+use larksuite_oapi_sdk_rs::channel::SendInput;
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 # async fn run() -> Result<(), Box<dyn std::error::Error>> {
 let client = LarkClient::builder("APP_ID", "APP_SECRET").build()?;
-let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
-channel
+let messaging = client.channel_messaging();
+messaging
     .reply_in_thread(
         "om_parent_message",
         &SendInput {
@@ -76,25 +78,25 @@ channel
 
 ## Message updates
 
-Use `Channel::edit_text` to update a text message. Use `Channel::edit_card`
-only for interactive cards; it uses the separate card patch operation. See
+Use `ChannelMessaging::edit_text` to update a text message. Use
+`ChannelMessaging::edit_card` only for interactive cards; it uses the separate
+card patch operation. See
 [`examples/channel_send.rs`](../examples/channel_send.rs) for sending and
 [`examples/card_action_handler.rs`](../examples/card_action_handler.rs) for
 interactive callback responses.
 
 ```rust,no_run
 use larksuite_oapi_sdk_rs::card::{div, Card, CardHeader};
-use larksuite_oapi_sdk_rs::channel::Channel;
-use larksuite_oapi_sdk_rs::{EventDispatcher, LarkClient, RequestOption};
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 # async fn run() -> Result<(), Box<dyn std::error::Error>> {
 let client = LarkClient::builder("APP_ID", "APP_SECRET").build()?;
-let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+let messaging = client.channel_messaging();
 
-channel
+messaging
     .edit_text("om_text_message", "Updated status", &RequestOption::default())
     .await?;
-channel
+messaging
     .edit_card(
         "om_card_message",
         Card::new().header(CardHeader::new("Done")).element(div("Complete")),

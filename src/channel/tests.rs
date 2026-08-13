@@ -1,15 +1,23 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+#[cfg(feature = "channel")]
+use std::time::Instant;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+#[cfg(feature = "channel")]
 use crate::event::{CardActionTriggerResponse, EventDispatcher, EventReq};
 use crate::events::common::UserId;
+#[cfg(feature = "channel")]
 use crate::events::im::{Mention, Message, MessageSender, P2MessageReceiveV1};
+#[cfg(feature = "channel")]
 use crate::service::im::v1::MessageType;
 use crate::{LarkClient, RequestOption};
 
+#[cfg(feature = "channel")]
 use super::handler::{ChannelHandlers, emit_message_event, register_channel_handlers};
+#[cfg(feature = "channel")]
 use super::identity::BotIdentityCache;
+#[cfg(feature = "channel")]
 use super::state::ChannelState;
 use super::*;
 
@@ -28,6 +36,49 @@ fn client_for(addr: std::net::SocketAddr) -> LarkClient {
         .unwrap()
 }
 
+#[cfg(feature = "channel")]
+#[allow(dead_code, deprecated)]
+async fn deprecated_channel_messaging_methods_compile(
+    channel: &Channel<'_>,
+    option: &RequestOption,
+) {
+    let target = SendTarget::new("chat_id", "oc_chat");
+    let input = SendInput {
+        text: Some("hello".into()),
+        ..Default::default()
+    };
+    let _ = channel.send_text(&target, "hello", option).await;
+    let _ = channel.send(&input, option).await;
+    let _ = channel.reply("om_parent", &input, option).await;
+    let _ = channel.reply_in_thread("om_parent", &input, option).await;
+    let _ = channel
+        .send_text_with_fallback(std::slice::from_ref(&target), "hello", option)
+        .await;
+    let _ = channel
+        .reply_text("om_parent", "hello", false, option)
+        .await;
+    let _ = channel.edit_text("om_message", "hello", option).await;
+    let _ = channel
+        .edit_card("om_message", serde_json::json!({}), option)
+        .await;
+    let _ = channel
+        .send_markdown_chunks(&target, "hello", 20_000, option)
+        .await;
+    let _ = channel.upload_image("message", Vec::new(), option).await;
+    let _ = channel
+        .upload_file("stream", "file.bin", None, Vec::new(), option)
+        .await;
+    let _ = channel
+        .download_message_resource("om_message", "file_key", "file", option)
+        .await;
+    let _ = channel
+        .download_file("om_message", "file_key", "file", option)
+        .await;
+    let mut stream = StreamUpdate::new("om_message", Duration::ZERO);
+    let _ = channel.flush_stream_text(&mut stream, option).await;
+}
+
+#[cfg(feature = "channel")]
 async fn counting_json_server(
     body: &'static str,
 ) -> (
@@ -120,6 +171,7 @@ async fn mock_json_server_with_requests(
     (addr, handle, requests)
 }
 
+#[cfg(feature = "channel")]
 fn message_event(message_id: &str, message_type: &str, content: &str) -> P2MessageReceiveV1 {
     P2MessageReceiveV1 {
         sender: MessageSender {
@@ -143,12 +195,14 @@ fn message_event(message_id: &str, message_type: &str, content: &str) -> P2Messa
     }
 }
 
+#[cfg(feature = "channel")]
 fn dm_message_event(message_id: &str) -> P2MessageReceiveV1 {
     let mut event = message_event(message_id, MessageType::TEXT, r#"{"text":"hello"}"#);
     event.message.chat_type = "p2p".into();
     event
 }
 
+#[cfg(feature = "channel")]
 fn mentioned_group_event(message_id: &str) -> P2MessageReceiveV1 {
     let mut event = message_event(message_id, MessageType::TEXT, r#"{"text":"hello"}"#);
     event.message.mentions.push(Mention {
@@ -165,6 +219,7 @@ fn mentioned_group_event(message_id: &str) -> P2MessageReceiveV1 {
     event
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn normalizes_text_message_content() {
     let event = message_event("om_1", MessageType::TEXT, r#"{"text":"hello"}"#);
@@ -172,6 +227,7 @@ fn normalizes_text_message_content() {
     assert_eq!(message.text.as_deref(), Some("hello"));
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn normalizes_go_channel_content_cases() {
     let cases = [
@@ -309,6 +365,7 @@ fn normalizes_go_channel_content_cases() {
     }
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn normalizes_post_content_v2_and_rich_text_fallback() {
     let post = NormalizedMessage::from_event(message_event(
@@ -351,6 +408,7 @@ fn normalizes_post_content_v2_and_rich_text_fallback() {
     assert!(protected.resources.is_empty());
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn normalizes_root_post_content_with_one_image_resource() {
     let event: P2MessageReceiveV1 = serde_json::from_value(serde_json::json!({
@@ -384,6 +442,7 @@ fn normalizes_root_post_content_with_one_image_resource() {
     );
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn rejects_duplicate_messages() {
     let state = ChannelState::new(
@@ -402,6 +461,7 @@ fn rejects_duplicate_messages() {
     ));
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn rejects_cached_bot_sender() {
     let state = ChannelState::new(
@@ -422,6 +482,7 @@ fn rejects_cached_bot_sender() {
     ));
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn group_policy_requires_bot_mention_by_default() {
     let state = ChannelState::new(ChannelPolicy::default(), BotIdentityCacheConfig::default());
@@ -441,6 +502,7 @@ fn group_policy_requires_bot_mention_by_default() {
     assert!(matches!(result, ChannelDecision::Accepted(_)));
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn mention_all_is_rejected_unless_enabled() {
     let mut event = message_event("om_all", MessageType::TEXT, "{}");
@@ -468,6 +530,7 @@ fn mention_all_is_rejected_unless_enabled() {
     ));
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn group_and_dm_policy_rejections_are_typed() {
     let state = ChannelState::new(
@@ -509,6 +572,7 @@ fn group_and_dm_policy_rejections_are_typed() {
     ));
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn runtime_policy_update_changes_acceptance() {
     let state = ChannelState::new(ChannelPolicy::default(), BotIdentityCacheConfig::default());
@@ -527,6 +591,7 @@ fn runtime_policy_update_changes_acceptance() {
     assert!(!state.policy().require_mention);
 }
 
+#[cfg(feature = "channel")]
 #[test]
 fn bot_identity_cache_normalizes_and_tracks_freshness() {
     let config = BotIdentityCacheConfig {
@@ -569,6 +634,55 @@ fn stream_throttle_blocks_immediate_flush() {
     assert!(stream.should_flush());
 }
 
+#[cfg(feature = "channel")]
+#[allow(deprecated)]
+#[tokio::test]
+async fn deprecated_channel_methods_delegate_across_wire_families() {
+    let (addr, _handle, requests) = mock_json_server_with_requests(vec![
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_send","chat_id":"oc_chat"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_reply","chat_id":"oc_chat"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"message_id":"om_edit"}}"#,
+        r#"{"code":0,"msg":"ok","data":{"file_key":"file_key"}}"#,
+        "resource-bytes",
+    ])
+    .await;
+    let client = client_for(addr);
+    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let option = RequestOption::default();
+
+    channel
+        .send_text(&SendTarget::new("chat_id", "oc_chat"), "send", &option)
+        .await
+        .unwrap();
+    channel
+        .reply_text("om_parent", "reply", false, &option)
+        .await
+        .unwrap();
+    channel
+        .edit_text("om_edit", "updated", &option)
+        .await
+        .unwrap();
+    channel
+        .upload_file("stream", "file.bin", None, b"resource".to_vec(), &option)
+        .await
+        .unwrap();
+    let resource = channel
+        .download_file("om_message", "file_key", "file", &option)
+        .await
+        .unwrap();
+    assert_eq!(resource.data, b"resource-bytes");
+
+    let requests = requests.lock().unwrap();
+    assert!(requests[0].contains("POST /open-apis/im/v1/messages?receive_id_type=chat_id"));
+    assert!(requests[1].contains("POST /open-apis/im/v1/messages/om_parent/reply"));
+    assert!(requests[2].contains("PUT /open-apis/im/v1/messages/om_edit"));
+    assert!(requests[3].contains("POST /open-apis/im/v1/files"));
+    assert!(
+        requests[4]
+            .contains("GET /open-apis/im/v1/messages/om_message/resources/file_key?type=file")
+    );
+}
+
 #[tokio::test]
 async fn channel_send_text_detects_receive_id_and_mentions() {
     let (addr, _handle, requests) = mock_json_server_with_requests(vec![
@@ -576,9 +690,9 @@ async fn channel_send_text_detects_receive_id_and_mentions() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 receive_id: Some("ou_user".into()),
@@ -615,9 +729,9 @@ async fn channel_send_user_id_uses_user_id_receive_type() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 user_id: Some("user_123".into()),
@@ -642,9 +756,9 @@ async fn channel_send_markdown_uses_post_content() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -673,9 +787,9 @@ async fn channel_send_direct_image_and_file_keys() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let image = channel
+    let image = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -686,7 +800,7 @@ async fn channel_send_direct_image_and_file_keys() {
         )
         .await
         .unwrap();
-    let file = channel
+    let file = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -715,11 +829,11 @@ async fn channel_send_image_path_uploads_then_sends_image_key() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
     let path = std::env::temp_dir().join(format!("lark-channel-{}.png", now_ms()));
     std::fs::write(&path, b"image-bytes").unwrap();
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -748,11 +862,11 @@ async fn channel_send_file_path_uploads_then_sends_file_key() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
     let path = std::env::temp_dir().join(format!("lark-channel-{}.txt", now_ms()));
     std::fs::write(&path, b"file-bytes").unwrap();
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -781,9 +895,9 @@ async fn channel_send_audio_source_bytes_infers_duration() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -817,9 +931,9 @@ async fn channel_send_audio_zero_duration_infers_duration() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -850,9 +964,9 @@ async fn channel_send_source_url_to_private_host_is_rejected() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let err = channel
+    let err = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -879,9 +993,9 @@ async fn channel_send_empty_input_is_rejected_without_request() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let err = channel
+    let err = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -904,10 +1018,10 @@ async fn channel_send_text_chunks_long_messages() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
     let text = format!("{}b", "a".repeat(20_000));
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -935,10 +1049,10 @@ async fn channel_send_passes_uuid_and_derives_keys_for_chunks() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
     let text = format!("{}b", "a".repeat(20_000));
 
-    channel
+    messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -964,9 +1078,9 @@ async fn channel_reply_in_thread_stays_on_reply_endpoint() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let result = channel
+    let result = messaging
         .reply_in_thread(
             "om_parent",
             &SendInput {
@@ -995,9 +1109,9 @@ async fn channel_edit_text_uses_message_update_contract() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let response = channel
+    let response = messaging
         .edit_text("om_text", "updated text", &RequestOption::default())
         .await
         .unwrap();
@@ -1016,9 +1130,9 @@ async fn channel_edit_card_uses_message_patch_contract() {
     let (addr, _handle, requests) =
         mock_json_server_with_requests(vec![r#"{"code":0,"msg":"ok","data":{}}"#]).await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let response = channel
+    let response = messaging
         .edit_card(
             "om_card",
             serde_json::json!({ "header": { "title": "Updated" } }),
@@ -1041,9 +1155,9 @@ async fn channel_strict_reply_never_falls_back_to_top_level_send() {
         mock_json_server_with_requests(vec![r#"{"code":230020,"msg":"reply target unavailable"}"#])
             .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let err = channel
+    let err = messaging
         .reply(
             "om_missing",
             &SendInput {
@@ -1070,9 +1184,9 @@ async fn channel_send_falls_back_when_its_reply_target_is_gone() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -1104,9 +1218,9 @@ async fn channel_strict_reply_chunks_keep_reply_routing_and_derived_uuids() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let result = channel
+    let result = messaging
         .reply(
             "om_parent",
             &SendInput {
@@ -1141,9 +1255,9 @@ async fn channel_strict_reply_rejects_ambiguous_target_without_request() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let err = channel
+    let err = messaging
         .reply(
             "om_parent",
             &SendInput {
@@ -1167,9 +1281,9 @@ async fn channel_send_rejects_invalid_or_ambiguous_uuids_without_request() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let empty = channel
+    let empty = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -1183,7 +1297,7 @@ async fn channel_send_rejects_invalid_or_ambiguous_uuids_without_request() {
         .unwrap_err();
     assert!(empty.to_string().contains("must not be empty"));
 
-    let too_long = channel
+    let too_long = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -1197,7 +1311,7 @@ async fn channel_send_rejects_invalid_or_ambiguous_uuids_without_request() {
         .unwrap_err();
     assert!(too_long.to_string().contains("at most 50"));
 
-    let split = channel
+    let split = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -1225,9 +1339,9 @@ async fn channel_send_retries_format_error_as_text() {
     ])
     .await;
     let client = client_for(addr);
-    let channel = Channel::builder(&client, EventDispatcher::new("", "")).build();
+    let messaging = client.channel_messaging();
 
-    let result = channel
+    let result = messaging
         .send(
             &SendInput {
                 chat_id: Some("oc_group".into()),
@@ -1249,6 +1363,7 @@ async fn channel_send_retries_format_error_as_text() {
     assert!(request_dump.contains(r#""uuid":"format-1-fallback""#));
 }
 
+#[cfg(feature = "channel")]
 #[tokio::test]
 async fn typed_handlers_and_observer_receive_events() {
     let (addr, _calls, handle) = counting_json_server(
@@ -1295,6 +1410,7 @@ async fn typed_handlers_and_observer_receive_events() {
     assert!(*observed_called.lock().unwrap());
 }
 
+#[cfg(feature = "channel")]
 #[tokio::test]
 async fn message_dispatch_fetches_bot_identity_before_policy() {
     let (addr, calls, handle) = counting_json_server(
@@ -1334,6 +1450,7 @@ async fn message_dispatch_fetches_bot_identity_before_policy() {
     assert!(*message_called.lock().unwrap());
 }
 
+#[cfg(feature = "channel")]
 #[tokio::test]
 async fn bot_identity_refresh_is_single_flight() {
     let (addr, calls, handle) = counting_json_server(
@@ -1367,6 +1484,7 @@ async fn bot_identity_refresh_is_single_flight() {
     assert_eq!(calls.load(Ordering::SeqCst), 1);
 }
 
+#[cfg(feature = "channel")]
 #[tokio::test]
 async fn channel_registration_preserves_existing_card_action_handler() {
     let existing_called = Arc::new(Mutex::new(false));

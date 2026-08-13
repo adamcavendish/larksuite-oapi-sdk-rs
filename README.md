@@ -77,7 +77,8 @@ for the complete setup.
 | Receive webhook events | [`examples/event_handler.rs`](examples/event_handler.rs) |
 | Handle interactive card callbacks | [`examples/card_action_handler.rs`](examples/card_action_handler.rs) |
 | Run a WebSocket event client | [`examples/ws_client.rs`](examples/ws_client.rs) with `ws` enabled |
-| Send and normalize channel messages | [`examples/channel_send.rs`](examples/channel_send.rs) and [`examples/channel_normalize.rs`](examples/channel_normalize.rs) with `channel` enabled |
+| Send channel messages | [`examples/channel_send.rs`](examples/channel_send.rs) with `messaging` enabled |
+| Normalize channel messages | [`examples/channel_normalize.rs`](examples/channel_normalize.rs) with `channel` enabled |
 | Search bots or work with OKRs | [`examples/bot_search.rs`](examples/bot_search.rs) and [`examples/okr_v2.rs`](examples/okr_v2.rs) |
 
 ## Guides
@@ -116,8 +117,13 @@ literals to create server-owned values.
 | Feature | Description |
 | --- | --- |
 | `ws` | WebSocket long-connection event client with protobuf framing. |
-| `channel` | Higher-level send and normalized receive helpers; enables `ws`. |
+| `messaging` | High-level outbound messaging and resource operations without WebSocket dependencies. |
+| `channel` | Inbound normalization and runtime policy helpers; enables `messaging` and `ws`. |
 | `axum` | Axum adapters for webhook and card-action handlers. |
+
+Cargo unifies enabled features across the dependency graph. Enabling `channel`
+therefore enables both `messaging` and `ws`; enabling `messaging` and `ws`
+separately does not enable the `channel` runtime API.
 
 ```toml
 [dependencies]

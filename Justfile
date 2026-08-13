@@ -11,13 +11,17 @@ build:
 # Build with all feature combinations
 build-all:
     cargo build
-    cargo build --features ws
-    cargo build --features axum
+    cargo build --no-default-features --features messaging
+    cargo build --no-default-features --features ws
+    cargo build --no-default-features --features messaging,ws
+    cargo build --no-default-features --features channel
+    cargo build --no-default-features --features axum
     cargo build --all-features
 
 # Check MSRV (1.95)
 msrv:
     cargo +1.95.0 check --workspace
+    PROTOC=/definitely/unavailable/protoc cargo +1.95.0 check --workspace --no-default-features --features messaging --all-targets
     cargo +1.95.0 check --workspace --all-features
 
 # ---------- Lint ----------
@@ -25,6 +29,9 @@ msrv:
 # Run clippy across all feature combinations
 clippy:
     cargo clippy --workspace --all-targets -- -D warnings
+    cargo clippy --workspace --all-targets --no-default-features --features messaging -- -D warnings
+    cargo clippy --workspace --all-targets --no-default-features --features ws -- -D warnings
+    cargo clippy --workspace --all-targets --no-default-features --features channel -- -D warnings
     cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 # Check formatting
@@ -45,6 +52,7 @@ test:
 # Run tests with all feature combinations
 test-all:
     cargo nextest run --workspace
+    PROTOC=/definitely/unavailable/protoc cargo nextest run --workspace --no-default-features --features messaging
     cargo nextest run --workspace --all-features
     cargo test --doc --workspace
 

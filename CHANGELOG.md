@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Channel
+
+- Added the `messaging` feature and `LarkClient::channel_messaging()` for
+  high-level outbound messaging without WebSocket dependencies. The `channel`
+  feature continues to enable the complete messaging and WebSocket runtime.
+- Deprecated outbound methods on `Channel`; their behavior remains available
+  through `ChannelMessaging`.
+
 ## [0.3.5] - 2026-08-09
 
 ### REST service coverage

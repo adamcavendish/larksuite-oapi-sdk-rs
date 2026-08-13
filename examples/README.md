@@ -25,7 +25,7 @@ Most examples use this shape:
 | `event_handler` | Event dispatcher | Handle encrypted HTTP callback events | none for compilation | `cargo run --example event_handler` |
 | `card_action_handler` | Card callbacks | Handle an interactive card callback and return a toast JSON body | none for compilation | `cargo run --example card_action_handler` |
 | `ws_client` | WebSocket events | Receive events through WebSocket long connections; optionally attach a trusted user channel | `APP_ID`, `APP_SECRET`, optional `WS_CHANNEL_TAG`, `USER_ACCESS_TOKEN` | `cargo run --features ws --example ws_client` |
-| `channel_send` | Channel helpers | Send markdown through channel helpers with an optional idempotency UUID | `APP_ID`, `APP_SECRET`, `CHAT_ID`, optional `MESSAGE_UUID` | `cargo run --features channel --example channel_send` |
+| `channel_send` | Channel messaging | Send markdown through channel messaging with an optional idempotency UUID | `APP_ID`, `APP_SECRET`, `CHAT_ID`, optional `MESSAGE_UUID` | `cargo run --features messaging --example channel_send` |
 | `channel_normalize` | Channel helpers | Normalize incoming channel messages | `APP_ID`, `APP_SECRET` | `cargo run --features channel --example channel_normalize` |
 
 ## Generated service examples
@@ -61,7 +61,7 @@ Use this table when translating code from the official Go SDK sample tree.
 | `sample/event/event.go` | `event_handler` | Register typed event callbacks on `EventDispatcher` |
 | `sample/ws/sample.go` | `ws_client` | Build a dispatcher, then start `client.ws_client(dispatcher)` with the `ws` feature |
 | `sample/card/card.go` | `card_action_handler`, card builder APIs | Use `CardActionHandler` for callbacks and `larksuite_oapi_sdk_rs::card` for message JSON |
-| `sample/channel/main.go` | `channel_send`, `channel_normalize` | Use the `channel` feature for higher-level send and normalized receive flows |
+| `sample/channel/main.go` | `channel_send`, `channel_normalize` | Use `messaging` for outbound operations and `channel` for inbound normalization and runtime policy |
 | `sample/apiall/botv4`, `sample/apiall/okrv2` | `bot_search`, `okr_v2` | Prefer the dedicated typed resources; retain `go_compatibility` for endpoints not promoted to Rust resources |
 
 ## Typed resources vs GoCompatibilityEndpoint

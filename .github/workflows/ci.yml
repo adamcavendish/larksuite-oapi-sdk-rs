@@ -22,6 +22,36 @@ defaults:
     shell: bash
 
 jobs:
+  messaging:
+    name: Messaging without WebSocket dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - run: rustup toolchain install "${{ env.rust_min }}" --profile minimal
+      - uses: Swatinem/rust-cache@v2
+      - name: Test bare messaging with protobuf unavailable
+        env:
+          PROTOC: /definitely/unavailable/protoc
+        run: cargo test --workspace --all-targets --no-default-features --features messaging
+      - name: Check bare messaging on MSRV
+        env:
+          PROTOC: /definitely/unavailable/protoc
+        run: cargo +${{ env.rust_min }} check --workspace --all-targets --no-default-features --features messaging
+      - name: Assert independently enabled messaging and WebSocket features
+        run: |
+          cargo metadata --format-version 1 --no-default-features --features messaging,ws \
+            | jq -e '.resolve.root as $root | .resolve.nodes[] | select(.id == $root) | (.features | sort == ["messaging", "ws"])'
+      - name: Assert WebSocket and protobuf dependencies are absent
+        run: |
+          if cargo tree --workspace --no-default-features --features messaging -e normal,build \
+            | grep -E '(^| )(prost|prost-build|tokio-tungstenite|futures-util) v'; then
+            echo "bare messaging unexpectedly enables WebSocket or protobuf dependencies" >&2
+            exit 1
+          fi
+
   fmt:
     name: Format
     runs-on: ubuntu-latest
@@ -79,7 +109,7 @@ jobs:
   basics:
     name: Basics
     runs-on: ubuntu-latest
-    needs: [fmt, clippy, doc, go-contract-provenance]
+    needs: [messaging, fmt, clippy, doc, go-contract-provenance]
     steps:
       - run: exit 0
 
