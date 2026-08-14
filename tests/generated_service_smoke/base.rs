@@ -138,3 +138,227 @@ async fn base_v3_record_read_contract_smoke() {
     assert!(request.contains(r#""keyword":"Task""#));
     assert!(request.contains(r#""search_fields":["Name"]"#));
 }
+
+#[tokio::test]
+async fn base_v3_application_mode_contract_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+    ])
+    .await;
+    let client = client_for(addr);
+    let option = RequestOption {
+        user_access_token: Some("user-token".to_string()),
+        ..RequestOption::default()
+    };
+    let tenant_option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..RequestOption::default()
+    };
+
+    let tenant_error = client
+        .base_v3()
+        .app
+        .get("app token", &tenant_option)
+        .await
+        .unwrap_err();
+    assert!(
+        tenant_error
+            .to_string()
+            .contains("tenant access token is not supported")
+    );
+
+    client
+        .base_v3()
+        .workspace
+        .create(json_value!({"name": "Growth workspace"}), &option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .workspace
+        .list_entities(
+            &ListWorkspaceEntitiesQuery::new("workspace token")
+                .entity_type("baseapp")
+                .page(PageQuery::new().page_size(20).page_token("workspace-next")),
+            &option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .workspace
+        .move_in(
+            "workspace token",
+            json_value!({"entity_token": "base-token"}),
+            &option,
+        )
+        .await
+        .unwrap();
+
+    client
+        .base_v3()
+        .app
+        .create(
+            json_value!({
+                "name": "Sales app",
+                "workspace_token": "workspace token",
+                "theme": {"theme_style": "cloudBlue"},
+            }),
+            &option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .app
+        .get("app token", &option)
+        .await
+        .unwrap();
+
+    client
+        .base_v3()
+        .page
+        .list(
+            &ListBaseAppPagesQuery::new("app token")
+                .page(PageQuery::new().page_size(20).page_token("page-next")),
+            &option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .page
+        .get("app token", "page id", &option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .page
+        .create("app token", json_value!({"name": "Overview"}), &option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .page
+        .rename(
+            "app token",
+            "page id",
+            json_value!({"name": "Revenue"}),
+            &option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .page
+        .delete("app token", "page id", &option)
+        .await
+        .unwrap();
+
+    client
+        .base_v3()
+        .block
+        .list(
+            &ListBaseAppBlocksQuery::new("app token", "page id")
+                .page(PageQuery::new().page_size(20).page_token("block-next")),
+            &option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .block
+        .get("app token", "page id", "block id", &option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .block
+        .create(
+            "app token",
+            "page id",
+            json_value!({"name": "Orders", "type": "text", "data_config": {"text": "# Orders"}}),
+            &option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .block
+        .update(
+            "app token",
+            "page id",
+            "block id",
+            json_value!({"name": "Revenue"}),
+            &option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .block
+        .get_data(
+            &GetBaseAppBlockDataQuery::new("app token", "chart token", "base token"),
+            &option,
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    for path in [
+        "POST /open-apis/base/v3/workspaces ",
+        "GET /open-apis/base/v3/workspaces/workspace%20token/entities?",
+        "POST /open-apis/base/v3/workspaces/workspace%20token/move_in ",
+        "POST /open-apis/base/v3/base_apps ",
+        "GET /open-apis/base/v3/base_apps/app%20token ",
+        "GET /open-apis/base/v3/base_apps/app%20token/pages?",
+        "GET /open-apis/base/v3/base_apps/app%20token/pages/page%20id ",
+        "POST /open-apis/base/v3/base_apps/app%20token/pages ",
+        "PATCH /open-apis/base/v3/base_apps/app%20token/pages/page%20id ",
+        "DELETE /open-apis/base/v3/base_apps/app%20token/pages/page%20id ",
+        "GET /open-apis/base/v3/base_apps/app%20token/pages/page%20id/blocks?",
+        "GET /open-apis/base/v3/base_apps/app%20token/pages/page%20id/blocks/block%20id ",
+        "POST /open-apis/base/v3/base_apps/app%20token/pages/page%20id/blocks ",
+        "PATCH /open-apis/base/v3/base_apps/app%20token/pages/page%20id/blocks/block%20id ",
+        "GET /open-apis/base/v3/base_apps/app%20token/blocks/chart%20token/data?",
+    ] {
+        assert!(
+            request.contains(path),
+            "missing request path {path}:\n{request}"
+        );
+    }
+    for value in [
+        "entity_type=baseapp",
+        "page_size=20",
+        "page_token=workspace-next",
+        "page_token=page-next",
+        "page_token=block-next",
+        "base_token=base+token",
+        "authorization: Bearer user-token",
+        "x-app-id: test_app_id",
+        r#""workspace_token":"workspace token""#,
+        r#""entity_token":"base-token""#,
+        r#""name":"Revenue""#,
+        r##""data_config":{"text":"# Orders"}"##,
+    ] {
+        assert!(
+            request.contains(value),
+            "missing request value {value}:\n{request}"
+        );
+    }
+}

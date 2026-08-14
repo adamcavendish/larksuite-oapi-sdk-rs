@@ -4,7 +4,7 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::service::common::{JsonResp, RestRequest};
+use crate::service::common::{JsonResp, PageQuery, RestRequest};
 
 pub type ListRecordResp = JsonResp;
 pub type SearchRecordResp = JsonResp;
@@ -67,14 +67,116 @@ impl<'a> ListRecordQuery<'a> {
     }
 }
 
+/// Query parameters for listing entities in a Base workspace.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListWorkspaceEntitiesQuery<'a> {
+    pub workspace_token: &'a str,
+    pub entity_type: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListWorkspaceEntitiesQuery<'a> {
+    pub fn new(workspace_token: &'a str) -> Self {
+        Self {
+            workspace_token,
+            entity_type: None,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn entity_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.entity_type = value.into();
+        self
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
+/// Query parameters for listing pages in a BaseApp.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListBaseAppPagesQuery<'a> {
+    pub app_token: &'a str,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListBaseAppPagesQuery<'a> {
+    pub fn new(app_token: &'a str) -> Self {
+        Self {
+            app_token,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
+/// Query parameters for listing blocks on a BaseApp page.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListBaseAppBlocksQuery<'a> {
+    pub app_token: &'a str,
+    pub page_id: &'a str,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListBaseAppBlocksQuery<'a> {
+    pub fn new(app_token: &'a str, page_id: &'a str) -> Self {
+        Self {
+            app_token,
+            page_id,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
+/// Query parameters for reading computed data from a BaseApp chart block.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetBaseAppBlockDataQuery<'a> {
+    pub app_token: &'a str,
+    pub block_id: &'a str,
+    pub base_token: &'a str,
+}
+
+impl<'a> GetBaseAppBlockDataQuery<'a> {
+    pub fn new(app_token: &'a str, block_id: &'a str, base_token: &'a str) -> Self {
+        Self {
+            app_token,
+            block_id,
+            base_token,
+        }
+    }
+}
+
 pub struct V3<'a> {
     pub record: RecordResource<'a>,
+    pub workspace: WorkspaceResource<'a>,
+    pub app: BaseAppResource<'a>,
+    pub page: BaseAppPageResource<'a>,
+    pub block: BaseAppBlockResource<'a>,
 }
 
 impl<'a> V3<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             record: RecordResource { config },
+            workspace: WorkspaceResource { config },
+            app: BaseAppResource { config },
+            page: BaseAppPageResource { config },
+            block: BaseAppBlockResource { config },
         }
     }
 }
@@ -90,7 +192,7 @@ impl RecordResource<'_> {
         query: &ListRecordQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListRecordResp, LarkError> {
-        let option = self.with_app_id(option)?;
+        let option = with_app_id(self.config, option)?;
         RestRequest::new(
             self.config,
             http::Method::GET,
@@ -118,7 +220,7 @@ impl RecordResource<'_> {
         body: impl Serialize,
         option: &RequestOption,
     ) -> Result<SearchRecordResp, LarkError> {
-        let option = self.with_app_id(option)?;
+        let option = with_app_id(self.config, option)?;
         RestRequest::new(
             self.config,
             http::Method::POST,
@@ -132,17 +234,366 @@ impl RecordResource<'_> {
         .send_json()
         .await
     }
+}
 
-    fn with_app_id(&self, option: &RequestOption) -> Result<RequestOption, LarkError> {
-        let mut option = option.clone();
-        option
-            .headers
-            .get_or_insert_with(http::HeaderMap::new)
-            .insert(
-                http::HeaderName::from_static("x-app-id"),
-                http::HeaderValue::from_str(self.config.app_id())
-                    .map_err(|err| LarkError::IllegalParam(err.to_string()))?,
-            );
-        Ok(option)
+/// Base v3 workspace operations proven by the official CLI's Open Platform client.
+pub struct WorkspaceResource<'a> {
+    config: &'a Config,
+}
+
+impl WorkspaceResource<'_> {
+    /// Creates a workspace from the documented JSON request body.
+    pub async fn create(
+        &self,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/workspaces",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .json_body(&body)?
+        .send_json()
+        .await
     }
+
+    /// Lists Base and BaseApp entities in a workspace.
+    pub async fn list_entities(
+        &self,
+        query: &ListWorkspaceEntitiesQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/workspaces/:workspace_token/entities",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("workspace_token", query.workspace_token)
+        .query("entity_type", query.entity_type)
+        .page_query(query.page)
+        .send_json()
+        .await
+    }
+
+    /// Moves a Base or BaseApp entity into a workspace.
+    pub async fn move_in(
+        &self,
+        workspace_token: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/workspaces/:workspace_token/move_in",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("workspace_token", workspace_token)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+}
+
+/// BaseApp application-mode operations proven by the official CLI's Open Platform client.
+pub struct BaseAppResource<'a> {
+    config: &'a Config,
+}
+
+impl BaseAppResource<'_> {
+    /// Creates a BaseApp from the documented JSON request body.
+    pub async fn create(
+        &self,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/base_apps",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Gets a BaseApp and its page summaries.
+    pub async fn get(
+        &self,
+        app_token: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/base_apps/:app_token",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", app_token)
+        .send_json()
+        .await
+    }
+}
+
+/// Page operations for BaseApps.
+pub struct BaseAppPageResource<'a> {
+    config: &'a Config,
+}
+
+impl BaseAppPageResource<'_> {
+    /// Lists pages in a BaseApp.
+    pub async fn list(
+        &self,
+        query: &ListBaseAppPagesQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/base_apps/:app_token/pages",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", query.app_token)
+        .page_query(query.page)
+        .send_json()
+        .await
+    }
+
+    /// Gets one BaseApp page.
+    pub async fn get(
+        &self,
+        app_token: &str,
+        page_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/base_apps/:app_token/pages/:page_id",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", app_token)
+        .path_param("page_id", page_id)
+        .send_json()
+        .await
+    }
+
+    /// Creates a top-level BaseApp page.
+    pub async fn create(
+        &self,
+        app_token: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/base_apps/:app_token/pages",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", app_token)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Renames a BaseApp page with the documented JSON request body.
+    pub async fn rename(
+        &self,
+        app_token: &str,
+        page_id: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/base/v3/base_apps/:app_token/pages/:page_id",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", app_token)
+        .path_param("page_id", page_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Deletes a BaseApp page.
+    pub async fn delete(
+        &self,
+        app_token: &str,
+        page_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            "/open-apis/base/v3/base_apps/:app_token/pages/:page_id",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", app_token)
+        .path_param("page_id", page_id)
+        .send_json()
+        .await
+    }
+}
+
+/// Block operations for BaseApp pages.
+pub struct BaseAppBlockResource<'a> {
+    config: &'a Config,
+}
+
+impl BaseAppBlockResource<'_> {
+    /// Lists blocks on a BaseApp page.
+    pub async fn list(
+        &self,
+        query: &ListBaseAppBlocksQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/base_apps/:app_token/pages/:page_id/blocks",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", query.app_token)
+        .path_param("page_id", query.page_id)
+        .page_query(query.page)
+        .send_json()
+        .await
+    }
+
+    /// Gets one BaseApp block.
+    pub async fn get(
+        &self,
+        app_token: &str,
+        page_id: &str,
+        block_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/base_apps/:app_token/pages/:page_id/blocks/:block_id",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", app_token)
+        .path_param("page_id", page_id)
+        .path_param("block_id", block_id)
+        .send_json()
+        .await
+    }
+
+    /// Creates a BaseApp block from the documented JSON request body.
+    pub async fn create(
+        &self,
+        app_token: &str,
+        page_id: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/base_apps/:app_token/pages/:page_id/blocks",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", app_token)
+        .path_param("page_id", page_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Updates a BaseApp block with the documented JSON request body.
+    pub async fn update(
+        &self,
+        app_token: &str,
+        page_id: &str,
+        block_id: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/base/v3/base_apps/:app_token/pages/:page_id/blocks/:block_id",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", app_token)
+        .path_param("page_id", page_id)
+        .path_param("block_id", block_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Reads computed data for a BaseApp chart block.
+    ///
+    /// The endpoint takes a chart token rather than the page-scoped widget ID,
+    /// and does not support text blocks.
+    pub async fn get_data(
+        &self,
+        query: &GetBaseAppBlockDataQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/base_apps/:app_token/blocks/:block_id/data",
+            vec![AccessTokenType::User],
+            &option,
+        )
+        .path_param("app_token", query.app_token)
+        .path_param("block_id", query.block_id)
+        .query("base_token", query.base_token)
+        .send_json()
+        .await
+    }
+}
+
+fn with_app_id(config: &Config, option: &RequestOption) -> Result<RequestOption, LarkError> {
+    let mut option = option.clone();
+    option
+        .headers
+        .get_or_insert_with(http::HeaderMap::new)
+        .insert(
+            http::HeaderName::from_static("x-app-id"),
+            http::HeaderValue::from_str(config.app_id())
+                .map_err(|err| LarkError::IllegalParam(err.to_string()))?,
+        );
+    Ok(option)
 }

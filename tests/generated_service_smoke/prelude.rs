@@ -113,7 +113,10 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
     },
     base::{
         v2::{CreateAppRoleV2Query, ListAppRoleV2Query, UpdateAppRoleV2Query},
-        v3::ListRecordQuery as ListBaseV3RecordQuery,
+        v3::{
+            GetBaseAppBlockDataQuery, ListBaseAppBlocksQuery, ListBaseAppPagesQuery,
+            ListRecordQuery as ListBaseV3RecordQuery, ListWorkspaceEntitiesQuery,
+        },
     },
     bitable::v1::{
         ListAppRoleMemberQuery, ListAppRoleQuery, ListAppWorkflowQuery, ListDashboardQuery,
