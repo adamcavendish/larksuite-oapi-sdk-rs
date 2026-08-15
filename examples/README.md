@@ -22,6 +22,7 @@ Most examples use this shape:
 | `base_v3_record_read` | Base v3 | Read Base table records with an offset-paginated, user-token request | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `BASE_V3_BASE_TOKEN`, `BASE_V3_TABLE_ID` | `cargo run --example base_v3_record_read` |
 | `base_v3_app_read` | Base v3 | Discover BaseApps in a workspace, then read their pages and optional blocks | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `BASE_V3_WORKSPACE_TOKEN`, `BASE_V3_APP_TOKEN`, optional `BASE_V3_PAGE_ID` | `cargo run --example base_v3_app_read` |
 | `docs_ai_fetch` | Docs AI v1 | Read modern Docx content, including comment metadata when enabled | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `DOCS_AI_DOCUMENT_ID` | `cargo run --example docs_ai_fetch` |
+| `slides_ai_read` | Slides AI v1 | Read XML presentation content with a user access token | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `SLIDES_AI_PRESENTATION_ID` | `cargo run --example slides_ai_read` |
 | `app_registration` | OAuth app registration | Create or update an app through the device-code registration flow | optional `APP_AVATAR_URL`, `CREATE_ONLY`, `EXISTING_APP_ID`, `REGISTRATION_DOMAIN`, `REGISTRATION_LARK_DOMAIN` | `cargo run --example app_registration` |
 | `send_message` | IM v1 | Send a text IM message through the generated IM service | `APP_ID`, `APP_SECRET`, `CHAT_ID` | `cargo run --example send_message` |
 | `event_handler` | Event dispatcher | Handle encrypted HTTP callback events | none for compilation | `cargo run --example event_handler` |

@@ -326,6 +326,8 @@ mod search_schema;
 mod security_and_compliance;
 #[path = "generated_service_smoke/sheets.rs"]
 mod sheets;
+#[path = "generated_service_smoke/slides_ai.rs"]
+mod slides_ai;
 #[path = "generated_service_smoke/spark/app.rs"]
 mod spark_app;
 #[path = "generated_service_smoke/spark/db_sync.rs"]

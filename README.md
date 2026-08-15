@@ -75,6 +75,7 @@ for the complete setup.
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
 | Discover or manage BaseApps | [`examples/base_v3_app_read.rs`](examples/base_v3_app_read.rs) and [Base v3 application mode](docs/base-v3-apps.md) |
 | Read or update modern Docx content | [`examples/docs_ai_fetch.rs`](examples/docs_ai_fetch.rs) and [Docs AI document content](docs/docs-ai.md) |
+| Read or edit Slides AI presentations | [`examples/slides_ai_read.rs`](examples/slides_ai_read.rs) and [Slides AI presentation content](docs/slides-ai.md) |
 | Exchange or refresh OAuth tokens | [`examples/authen_oauth.rs`](examples/authen_oauth.rs) and [OAuth SSO guide](docs/oauth-sso.md) |
 | Receive webhook events | [`examples/event_handler.rs`](examples/event_handler.rs) |
 | Handle interactive card callbacks | [`examples/card_action_handler.rs`](examples/card_action_handler.rs) |
@@ -95,6 +96,8 @@ for the complete setup.
   BaseApp, page, and block operations.
 - [Docs AI document content](docs/docs-ai.md): modern Docx content fetches,
   updates, and version-history operations.
+- [Slides AI presentation content](docs/slides-ai.md): XML presentation and
+  slide operations with version-history support.
 - [Documentation index](docs/README.md): detailed guides and runnable examples.
 
 ## Migration from 0.2

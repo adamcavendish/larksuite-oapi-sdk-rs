@@ -53,6 +53,7 @@ pub mod report;
 pub mod search;
 pub mod security_and_compliance;
 pub mod sheets;
+pub mod slides_ai;
 pub mod spark;
 pub mod speech_to_text;
 pub mod task;

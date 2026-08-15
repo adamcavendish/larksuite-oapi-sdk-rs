@@ -34,6 +34,7 @@ impl LarkClient {
     service_accessor!(hire_v2, hire, v2, V2);
     service_accessor!(im, im, v1, V1);
     service_accessor!(sheets, sheets, v3, V3);
+    service_accessor!(slides_ai, slides_ai, v1, V1);
     service_accessor!(spark, spark, v1, V1);
     service_accessor!(task, task, v1, V1);
     service_accessor!(im_v2, im, v2, V2);
