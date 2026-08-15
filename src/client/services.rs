@@ -26,6 +26,7 @@ impl LarkClient {
     service_accessor!(corehr, corehr, v1, V1);
     service_accessor!(corehr_v2, corehr, v2, V2);
     service_accessor!(docx, docx, v1, V1);
+    service_accessor!(docs_ai, docs_ai, v1, V1);
     service_accessor!(drive, drive, v1, V1);
     service_accessor!(drive_v2, drive, v2, V2);
     service_accessor!(helpdesk, helpdesk, v1, V1);

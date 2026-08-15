@@ -22,6 +22,7 @@ pub mod contact;
 pub mod corehr;
 pub mod directory;
 pub mod docs;
+pub mod docs_ai;
 pub mod document_ai;
 pub mod docx;
 pub mod drive;
