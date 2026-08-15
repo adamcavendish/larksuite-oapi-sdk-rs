@@ -1,7 +1,8 @@
 use super::prelude::*;
 use larksuite_oapi_sdk_rs::service::slides_ai::v1::{
-    AddSlideQuery, DeleteSlideQuery, GetSlideQuery, GetXmlPresentationHistoryRevertStatusQuery,
-    GetXmlPresentationQuery, ListXmlPresentationHistoryQuery, ReplaceSlideQuery,
+    AddSlideQuery, DeleteSlideQuery, GetSlideImagesRequest, GetSlideQuery,
+    GetXmlPresentationHistoryRevertStatusQuery, GetXmlPresentationQuery,
+    ListXmlPresentationHistoryQuery, ReplaceSlideQuery, SlideImage,
 };
 
 // ── Slides AI ──
@@ -190,4 +191,122 @@ async fn slides_ai_core_contract_smoke() {
     assert!(request.contains(r#""xml_presentation":{"content":"<presentation/>"}"#));
     assert!(request.contains(r#""block_replace"#));
     assert!(request.contains(r#""history_version_id":"42"#));
+}
+
+#[tokio::test]
+async fn slides_ai_image_contract_smoke() {
+    let selected_body = r#"{"code":0,"msg":"ok","data":{"slide_images":[{"slide_id":"slide /1","slide_number":1,"format":"jpeg","data":"c2VsZWN0ZWQ="}]}}"#;
+    let rendered_body =
+        r#"{"code":0,"msg":"ok","data":{"slide_image":{"format":"png","data":"cmVuZGVyZWQ="}}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, selected_body),
+        http_response(200, selected_body),
+        http_response(200, rendered_body),
+    ])
+    .await;
+
+    let client = client_for(addr);
+    let user_option = RequestOption {
+        user_access_token: Some("user-token".to_string()),
+        ..RequestOption::default()
+    };
+    let tenant_option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..RequestOption::default()
+    };
+    let presentation_id = "pres /A";
+    let slide_numbers = [1, 2];
+    let slide_ids = ["slide /1"];
+
+    let selected_by_number = client
+        .slides_ai()
+        .image
+        .get(
+            &GetSlideImagesRequest::by_numbers(presentation_id, &slide_numbers),
+            &user_option,
+        )
+        .await
+        .unwrap();
+    let selected_by_id = client
+        .slides_ai()
+        .image
+        .get(
+            &GetSlideImagesRequest::by_ids(presentation_id, &slide_ids),
+            &tenant_option,
+        )
+        .await
+        .unwrap();
+    let rendered = client
+        .slides_ai()
+        .image
+        .render("<slide id=\"render\"/>", &user_option)
+        .await
+        .unwrap();
+
+    assert!(selected_by_number.success());
+    assert!(selected_by_id.success());
+    assert!(rendered.success());
+    assert_eq!(
+        selected_by_number.data.unwrap().slide_images[0]
+            .decode()
+            .unwrap(),
+        b"selected"
+    );
+    assert_eq!(
+        rendered
+            .data
+            .unwrap()
+            .slide_image
+            .unwrap()
+            .decode()
+            .unwrap(),
+        b"rendered"
+    );
+
+    let empty_ids: [&str; 0] = [];
+    let err = client
+        .slides_ai()
+        .image
+        .get(
+            &GetSlideImagesRequest::by_ids(presentation_id, &empty_ids),
+            &user_option,
+        )
+        .await
+        .unwrap_err();
+    assert!(err.to_string().contains("requires at least one"));
+
+    let too_many_ids = ["slide"; 11];
+    let err = client
+        .slides_ai()
+        .image
+        .get(
+            &GetSlideImagesRequest::by_ids(presentation_id, &too_many_ids),
+            &user_option,
+        )
+        .await
+        .unwrap_err();
+    assert!(err.to_string().contains("at most 10"));
+
+    let err = client
+        .slides_ai()
+        .image
+        .render("  ", &tenant_option)
+        .await
+        .unwrap_err();
+    assert!(err.to_string().contains("content cannot be empty"));
+
+    let invalid_image: SlideImage = serde_json::from_str(r#"{"data":"not-base64"}"#).unwrap();
+    assert!(invalid_image.decode().is_err());
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(
+        request
+            .contains("POST /open-apis/slides_ai/v1/xml_presentations/pres%20%2FA/slide_images ")
+    );
+    assert!(request.contains("POST /open-apis/slides_ai/v1/slide_image/render "));
+    assert!(request.contains("authorization: Bearer user-token"));
+    assert!(request.contains("authorization: Bearer tenant-token"));
+    assert!(request.contains(r#""slide_numbers":[1,2]"#));
+    assert!(request.contains(r#""slide_ids":["slide /1"]"#));
+    assert!(request.contains(r#""content":"<slide id=\"render\"/>"#));
 }

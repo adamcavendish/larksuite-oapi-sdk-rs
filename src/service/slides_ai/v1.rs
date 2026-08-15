@@ -1,10 +1,12 @@
-use serde::Serialize;
+use base64::Engine as _;
+use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
-use crate::service::common::{JsonResp, PageQuery, RestRequest};
+use crate::resp::{ApiResp, CodeError};
+use crate::service::common::{FromV2Response, JsonResp, PageQuery, RestRequest};
 
 pub type CreateXmlPresentationResp = JsonResp;
 pub type GetXmlPresentationResp = JsonResp;
@@ -15,6 +17,123 @@ pub type ReplaceSlideResp = JsonResp;
 pub type ListXmlPresentationHistoryResp = JsonResp;
 pub type RevertXmlPresentationHistoryResp = JsonResp;
 pub type GetXmlPresentationHistoryRevertStatusResp = JsonResp;
+
+pub type GetSlideImagesResp = SlideImageResponse<SlideImagesData>;
+pub type RenderSlideImageResp = SlideImageResponse<RenderedSlideImageData>;
+
+const MAX_SLIDE_IMAGES_PER_REQUEST: usize = 10;
+
+/// A rendered slide image returned as Base64-encoded bytes.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SlideImage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slide_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slide_number: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub format: Option<String>,
+    #[serde(default)]
+    pub data: String,
+}
+
+impl SlideImage {
+    /// Decodes the service's standard-Base64 image payload.
+    pub fn decode(&self) -> Result<Vec<u8>, base64::DecodeError> {
+        base64::engine::general_purpose::STANDARD.decode(self.data.trim())
+    }
+}
+
+/// Image data returned for selected presentation slides.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SlideImagesData {
+    #[serde(default)]
+    pub slide_images: Vec<SlideImage>,
+}
+
+/// Image data returned after rendering one XML slide fragment.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct RenderedSlideImageData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slide_image: Option<SlideImage>,
+}
+
+/// A typed Slides AI image response.
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct SlideImageResponse<T> {
+    pub api_resp: ApiResp,
+    pub code_error: Option<CodeError>,
+    pub data: Option<T>,
+}
+
+impl<T> SlideImageResponse<T> {
+    pub fn success(&self) -> bool {
+        self.api_resp.status_code == 200 && self.code_error.as_ref().is_none_or(|e| e.code == 0)
+    }
+}
+
+impl<T> FromV2Response<T> for SlideImageResponse<T> {
+    fn from_v2_response(api_resp: ApiResp, code_error: Option<CodeError>, data: Option<T>) -> Self {
+        Self {
+            api_resp,
+            code_error,
+            data,
+        }
+    }
+}
+
+/// Exactly one supported selector type for presentation-slide images.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub enum SlideImageSelector<'a> {
+    Ids(&'a [&'a str]),
+    Numbers(&'a [i32]),
+}
+
+/// Request parameters for rendering existing presentation slides as images.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetSlideImagesRequest<'a> {
+    pub xml_presentation_id: &'a str,
+    pub selector: SlideImageSelector<'a>,
+}
+
+impl<'a> GetSlideImagesRequest<'a> {
+    pub fn by_ids(xml_presentation_id: &'a str, slide_ids: &'a [&'a str]) -> Self {
+        Self {
+            xml_presentation_id,
+            selector: SlideImageSelector::Ids(slide_ids),
+        }
+    }
+
+    pub fn by_numbers(xml_presentation_id: &'a str, slide_numbers: &'a [i32]) -> Self {
+        Self {
+            xml_presentation_id,
+            selector: SlideImageSelector::Numbers(slide_numbers),
+        }
+    }
+
+    fn validate(&self) -> Result<(), LarkError> {
+        let count = match self.selector {
+            SlideImageSelector::Ids(slide_ids) => slide_ids.len(),
+            SlideImageSelector::Numbers(slide_numbers) => slide_numbers.len(),
+        };
+        if count == 0 {
+            return Err(LarkError::IllegalParam(
+                "slide image request requires at least one slide ID or number".to_string(),
+            ));
+        }
+        if count > MAX_SLIDE_IMAGES_PER_REQUEST {
+            return Err(LarkError::IllegalParam(format!(
+                "slide image request supports at most {MAX_SLIDE_IMAGES_PER_REQUEST} selections"
+            )));
+        }
+        Ok(())
+    }
+}
 
 /// Query parameters for retrieving an XML presentation.
 #[derive(Debug, Clone, Copy)]
@@ -206,10 +325,12 @@ impl<'a> GetXmlPresentationHistoryRevertStatusQuery<'a> {
 /// This module is separate from Docs AI document content and structured Docx
 /// block APIs. XML presentation and slide-part schemas are not present in the
 /// pinned Go SDK catalog, so callers pass serializable JSON payloads and
-/// receive [`JsonResp`] values unchanged.
+/// receive [`JsonResp`] values unchanged. Slide-image routes use small typed
+/// result models because their Base64 payloads have reusable decoding behavior.
 pub struct V1<'a> {
     pub presentation: PresentationResource<'a>,
     pub slide: SlideResource<'a>,
+    pub image: SlideImageResource<'a>,
     pub history: XmlPresentationHistoryResource<'a>,
 }
 
@@ -218,6 +339,7 @@ impl<'a> V1<'a> {
         Self {
             presentation: PresentationResource { config },
             slide: SlideResource { config },
+            image: SlideImageResource { config },
             history: XmlPresentationHistoryResource { config },
         }
     }
@@ -362,6 +484,68 @@ impl SlideResource<'_> {
         .send_json()
         .await
     }
+}
+
+/// Render Slides AI XML content as server-produced image data.
+pub struct SlideImageResource<'a> {
+    config: &'a Config,
+}
+
+impl SlideImageResource<'_> {
+    /// Renders selected existing slides as Base64 image payloads.
+    pub async fn get(
+        &self,
+        request: &GetSlideImagesRequest<'_>,
+        option: &RequestOption,
+    ) -> Result<GetSlideImagesResp, LarkError> {
+        request.validate()?;
+        let body = match request.selector {
+            SlideImageSelector::Ids(slide_ids) => serde_json::json!({ "slide_ids": slide_ids }),
+            SlideImageSelector::Numbers(slide_numbers) => {
+                serde_json::json!({ "slide_numbers": slide_numbers })
+            }
+        };
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/slides_ai/v1/xml_presentations/:xml_presentation_id/slide_images",
+            supported_access_tokens(),
+            option,
+        )
+        .path_param("xml_presentation_id", request.xml_presentation_id)
+        .json_body(&body)?
+        .send_v2_response::<SlideImagesData, GetSlideImagesResp>()
+        .await
+    }
+
+    /// Renders one XML slide fragment as a Base64 image payload.
+    pub async fn render(
+        &self,
+        content: &str,
+        option: &RequestOption,
+    ) -> Result<RenderSlideImageResp, LarkError> {
+        if content.trim().is_empty() {
+            return Err(LarkError::IllegalParam(
+                "slide image render content cannot be empty".to_string(),
+            ));
+        }
+        let body = RenderSlideImageBody { content };
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/slides_ai/v1/slide_image/render",
+            supported_access_tokens(),
+            option,
+        )
+        .json_body(&body)?
+        .send_v2_response::<RenderedSlideImageData, RenderSlideImageResp>()
+        .await
+    }
+}
+
+#[derive(Serialize)]
+struct RenderSlideImageBody<'a> {
+    content: &'a str,
 }
 
 /// List, revert, and inspect XML-presentation history.
