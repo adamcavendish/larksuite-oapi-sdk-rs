@@ -232,6 +232,7 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         ToBeResignedEmployeeReqBody, UpdateCollaborationRuleQuery,
     },
     docs::v1::{GetContentQuery as GetDocsContentQuery, GetDocumentQuery as GetDocsDocumentQuery},
+    docs_ai::v1::{GetDocumentHistoryRevertStatusQuery, ListDocumentHistoryQuery},
     docx::v1::{
         BatchDeleteChatAnnouncementBlockChildrenQuery,
         BatchDeleteChatAnnouncementBlockChildrenReqBody, BatchUpdateBlockReqBody,

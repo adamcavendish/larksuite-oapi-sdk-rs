@@ -16,4 +16,6 @@ examples, features, and coverage.
   list/search operations and their read-only live verification.
 - [Base v3 application mode](base-v3-apps.md) covers CLI-proven workspace,
   BaseApp, page, and block operations with user credentials.
+- [Docs AI document content](docs-ai.md) covers modern Docx content fetches,
+  updates, and version-history operations with user or bot credentials.
 - [Examples](../examples/README.md) contains runnable service workflows.

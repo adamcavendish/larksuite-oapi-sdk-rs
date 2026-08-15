@@ -164,6 +164,8 @@ mod directory_share_entity;
 mod directory_user;
 #[path = "generated_service_smoke/docs.rs"]
 mod docs;
+#[path = "generated_service_smoke/docs_ai.rs"]
+mod docs_ai;
 #[path = "generated_service_smoke/docx/announcement.rs"]
 mod docx_announcement;
 #[path = "generated_service_smoke/docx/block.rs"]
