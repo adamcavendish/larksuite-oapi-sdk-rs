@@ -18,4 +18,6 @@ examples, features, and coverage.
   BaseApp, page, and block operations with user credentials.
 - [Docs AI document content](docs-ai.md) covers modern Docx content fetches,
   updates, and version-history operations with user or bot credentials.
+- [Slides AI presentation content](slides-ai.md) covers XML presentation,
+  slide, and version-history operations with user or bot credentials.
 - [Examples](../examples/README.md) contains runnable service workflows.
