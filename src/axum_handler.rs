@@ -8,17 +8,19 @@ use axum::response::{IntoResponse, Response};
 use crate::event::{CardActionHandler, EventDispatcher, EventReq};
 use crate::http_handler::{event_req_from_parts, event_resp_into_http};
 
-async fn parse_request(req: Request) -> std::result::Result<EventReq, Response> {
+async fn parse_request(req: Request) -> std::result::Result<EventReq, Box<Response>> {
     let (parts, body) = req.into_parts();
 
     let body_bytes: Bytes = axum::body::to_bytes(body, 10 * 1024 * 1024)
         .await
         .map_err(|e| {
-            (
-                StatusCode::BAD_REQUEST,
-                format!("failed to read request body: {e}"),
+            Box::new(
+                (
+                    StatusCode::BAD_REQUEST,
+                    format!("failed to read request body: {e}"),
+                )
+                    .into_response(),
             )
-                .into_response()
         })?;
 
     Ok(event_req_from_parts(parts, body_bytes.to_vec()))
@@ -34,7 +36,7 @@ pub async fn event_handler(
 ) -> Response {
     let event_req = match parse_request(req).await {
         Ok(r) => r,
-        Err(resp) => return resp,
+        Err(resp) => return *resp,
     };
     build_response(dispatcher.handle(event_req).await)
 }
@@ -45,7 +47,7 @@ pub async fn card_action_handler(
 ) -> Response {
     let event_req = match parse_request(req).await {
         Ok(r) => r,
-        Err(resp) => return resp,
+        Err(resp) => return *resp,
     };
     build_response(handler.handle(event_req).await)
 }

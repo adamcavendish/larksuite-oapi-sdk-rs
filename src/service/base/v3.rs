@@ -9,6 +9,132 @@ use crate::service::common::{JsonResp, PageQuery, RestRequest};
 pub type ListRecordResp = JsonResp;
 pub type SearchRecordResp = JsonResp;
 
+/// PATCH body for dashboard sharing settings.
+///
+/// Every field is optional because the endpoint applies a partial update. In
+/// particular, `Some(false)` is serialized so callers can explicitly disable
+/// a setting.
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct UpdateDashboardShareReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub access_scope: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub settings: Option<UpdateDashboardShareSettings>,
+}
+
+impl UpdateDashboardShareReqBody {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn enabled(mut self, value: bool) -> Self {
+        self.enabled = Some(value);
+        self
+    }
+
+    pub fn access_scope(mut self, value: impl Into<String>) -> Self {
+        self.access_scope = Some(value.into());
+        self
+    }
+
+    pub fn settings(mut self, value: UpdateDashboardShareSettings) -> Self {
+        self.settings = Some(value);
+        self
+    }
+}
+
+/// Dashboard-specific fields for [`UpdateDashboardShareReqBody`].
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct UpdateDashboardShareSettings {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub show_source: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enable_auto_analysis: Option<bool>,
+}
+
+impl UpdateDashboardShareSettings {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn show_source(mut self, value: bool) -> Self {
+        self.show_source = Some(value);
+        self
+    }
+
+    pub fn enable_auto_analysis(mut self, value: bool) -> Self {
+        self.enable_auto_analysis = Some(value);
+        self
+    }
+}
+
+/// PATCH body for form sharing settings.
+///
+/// Every field is optional because the endpoint applies a partial update. In
+/// particular, `Some(false)` is serialized so callers can explicitly disable
+/// a setting.
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct UpdateFormShareReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub access_scope: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub settings: Option<UpdateFormShareSettings>,
+}
+
+impl UpdateFormShareReqBody {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn enabled(mut self, value: bool) -> Self {
+        self.enabled = Some(value);
+        self
+    }
+
+    pub fn access_scope(mut self, value: impl Into<String>) -> Self {
+        self.access_scope = Some(value.into());
+        self
+    }
+
+    pub fn settings(mut self, value: UpdateFormShareSettings) -> Self {
+        self.settings = Some(value);
+        self
+    }
+}
+
+/// Form-specific fields for [`UpdateFormShareReqBody`].
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct UpdateFormShareSettings {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub allow_anonymous: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub require_login: Option<bool>,
+}
+
+impl UpdateFormShareSettings {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn allow_anonymous(mut self, value: bool) -> Self {
+        self.allow_anonymous = Some(value);
+        self
+    }
+
+    pub fn require_login(mut self, value: bool) -> Self {
+        self.require_login = Some(value);
+        self
+    }
+}
+
 /// Query parameters for reading Base v3 records.
 ///
 /// `filter` and `sort` are JSON-encoded strings, as required by the Base v3
@@ -163,6 +289,8 @@ impl<'a> GetBaseAppBlockDataQuery<'a> {
 
 pub struct V3<'a> {
     pub record: RecordResource<'a>,
+    pub dashboard_share: DashboardShareResource<'a>,
+    pub form_share: FormShareResource<'a>,
     pub workspace: WorkspaceResource<'a>,
     pub app: BaseAppResource<'a>,
     pub page: BaseAppPageResource<'a>,
@@ -173,11 +301,119 @@ impl<'a> V3<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             record: RecordResource { config },
+            dashboard_share: DashboardShareResource { config },
+            form_share: FormShareResource { config },
             workspace: WorkspaceResource { config },
             app: BaseAppResource { config },
             page: BaseAppPageResource { config },
             block: BaseAppBlockResource { config },
         }
+    }
+}
+
+/// Dashboard sharing operations for Base v3.
+pub struct DashboardShareResource<'a> {
+    config: &'a Config,
+}
+
+impl DashboardShareResource<'_> {
+    /// Gets a dashboard's sharing status and settings.
+    pub async fn get(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id/share",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .send_json()
+        .await
+    }
+
+    /// Partially updates a dashboard's sharing settings.
+    pub async fn update(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        body: &UpdateDashboardShareReqBody,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id/share",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .json_body(body)?
+        .send_json()
+        .await
+    }
+}
+
+/// Form sharing operations for Base v3.
+pub struct FormShareResource<'a> {
+    config: &'a Config,
+}
+
+impl FormShareResource<'_> {
+    /// Gets a form's sharing status and settings.
+    pub async fn get(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        form_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id/share",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("form_id", form_id)
+        .send_json()
+        .await
+    }
+
+    /// Partially updates a form's sharing settings.
+    pub async fn update(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        form_id: &str,
+        body: &UpdateFormShareReqBody,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id/share",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("form_id", form_id)
+        .json_body(body)?
+        .send_json()
+        .await
     }
 }
 
