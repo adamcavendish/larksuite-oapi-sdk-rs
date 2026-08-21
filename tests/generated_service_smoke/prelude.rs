@@ -116,6 +116,8 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         v3::{
             GetBaseAppBlockDataQuery, ListBaseAppBlocksQuery, ListBaseAppPagesQuery,
             ListRecordQuery as ListBaseV3RecordQuery, ListWorkspaceEntitiesQuery,
+            UpdateDashboardShareReqBody, UpdateDashboardShareSettings, UpdateFormShareReqBody,
+            UpdateFormShareSettings,
         },
     },
     bitable::v1::{

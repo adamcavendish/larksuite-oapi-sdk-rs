@@ -140,6 +140,98 @@ async fn base_v3_record_read_contract_smoke() {
 }
 
 #[tokio::test]
+async fn base_v3_share_contract_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+    ])
+    .await;
+    let client = client_for(addr);
+    let user_option = RequestOption {
+        user_access_token: Some("user-token".to_string()),
+        ..RequestOption::default()
+    };
+    let tenant_option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..RequestOption::default()
+    };
+    let dashboard_update = UpdateDashboardShareReqBody::new()
+        .access_scope("tenant")
+        .settings(UpdateDashboardShareSettings::new().show_source(false));
+    let form_update = UpdateFormShareReqBody::new()
+        .enabled(false)
+        .settings(UpdateFormShareSettings::new().require_login(false));
+
+    client
+        .base_v3()
+        .dashboard_share
+        .get("base token", "dashboard id", &user_option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard_share
+        .update(
+            "base token",
+            "dashboard id",
+            &dashboard_update,
+            &tenant_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .form_share
+        .get("base token", "table id", "form id", &tenant_option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .form_share
+        .update(
+            "base token",
+            "table id",
+            "form id",
+            &form_update,
+            &user_option,
+        )
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    for path in [
+        "GET /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id/share ",
+        "PATCH /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id/share ",
+        "GET /open-apis/base/v3/bases/base%20token/tables/table%20id/forms/form%20id/share ",
+        "PATCH /open-apis/base/v3/bases/base%20token/tables/table%20id/forms/form%20id/share ",
+    ] {
+        assert!(
+            request.contains(path),
+            "missing request path {path}:\n{request}"
+        );
+    }
+    for value in [
+        "authorization: Bearer user-token",
+        "authorization: Bearer tenant-token",
+        "x-app-id: test_app_id",
+        r#""access_scope":"tenant""#,
+        r#""show_source":false"#,
+        r#""enabled":false"#,
+        r#""require_login":false"#,
+    ] {
+        assert!(
+            request.contains(value),
+            "missing request value {value}:\n{request}"
+        );
+    }
+    assert!(!request.contains("enable_auto_analysis"));
+    assert!(!request.contains("allow_anonymous"));
+}
+
+#[tokio::test]
 async fn base_v3_application_mode_contract_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
