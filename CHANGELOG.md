@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## [0.3.6] - 2026-08-21
+
+### Authentication
+
+- Added Feishu and Lark OAuth SSO support, including authorization-code and
+  PKCE exchange, refresh-token rotation, device authorization, and token
+  revocation.
+- Retried pending Feishu device authorization responses at the server-provided
+  polling interval.
+
+### REST service coverage
+
+- Added user-token Spark v1 Base-to-database sync operations.
+- Added Base v3 record reads; user-token workspace, BaseApp, page, and block
+  operations; and dashboard and form sharing reads and partial updates. Share
+  updates preserve explicit `false` settings and accept user or tenant tokens.
+- Added Docs AI v1 document content and history operations.
+- Added Slides AI v1 presentation, slide, history, and image-rendering
+  operations, including Base64 image decoding helpers.
+
 ### Channel
 
 - Added the `messaging` feature and `LarkClient::channel_messaging()` for
@@ -9,6 +29,11 @@
   feature continues to enable the complete messaging and WebSocket runtime.
 - Deprecated outbound methods on `Channel`; their behavior remains available
   through `ChannelMessaging`.
+
+### CI
+
+- Parallelized pull-request validation while retaining test, coverage, MSRV,
+  package dry-run, and quick-check evidence.
 
 ## [0.3.5] - 2026-08-09
 
@@ -479,6 +504,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.6]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.6
 [0.3.5]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.5
 [0.3.4]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.4
 [0.3.3]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.3

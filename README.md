@@ -27,7 +27,7 @@ WebSocket, Axum, and channel integration.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.3.5"
+larksuite-oapi-sdk-rs = "0.3.6"
 ```
 
 The minimum supported Rust version is 1.95.0.
@@ -74,6 +74,7 @@ for the complete setup.
 | Call a typed REST endpoint | [`examples/send_message.rs`](examples/send_message.rs) or [generated examples](examples/README.md) |
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
 | Discover or manage BaseApps | [`examples/base_v3_app_read.rs`](examples/base_v3_app_read.rs) and [Base v3 application mode](docs/base-v3-apps.md) |
+| Read or update Base dashboard or form sharing | [Base v3 sharing](docs/base-v3-sharing.md) |
 | Read or update modern Docx content | [`examples/docs_ai_fetch.rs`](examples/docs_ai_fetch.rs) and [Docs AI document content](docs/docs-ai.md) |
 | Read, edit, or render Slides AI presentations | [`examples/slides_ai_read.rs`](examples/slides_ai_read.rs), [`examples/slides_ai_render.rs`](examples/slides_ai_render.rs), and [Slides AI presentation content](docs/slides-ai.md) |
 | Exchange or refresh OAuth tokens | [`examples/authen_oauth.rs`](examples/authen_oauth.rs) and [OAuth SSO guide](docs/oauth-sso.md) |
@@ -94,6 +95,8 @@ for the complete setup.
   refresh, and application-owned session handling.
 - [Base v3 application mode](docs/base-v3-apps.md): user-token workspace,
   BaseApp, page, and block operations.
+- [Base v3 sharing](docs/base-v3-sharing.md): dashboard and form sharing
+  reads and partial updates with user or tenant credentials.
 - [Docs AI document content](docs/docs-ai.md): modern Docx content fetches,
   updates, and version-history operations.
 - [Slides AI presentation content](docs/slides-ai.md): XML presentation and
@@ -136,7 +139,7 @@ separately does not enable the `channel` runtime API.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.3.5", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.3.6", features = ["ws", "axum"] }
 ```
 
 ## API Coverage
