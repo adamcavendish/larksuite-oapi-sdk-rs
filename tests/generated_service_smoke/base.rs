@@ -232,6 +232,117 @@ async fn base_v3_share_contract_smoke() {
 }
 
 #[tokio::test]
+async fn base_v3_template_center_contract_smoke() {
+    let category_body =
+        r#"{"code":0,"msg":"ok","data":{"categories":[{"key":"office","name":"Office"}]}}"#;
+    let template_body = r#"{"code":0,"msg":"ok","data":{"templates":[{"token":"tpl_1","name":"Weekly report","introduction":"Status updates","scenarios":["Reporting"],"developer":"Base Team","link":"https://example.com/base/tpl_1","created_at":"2025-12-03T02:53:34Z","updated_at":"2026-06-22T08:18:58Z"}],"has_more":true,"offset":"next"}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, category_body),
+        http_response(200, template_body),
+        http_response(200, template_body),
+    ])
+    .await;
+    let client = client_for(addr);
+    let user_option = RequestOption {
+        user_access_token: Some("user-token".to_string()),
+        ..RequestOption::default()
+    };
+    let tenant_option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..RequestOption::default()
+    };
+
+    let categories = client
+        .base_v3()
+        .template
+        .list_categories(&user_option)
+        .await
+        .unwrap();
+    let templates = client
+        .base_v3()
+        .template
+        .list(
+            &ListBaseTemplateQuery::new()
+                .category_key("office")
+                .limit(20)
+                .offset("cursor 1"),
+            &tenant_option,
+        )
+        .await
+        .unwrap();
+    let search = client
+        .base_v3()
+        .template
+        .search(
+            &SearchBaseTemplateQuery::new("AI plans")
+                .limit(10)
+                .offset("cursor 2"),
+            &user_option,
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(
+        categories
+            .data
+            .as_ref()
+            .and_then(|data| data.categories.as_ref())
+            .and_then(|items| items.first())
+            .and_then(|category| category.key.as_deref()),
+        Some("office")
+    );
+    assert_eq!(
+        templates
+            .data
+            .as_ref()
+            .and_then(|data| data.templates.as_ref())
+            .and_then(|items| items.first())
+            .and_then(|template| template.token.as_deref()),
+        Some("tpl_1")
+    );
+    let template = templates
+        .data
+        .as_ref()
+        .and_then(|data| data.templates.as_ref())
+        .and_then(|items| items.first())
+        .unwrap();
+    assert_eq!(template.introduction.as_deref(), Some("Status updates"));
+    assert_eq!(
+        template.scenarios.as_ref().unwrap(),
+        &["Reporting".to_owned()]
+    );
+    assert_eq!(template.developer.as_deref(), Some("Base Team"));
+    assert_eq!(
+        template.link.as_deref(),
+        Some("https://example.com/base/tpl_1")
+    );
+    assert_eq!(template.created_at.as_deref(), Some("2025-12-03T02:53:34Z"));
+    assert_eq!(template.updated_at.as_deref(), Some("2026-06-22T08:18:58Z"));
+    assert_eq!(
+        search.data.as_ref().and_then(|data| data.offset.as_deref()),
+        Some("next")
+    );
+
+    let request = requests.lock().unwrap().join("\n");
+    for value in [
+        "GET /open-apis/base/v3/bases/templates/category ",
+        "GET /open-apis/base/v3/bases/templates?",
+        "GET /open-apis/base/v3/bases/templates/search?",
+        "category_key=office",
+        "keyword=AI+plans",
+        "limit=20",
+        "limit=10",
+        "offset=cursor+1",
+        "offset=cursor+2",
+        "authorization: Bearer user-token",
+        "authorization: Bearer tenant-token",
+        "x-app-id: test_app_id",
+    ] {
+        assert!(request.contains(value), "missing {value}:\n{request}");
+    }
+}
+
+#[tokio::test]
 async fn base_v3_application_mode_contract_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![

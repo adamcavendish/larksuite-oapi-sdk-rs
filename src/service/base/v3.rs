@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
@@ -8,6 +8,49 @@ use crate::service::common::{JsonResp, PageQuery, RestRequest};
 
 pub type ListRecordResp = JsonResp;
 pub type SearchRecordResp = JsonResp;
+
+/// The default number of Base templates returned per request.
+pub const DEFAULT_BASE_TEMPLATE_LIMIT: i32 = 10;
+/// The maximum number of Base templates accepted by the template-center API.
+pub const MAX_BASE_TEMPLATE_LIMIT: i32 = 100;
+
+/// A category in the Base template center.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
+pub struct TemplateCategory {
+    pub key: Option<String>,
+    pub name: Option<String>,
+}
+
+/// A Base template that can be copied into a new Base.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
+pub struct BaseTemplate {
+    pub token: Option<String>,
+    pub name: Option<String>,
+    pub introduction: Option<String>,
+    pub scenarios: Option<Vec<String>>,
+    pub developer: Option<String>,
+    pub link: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+}
+
+/// Response data for template-center category discovery.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
+pub struct ListTemplateCategoryRespData {
+    pub categories: Option<Vec<TemplateCategory>>,
+}
+
+/// Response data for template-center list and search operations.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
+pub struct ListBaseTemplateRespData {
+    pub templates: Option<Vec<BaseTemplate>>,
+    pub has_more: Option<bool>,
+    pub offset: Option<String>,
+}
 
 /// PATCH body for dashboard sharing settings.
 ///
@@ -268,6 +311,129 @@ impl<'a> ListBaseAppBlocksQuery<'a> {
     }
 }
 
+/// Query parameters for listing Base templates by category.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListBaseTemplateQuery<'a> {
+    pub category_key: Option<&'a str>,
+    pub limit: Option<i32>,
+    pub offset: Option<&'a str>,
+}
+
+impl<'a> Default for ListBaseTemplateQuery<'a> {
+    fn default() -> Self {
+        Self {
+            category_key: None,
+            limit: Some(DEFAULT_BASE_TEMPLATE_LIMIT),
+            offset: None,
+        }
+    }
+}
+
+impl<'a> ListBaseTemplateQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn category_key(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.category_key = value.into();
+        self
+    }
+
+    pub fn limit(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.limit = value.into();
+        self
+    }
+
+    pub fn offset(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.offset = value.into();
+        self
+    }
+
+    fn normalized_category_key(&self) -> Option<&str> {
+        self.category_key.and_then(|key| {
+            let key = key.trim();
+            (!key.is_empty()).then_some(key)
+        })
+    }
+
+    fn normalized_offset(&self) -> Option<&str> {
+        self.offset.and_then(|offset| {
+            let offset = offset.trim();
+            (!offset.is_empty()).then_some(offset)
+        })
+    }
+
+    fn validate(&self) -> Result<(), LarkError> {
+        validate_template_limit(self.limit)
+    }
+}
+
+/// Query parameters for searching Base templates.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct SearchBaseTemplateQuery<'a> {
+    pub keyword: &'a str,
+    pub limit: Option<i32>,
+    pub offset: Option<&'a str>,
+}
+
+impl<'a> SearchBaseTemplateQuery<'a> {
+    pub fn new(keyword: &'a str) -> Self {
+        Self {
+            keyword,
+            limit: Some(DEFAULT_BASE_TEMPLATE_LIMIT),
+            offset: None,
+        }
+    }
+
+    pub fn limit(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.limit = value.into();
+        self
+    }
+
+    pub fn offset(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.offset = value.into();
+        self
+    }
+
+    fn keyword(&self) -> Result<&str, LarkError> {
+        let keyword = self.keyword.trim();
+        if keyword.is_empty() {
+            return Err(LarkError::IllegalParam(
+                "template keyword must not be blank".to_owned(),
+            ));
+        }
+        Ok(keyword)
+    }
+
+    fn normalized_offset(&self) -> Option<&str> {
+        self.offset.and_then(|offset| {
+            let offset = offset.trim();
+            (!offset.is_empty()).then_some(offset)
+        })
+    }
+
+    fn validate(&self) -> Result<&str, LarkError> {
+        validate_template_limit(self.limit)?;
+        self.keyword()
+    }
+}
+
+fn validate_template_limit(limit: Option<i32>) -> Result<(), LarkError> {
+    if let Some(limit) = limit
+        && !(1..=MAX_BASE_TEMPLATE_LIMIT).contains(&limit)
+    {
+        return Err(LarkError::IllegalParam(format!(
+            "template limit must be between 1 and {MAX_BASE_TEMPLATE_LIMIT}"
+        )));
+    }
+    Ok(())
+}
+
+impl_resp!(ListTemplateCategoryResp, ListTemplateCategoryRespData);
+impl_resp!(ListBaseTemplateResp, ListBaseTemplateRespData);
+
 /// Query parameters for reading computed data from a BaseApp chart block.
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
@@ -289,6 +455,7 @@ impl<'a> GetBaseAppBlockDataQuery<'a> {
 
 pub struct V3<'a> {
     pub record: RecordResource<'a>,
+    pub template: TemplateResource<'a>,
     pub dashboard_share: DashboardShareResource<'a>,
     pub form_share: FormShareResource<'a>,
     pub workspace: WorkspaceResource<'a>,
@@ -301,6 +468,7 @@ impl<'a> V3<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             record: RecordResource { config },
+            template: TemplateResource { config },
             dashboard_share: DashboardShareResource { config },
             form_share: FormShareResource { config },
             workspace: WorkspaceResource { config },
@@ -308,6 +476,74 @@ impl<'a> V3<'a> {
             page: BaseAppPageResource { config },
             block: BaseAppBlockResource { config },
         }
+    }
+}
+
+/// Template-center discovery operations for Base v3.
+pub struct TemplateResource<'a> {
+    config: &'a Config,
+}
+
+impl TemplateResource<'_> {
+    /// Lists the available Base template categories.
+    pub async fn list_categories(
+        &self,
+        option: &RequestOption,
+    ) -> Result<ListTemplateCategoryResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/templates/category",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .send_response::<ListTemplateCategoryRespData, ListTemplateCategoryResp>()
+        .await
+    }
+
+    /// Lists Base templates, optionally filtered by a template category.
+    pub async fn list(
+        &self,
+        query: &ListBaseTemplateQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListBaseTemplateResp, LarkError> {
+        query.validate()?;
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/templates",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .query("category_key", query.normalized_category_key())
+        .query("limit", query.limit)
+        .query("offset", query.normalized_offset())
+        .send_response::<ListBaseTemplateRespData, ListBaseTemplateResp>()
+        .await
+    }
+
+    /// Searches Base templates by keyword.
+    pub async fn search(
+        &self,
+        query: &SearchBaseTemplateQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListBaseTemplateResp, LarkError> {
+        let keyword = query.validate()?;
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/templates/search",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .query("keyword", keyword)
+        .query("limit", query.limit)
+        .query("offset", query.normalized_offset())
+        .send_response::<ListBaseTemplateRespData, ListBaseTemplateResp>()
+        .await
     }
 }
 
@@ -832,4 +1068,43 @@ fn with_app_id(config: &Config, option: &RequestOption) -> Result<RequestOption,
                 .map_err(|err| LarkError::IllegalParam(err.to_string()))?,
         );
     Ok(option)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn template_queries_use_the_cli_default_page_size() {
+        let list = ListBaseTemplateQuery::new();
+        let search = SearchBaseTemplateQuery::new("templates");
+
+        assert_eq!(list.limit, Some(DEFAULT_BASE_TEMPLATE_LIMIT));
+        assert_eq!(search.limit, Some(DEFAULT_BASE_TEMPLATE_LIMIT));
+        assert!(list.validate().is_ok());
+        assert_eq!(search.validate().unwrap(), "templates");
+    }
+
+    #[test]
+    fn template_queries_reject_out_of_range_page_sizes() {
+        for limit in [0, MAX_BASE_TEMPLATE_LIMIT + 1] {
+            let list = ListBaseTemplateQuery::new().limit(limit);
+            let search = SearchBaseTemplateQuery::new("templates").limit(limit);
+
+            assert!(matches!(list.validate(), Err(LarkError::IllegalParam(_))));
+            assert!(matches!(search.validate(), Err(LarkError::IllegalParam(_))));
+        }
+    }
+
+    #[test]
+    fn template_search_rejects_blank_keywords_and_normalizes_whitespace() {
+        assert!(matches!(
+            SearchBaseTemplateQuery::new(" \t ").validate(),
+            Err(LarkError::IllegalParam(_))
+        ));
+        assert_eq!(
+            SearchBaseTemplateQuery::new(" AI ").validate().unwrap(),
+            "AI"
+        );
+    }
 }

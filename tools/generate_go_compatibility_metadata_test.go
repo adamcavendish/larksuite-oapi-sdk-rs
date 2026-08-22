@@ -5,6 +5,12 @@ import (
 	"testing"
 )
 
+func TestDefaultTargetIncludesV3100(t *testing.T) {
+	if defaultTo != "v3.10.0" {
+		t.Fatalf("defaultTo = %q, want v3.10.0", defaultTo)
+	}
+}
+
 func TestParseResourceSkipsTokenlessEndpoints(t *testing.T) {
 	source := []byte(`package larkexample
 

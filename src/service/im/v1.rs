@@ -845,6 +845,48 @@ pub struct ForwardThreadReqBody {
     pub receive_id: Option<String>,
 }
 
+/// The maximum number of message IDs accepted by the batch read-status endpoint.
+pub const MAX_READ_STATUS_MESSAGE_IDS: usize = 50;
+
+/// Request body for querying the current user's read status for messages.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct ReadStatusMessageReqBody {
+    message_ids: Vec<String>,
+}
+
+impl ReadStatusMessageReqBody {
+    /// Builds a request body containing between one and 50 non-empty message IDs.
+    pub fn new<I, S>(message_ids: I) -> Result<Self, LarkError>
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        let message_ids: Vec<_> = message_ids
+            .into_iter()
+            .map(Into::into)
+            .map(|message_id: String| message_id.trim().to_owned())
+            .collect();
+
+        if message_ids.is_empty() || message_ids.len() > MAX_READ_STATUS_MESSAGE_IDS {
+            return Err(LarkError::IllegalParam(format!(
+                "message_ids must contain between 1 and {MAX_READ_STATUS_MESSAGE_IDS} items"
+            )));
+        }
+        if message_ids.iter().any(String::is_empty) {
+            return Err(LarkError::IllegalParam(
+                "message_ids must not contain empty values".to_owned(),
+            ));
+        }
+
+        Ok(Self { message_ids })
+    }
+
+    pub fn message_ids(&self) -> &[String] {
+        &self.message_ids
+    }
+}
+
 // ── Response data types ──
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -893,6 +935,23 @@ pub struct ReadUsersMessageRespData {
     pub items: Option<Vec<ReadUser>>,
     pub has_more: Option<bool>,
     pub page_token: Option<String>,
+}
+
+/// A current-user message read-status result. `unexpected_reason` explains an
+/// invalid, inaccessible, or unsupported message ID.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
+pub struct MessageReadStatus {
+    pub message_id: Option<String>,
+    pub read_status: Option<String>,
+    pub unexpected_reason: Option<String>,
+}
+
+/// Response data for a batch message read-status query.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
+pub struct ReadStatusMessageRespData {
+    pub items: Option<Vec<MessageReadStatus>>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -1131,6 +1190,7 @@ impl_resp!(MergeForwardMessageResp, MergeForwardMessageRespData);
 impl_resp!(GetMessageResp, GetMessageRespData);
 impl_resp!(ListMessageResp, ListMessageRespData);
 impl_resp!(ReadUsersMessageResp, ReadUsersMessageRespData);
+impl_resp!(ReadStatusMessageResp, ReadStatusMessageRespData);
 impl_resp!(UrgentAppMessageResp, UrgentMessageRespData);
 impl_resp!(UrgentPhoneMessageResp, UrgentMessageRespData);
 impl_resp!(UrgentSmsMessageResp, UrgentMessageRespData);
@@ -1778,13 +1838,31 @@ impl<'a> MessageResource<'a> {
             self.config,
             http::Method::GET,
             path,
-            vec![AccessTokenType::Tenant],
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
             option,
         )
         .query("user_id_type", query.user_id_type)
         .query("page_size", query.page_size)
         .query("page_token", query.page_token)
         .send_response::<ReadUsersMessageRespData, ReadUsersMessageResp>()
+        .await
+    }
+
+    /// Queries whether the current user has read up to 50 messages.
+    pub async fn read_status(
+        &self,
+        body: &ReadStatusMessageReqBody,
+        option: &RequestOption,
+    ) -> Result<ReadStatusMessageResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/im/v1/messages/read_status",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(body)?
+        .send_response::<ReadStatusMessageRespData, ReadStatusMessageResp>()
         .await
     }
 

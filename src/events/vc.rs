@@ -211,6 +211,239 @@ pub struct TimeConfig {
     pub max_duration: Option<i32>,
 }
 
+/// A meeting participant reported by a VC bot webhook.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MeetingAgentEventUser {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_role: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_name: Option<String>,
+}
+
+/// The meeting information supplied to VC bot webhooks.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MeetingAgentEventMeeting {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub topic: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_no: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub host_user: Option<MeetingAgentEventUser>,
+}
+
+/// A shared document reported by a VC bot activity webhook.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ShareDoc {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+}
+
+/// A change to the currently focused document comment.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct CommentFocus {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub focused: Option<bool>,
+}
+
+/// A change to the currently viewed document section.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SectionLocation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_titles: Option<Vec<String>>,
+}
+
+/// A preview action for an element in a shared document.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ElementPreview {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub element_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub element_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ParticipantJoinedItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub participant: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub join_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ParticipantLeftItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub participant: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_reason: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub leave_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct TranscriptItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub speaker: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub language: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time_ms: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time_ms: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sentence_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ChatMessageItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub send_time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MagicShareStartedItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub share_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub share_doc: Option<ShareDoc>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MagicShareEndedItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub share_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct DocumentContextChangedItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub share_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub share_doc: Option<ShareDoc>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment_focus: Option<CommentFocus>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub section_location: Option<SectionLocation>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub element_preview: Option<ElementPreview>,
+}
+
+/// One activity record delivered to a VC bot while it is in a meeting.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MeetingActivityItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting: Option<MeetingAgentEventMeeting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_event_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub participant_joined_items: Option<Vec<ParticipantJoinedItem>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub participant_left_items: Option<Vec<ParticipantLeftItem>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transcript_received_items: Option<Vec<TranscriptItem>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_received_items: Option<Vec<ChatMessageItem>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub magic_share_started_items: Option<Vec<MagicShareStartedItem>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub magic_share_ended_items: Option<Vec<MagicShareEndedItem>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub document_context_changed_items: Option<Vec<DocumentContextChangedItem>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct P2VcBotMeetingActivityV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting_activity_items: Option<Vec<MeetingActivityItem>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct P2VcBotMeetingEndedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting: Option<MeetingAgentEventMeeting>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct P2VcBotMeetingInvitedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting: Option<MeetingAgentEventMeeting>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inviter: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invite_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub call_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct P2VcBotMeetingStartedV1 {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meeting: Option<MeetingAgentEventMeeting>,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct P2VcMeetingStartedV1 {
@@ -405,6 +638,14 @@ pub struct P2VcReserveConfigUpdatedV1 {
 // ── EventDispatcher extension methods ──
 
 event_handlers! {
+    on_p2_vc_bot_meeting_activity_v1 => P2VcBotMeetingActivityV1
+        : "vc.bot.meeting_activity_v1",
+    on_p2_vc_bot_meeting_ended_v1 => P2VcBotMeetingEndedV1
+        : "vc.bot.meeting_ended_v1",
+    on_p2_vc_bot_meeting_invited_v1 => P2VcBotMeetingInvitedV1
+        : "vc.bot.meeting_invited_v1",
+    on_p2_vc_bot_meeting_started_v1 => P2VcBotMeetingStartedV1
+        : "vc.bot.meeting_started_v1",
     on_p2_vc_meeting_started_v1 => P2VcMeetingStartedV1
         : "vc.meeting.meeting_started_v1",
     on_p2_vc_meeting_ended_v1 => P2VcMeetingEndedV1

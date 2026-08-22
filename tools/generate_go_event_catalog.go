@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	defaultEventRevision = "v3.9.10"
+	defaultEventRevision = "v3.10.0"
 	defaultEventOutput   = "tools/go_event_catalog.json"
 )
 

@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "go_catalog_sha256": "4949441a62d9fa1baac3f5329873f9869982976bc947610cd7d273c657897a13",
+  "go_catalog_sha256": "b1317191a54544afa09a924719bdf93d16b00eeb0ac60bb100ee49fb944216e8",
   "summary": {
-    "go_contracts": 1631,
-    "rust_direct_contracts": 1620,
-    "go_compatibility_bridge_contracts": 183,
+    "go_contracts": 1642,
+    "rust_direct_contracts": 1624,
+    "go_compatibility_bridge_contracts": 194,
     "typed_matches": 1486,
-    "bridge_matches": 145,
+    "bridge_matches": 156,
     "metadata_mismatches": 0,
     "missing_contracts": 0,
     "unparsed_rust_requests": 0

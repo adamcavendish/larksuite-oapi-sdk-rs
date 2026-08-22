@@ -130,7 +130,7 @@ mod tests {
 
     #[test]
     fn generated_endpoint_metadata_is_valid() {
-        assert_eq!(GoCompatibilityEndpoint::ALL.len(), 183);
+        assert_eq!(GoCompatibilityEndpoint::ALL.len(), 194);
         for endpoint in GoCompatibilityEndpoint::ALL {
             let meta = endpoint.meta();
             assert!(meta.path.starts_with("/open-apis/"));
@@ -139,7 +139,7 @@ mod tests {
     }
 
     #[test]
-    fn v3_9_10_bridge_endpoints_preserve_contract_metadata() {
+    fn v3_10_0_bridge_endpoints_preserve_contract_metadata() {
         let bot_search = GoCompatibilityEndpoint::PostBotV4BotSearch.meta();
         assert_eq!(bot_search.method, http::Method::POST);
         assert_eq!(bot_search.path, "/open-apis/bot/v4/bot/search");
@@ -153,6 +153,31 @@ mod tests {
         assert_eq!(okr_cycles.path, "/open-apis/okr/v2/cycles");
         assert_eq!(
             okr_cycles.supported_access_token_types,
+            &[AccessTokenType::User, AccessTokenType::Tenant]
+        );
+
+        let unified_kms = GoCompatibilityEndpoint::PostUnifiedKmsV1AutonomousKeys.meta();
+        assert_eq!(unified_kms.method, http::Method::POST);
+        assert_eq!(
+            unified_kms.path,
+            "/open-apis/unified_kms/v1/autonomous_keys"
+        );
+        assert_eq!(
+            unified_kms.supported_access_token_types,
+            &[AccessTokenType::Tenant]
+        );
+
+        let bot_join = GoCompatibilityEndpoint::PostVcV1BotsJoin.meta();
+        assert_eq!(bot_join.method, http::Method::POST);
+        assert_eq!(bot_join.path, "/open-apis/vc/v1/bots/join");
+        assert_eq!(
+            bot_join.supported_access_token_types,
+            &[AccessTokenType::User, AccessTokenType::Tenant]
+        );
+
+        let message_search = GoCompatibilityEndpoint::PostImV1MessagesSearch.meta();
+        assert_eq!(
+            message_search.supported_access_token_types,
             &[AccessTokenType::User, AccessTokenType::Tenant]
         );
     }

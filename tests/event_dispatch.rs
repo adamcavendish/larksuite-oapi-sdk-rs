@@ -3,7 +3,10 @@ use std::sync::{Arc, Mutex};
 use larksuite_oapi_sdk_rs::event::{EventDispatcher, EventReq};
 use larksuite_oapi_sdk_rs::events::approval::{P2InstanceStatusChangedV4, P2TaskStatusChangedV4};
 use larksuite_oapi_sdk_rs::events::im::P2MessageReceiveV1;
-use larksuite_oapi_sdk_rs::events::vc::P2VcNoteGeneratedV1;
+use larksuite_oapi_sdk_rs::events::vc::{
+    P2VcBotMeetingActivityV1, P2VcBotMeetingEndedV1, P2VcBotMeetingInvitedV1,
+    P2VcBotMeetingStartedV1, P2VcNoteGeneratedV1,
+};
 
 fn make_event_req(event_type: &str, event_payload: serde_json::Value) -> EventReq {
     let body = serde_json::json!({
@@ -148,6 +151,134 @@ async fn typed_v3910_event_handlers_dispatch() {
     assert_eq!(
         received.lock().unwrap().as_slice(),
         ["instance_1", "task_1", "note_1"]
+    );
+}
+
+#[tokio::test]
+async fn typed_vc_bot_event_handlers_dispatch() {
+    let received = Arc::new(Mutex::new(Vec::new()));
+
+    let activity_received = Arc::clone(&received);
+    let ended_received = Arc::clone(&received);
+    let invited_received = Arc::clone(&received);
+    let started_received = Arc::clone(&received);
+    let dispatcher = EventDispatcher::new("", "")
+        .on_p2_vc_bot_meeting_activity_v1(move |event: P2VcBotMeetingActivityV1| {
+            let received = Arc::clone(&activity_received);
+            async move {
+                let activity = event
+                    .meeting_activity_items
+                    .and_then(|items| items.into_iter().next())
+                    .unwrap_or_default();
+                let context = activity
+                    .document_context_changed_items
+                    .and_then(|items| items.into_iter().next())
+                    .unwrap_or_default();
+                received.lock().unwrap().push(format!(
+                    "{}:{}:{}:{}:{}",
+                    activity.activity_event_type.unwrap_or_default(),
+                    context
+                        .share_doc
+                        .and_then(|document| document.title)
+                        .unwrap_or_default(),
+                    context
+                        .comment_focus
+                        .and_then(|focus| focus.comment_id)
+                        .unwrap_or_default(),
+                    context
+                        .section_location
+                        .and_then(|location| location.title)
+                        .unwrap_or_default(),
+                    context
+                        .element_preview
+                        .and_then(|preview| preview.element_token)
+                        .unwrap_or_default(),
+                ));
+                Ok(())
+            }
+        })
+        .on_p2_vc_bot_meeting_ended_v1(move |event: P2VcBotMeetingEndedV1| {
+            let received = Arc::clone(&ended_received);
+            async move {
+                received.lock().unwrap().push(
+                    event
+                        .meeting
+                        .and_then(|meeting| meeting.id)
+                        .unwrap_or_default(),
+                );
+                Ok(())
+            }
+        })
+        .on_p2_vc_bot_meeting_invited_v1(move |event: P2VcBotMeetingInvitedV1| {
+            let received = Arc::clone(&invited_received);
+            async move {
+                received
+                    .lock()
+                    .unwrap()
+                    .push(event.call_id.unwrap_or_default());
+                Ok(())
+            }
+        })
+        .on_p2_vc_bot_meeting_started_v1(move |event: P2VcBotMeetingStartedV1| {
+            let received = Arc::clone(&started_received);
+            async move {
+                received.lock().unwrap().push(
+                    event
+                        .meeting
+                        .and_then(|meeting| meeting.topic)
+                        .unwrap_or_default(),
+                );
+                Ok(())
+            }
+        });
+
+    for (event_type, event_payload) in [
+        (
+            "vc.bot.meeting_activity_v1",
+            serde_json::json!({
+                "meeting_activity_items": [{
+                    "activity_event_type": "document_context_changed",
+                    "document_context_changed_items": [{
+                        "share_doc": { "url": "https://example.com/doc", "title": "Meeting notes" },
+                        "comment_focus": { "comment_id": "comment_1", "focused": true },
+                        "section_location": { "title": "Decisions", "level": 2, "parent_titles": ["Agenda"] },
+                        "element_preview": { "action": "open", "element_type": "image", "element_token": "element_1", "block_id": "block_1" }
+                    }]
+                }]
+            }),
+        ),
+        (
+            "vc.bot.meeting_ended_v1",
+            serde_json::json!({ "meeting": { "id": "meeting_ended" } }),
+        ),
+        (
+            "vc.bot.meeting_invited_v1",
+            serde_json::json!({
+                "meeting": { "id": "meeting_invited" },
+                "bot": { "id": "bot_1" },
+                "inviter": { "id": "user_1" },
+                "call_id": "call_1"
+            }),
+        ),
+        (
+            "vc.bot.meeting_started_v1",
+            serde_json::json!({ "meeting": { "topic": "Weekly sync" } }),
+        ),
+    ] {
+        let resp = dispatcher
+            .handle(make_event_req(event_type, event_payload))
+            .await;
+        assert_eq!(resp.status_code, 200);
+    }
+
+    assert_eq!(
+        received.lock().unwrap().as_slice(),
+        [
+            "document_context_changed:Meeting notes:comment_1:Decisions:element_1",
+            "meeting_ended",
+            "call_1",
+            "Weekly sync"
+        ]
     );
 }
 

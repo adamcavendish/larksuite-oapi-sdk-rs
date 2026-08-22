@@ -19,7 +19,7 @@ import (
 
 const (
 	defaultFrom   = "v3.6.1"
-	defaultTo     = "v3.9.10"
+	defaultTo     = "v3.10.0"
 	defaultOutput = "src/service/go_compatibility_metadata.rs"
 )
 
