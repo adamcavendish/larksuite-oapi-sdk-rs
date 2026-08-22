@@ -41,7 +41,7 @@ func TestCurrentEventParityBaselineHasNoUnresolvedCoverage(t *testing.T) {
 	if err := json.Unmarshal(generated, &decoded); err != nil {
 		t.Fatal(err)
 	}
-	if decoded.Summary.GoTypedEventKeys != 223 || decoded.Summary.MatchedEventKeys != 223 {
+	if decoded.Summary.GoTypedEventKeys != 227 || decoded.Summary.MatchedEventKeys != 227 {
 		t.Fatalf("summary = %#v", decoded.Summary)
 	}
 }

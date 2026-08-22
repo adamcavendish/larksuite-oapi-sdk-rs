@@ -2,11 +2,11 @@
   "schema_version": 1,
   "source": {
     "sdk": "larksuite-oapi-sdk-go",
-    "revision": "v3.9.10",
-    "commit": "8dfbfff01d210b20ec9473bf383d38d1b54aa37b",
+    "revision": "v3.10.0",
+    "commit": "dbeec3d5f3afa4558d5cb22d93506c570e25385a",
     "glob": "service/*/*/resource.go"
   },
-  "endpoint_count": 1631,
+  "endpoint_count": 1642,
   "endpoints": [
     {
       "resource_file": "service/acs/v1/resource.go",
@@ -12783,6 +12783,7 @@
       "method": "GET",
       "path": "/open-apis/im/v1/messages/:message_id/read_users",
       "token_types": [
+        "User",
         "Tenant"
       ],
       "file_upload": false
@@ -12806,7 +12807,8 @@
       "method": "POST",
       "path": "/open-apis/im/v1/messages/search",
       "token_types": [
-        "User"
+        "User",
+        "Tenant"
       ],
       "file_upload": false
     },
@@ -14545,7 +14547,8 @@
       "method": "GET",
       "path": "/open-apis/minutes/v1/minutes/:minute_token/artifacts",
       "token_types": [
-        "User"
+        "User",
+        "Tenant"
       ],
       "file_upload": false
     },
@@ -14568,7 +14571,8 @@
       "method": "POST",
       "path": "/open-apis/minutes/v1/minutes/search",
       "token_types": [
-        "User"
+        "User",
+        "Tenant"
       ],
       "file_upload": false
     },
@@ -17585,6 +17589,94 @@
       "file_upload": false
     },
     {
+      "resource_file": "service/unified_kms/v1/resource.go",
+      "receiver": "autonomousKey",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/unified_kms/v1/autonomous_keys",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/unified_kms/v1/resource.go",
+      "receiver": "autonomousKey",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/unified_kms/v1/autonomous_keys/:key_version_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/unified_kms/v1/resource.go",
+      "receiver": "autonomousKey",
+      "operation": "Get",
+      "method": "GET",
+      "path": "/open-apis/unified_kms/v1/autonomous_keys/:key_version_id",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/unified_kms/v1/resource.go",
+      "receiver": "autonomousKey",
+      "operation": "List",
+      "method": "GET",
+      "path": "/open-apis/unified_kms/v1/autonomous_keys",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/unified_kms/v1/resource.go",
+      "receiver": "autonomousKeyDeletionPlan",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/unified_kms/v1/autonomous_keys/:key_version_id/deletion_plan",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/unified_kms/v1/resource.go",
+      "receiver": "autonomousKeyDeletionPlan",
+      "operation": "Delete",
+      "method": "DELETE",
+      "path": "/open-apis/unified_kms/v1/autonomous_keys/:key_version_id/deletion_plan",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/unified_kms/v1/resource.go",
+      "receiver": "autonomousKeyRecover",
+      "operation": "Create",
+      "method": "POST",
+      "path": "/open-apis/unified_kms/v1/autonomous_keys/:key_version_id/recover",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/unified_kms/v1/resource.go",
+      "receiver": "keyImportMaterial",
+      "operation": "Get",
+      "method": "GET",
+      "path": "/open-apis/unified_kms/v1/key_import_material",
+      "token_types": [
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
       "resource_file": "service/vc/v1/resource.go",
       "receiver": "alert",
       "operation": "List",
@@ -17601,6 +17693,42 @@
       "operation": "Events",
       "method": "GET",
       "path": "/open-apis/vc/v1/bots/events",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/vc/v1/resource.go",
+      "receiver": "bot",
+      "operation": "Join",
+      "method": "POST",
+      "path": "/open-apis/vc/v1/bots/join",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/vc/v1/resource.go",
+      "receiver": "bot",
+      "operation": "Leave",
+      "method": "POST",
+      "path": "/open-apis/vc/v1/bots/leave",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/vc/v1/resource.go",
+      "receiver": "bot",
+      "operation": "Message",
+      "method": "POST",
+      "path": "/open-apis/vc/v1/bots/message",
       "token_types": [
         "User",
         "Tenant"
@@ -17857,7 +17985,8 @@
       "method": "GET",
       "path": "/open-apis/vc/v1/notes/:note_id",
       "token_types": [
-        "User"
+        "User",
+        "Tenant"
       ],
       "file_upload": false
     },

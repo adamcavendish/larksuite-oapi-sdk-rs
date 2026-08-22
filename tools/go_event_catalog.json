@@ -2,12 +2,12 @@
   "schema_version": 1,
   "source": {
     "sdk": "larksuite-oapi-sdk-go",
-    "revision": "v3.9.10",
-    "commit": "8dfbfff01d210b20ec9473bf383d38d1b54aa37b",
+    "revision": "v3.10.0",
+    "commit": "dbeec3d5f3afa4558d5cb22d93506c570e25385a",
     "glob": "event/dispatcher/*_event_dispatch.go"
   },
-  "registration_count": 215,
-  "event_key_count": 223,
+  "registration_count": 219,
+  "event_key_count": 227,
   "events": [
     {
       "protocol": "p2",
@@ -2945,13 +2945,73 @@
     {
       "protocol": "p2",
       "event_keys": [
-        "vc.meeting.all_meeting_ended_v1"
+        "vc.bot.meeting_activity_v1"
       ],
       "family": "vc",
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
         "line": 26,
+        "method": "OnP2BotMeetingActivityV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2BotMeetingActivityV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.bot.meeting_ended_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 40,
+        "method": "OnP2BotMeetingEndedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2BotMeetingEndedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.bot.meeting_invited_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 54,
+        "method": "OnP2BotMeetingInvitedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2BotMeetingInvitedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.bot.meeting_started_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 68,
+        "method": "OnP2BotMeetingStartedV1",
+        "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
+        "payload": "P2BotMeetingStartedV1"
+      }
+    },
+    {
+      "protocol": "p2",
+      "event_keys": [
+        "vc.meeting.all_meeting_ended_v1"
+      ],
+      "family": "vc",
+      "version": "v1",
+      "go": {
+        "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
+        "line": 82,
         "method": "OnP2MeetingAllMeetingEndedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingAllMeetingEndedV1"
@@ -2966,7 +3026,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 40,
+        "line": 96,
         "method": "OnP2MeetingAllMeetingStartedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingAllMeetingStartedV1"
@@ -2981,7 +3041,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 82,
+        "line": 138,
         "method": "OnP2MeetingEndedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingEndedV1"
@@ -2996,7 +3056,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 54,
+        "line": 110,
         "method": "OnP2MeetingJoinMeetingV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingJoinMeetingV1"
@@ -3011,7 +3071,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 68,
+        "line": 124,
         "method": "OnP2MeetingLeaveMeetingV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingLeaveMeetingV1"
@@ -3026,7 +3086,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 110,
+        "line": 166,
         "method": "OnP2MeetingParticipantMeetingEndedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingParticipantMeetingEndedV1"
@@ -3041,7 +3101,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 124,
+        "line": 180,
         "method": "OnP2MeetingRecordingEndedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingRecordingEndedV1"
@@ -3056,7 +3116,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 138,
+        "line": 194,
         "method": "OnP2MeetingRecordingReadyV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingRecordingReadyV1"
@@ -3071,7 +3131,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 152,
+        "line": 208,
         "method": "OnP2MeetingRecordingStartedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingRecordingStartedV1"
@@ -3086,7 +3146,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 166,
+        "line": 222,
         "method": "OnP2MeetingShareEndedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingShareEndedV1"
@@ -3101,7 +3161,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 180,
+        "line": 236,
         "method": "OnP2MeetingShareStartedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingShareStartedV1"
@@ -3116,7 +3176,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 96,
+        "line": 152,
         "method": "OnP2MeetingStartedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2MeetingStartedV1"
@@ -3131,7 +3191,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 194,
+        "line": 250,
         "method": "OnP2NoteGeneratedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2NoteGeneratedV1"
@@ -3146,7 +3206,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 208,
+        "line": 264,
         "method": "OnP2ReserveConfigUpdatedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2ReserveConfigUpdatedV1"
@@ -3161,7 +3221,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 222,
+        "line": 278,
         "method": "OnP2RoomCreatedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2RoomCreatedV1"
@@ -3176,7 +3236,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 236,
+        "line": 292,
         "method": "OnP2RoomDeletedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2RoomDeletedV1"
@@ -3191,7 +3251,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 264,
+        "line": 320,
         "method": "OnP2RoomLevelCreatedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2RoomLevelCreatedV1"
@@ -3206,7 +3266,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 278,
+        "line": 334,
         "method": "OnP2RoomLevelDeletedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2RoomLevelDeletedV1"
@@ -3221,7 +3281,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 292,
+        "line": 348,
         "method": "OnP2RoomLevelUpdatedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2RoomLevelUpdatedV1"
@@ -3236,7 +3296,7 @@
       "version": "v1",
       "go": {
         "dispatcher_file": "event/dispatcher/vc_v1_event_dispatch.go",
-        "line": 250,
+        "line": 306,
         "method": "OnP2RoomUpdatedV1",
         "package": "github.com/larksuite/oapi-sdk-go/v3/service/vc/v1",
         "payload": "P2RoomUpdatedV1"

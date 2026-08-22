@@ -100,7 +100,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           repository: larksuite/oapi-sdk-go
-          ref: v3.9.10
+          ref: v3.10.0
           path: .go-sdk
           fetch-depth: 0
       - uses: taiki-e/install-action@just

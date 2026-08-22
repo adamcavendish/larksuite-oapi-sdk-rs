@@ -115,9 +115,9 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         v2::{CreateAppRoleV2Query, ListAppRoleV2Query, UpdateAppRoleV2Query},
         v3::{
             GetBaseAppBlockDataQuery, ListBaseAppBlocksQuery, ListBaseAppPagesQuery,
-            ListRecordQuery as ListBaseV3RecordQuery, ListWorkspaceEntitiesQuery,
-            UpdateDashboardShareReqBody, UpdateDashboardShareSettings, UpdateFormShareReqBody,
-            UpdateFormShareSettings,
+            ListBaseTemplateQuery, ListRecordQuery as ListBaseV3RecordQuery,
+            ListWorkspaceEntitiesQuery, SearchBaseTemplateQuery, UpdateDashboardShareReqBody,
+            UpdateDashboardShareSettings, UpdateFormShareReqBody, UpdateFormShareSettings,
         },
     },
     bitable::v1::{
@@ -346,7 +346,7 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         GetChatQuery as GetImChatQuery, GetMessageQuery as GetImMessageQuery,
         GetMessageResourceDownloadQuery, IsInChatMembersQuery, ListChatQuery as ListImChatQuery,
         ListMessageQuery as ListImMessageQuery, ListMessageReactionQuery, ListPinQuery,
-        ReadUsersMessageQuery, SearchChatQuery as SearchImChatQuery,
+        ReadStatusMessageReqBody, ReadUsersMessageQuery, SearchChatQuery as SearchImChatQuery,
     },
     im::v2::{
         BatchUpdateUrlPreviewV2Query, BatchUpdateUrlPreviewV2ReqBody,

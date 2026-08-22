@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "go_event_catalog_sha256": "db00099637ca04ad3f4840efacb60f6572e737ba54b57b1d0792473c21683239",
+  "go_event_catalog_sha256": "7ca31f16ae10b68010e0d363c26151b1566f6c00c44e086ef788c83e6870618c",
   "summary": {
-    "go_typed_event_keys": 223,
-    "rust_typed_event_keys": 230,
-    "matched_event_keys": 223,
+    "go_typed_event_keys": 227,
+    "rust_typed_event_keys": 234,
+    "matched_event_keys": 227,
     "missing_go_event_keys": 0,
     "duplicate_rust_event_keys": 0,
     "protocol_mismatches": 0,
