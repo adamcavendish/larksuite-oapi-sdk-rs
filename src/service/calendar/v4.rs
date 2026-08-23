@@ -510,6 +510,19 @@ pub struct PatchEventReqBody {
     pub attendees: Option<Vec<EventAttendee>>,
 }
 
+/// Request body for transferring an event's organizer.
+///
+/// This operation is irreversible. For recurring events, the transfer applies
+/// to the entire series, including its exceptions.
+#[derive(Debug, Clone, Serialize)]
+pub struct TransferEventReqBody {
+    /// The `open_id` of the user or bot that becomes the new organizer.
+    pub to_user_id: String,
+    /// Whether to remove the original organizer rather than retaining them as
+    /// an attendee. This field is serialized even when `false`.
+    pub need_remove_original_organizer: bool,
+}
+
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct CreateAttendeeReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1233,6 +1246,31 @@ impl<'a> GetEventQuery<'a> {
 
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
+pub struct TransferEventQuery<'a> {
+    pub calendar_id: &'a str,
+    pub event_id: &'a str,
+    pub body: &'a TransferEventReqBody,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> TransferEventQuery<'a> {
+    pub fn new(calendar_id: &'a str, event_id: &'a str, body: &'a TransferEventReqBody) -> Self {
+        Self {
+            calendar_id,
+            event_id,
+            body,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
 pub struct ListEventQuery<'a> {
     pub calendar_id: &'a str,
     pub page: PageQuery<'a>,
@@ -1455,6 +1493,46 @@ impl<'a> CalendarEventResource<'a> {
         )
         .query("user_id_type", query.user_id_type)
         .send_response::<CalendarEventData, GetEventResp>()
+        .await
+    }
+
+    /// Transfers an event's organizer to a user or bot.
+    ///
+    /// The calling identity must be the current organizer and have the
+    /// `calendar:calendar.event:transfer` scope. This irreversible operation
+    /// transfers a recurring event's entire series, not an individual
+    /// occurrence.
+    pub async fn transfer(
+        &self,
+        calendar_id: &str,
+        event_id: &str,
+        body: &TransferEventReqBody,
+        user_id_type: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let query = TransferEventQuery::new(calendar_id, event_id, body).user_id_type(user_id_type);
+        self.transfer_by_query(&query, option).await
+    }
+
+    pub async fn transfer_by_query(
+        &self,
+        query: &TransferEventQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        let path = format!(
+            "/open-apis/calendar/v4/calendars/{}/events/{}/transfer",
+            query.calendar_id, query.event_id
+        );
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            path,
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id_type", query.user_id_type)
+        .json_body(query.body)?
+        .send_empty()
         .await
     }
 

@@ -152,6 +152,7 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         ListEventQuery as ListCalendarEventQuery, ListFreeBusyQuery, ListFreeBusyReqBody,
         ListTimeZoneQuery, SearchCalendarQuery, SearchCalendarReqBody,
         SearchEventQuery as SearchCalendarEventQuery, SearchEventReqBody,
+        TransferEventQuery as TransferCalendarEventQuery, TransferEventReqBody,
     },
     cardkit::v1::{
         BatchUpdateCardQuery as BatchUpdateCardkitCardQuery, BatchUpdateCardReqBody,
