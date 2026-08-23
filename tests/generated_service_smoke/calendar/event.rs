@@ -33,6 +33,36 @@ async fn calendar_event_get_by_query_smoke() {
 }
 
 #[tokio::test]
+async fn calendar_event_transfer_by_query_smoke() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let body = TransferEventReqBody {
+        to_user_id: "ou-receiver".to_string(),
+        need_remove_original_organizer: false,
+    };
+    let resp = client
+        .calendar()
+        .event
+        .transfer_by_query(
+            &TransferCalendarEventQuery::new("cal-1", "event-1", &body).user_id_type("open_id"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert!(resp.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(
+        request.contains("POST /open-apis/calendar/v4/calendars/cal-1/events/event-1/transfer?")
+    );
+    assert!(request.contains("user_id_type=open_id"));
+    assert!(request.contains(r#""to_user_id":"ou-receiver""#));
+    assert!(request.contains(r#""need_remove_original_organizer":false"#));
+}
+
+#[tokio::test]
 async fn calendar_event_list_by_query_smoke() {
     let body =
         r#"{"code":0,"msg":"ok","data":{"items":[{"event_id":"event-1","summary":"Standup"}]}}"#;
