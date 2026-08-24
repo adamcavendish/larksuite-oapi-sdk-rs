@@ -18,7 +18,8 @@ use larksuite_oapi_sdk_rs::event::{CallbackCard, CardActionTriggerRequest};
 use serde::Deserialize;
 use serde_json::Value;
 
-const MANIFEST: &str = include_str!("fixtures/card_protocol/card_json_v1.json");
+const V1_MANIFEST: &str = include_str!("fixtures/card_protocol/card_json_v1.json");
+const V2_MANIFEST: &str = include_str!("fixtures/card_protocol/card_json_v2.json");
 const FIXTURE_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/card_protocol");
 
 const REQUIRED_SURFACES: &[&str] = &[
@@ -61,6 +62,85 @@ const REQUIRED_SURFACES: &[&str] = &[
     "card.action.trigger",
 ];
 
+const REQUIRED_V2_SURFACES: &[&str] = &[
+    "card",
+    "config",
+    "card_link",
+    "header",
+    "body",
+    "column_set",
+    "column",
+    "collapsible_panel",
+    "form",
+    "interactive_container",
+    "recycling_container",
+    "div",
+    "markdown",
+    "img",
+    "img_combination",
+    "person",
+    "person_list",
+    "chart",
+    "table",
+    "hr",
+    "button",
+    "input",
+    "overflow",
+    "select_static",
+    "multi_select_static",
+    "select_person",
+    "multi_select_person",
+    "date_picker",
+    "picker_time",
+    "picker_datetime",
+    "select_img",
+    "checker",
+    "behaviors",
+    "card.action.trigger",
+];
+
+const REQUIRED_V2_FIELDS: &[&str] = &[
+    "card.schema",
+    "card.config",
+    "card.card_link",
+    "card.header",
+    "card.body",
+    "config.streaming_mode",
+    "config.streaming_config",
+    "config.summary",
+    "config.locales",
+    "config.enable_forward",
+    "config.update_multi",
+    "config.width_mode",
+    "config.use_custom_translation",
+    "config.enable_forward_interaction",
+    "config.style",
+    "card_link.url",
+    "body.elements",
+    "body.direction",
+    "body.padding",
+    "body.horizontal_spacing",
+    "body.vertical_spacing",
+    "body.horizontal_align",
+    "body.vertical_align",
+    "element.tag",
+    "element.element_id",
+    "element.margin",
+    "header.title",
+    "header.subtitle",
+    "header.template",
+    "header.text_tag_list",
+    "header.i18n_text_tag_list",
+    "header.icon",
+    "header.padding",
+    "behavior.type",
+    "behavior.value",
+    "form.name",
+    "button.form_action_type",
+    "input.name",
+    "input.required",
+];
+
 #[derive(Debug, Deserialize)]
 struct Manifest {
     schema_version: u32,
@@ -69,6 +149,8 @@ struct Manifest {
     sources: Sources,
     surfaces: Vec<Surface>,
     fixtures: Vec<Fixture>,
+    #[serde(default)]
+    fields: Vec<ProtocolField>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -115,10 +197,25 @@ struct Fixture {
     path: String,
     kind: String,
     expected_tags: Vec<String>,
+    #[serde(default)]
+    expected_constraints: Vec<String>,
 }
 
-fn manifest() -> Manifest {
-    serde_json::from_str(MANIFEST).expect("Card JSON 1.0 protocol manifest must be valid JSON")
+#[derive(Debug, Deserialize)]
+struct ProtocolField {
+    surface: String,
+    name: String,
+    domain: String,
+    constraints: Vec<String>,
+    sources: Vec<String>,
+}
+
+fn v1_manifest() -> Manifest {
+    serde_json::from_str(V1_MANIFEST).expect("Card JSON 1.0 protocol manifest must be valid JSON")
+}
+
+fn v2_manifest() -> Manifest {
+    serde_json::from_str(V2_MANIFEST).expect("Card JSON 2.0 protocol manifest must be valid JSON")
 }
 
 fn fixture(path: &str) -> Value {
@@ -182,7 +279,7 @@ fn assert_reference_artifacts(environment: &str, source: &ImplementationSource) 
 
 #[test]
 fn card_json_v1_inventory_is_complete_and_traceable() {
-    let manifest = manifest();
+    let manifest = v1_manifest();
     assert_eq!(manifest.schema_version, 1);
     assert_eq!(manifest.protocol, "card-json");
     assert_eq!(manifest.version, "1.0");
@@ -272,7 +369,7 @@ fn card_json_v1_inventory_is_complete_and_traceable() {
 
 #[test]
 fn card_json_v1_fixtures_are_complete_json_examples() {
-    let manifest = manifest();
+    let manifest = v1_manifest();
     let ids: BTreeSet<_> = manifest
         .fixtures
         .iter()
@@ -306,6 +403,810 @@ fn card_json_v1_fixtures_are_complete_json_examples() {
             other => panic!("unknown fixture kind {other}"),
         }
     }
+}
+
+#[test]
+fn card_json_v2_inventory_is_complete_and_traceable() {
+    let manifest = v2_manifest();
+    assert_eq!(manifest.schema_version, 1);
+    assert_eq!(manifest.protocol, "card-json");
+    assert_eq!(manifest.version, "2.0");
+
+    assert_eq!(manifest.sources.official_docs.role, "normative");
+    assert_eq!(manifest.sources.official_docs.accessed_on, "2026-08-25");
+    assert!(manifest.sources.official_docs.urls.len() >= 4);
+    assert!(
+        manifest
+            .sources
+            .official_docs
+            .urls
+            .iter()
+            .all(|url| url.starts_with("https://open.larksuite.com/"))
+    );
+    for source in [&manifest.sources.go_sdk, &manifest.sources.lark_cli] {
+        assert_eq!(source.role, "implementation_cross_check");
+        assert!(
+            source
+                .repository
+                .starts_with("https://github.com/larksuite/")
+        );
+        assert_eq!(source.revision.len(), 40);
+        assert!(source.revision.chars().all(|ch| ch.is_ascii_hexdigit()));
+        assert!(!source.artifacts.is_empty());
+    }
+    assert_reference_revision(
+        "CARD_PROTOCOL_GO_SDK_DIR",
+        &manifest.sources.go_sdk.revision,
+    );
+    assert_reference_revision("CARD_PROTOCOL_CLI_DIR", &manifest.sources.lark_cli.revision);
+    assert_reference_artifacts("CARD_PROTOCOL_GO_SDK_DIR", &manifest.sources.go_sdk);
+    assert_reference_artifacts("CARD_PROTOCOL_CLI_DIR", &manifest.sources.lark_cli);
+
+    let ids: BTreeSet<_> = manifest
+        .surfaces
+        .iter()
+        .map(|surface| surface.id.as_str())
+        .collect();
+    let expected: BTreeSet<_> = REQUIRED_V2_SURFACES.iter().copied().collect();
+    assert_eq!(
+        ids, expected,
+        "inventory must classify every Card JSON 2.0 surface"
+    );
+
+    for surface in &manifest.surfaces {
+        assert!(
+            matches!(
+                surface.status.as_str(),
+                "implemented" | "partial" | "missing" | "known_divergence" | "under_investigation"
+            ),
+            "{} has an unknown status {}",
+            surface.id,
+            surface.status
+        );
+        assert!(!surface.kind.is_empty(), "{} is missing a kind", surface.id);
+        assert!(!surface.sources.is_empty(), "{} has no sources", surface.id);
+        assert!(surface.sources.contains(&"official_docs".to_string()));
+        if surface.status == "known_divergence" || surface.status == "under_investigation" {
+            assert!(
+                surface
+                    .remediation
+                    .as_deref()
+                    .is_some_and(|remediation| !remediation.is_empty()),
+                "{} needs an explicit remediation",
+                surface.id
+            );
+        }
+        if surface.id == "recycling_container" {
+            assert_eq!(surface.status, "known_divergence");
+            assert!(surface.wire_tag.is_none());
+        } else if matches!(surface.kind.as_str(), "component" | "container") {
+            assert!(
+                surface.wire_tag.is_some(),
+                "{} is missing a wire tag",
+                surface.id
+            );
+        }
+    }
+
+    let fields: BTreeSet<_> = manifest
+        .fields
+        .iter()
+        .map(|field| format!("{}.{}", field.surface, field.name))
+        .collect();
+    let expected_fields: BTreeSet<_> = REQUIRED_V2_FIELDS
+        .iter()
+        .map(|field| (*field).to_string())
+        .collect();
+    assert_eq!(
+        fields, expected_fields,
+        "inventory must retain v2 root and cross-field rules"
+    );
+    for field in &manifest.fields {
+        assert!(!field.domain.is_empty());
+        assert!(!field.constraints.is_empty());
+        assert!(field.sources.contains(&"official_docs".to_string()));
+    }
+}
+
+#[test]
+fn card_json_v2_fixtures_are_exact_protocol_contracts() {
+    let manifest = v2_manifest();
+    let ids: BTreeSet<_> = manifest
+        .fixtures
+        .iter()
+        .map(|fixture| fixture.id.as_str())
+        .collect();
+    assert_eq!(
+        ids.len(),
+        manifest.fixtures.len(),
+        "fixture IDs must be unique"
+    );
+
+    for entry in &manifest.fixtures {
+        assert!(entry.path.starts_with("card_json_v2/"));
+        let value = fixture(&entry.path);
+        assert!(value.is_object(), "{} must be a JSON object", entry.id);
+        assert_eq!(value["schema"], "2.0", "{} must be a v2 card", entry.id);
+        let elements = value["body"]["elements"].as_array();
+        let tags: Vec<_> = elements
+            .into_iter()
+            .flatten()
+            .map(|element| element["tag"].as_str().expect("element tag"))
+            .collect();
+        assert_eq!(
+            tags, entry.expected_tags,
+            "{} has unexpected tags",
+            entry.id
+        );
+
+        match entry.kind.as_str() {
+            "outbound_card" => assert!(entry.expected_constraints.is_empty()),
+            "invalid_card" => {
+                assert!(!entry.expected_constraints.is_empty());
+                for constraint in &entry.expected_constraints {
+                    match constraint.as_str() {
+                        "shared_only" => assert_ne!(value["config"]["update_multi"], true),
+                        "required_shared_config" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::V2RequiresSharedCard)
+                            );
+                        }
+                        "required_body" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(card.validate(), Err(card::ValidationError::MissingBody));
+                        }
+                        "unique_element_ids" => {
+                            let elements = elements.expect("constraint requires body.elements");
+                            let ids: Vec<_> = elements
+                                .iter()
+                                .filter_map(|element| element["element_id"].as_str())
+                                .collect();
+                            assert!(ids.len() > BTreeSet::from_iter(ids.iter()).len());
+                        }
+                        "element_id_format" => {
+                            let elements = elements.expect("constraint requires body.elements");
+                            assert!(elements.iter().any(|element| {
+                                element["element_id"]
+                                    .as_str()
+                                    .is_some_and(|id| !id.starts_with(char::is_alphabetic))
+                            }));
+                        }
+                        other => panic!("unknown v2 fixture constraint {other}"),
+                    }
+                }
+            }
+            other => panic!("unknown v2 fixture kind {other}"),
+        }
+    }
+}
+
+#[test]
+fn modern_v2_root_matches_complete_fixture() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let card = card::Card::new()
+        .config(
+            card::Config::new()
+                .streaming_mode(true)
+                .streaming_config(
+                    card::StreamingConfig::new()
+                        .print_frequency_ms(card::ClientValue::new().default(70).pc(70))
+                        .print_strategy(card::StreamingPrintStrategy::Fast),
+                )
+                .summary(
+                    card::Summary::new("Release health").i18n_content(BTreeMap::from([(
+                        card::Locale::ZhCn,
+                        "发布健康度".to_string(),
+                    )])),
+                )
+                .locales([card::Locale::EnUs, card::Locale::ZhCn])
+                .enable_forward(true)
+                .update_multi()
+                .width_mode(card::WidthMode::Fill)
+                .use_custom_translation(true)
+                .enable_forward_interaction(true)
+                .style(
+                    card::CardStyle::new()
+                        .text_size(
+                            "title",
+                            card::CustomTextSize::new()
+                                .default("heading-2")
+                                .pc("heading-2")
+                                .mobile("heading-3"),
+                        )
+                        .color(
+                            "cus-primary",
+                            card::CustomColor::new("rgba(30,120,255,1)", "rgba(80,150,255,1)"),
+                        ),
+                ),
+        )
+        .card_link(
+            card::MultiUrl::new("https://example.com/release")
+                .pc_url("https://example.com/release/desktop"),
+        )
+        .header(
+            card::Header::new(card::Text::plain("Release health"))
+                .subtitle(card::Text::plain("All systems normal"))
+                .template(TemplateColor::Blue)
+                .icon(card::HeaderIcon::standard("approval_colorful"))
+                .text_tag(
+                    card::HeaderTag::new(card::Text::plain("Stable"), card::HeaderTagColor::Green)
+                        .element_id("status_tag"),
+                )
+                .i18n_text_tag_list(BTreeMap::from([(
+                    card::Locale::ZhCn,
+                    vec![
+                        card::HeaderTag::new(
+                            card::Text::plain("稳定"),
+                            card::HeaderTagColor::Green,
+                        )
+                        .element_id("status_tag_zh"),
+                    ],
+                )]))
+                .padding("12px 12px 8px 12px"),
+        )
+        .body(
+            card::Body::new()
+                .direction(card::Direction::Vertical)
+                .padding("12px")
+                .horizontal_spacing(card::Spacing::Medium)
+                .vertical_spacing(card::Spacing::Large)
+                .horizontal_align(card::HorizontalAlign::Left)
+                .vertical_align(card::VerticalAlign::Top)
+                .element(card::Element::Markdown(
+                    card::Markdown::new("**All checks are passing.**")
+                        .element_id("summary_md")
+                        .text_size("title")
+                        .margin("0px"),
+                ))
+                .element(card::Element::ColumnSet(
+                    card::ColumnSet::new()
+                        .element_id("metrics_cols")
+                        .flex_mode(card::ColumnFlexMode::Stretch)
+                        .column(
+                            card::Column::new()
+                                .width(card::ColumnWidth::Weighted)
+                                .weight(1)
+                                .element(card::Element::Markdown(
+                                    card::Markdown::new("Latency: 92ms").element_id("metric_one"),
+                                )),
+                        )
+                        .column(
+                            card::Column::new()
+                                .width(card::ColumnWidth::Weighted)
+                                .weight(1)
+                                .element(card::Element::Markdown(
+                                    card::Markdown::new("Errors: 0").element_id("metric_two"),
+                                )),
+                        ),
+                ))
+                .element(card::Element::Form(
+                    card::Form::new("feedback")
+                        .element_id("feedback_form")
+                        .element(card::Element::Input(
+                            card::Input::new("reason")
+                                .element_id("reason_input")
+                                .required(true)
+                                .placeholder(card::Text::plain("Reason")),
+                        ))
+                        .element(card::Element::Button(
+                            card::Button::new(card::Text::plain("Submit"))
+                                .element_id("submit_button")
+                                .name("submit")
+                                .form_action(card::FormActionType::Submit)
+                                .button_type(card::ButtonType::PrimaryFilled),
+                        )),
+                )),
+        );
+
+    card.validate().expect("complete v2 card is valid");
+    let fixture = fixture("card_json_v2/complete_root.json");
+    assert_eq!(card.to_json(), fixture.clone().into());
+    let decoded: card::Card = serde_json::from_value(fixture.clone())
+        .expect("deserialize complete Card JSON 2.0 fixture");
+    assert_eq!(
+        decoded.to_json(),
+        fixture.into(),
+        "complete Card JSON 2.0 fixture must round-trip"
+    );
+}
+
+#[test]
+fn modern_v2_serializes_every_handwritten_component_tag() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let text = card::Text::plain("text");
+    let callback_value: larksuite_oapi_sdk_rs::JsonValue =
+        serde_json::json!({"operation": "run"}).into();
+    let callback = card::Behavior::callback(callback_value);
+    let elements = vec![
+        ("div", card::Element::Div(card::Div::new(text.clone()))),
+        (
+            "markdown",
+            card::Element::Markdown(card::Markdown::new("markdown")),
+        ),
+        (
+            "img",
+            card::Element::Img(card::Image::new("img", text.clone())),
+        ),
+        (
+            "img_combination",
+            card::Element::ImgCombination(card::ImageCombination::new(
+                card::ImageCombinationMode::Double,
+            )),
+        ),
+        (
+            "person",
+            card::Element::Person(card::Person::new("ou_user")),
+        ),
+        (
+            "person_list",
+            card::Element::PersonList(card::PersonList::new()),
+        ),
+        (
+            "chart",
+            card::Element::Chart(card::Chart::new(serde_json::json!({}).into())),
+        ),
+        ("table", card::Element::Table(card::Table::new())),
+        ("hr", card::Element::Hr(card::Hr::new())),
+        (
+            "column_set",
+            card::Element::ColumnSet(card::ColumnSet::new()),
+        ),
+        (
+            "collapsible_panel",
+            card::Element::CollapsiblePanel(card::CollapsiblePanel::new(
+                card::CollapsiblePanelHeader::new(text.clone()),
+            )),
+        ),
+        ("form", card::Element::Form(card::Form::new("form"))),
+        (
+            "interactive_container",
+            card::Element::InteractiveContainer(card::InteractiveContainer::new(callback.clone())),
+        ),
+        (
+            "button",
+            card::Element::Button(card::Button::new(text.clone())),
+        ),
+        ("input", card::Element::Input(card::Input::new("input"))),
+        ("overflow", card::Element::Overflow(card::Overflow::new())),
+        (
+            "select_static",
+            card::Element::SelectStatic(card::StaticSelect::new()),
+        ),
+        (
+            "multi_select_static",
+            card::Element::MultiSelectStatic(card::MultiStaticSelect::new()),
+        ),
+        (
+            "select_person",
+            card::Element::SelectPerson(card::PersonSelect::new()),
+        ),
+        (
+            "multi_select_person",
+            card::Element::MultiSelectPerson(card::MultiPersonSelect::new()),
+        ),
+        (
+            "date_picker",
+            card::Element::DatePicker(card::DatePicker::new()),
+        ),
+        (
+            "picker_time",
+            card::Element::PickerTime(card::TimePicker::new()),
+        ),
+        (
+            "picker_datetime",
+            card::Element::PickerDatetime(card::DatetimePicker::new()),
+        ),
+        (
+            "select_img",
+            card::Element::SelectImg(card::ImageSelect::new(
+                vec![card::ImageSelectOption {
+                    img_key: "img".into(),
+                    value: "value".into(),
+                    disabled: None,
+                    disabled_tips: None,
+                    hover_tips: None,
+                }],
+                callback.clone(),
+            )),
+        ),
+        ("checker", card::Element::Checker(card::Checker::new())),
+    ];
+
+    for (expected_tag, element) in elements {
+        let value = serde_json::to_value(element).expect("serialize Card JSON 2.0 element");
+        assert_eq!(value["tag"], expected_tag, "wrong tag for {expected_tag}");
+        let decoded: card::Element =
+            serde_json::from_value(value.clone()).expect("deserialize Card JSON 2.0 element");
+        assert_eq!(
+            serde_json::to_value(decoded).expect("reserialize Card JSON 2.0 element"),
+            value,
+            "round-trip changed {expected_tag}"
+        );
+    }
+}
+
+#[test]
+fn modern_v2_rejects_unknown_component_tag() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let error = serde_json::from_value::<card::Element>(serde_json::json!({"tag": "unknown"}))
+        .expect_err("unknown Card JSON 2.0 tag must be rejected");
+    assert!(error.to_string().contains("unknown variant"));
+
+    let error = serde_json::from_value::<card::Element>(serde_json::json!({
+        "tag": "markdown",
+        "content": "Known tag with unsupported property",
+        "unsupported": true
+    }))
+    .expect_err("unknown component property must be rejected");
+    assert!(error.to_string().contains("unknown field"));
+
+    let error = serde_json::from_value::<card::Element>(serde_json::json!({
+        "tag": "overflow",
+        "options": [],
+        "unsupported": true
+    }))
+    .expect_err("unknown flattened-control property must be rejected");
+    assert!(error.to_string().contains("unknown field"));
+
+    let error = serde_json::from_value::<card::Card>(serde_json::json!({
+        "schema": "2.0",
+        "config": {"update_multi": true},
+        "body": {"elements": []},
+        "unsupported": true
+    }))
+    .expect_err("unknown root property must be rejected");
+    assert!(error.to_string().contains("unknown field"));
+}
+
+#[test]
+fn modern_v2_callback_behavior_and_raw_response_match_protocol() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let callback_value: larksuite_oapi_sdk_rs::JsonValue =
+        serde_json::json!({"operation": "approve"}).into();
+    let card = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .header(card::Header::new(card::Text::plain("Approval")))
+        .body(
+            card::Body::new().element(card::Element::Button(
+                card::Button::new(card::Text::plain("Approve"))
+                    .element_id("approve_button")
+                    .button_type(card::ButtonType::PrimaryFilled)
+                    .behavior(card::Behavior::callback(callback_value))
+                    .behavior(card::Behavior::open_url("https://example.com/approval")),
+            )),
+        );
+    card.validate().expect("v2 callback card is valid");
+    assert_eq!(
+        card.to_json(),
+        fixture("card_json_v2/callback_button.json").into()
+    );
+
+    let request: CardActionTriggerRequest = serde_json::from_value(serde_json::json!({
+        "token": "callback-token",
+        "action": {"tag": "button", "value": {"operation": "approve"}}
+    }))
+    .expect("deserialize v2 callback");
+    assert_eq!(
+        request.action.expect("callback action").value["operation"].as_str(),
+        Some("approve")
+    );
+    let response = CallbackCard::raw(card).expect("serialize v2 raw callback response");
+    let response = serde_json::to_value(response).expect("serialize response");
+    assert_eq!(response["data"]["schema"], "2.0");
+}
+
+#[test]
+fn modern_v2_button_and_input_preserve_optional_interaction_fields() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let mut button = card::Button::new(card::Text::plain("Open"))
+        .button_type(card::ButtonType::Laser)
+        .behavior(card::Behavior::open_url("https://example.com"));
+    button.size = Some(card::ControlSize::Large);
+    button.width = Some("fill".into());
+    button.disabled = Some(false);
+    button.confirm = Some(card::Confirm::new(
+        card::Text::plain("Continue?"),
+        card::Text::plain("Open the linked page"),
+    ));
+    let button = serde_json::to_value(card::Element::Button(button)).expect("serialize button");
+    assert_eq!(button["type"], "laser");
+    assert_eq!(button["size"], "large");
+    assert_eq!(button["width"], "fill");
+    assert_eq!(button["disabled"], false);
+    assert_eq!(button["behaviors"][0]["type"], "open_url");
+    assert_eq!(button["confirm"]["title"]["content"], "Continue?");
+
+    let mut input = card::Input::new("reason")
+        .required(true)
+        .placeholder(card::Text::plain("Reason"));
+    input.default_value = Some("initial".into());
+    input.label = Some(card::Text::plain("Reason"));
+    input.label_position = Some(card::LabelPosition::Left);
+    input.input_type = Some(card::InputType::MultilineText);
+    input.multiline = Some(true);
+    input.rows = Some(3);
+    input.auto_resize = Some(true);
+    input.max_rows = Some(6);
+    input.max_length = Some(500);
+    input.width = Some("fill".into());
+    input.disabled = Some(false);
+    input.behaviors.push(card::Behavior::callback(
+        serde_json::json!({"field": "reason"}),
+    ));
+    let input = serde_json::to_value(card::Element::Input(input)).expect("serialize input");
+    assert_eq!(input["default_value"], "initial");
+    assert_eq!(input["multiline"], true);
+    assert_eq!(input["rows"], 3);
+    assert_eq!(input["max_length"], 500);
+    assert_eq!(input["label"]["content"], "Reason");
+    assert_eq!(input["label_position"], "left");
+    assert_eq!(input["input_type"], "multiline_text");
+    assert_eq!(input["auto_resize"], true);
+    assert_eq!(input["max_rows"], 6);
+    assert_eq!(input["behaviors"][0]["type"], "callback");
+
+    let mut select = card::StaticSelect::new();
+    select.r#type = Some(card::SelectType::Text);
+    let select =
+        serde_json::to_value(card::Element::SelectStatic(select)).expect("serialize static select");
+    assert_eq!(select["type"], "text");
+    assert!(select.get("select_type").is_none());
+}
+
+#[test]
+fn modern_v2_controls_match_fixture() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let mut input = card::Input::new("reason")
+        .required(true)
+        .placeholder(card::Text::plain("Reason"));
+    input.label = Some(card::Text::plain("Release reason"));
+    input.label_position = Some(card::LabelPosition::Left);
+    input.input_type = Some(card::InputType::MultilineText);
+    input.rows = Some(3);
+    input.auto_resize = Some(true);
+    input.max_rows = Some(6);
+    input.max_length = Some(500);
+    input.width = Some("fill".into());
+
+    let mut select = card::StaticSelect::new();
+    select.r#type = Some(card::SelectType::Text);
+    select.control.placeholder = Some(card::Text::plain("Severity"));
+    select.options = Some(vec![
+        card::SelectOption::new(card::Text::plain("S1"), "s1"),
+        card::SelectOption::new(card::Text::plain("S2"), "s2"),
+    ]);
+    select.initial_option = Some("s2".into());
+
+    let mut checker = card::Checker::new();
+    checker.control.name = Some("confirmed".into());
+    checker.checked = Some(false);
+    checker.text = Some(card::Text::plain("I confirmed the release"));
+    checker.overall_checkable = Some(true);
+    checker.checked_style = Some(card::CheckedStyle {
+        show_strikethrough: Some(true),
+        opacity: Some(0.5),
+    });
+
+    let card = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .body(
+            card::Body::new()
+                .element(card::Element::Input(input))
+                .element(card::Element::SelectStatic(select))
+                .element(card::Element::Checker(checker)),
+        );
+    card.validate().expect("controls fixture is valid");
+    assert_eq!(card.to_json(), fixture("card_json_v2/controls.json").into());
+}
+
+#[test]
+fn modern_v2_container_optional_fields_preserve_wire_shape() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let icon = card::HeaderIcon::standard("right_small")
+        .color(card::HeaderTagColor::Blue)
+        .size("16px");
+    let mut panel = card::CollapsiblePanel::new(card::CollapsiblePanelHeader::new(
+        card::Text::plain("Details"),
+    ))
+    .element(card::Element::Markdown(card::Markdown::new("content")));
+    panel.border = Some(card::Border::new(card::Color::Grey));
+    let panel = serde_json::to_value(card::Element::CollapsiblePanel(panel))
+        .expect("serialize collapsible panel");
+    assert_eq!(panel["border"]["color"], "grey");
+
+    let callback_value: larksuite_oapi_sdk_rs::JsonValue = serde_json::json!({}).into();
+    let mut container = card::InteractiveContainer::new(card::Behavior::callback(callback_value))
+        .element(card::Element::Div(card::Div::new(card::Text::plain(
+            "content",
+        ))));
+    container.disabled = Some(false);
+    container.disabled_tips = Some(card::Text::plain("Unavailable"));
+    container.hover_tips = Some(card::Text::plain("Open details"));
+    container.confirm = Some(card::Confirm::new(
+        card::Text::plain("Continue?"),
+        card::Text::plain("Open this item"),
+    ));
+    let container = serde_json::to_value(card::Element::InteractiveContainer(container))
+        .expect("serialize interactive container");
+    assert_eq!(container["disabled"], false);
+    assert_eq!(container["disabled_tips"]["content"], "Unavailable");
+    assert_eq!(container["hover_tips"]["content"], "Open details");
+    assert_eq!(container["confirm"]["title"]["content"], "Continue?");
+    assert_eq!(
+        serde_json::to_value(icon).expect("serialize icon")["size"],
+        "16px"
+    );
+}
+
+#[test]
+fn modern_v2_validation_rejects_documented_component_placement_errors() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let shared_card = |body| {
+        card::Card::new()
+            .config(card::Config::new().update_multi())
+            .body(body)
+    };
+    let callback_value: larksuite_oapi_sdk_rs::JsonValue = serde_json::json!({}).into();
+    let callback = card::Behavior::callback(callback_value);
+    let image_select = card::ImageSelect::new(
+        vec![card::ImageSelectOption {
+            img_key: "img".into(),
+            value: "img-1".into(),
+            disabled: None,
+            disabled_tips: None,
+            hover_tips: None,
+        }],
+        callback.clone(),
+    );
+    let mut image_select = image_select;
+    image_select.multi_select = Some(true);
+    let image_card = shared_card(card::Body::new().element(card::Element::SelectImg(image_select)));
+    assert_eq!(
+        image_card.validate(),
+        Err(card::ValidationError::MultiSelectImageOutsideForm)
+    );
+
+    let nested_table = shared_card(
+        card::Body::new()
+            .element(card::Element::ColumnSet(card::ColumnSet::new().column(
+                card::Column::new().element(card::Element::Table(card::Table::new())),
+            ))),
+    );
+    assert_eq!(
+        nested_table.validate(),
+        Err(card::ValidationError::TableNestedOutsideBody)
+    );
+
+    let empty_container = shared_card(card::Body::new().element(
+        card::Element::InteractiveContainer(card::InteractiveContainer::new(callback)),
+    ));
+    assert_eq!(
+        empty_container.validate(),
+        Err(card::ValidationError::EmptyInteractiveContainer)
+    );
+
+    let empty_overflow =
+        shared_card(card::Body::new().element(card::Element::Overflow(card::Overflow::new())));
+    assert_eq!(
+        empty_overflow.validate(),
+        Err(card::ValidationError::EmptyOptions("overflow"))
+    );
+
+    let empty_picker =
+        shared_card(card::Body::new().element(card::Element::DatePicker(card::DatePicker::new())));
+    assert_eq!(
+        empty_picker.validate(),
+        Err(card::ValidationError::MissingPickerValue("date_picker"))
+    );
+
+    let mut duplicate_options = card::StaticSelect::new();
+    duplicate_options.options = Some(vec![
+        card::SelectOption::new(card::Text::plain("one"), "duplicate"),
+        card::SelectOption::new(card::Text::plain("two"), "duplicate"),
+    ]);
+    let duplicate_options =
+        shared_card(card::Body::new().element(card::Element::SelectStatic(duplicate_options)));
+    assert_eq!(
+        duplicate_options.validate(),
+        Err(card::ValidationError::DuplicateOptionValue(
+            "duplicate".into()
+        ))
+    );
+
+    let button_without_behavior = shared_card(card::Body::new().element(card::Element::Button(
+        card::Button::new(card::Text::plain("button")),
+    )));
+    assert_eq!(
+        button_without_behavior.validate(),
+        Err(card::ValidationError::MissingButtonBehavior)
+    );
+
+    let conflicting_button = shared_card(
+        card::Body::new().element(card::Element::Form(
+            card::Form::new("form").element(card::Element::Button(
+                card::Button::new(card::Text::plain("button"))
+                    .form_action(card::FormActionType::Submit)
+                    .behavior(card::Behavior::callback(serde_json::json!({}))),
+            )),
+        )),
+    );
+    assert_eq!(
+        conflicting_button.validate(),
+        Err(card::ValidationError::ButtonBehaviorConflict)
+    );
+
+    let empty_table =
+        shared_card(card::Body::new().element(card::Element::Table(card::Table::new())));
+    assert_eq!(
+        empty_table.validate(),
+        Err(card::ValidationError::EmptyTableColumns)
+    );
+
+    let mut invalid_page_size = card::Table::new()
+        .column(card::TableColumn::new("status"))
+        .row(BTreeMap::from([(
+            "status".to_string(),
+            serde_json::json!("ok").into(),
+        )]));
+    invalid_page_size.page_size = Some(11);
+    let invalid_page_size =
+        shared_card(card::Body::new().element(card::Element::Table(invalid_page_size)));
+    assert_eq!(
+        invalid_page_size.validate(),
+        Err(card::ValidationError::InvalidTablePageSize(11))
+    );
+
+    let duplicate_form_name = shared_card(
+        card::Body::new().element(card::Element::Form(
+            card::Form::new("form")
+                .element(card::Element::Input(card::Input::new("duplicate")))
+                .element(card::Element::Input(card::Input::new("duplicate"))),
+        )),
+    );
+    assert_eq!(
+        duplicate_form_name.validate(),
+        Err(card::ValidationError::DuplicateFormControlName(
+            "duplicate".into()
+        ))
+    );
+
+    let callback_value: larksuite_oapi_sdk_rs::JsonValue = serde_json::json!({}).into();
+    let mut deeply_nested = card::Element::Markdown(card::Markdown::new("leaf"));
+    for _ in 0..6 {
+        deeply_nested = card::Element::InteractiveContainer(
+            card::InteractiveContainer::new(card::Behavior::callback(callback_value.clone()))
+                .element(deeply_nested),
+        );
+    }
+    let deeply_nested = shared_card(card::Body::new().element(deeply_nested));
+    assert_eq!(
+        deeply_nested.validate(),
+        Err(card::ValidationError::TooDeeplyNestedContainer(6))
+    );
+
+    let form_without_submit = shared_card(card::Body::new().element(card::Element::Form(
+        card::Form::new("form").element(card::Element::Input(card::Input::new("reason"))),
+    )));
+    assert_eq!(
+        form_without_submit.validate(),
+        Err(card::ValidationError::MissingFormSubmit("form".into()))
+    );
 }
 
 #[test]

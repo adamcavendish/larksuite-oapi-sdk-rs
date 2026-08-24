@@ -44,6 +44,13 @@ use serde::{Deserialize, Serialize};
 #[path = "card/v1.rs"]
 pub mod v1;
 
+/// Typed Card JSON 2.0 composition.
+///
+/// This root is deliberately separate from [`v1`]: Card JSON 2.0 changes the
+/// root shape to `schema` plus `body.elements` and adds streaming identifiers.
+#[path = "card/v2.rs"]
+pub mod v2;
+
 // ── Closed card option sets ──
 
 /// Header templates supported by Feishu interactive cards.

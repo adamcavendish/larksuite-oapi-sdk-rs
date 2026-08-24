@@ -1,0 +1,40 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [
+      {
+        "tag": "input",
+        "name": "reason",
+        "required": true,
+        "placeholder": {"tag": "plain_text", "content": "Reason"},
+        "label": {"tag": "plain_text", "content": "Release reason"},
+        "label_position": "left",
+        "input_type": "multiline_text",
+        "rows": 3,
+        "auto_resize": true,
+        "max_rows": 6,
+        "max_length": 500,
+        "width": "fill"
+      },
+      {
+        "tag": "select_static",
+        "type": "text",
+        "placeholder": {"tag": "plain_text", "content": "Severity"},
+        "options": [
+          {"text": {"tag": "plain_text", "content": "S1"}, "value": "s1"},
+          {"text": {"tag": "plain_text", "content": "S2"}, "value": "s2"}
+        ],
+        "initial_option": "s2"
+      },
+      {
+        "tag": "checker",
+        "name": "confirmed",
+        "checked": false,
+        "text": {"tag": "plain_text", "content": "I confirmed the release"},
+        "overall_checkable": true,
+        "checked_style": {"show_strikethrough": true, "opacity": 0.5}
+      }
+    ]
+  }
+}

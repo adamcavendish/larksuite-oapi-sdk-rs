@@ -74,3 +74,12 @@ their revisions, and checks recorded source artifacts before it runs the Rust
 fixture tests. Card checks remain one part of this aggregate gate, alongside
 REST, event, and future protocol alignment; they do not get a separate command
 or CI job.
+
+The Card JSON 2.0 inventory is separate from the 1.0 corpus. It records the
+incompatible root, every documented handwritten component, the root and
+cross-field constraints that the typed AST must enforce, and exact valid and
+invalid wire fixtures. `partial` means that a component has a typed wire shape
+but is not yet eligible to be marked complete: its optional fields, validation,
+and exact fixtures must still be covered. The documented Card-Builder-only
+recycling container is recorded as a known divergence because it has no
+handwritten Card JSON tag.
