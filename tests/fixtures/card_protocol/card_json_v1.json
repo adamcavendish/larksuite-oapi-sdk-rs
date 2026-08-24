@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "protocol": "card-json",
+  "version": "1.0",
+  "sources": {
+    "official_docs": {
+      "role": "normative",
+      "accessed_on": "2026-08-24",
+      "urls": [
+        "https://open.larksuite.com/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/card-json-structure",
+        "https://open.larksuite.com/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/card-components/component-overview",
+        "https://open.larksuite.com/document/common-capabilities/message-card/add-card-interaction/interaction-module",
+        "https://open.larksuite.com/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/card-callback-communication"
+      ]
+    },
+    "go_sdk": {
+      "role": "implementation_cross_check",
+      "repository": "https://github.com/larksuite/oapi-sdk-go.git",
+      "revision": "dbeec3d5f3afa4558d5cb22d93506c570e25385a",
+      "artifacts": [
+        {
+          "path": "card/model.go",
+          "required_snippets": [
+            "TemplateBlue      = \"blue\"",
+            "TemplateWathet    = \"wathet\"",
+            "TemplateGrey      = \"grey\"",
+            "func (m *MessageCardDiv) Tag() string",
+            "return \"div\""
+          ]
+        }
+      ]
+    },
+    "lark_cli": {
+      "role": "implementation_cross_check",
+      "repository": "https://github.com/larksuite/cli.git",
+      "revision": "7874dc144b6d94ba5986664dfe65b007dcd5e381",
+      "artifacts": [
+        {
+          "path": "events/im/card_action.go",
+          "required_snippets": [
+            "always card.action.trigger",
+            "ActionTag",
+            "FormValue",
+            "Timezone"
+          ]
+        },
+        {
+          "path": "skills/lark-im/references/card/resource/colors.md",
+          "required_snippets": [
+            "卡片所有颜色字段",
+            "`blue`",
+            "`wathet`",
+            "`grey`"
+          ]
+        }
+      ]
+    }
+  },
+  "surfaces": [
+    {"id": "card", "kind": "root", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "config", "kind": "root_field", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "card_link", "kind": "root_field", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "header", "kind": "root_field", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "i18n_elements", "kind": "root_field", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "fallback", "kind": "root_field", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "div", "kind": "component", "wire_tag": "div", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "markdown", "kind": "component", "wire_tag": "markdown", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "img", "kind": "component", "wire_tag": "img", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "img_combination", "kind": "component", "wire_tag": "img_combination", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "person", "kind": "component", "wire_tag": "person", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "person_list", "kind": "component", "wire_tag": "person_list", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "chart", "kind": "component", "wire_tag": "chart", "status": "implemented", "sources": ["official_docs"]},
+    {"id": "table", "kind": "component", "wire_tag": "table", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "hr", "kind": "component", "wire_tag": "hr", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "note", "kind": "component", "wire_tag": "note", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "column_set", "kind": "container", "wire_tag": "column_set", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "column", "kind": "nested_object", "wire_tag": "column", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "collapsible_panel", "kind": "container", "wire_tag": "collapsible_panel", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "interactive_container", "kind": "container", "wire_tag": "interactive_container", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "form", "kind": "container", "wire_tag": "form", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "action", "kind": "container", "wire_tag": "action", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "button", "kind": "interactive_component", "wire_tag": "button", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "overflow", "kind": "interactive_component", "wire_tag": "overflow", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "select_static", "kind": "interactive_component", "wire_tag": "select_static", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "multi_select_static", "kind": "interactive_component", "wire_tag": "multi_select_static", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "select_person", "kind": "interactive_component", "wire_tag": "select_person", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "multi_select_person", "kind": "interactive_component", "wire_tag": "multi_select_person", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "date_picker", "kind": "interactive_component", "wire_tag": "date_picker", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "picker_time", "kind": "interactive_component", "wire_tag": "picker_time", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "picker_datetime", "kind": "interactive_component", "wire_tag": "picker_datetime", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "input", "kind": "interactive_component", "wire_tag": "input", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "select_img", "kind": "interactive_component", "wire_tag": "select_img", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "checker", "kind": "interactive_component", "wire_tag": "checker", "status": "implemented", "sources": ["official_docs", "lark_cli"]},
+    {"id": "open_url", "kind": "behavior", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "callback", "kind": "behavior", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "card.action.trigger", "kind": "callback", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]}
+  ],
+  "fixtures": [
+    {"id": "basic_card", "path": "card_json_v1/basic_card.json", "kind": "outbound_card", "expected_tags": ["div", "markdown", "hr", "img"]},
+    {"id": "callback_button", "path": "card_json_v1/callback_button.json", "kind": "outbound_element", "expected_tags": ["action", "button"]},
+    {"id": "card_action_trigger", "path": "card_json_v1/card_action_trigger.json", "kind": "callback_payload", "expected_tags": []},
+    {"id": "modern_v1_chart_card", "path": "card_json_v1/modern_v1_chart_card.json", "kind": "outbound_card", "expected_tags": ["div", "markdown", "hr", "img", "chart"]},
+    {"id": "all_components", "path": "card_json_v1/all_components.json", "kind": "outbound_card", "expected_tags": ["div", "markdown", "img", "img_combination", "person", "person_list", "chart", "table", "hr", "note", "column_set", "interactive_container", "collapsible_panel", "form", "action", "button", "overflow", "select_static", "multi_select_static", "select_person", "multi_select_person", "date_picker", "picker_time", "picker_datetime", "input", "select_img", "checker"]}
+  ]
+}

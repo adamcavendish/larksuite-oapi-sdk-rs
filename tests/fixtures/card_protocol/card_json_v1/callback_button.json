@@ -1,0 +1,16 @@
+{
+  "tag": "action",
+  "actions": [
+    {
+      "tag": "button",
+      "text": {
+        "tag": "plain_text",
+        "content": "Approve"
+      },
+      "type": "primary",
+      "value": {
+        "operation": "approve"
+      }
+    }
+  ]
+}

@@ -87,8 +87,10 @@ for the complete setup.
 
 ## Guides
 
-- [Go compatibility and contract provenance](docs/go-compatibility.md): raw
+- [Go service and event compatibility](docs/go-compatibility.md): raw
   requests, the compatibility bridge, and deterministic Go-to-Rust checks.
+- [Card protocol alignment](docs/card-protocol.md): source hierarchy and
+  verification workflow for Card JSON and card callbacks.
 - [Events, WebSockets, and channels](docs/events-and-channels.md): webhook
   dispatch, long connections, trusted user channels, replies, and updates.
 - [OAuth SSO](docs/oauth-sso.md): Feishu and Lark browser login, PKCE, token

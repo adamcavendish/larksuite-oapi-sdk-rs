@@ -93,6 +93,12 @@ go-contract-provenance-check go_sdk:
     just go-rust-service-parity-check
     just go-rust-event-parity-check
 
+# Verify every checked-in external-reference alignment artifact. New protocol
+# families extend this aggregate check instead of adding a parallel CI gate.
+reference-alignment-check go_sdk lark_cli:
+    just go-contract-provenance-check "{{go_sdk}}"
+    CARD_PROTOCOL_GO_SDK_DIR="{{go_sdk}}" CARD_PROTOCOL_CLI_DIR="{{lark_cli}}" cargo test --test card_protocol
+
 # ---------- Docs ----------
 
 # Build rustdoc (CI mode)

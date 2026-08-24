@@ -1,0 +1,76 @@
+# Card protocol alignment
+
+Message cards are an embedded JSON protocol: IM and CardKit APIs transport a
+card as opaque content, so REST route parity cannot establish card-schema
+coverage. This guide defines the required reference and verification workflow
+for every change to the SDK's card support.
+
+## Source roles
+
+Use each reference for the thing it can prove:
+
+1. **Official Lark card documentation** is the wire-contract authority. It
+   defines Card JSON 1.0 and 2.0 roots, component tags, field names, value
+   domains, constraints, client-version requirements, and deprecations.
+2. **The Lark CLI card references and fixtures** are an operational
+   cross-check. They supply representative valid payloads and callback/update
+   lifecycle details, including `card.action.trigger`.
+3. **The official Go SDK** is an implementation cross-check and compatibility
+   reference. Its card model may deliberately represent a different layer or
+   expose a different surface from a particular documentation page; an apparent
+   gap is a discrepancy to investigate, not evidence that the Go SDK is
+   obsolete or incomplete.
+4. **The existing Rust SDK** is a regression baseline only. An existing
+   serializer or a test that repeats its output is not evidence of protocol
+   correctness.
+
+When sources disagree, record the discrepancy in the protocol inventory and
+investigate its version, schema, and transport context. The official
+documentation defines the wire contract, while current Go SDK and CLI behavior
+are required implementation evidence; do not assume that either implementation
+is stale, or silently preserve a conflicting spelling.
+
+## Required workflow
+
+Before implementing or accepting an embedded-protocol change:
+
+1. Classify it. REST resources and typed events use the Go compatibility
+   workflow; message cards use this workflow. A change touching both must pass
+   both sets of checks.
+2. Refresh the pinned Go SDK and Lark CLI references, and record the source
+   revision plus official-documentation URLs and access date in the protocol
+   inventory.
+3. Update the version-specific inventory before implementation. Card JSON 1.0
+   and 2.0 have separate roots and must have separate component, field,
+   enumeration, validation, and client-version entries.
+4. Add or update exact JSON fixtures for every changed wire shape. Fixtures
+   must cover the tag, required fields, optional fields, enum spelling, and at
+   least one invalid cross-field combination where the protocol defines one.
+5. Cross-check each changed card component against the CLI and Go references.
+   Record an absence from either reference as an absence, not as permission to
+   omit a documented capability.
+6. Run the aggregate reference-alignment check and the focused Rust tests. A
+   new card feature cannot merge with only a builder unit test that asserts the
+   implementation's own JSON.
+
+## Callback and update coverage
+
+For callback-bearing Card JSON 1.0 components, the inventory and fixtures must
+also cover the corresponding `card.action.trigger` fields, callback value or
+form-value shape, and the three-second acknowledgement/update response. The
+SDK may expose outbound card construction and inbound event types independently,
+but their protocol relationship must be tested together.
+
+Card JSON 2.0 and CardKit streaming or delayed updates are separate future
+tracks. They need their own root fixtures and transport fixtures; neither may
+be accepted as an optional extension of a Card JSON 1.0 fixture.
+
+## Gate status
+
+The Card JSON 1.0 inventory and fixture corpus extend the deterministic
+`reference-alignment-check` command with card fixtures and validation. The
+aggregate command receives pinned Go and Lark CLI checkout paths, verifies
+their revisions, and checks recorded source artifacts before it runs the Rust
+fixture tests. Card checks remain one part of this aggregate gate, alongside
+REST, event, and future protocol alignment; they do not get a separate command
+or CI job.

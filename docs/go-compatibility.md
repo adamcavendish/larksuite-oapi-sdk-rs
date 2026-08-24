@@ -1,8 +1,15 @@
-# Go compatibility and contract provenance
+# Go service and event compatibility
 
-The Rust SDK follows the official Go SDK closely. This guide covers the
-fallback path for an uncovered endpoint and the checked-in evidence that keeps
-the two SDKs aligned.
+The Rust SDK uses the official Go SDK as a compatibility reference for REST
+resources and typed webhook registrations. This guide covers the fallback path
+for an uncovered endpoint and the checked-in evidence that keeps those
+contracts aligned.
+
+This is deliberately not a universal protocol-parity claim. The generated
+checks inspect Go `service/*/*/resource.go` and typed event registrations; they
+do not inspect embedded JSON protocols such as message cards. Each embedded
+protocol needs its own source-of-truth inventory, fixtures, and CI gate. See
+[Card protocol alignment](card-protocol.md) for the card workflow.
 
 ## Raw requests and the Go bridge
 
@@ -68,7 +75,8 @@ just go-event-catalog-check "$GO_SDK_DIR"
 just go-rust-event-parity-check
 ```
 
-CI runs `just go-contract-provenance-check` against a full-history checkout of
-the pinned Go `v3.10.0` reference. That gate runs all Go extractor tests and
-verifies compatibility metadata, service contracts, webhook routes, and both
-Rust parity reports.
+CI runs `just reference-alignment-check` against pinned Go and Lark CLI
+references. It runs the Go extractor tests and verifies compatibility metadata,
+service contracts, webhook routes, both Rust parity reports, and the checked-in
+embedded-protocol inventories and fixtures. Protocol families join this
+aggregate gate instead of receiving parallel CI jobs.

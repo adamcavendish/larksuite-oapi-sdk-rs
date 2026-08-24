@@ -4,8 +4,10 @@ This directory holds detailed operational guides for the SDK. The root
 [README](../README.md) remains the shortest path to installation, quick start,
 examples, features, and coverage.
 
-- [Go compatibility and contract provenance](go-compatibility.md) covers raw
+- [Go service and event compatibility](go-compatibility.md) covers raw
   requests, the compatibility bridge, and reproducible Go-to-Rust checks.
+- [Card protocol alignment](card-protocol.md) defines the source hierarchy and
+  verification workflow for Card JSON and card callbacks.
 - [Events, WebSockets, and channels](events-and-channels.md) covers webhook
   dispatch, long connections, trusted user channels, replies, and updates.
 - [OAuth SSO](oauth-sso.md) covers Feishu and Lark browser authorization,
