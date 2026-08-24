@@ -6,11 +6,11 @@
 //! # Example
 //!
 //! ```rust
-//! use larksuite_oapi_sdk_rs::card::{Card, CardConfig, CardHeader};
+//! use larksuite_oapi_sdk_rs::card::{Card, CardConfig, CardHeader, TemplateColor};
 //!
 //! let card = Card::new()
 //!     .config(CardConfig::new().wide_screen_mode(true))
-//!     .header(CardHeader::new("Hello").template("blue"))
+//!     .header(CardHeader::new("Hello").template(TemplateColor::Blue))
 //!     .element(larksuite_oapi_sdk_rs::card::md("**world**"));
 //!
 //! let json = card.to_json();
@@ -36,20 +36,75 @@
 use crate::JsonValue as Value;
 use serde::{Deserialize, Serialize};
 
-// ── Template color constants (matching Go SDK) ──
+// ── Closed card option sets ──
 
-pub const TEMPLATE_BLUE: &str = "blue";
-pub const TEMPLATE_WATHET: &str = "wathet";
-pub const TEMPLATE_TURQUOISE: &str = "turquoise";
-pub const TEMPLATE_GREEN: &str = "green";
-pub const TEMPLATE_YELLOW: &str = "yellow";
-pub const TEMPLATE_ORANGE: &str = "orange";
-pub const TEMPLATE_RED: &str = "red";
-pub const TEMPLATE_CARMINE: &str = "carmine";
-pub const TEMPLATE_VIOLET: &str = "violet";
-pub const TEMPLATE_PURPLE: &str = "purple";
-pub const TEMPLATE_INDIGO: &str = "indigo";
-pub const TEMPLATE_GREY: &str = "grey";
+/// Header templates supported by Feishu interactive cards.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TemplateColor {
+    Default,
+    Blue,
+    Wathet,
+    Turquoise,
+    Green,
+    Yellow,
+    Orange,
+    Red,
+    Carmine,
+    Violet,
+    Purple,
+    Indigo,
+    Grey,
+}
+
+/// Image display mode supported by interactive cards.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ImageMode {
+    FitHorizontal,
+    CropCenter,
+}
+
+/// Visual style for an interactive-card button or select option.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ButtonType {
+    Default,
+    Primary,
+    Danger,
+}
+
+/// Layout of the controls in an action block.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ActionLayout {
+    Bisected,
+    Trisection,
+    Flow,
+}
+
+/// Horizontal alignment for Markdown content.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TextAlign {
+    Left,
+    Center,
+    Right,
+}
+
+/// Responsive layout mode for a column set.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ColumnFlexMode {
+    None,
+    Stretch,
+    Flow,
+    Bisect,
+    Trisect,
+}
+
+/// Backwards-compatible name for [`ActionLayout`].
+pub type MessageCardActionLayout = ActionLayout;
 
 // ── Card top-level ──
 
@@ -142,7 +197,7 @@ pub struct CardHeader {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<TextObject>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub template: Option<String>,
+    pub template: Option<TemplateColor>,
 }
 
 impl CardHeader {
@@ -153,8 +208,8 @@ impl CardHeader {
         }
     }
 
-    pub fn template(mut self, template: impl Into<String>) -> Self {
-        self.template = Some(template.into());
+    pub fn template(mut self, template: TemplateColor) -> Self {
+        self.template = Some(template);
         self
     }
 }
@@ -285,7 +340,7 @@ pub struct ImgElement {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<TextObject>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub mode: Option<String>,
+    pub mode: Option<ImageMode>,
 }
 
 impl ImgElement {
@@ -300,6 +355,11 @@ impl ImgElement {
         self.alt = Some(alt);
         self
     }
+
+    pub fn mode(mut self, mode: ImageMode) -> Self {
+        self.mode = Some(mode);
+        self
+    }
 }
 
 // ── Action ──
@@ -308,7 +368,7 @@ impl ImgElement {
 pub struct ActionElement {
     pub actions: Vec<ActionComponent>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub layout: Option<String>,
+    pub layout: Option<ActionLayout>,
 }
 
 impl ActionElement {
@@ -318,6 +378,11 @@ impl ActionElement {
 
     pub fn action(mut self, action: ActionComponent) -> Self {
         self.actions.push(action);
+        self
+    }
+
+    pub fn layout(mut self, layout: ActionLayout) -> Self {
+        self.layout = Some(layout);
         self
     }
 }
@@ -339,7 +404,7 @@ pub enum ActionComponent {
 pub struct ButtonComponent {
     pub text: TextObject,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
+    pub r#type: Option<ButtonType>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub value: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -356,8 +421,8 @@ impl ButtonComponent {
         }
     }
 
-    pub fn button_type(mut self, t: impl Into<String>) -> Self {
-        self.r#type = Some(t.into());
+    pub fn button_type(mut self, button_type: ButtonType) -> Self {
+        self.r#type = Some(button_type);
         self
     }
 
@@ -444,7 +509,7 @@ pub enum NoteContent {
 pub struct MarkdownElement {
     pub content: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub text_align: Option<String>,
+    pub text_align: Option<TextAlign>,
 }
 
 impl MarkdownElement {
@@ -455,8 +520,8 @@ impl MarkdownElement {
         }
     }
 
-    pub fn text_align(mut self, align: impl Into<String>) -> Self {
-        self.text_align = Some(align.into());
+    pub fn text_align(mut self, align: TextAlign) -> Self {
+        self.text_align = Some(align);
         self
     }
 }
@@ -468,7 +533,7 @@ pub struct ColumnSetElement {
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub columns: Vec<ColumnElement>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub flex_mode: Option<String>,
+    pub flex_mode: Option<ColumnFlexMode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub background_style: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -485,8 +550,8 @@ impl ColumnSetElement {
         self
     }
 
-    pub fn flex_mode(mut self, mode: impl Into<String>) -> Self {
-        self.flex_mode = Some(mode.into());
+    pub fn flex_mode(mut self, mode: ColumnFlexMode) -> Self {
+        self.flex_mode = Some(mode);
         self
     }
 }
@@ -738,7 +803,7 @@ pub fn hr() -> Element {
 pub fn button(text: impl Into<String>, value: Value) -> ActionComponent {
     ActionComponent::Button(
         ButtonComponent::new(TextObject::plain(text))
-            .button_type("default")
+            .button_type(ButtonType::Default)
             .value(value),
     )
 }
@@ -830,7 +895,7 @@ impl MessageCardConfig {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MessageCardHeader {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub template: Option<String>,
+    pub template: Option<TemplateColor>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<MessageCardPlainText>,
 }
@@ -843,8 +908,8 @@ impl MessageCardHeader {
         }
     }
 
-    pub fn template(mut self, template: impl Into<String>) -> Self {
-        self.template = Some(template.into());
+    pub fn template(mut self, template: TemplateColor) -> Self {
+        self.template = Some(template);
         self
     }
 }
@@ -958,15 +1023,6 @@ fn message_card_select_person_tag() -> String {
     "select_person".to_string()
 }
 
-/// Layout for a legacy message card action block.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum MessageCardActionLayout {
-    Bisected,
-    Trisection,
-    Flow,
-}
-
 /// Confirmation dialog shown before running a legacy message card action.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MessageCardActionConfirm {
@@ -1004,7 +1060,7 @@ pub struct MessageCardEmbedSelectOption {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub multi_url: Option<MessageCardURL>,
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
+    pub r#type: Option<ButtonType>,
 }
 
 impl MessageCardEmbedSelectOption {
@@ -1032,8 +1088,8 @@ impl MessageCardEmbedSelectOption {
         self
     }
 
-    pub fn option_type(mut self, option_type: impl Into<String>) -> Self {
-        self.r#type = Some(option_type.into());
+    pub fn option_type(mut self, option_type: ButtonType) -> Self {
+        self.r#type = Some(option_type);
         self
     }
 }
