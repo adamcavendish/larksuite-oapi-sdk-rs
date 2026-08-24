@@ -1,0 +1,38 @@
+{
+  "config": {
+    "enable_forward": true,
+    "update_multi": true
+  },
+  "header": {
+    "title": {
+      "tag": "plain_text",
+      "content": "Protocol baseline"
+    },
+    "template": "default"
+  },
+  "elements": [
+    {
+      "tag": "div",
+      "text": {
+        "tag": "plain_text",
+        "content": "A display block"
+      }
+    },
+    {
+      "tag": "markdown",
+      "content": "**A markdown block**"
+    },
+    {
+      "tag": "hr"
+    },
+    {
+      "tag": "img",
+      "img_key": "img_protocol_baseline",
+      "alt": {
+        "tag": "plain_text",
+        "content": "Protocol image"
+      },
+      "mode": "fit_horizontal"
+    }
+  ]
+}

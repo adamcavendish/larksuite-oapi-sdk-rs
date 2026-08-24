@@ -1,0 +1,22 @@
+{
+  "operator": {
+    "open_id": "ou_operator",
+    "tenant_key": "tenant_demo"
+  },
+  "token": "card_action_token",
+  "action": {
+    "tag": "button",
+    "value": {
+      "operation": "approve"
+    },
+    "form_value": {
+      "reason": "approved"
+    }
+  },
+  "host": "im_message",
+  "delivery_type": "url",
+  "context": {
+    "open_message_id": "om_message",
+    "open_chat_id": "oc_chat"
+  }
+}

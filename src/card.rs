@@ -36,6 +36,14 @@
 use crate::JsonValue as Value;
 use serde::{Deserialize, Serialize};
 
+/// Modern, versioned Card JSON models.
+///
+/// [`v1`] is intentionally separate from the historical [`Card`] builder: the
+/// two public roots can evolve without making Card JSON 1.0 and 2.0 fields
+/// mutually optional on a single type.
+#[path = "card/v1.rs"]
+pub mod v1;
+
 // ── Closed card option sets ──
 
 /// Header templates supported by Feishu interactive cards.
@@ -274,7 +282,12 @@ pub enum Element {
     Markdown(MarkdownElement),
     ColumnSet(ColumnSetElement),
     Form(FormElement),
-    ChartMd(ChartMdElement),
+    /// Compatibility variant for the historical `ChartMd` spelling.
+    ///
+    /// The Lark wire tag is `chart`, not `chart_md`. New code should use
+    /// [`v1::Element::Chart`].
+    #[serde(rename = "chart")]
+    ChartMd(ChartElement),
 }
 
 // ── Div (content block) ──
@@ -607,10 +620,10 @@ impl FormElement {
     }
 }
 
-// ── ChartMd ──
+// ── Chart ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct ChartMdElement {
+pub struct ChartElement {
     pub chart_spec: Value,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color_theme: Option<String>,
@@ -620,7 +633,7 @@ pub struct ChartMdElement {
     pub height: Option<String>,
 }
 
-impl ChartMdElement {
+impl ChartElement {
     pub fn new(chart_spec: Value) -> Self {
         Self {
             chart_spec,
@@ -638,6 +651,14 @@ impl ChartMdElement {
         self
     }
 }
+
+/// Historical name for [`ChartElement`].
+///
+/// The old name incorrectly suggested the `chart_md` wire tag. Serialization
+/// has always been determined by [`Element`], which now emits the documented
+/// `chart` tag.
+#[deprecated(note = "use ChartElement; the documented wire tag is `chart`")]
+pub type ChartMdElement = ChartElement;
 
 // ── MultiSelectStatic ──
 

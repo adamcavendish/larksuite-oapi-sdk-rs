@@ -31,11 +31,17 @@ pub struct CallbackContext {
 }
 
 /// Action detail for card action trigger callbacks.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize)]
 #[non_exhaustive]
 pub struct CallbackAction {
+    /// Historical object-shaped callback payload retained for source
+    /// compatibility with the channel-normalized action API.
     #[serde(default)]
     pub value: BTreeMap<String, crate::JsonValue>,
+    /// Exact callback payload, including the string form permitted by the
+    /// current `card.action.trigger` schema.
+    #[serde(skip)]
+    pub raw_value: Option<crate::JsonValue>,
     #[serde(default)]
     pub tag: String,
     #[serde(default)]
@@ -52,6 +58,62 @@ pub struct CallbackAction {
     pub options: Vec<String>,
     #[serde(default)]
     pub checked: bool,
+}
+
+impl<'de> Deserialize<'de> for CallbackAction {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct WireAction {
+            #[serde(default)]
+            value: Option<crate::JsonValue>,
+            #[serde(default)]
+            tag: String,
+            #[serde(default)]
+            option: String,
+            #[serde(default)]
+            timezone: String,
+            #[serde(default)]
+            name: String,
+            #[serde(default)]
+            form_value: BTreeMap<String, crate::JsonValue>,
+            #[serde(default)]
+            input_value: String,
+            #[serde(default)]
+            options: Vec<String>,
+            #[serde(default)]
+            checked: bool,
+        }
+
+        let wire = WireAction::deserialize(deserializer)?;
+        let value = wire
+            .value
+            .as_ref()
+            .and_then(|value| match value.as_value() {
+                serde_json::Value::Object(values) => Some(
+                    values
+                        .iter()
+                        .map(|(key, value)| (key.clone(), value.clone().into()))
+                        .collect(),
+                ),
+                _ => None,
+            })
+            .unwrap_or_default();
+        Ok(Self {
+            value,
+            raw_value: wire.value,
+            tag: wire.tag,
+            option: wire.option,
+            timezone: wire.timezone,
+            name: wire.name,
+            form_value: wire.form_value,
+            input_value: wire.input_value,
+            options: wire.options,
+            checked: wire.checked,
+        })
+    }
 }
 
 /// Request payload for `card.action.trigger` callbacks.
@@ -150,6 +212,14 @@ impl CallbackCard {
             card_type: Some("template".to_string()),
             data: crate::JsonValue::from_serializable(card).ok(),
         }
+    }
+
+    /// Create a raw Card JSON callback response.
+    pub fn raw(card: impl Serialize) -> Result<Self, crate::LarkError> {
+        Ok(Self {
+            card_type: Some("raw".to_string()),
+            data: Some(crate::JsonValue::from_serializable(card)?),
+        })
     }
 }
 

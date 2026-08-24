@@ -1,9 +1,9 @@
 use larksuite_oapi_sdk_rs::LarkError;
 use larksuite_oapi_sdk_rs::card::{
     ActionComponent, ActionElement, ActionLayout, ButtonComponent, ButtonType, Card, CardConfig,
-    CardHeader, ChartMdElement, ColumnElement, ColumnFlexMode, ColumnSetElement,
-    DatePickerComponent, DivElement, DivField, Element, FormElement, ImageMode, ImgElement,
-    MarkdownElement, MultiSelectStaticComponent, NoteElement, OverflowComponent, SelectOption,
+    CardHeader, ChartElement, ColumnElement, ColumnFlexMode, ColumnSetElement, DatePickerComponent,
+    DivElement, DivField, Element, FormElement, ImageMode, ImgElement, MarkdownElement,
+    MultiSelectStaticComponent, NoteElement, OverflowComponent, SelectOption,
     SelectStaticComponent, TemplateColor, TextAlign, TextObject, TimePickerComponent,
 };
 use serde::{Serialize, Serializer};
@@ -179,15 +179,25 @@ fn form_element() {
 }
 
 #[test]
-fn chart_md_element() {
-    let chart = ChartMdElement::new(serde_json::json!({"type": "bar"}).into())
+fn chart_element_uses_documented_wire_tag() {
+    let chart = ChartElement::new(serde_json::json!({"type": "bar"}).into())
         .color_theme("dark")
         .height("300px");
     let json = serde_json::to_value(Element::ChartMd(chart)).unwrap();
-    assert_eq!(json["tag"], "chart_md");
+    assert_eq!(json["tag"], "chart");
     assert_eq!(json["chart_spec"]["type"], "bar");
     assert_eq!(json["color_theme"], "dark");
     assert_eq!(json["height"], "300px");
+}
+
+#[allow(deprecated)]
+#[test]
+fn chart_md_type_alias_remains_source_compatible() {
+    use larksuite_oapi_sdk_rs::card::ChartMdElement;
+
+    let chart = ChartMdElement::new(serde_json::json!({"type": "line"}).into());
+    let json = serde_json::to_value(Element::ChartMd(chart)).unwrap();
+    assert_eq!(json["tag"], "chart");
 }
 
 #[test]

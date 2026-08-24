@@ -1,0 +1,32 @@
+{
+  "config": {"width_mode": "fill", "compact_width": false},
+  "elements": [
+    {"tag": "div", "text": {"tag": "plain_text", "content": "text", "text_size": "normal"}, "fields": [{"is_short": true, "text": {"tag": "lark_md", "content": "field"}}]},
+    {"tag": "markdown", "content": "**markdown**", "href": {"docs": {"url": "https://example.com"}}},
+    {"tag": "img", "img_key": "img_1", "alt": {"tag": "plain_text", "content": "image"}, "scale_type": "crop_center", "size": "100px 100px"},
+    {"tag": "img_combination", "combination_mode": "double", "corner_radius": "8px", "img_list": [{"img_key": "img_1"}, {"img_key": "img_2"}]},
+    {"tag": "person", "user_id": "ou_user", "size": "small", "show_avatar": true, "show_name": true, "style": "capsule"},
+    {"tag": "person_list", "persons": [{"id": "ou_user"}], "show_name": true, "show_avatar": true, "lines": 1},
+    {"tag": "chart", "chart_spec": {"type": "line", "data": {"values": []}}},
+    {"tag": "table", "page_size": 5, "columns": [{"name": "name", "display_name": "Name", "data_type": "text"}], "rows": [{"name": "Ada"}]},
+    {"tag": "hr"},
+    {"tag": "note", "elements": [{"tag": "plain_text", "content": "note"}]},
+    {"tag": "column_set", "columns": [{"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": "column"}]}]},
+    {"tag": "interactive_container", "background_style": "default", "elements": [{"tag": "markdown", "content": "container"}]},
+    {"tag": "collapsible_panel", "expanded": false, "header": {"title": {"tag": "plain_text", "content": "Details"}}, "elements": [{"tag": "markdown", "content": "body"}]},
+    {"tag": "form", "name": "form", "elements": [{"tag": "input", "name": "reason", "required": true}, {"tag": "button", "name": "submit", "action_type": "form_submit", "text": {"tag": "plain_text", "content": "Submit"}}]},
+    {"tag": "action", "actions": [{"tag": "button", "text": {"tag": "plain_text", "content": "Callback"}, "value": {"operation": "approve"}}, {"tag": "overflow", "options": [{"text": {"tag": "plain_text", "content": "Option"}, "value": "option"}]}]},
+    {"tag": "button", "text": {"tag": "plain_text", "content": "Open"}, "url": "https://example.com"},
+    {"tag": "overflow", "options": [{"text": {"tag": "plain_text", "content": "Option"}, "value": "option"}]},
+    {"tag": "select_static", "placeholder": {"tag": "plain_text", "content": "Choose"}, "options": [{"text": {"tag": "plain_text", "content": "One"}, "value": "1"}]},
+    {"tag": "multi_select_static", "options": [{"text": {"tag": "plain_text", "content": "One"}, "value": "1"}], "selected_values": ["1"]},
+    {"tag": "select_person", "placeholder": {"tag": "plain_text", "content": "Choose"}},
+    {"tag": "multi_select_person", "selected_values": ["ou_user"]},
+    {"tag": "date_picker", "initial_date": "2026-08-24"},
+    {"tag": "picker_time", "initial_time": "12:00"},
+    {"tag": "picker_datetime", "initial_datetime": "2026-08-24 12:00"},
+    {"tag": "input", "name": "input", "placeholder": {"tag": "plain_text", "content": "Type"}},
+    {"tag": "select_img", "options": [{"img_key": "img_1", "value": "one"}]},
+    {"tag": "checker", "name": "done", "checked": false, "text": {"tag": "plain_text", "content": "Done"}, "value": {"task": "1"}}
+  ]
+}

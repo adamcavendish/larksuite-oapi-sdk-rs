@@ -89,8 +89,8 @@ jobs:
       - uses: taiki-e/install-action@just
       - run: just doc-check
 
-  go-contract-provenance:
-    name: Go Contract Provenance
+  reference-alignment:
+    name: Reference Alignment
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -103,13 +103,19 @@ jobs:
           ref: v3.10.0
           path: .go-sdk
           fetch-depth: 0
+      - uses: actions/checkout@v6
+        with:
+          repository: larksuite/cli
+          ref: 7874dc144b6d94ba5986664dfe65b007dcd5e381
+          path: .lark-cli
+          fetch-depth: 1
       - uses: taiki-e/install-action@just
-      - run: just go-contract-provenance-check "$GITHUB_WORKSPACE/.go-sdk"
+      - run: just reference-alignment-check "$GITHUB_WORKSPACE/.go-sdk" "$GITHUB_WORKSPACE/.lark-cli"
 
   basics:
     name: Basics
     runs-on: ubuntu-latest
-    needs: [messaging, fmt, clippy, doc, go-contract-provenance]
+    needs: [messaging, fmt, clippy, doc, reference-alignment]
     steps:
       - run: exit 0
 
