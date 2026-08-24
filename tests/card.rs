@@ -1,9 +1,10 @@
 use larksuite_oapi_sdk_rs::LarkError;
 use larksuite_oapi_sdk_rs::card::{
-    ActionComponent, ActionElement, ButtonComponent, Card, CardConfig, CardHeader, ChartMdElement,
-    ColumnElement, ColumnSetElement, DatePickerComponent, DivElement, DivField, Element,
-    FormElement, ImgElement, MarkdownElement, MultiSelectStaticComponent, NoteElement,
-    OverflowComponent, SelectOption, SelectStaticComponent, TextObject, TimePickerComponent,
+    ActionComponent, ActionElement, ActionLayout, ButtonComponent, ButtonType, Card, CardConfig,
+    CardHeader, ChartMdElement, ColumnElement, ColumnFlexMode, ColumnSetElement,
+    DatePickerComponent, DivElement, DivField, Element, FormElement, ImageMode, ImgElement,
+    MarkdownElement, MultiSelectStaticComponent, NoteElement, OverflowComponent, SelectOption,
+    SelectStaticComponent, TemplateColor, TextAlign, TextObject, TimePickerComponent,
 };
 use serde::{Serialize, Serializer};
 
@@ -24,7 +25,7 @@ impl Serialize for FailingSerialize {
 fn test_card_to_json_basic() {
     let card = Card::new()
         .config(CardConfig::new().wide_screen_mode(true))
-        .header(CardHeader::new("Test Title").template("blue"))
+        .header(CardHeader::new("Test Title").template(TemplateColor::Blue))
         .element(larksuite_oapi_sdk_rs::card::div("Hello world"))
         .element(larksuite_oapi_sdk_rs::card::hr());
 
@@ -123,11 +124,14 @@ fn div_with_text_and_extra() {
 
 #[test]
 fn img_element() {
-    let img = ImgElement::new("img_key_abc").alt(TextObject::plain("alt text"));
+    let img = ImgElement::new("img_key_abc")
+        .alt(TextObject::plain("alt text"))
+        .mode(ImageMode::CropCenter);
     let json = serde_json::to_value(Element::Img(img)).unwrap();
     assert_eq!(json["tag"], "img");
     assert_eq!(json["img_key"], "img_key_abc");
     assert_eq!(json["alt"]["content"], "alt text");
+    assert_eq!(json["mode"], "crop_center");
 }
 
 #[test]
@@ -142,7 +146,7 @@ fn note_element_text_and_img() {
 
 #[test]
 fn markdown_element_with_alignment() {
-    let md = MarkdownElement::new("# Title").text_align("center");
+    let md = MarkdownElement::new("# Title").text_align(TextAlign::Center);
     let json = serde_json::to_value(Element::Markdown(md)).unwrap();
     assert_eq!(json["content"], "# Title");
     assert_eq!(json["text_align"], "center");
@@ -155,7 +159,7 @@ fn column_set_element() {
         .element(larksuite_oapi_sdk_rs::card::md("Col 1"));
     let col2 = ColumnElement::new().element(larksuite_oapi_sdk_rs::card::md("Col 2"));
     let cs = ColumnSetElement::new()
-        .flex_mode("bisect")
+        .flex_mode(ColumnFlexMode::Bisect)
         .column(col1)
         .column(col2);
     let json = serde_json::to_value(Element::ColumnSet(cs)).unwrap();
@@ -189,7 +193,7 @@ fn chart_md_element() {
 #[test]
 fn button_component_with_url_and_type() {
     let btn = ButtonComponent::new(TextObject::plain("Open"))
-        .button_type("primary")
+        .button_type(ButtonType::Primary)
         .value(serde_json::json!({"k": "v"}).into())
         .url("https://example.com");
     let json = serde_json::to_value(ActionComponent::Button(btn)).unwrap();
@@ -275,10 +279,7 @@ fn overflow_component() {
 
 #[test]
 fn action_element_layout() {
-    let action = ActionElement {
-        actions: vec![],
-        layout: Some("flow".to_string()),
-    };
+    let action = ActionElement::new().layout(ActionLayout::Flow);
     let json = serde_json::to_value(Element::Action(action)).unwrap();
     assert_eq!(json["layout"], "flow");
 }
@@ -291,7 +292,7 @@ fn card_serde_roundtrip() {
                 .wide_screen_mode(true)
                 .enable_forward(false),
         )
-        .header(CardHeader::new("Title").template("green"))
+        .header(CardHeader::new("Title").template(TemplateColor::Green))
         .element(larksuite_oapi_sdk_rs::card::div("content"))
         .element(larksuite_oapi_sdk_rs::card::hr())
         .element(larksuite_oapi_sdk_rs::card::md("**bold**"));
@@ -343,20 +344,43 @@ fn test_template_card_in_callback_card() {
 }
 
 #[test]
-fn template_color_constants() {
-    use larksuite_oapi_sdk_rs::card::*;
-    assert_eq!(TEMPLATE_BLUE, "blue");
-    assert_eq!(TEMPLATE_WATHET, "wathet");
-    assert_eq!(TEMPLATE_TURQUOISE, "turquoise");
-    assert_eq!(TEMPLATE_GREEN, "green");
-    assert_eq!(TEMPLATE_YELLOW, "yellow");
-    assert_eq!(TEMPLATE_ORANGE, "orange");
-    assert_eq!(TEMPLATE_RED, "red");
-    assert_eq!(TEMPLATE_CARMINE, "carmine");
-    assert_eq!(TEMPLATE_VIOLET, "violet");
-    assert_eq!(TEMPLATE_PURPLE, "purple");
-    assert_eq!(TEMPLATE_INDIGO, "indigo");
-    assert_eq!(TEMPLATE_GREY, "grey");
+fn card_option_enums_serialize_to_protocol_values() {
+    for (color, expected) in [
+        (TemplateColor::Default, "default"),
+        (TemplateColor::Blue, "blue"),
+        (TemplateColor::Wathet, "wathet"),
+        (TemplateColor::Turquoise, "turquoise"),
+        (TemplateColor::Green, "green"),
+        (TemplateColor::Yellow, "yellow"),
+        (TemplateColor::Orange, "orange"),
+        (TemplateColor::Red, "red"),
+        (TemplateColor::Carmine, "carmine"),
+        (TemplateColor::Violet, "violet"),
+        (TemplateColor::Purple, "purple"),
+        (TemplateColor::Indigo, "indigo"),
+        (TemplateColor::Grey, "grey"),
+    ] {
+        assert_eq!(serde_json::to_value(color).unwrap(), expected);
+        assert_eq!(
+            serde_json::from_value::<TemplateColor>(expected.into()).unwrap(),
+            color
+        );
+    }
+
+    assert_eq!(
+        serde_json::to_value(ImageMode::FitHorizontal).unwrap(),
+        "fit_horizontal"
+    );
+    assert_eq!(serde_json::to_value(ButtonType::Danger).unwrap(), "danger");
+    assert_eq!(
+        serde_json::to_value(ActionLayout::Trisection).unwrap(),
+        "trisection"
+    );
+    assert_eq!(serde_json::to_value(TextAlign::Left).unwrap(), "left");
+    assert_eq!(
+        serde_json::to_value(ColumnFlexMode::Trisect).unwrap(),
+        "trisect"
+    );
 }
 
 #[test]
@@ -369,7 +393,7 @@ fn message_card_builder() {
                 .wide_screen_mode(true)
                 .enable_forward(false),
         )
-        .header(MessageCardHeader::new("Hello").template(TEMPLATE_BLUE))
+        .header(MessageCardHeader::new("Hello").template(TemplateColor::Blue))
         .element(
             serde_json::json!({"tag": "div", "text": {"tag": "plain_text", "content": "world"}}),
         )
@@ -410,7 +434,8 @@ fn message_card_action_select_menus() {
     let option_b = MessageCardEmbedSelectOption::new()
         .value("b")
         .text(MessageCardPlainText::new("Option B"))
-        .url("https://example.com/b");
+        .url("https://example.com/b")
+        .option_type(ButtonType::Danger);
 
     let static_menu = MessageCardEmbedSelectMenuStatic::new().base(
         MessageCardEmbedSelectMenuBase::new()
@@ -461,6 +486,7 @@ fn message_card_action_select_menus() {
         element["actions"][0]["options"][1]["url"],
         "https://example.com/b"
     );
+    assert_eq!(element["actions"][0]["options"][1]["type"], "danger");
     assert_eq!(element["actions"][0]["value"]["scope"], "single");
     assert_eq!(element["actions"][1]["tag"], "multi_select_static");
     assert_eq!(element["actions"][1]["initial_options"][1], "b");
