@@ -1,0 +1,11 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": false},
+  "header": {"title": {"tag": "plain_text", "content": "Invalid Card"}},
+  "body": {
+    "elements": [
+      {"tag": "markdown", "element_id": "1invalid", "content": "Invalid identifier"},
+      {"tag": "markdown", "element_id": "1invalid", "content": "Duplicate identifier"}
+    ]
+  }
+}

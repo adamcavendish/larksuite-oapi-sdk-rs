@@ -1,0 +1,19 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "header": {"title": {"tag": "plain_text", "content": "Approval"}},
+  "body": {
+    "elements": [
+      {
+        "tag": "button",
+        "element_id": "approve_button",
+        "text": {"tag": "plain_text", "content": "Approve"},
+        "type": "primary_filled",
+        "behaviors": [
+          {"type": "callback", "value": {"operation": "approve"}},
+          {"type": "open_url", "default_url": "https://example.com/approval"}
+        ]
+      }
+    ]
+  }
+}
