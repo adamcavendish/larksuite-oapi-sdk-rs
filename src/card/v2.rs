@@ -2097,7 +2097,7 @@ pub struct CollapsiblePanelHeader {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub icon_position: Option<IconPosition>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub icon_expanded_angle: Option<i16>,
+    pub icon_expanded_angle: Option<PanelIconExpandedAngle>,
 }
 impl CollapsiblePanelHeader {
     pub fn new(title: Text) -> Self {
@@ -2125,6 +2125,19 @@ pub enum IconPosition {
     Left,
     Right,
     FollowText,
+}
+
+/// The only rotation angles supported by a collapsible-panel header icon.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PanelIconExpandedAngle {
+    #[serde(rename = "-180")]
+    NegativeOneEighty,
+    #[serde(rename = "-90")]
+    NegativeNinety,
+    #[serde(rename = "90")]
+    Ninety,
+    #[serde(rename = "180")]
+    OneEighty,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -2545,6 +2558,11 @@ pub enum ValidationError {
     TableNestedOutsideBody,
     MultiSelectImageOutsideForm,
     EmptyInteractiveContainer,
+    MissingInteractiveContainerBehavior,
+    InvalidOpenUrl(String),
+    InvalidInteractiveContainerWidth(String),
+    InvalidInteractiveContainerHeight(String),
+    InvalidCornerRadius(String),
     EmptyOptions(&'static str),
     DuplicateOptionValue(String),
     MissingPickerValue(&'static str),
@@ -2628,6 +2646,19 @@ impl std::fmt::Display for ValidationError {
             Self::EmptyInteractiveContainer => {
                 f.write_str("interactive_container requires at least one child element")
             }
+            Self::MissingInteractiveContainerBehavior => {
+                f.write_str("interactive_container requires at least one behavior")
+            }
+            Self::InvalidOpenUrl(url) => {
+                write!(f, "open_url requires a non-empty default_url, got {url:?}")
+            }
+            Self::InvalidInteractiveContainerWidth(width) => {
+                write!(f, "invalid interactive_container width {width:?}")
+            }
+            Self::InvalidInteractiveContainerHeight(height) => {
+                write!(f, "invalid interactive_container height {height:?}")
+            }
+            Self::InvalidCornerRadius(value) => write!(f, "invalid corner radius {value:?}"),
             Self::EmptyOptions(tag) => write!(f, "{tag} requires at least one option"),
             Self::DuplicateOptionValue(value) => write!(f, "duplicate option value {value:?}"),
             Self::MissingPickerValue(tag) => {
@@ -2757,8 +2788,23 @@ fn validate_control(
     tag: &'static str,
     in_form: bool,
 ) -> Result<(), ValidationError> {
+    validate_behaviors(&control.behaviors, false)?;
     if in_form && control.name.is_none() {
         return Err(ValidationError::MissingFormControlName(tag));
+    }
+    Ok(())
+}
+
+fn validate_behaviors(behaviors: &[Behavior], required: bool) -> Result<(), ValidationError> {
+    if required && behaviors.is_empty() {
+        return Err(ValidationError::MissingInteractiveContainerBehavior);
+    }
+    for behavior in behaviors {
+        if let Behavior::OpenUrl { default_url, .. } = behavior
+            && default_url.is_empty()
+        {
+            return Err(ValidationError::InvalidOpenUrl(default_url.clone()));
+        }
     }
     Ok(())
 }
@@ -2776,6 +2822,17 @@ fn valid_box_pixels(value: &str, min: i16, max: i16) -> bool {
         && values
             .into_iter()
             .all(|value| valid_pixels(value, min, max))
+}
+
+fn valid_corner_radius(value: &str) -> bool {
+    value
+        .strip_suffix("px")
+        .and_then(|value| value.parse::<u32>().ok())
+        .is_some()
+        || value
+            .strip_suffix('%')
+            .and_then(|value| value.parse::<u8>().ok())
+            .is_some_and(|value| value <= 100)
 }
 
 fn validate_spacing(spacing: &Spacing) -> Result<(), ValidationError> {
@@ -2943,6 +3000,55 @@ fn validate_person_list(person_list: &PersonList) -> Result<(), ValidationError>
     validate_margin(person_list.margin.as_deref())?;
     if person_list.lines == Some(0) {
         return Err(ValidationError::InvalidPersonListLines);
+    }
+    Ok(())
+}
+
+fn validate_collapsible_panel(panel: &CollapsiblePanel) -> Result<(), ValidationError> {
+    validate_layout(
+        panel.padding.as_deref(),
+        panel.margin.as_deref(),
+        panel.horizontal_spacing.as_ref(),
+        panel.vertical_spacing.as_ref(),
+    )?;
+    if let Some(border) = &panel.border
+        && let Some(corner_radius) = &border.corner_radius
+        && !valid_corner_radius(corner_radius)
+    {
+        return Err(ValidationError::InvalidCornerRadius(corner_radius.clone()));
+    }
+    Ok(())
+}
+
+fn validate_interactive_container(container: &InteractiveContainer) -> Result<(), ValidationError> {
+    validate_behaviors(&container.behaviors, true)?;
+    validate_layout(
+        container.padding.as_deref(),
+        container.margin.as_deref(),
+        None,
+        None,
+    )?;
+    if let Some(width) = &container.width
+        && width != "fill"
+        && width != "auto"
+        && !valid_pixels(width, 16, 999)
+    {
+        return Err(ValidationError::InvalidInteractiveContainerWidth(
+            width.clone(),
+        ));
+    }
+    if let Some(height) = &container.height
+        && height != "auto"
+        && !valid_pixels(height, 10, 999)
+    {
+        return Err(ValidationError::InvalidInteractiveContainerHeight(
+            height.clone(),
+        ));
+    }
+    if let Some(corner_radius) = &container.corner_radius
+        && !valid_corner_radius(corner_radius)
+    {
+        return Err(ValidationError::InvalidCornerRadius(corner_radius.clone()));
     }
     Ok(())
 }
@@ -3156,6 +3262,7 @@ fn validate_element(
             validate_optional_element_id(element.element_id.as_deref(), ids)
         }
         Element::Button(element) => {
+            validate_behaviors(&element.behaviors, false)?;
             if in_form && element.form_action_type.is_some() && !element.behaviors.is_empty() {
                 return Err(ValidationError::ButtonBehaviorConflict);
             }
@@ -3167,7 +3274,10 @@ fn validate_element(
             }
             validate_optional_element_id(element.element_id.as_deref(), ids)
         }
-        Element::Input(element) => validate_optional_element_id(element.element_id.as_deref(), ids),
+        Element::Input(element) => {
+            validate_behaviors(&element.behaviors, false)?;
+            validate_optional_element_id(element.element_id.as_deref(), ids)
+        }
         Element::ColumnSet(element) => {
             validate_column_set(element)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)?;
@@ -3199,6 +3309,7 @@ fn validate_element(
             Ok(())
         }
         Element::CollapsiblePanel(element) => {
+            validate_collapsible_panel(element)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)?;
             let child_depth = next_container_depth(container_depth)?;
             for child in &element.elements {
@@ -3210,6 +3321,7 @@ fn validate_element(
             if element.elements.is_empty() {
                 return Err(ValidationError::EmptyInteractiveContainer);
             }
+            validate_interactive_container(element)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)?;
             let child_depth = next_container_depth(container_depth)?;
             for child in &element.elements {
@@ -3220,6 +3332,7 @@ fn validate_element(
         Element::Table(table) if root => validate_table(table),
         Element::Table(_) => Err(ValidationError::TableNestedOutsideBody),
         Element::Overflow(element) => {
+            validate_control(&element.control, "overflow", in_form)?;
             let options = element
                 .options
                 .as_deref()

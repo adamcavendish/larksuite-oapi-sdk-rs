@@ -1,0 +1,11 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "collapsible_panel",
+      "header": {"title": {"tag": "plain_text", "content": "Details"}},
+      "elements": [{"tag": "form", "name": "nested", "elements": []}]
+    }]
+  }
+}

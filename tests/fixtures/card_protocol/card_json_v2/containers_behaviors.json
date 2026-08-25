@@ -1,0 +1,54 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [
+      {
+        "tag": "collapsible_panel",
+        "element_id": "release_details",
+        "header": {
+          "title": {"tag": "plain_text", "content": "Release details"},
+          "background_color": "wathet",
+          "width": "auto_when_fold",
+          "vertical_align": "center",
+          "icon": {"tag": "standard_icon", "token": "right_small", "color": "blue", "size": "16px"},
+          "icon_position": "right",
+          "icon_expanded_angle": "-90"
+        },
+        "elements": [{"tag": "markdown", "content": "Deployment and rollback notes."}],
+        "expanded": false,
+        "background_color": "grey",
+        "border": {"color": "blue", "corner_radius": "12px"},
+        "direction": "horizontal",
+        "vertical_spacing": "8px",
+        "horizontal_spacing": "medium",
+        "padding": "4px 8px",
+        "margin": "-2px 0px"
+      },
+      {
+        "tag": "interactive_container",
+        "element_id": "release_action",
+        "elements": [{"tag": "div", "text": {"tag": "plain_text", "content": "Open release dashboard"}}],
+        "behaviors": [
+          {"type": "callback", "value": {"operation": "open_release"}},
+          {"type": "open_url", "default_url": "https://example.com/releases", "pc_url": "https://example.com/releases/desktop", "ios_url": "https://example.com/releases/ios", "android_url": "https://example.com/releases/android"}
+        ],
+        "width": "fill",
+        "height": "64px",
+        "direction": "horizontal",
+        "horizontal_align": "center",
+        "vertical_align": "center",
+        "background_style": "laser",
+        "has_border": true,
+        "border_color": "grey",
+        "corner_radius": "25%",
+        "padding": "4px 12px",
+        "margin": "0px",
+        "disabled": false,
+        "disabled_tips": {"tag": "plain_text", "content": "Unavailable"},
+        "hover_tips": {"tag": "plain_text", "content": "Open details"},
+        "confirm": {"title": {"tag": "plain_text", "content": "Continue?"}, "text": {"tag": "plain_text", "content": "Open the release dashboard?"}}
+      }
+    ]
+  }
+}
