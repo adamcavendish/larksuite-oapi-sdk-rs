@@ -102,6 +102,7 @@ impl Card {
             }
         }
         let body = self.body.as_ref().ok_or(ValidationError::MissingBody)?;
+        validate_body(body)?;
         let table_count = body
             .elements
             .iter()
@@ -1201,8 +1202,24 @@ pub enum ColumnTag {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ColumnWidth {
+    Auto,
     Weighted,
-    Custom(String),
+    /// A documented fixed pixel width. Validate it with [`Card::validate`]
+    /// before sending: Card JSON 2.0 accepts 16px through 600px.
+    Pixels(String),
+}
+
+/// The document's fixed chart aspect-ratio vocabulary.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ChartAspectRatio {
+    #[serde(rename = "1:1")]
+    OneToOne,
+    #[serde(rename = "2:1")]
+    TwoToOne,
+    #[serde(rename = "4:3")]
+    FourToThree,
+    #[serde(rename = "16:9")]
+    SixteenToNine,
 }
 impl Serialize for ColumnWidth {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -1210,8 +1227,9 @@ impl Serialize for ColumnWidth {
         S: serde::Serializer,
     {
         serializer.serialize_str(match self {
+            Self::Auto => "auto",
             Self::Weighted => "weighted",
-            Self::Custom(value) => value,
+            Self::Pixels(value) => value,
         })
     }
 }
@@ -1221,10 +1239,10 @@ impl<'de> Deserialize<'de> for ColumnWidth {
         D: serde::Deserializer<'de>,
     {
         let value = String::deserialize(deserializer)?;
-        Ok(if value == "weighted" {
-            Self::Weighted
-        } else {
-            Self::Custom(value)
+        Ok(match value.as_str() {
+            "auto" => Self::Auto,
+            "weighted" => Self::Weighted,
+            _ => Self::Pixels(value),
         })
     }
 }
@@ -1859,7 +1877,7 @@ pub struct Chart {
     pub element_id: Option<String>,
     pub chart_spec: JsonValue,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub aspect_ratio: Option<String>,
+    pub aspect_ratio: Option<ChartAspectRatio>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color_theme: Option<ChartColorTheme>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1960,6 +1978,48 @@ pub enum TableHeaderBackground {
     Grey,
     None,
 }
+
+/// The documented table row-height options, with a pixel escape hatch.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TableRowHeight {
+    Low,
+    Middle,
+    High,
+    Auto,
+    Pixels(String),
+}
+
+impl Serialize for TableRowHeight {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(match self {
+            Self::Low => "low",
+            Self::Middle => "middle",
+            Self::High => "high",
+            Self::Auto => "auto",
+            Self::Pixels(value) => value,
+        })
+    }
+}
+
+impl<'de> Deserialize<'de> for TableRowHeight {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = String::deserialize(deserializer)?;
+        Ok(match value.as_str() {
+            "low" => Self::Low,
+            "middle" => Self::Middle,
+            "high" => Self::High,
+            "auto" => Self::Auto,
+            _ => Self::Pixels(value),
+        })
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Table {
@@ -1969,7 +2029,7 @@ pub struct Table {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_size: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub row_height: Option<String>,
+    pub row_height: Option<TableRowHeight>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub row_max_height: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2468,6 +2528,22 @@ pub enum ValidationError {
     V2RequiresSharedCard,
     MissingBody,
     InvalidCardLink,
+    InvalidSpacing(String),
+    InvalidPadding(String),
+    InvalidMargin(String),
+    EmptyColumnSet,
+    InvalidColumnWidth(String),
+    InvalidColumnWeight(u8),
+    ColumnWidthRequiresFixedFlexMode,
+    InvalidDivWidth(String),
+    ImageSizeRequiresCropScale,
+    TooManyImagesInCombination {
+        mode: ImageCombinationMode,
+        count: usize,
+    },
+    InvalidPersonListLines,
+    InvalidChartSpec,
+    InvalidChartHeight(String),
     InvalidElementId(String),
     DuplicateElementId(String),
     TooManyElements(usize),
@@ -2488,7 +2564,12 @@ pub enum ValidationError {
     EmptyTableColumns,
     EmptyTableRows,
     TooManyTableColumns(usize),
+    DuplicateTableColumn(String),
     InvalidTablePageSize(u8),
+    InvalidTableColumnWidth(String),
+    InvalidTableRowHeight(String),
+    InvalidTableRowMaxHeight(String),
+    TableRowMaxHeightRequiresAutoRowHeight,
     UnknownTableRowColumn(String),
     DuplicateFormControlName(String),
     TooDeeplyNestedContainer(usize),
@@ -2502,6 +2583,34 @@ impl std::fmt::Display for ValidationError {
             Self::V2RequiresSharedCard => f.write_str("Card JSON v2 supports shared cards only"),
             Self::MissingBody => f.write_str("Card JSON v2 requires body.elements"),
             Self::InvalidCardLink => f.write_str("card_link requires url or all platform URLs"),
+            Self::InvalidSpacing(value) => write!(f, "invalid spacing {value:?}"),
+            Self::InvalidPadding(value) => write!(f, "invalid padding {value:?}"),
+            Self::InvalidMargin(value) => write!(f, "invalid margin {value:?}"),
+            Self::EmptyColumnSet => f.write_str("column_set requires at least one column"),
+            Self::InvalidColumnWidth(value) => write!(f, "invalid column width {value:?}"),
+            Self::InvalidColumnWeight(weight) => {
+                write!(
+                    f,
+                    "column weight requires width weighted and a value from 1 through 5, got {weight}"
+                )
+            }
+            Self::ColumnWidthRequiresFixedFlexMode => {
+                f.write_str("column width and weight require column_set flex_mode none")
+            }
+            Self::InvalidDivWidth(value) => write!(f, "invalid div width {value:?}"),
+            Self::ImageSizeRequiresCropScale => {
+                f.write_str("img size requires crop_center or crop_top scale_type")
+            }
+            Self::TooManyImagesInCombination { mode, count } => {
+                write!(
+                    f,
+                    "img_combination {mode:?} supports at most {} images, got {count}",
+                    image_combination_limit(*mode)
+                )
+            }
+            Self::InvalidPersonListLines => f.write_str("person_list lines must not be zero"),
+            Self::InvalidChartSpec => f.write_str("chart_spec must be a JSON object"),
+            Self::InvalidChartHeight(value) => write!(f, "invalid chart height {value:?}"),
             Self::InvalidElementId(id) => write!(f, "invalid element_id {id:?}"),
             Self::DuplicateElementId(id) => write!(f, "duplicate element_id {id:?}"),
             Self::TooManyElements(count) => {
@@ -2545,8 +2654,19 @@ impl std::fmt::Display for ValidationError {
             Self::TooManyTableColumns(count) => {
                 write!(f, "table supports at most 50 columns, got {count}")
             }
+            Self::DuplicateTableColumn(column) => write!(f, "duplicate table column {column:?}"),
             Self::InvalidTablePageSize(size) => {
                 write!(f, "table page_size must be 1 through 10, got {size}")
+            }
+            Self::InvalidTableColumnWidth(value) => {
+                write!(f, "invalid table column width {value:?}")
+            }
+            Self::InvalidTableRowHeight(value) => write!(f, "invalid table row_height {value:?}"),
+            Self::InvalidTableRowMaxHeight(value) => {
+                write!(f, "invalid table row_max_height {value:?}")
+            }
+            Self::TableRowMaxHeightRequiresAutoRowHeight => {
+                f.write_str("table row_max_height requires row_height auto")
             }
             Self::UnknownTableRowColumn(column) => {
                 write!(f, "table row has no declared column {column:?}")
@@ -2597,6 +2717,190 @@ fn validate_control(
     Ok(())
 }
 
+fn valid_pixels(value: &str, min: i16, max: i16) -> bool {
+    value
+        .strip_suffix("px")
+        .and_then(|value| value.parse::<i16>().ok())
+        .is_some_and(|value| (min..=max).contains(&value))
+}
+
+fn valid_box_pixels(value: &str, min: i16, max: i16) -> bool {
+    let values: Vec<_> = value.split_ascii_whitespace().collect();
+    (1..=4).contains(&values.len())
+        && values
+            .into_iter()
+            .all(|value| valid_pixels(value, min, max))
+}
+
+fn validate_spacing(spacing: &Spacing) -> Result<(), ValidationError> {
+    match spacing {
+        Spacing::Pixels(value) if !valid_pixels(value, 0, 99) => {
+            Err(ValidationError::InvalidSpacing(value.clone()))
+        }
+        _ => Ok(()),
+    }
+}
+
+fn validate_padding(value: Option<&str>) -> Result<(), ValidationError> {
+    if let Some(value) = value
+        && !valid_box_pixels(value, 0, 99)
+    {
+        return Err(ValidationError::InvalidPadding(value.to_string()));
+    }
+    Ok(())
+}
+
+fn validate_margin(value: Option<&str>) -> Result<(), ValidationError> {
+    if let Some(value) = value
+        && !valid_box_pixels(value, -99, 99)
+    {
+        return Err(ValidationError::InvalidMargin(value.to_string()));
+    }
+    Ok(())
+}
+
+fn validate_layout(
+    padding: Option<&str>,
+    margin: Option<&str>,
+    horizontal_spacing: Option<&Spacing>,
+    vertical_spacing: Option<&Spacing>,
+) -> Result<(), ValidationError> {
+    validate_padding(padding)?;
+    validate_margin(margin)?;
+    if let Some(spacing) = horizontal_spacing {
+        validate_spacing(spacing)?;
+    }
+    if let Some(spacing) = vertical_spacing {
+        validate_spacing(spacing)?;
+    }
+    Ok(())
+}
+
+fn validate_body(body: &Body) -> Result<(), ValidationError> {
+    validate_layout(
+        body.padding.as_deref(),
+        None,
+        body.horizontal_spacing.as_ref(),
+        body.vertical_spacing.as_ref(),
+    )
+}
+
+fn validate_column(column: &Column) -> Result<(), ValidationError> {
+    validate_layout(
+        column.padding.as_deref(),
+        column.margin.as_deref(),
+        column.horizontal_spacing.as_ref(),
+        column.vertical_spacing.as_ref(),
+    )?;
+    match &column.width {
+        Some(ColumnWidth::Pixels(value)) if !valid_pixels(value, 16, 600) => {
+            Err(ValidationError::InvalidColumnWidth(value.clone()))
+        }
+        _ if column
+            .weight
+            .is_some_and(|weight| !(1..=5).contains(&weight)) =>
+        {
+            Err(ValidationError::InvalidColumnWeight(
+                column.weight.unwrap_or_default(),
+            ))
+        }
+        _ if column.weight.is_some() && !matches!(column.width, Some(ColumnWidth::Weighted)) => {
+            Err(ValidationError::InvalidColumnWeight(
+                column.weight.unwrap_or_default(),
+            ))
+        }
+        _ => Ok(()),
+    }
+}
+
+fn validate_column_set(column_set: &ColumnSet) -> Result<(), ValidationError> {
+    if column_set.columns.is_empty() {
+        return Err(ValidationError::EmptyColumnSet);
+    }
+    validate_margin(column_set.margin.as_deref())?;
+    if let Some(spacing) = &column_set.horizontal_spacing {
+        validate_spacing(spacing)?;
+    }
+    for column in &column_set.columns {
+        validate_column(column)?;
+        if column_set
+            .flex_mode
+            .is_some_and(|mode| mode != ColumnFlexMode::None)
+            && (column.width.is_some() || column.weight.is_some())
+        {
+            return Err(ValidationError::ColumnWidthRequiresFixedFlexMode);
+        }
+    }
+    Ok(())
+}
+
+fn image_combination_limit(mode: ImageCombinationMode) -> usize {
+    match mode {
+        ImageCombinationMode::Double => 2,
+        ImageCombinationMode::Triple => 3,
+        ImageCombinationMode::Bisect => 6,
+        ImageCombinationMode::Trisect => 9,
+    }
+}
+
+fn validate_image_combination(element: &ImageCombination) -> Result<(), ValidationError> {
+    validate_margin(element.margin.as_deref())?;
+    let limit = image_combination_limit(element.combination_mode);
+    if element.img_list.len() > limit {
+        return Err(ValidationError::TooManyImagesInCombination {
+            mode: element.combination_mode,
+            count: element.img_list.len(),
+        });
+    }
+    Ok(())
+}
+
+fn validate_chart(chart: &Chart) -> Result<(), ValidationError> {
+    validate_margin(chart.margin.as_deref())?;
+    if !matches!(chart.chart_spec.as_value(), serde_json::Value::Object(_)) {
+        return Err(ValidationError::InvalidChartSpec);
+    }
+    if let Some(height) = &chart.height
+        && height != "auto"
+        && !valid_pixels(height, 1, 999)
+    {
+        return Err(ValidationError::InvalidChartHeight(height.clone()));
+    }
+    Ok(())
+}
+
+fn validate_div(div: &Div) -> Result<(), ValidationError> {
+    validate_margin(div.margin.as_deref())?;
+    if let Some(width) = &div.width
+        && width != "fill"
+        && width != "auto"
+        && !valid_pixels(width, 16, 999)
+    {
+        return Err(ValidationError::InvalidDivWidth(width.clone()));
+    }
+    Ok(())
+}
+
+fn validate_image(image: &Image) -> Result<(), ValidationError> {
+    validate_margin(image.margin.as_deref())?;
+    if image.size.is_some() && matches!(image.scale_type, Some(ImageScale::FitHorizontal)) {
+        return Err(ValidationError::ImageSizeRequiresCropScale);
+    }
+    Ok(())
+}
+
+fn validate_person(person: &Person) -> Result<(), ValidationError> {
+    validate_margin(person.margin.as_deref())
+}
+
+fn validate_person_list(person_list: &PersonList) -> Result<(), ValidationError> {
+    validate_margin(person_list.margin.as_deref())?;
+    if person_list.lines == Some(0) {
+        return Err(ValidationError::InvalidPersonListLines);
+    }
+    Ok(())
+}
+
 fn validate_options(options: &[SelectOption]) -> Result<(), ValidationError> {
     let mut values = BTreeSet::new();
     for option in options {
@@ -2617,17 +2921,43 @@ fn validate_table(table: &Table) -> Result<(), ValidationError> {
     if table.columns.len() > 50 {
         return Err(ValidationError::TooManyTableColumns(table.columns.len()));
     }
+    let mut columns = BTreeSet::new();
+    for column in &table.columns {
+        if !columns.insert(&column.name) {
+            return Err(ValidationError::DuplicateTableColumn(column.name.clone()));
+        }
+        if let Some(width) = &column.width
+            && width != "auto"
+            && !width.ends_with('%')
+            && !valid_pixels(width, 80, 600)
+        {
+            return Err(ValidationError::InvalidTableColumnWidth(width.clone()));
+        }
+    }
     if let Some(page_size) = table.page_size
         && !(1..=10).contains(&page_size)
     {
         return Err(ValidationError::InvalidTablePageSize(page_size));
     }
-    let columns: BTreeSet<_> = table.columns.iter().map(|column| &column.name).collect();
     for row in &table.rows {
         if let Some(column) = row.keys().find(|column| !columns.contains(*column)) {
             return Err(ValidationError::UnknownTableRowColumn(column.clone()));
         }
     }
+    if let Some(TableRowHeight::Pixels(height)) = &table.row_height
+        && !valid_pixels(height, 32, 124)
+    {
+        return Err(ValidationError::InvalidTableRowHeight(height.clone()));
+    }
+    if let Some(height) = &table.row_max_height
+        && !valid_pixels(height, 32, 999)
+    {
+        return Err(ValidationError::InvalidTableRowMaxHeight(height.clone()));
+    }
+    if table.row_max_height.is_some() && table.row_height != Some(TableRowHeight::Auto) {
+        return Err(ValidationError::TableRowMaxHeightRequiresAutoRowHeight);
+    }
+    validate_margin(table.margin.as_deref())?;
     Ok(())
 }
 
@@ -2747,22 +3077,38 @@ fn validate_element(
 ) -> Result<(), ValidationError> {
     *count += 1;
     match element {
-        Element::Div(element) => validate_optional_element_id(element.element_id.as_deref(), ids),
-        Element::Markdown(element) => {
+        Element::Div(element) => {
+            validate_div(element)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)
         }
-        Element::Img(element) => validate_optional_element_id(element.element_id.as_deref(), ids),
+        Element::Markdown(element) => {
+            validate_margin(element.margin.as_deref())?;
+            validate_optional_element_id(element.element_id.as_deref(), ids)
+        }
+        Element::Img(element) => {
+            validate_image(element)?;
+            validate_optional_element_id(element.element_id.as_deref(), ids)
+        }
         Element::ImgCombination(element) => {
+            validate_image_combination(element)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)
         }
         Element::Person(element) => {
+            validate_person(element)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)
         }
         Element::PersonList(element) => {
+            validate_person_list(element)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)
         }
-        Element::Chart(element) => validate_optional_element_id(element.element_id.as_deref(), ids),
-        Element::Hr(element) => validate_optional_element_id(element.element_id.as_deref(), ids),
+        Element::Chart(element) => {
+            validate_chart(element)?;
+            validate_optional_element_id(element.element_id.as_deref(), ids)
+        }
+        Element::Hr(element) => {
+            validate_margin(element.margin.as_deref())?;
+            validate_optional_element_id(element.element_id.as_deref(), ids)
+        }
         Element::Button(element) => {
             if in_form && element.form_action_type.is_some() && !element.behaviors.is_empty() {
                 return Err(ValidationError::ButtonBehaviorConflict);
@@ -2777,6 +3123,7 @@ fn validate_element(
         }
         Element::Input(element) => validate_optional_element_id(element.element_id.as_deref(), ids),
         Element::ColumnSet(element) => {
+            validate_column_set(element)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)?;
             let child_depth = next_container_depth(container_depth)?;
             for column in &element.columns {

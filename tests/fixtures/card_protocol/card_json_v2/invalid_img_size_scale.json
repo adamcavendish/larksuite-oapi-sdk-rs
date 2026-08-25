@@ -1,0 +1,9 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [
+      {"tag": "img", "img_key": "img_hero", "alt": {"tag": "plain_text", "content": "Hero"}, "scale_type": "fit_horizontal", "size": "large"}
+    ]
+  }
+}

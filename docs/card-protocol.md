@@ -83,3 +83,9 @@ but is not yet eligible to be marked complete: its optional fields, validation,
 and exact fixtures must still be covered. The documented Card-Builder-only
 recycling container is recorded as a known divergence because it has no
 handwritten Card JSON tag.
+
+`implemented` is reserved for a component whose field-level inventory, valid
+fixture, invalid constraint fixture where applicable, and direct serde
+round-trip coverage are all present. A complete component group does not imply
+that the incompatible Card JSON 2.0 root or unrelated interaction and update
+surfaces are complete.
