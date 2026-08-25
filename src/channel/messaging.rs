@@ -1,7 +1,6 @@
 use std::path::Path;
 
-use serde::Serialize;
-
+use crate::card::SendReadyCard;
 use crate::service::common::{DownloadResp, EmptyResp};
 use crate::service::im::v1::{
     CreateFileResp, CreateImageResp, CreateMessageReqBody, CreateMessageResp, FileResource,
@@ -194,7 +193,7 @@ impl<'a> ChannelMessaging<'a> {
     pub async fn edit_card(
         &self,
         message_id: &str,
-        card: impl Serialize,
+        card: &impl SendReadyCard,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         let body = PatchMessageReqBody::interactive_card(card)?;

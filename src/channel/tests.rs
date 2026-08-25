@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Instant;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use crate::card::v1::{Card, CardDocument, Header};
 #[cfg(feature = "channel")]
 use crate::event::{CardActionTriggerResponse, EventDispatcher, EventReq};
 use crate::events::common::UserId;
@@ -59,7 +60,11 @@ async fn deprecated_channel_messaging_methods_compile(
         .await;
     let _ = channel.edit_text("om_message", "hello", option).await;
     let _ = channel
-        .edit_card("om_message", serde_json::json!({}), option)
+        .edit_card(
+            "om_message",
+            &CardDocument::new(Card::new()).expect("empty Card JSON 1.0 is valid"),
+            option,
+        )
         .await;
     let _ = channel
         .send_markdown_chunks(&target, "hello", 20_000, option)
@@ -1135,7 +1140,8 @@ async fn channel_edit_card_uses_message_patch_contract() {
     let response = messaging
         .edit_card(
             "om_card",
-            serde_json::json!({ "header": { "title": "Updated" } }),
+            &CardDocument::new(Card::new().header(Header::new("Updated")))
+                .expect("test Card JSON 1.0 document must be valid"),
             &RequestOption::default(),
         )
         .await

@@ -2,6 +2,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+use crate::card::v1::{Card, CardDocument, Header};
 use crate::{LarkClient, RequestOption};
 
 use super::{SendInput, SendTarget, StreamUpdate};
@@ -199,7 +200,7 @@ async fn public_update_chunk_and_stream_operations_preserve_their_contracts() {
     messaging
         .edit_card(
             "om_card",
-            serde_json::json!({ "header": "updated" }),
+            &CardDocument::new(Card::new().header(Header::new("updated"))).unwrap(),
             &option,
         )
         .await

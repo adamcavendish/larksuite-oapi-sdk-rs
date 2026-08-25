@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
 
-use crate::JsonValue;
+use crate::{JsonValue, LarkError};
 
 pub use super::TemplateColor;
 pub use super::v1::Color;
@@ -126,6 +126,44 @@ impl Card {
 impl Default for Card {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// An immutable Card JSON 2.0 document that has passed protocol validation.
+#[derive(Debug, Clone)]
+pub struct CardDocument {
+    card: Card,
+}
+
+impl CardDocument {
+    /// Validate a Card JSON 2.0 document before an outbound Card transport uses it.
+    pub fn new(card: Card) -> Result<Self, ValidationError> {
+        card.validate()?;
+        Ok(Self { card })
+    }
+
+    /// Inspect the validated Card JSON 2.0 document.
+    pub fn card(&self) -> &Card {
+        &self.card
+    }
+
+    /// Return to an editable Card JSON 2.0 document.
+    ///
+    /// The returned Card must be validated again before it can be sent.
+    pub fn into_card(self) -> Card {
+        self.card
+    }
+
+    pub(crate) fn encoded_content(&self) -> Result<String, LarkError> {
+        serde_json::to_string(&self.card).map_err(LarkError::Json)
+    }
+}
+
+impl TryFrom<Card> for CardDocument {
+    type Error = ValidationError;
+
+    fn try_from(card: Card) -> Result<Self, Self::Error> {
+        Self::new(card)
     }
 }
 

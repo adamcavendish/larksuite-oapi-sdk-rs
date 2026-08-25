@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
-use serde::Serialize;
-
+use crate::card::SendReadyCard;
 use crate::event::EventDispatcher;
 use crate::events::im::P2MessageReceiveV1;
 use crate::service::common::{DownloadResp, EmptyResp};
@@ -151,7 +150,7 @@ impl<'a> Channel<'a> {
     pub async fn edit_card(
         &self,
         message_id: &str,
-        card: impl Serialize,
+        card: &impl SendReadyCard,
         option: &RequestOption,
     ) -> Result<EmptyResp, LarkError> {
         self.client
