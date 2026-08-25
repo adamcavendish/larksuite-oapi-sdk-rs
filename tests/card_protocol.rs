@@ -380,6 +380,7 @@ struct Surface {
     status: String,
     sources: Vec<String>,
     remediation: Option<String>,
+    cross_check_note: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -733,13 +734,35 @@ fn cardkit_v1_document_and_content_stream_are_traceable() {
         .collect();
     assert_eq!(
         surfaces,
-        BTreeSet::from(["card_json_document", "content_stream"])
+        BTreeSet::from([
+            "batch_update",
+            "card_json_document",
+            "content_stream",
+            "element_create",
+            "element_delete",
+            "element_patch",
+            "element_update",
+            "settings",
+            "template_instance",
+        ])
     );
     assert!(
         manifest
             .surfaces
             .iter()
             .all(|surface| surface.status == "implemented")
+    );
+    let template_instance = manifest
+        .surfaces
+        .iter()
+        .find(|surface| surface.id == "template_instance")
+        .expect("template instance surface");
+    assert_eq!(template_instance.sources, ["official_docs"]);
+    assert!(
+        template_instance
+            .cross_check_note
+            .as_deref()
+            .is_some_and(|note| note.contains("does not expose Card Instance"))
     );
 
     for entry in &manifest.fixtures {
@@ -764,6 +787,80 @@ fn cardkit_v1_document_and_content_stream_are_traceable() {
                 assert_eq!(value["sequence"], 1);
                 assert!(value["uuid"].as_str().is_some_and(|uuid| !uuid.is_empty()));
                 assert!(value["content"].as_str().is_some());
+            }
+            "settings" => {
+                let settings: Value = serde_json::from_str(
+                    value["settings"]
+                        .as_str()
+                        .expect("CardKit settings must be escaped JSON"),
+                )
+                .expect("CardKit settings must decode");
+                assert!(settings.get(entry.expected_tags[0].as_str()).is_some());
+                assert!(settings.get(entry.expected_tags[1].as_str()).is_some());
+                assert!(
+                    value["sequence"]
+                        .as_i64()
+                        .is_some_and(|sequence| sequence > 0)
+                );
+            }
+            "element_create" => {
+                assert_eq!(value["type"], entry.expected_tags[0]);
+                let elements: Vec<Value> = serde_json::from_str(
+                    value["elements"]
+                        .as_str()
+                        .expect("CardKit elements must be escaped JSON"),
+                )
+                .expect("CardKit elements must decode");
+                assert_eq!(elements[0]["tag"], entry.expected_tags[1]);
+            }
+            "element_update" => {
+                let element: Value = serde_json::from_str(
+                    value["element"]
+                        .as_str()
+                        .expect("CardKit element update must be escaped JSON"),
+                )
+                .expect("CardKit element update must decode");
+                assert_eq!(element["tag"], entry.expected_tags[0]);
+            }
+            "element_delete" => {
+                assert!(value["uuid"].as_str().is_some_and(|uuid| !uuid.is_empty()));
+                assert!(
+                    value["sequence"]
+                        .as_i64()
+                        .is_some_and(|sequence| sequence > 0)
+                );
+            }
+            "element_patch" => {
+                let patch: Value = serde_json::from_str(
+                    value["partial_element"]
+                        .as_str()
+                        .expect("CardKit element patch must be escaped JSON"),
+                )
+                .expect("CardKit element patch must decode");
+                assert!(patch.is_object());
+                assert!(patch.get("tag").is_none());
+            }
+            "batch_update" => {
+                let actions: Vec<Value> = serde_json::from_str(
+                    value["actions"]
+                        .as_str()
+                        .expect("CardKit actions must be escaped JSON"),
+                )
+                .expect("CardKit actions must decode");
+                let action_names: Vec<String> = actions
+                    .iter()
+                    .map(|action| action["action"].as_str().expect("action name").to_string())
+                    .collect();
+                assert_eq!(action_names, entry.expected_tags);
+                assert!(actions.iter().all(|action| action["params"].is_object()));
+            }
+            "template_instance" => {
+                assert!(
+                    value["template_id"]
+                        .as_str()
+                        .is_some_and(|template_id| !template_id.is_empty())
+                );
+                assert!(value["template_variable"].is_object());
             }
             other => panic!("unknown CardKit fixture kind {other}"),
         }

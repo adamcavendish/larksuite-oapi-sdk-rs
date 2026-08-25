@@ -58,7 +58,6 @@ async fn cardkit_card_by_query_smoke() {
         http_response(200, value_body),
         http_response(200, empty_body),
         http_response(200, empty_body),
-        http_response(200, value_body),
         http_response(200, empty_body),
     ])
     .await;
@@ -67,7 +66,6 @@ async fn cardkit_card_by_query_smoke() {
     let create_body = CreateCardReqBody::default();
     let update_body = UpdateCardReqBody::default();
     let batch_body = BatchUpdateCardReqBody::default();
-    let convert_body = IdConvertCardReqBody::default();
     let settings_body = SettingsCardReqBody::default();
 
     let create_resp = client
@@ -97,15 +95,6 @@ async fn cardkit_card_by_query_smoke() {
         )
         .await
         .unwrap();
-    let convert_resp = client
-        .cardkit()
-        .card
-        .id_convert_by_query(
-            &IdConvertCardkitCardQuery::new(&convert_body),
-            &RequestOption::default(),
-        )
-        .await
-        .unwrap();
     let settings_resp = client
         .cardkit()
         .card
@@ -119,13 +108,11 @@ async fn cardkit_card_by_query_smoke() {
     assert!(create_resp.success());
     assert!(update_resp.success());
     assert!(batch_resp.success());
-    assert!(convert_resp.success());
     assert!(settings_resp.success());
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/cardkit/v1/cards "));
     assert!(request.contains("PUT /open-apis/cardkit/v1/cards/card-1 "));
     assert!(request.contains("POST /open-apis/cardkit/v1/cards/card-1/batch_update "));
-    assert!(request.contains("POST /open-apis/cardkit/v1/cards/id_convert "));
     assert!(request.contains("PATCH /open-apis/cardkit/v1/cards/card-1/settings "));
 }
 

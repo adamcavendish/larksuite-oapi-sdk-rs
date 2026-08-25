@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	defaultCatalog = "tools/go_service_catalog.json"
-	defaultOutput  = "tools/go_rust_service_parity.json"
+	defaultCatalog   = "tools/go_service_catalog.json"
+	defaultOmissions = "tools/go_rust_service_parity_omissions.json"
+	defaultOutput    = "tools/go_rust_service_parity.json"
 )
 
 type goCatalog struct {
@@ -64,6 +65,29 @@ type metadataMismatch struct {
 	Bridge   []rustEndpoint `json:"bridge"`
 }
 
+type omissionCatalog struct {
+	SchemaVersion int               `json:"schema_version"`
+	Omissions     []serviceOmission `json:"omissions"`
+}
+
+type serviceOmission struct {
+	ResourceFile string `json:"resource_file"`
+	Receiver     string `json:"receiver"`
+	Operation    string `json:"operation"`
+	Reason       string `json:"reason"`
+	Source       string `json:"source"`
+}
+
+func (omission serviceOmission) identity() string {
+	return omission.ResourceFile + ":" + omission.Receiver + "." + omission.Operation
+}
+
+type omittedContract struct {
+	Contract goEndpoint `json:"contract"`
+	Reason   string     `json:"reason"`
+	Source   string     `json:"source"`
+}
+
 type paritySummary struct {
 	GoContracts                    int `json:"go_contracts"`
 	RustDirectContracts            int `json:"rust_direct_contracts"`
@@ -72,6 +96,7 @@ type paritySummary struct {
 	BridgeMatches                  int `json:"bridge_matches"`
 	MetadataMismatches             int `json:"metadata_mismatches"`
 	MissingContracts               int `json:"missing_contracts"`
+	IntentionalOmissions           int `json:"intentional_omissions"`
 	UnparsedRustRequests           int `json:"unparsed_rust_requests"`
 }
 
@@ -81,6 +106,7 @@ type parityReport struct {
 	Summary              paritySummary         `json:"summary"`
 	MetadataMismatches   []metadataMismatch    `json:"metadata_mismatches"`
 	MissingContracts     []goEndpoint          `json:"missing_contracts"`
+	IntentionalOmissions []omittedContract     `json:"intentional_omissions"`
 	UnparsedRustRequests []unparsedRustRequest `json:"unparsed_rust_requests"`
 }
 
@@ -97,12 +123,13 @@ type sourceRange struct {
 
 func main() {
 	goCatalogPath := flag.String("go-catalog", defaultCatalog, "path to the generated Go service contract catalog")
+	omissionsPath := flag.String("omissions", defaultOmissions, "path to documented intentional Go contract omissions")
 	rustSDK := flag.String("rust-sdk", ".", "path to the Rust SDK checkout")
 	output := flag.String("output", defaultOutput, "generated parity report path")
 	check := flag.Bool("check", false, "fail when the generated report is stale")
 	flag.Parse()
 
-	generated, err := generate(*goCatalogPath, *rustSDK)
+	generated, err := generate(*goCatalogPath, *omissionsPath, *rustSDK)
 	if err != nil {
 		fail(err)
 	}
@@ -130,7 +157,7 @@ func fail(err error) {
 	os.Exit(1)
 }
 
-func generate(goCatalogPath, rustSDK string) ([]byte, error) {
+func generate(goCatalogPath, omissionsPath, rustSDK string) ([]byte, error) {
 	goCatalogBytes, err := os.ReadFile(goCatalogPath)
 	if err != nil {
 		return nil, fmt.Errorf("read Go catalog: %w", err)
@@ -141,6 +168,10 @@ func generate(goCatalogPath, rustSDK string) ([]byte, error) {
 	}
 	if catalog.EndpointCount != len(catalog.Endpoints) {
 		return nil, fmt.Errorf("Go catalog endpoint count %d does not match %d entries", catalog.EndpointCount, len(catalog.Endpoints))
+	}
+	omissions, err := loadOmissions(omissionsPath)
+	if err != nil {
+		return nil, err
 	}
 
 	direct, unparsed, err := rustServiceContracts(rustSDK)
@@ -155,7 +186,7 @@ func generate(goCatalogPath, rustSDK string) ([]byte, error) {
 	directByRoute := contractsByRoute(direct)
 	bridgeByRoute := contractsByRoute(bridge)
 	report := parityReport{
-		SchemaVersion:   2,
+		SchemaVersion:   3,
 		GoCatalogSHA256: sha256Hex(goCatalogBytes),
 		Summary: paritySummary{
 			GoContracts:                    len(catalog.Endpoints),
@@ -165,7 +196,17 @@ func generate(goCatalogPath, rustSDK string) ([]byte, error) {
 		UnparsedRustRequests: unparsed,
 	}
 
+	matchedOmissions := make(map[string]bool, len(omissions))
 	for _, endpoint := range catalog.Endpoints {
+		if omission, ok := omissions[endpoint.identity()]; ok {
+			report.IntentionalOmissions = append(report.IntentionalOmissions, omittedContract{
+				Contract: endpoint,
+				Reason:   omission.Reason,
+				Source:   omission.Source,
+			})
+			matchedOmissions[endpoint.identity()] = true
+			continue
+		}
 		route := routeKey(endpoint.Method, endpoint.Path)
 		directMatches := directByRoute[route]
 		bridgeMatches := bridgeByRoute[route]
@@ -187,15 +228,24 @@ func generate(goCatalogPath, rustSDK string) ([]byte, error) {
 		}
 		report.MissingContracts = append(report.MissingContracts, endpoint)
 	}
+	for identity := range omissions {
+		if !matchedOmissions[identity] {
+			return nil, fmt.Errorf("intentional omission %s is not in the Go catalog", identity)
+		}
+	}
 
 	report.Summary.MetadataMismatches = len(report.MetadataMismatches)
 	report.Summary.MissingContracts = len(report.MissingContracts)
+	report.Summary.IntentionalOmissions = len(report.IntentionalOmissions)
 	report.Summary.UnparsedRustRequests = len(report.UnparsedRustRequests)
 	sort.Slice(report.MetadataMismatches, func(i, j int) bool {
 		return report.MetadataMismatches[i].Contract.identity() < report.MetadataMismatches[j].Contract.identity()
 	})
 	sort.Slice(report.MissingContracts, func(i, j int) bool {
 		return report.MissingContracts[i].identity() < report.MissingContracts[j].identity()
+	})
+	sort.Slice(report.IntentionalOmissions, func(i, j int) bool {
+		return report.IntentionalOmissions[i].Contract.identity() < report.IntentionalOmissions[j].Contract.identity()
 	})
 	sort.Slice(report.UnparsedRustRequests, func(i, j int) bool {
 		left := report.UnparsedRustRequests[i]
@@ -214,6 +264,32 @@ func generate(goCatalogPath, rustSDK string) ([]byte, error) {
 		return nil, fmt.Errorf("encode parity report: %w", err)
 	}
 	return output.Bytes(), nil
+}
+
+func loadOmissions(path string) (map[string]serviceOmission, error) {
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read intentional omissions: %w", err)
+	}
+	var catalog omissionCatalog
+	if err := json.Unmarshal(contents, &catalog); err != nil {
+		return nil, fmt.Errorf("decode intentional omissions: %w", err)
+	}
+	if catalog.SchemaVersion != 1 {
+		return nil, fmt.Errorf("intentional omissions schema version %d is unsupported", catalog.SchemaVersion)
+	}
+	omissions := make(map[string]serviceOmission, len(catalog.Omissions))
+	for _, omission := range catalog.Omissions {
+		if omission.ResourceFile == "" || omission.Receiver == "" || omission.Operation == "" || omission.Reason == "" || omission.Source == "" {
+			return nil, errors.New("intentional omissions require resource_file, receiver, operation, reason, and source")
+		}
+		identity := omission.identity()
+		if _, exists := omissions[identity]; exists {
+			return nil, fmt.Errorf("duplicate intentional omission %s", identity)
+		}
+		omissions[identity] = omission
+	}
+	return omissions, nil
 }
 
 func rustServiceContracts(rustSDK string) ([]rustEndpoint, []unparsedRustRequest, error) {

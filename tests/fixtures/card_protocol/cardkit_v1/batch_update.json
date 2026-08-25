@@ -1,0 +1,5 @@
+{
+  "uuid": "batch-1",
+  "sequence": 6,
+  "actions": "[{\"action\":\"partial_update_setting\",\"params\":{\"settings\":{\"config\":{\"streaming_mode\":true}}}},{\"action\":\"add_elements\",\"params\":{\"type\":\"append\",\"elements\":[{\"tag\":\"markdown\",\"element_id\":\"stream_content\",\"content\":\"Preparing\"}]}},{\"action\":\"delete_elements\",\"params\":{\"element_ids\":[\"old_content\"]}},{\"action\":\"partial_update_element\",\"params\":{\"element_id\":\"stream_content\",\"partial_element\":{\"content\":\"Complete\"}}},{\"action\":\"update_element\",\"params\":{\"element_id\":\"stream_content\",\"element\":{\"tag\":\"markdown\",\"element_id\":\"stream_content\",\"content\":\"Complete\"}}}]"
+}

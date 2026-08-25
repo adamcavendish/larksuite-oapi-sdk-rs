@@ -70,12 +70,6 @@ pub struct BatchUpdateCardReqBody {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct IdConvertCardReqBody {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub message_id: Option<String>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SettingsCardReqBody {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub settings: Option<String>,
@@ -105,6 +99,14 @@ pub struct UpdateCardElementReqBody {
     pub uuid: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub element: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeleteCardElementReqBody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sequence: Option<i32>,
 }
@@ -143,7 +145,6 @@ impl_resp!(CreateCardInstanceResp, CardInstanceData);
 impl_resp_v2!(CreateCardResp, CreateCardRespData);
 impl_resp_v2!(UpdateCardResp, ());
 impl_resp_v2!(BatchUpdateCardResp, ());
-impl_resp_v2!(IdConvertCardResp, IdConvertCardRespData);
 impl_resp_v2!(SettingsCardResp, ());
 impl_resp_v2!(CreateCardElementResp, ());
 impl_resp_v2!(UpdateCardElementResp, ());
@@ -216,18 +217,6 @@ impl<'a> BatchUpdateCardQuery<'a> {
 
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
-pub struct IdConvertCardQuery<'a> {
-    pub body: &'a IdConvertCardReqBody,
-}
-
-impl<'a> IdConvertCardQuery<'a> {
-    pub fn new(body: &'a IdConvertCardReqBody) -> Self {
-        Self { body }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-#[non_exhaustive]
 pub struct SettingsCardQuery<'a> {
     pub card_id: &'a str,
     pub body: &'a SettingsCardReqBody,
@@ -275,6 +264,7 @@ impl<'a> UpdateCardElementQuery<'a> {
 pub struct DeleteCardElementQuery<'a> {
     pub card_id: &'a str,
     pub element_id: &'a str,
+    pub body: Option<&'a DeleteCardElementReqBody>,
 }
 
 impl<'a> DeleteCardElementQuery<'a> {
@@ -282,6 +272,20 @@ impl<'a> DeleteCardElementQuery<'a> {
         Self {
             card_id,
             element_id,
+            body: None,
+        }
+    }
+
+    /// Include the documented idempotency and ordering metadata in this delete.
+    pub fn with_body(
+        card_id: &'a str,
+        element_id: &'a str,
+        body: &'a DeleteCardElementReqBody,
+    ) -> Self {
+        Self {
+            card_id,
+            element_id,
+            body: Some(body),
         }
     }
 }
@@ -331,12 +335,6 @@ pub struct CreateCardRespData {
     pub card_id: Option<String>,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct IdConvertCardRespData {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub card_id: Option<String>,
-}
 // ── Resources ──
 
 pub struct CardInstanceResource<'a> {
@@ -486,32 +484,6 @@ impl CardResource<'_> {
         .await
     }
 
-    pub async fn id_convert(
-        &self,
-        body: &IdConvertCardReqBody,
-        option: &RequestOption,
-    ) -> Result<IdConvertCardResp, LarkError> {
-        self.id_convert_by_query(&IdConvertCardQuery::new(body), option)
-            .await
-    }
-
-    pub async fn id_convert_by_query(
-        &self,
-        query: &IdConvertCardQuery<'_>,
-        option: &RequestOption,
-    ) -> Result<IdConvertCardResp, LarkError> {
-        RestRequest::new(
-            self.config,
-            http::Method::POST,
-            "/open-apis/cardkit/v1/cards/id_convert",
-            vec![AccessTokenType::Tenant],
-            option,
-        )
-        .json_body(query.body)?
-        .send_v2_response::<IdConvertCardRespData, IdConvertCardResp>()
-        .await
-    }
-
     pub async fn settings(
         &self,
         card_id: &str,
@@ -619,6 +591,21 @@ impl CardElementResource<'_> {
             .await
     }
 
+    /// Delete an element with the documented idempotency and ordering metadata.
+    pub async fn delete_with_body(
+        &self,
+        card_id: &str,
+        element_id: &str,
+        body: &DeleteCardElementReqBody,
+        option: &RequestOption,
+    ) -> Result<DeleteCardElementResp, LarkError> {
+        self.delete_by_query(
+            &DeleteCardElementQuery::with_body(card_id, element_id, body),
+            option,
+        )
+        .await
+    }
+
     pub async fn delete_by_query(
         &self,
         query: &DeleteCardElementQuery<'_>,
@@ -628,15 +615,21 @@ impl CardElementResource<'_> {
             "/open-apis/cardkit/v1/cards/{}/elements/{}",
             query.card_id, query.element_id
         );
-        RestRequest::new(
+        let request = RestRequest::new(
             self.config,
             http::Method::DELETE,
             path,
             vec![AccessTokenType::Tenant],
             option,
-        )
-        .send_v2_response::<(), DeleteCardElementResp>()
-        .await
+        );
+        let request = if let Some(body) = query.body {
+            request.json_body(body)?
+        } else {
+            request
+        };
+        request
+            .send_v2_response::<(), DeleteCardElementResp>()
+            .await
     }
 
     pub async fn patch(
