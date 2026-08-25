@@ -1,0 +1,9 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [
+      {"tag": "table", "columns": [{"name": "service"}], "rows": [{"service": "API"}], "row_height": "middle", "row_max_height": "200px"}
+    ]
+  }
+}

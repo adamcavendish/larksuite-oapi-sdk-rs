@@ -139,6 +139,67 @@ const REQUIRED_V2_FIELDS: &[&str] = &[
     "button.form_action_type",
     "input.name",
     "input.required",
+    "column_set.columns",
+    "column_set.flex_mode",
+    "column_set.horizontal_spacing",
+    "column_set.horizontal_align",
+    "column_set.background_style",
+    "column_set.action",
+    "column.width",
+    "column.weight",
+    "column.vertical_align",
+    "column.direction",
+    "column.horizontal_spacing",
+    "column.vertical_spacing",
+    "column.padding",
+    "column.background_style",
+    "column.action",
+    "column.elements",
+    "div.text",
+    "div.fields",
+    "div.icon",
+    "div.width",
+    "markdown.content",
+    "markdown.text_size",
+    "markdown.text_align",
+    "markdown.icon",
+    "img.img_key",
+    "img.alt",
+    "img.title",
+    "img.scale_type",
+    "img.size",
+    "img.corner_radius",
+    "img.transparent",
+    "img.preview",
+    "img_combination.combination_mode",
+    "img_combination.img_list",
+    "img_combination.combination_transparent",
+    "img_combination.corner_radius",
+    "person.user_id",
+    "person.size",
+    "person.show_avatar",
+    "person.show_name",
+    "person.style",
+    "person_list.persons",
+    "person_list.show_name",
+    "person_list.show_avatar",
+    "person_list.size",
+    "person_list.lines",
+    "person_list.drop_invalid_user_id",
+    "person_list.icon",
+    "person_list.ud_icon",
+    "chart.chart_spec",
+    "chart.aspect_ratio",
+    "chart.color_theme",
+    "chart.height",
+    "chart.preview",
+    "table.columns",
+    "table.rows",
+    "table.page_size",
+    "table.row_height",
+    "table.row_max_height",
+    "table.freeze_first_column",
+    "table.header_style",
 ];
 
 #[derive(Debug, Deserialize)]
@@ -540,7 +601,20 @@ fn card_json_v2_fixtures_are_exact_protocol_contracts() {
         );
 
         match entry.kind.as_str() {
-            "outbound_card" => assert!(entry.expected_constraints.is_empty()),
+            "outbound_card" => {
+                use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                assert!(entry.expected_constraints.is_empty());
+                let card: card::Card = serde_json::from_value(value.clone())
+                    .expect("outbound fixture must deserialize into the typed v2 AST");
+                card.validate()
+                    .expect("outbound fixture must satisfy v2 validation");
+                assert_eq!(
+                    card.to_json(),
+                    value.clone().into(),
+                    "outbound fixture must round-trip without changing the wire shape"
+                );
+            }
             "invalid_card" => {
                 assert!(!entry.expected_constraints.is_empty());
                 for constraint in &entry.expected_constraints {
@@ -578,6 +652,39 @@ fn card_json_v2_fixtures_are_exact_protocol_contracts() {
                                     .as_str()
                                     .is_some_and(|id| !id.starts_with(char::is_alphabetic))
                             }));
+                        }
+                        "img_combination_limit" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::TooManyImagesInCombination {
+                                    mode: card::ImageCombinationMode::Double,
+                                    count: 3,
+                                })
+                            );
+                        }
+                        "img_size_requires_crop_scale" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::ImageSizeRequiresCropScale)
+                            );
+                        }
+                        "table_row_max_height_requires_auto" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::TableRowMaxHeightRequiresAutoRowHeight)
+                            );
                         }
                         other => panic!("unknown v2 fixture constraint {other}"),
                     }
@@ -670,7 +777,7 @@ fn modern_v2_root_matches_complete_fixture() {
                 .element(card::Element::ColumnSet(
                     card::ColumnSet::new()
                         .element_id("metrics_cols")
-                        .flex_mode(card::ColumnFlexMode::Stretch)
+                        .flex_mode(card::ColumnFlexMode::None)
                         .column(
                             card::Column::new()
                                 .width(card::ColumnWidth::Weighted)
@@ -717,6 +824,118 @@ fn modern_v2_root_matches_complete_fixture() {
         fixture.into(),
         "complete Card JSON 2.0 fixture must round-trip"
     );
+}
+
+#[test]
+fn modern_v2_display_layout_fixture_round_trips_and_validates() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let fixture = fixture("card_json_v2/display_layout.json");
+    let card: card::Card = serde_json::from_value(fixture.clone())
+        .expect("deserialize complete Card JSON 2.0 display/layout fixture");
+    card.validate()
+        .expect("display/layout fixture satisfies protocol constraints");
+    assert_eq!(
+        card.to_json(),
+        fixture.into(),
+        "display/layout fixture must preserve every documented field"
+    );
+}
+
+#[test]
+fn modern_v2_display_layout_validation_rejects_documented_ranges() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let shared_card = |element| {
+        card::Card::new()
+            .config(card::Config::new().update_multi())
+            .body(card::Body::new().element(element))
+    };
+
+    let mut person_list = card::PersonList::new();
+    person_list.lines = Some(0);
+    assert_eq!(
+        shared_card(card::Element::PersonList(person_list)).validate(),
+        Err(card::ValidationError::InvalidPersonListLines)
+    );
+
+    let column_set = card::ColumnSet::new().column(
+        card::Column::new()
+            .width(card::ColumnWidth::Pixels("15px".into()))
+            .element(card::Element::Markdown(card::Markdown::new("too narrow"))),
+    );
+    assert_eq!(
+        shared_card(card::Element::ColumnSet(column_set)).validate(),
+        Err(card::ValidationError::InvalidColumnWidth("15px".into()))
+    );
+
+    let default_weight_column = card::ColumnSet::new().column(
+        card::Column::new()
+            .width(card::ColumnWidth::Weighted)
+            .element(card::Element::Markdown(card::Markdown::new(
+                "default weight",
+            ))),
+    );
+    shared_card(card::Element::ColumnSet(default_weight_column))
+        .validate()
+        .expect("weighted columns may use the documented default weight");
+
+    let chart = card::Chart::new(serde_json::json!([]).into());
+    assert_eq!(
+        shared_card(card::Element::Chart(chart)).validate(),
+        Err(card::ValidationError::InvalidChartSpec)
+    );
+
+    let table = card::Table::new()
+        .column(card::TableColumn::new("service"))
+        .row(BTreeMap::from([(
+            "service".into(),
+            serde_json::json!("API").into(),
+        )]));
+    let mut table = table;
+    table.row_height = Some(card::TableRowHeight::Pixels("12px".into()));
+    assert_eq!(
+        shared_card(card::Element::Table(table)).validate(),
+        Err(card::ValidationError::InvalidTableRowHeight("12px".into()))
+    );
+
+    let mut image = card::Image::new("img", card::Text::plain("Image"));
+    image.scale_type = Some(card::ImageScale::FitHorizontal);
+    image.size = Some("large".into());
+    assert_eq!(
+        shared_card(card::Element::Img(image)).validate(),
+        Err(card::ValidationError::ImageSizeRequiresCropScale)
+    );
+
+    let table = card::Table::new()
+        .column(card::TableColumn::new("service"))
+        .row(BTreeMap::from([(
+            "service".into(),
+            serde_json::json!("API").into(),
+        )]));
+    let mut table = table;
+    table.row_height = Some(card::TableRowHeight::Middle);
+    table.row_max_height = Some("200px".into());
+    assert_eq!(
+        shared_card(card::Element::Table(table)).validate(),
+        Err(card::ValidationError::TableRowMaxHeightRequiresAutoRowHeight)
+    );
+
+    let column_set = card::ColumnSet::new()
+        .flex_mode(card::ColumnFlexMode::Flow)
+        .column(
+            card::Column::new()
+                .width(card::ColumnWidth::Auto)
+                .element(card::Element::Markdown(card::Markdown::new("flow"))),
+        );
+    assert_eq!(
+        shared_card(card::Element::ColumnSet(column_set)).validate(),
+        Err(card::ValidationError::ColumnWidthRequiresFixedFlexMode)
+    );
+
+    let error = serde_json::from_value::<card::ChartAspectRatio>(serde_json::json!("3:2"))
+        .expect_err("undocumented chart aspect ratios must be rejected");
+    assert!(error.to_string().contains("unknown variant"));
 }
 
 #[test]

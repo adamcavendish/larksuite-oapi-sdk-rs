@@ -1,0 +1,9 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [
+      {"tag": "img_combination", "combination_mode": "double", "img_list": [{"img_key": "img_one"}, {"img_key": "img_two"}, {"img_key": "img_three"}]}
+    ]
+  }
+}

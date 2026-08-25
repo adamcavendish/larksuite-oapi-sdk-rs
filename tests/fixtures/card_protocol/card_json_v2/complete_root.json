@@ -56,7 +56,7 @@
       {
         "tag": "column_set",
         "element_id": "metrics_cols",
-        "flex_mode": "stretch",
+        "flex_mode": "none",
         "columns": [
           {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "element_id": "metric_one", "content": "Latency: 92ms"}]},
           {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "element_id": "metric_two", "content": "Errors: 0"}]}

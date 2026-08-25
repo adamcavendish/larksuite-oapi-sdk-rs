@@ -1,0 +1,32 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "direction": "vertical",
+    "padding": "0px 12px",
+    "horizontal_spacing": "16px",
+    "vertical_spacing": "small",
+    "horizontal_align": "center",
+    "vertical_align": "bottom",
+    "elements": [
+      {
+        "tag": "div",
+        "element_id": "details_div",
+        "text": {"tag": "plain_text", "content": "Deployment", "text_size": "heading-2", "text_color": "blue", "text_align": "center", "lines": 2},
+        "fields": [{"is_short": true, "text": {"tag": "plain_text", "content": "Healthy"}}],
+        "icon": {"tag": "standard_icon", "token": "approval_colorful", "color": "green", "size": "16px"},
+        "width": "240px",
+        "margin": "1px -2px"
+      },
+      {"tag": "markdown", "element_id": "rich_text", "content": "**ready**", "text_size": "notation", "text_align": "right", "icon": {"tag": "custom_icon", "img_key": "img_icon"}, "margin": "0px"},
+      {"tag": "img", "element_id": "hero_img", "img_key": "img_hero", "alt": {"tag": "plain_text", "content": "Release dashboard"}, "title": {"tag": "plain_text", "content": "Dashboard"}, "scale_type": "crop_top", "size": "large", "corner_radius": "50%", "transparent": true, "preview": false, "margin": "0px 4px"},
+      {"tag": "img_combination", "element_id": "gallery", "combination_mode": "triple", "img_list": [{"img_key": "img_one"}, {"img_key": "img_two"}, {"img_key": "img_three"}], "combination_transparent": true, "corner_radius": "8px", "margin": "0px"},
+      {"tag": "person", "element_id": "owner", "user_id": "ou_owner", "size": "large", "show_avatar": true, "show_name": true, "style": "capsule", "margin": "0px"},
+      {"tag": "person_list", "element_id": "reviewers", "persons": [{"id": "ou_first"}, {"id": "ou_second"}], "show_name": false, "show_avatar": true, "size": "small", "lines": 2, "drop_invalid_user_id": true, "icon": {"tag": "standard_icon", "token": "group_outlined"}, "ud_icon": {"tag": "custom_icon", "img_key": "img_people"}, "margin": "0px"},
+      {"tag": "chart", "element_id": "trend", "chart_spec": {"type": "line", "data": {"values": [{"day": "Mon", "count": 8}]}, "xField": "day", "yField": "count"}, "aspect_ratio": "16:9", "color_theme": "rainbow", "height": "320px", "preview": false, "margin": "0px"},
+      {"tag": "table", "columns": [{"name": "service", "display_name": "Service", "data_type": "lark_md", "width": "40%", "horizontal_align": "left", "vertical_align": "center"}, {"name": "latency", "display_name": "Latency", "data_type": "number", "width": "160px", "format": {"precision": 1, "symbol": "ms", "separator": true}}, {"name": "published", "data_type": "date", "date_format": "YYYY/MM/DD"}], "rows": [{"service": "[API](https://example.com)", "latency": 12.3, "published": 1720000000000}], "page_size": 1, "row_height": "auto", "row_max_height": "200px", "freeze_first_column": true, "header_style": {"text_align": "center", "text_size": "heading-4", "background_style": "grey", "text_color": "blue", "bold": true, "lines": 2}, "margin": "0px"},
+      {"tag": "hr", "element_id": "section_break", "margin": "8px 0px"},
+      {"tag": "column_set", "element_id": "two_columns", "flex_mode": "none", "horizontal_spacing": "12px", "horizontal_align": "right", "background_style": "blue", "action": {"multi_url": {"url": "https://example.com/columns"}}, "margin": "0px", "columns": [{"tag": "column", "width": "auto", "vertical_align": "center", "direction": "horizontal", "horizontal_spacing": "small", "vertical_spacing": "4px", "padding": "2px", "margin": "0px", "background_style": "rgba(1,2,3,0.5)", "action": {"multi_url": {"url": "https://example.com/column"}}, "elements": [{"tag": "markdown", "element_id": "left_column", "content": "Left"}]}, {"tag": "column", "width": "weighted", "weight": 3, "elements": [{"tag": "markdown", "element_id": "right_column", "content": "Right"}]}]}
+    ]
+  }
+}
