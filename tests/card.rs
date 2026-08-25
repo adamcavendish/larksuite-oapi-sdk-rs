@@ -1,3 +1,5 @@
+#![allow(deprecated)] // Exercises the deprecated compatibility facade.
+
 use larksuite_oapi_sdk_rs::LarkError;
 use larksuite_oapi_sdk_rs::card::{
     ActionComponent, ActionElement, ActionLayout, ButtonComponent, ButtonType, Card, CardConfig,

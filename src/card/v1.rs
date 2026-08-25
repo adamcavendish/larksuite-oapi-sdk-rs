@@ -2034,10 +2034,13 @@ pub struct Checker {
 pub enum ValidationError {
     InvalidCardLink,
     EmptyFallback,
+    #[deprecated(note = "both header tag lists are valid; localized tags take precedence")]
     HeaderTagLocalizationConflict,
     EmptyColumns,
     EmptyActionRow,
-    EmptyForm { name: String },
+    EmptyForm {
+        name: String,
+    },
     EmptyImageSelect,
     EmptyImageCombination,
     MissingImageCombinationMode,
@@ -2049,9 +2052,12 @@ pub enum ValidationError {
     EmptyStaticSelect,
     InvalidTablePageSize(u8),
     TableHasNoColumns,
-    UnknownTableRowColumn { column: String },
+    UnknownTableRowColumn {
+        column: String,
+    },
 }
 
+#[allow(deprecated)] // Formats the retained, deprecated compatibility variant.
 impl std::fmt::Display for ValidationError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -2062,7 +2068,7 @@ impl std::fmt::Display for ValidationError {
                 formatter.write_str("fallback.trigger_conditions must not be empty")
             }
             Self::HeaderTagLocalizationConflict => formatter
-                .write_str("header cannot contain both text_tag_list and i18n_text_tag_list"),
+                .write_str("both header tag lists are valid; localized tags take precedence"),
             Self::EmptyColumns => formatter.write_str("column_set.columns must not be empty"),
             Self::EmptyActionRow => formatter.write_str("action.actions must not be empty"),
             Self::EmptyForm { name } => {
@@ -2113,11 +2119,6 @@ impl Card {
             .is_some_and(|fallback| fallback.trigger_conditions.is_empty())
         {
             return Err(ValidationError::EmptyFallback);
-        }
-        if self.header.as_ref().is_some_and(|header| {
-            !header.text_tag_list.is_empty() && header.i18n_text_tag_list.is_some()
-        }) {
-            return Err(ValidationError::HeaderTagLocalizationConflict);
         }
         for element in &self.elements {
             validate_element(element)?;

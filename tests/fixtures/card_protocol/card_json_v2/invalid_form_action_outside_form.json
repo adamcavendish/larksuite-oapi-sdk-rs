@@ -1,0 +1,12 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "button",
+      "text": {"tag": "plain_text", "content": "Submit"},
+      "form_action_type": "submit",
+      "behaviors": [{"type": "callback", "value": {}}]
+    }]
+  }
+}

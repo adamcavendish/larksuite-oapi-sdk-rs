@@ -86,7 +86,7 @@ card patch operation. See
 interactive callback responses.
 
 ```rust,no_run
-use larksuite_oapi_sdk_rs::card::{div, Card, CardHeader};
+use larksuite_oapi_sdk_rs::card::v1::{Card, Div, Element, Header, Text};
 use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 # async fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -99,7 +99,9 @@ messaging
 messaging
     .edit_card(
         "om_card_message",
-        Card::new().header(CardHeader::new("Done")).element(div("Complete")),
+        Card::new()
+            .header(Header::new("Done"))
+            .element(Element::Div(Div::new(Text::lark_md("Complete")))),
         &RequestOption::default(),
     )
     .await?;

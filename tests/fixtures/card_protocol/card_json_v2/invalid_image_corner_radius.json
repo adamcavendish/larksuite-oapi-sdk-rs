@@ -1,0 +1,12 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "img",
+      "img_key": "img_v2_example",
+      "alt": {"tag": "plain_text", "content": "Example"},
+      "corner_radius": "101%"
+    }]
+  }
+}

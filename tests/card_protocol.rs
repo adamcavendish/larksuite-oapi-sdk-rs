@@ -1,3 +1,5 @@
+#![allow(deprecated)] // Verifies the deprecated facade's frozen wire baseline.
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs;
@@ -895,6 +897,38 @@ fn card_json_v2_fixtures_are_exact_protocol_contracts() {
                                 Err(card::ValidationError::ButtonTextRequiresPlainText)
                             );
                         }
+                        "plain_text_slot" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::PlainTextRequired(
+                                    "input.placeholder",
+                                ))
+                            );
+                        }
+                        "form_action_outside_form" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::FormActionOutsideForm)
+                            );
+                        }
+                        "image_corner_radius" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::InvalidCornerRadius("101%".into()))
+                            );
+                        }
                         "picker_initial_value" => {
                             use larksuite_oapi_sdk_rs::card::v2 as card;
 
@@ -1789,6 +1823,13 @@ fn modern_v2_container_behavior_validation_rejects_documented_constraints() {
         Err(card::ValidationError::InvalidCornerRadius("4em".into()))
     );
 
+    let mut image_combination = card::ImageCombination::new(card::ImageCombinationMode::Double);
+    image_combination.corner_radius = Some("101%".into());
+    assert_eq!(
+        shared_card(card::Element::ImgCombination(image_combination)).validate(),
+        Err(card::ValidationError::InvalidCornerRadius("101%".into()))
+    );
+
     let error = serde_json::from_value::<card::PanelIconExpandedAngle>(serde_json::json!("0"))
         .expect_err("undocumented panel icon angles must be rejected");
     assert!(error.to_string().contains("unknown variant"));
@@ -2097,11 +2138,19 @@ fn card_action_trigger_preserves_string_callback_values() {
         "action": {"tag": "button", "value": "approve"}
     }))
     .expect("deserialize string callback value");
-    let action = request.action.expect("action");
+    let action = request.action.as_ref().expect("action");
     assert!(action.value.is_empty());
     assert_eq!(
-        action.raw_value.expect("raw string value").as_str(),
+        action
+            .raw_value
+            .as_ref()
+            .expect("raw string value")
+            .as_str(),
         Some("approve")
+    );
+    assert_eq!(
+        serde_json::to_value(request).unwrap()["action"]["value"],
+        "approve"
     );
 }
 
@@ -2490,7 +2539,6 @@ fn modern_v1_serializes_color_domains_and_validation_errors() {
     for error in [
         card::ValidationError::InvalidCardLink,
         card::ValidationError::EmptyFallback,
-        card::ValidationError::HeaderTagLocalizationConflict,
         card::ValidationError::EmptyColumns,
         card::ValidationError::EmptyActionRow,
         card::ValidationError::EmptyForm {
@@ -2526,7 +2574,7 @@ fn modern_v1_validation_rejects_cross_field_protocol_errors() {
         Err(card::ValidationError::EmptyFallback)
     ));
 
-    let conflicting_tags = CardV1::new().header(
+    let localized_tags = CardV1::new().header(
         HeaderV1::new("title")
             .text_tag(HeaderTag::new("tag", HeaderTagColor::Blue))
             .i18n_text_tag_list(BTreeMap::from([(
@@ -2534,10 +2582,9 @@ fn modern_v1_validation_rejects_cross_field_protocol_errors() {
                 vec![HeaderTag::new("标签", HeaderTagColor::Blue)],
             )])),
     );
-    assert!(matches!(
-        conflicting_tags.validate(),
-        Err(card::ValidationError::HeaderTagLocalizationConflict)
-    ));
+    localized_tags
+        .validate()
+        .expect("localized header tags take precedence when both lists are present");
 
     let invalid_table = CardV1::new().element(ElementV1::Table(card::Table::new()));
     assert!(matches!(
