@@ -1,0 +1,10 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "date_picker",
+      "initial_date": "2026-13-40"
+    }]
+  }
+}

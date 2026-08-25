@@ -236,6 +236,36 @@ const REQUIRED_V2_FIELDS: &[&str] = &[
     "overflow.behaviors",
     "overflow.confirm",
     "overflow.width",
+    "select_static.options",
+    "select_static.initial_option",
+    "select_static.initial_index",
+    "select_static.type",
+    "multi_select_static.options",
+    "multi_select_static.selected_values",
+    "multi_select_static.type",
+    "select_person.options",
+    "select_person.initial_option",
+    "select_person.type",
+    "multi_select_person.options",
+    "multi_select_person.selected_values",
+    "multi_select_person.type",
+    "date_picker.initial_date",
+    "picker_time.initial_time",
+    "picker_datetime.initial_datetime",
+    "select_img.options",
+    "select_img.multi_select",
+    "select_img.layout",
+    "select_img.aspect_ratio",
+    "select_img.can_preview",
+    "select_img.value",
+    "select_img.behaviors",
+    "checker.checked",
+    "checker.text",
+    "checker.overall_checkable",
+    "checker.button_area",
+    "checker.checked_style",
+    "checker.padding",
+    "checker.behaviors",
     "column_set.columns",
     "column_set.flex_mode",
     "column_set.horizontal_spacing",
@@ -863,6 +893,29 @@ fn card_json_v2_fixtures_are_exact_protocol_contracts() {
                             assert_eq!(
                                 card.validate(),
                                 Err(card::ValidationError::ButtonTextRequiresPlainText)
+                            );
+                        }
+                        "picker_initial_value" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::InvalidPickerInitialValue(
+                                    "date_picker",
+                                    "2026-13-40".into(),
+                                ))
+                            );
+                        }
+                        "image_preview_form_only" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::ImagePreviewOutsideForm)
                             );
                         }
                         other => panic!("unknown v2 fixture constraint {other}"),
@@ -1558,6 +1611,73 @@ fn modern_v2_form_action_controls_fixture_round_trips_and_validates() {
             "action".into()
         ))
     );
+}
+
+#[test]
+fn modern_v2_selection_and_picker_controls_fixture_round_trips_and_validates() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let fixture = fixture("card_json_v2/selection_picker_controls.json");
+    let card: card::Card = serde_json::from_value(fixture.clone())
+        .expect("selection and picker fixture must deserialize");
+    card.validate()
+        .expect("selection and picker fixture must validate");
+    assert_eq!(card.to_json(), fixture.into());
+
+    let shared_card = |element| {
+        card::Card::new()
+            .config(card::Config::new().update_multi())
+            .body(card::Body::new().element(element))
+    };
+    let mut select = card::StaticSelect::new();
+    select.options = Some(vec![card::SelectOption::new(
+        card::Text::plain("One"),
+        "one",
+    )]);
+    select.initial_option = Some("missing".into());
+    assert_eq!(
+        shared_card(card::Element::SelectStatic(select)).validate(),
+        Err(card::ValidationError::InvalidInitialOption(
+            "select_static",
+            "missing".into(),
+        ))
+    );
+
+    let mut image = card::ImageSelect::new(
+        vec![card::ImageSelectOption {
+            img_key: "img_v2_a".into(),
+            value: "cover_a".into(),
+            disabled: None,
+            disabled_tips: None,
+            hover_tips: None,
+        }],
+        card::Behavior::callback(serde_json::json!({})),
+    );
+    image.control.behaviors.clear();
+    assert_eq!(
+        shared_card(card::Element::SelectImg(image)).validate(),
+        Err(card::ValidationError::MissingImageSelectBehavior)
+    );
+
+    let mut preview = card::ImageSelect::new(
+        vec![card::ImageSelectOption {
+            img_key: "img_v2_a".into(),
+            value: "cover_a".into(),
+            disabled: None,
+            disabled_tips: None,
+            hover_tips: None,
+        }],
+        card::Behavior::callback(serde_json::json!({})),
+    );
+    preview.can_preview = Some(true);
+    assert_eq!(
+        shared_card(card::Element::SelectImg(preview)).validate(),
+        Err(card::ValidationError::ImagePreviewOutsideForm)
+    );
+
+    let error = serde_json::from_value::<card::ImageSelectAspectRatio>(serde_json::json!("3:2"))
+        .expect_err("undocumented image ratios must be rejected");
+    assert!(error.to_string().contains("unknown variant"));
 }
 
 #[test]
