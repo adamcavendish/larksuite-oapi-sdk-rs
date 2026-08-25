@@ -86,6 +86,7 @@ impl Card {
         }
 
         let mut element_ids = BTreeSet::new();
+        let mut form_state = FormValidationState::default();
         let mut element_count = 0;
         if let Some(header) = &self.header {
             validate_header(header, &mut element_ids)?;
@@ -104,6 +105,7 @@ impl Card {
             validate_element(
                 element,
                 &mut element_ids,
+                &mut form_state,
                 &mut element_count,
                 true,
                 false,
@@ -1297,7 +1299,8 @@ pub struct Button {
     pub tag: ButtonTag,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub element_id: Option<String>,
-    pub text: Text,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<Text>,
     #[serde(skip_serializing_if = "Option::is_none", rename = "type")]
     pub button_type: Option<ButtonType>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1328,7 +1331,7 @@ impl Button {
         Self {
             tag: ButtonTag::Button,
             element_id: None,
-            text,
+            text: Some(text),
             button_type: None,
             size: None,
             width: None,
@@ -1405,7 +1408,7 @@ pub struct Input {
     pub tag: InputTag,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub element_id: Option<String>,
-    pub name: String,
+    pub name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub placeholder: Option<Text>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1417,8 +1420,6 @@ pub struct Input {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub default_value: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub multiline: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub input_type: Option<InputType>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rows: Option<u8>,
@@ -1428,6 +1429,8 @@ pub struct Input {
     pub max_rows: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_length: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub show_icon: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub width: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1445,21 +1448,28 @@ pub struct Input {
 }
 impl Input {
     pub fn new(name: impl Into<String>) -> Self {
+        Self::unnamed().name(name)
+    }
+    pub fn element_id(mut self, id: impl Into<String>) -> Self {
+        self.element_id = Some(id.into());
+        self
+    }
+    pub fn unnamed() -> Self {
         Self {
             tag: InputTag::Input,
             element_id: None,
-            name: name.into(),
+            name: None,
             placeholder: None,
             label: None,
             label_position: None,
             required: None,
             default_value: None,
-            multiline: None,
             input_type: None,
             rows: None,
             auto_resize: None,
             max_rows: None,
             max_length: None,
+            show_icon: None,
             width: None,
             disabled: None,
             disabled_tips: None,
@@ -1469,8 +1479,8 @@ impl Input {
             margin: None,
         }
     }
-    pub fn element_id(mut self, id: impl Into<String>) -> Self {
-        self.element_id = Some(id.into());
+    pub fn name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
         self
     }
     pub fn required(mut self, required: bool) -> Self {
@@ -2554,6 +2564,8 @@ pub enum ValidationError {
     DuplicateElementId(String),
     TooManyElements(usize),
     EmptyForm(String),
+    InvalidFormName(String),
+    DuplicateFormName(String),
     FormNestedOutsideBody,
     TableNestedOutsideBody,
     MultiSelectImageOutsideForm,
@@ -2586,6 +2598,10 @@ pub enum ValidationError {
     TooDeeplyNestedContainer(usize),
     MissingFormSubmit(String),
     MissingFormButtonAction,
+    ButtonTextRequiresPlainText,
+    ButtonTextTooLong(usize),
+    InvalidControlWidth(String),
+    InvalidInputMaxLength(u32),
 }
 impl std::fmt::Display for ValidationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -2638,6 +2654,8 @@ impl std::fmt::Display for ValidationError {
                 write!(f, "Card JSON v2 supports at most 200 elements, got {count}")
             }
             Self::EmptyForm(name) => write!(f, "form {name:?} has no elements"),
+            Self::InvalidFormName(name) => write!(f, "invalid form name {name:?}"),
+            Self::DuplicateFormName(name) => write!(f, "duplicate form name {name:?}"),
             Self::FormNestedOutsideBody => f.write_str("form may only appear in body.elements"),
             Self::TableNestedOutsideBody => f.write_str("table may only appear in body.elements"),
             Self::MultiSelectImageOutsideForm => {
@@ -2717,10 +2735,27 @@ impl std::fmt::Display for ValidationError {
             Self::MissingFormButtonAction => {
                 f.write_str("button inside a form requires form_action_type")
             }
+            Self::ButtonTextRequiresPlainText => f.write_str("button text requires plain_text"),
+            Self::ButtonTextTooLong(length) => {
+                write!(
+                    f,
+                    "button text supports at most 100 characters, got {length}"
+                )
+            }
+            Self::InvalidControlWidth(width) => write!(f, "invalid control width {width:?}"),
+            Self::InvalidInputMaxLength(length) => {
+                write!(f, "input max_length must be 1 through 1000, got {length}")
+            }
         }
     }
 }
 impl std::error::Error for ValidationError {}
+
+#[derive(Default)]
+struct FormValidationState {
+    names: BTreeSet<String>,
+    control_names: BTreeSet<String>,
+}
 
 fn validate_optional_element_id(
     id: Option<&str>,
@@ -2789,9 +2824,11 @@ fn validate_control(
     in_form: bool,
 ) -> Result<(), ValidationError> {
     validate_behaviors(&control.behaviors, false)?;
-    if in_form && control.name.is_none() {
+    if in_form && control.name.as_deref().is_none_or(str::is_empty) {
         return Err(ValidationError::MissingFormControlName(tag));
     }
+    validate_margin(control.margin.as_deref())?;
+    validate_control_width(control.width.as_deref())?;
     Ok(())
 }
 
@@ -2814,6 +2851,24 @@ fn valid_pixels(value: &str, min: i16, max: i16) -> bool {
         .strip_suffix("px")
         .and_then(|value| value.parse::<i16>().ok())
         .is_some_and(|value| (min..=max).contains(&value))
+}
+
+fn valid_min_pixels(value: &str, min: u32) -> bool {
+    value
+        .strip_suffix("px")
+        .and_then(|value| value.parse::<u32>().ok())
+        .is_some_and(|value| value >= min)
+}
+
+fn validate_control_width(value: Option<&str>) -> Result<(), ValidationError> {
+    if let Some(value) = value
+        && value != "default"
+        && value != "fill"
+        && !valid_min_pixels(value, 100)
+    {
+        return Err(ValidationError::InvalidControlWidth(value.to_string()));
+    }
+    Ok(())
 }
 
 fn valid_box_pixels(value: &str, min: i16, max: i16) -> bool {
@@ -3053,6 +3108,58 @@ fn validate_interactive_container(container: &InteractiveContainer) -> Result<()
     Ok(())
 }
 
+fn validate_form(form: &Form, form_names: &mut BTreeSet<String>) -> Result<(), ValidationError> {
+    if form.name.is_empty() {
+        return Err(ValidationError::InvalidFormName(form.name.clone()));
+    }
+    if !form_names.insert(form.name.clone()) {
+        return Err(ValidationError::DuplicateFormName(form.name.clone()));
+    }
+    if let Some(padding) = form.padding.as_deref()
+        && !valid_box_pixels(padding, -99, 99)
+    {
+        return Err(ValidationError::InvalidPadding(padding.to_string()));
+    }
+    validate_margin(form.margin.as_deref())?;
+    if let Some(spacing) = &form.horizontal_spacing {
+        validate_spacing(spacing)?;
+    }
+    if let Some(spacing) = &form.vertical_spacing {
+        validate_spacing(spacing)?;
+    }
+    Ok(())
+}
+
+fn validate_button(button: &Button) -> Result<(), ValidationError> {
+    if let Some(text) = &button.text {
+        if text.tag != TextTag::PlainText {
+            return Err(ValidationError::ButtonTextRequiresPlainText);
+        }
+        let length = text.content.chars().count();
+        if length > 100 {
+            return Err(ValidationError::ButtonTextTooLong(length));
+        }
+    }
+    validate_behaviors(&button.behaviors, false)?;
+    validate_margin(button.margin.as_deref())?;
+    validate_control_width(button.width.as_deref())
+}
+
+fn validate_input(input: &Input) -> Result<(), ValidationError> {
+    validate_behaviors(&input.behaviors, false)?;
+    validate_margin(input.margin.as_deref())?;
+    validate_control_width(input.width.as_deref())?;
+    if input
+        .max_length
+        .is_some_and(|length| !(1..=1000).contains(&length))
+    {
+        return Err(ValidationError::InvalidInputMaxLength(
+            input.max_length.unwrap_or_default(),
+        ));
+    }
+    Ok(())
+}
+
 fn validate_options(options: &[SelectOption]) -> Result<(), ValidationError> {
     let mut values = BTreeSet::new();
     for option in options {
@@ -3114,9 +3221,13 @@ fn validate_table(table: &Table) -> Result<(), ValidationError> {
 }
 
 fn validate_form_control_name(
-    name: &str,
+    name: Option<&str>,
+    tag: &'static str,
     names: &mut BTreeSet<String>,
 ) -> Result<(), ValidationError> {
+    let name = name
+        .filter(|name| !name.is_empty())
+        .ok_or(ValidationError::MissingFormControlName(tag))?;
     if !names.insert(name.to_string()) {
         return Err(ValidationError::DuplicateFormControlName(name.to_string()));
     }
@@ -3128,52 +3239,60 @@ fn validate_form_control_names(
     names: &mut BTreeSet<String>,
 ) -> Result<(), ValidationError> {
     match element {
-        Element::Input(element) => validate_form_control_name(&element.name, names),
-        Element::SelectStatic(element) => element
-            .control
-            .name
-            .as_deref()
-            .map_or(Ok(()), |name| validate_form_control_name(name, names)),
-        Element::MultiSelectStatic(element) => element
-            .control
-            .name
-            .as_deref()
-            .map_or(Ok(()), |name| validate_form_control_name(name, names)),
-        Element::SelectPerson(element) => element
-            .control
-            .name
-            .as_deref()
-            .map_or(Ok(()), |name| validate_form_control_name(name, names)),
-        Element::MultiSelectPerson(element) => element
-            .control
-            .name
-            .as_deref()
-            .map_or(Ok(()), |name| validate_form_control_name(name, names)),
-        Element::DatePicker(element) => element
-            .control
-            .name
-            .as_deref()
-            .map_or(Ok(()), |name| validate_form_control_name(name, names)),
-        Element::PickerTime(element) => element
-            .control
-            .name
-            .as_deref()
-            .map_or(Ok(()), |name| validate_form_control_name(name, names)),
-        Element::PickerDatetime(element) => element
-            .control
-            .name
-            .as_deref()
-            .map_or(Ok(()), |name| validate_form_control_name(name, names)),
-        Element::SelectImg(element) => element
-            .control
-            .name
-            .as_deref()
-            .map_or(Ok(()), |name| validate_form_control_name(name, names)),
-        Element::Checker(element) => element
-            .control
-            .name
-            .as_deref()
-            .map_or(Ok(()), |name| validate_form_control_name(name, names)),
+        Element::Button(element) => {
+            validate_form_control_name(element.name.as_deref(), "button", names)
+        }
+        Element::Overflow(element) => element.control.name.as_deref().map_or_else(
+            || Err(ValidationError::MissingFormControlName("overflow")),
+            |name| validate_form_control_name(Some(name), "overflow", names),
+        ),
+        Element::Input(element) => {
+            validate_form_control_name(element.name.as_deref(), "input", names)
+        }
+        Element::SelectStatic(element) => element.control.name.as_deref().map_or_else(
+            || Err(ValidationError::MissingFormControlName("select_static")),
+            |name| validate_form_control_name(Some(name), "select_static", names),
+        ),
+        Element::MultiSelectStatic(element) => element.control.name.as_deref().map_or_else(
+            || {
+                Err(ValidationError::MissingFormControlName(
+                    "multi_select_static",
+                ))
+            },
+            |name| validate_form_control_name(Some(name), "multi_select_static", names),
+        ),
+        Element::SelectPerson(element) => element.control.name.as_deref().map_or_else(
+            || Err(ValidationError::MissingFormControlName("select_person")),
+            |name| validate_form_control_name(Some(name), "select_person", names),
+        ),
+        Element::MultiSelectPerson(element) => element.control.name.as_deref().map_or_else(
+            || {
+                Err(ValidationError::MissingFormControlName(
+                    "multi_select_person",
+                ))
+            },
+            |name| validate_form_control_name(Some(name), "multi_select_person", names),
+        ),
+        Element::DatePicker(element) => element.control.name.as_deref().map_or_else(
+            || Err(ValidationError::MissingFormControlName("date_picker")),
+            |name| validate_form_control_name(Some(name), "date_picker", names),
+        ),
+        Element::PickerTime(element) => element.control.name.as_deref().map_or_else(
+            || Err(ValidationError::MissingFormControlName("picker_time")),
+            |name| validate_form_control_name(Some(name), "picker_time", names),
+        ),
+        Element::PickerDatetime(element) => element.control.name.as_deref().map_or_else(
+            || Err(ValidationError::MissingFormControlName("picker_datetime")),
+            |name| validate_form_control_name(Some(name), "picker_datetime", names),
+        ),
+        Element::SelectImg(element) => element.control.name.as_deref().map_or_else(
+            || Err(ValidationError::MissingFormControlName("select_img")),
+            |name| validate_form_control_name(Some(name), "select_img", names),
+        ),
+        Element::Checker(element) => element.control.name.as_deref().map_or_else(
+            || Err(ValidationError::MissingFormControlName("checker")),
+            |name| validate_form_control_name(Some(name), "checker", names),
+        ),
         Element::ColumnSet(element) => {
             for column in &element.columns {
                 for child in &column.elements {
@@ -3222,6 +3341,7 @@ fn has_form_submit(element: &Element) -> bool {
 fn validate_element(
     element: &Element,
     ids: &mut BTreeSet<String>,
+    form_state: &mut FormValidationState,
     count: &mut usize,
     root: bool,
     in_form: bool,
@@ -3262,7 +3382,7 @@ fn validate_element(
             validate_optional_element_id(element.element_id.as_deref(), ids)
         }
         Element::Button(element) => {
-            validate_behaviors(&element.behaviors, false)?;
+            validate_button(element)?;
             if in_form && element.form_action_type.is_some() && !element.behaviors.is_empty() {
                 return Err(ValidationError::ButtonBehaviorConflict);
             }
@@ -3275,7 +3395,7 @@ fn validate_element(
             validate_optional_element_id(element.element_id.as_deref(), ids)
         }
         Element::Input(element) => {
-            validate_behaviors(&element.behaviors, false)?;
+            validate_input(element)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)
         }
         Element::ColumnSet(element) => {
@@ -3284,7 +3404,7 @@ fn validate_element(
             let child_depth = next_container_depth(container_depth)?;
             for column in &element.columns {
                 for child in &column.elements {
-                    validate_element(child, ids, count, false, in_form, child_depth)?;
+                    validate_element(child, ids, form_state, count, false, in_form, child_depth)?;
                 }
             }
             Ok(())
@@ -3296,12 +3416,12 @@ fn validate_element(
             if element.elements.is_empty() {
                 return Err(ValidationError::EmptyForm(element.name.clone()));
             }
+            validate_form(element, &mut form_state.names)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)?;
             let child_depth = next_container_depth(container_depth)?;
-            let mut names = BTreeSet::new();
             for child in &element.elements {
-                validate_form_control_names(child, &mut names)?;
-                validate_element(child, ids, count, false, true, child_depth)?;
+                validate_form_control_names(child, &mut form_state.control_names)?;
+                validate_element(child, ids, form_state, count, false, true, child_depth)?;
             }
             if !element.elements.iter().any(has_form_submit) {
                 return Err(ValidationError::MissingFormSubmit(element.name.clone()));
@@ -3313,7 +3433,7 @@ fn validate_element(
             validate_optional_element_id(element.element_id.as_deref(), ids)?;
             let child_depth = next_container_depth(container_depth)?;
             for child in &element.elements {
-                validate_element(child, ids, count, false, in_form, child_depth)?;
+                validate_element(child, ids, form_state, count, false, in_form, child_depth)?;
             }
             Ok(())
         }
@@ -3325,7 +3445,7 @@ fn validate_element(
             validate_optional_element_id(element.element_id.as_deref(), ids)?;
             let child_depth = next_container_depth(container_depth)?;
             for child in &element.elements {
-                validate_element(child, ids, count, false, in_form, child_depth)?;
+                validate_element(child, ids, form_state, count, false, in_form, child_depth)?;
             }
             Ok(())
         }

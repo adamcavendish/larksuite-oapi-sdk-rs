@@ -1,0 +1,15 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "form",
+      "name": "actions",
+      "elements": [
+        {"tag": "overflow", "name": "action", "options": [{"text": {"tag": "plain_text", "content": "Open"}, "value": "open"}], "behaviors": [{"type": "callback", "value": {}}]},
+        {"tag": "overflow", "name": "action", "options": [{"text": {"tag": "plain_text", "content": "Close"}, "value": "close"}], "behaviors": [{"type": "callback", "value": {}}]},
+        {"tag": "button", "text": {"tag": "plain_text", "content": "Submit"}, "name": "submit", "form_action_type": "submit"}
+      ]
+    }]
+  }
+}

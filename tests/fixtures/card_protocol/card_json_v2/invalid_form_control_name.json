@@ -1,0 +1,14 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "form",
+      "name": "approval",
+      "elements": [
+        {"tag": "input", "placeholder": {"tag": "plain_text", "content": "Reason"}},
+        {"tag": "button", "name": "submit", "text": {"tag": "plain_text", "content": "Submit"}, "form_action_type": "submit"}
+      ]
+    }]
+  }
+}

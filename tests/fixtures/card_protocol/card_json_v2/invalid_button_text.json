@@ -1,0 +1,11 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "button",
+      "text": {"tag": "lark_md", "content": "**Open**"},
+      "behaviors": [{"type": "callback", "value": {}}]
+    }]
+  }
+}

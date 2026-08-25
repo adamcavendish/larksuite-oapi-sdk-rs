@@ -1,0 +1,76 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [
+      {
+        "tag": "form",
+        "element_id": "approval_form",
+        "name": "approval",
+        "direction": "horizontal",
+        "horizontal_spacing": "medium",
+        "vertical_spacing": "12px",
+        "horizontal_align": "center",
+        "vertical_align": "bottom",
+        "padding": "-2px 8px",
+        "margin": "0px 4px",
+        "elements": [
+          {
+            "tag": "input",
+            "element_id": "reason",
+            "name": "reason",
+            "required": true,
+            "placeholder": {"tag": "plain_text", "content": "Reason"},
+            "label": {"tag": "plain_text", "content": "Approval reason"},
+            "label_position": "left",
+            "default_value": "Ready",
+            "input_type": "password",
+            "rows": 3,
+            "auto_resize": true,
+            "max_rows": 6,
+            "max_length": 1000,
+            "show_icon": false,
+            "width": "100px",
+            "disabled": false,
+            "disabled_tips": {"tag": "plain_text", "content": "Locked"},
+            "hover_tips": {"tag": "plain_text", "content": "Enter a reason"},
+            "behaviors": [{"type": "callback", "value": {"field": "reason"}}],
+            "confirm": {"title": {"tag": "plain_text", "content": "Continue?"}, "text": {"tag": "plain_text", "content": "Keep this value?"}},
+            "margin": "-1px"
+          },
+          {
+            "tag": "button",
+            "element_id": "submit",
+            "text": {"tag": "plain_text", "content": "Submit"},
+            "type": "primary_filled",
+            "size": "large",
+            "width": "fill",
+            "icon": {"tag": "standard_icon", "token": "right_small"},
+            "disabled": false,
+            "disabled_tips": {"tag": "plain_text", "content": "Unavailable"},
+            "hover_tips": {"tag": "plain_text", "content": "Submit approval"},
+            "confirm": {"title": {"tag": "plain_text", "content": "Submit?"}, "text": {"tag": "plain_text", "content": "Send this approval?"}},
+            "margin": "2px",
+            "name": "submit_approval",
+            "form_action_type": "submit"
+          }
+        ]
+      },
+      {
+        "tag": "overflow",
+        "element_id": "more_actions",
+        "placeholder": {"tag": "plain_text", "content": "More actions"},
+        "width": "120px",
+        "disabled": false,
+        "disabled_tips": {"tag": "plain_text", "content": "Unavailable"},
+        "hover_tips": {"tag": "plain_text", "content": "Open actions"},
+        "behaviors": [{"type": "callback", "value": {"menu": "more"}}],
+        "confirm": {"title": {"tag": "plain_text", "content": "Continue?"}, "text": {"tag": "plain_text", "content": "Run this action?"}},
+        "margin": "4px",
+        "options": [
+          {"text": {"tag": "plain_text", "content": "Open runbook"}, "value": "runbook", "multi_url": {"url": "https://example.com/runbook", "pc_url": "https://example.com/runbook/desktop"}, "icon": {"tag": "standard_icon", "token": "right_small"}}
+        ]
+      }
+    ]
+  }
+}
