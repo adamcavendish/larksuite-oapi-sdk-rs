@@ -153,6 +153,44 @@ const REQUIRED_V2_FIELDS: &[&str] = &[
     "header.icon.size",
     "behavior.type",
     "behavior.value",
+    "behavior.default_url",
+    "behavior.pc_url",
+    "behavior.ios_url",
+    "behavior.android_url",
+    "collapsible_panel.header",
+    "collapsible_panel.elements",
+    "collapsible_panel.expanded",
+    "collapsible_panel.background_color",
+    "collapsible_panel.border",
+    "collapsible_panel.direction",
+    "collapsible_panel.vertical_spacing",
+    "collapsible_panel.horizontal_spacing",
+    "collapsible_panel.padding",
+    "collapsible_panel.margin",
+    "collapsible_panel.header.title",
+    "collapsible_panel.header.background_color",
+    "collapsible_panel.header.width",
+    "collapsible_panel.header.vertical_align",
+    "collapsible_panel.header.icon",
+    "collapsible_panel.header.icon_position",
+    "collapsible_panel.header.icon_expanded_angle",
+    "interactive_container.elements",
+    "interactive_container.behaviors",
+    "interactive_container.width",
+    "interactive_container.height",
+    "interactive_container.direction",
+    "interactive_container.horizontal_align",
+    "interactive_container.vertical_align",
+    "interactive_container.background_style",
+    "interactive_container.has_border",
+    "interactive_container.border_color",
+    "interactive_container.corner_radius",
+    "interactive_container.padding",
+    "interactive_container.margin",
+    "interactive_container.disabled",
+    "interactive_container.disabled_tips",
+    "interactive_container.hover_tips",
+    "interactive_container.confirm",
     "form.name",
     "button.form_action_type",
     "input.name",
@@ -732,6 +770,26 @@ fn card_json_v2_fixtures_are_exact_protocol_contracts() {
                             assert_eq!(
                                 card.validate(),
                                 Err(card::ValidationError::InvalidHeaderTitleLines(5))
+                            );
+                        }
+                        "open_url_default" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::InvalidOpenUrl(String::new()))
+                            );
+                        }
+                        "panel_disallows_form" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::FormNestedOutsideBody)
                             );
                         }
                         other => panic!("unknown v2 fixture constraint {other}"),
@@ -1337,10 +1395,12 @@ fn modern_v2_container_optional_fields_preserve_wire_shape() {
         card::Text::plain("Details"),
     ))
     .element(card::Element::Markdown(card::Markdown::new("content")));
+    panel.header.icon_expanded_angle = Some(card::PanelIconExpandedAngle::NegativeNinety);
     panel.border = Some(card::Border::new(card::Color::Grey));
     let panel = serde_json::to_value(card::Element::CollapsiblePanel(panel))
         .expect("serialize collapsible panel");
     assert_eq!(panel["border"]["color"], "grey");
+    assert_eq!(panel["header"]["icon_expanded_angle"], "-90");
 
     let callback_value: larksuite_oapi_sdk_rs::JsonValue = serde_json::json!({}).into();
     let mut container = card::InteractiveContainer::new(card::Behavior::callback(callback_value))
@@ -1364,6 +1424,78 @@ fn modern_v2_container_optional_fields_preserve_wire_shape() {
         serde_json::to_value(icon).expect("serialize icon")["size"],
         "16px"
     );
+}
+
+#[test]
+fn modern_v2_container_behavior_validation_rejects_documented_constraints() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let shared_card = |element| {
+        card::Card::new()
+            .config(card::Config::new().update_multi())
+            .body(card::Body::new().element(element))
+    };
+    let callback = || card::Behavior::callback(serde_json::json!({}));
+    let interactive = |behavior| {
+        card::InteractiveContainer::new(behavior)
+            .element(card::Element::Markdown(card::Markdown::new("content")))
+    };
+
+    assert_eq!(
+        shared_card(card::Element::InteractiveContainer(interactive(
+            card::Behavior::open_url("")
+        )))
+        .validate(),
+        Err(card::ValidationError::InvalidOpenUrl(String::new()))
+    );
+
+    let mut no_behavior = interactive(callback());
+    no_behavior.behaviors.clear();
+    assert_eq!(
+        shared_card(card::Element::InteractiveContainer(no_behavior)).validate(),
+        Err(card::ValidationError::MissingInteractiveContainerBehavior)
+    );
+
+    let mut narrow = interactive(callback());
+    narrow.width = Some("15px".into());
+    assert_eq!(
+        shared_card(card::Element::InteractiveContainer(narrow)).validate(),
+        Err(card::ValidationError::InvalidInteractiveContainerWidth(
+            "15px".into()
+        ))
+    );
+
+    let mut short = interactive(callback());
+    short.height = Some("9px".into());
+    assert_eq!(
+        shared_card(card::Element::InteractiveContainer(short)).validate(),
+        Err(card::ValidationError::InvalidInteractiveContainerHeight(
+            "9px".into()
+        ))
+    );
+
+    let mut square = interactive(callback());
+    square.corner_radius = Some("101%".into());
+    assert_eq!(
+        shared_card(card::Element::InteractiveContainer(square)).validate(),
+        Err(card::ValidationError::InvalidCornerRadius("101%".into()))
+    );
+
+    let mut panel = card::CollapsiblePanel::new(card::CollapsiblePanelHeader::new(
+        card::Text::plain("Details"),
+    ));
+    panel.border = Some(card::Border {
+        color: card::Color::Grey,
+        corner_radius: Some("4em".into()),
+    });
+    assert_eq!(
+        shared_card(card::Element::CollapsiblePanel(panel)).validate(),
+        Err(card::ValidationError::InvalidCornerRadius("4em".into()))
+    );
+
+    let error = serde_json::from_value::<card::PanelIconExpandedAngle>(serde_json::json!("0"))
+        .expect_err("undocumented panel icon angles must be rejected");
+    assert!(error.to_string().contains("unknown variant"));
 }
 
 #[test]

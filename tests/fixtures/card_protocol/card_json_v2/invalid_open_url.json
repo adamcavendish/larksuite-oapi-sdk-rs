@@ -1,0 +1,11 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "interactive_container",
+      "elements": [{"tag": "markdown", "content": "Open details"}],
+      "behaviors": [{"type": "open_url", "default_url": ""}]
+    }]
+  }
+}
