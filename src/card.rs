@@ -6,12 +6,12 @@
 //! # Example
 //!
 //! ```rust
-//! use larksuite_oapi_sdk_rs::card::{Card, CardConfig, CardHeader, TemplateColor};
+//! use larksuite_oapi_sdk_rs::card::v1::{Card, Div, Element, Header, Text};
+//! use larksuite_oapi_sdk_rs::card::TemplateColor;
 //!
 //! let card = Card::new()
-//!     .config(CardConfig::new().wide_screen_mode(true))
-//!     .header(CardHeader::new("Hello").template(TemplateColor::Blue))
-//!     .element(larksuite_oapi_sdk_rs::card::md("**world**"));
+//!     .header(Header::new("Hello").template(TemplateColor::Blue))
+//!     .element(Element::Div(Div::new(Text::lark_md("**world**"))));
 //!
 //! let json = card.to_json();
 //! ```
@@ -123,6 +123,10 @@ pub type MessageCardActionLayout = ActionLayout;
 
 // ── Card top-level ──
 
+/// Historical incomplete Card JSON builder.
+///
+/// Use [`v1::Card`] for Card JSON 1.0 or [`v2::Card`] for Card JSON 2.0.
+#[deprecated(note = "use card::v1::Card for Card JSON 1.0 or card::v2::Card for Card JSON 2.0")]
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Card {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -137,6 +141,7 @@ pub struct Card {
     pub card_link: Option<CardUrl>,
 }
 
+#[allow(deprecated)]
 impl Card {
     pub fn new() -> Self {
         Self::default()

@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 
+use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize};
 
 // ── Typed callback types ──
@@ -31,32 +32,22 @@ pub struct CallbackContext {
 }
 
 /// Action detail for card action trigger callbacks.
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default)]
 #[non_exhaustive]
 pub struct CallbackAction {
     /// Historical object-shaped callback payload retained for source
     /// compatibility with the channel-normalized action API.
-    #[serde(default)]
     pub value: BTreeMap<String, crate::JsonValue>,
     /// Exact callback payload, including the string form permitted by the
     /// current `card.action.trigger` schema.
-    #[serde(skip)]
     pub raw_value: Option<crate::JsonValue>,
-    #[serde(default)]
     pub tag: String,
-    #[serde(default)]
     pub option: String,
-    #[serde(default)]
     pub timezone: String,
-    #[serde(default)]
     pub name: String,
-    #[serde(default)]
     pub form_value: BTreeMap<String, crate::JsonValue>,
-    #[serde(default)]
     pub input_value: String,
-    #[serde(default)]
     pub options: Vec<String>,
-    #[serde(default)]
     pub checked: bool,
 }
 
@@ -113,6 +104,29 @@ impl<'de> Deserialize<'de> for CallbackAction {
             options: wire.options,
             checked: wire.checked,
         })
+    }
+}
+
+impl Serialize for CallbackAction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let value = self.raw_value.as_ref().cloned().unwrap_or_else(|| {
+            crate::JsonValue::from_serializable(&self.value)
+                .expect("callback value map is always serializable")
+        });
+        let mut state = serializer.serialize_struct("CallbackAction", 9)?;
+        state.serialize_field("value", &value)?;
+        state.serialize_field("tag", &self.tag)?;
+        state.serialize_field("option", &self.option)?;
+        state.serialize_field("timezone", &self.timezone)?;
+        state.serialize_field("name", &self.name)?;
+        state.serialize_field("form_value", &self.form_value)?;
+        state.serialize_field("input_value", &self.input_value)?;
+        state.serialize_field("options", &self.options)?;
+        state.serialize_field("checked", &self.checked)?;
+        state.end()
     }
 }
 

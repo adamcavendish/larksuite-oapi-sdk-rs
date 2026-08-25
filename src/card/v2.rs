@@ -2600,6 +2600,7 @@ pub enum ValidationError {
     MissingPickerValue(&'static str),
     MissingFormControlName(&'static str),
     ButtonBehaviorConflict,
+    FormActionOutsideForm,
     MissingButtonBehavior,
     TooManyCheckerButtons(usize),
     TooManyHeaderTags(usize),
@@ -2620,6 +2621,11 @@ pub enum ValidationError {
     MissingFormButtonAction,
     ButtonTextRequiresPlainText,
     ButtonTextTooLong(usize),
+    PlainTextRequired(&'static str),
+    TextTooLong {
+        field: &'static str,
+        length: usize,
+    },
     InvalidControlWidth(String),
     InvalidInputMaxLength(u32),
     InvalidInitialOption(&'static str, String),
@@ -2713,6 +2719,9 @@ impl std::fmt::Display for ValidationError {
             Self::ButtonBehaviorConflict => {
                 f.write_str("form button must use form_action_type instead of behaviors")
             }
+            Self::FormActionOutsideForm => {
+                f.write_str("form_action_type is only valid for buttons inside a form")
+            }
             Self::MissingButtonBehavior => f.write_str("button outside a form requires a behavior"),
             Self::TooManyCheckerButtons(count) => {
                 write!(
@@ -2765,6 +2774,13 @@ impl std::fmt::Display for ValidationError {
                 write!(
                     f,
                     "button text supports at most 100 characters, got {length}"
+                )
+            }
+            Self::PlainTextRequired(field) => write!(f, "{field} requires plain_text"),
+            Self::TextTooLong { field, length } => {
+                write!(
+                    f,
+                    "{field} exceeds its maximum length with {length} characters"
                 )
             }
             Self::InvalidControlWidth(width) => write!(f, "invalid control width {width:?}"),
@@ -2864,11 +2880,54 @@ fn validate_control(
     in_form: bool,
 ) -> Result<(), ValidationError> {
     validate_behaviors(&control.behaviors, false)?;
+    validate_optional_plain_text(control.placeholder.as_ref(), "control.placeholder", None)?;
+    validate_optional_plain_text(
+        control.disabled_tips.as_ref(),
+        "control.disabled_tips",
+        None,
+    )?;
+    validate_optional_plain_text(control.hover_tips.as_ref(), "control.hover_tips", None)?;
+    validate_optional_confirm(control.confirm.as_ref())?;
     if in_form && control.name.as_deref().is_none_or(str::is_empty) {
         return Err(ValidationError::MissingFormControlName(tag));
     }
     validate_margin(control.margin.as_deref())?;
     validate_control_width(control.width.as_deref())?;
+    Ok(())
+}
+
+fn validate_plain_text(
+    text: &Text,
+    field: &'static str,
+    maximum_length: Option<usize>,
+) -> Result<(), ValidationError> {
+    if text.tag != TextTag::PlainText {
+        return Err(ValidationError::PlainTextRequired(field));
+    }
+    if let Some(maximum_length) = maximum_length {
+        let length = text.content.chars().count();
+        if length > maximum_length {
+            return Err(ValidationError::TextTooLong { field, length });
+        }
+    }
+    Ok(())
+}
+
+fn validate_optional_plain_text(
+    text: Option<&Text>,
+    field: &'static str,
+    maximum_length: Option<usize>,
+) -> Result<(), ValidationError> {
+    text.map_or(Ok(()), |text| {
+        validate_plain_text(text, field, maximum_length)
+    })
+}
+
+fn validate_optional_confirm(confirm: Option<&Confirm>) -> Result<(), ValidationError> {
+    if let Some(confirm) = confirm {
+        validate_plain_text(&confirm.title, "confirm.title", None)?;
+        validate_plain_text(&confirm.text, "confirm.text", None)?;
+    }
     Ok(())
 }
 
@@ -3043,6 +3102,11 @@ fn image_combination_limit(mode: ImageCombinationMode) -> usize {
 
 fn validate_image_combination(element: &ImageCombination) -> Result<(), ValidationError> {
     validate_margin(element.margin.as_deref())?;
+    if let Some(corner_radius) = &element.corner_radius
+        && !valid_corner_radius(corner_radius)
+    {
+        return Err(ValidationError::InvalidCornerRadius(corner_radius.clone()));
+    }
     let limit = image_combination_limit(element.combination_mode);
     if element.img_list.len() > limit {
         return Err(ValidationError::TooManyImagesInCombination {
@@ -3081,6 +3145,13 @@ fn validate_div(div: &Div) -> Result<(), ValidationError> {
 
 fn validate_image(image: &Image) -> Result<(), ValidationError> {
     validate_margin(image.margin.as_deref())?;
+    validate_plain_text(&image.alt, "img.alt", None)?;
+    validate_optional_plain_text(image.title.as_ref(), "img.title", None)?;
+    if let Some(corner_radius) = &image.corner_radius
+        && !valid_corner_radius(corner_radius)
+    {
+        return Err(ValidationError::InvalidCornerRadius(corner_radius.clone()));
+    }
     if image.size.is_some() && matches!(image.scale_type, Some(ImageScale::FitHorizontal)) {
         return Err(ValidationError::ImageSizeRequiresCropScale);
     }
@@ -3117,6 +3188,17 @@ fn validate_collapsible_panel(panel: &CollapsiblePanel) -> Result<(), Validation
 
 fn validate_interactive_container(container: &InteractiveContainer) -> Result<(), ValidationError> {
     validate_behaviors(&container.behaviors, true)?;
+    validate_optional_plain_text(
+        container.disabled_tips.as_ref(),
+        "interactive_container.disabled_tips",
+        None,
+    )?;
+    validate_optional_plain_text(
+        container.hover_tips.as_ref(),
+        "interactive_container.hover_tips",
+        None,
+    )?;
+    validate_optional_confirm(container.confirm.as_ref())?;
     validate_layout(
         container.padding.as_deref(),
         container.margin.as_deref(),
@@ -3180,6 +3262,9 @@ fn validate_button(button: &Button) -> Result<(), ValidationError> {
             return Err(ValidationError::ButtonTextTooLong(length));
         }
     }
+    validate_optional_plain_text(button.disabled_tips.as_ref(), "button.disabled_tips", None)?;
+    validate_optional_plain_text(button.hover_tips.as_ref(), "button.hover_tips", None)?;
+    validate_optional_confirm(button.confirm.as_ref())?;
     validate_behaviors(&button.behaviors, false)?;
     validate_margin(button.margin.as_deref())?;
     validate_control_width(button.width.as_deref())
@@ -3187,6 +3272,11 @@ fn validate_button(button: &Button) -> Result<(), ValidationError> {
 
 fn validate_input(input: &Input) -> Result<(), ValidationError> {
     validate_behaviors(&input.behaviors, false)?;
+    validate_optional_plain_text(input.placeholder.as_ref(), "input.placeholder", Some(100))?;
+    validate_optional_plain_text(input.label.as_ref(), "input.label", None)?;
+    validate_optional_plain_text(input.disabled_tips.as_ref(), "input.disabled_tips", None)?;
+    validate_optional_plain_text(input.hover_tips.as_ref(), "input.hover_tips", None)?;
+    validate_optional_confirm(input.confirm.as_ref())?;
     validate_margin(input.margin.as_deref())?;
     validate_control_width(input.width.as_deref())?;
     if input
@@ -3200,9 +3290,13 @@ fn validate_input(input: &Input) -> Result<(), ValidationError> {
     Ok(())
 }
 
-fn validate_options(options: &[SelectOption]) -> Result<(), ValidationError> {
+fn validate_options(
+    options: &[SelectOption],
+    maximum_text_length: Option<usize>,
+) -> Result<(), ValidationError> {
     let mut values = BTreeSet::new();
     for option in options {
+        validate_plain_text(&option.text, "select_option.text", maximum_text_length)?;
         if !values.insert(&option.value) {
             return Err(ValidationError::DuplicateOptionValue(option.value.clone()));
         }
@@ -3223,6 +3317,16 @@ fn validate_person_options(options: &[PersonOption]) -> Result<(), ValidationErr
 fn validate_image_options(options: &[ImageSelectOption]) -> Result<(), ValidationError> {
     let mut values = BTreeSet::new();
     for option in options {
+        validate_optional_plain_text(
+            option.disabled_tips.as_ref(),
+            "select_img.option.disabled_tips",
+            None,
+        )?;
+        validate_optional_plain_text(
+            option.hover_tips.as_ref(),
+            "select_img.option.hover_tips",
+            None,
+        )?;
         if !values.insert(&option.value) {
             return Err(ValidationError::DuplicateOptionValue(option.value.clone()));
         }
@@ -3564,6 +3668,9 @@ fn validate_element(
         }
         Element::Button(element) => {
             validate_button(element)?;
+            if !in_form && element.form_action_type.is_some() {
+                return Err(ValidationError::FormActionOutsideForm);
+            }
             if in_form && element.form_action_type.is_some() && !element.behaviors.is_empty() {
                 return Err(ValidationError::ButtonBehaviorConflict);
             }
@@ -3641,13 +3748,13 @@ fn validate_element(
             if options.is_empty() {
                 return Err(ValidationError::EmptyOptions("overflow"));
             }
-            validate_options(options)?;
+            validate_options(options, Some(100))?;
             validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
         Element::SelectStatic(element) => {
             validate_control(&element.control, "select_static", in_form)?;
             if let Some(options) = &element.options {
-                validate_options(options)?;
+                validate_options(options, None)?;
             }
             validate_initial_option(
                 "select_static",
@@ -3666,7 +3773,7 @@ fn validate_element(
         Element::MultiSelectStatic(element) => {
             validate_control(&element.control, "multi_select_static", in_form)?;
             if let Some(options) = &element.options {
-                validate_options(options)?;
+                validate_options(options, None)?;
             }
             validate_selected_values(
                 "multi_select_static",

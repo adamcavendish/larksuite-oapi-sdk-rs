@@ -1,0 +1,10 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "input",
+      "placeholder": {"tag": "lark_md", "content": "**Enter a reason**"}
+    }]
+  }
+}

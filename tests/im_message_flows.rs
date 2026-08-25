@@ -4,7 +4,7 @@ use common::{http_response, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::LarkError;
-use larksuite_oapi_sdk_rs::card::{Card, CardHeader, div};
+use larksuite_oapi_sdk_rs::card::v1::{Card, Div, Element, Header, Text};
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::im::v1::{
     CreateMessageReqBody, MessageType, PatchMessageReqBody, ReplyMessageReqBody,
@@ -13,6 +13,10 @@ use larksuite_oapi_sdk_rs::service::im::v1::{
 use serde::{Serialize, Serializer};
 
 struct FailingSerialize;
+
+fn div(content: impl Into<String>) -> Element {
+    Element::Div(Div::new(Text::lark_md(content)))
+}
 
 impl Serialize for FailingSerialize {
     fn serialize<S>(&self, _: S) -> Result<S::Ok, S::Error>
@@ -103,7 +107,7 @@ fn interactive_card_content_accepts_pre_serialized_card_json() {
 #[test]
 fn card_can_be_sent_as_reply_and_patched_later() {
     let card = Card::new()
-        .header(CardHeader::new("Working"))
+        .header(Header::new("Working"))
         .element(div("Preparing answer"));
 
     let reply = ReplyMessageReqBody::interactive_card(&card)
@@ -118,7 +122,7 @@ fn card_can_be_sent_as_reply_and_patched_later() {
     assert_eq!(reply_content["header"]["title"]["content"], "Working");
 
     let updated = Card::new()
-        .header(CardHeader::new("Done"))
+        .header(Header::new("Done"))
         .element(div("Final answer"));
     let patch = PatchMessageReqBody::interactive_card(&updated).unwrap();
     let patch_json = serde_json::to_value(&patch).unwrap();
@@ -130,7 +134,7 @@ fn card_can_be_sent_as_reply_and_patched_later() {
 #[test]
 fn card_can_be_created_and_updated_as_interactive_message() {
     let card = Card::new()
-        .header(CardHeader::new("Live"))
+        .header(Header::new("Live"))
         .element(div("Initial"));
     let create = CreateMessageReqBody::interactive_card("oc_group", &card).unwrap();
     let create_json = serde_json::to_value(&create).unwrap();
@@ -155,7 +159,7 @@ async fn reply_card_then_patch_uses_typed_im_methods() {
 
     let client = client_for(addr);
     let card = Card::new()
-        .header(CardHeader::new("Working"))
+        .header(Header::new("Working"))
         .element(div("Preparing answer"));
     let body = ReplyMessageReqBody::interactive_card(&card)
         .unwrap()
@@ -170,7 +174,7 @@ async fn reply_card_then_patch_uses_typed_im_methods() {
     assert_eq!(sent.data.unwrap().message_id.as_deref(), Some("om_live"));
 
     let final_card = Card::new()
-        .header(CardHeader::new("Done"))
+        .header(Header::new("Done"))
         .element(div("Final answer"));
     let patch = PatchMessageReqBody::interactive_card(&final_card).unwrap();
     let patched = client
