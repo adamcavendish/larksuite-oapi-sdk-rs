@@ -1,0 +1,18 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [
+      {"tag": "select_static", "element_id": "severity", "name": "severity", "required": true, "placeholder": {"tag": "plain_text", "content": "Severity"}, "width": "100px", "disabled": false, "disabled_tips": {"tag": "plain_text", "content": "Locked"}, "hover_tips": {"tag": "plain_text", "content": "Choose severity"}, "behaviors": [{"type": "callback", "value": {"control": "severity"}}], "confirm": {"title": {"tag": "plain_text", "content": "Apply?"}, "text": {"tag": "plain_text", "content": "Update severity?"}}, "margin": "2px", "type": "text", "options": [{"text": {"tag": "plain_text", "content": "S1"}, "value": "s1", "icon": {"tag": "standard_icon", "token": "right_small"}}, {"text": {"tag": "plain_text", "content": "S2"}, "value": "s2"}], "initial_option": "s2", "initial_index": 1},
+      {"tag": "multi_select_static", "name": "labels", "options": [{"text": {"tag": "plain_text", "content": "Backend"}, "value": "backend"}, {"text": {"tag": "plain_text", "content": "Urgent"}, "value": "urgent"}], "selected_values": ["backend", "urgent"], "type": "default"},
+      {"tag": "select_person", "name": "owner", "options": [{"value": "ou_owner"}, {"value": "ou_reviewer"}], "initial_option": "ou_owner", "type": "text"},
+      {"tag": "multi_select_person", "name": "reviewers", "options": [{"value": "ou_owner"}, {"value": "ou_reviewer"}], "selected_values": ["ou_reviewer"], "type": "default"},
+      {"tag": "date_picker", "name": "due_date", "placeholder": {"tag": "plain_text", "content": "Due date"}, "initial_date": "2026-08-25"},
+      {"tag": "picker_time", "name": "due_time", "placeholder": {"tag": "plain_text", "content": "Due time"}, "initial_time": "09:30"},
+      {"tag": "picker_datetime", "name": "release_at", "placeholder": {"tag": "plain_text", "content": "Release time"}, "initial_datetime": "2026-08-25 09:30"},
+      {"tag": "select_img", "element_id": "cover", "name": "cover", "options": [{"img_key": "img_v2_a", "value": "cover_a", "disabled": false, "disabled_tips": {"tag": "plain_text", "content": "Unavailable"}, "hover_tips": {"tag": "plain_text", "content": "Select cover"}}], "multi_select": false, "layout": "trisect", "aspect_ratio": "16:9", "value": {"source": "cover_picker"}, "behaviors": [{"type": "callback", "value": {"control": "cover"}}]},
+      {"tag": "checker", "element_id": "confirmed", "name": "confirmed", "checked": false, "text": {"tag": "lark_md", "content": "I **confirm** the release"}, "overall_checkable": true, "button_area": {"pc_display_rule": "on_hover", "buttons": [{"tag": "button", "text": {"tag": "plain_text", "content": "View runbook"}, "behaviors": [{"type": "open_url", "default_url": "https://example.com/runbook"}]}]}, "checked_style": {"show_strikethrough": true, "opacity": 0.5}, "padding": "-1px 4px", "behaviors": [{"type": "callback", "value": {"control": "confirmed"}}]},
+      {"tag": "form", "name": "cover_form", "elements": [{"tag": "select_img", "name": "form_cover", "options": [{"img_key": "img_v2_form", "value": "cover_form"}], "can_preview": true, "behaviors": [{"type": "callback", "value": {"control": "form_cover"}}]}, {"tag": "button", "text": {"tag": "plain_text", "content": "Submit"}, "name": "submit_cover", "form_action_type": "submit"}]}
+    ]
+  }
+}

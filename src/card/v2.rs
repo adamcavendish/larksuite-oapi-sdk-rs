@@ -860,13 +860,21 @@ fn validate_control_element_fields(value: &serde_json::Value, tag: &str) -> Resu
         "date_picker" => &["initial_date"],
         "picker_time" => &["initial_time"],
         "picker_datetime" => &["initial_datetime"],
-        "select_img" => &["options", "multi_select", "layout"],
+        "select_img" => &[
+            "options",
+            "multi_select",
+            "layout",
+            "aspect_ratio",
+            "can_preview",
+            "value",
+        ],
         "checker" => &[
             "checked",
             "text",
             "overall_checkable",
             "button_area",
             "checked_style",
+            "padding",
         ],
         _ => return Ok(()),
     };
@@ -2441,6 +2449,15 @@ pub enum ImageSelectLayout {
     Bisect,
     Trisect,
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ImageSelectAspectRatio {
+    #[serde(rename = "1:1")]
+    OneToOne,
+    #[serde(rename = "4:3")]
+    FourToThree,
+    #[serde(rename = "16:9")]
+    SixteenToNine,
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ImageSelect {
@@ -2453,7 +2470,7 @@ pub struct ImageSelect {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub layout: Option<ImageSelectLayout>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub aspect_ratio: Option<String>,
+    pub aspect_ratio: Option<ImageSelectAspectRatio>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub can_preview: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2492,6 +2509,8 @@ pub struct Checker {
     pub button_area: Option<CheckerButtonArea>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub checked_style: Option<CheckedStyle>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub padding: Option<String>,
 }
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -2525,6 +2544,7 @@ impl Checker {
             overall_checkable: None,
             button_area: None,
             checked_style: None,
+            padding: None,
         }
     }
 }
@@ -2602,6 +2622,11 @@ pub enum ValidationError {
     ButtonTextTooLong(usize),
     InvalidControlWidth(String),
     InvalidInputMaxLength(u32),
+    InvalidInitialOption(&'static str, String),
+    InvalidInitialIndex(u32),
+    InvalidPickerInitialValue(&'static str, String),
+    MissingImageSelectBehavior,
+    ImagePreviewOutsideForm,
 }
 impl std::fmt::Display for ValidationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -2745,6 +2770,21 @@ impl std::fmt::Display for ValidationError {
             Self::InvalidControlWidth(width) => write!(f, "invalid control width {width:?}"),
             Self::InvalidInputMaxLength(length) => {
                 write!(f, "input max_length must be 1 through 1000, got {length}")
+            }
+            Self::InvalidInitialOption(tag, value) => {
+                write!(f, "{tag} initial option {value:?} is not in options")
+            }
+            Self::InvalidInitialIndex(index) => {
+                write!(f, "select_static initial_index {index} is outside options")
+            }
+            Self::InvalidPickerInitialValue(tag, value) => {
+                write!(f, "invalid {tag} initial value {value:?}")
+            }
+            Self::MissingImageSelectBehavior => {
+                f.write_str("select_img requires at least one behavior")
+            }
+            Self::ImagePreviewOutsideForm => {
+                f.write_str("select_img.can_preview is only supported inside a form")
             }
         }
     }
@@ -3170,6 +3210,147 @@ fn validate_options(options: &[SelectOption]) -> Result<(), ValidationError> {
     Ok(())
 }
 
+fn validate_person_options(options: &[PersonOption]) -> Result<(), ValidationError> {
+    let mut values = BTreeSet::new();
+    for option in options {
+        if !values.insert(&option.value) {
+            return Err(ValidationError::DuplicateOptionValue(option.value.clone()));
+        }
+    }
+    Ok(())
+}
+
+fn validate_image_options(options: &[ImageSelectOption]) -> Result<(), ValidationError> {
+    let mut values = BTreeSet::new();
+    for option in options {
+        if !values.insert(&option.value) {
+            return Err(ValidationError::DuplicateOptionValue(option.value.clone()));
+        }
+    }
+    Ok(())
+}
+
+fn validate_initial_option(
+    tag: &'static str,
+    initial: Option<&str>,
+    options: Option<&[SelectOption]>,
+) -> Result<(), ValidationError> {
+    if let (Some(initial), Some(options)) = (initial, options)
+        && !options.iter().any(|option| option.value == initial)
+    {
+        return Err(ValidationError::InvalidInitialOption(
+            tag,
+            initial.to_string(),
+        ));
+    }
+    Ok(())
+}
+
+fn validate_selected_values(
+    tag: &'static str,
+    selected: Option<&[String]>,
+    options: Option<&[SelectOption]>,
+) -> Result<(), ValidationError> {
+    if let (Some(selected), Some(options)) = (selected, options) {
+        for value in selected {
+            if !options.iter().any(|option| option.value == *value) {
+                return Err(ValidationError::InvalidInitialOption(tag, value.clone()));
+            }
+        }
+    }
+    Ok(())
+}
+
+fn validate_person_initial_option(
+    tag: &'static str,
+    initial: Option<&str>,
+    options: Option<&[PersonOption]>,
+) -> Result<(), ValidationError> {
+    if let (Some(initial), Some(options)) = (initial, options)
+        && !options.iter().any(|option| option.value == initial)
+    {
+        return Err(ValidationError::InvalidInitialOption(
+            tag,
+            initial.to_string(),
+        ));
+    }
+    Ok(())
+}
+
+fn validate_person_selected_values(
+    tag: &'static str,
+    selected: Option<&[String]>,
+    options: Option<&[PersonOption]>,
+) -> Result<(), ValidationError> {
+    if let (Some(selected), Some(options)) = (selected, options) {
+        for value in selected {
+            if !options.iter().any(|option| option.value == *value) {
+                return Err(ValidationError::InvalidInitialOption(tag, value.clone()));
+            }
+        }
+    }
+    Ok(())
+}
+
+fn valid_date(value: &str) -> bool {
+    let mut pieces = value.split('-');
+    let year = pieces.next();
+    let month = pieces.next();
+    let day = pieces.next();
+    value.len() == 10
+        && pieces.next().is_none()
+        && year.is_some_and(|value| {
+            value.len() == 4 && value.bytes().all(|byte| byte.is_ascii_digit())
+        })
+        && month
+            .filter(|value| value.len() == 2 && value.bytes().all(|byte| byte.is_ascii_digit()))
+            .and_then(|value| value.parse::<u8>().ok())
+            .is_some_and(|value| (1..=12).contains(&value))
+        && day
+            .filter(|value| value.len() == 2 && value.bytes().all(|byte| byte.is_ascii_digit()))
+            .and_then(|value| value.parse::<u8>().ok())
+            .is_some_and(|value| (1..=31).contains(&value))
+}
+
+fn valid_time(value: &str) -> bool {
+    let mut pieces = value.split(':');
+    let hour = pieces.next();
+    let minute = pieces.next();
+    value.len() == 5
+        && pieces.next().is_none()
+        && hour
+            .filter(|value| value.len() == 2 && value.bytes().all(|byte| byte.is_ascii_digit()))
+            .and_then(|value| value.parse::<u8>().ok())
+            .is_some_and(|value| value <= 23)
+        && minute
+            .filter(|value| value.len() == 2 && value.bytes().all(|byte| byte.is_ascii_digit()))
+            .and_then(|value| value.parse::<u8>().ok())
+            .is_some_and(|value| value <= 59)
+}
+
+fn validate_image_select(select: &ImageSelect) -> Result<(), ValidationError> {
+    validate_control(&select.control, "select_img", false)?;
+    if select.control.behaviors.is_empty() {
+        return Err(ValidationError::MissingImageSelectBehavior);
+    }
+    validate_image_options(&select.options)
+}
+
+fn validate_checker(checker: &Checker) -> Result<(), ValidationError> {
+    validate_control(&checker.control, "checker", false)?;
+    if let Some(padding) = checker.padding.as_deref()
+        && !valid_box_pixels(padding, -99, 99)
+    {
+        return Err(ValidationError::InvalidPadding(padding.to_string()));
+    }
+    if let Some(button_area) = &checker.button_area {
+        for button in &button_area.buttons {
+            validate_button(button)?;
+        }
+    }
+    Ok(())
+}
+
 fn validate_table(table: &Table) -> Result<(), ValidationError> {
     if table.columns.is_empty() {
         return Err(ValidationError::EmptyTableColumns);
@@ -3468,6 +3649,18 @@ fn validate_element(
             if let Some(options) = &element.options {
                 validate_options(options)?;
             }
+            validate_initial_option(
+                "select_static",
+                element.initial_option.as_deref(),
+                element.options.as_deref(),
+            )?;
+            if element.initial_option.is_none()
+                && let (Some(index), Some(options)) =
+                    (element.initial_index, element.options.as_deref())
+                && index > options.len() as u32
+            {
+                return Err(ValidationError::InvalidInitialIndex(index));
+            }
             validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
         Element::MultiSelectStatic(element) => {
@@ -3475,20 +3668,49 @@ fn validate_element(
             if let Some(options) = &element.options {
                 validate_options(options)?;
             }
+            validate_selected_values(
+                "multi_select_static",
+                element.selected_values.as_deref(),
+                element.options.as_deref(),
+            )?;
             validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
         Element::SelectPerson(element) => {
             validate_control(&element.control, "select_person", in_form)?;
+            if let Some(options) = &element.options {
+                validate_person_options(options)?;
+            }
+            validate_person_initial_option(
+                "select_person",
+                element.initial_option.as_deref(),
+                element.options.as_deref(),
+            )?;
             validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
         Element::MultiSelectPerson(element) => {
             validate_control(&element.control, "multi_select_person", in_form)?;
+            if let Some(options) = &element.options {
+                validate_person_options(options)?;
+            }
+            validate_person_selected_values(
+                "multi_select_person",
+                element.selected_values.as_deref(),
+                element.options.as_deref(),
+            )?;
             validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
         Element::DatePicker(element) => {
             validate_control(&element.control, "date_picker", in_form)?;
             if element.initial_date.is_none() && element.control.placeholder.is_none() {
                 return Err(ValidationError::MissingPickerValue("date_picker"));
+            }
+            if let Some(value) = element.initial_date.as_deref()
+                && !valid_date(value)
+            {
+                return Err(ValidationError::InvalidPickerInitialValue(
+                    "date_picker",
+                    value.to_string(),
+                ));
             }
             validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
@@ -3497,6 +3719,14 @@ fn validate_element(
             if element.initial_time.is_none() && element.control.placeholder.is_none() {
                 return Err(ValidationError::MissingPickerValue("picker_time"));
             }
+            if let Some(value) = element.initial_time.as_deref()
+                && !valid_time(value)
+            {
+                return Err(ValidationError::InvalidPickerInitialValue(
+                    "picker_time",
+                    value.to_string(),
+                ));
+            }
             validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
         Element::PickerDatetime(element) => {
@@ -3504,12 +3734,27 @@ fn validate_element(
             if element.initial_datetime.is_none() && element.control.placeholder.is_none() {
                 return Err(ValidationError::MissingPickerValue("picker_datetime"));
             }
+            if let Some(value) = element.initial_datetime.as_deref() {
+                let (date, time) = value.split_once(' ').unwrap_or_default();
+                if !valid_date(date) || !valid_time(time) {
+                    return Err(ValidationError::InvalidPickerInitialValue(
+                        "picker_datetime",
+                        value.to_string(),
+                    ));
+                }
+            }
             validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
         Element::SelectImg(element) => {
-            validate_control(&element.control, "select_img", in_form)?;
+            validate_image_select(element)?;
+            if in_form && element.control.name.as_deref().is_none_or(str::is_empty) {
+                return Err(ValidationError::MissingFormControlName("select_img"));
+            }
             if element.multi_select == Some(true) && !in_form {
                 return Err(ValidationError::MultiSelectImageOutsideForm);
+            }
+            if element.can_preview.is_some() && !in_form {
+                return Err(ValidationError::ImagePreviewOutsideForm);
             }
             if element.options.is_empty() {
                 return Err(ValidationError::EmptyOptions("select_img"));
@@ -3517,7 +3762,10 @@ fn validate_element(
             validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
         Element::Checker(element) => {
-            validate_control(&element.control, "checker", in_form)?;
+            validate_checker(element)?;
+            if in_form && element.control.name.as_deref().is_none_or(str::is_empty) {
+                return Err(ValidationError::MissingFormControlName("checker"));
+            }
             if let Some(button_area) = &element.button_area
                 && button_area.buttons.len() > 3
             {

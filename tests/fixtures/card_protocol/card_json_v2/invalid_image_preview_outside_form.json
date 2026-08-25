@@ -1,0 +1,12 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [{
+      "tag": "select_img",
+      "options": [{"img_key": "img_v2_a", "value": "cover_a"}],
+      "can_preview": true,
+      "behaviors": [{"type": "callback", "value": {}}]
+    }]
+  }
+}
