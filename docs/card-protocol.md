@@ -65,7 +65,7 @@ Card JSON 2.0 and CardKit are separate tracks. CardKit's typed Card JSON 2.0
 document transport and ordered text-content streaming have their own manifest
 and transport fixtures; they are not optional extensions of a Card JSON 1.0
 fixture. CardKit settings, element mutation, and batch-action helpers remain
-separate follow-up surfaces.
+separate protocol surfaces with their own exact transport fixtures.
 
 ## Gate status
 
@@ -92,7 +92,7 @@ round-trip coverage are all present. A complete component group does not imply
 that the incompatible Card JSON 2.0 root or unrelated interaction and update
 surfaces are complete.
 
-## CardKit document and content-stream coverage
+## CardKit document, mutation, and instance coverage
 
 `card::cardkit::CardDocument` accepts only a locally validated Card JSON 2.0
 document and emits CardKit's escaped `type: "card_json"` payload. The typed
@@ -102,7 +102,18 @@ text or Markdown element.
 
 Each CardKit update carries a caller-provided idempotency key and a positive
 sequence. One `CardKitUpdateSession` owns the sequence across document and
-content updates, advancing it only after a successful request; a failed update
-can therefore be retried with the same sequence and key. Content updates
-intentionally send the complete current value: Lark renders a prefix extension
-as a typewriter update and otherwise replaces the element content.
+content, settings, element, and batch updates, advancing it only after a
+successful request; a failed update can therefore be retried with the same
+sequence and key. Content updates intentionally send the complete current
+value: Lark renders a prefix extension as a typewriter update and otherwise
+replaces the element content.
+
+The typed mutation surface retains Card JSON 2.0 settings and full elements,
+validates partial-element and insertion constraints, and encodes the nested
+objects required by CardKit batch actions exactly once. It also covers template
+instance creation and variable updates (a name-keyed object with open JSON
+values). The pinned Go CardKit source does not expose Card Instance resources,
+so those endpoints are normatively tracked against the official documentation
+rather than unrelated Go template models. The raw generated resource methods
+remain available for any future CardKit endpoint not yet given a typed
+composition layer.

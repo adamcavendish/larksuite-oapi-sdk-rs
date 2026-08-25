@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "omissions": [
+    {
+      "resource_file": "service/cardkit/v1/resource.go",
+      "receiver": "card",
+      "operation": "IdConvert",
+      "reason": "The CardKit API is deprecated and is intentionally omitted before the SDK releases CardKit support.",
+      "source": "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/cardkit-v1/card/id_convert"
+    }
+  ]
+}

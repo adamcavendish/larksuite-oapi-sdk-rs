@@ -1,17 +1,35 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "go_catalog_sha256": "b1317191a54544afa09a924719bdf93d16b00eeb0ac60bb100ee49fb944216e8",
   "summary": {
     "go_contracts": 1642,
-    "rust_direct_contracts": 1625,
+    "rust_direct_contracts": 1624,
     "go_compatibility_bridge_contracts": 194,
-    "typed_matches": 1486,
+    "typed_matches": 1485,
     "bridge_matches": 156,
     "metadata_mismatches": 0,
     "missing_contracts": 0,
+    "intentional_omissions": 1,
     "unparsed_rust_requests": 0
   },
   "metadata_mismatches": null,
   "missing_contracts": null,
+  "intentional_omissions": [
+    {
+      "contract": {
+        "resource_file": "service/cardkit/v1/resource.go",
+        "receiver": "card",
+        "operation": "IdConvert",
+        "method": "POST",
+        "path": "/open-apis/cardkit/v1/cards/id_convert",
+        "token_types": [
+          "Tenant"
+        ],
+        "file_upload": false
+      },
+      "reason": "The CardKit API is deprecated and is intentionally omitted before the SDK releases CardKit support.",
+      "source": "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/cardkit-v1/card/id_convert"
+    }
+  ],
   "unparsed_rust_requests": null
 }

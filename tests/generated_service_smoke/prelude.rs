@@ -161,7 +161,6 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
         CreateCardInstanceQuery as CreateCardkitInstanceQuery, CreateCardInstanceReqBody,
         CreateCardQuery as CreateCardkitCardQuery, CreateCardReqBody,
         DeleteCardElementQuery as DeleteCardkitElementQuery,
-        IdConvertCardQuery as IdConvertCardkitCardQuery, IdConvertCardReqBody,
         PatchCardElementQuery as PatchCardkitElementQuery, PatchCardElementReqBody,
         SettingsCardQuery as SettingsCardkitCardQuery, SettingsCardReqBody,
         UpdateCardElementQuery as UpdateCardkitElementQuery, UpdateCardElementReqBody,

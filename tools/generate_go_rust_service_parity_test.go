@@ -220,7 +220,7 @@ func TestMetadataMatchingNormalizesTokenOrder(t *testing.T) {
 }
 
 func TestCurrentParityBaselineHasNoUnresolvedContracts(t *testing.T) {
-	generated, err := generate("go_service_catalog.json", "..")
+	generated, err := generate("go_service_catalog.json", "go_rust_service_parity_omissions.json", "..")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,10 +229,13 @@ func TestCurrentParityBaselineHasNoUnresolvedContracts(t *testing.T) {
 	if err := json.Unmarshal(generated, &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.SchemaVersion != 2 {
-		t.Fatalf("schema version = %d, want 2", report.SchemaVersion)
+	if report.SchemaVersion != 3 {
+		t.Fatalf("schema version = %d, want 3", report.SchemaVersion)
 	}
 	if report.Summary.MetadataMismatches != 0 || report.Summary.MissingContracts != 0 || report.Summary.UnparsedRustRequests != 0 {
 		t.Fatalf("parity summary = %#v", report.Summary)
+	}
+	if report.Summary.IntentionalOmissions != 1 || len(report.IntentionalOmissions) != 1 {
+		t.Fatalf("intentional omissions = %#v", report.IntentionalOmissions)
 	}
 }
