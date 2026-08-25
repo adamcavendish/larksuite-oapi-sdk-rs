@@ -102,8 +102,7 @@ impl Card {
             return Err(ValidationError::TooManyTables(table_count));
         }
         for element in &body.elements {
-            validate_element(
-                element,
+            element.validate(
                 &mut element_ids,
                 &mut form_state,
                 &mut element_count,
@@ -888,58 +887,60 @@ pub enum Element {
     Checker(Checker),
 }
 
-fn validate_control_element_fields(value: &serde_json::Value, tag: &str) -> Result<(), String> {
-    let extra_fields: &[&str] = match tag {
-        "overflow" => &["options"],
-        "select_static" => &["options", "initial_option", "initial_index", "type"],
-        "multi_select_static" => &["options", "selected_values", "type"],
-        "select_person" => &["options", "initial_option", "type"],
-        "multi_select_person" => &["options", "selected_values", "type"],
-        "date_picker" => &["initial_date"],
-        "picker_time" => &["initial_time"],
-        "picker_datetime" => &["initial_datetime"],
-        "select_img" => &[
-            "options",
-            "multi_select",
-            "layout",
-            "aspect_ratio",
-            "can_preview",
-            "value",
-        ],
-        "checker" => &[
-            "checked",
-            "text",
-            "overall_checkable",
-            "button_area",
-            "checked_style",
-            "padding",
-        ],
-        _ => return Ok(()),
-    };
-    const CONTROL_FIELDS: &[&str] = &[
-        "tag",
-        "element_id",
-        "name",
-        "required",
-        "placeholder",
-        "width",
-        "disabled",
-        "disabled_tips",
-        "hover_tips",
-        "behaviors",
-        "confirm",
-        "margin",
-    ];
+impl Element {
+    fn validate_wire_fields(value: &serde_json::Value, tag: &str) -> Result<(), String> {
+        let extra_fields: &[&str] = match tag {
+            "overflow" => &["options"],
+            "select_static" => &["options", "initial_option", "initial_index", "type"],
+            "multi_select_static" => &["options", "selected_values", "type"],
+            "select_person" => &["options", "initial_option", "type"],
+            "multi_select_person" => &["options", "selected_values", "type"],
+            "date_picker" => &["initial_date"],
+            "picker_time" => &["initial_time"],
+            "picker_datetime" => &["initial_datetime"],
+            "select_img" => &[
+                "options",
+                "multi_select",
+                "layout",
+                "aspect_ratio",
+                "can_preview",
+                "value",
+            ],
+            "checker" => &[
+                "checked",
+                "text",
+                "overall_checkable",
+                "button_area",
+                "checked_style",
+                "padding",
+            ],
+            _ => return Ok(()),
+        };
+        const CONTROL_FIELDS: &[&str] = &[
+            "tag",
+            "element_id",
+            "name",
+            "required",
+            "placeholder",
+            "width",
+            "disabled",
+            "disabled_tips",
+            "hover_tips",
+            "behaviors",
+            "confirm",
+            "margin",
+        ];
 
-    let object = value
-        .as_object()
-        .ok_or_else(|| format!("component {tag:?} must be a JSON object"))?;
-    if let Some(field) = object.keys().find(|field| {
-        !CONTROL_FIELDS.contains(&field.as_str()) && !extra_fields.contains(&field.as_str())
-    }) {
-        return Err(format!("unknown field {field:?} for component {tag:?}"));
+        let object = value
+            .as_object()
+            .ok_or_else(|| format!("component {tag:?} must be a JSON object"))?;
+        if let Some(field) = object.keys().find(|field| {
+            !CONTROL_FIELDS.contains(&field.as_str()) && !extra_fields.contains(&field.as_str())
+        }) {
+            return Err(format!("unknown field {field:?} for component {tag:?}"));
+        }
+        Ok(())
     }
-    Ok(())
 }
 
 impl<'de> Deserialize<'de> for Element {
@@ -952,7 +953,7 @@ impl<'de> Deserialize<'de> for Element {
             .get("tag")
             .and_then(serde_json::Value::as_str)
             .ok_or_else(|| serde::de::Error::missing_field("tag"))?;
-        validate_control_element_fields(&value, tag).map_err(serde::de::Error::custom)?;
+        Self::validate_wire_fields(&value, tag).map_err(serde::de::Error::custom)?;
         let decode = |error: serde_json::Error| serde::de::Error::custom(error);
         match tag {
             "div" => serde_json::from_value(value).map(Self::Div).map_err(decode),
@@ -3660,265 +3661,268 @@ fn has_form_submit(element: &Element) -> bool {
     }
 }
 
-fn validate_element(
-    element: &Element,
-    ids: &mut BTreeSet<String>,
-    form_state: &mut FormValidationState,
-    count: &mut usize,
-    root: bool,
-    in_form: bool,
-    container_depth: usize,
-) -> Result<(), ValidationError> {
-    *count += 1;
-    match element {
-        Element::Div(element) => {
-            validate_div(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::Markdown(element) => {
-            validate_margin(element.margin.as_deref())?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::Img(element) => {
-            validate_image(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::ImgCombination(element) => {
-            validate_image_combination(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::Person(element) => {
-            validate_person(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::PersonList(element) => {
-            validate_person_list(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::Chart(element) => {
-            validate_chart(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::Hr(element) => {
-            validate_margin(element.margin.as_deref())?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::Button(element) => {
-            validate_button(element)?;
-            if !in_form && element.form_action_type.is_some() {
-                return Err(ValidationError::FormActionOutsideForm);
+impl Element {
+    fn validate(
+        &self,
+        ids: &mut BTreeSet<String>,
+        form_state: &mut FormValidationState,
+        count: &mut usize,
+        root: bool,
+        in_form: bool,
+        container_depth: usize,
+    ) -> Result<(), ValidationError> {
+        let element = self;
+        *count += 1;
+        match element {
+            Element::Div(element) => {
+                validate_div(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)
             }
-            if in_form && element.form_action_type.is_some() && !element.behaviors.is_empty() {
-                return Err(ValidationError::ButtonBehaviorConflict);
+            Element::Markdown(element) => {
+                validate_margin(element.margin.as_deref())?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)
             }
-            if in_form && element.form_action_type.is_none() {
-                return Err(ValidationError::MissingFormButtonAction);
+            Element::Img(element) => {
+                validate_image(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)
             }
-            if !in_form && element.behaviors.is_empty() {
-                return Err(ValidationError::MissingButtonBehavior);
+            Element::ImgCombination(element) => {
+                validate_image_combination(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)
             }
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::Input(element) => {
-            validate_input(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)
-        }
-        Element::ColumnSet(element) => {
-            validate_column_set(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)?;
-            let child_depth = next_container_depth(container_depth)?;
-            for column in &element.columns {
-                for child in &column.elements {
-                    validate_element(child, ids, form_state, count, false, in_form, child_depth)?;
+            Element::Person(element) => {
+                validate_person(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)
+            }
+            Element::PersonList(element) => {
+                validate_person_list(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)
+            }
+            Element::Chart(element) => {
+                validate_chart(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)
+            }
+            Element::Hr(element) => {
+                validate_margin(element.margin.as_deref())?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)
+            }
+            Element::Button(element) => {
+                validate_button(element)?;
+                if !in_form && element.form_action_type.is_some() {
+                    return Err(ValidationError::FormActionOutsideForm);
                 }
+                if in_form && element.form_action_type.is_some() && !element.behaviors.is_empty() {
+                    return Err(ValidationError::ButtonBehaviorConflict);
+                }
+                if in_form && element.form_action_type.is_none() {
+                    return Err(ValidationError::MissingFormButtonAction);
+                }
+                if !in_form && element.behaviors.is_empty() {
+                    return Err(ValidationError::MissingButtonBehavior);
+                }
+                validate_optional_element_id(element.element_id.as_deref(), ids)
             }
-            Ok(())
-        }
-        Element::Form(element) => {
-            if !root {
-                return Err(ValidationError::FormNestedOutsideBody);
+            Element::Input(element) => {
+                validate_input(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)
             }
-            if element.elements.is_empty() {
-                return Err(ValidationError::EmptyForm(element.name.clone()));
+            Element::ColumnSet(element) => {
+                validate_column_set(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)?;
+                let child_depth = next_container_depth(container_depth)?;
+                for column in &element.columns {
+                    for child in &column.elements {
+                        child.validate(ids, form_state, count, false, in_form, child_depth)?;
+                    }
+                }
+                Ok(())
             }
-            validate_form(element, &mut form_state.names)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)?;
-            let child_depth = next_container_depth(container_depth)?;
-            let mut control_names = BTreeSet::new();
-            for child in &element.elements {
-                validate_form_control_names(child, &mut control_names)?;
-                validate_element(child, ids, form_state, count, false, true, child_depth)?;
+            Element::Form(element) => {
+                if !root {
+                    return Err(ValidationError::FormNestedOutsideBody);
+                }
+                if element.elements.is_empty() {
+                    return Err(ValidationError::EmptyForm(element.name.clone()));
+                }
+                validate_form(element, &mut form_state.names)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)?;
+                let child_depth = next_container_depth(container_depth)?;
+                let mut control_names = BTreeSet::new();
+                for child in &element.elements {
+                    validate_form_control_names(child, &mut control_names)?;
+                    child.validate(ids, form_state, count, false, true, child_depth)?;
+                }
+                if !element.elements.iter().any(has_form_submit) {
+                    return Err(ValidationError::MissingFormSubmit(element.name.clone()));
+                }
+                Ok(())
             }
-            if !element.elements.iter().any(has_form_submit) {
-                return Err(ValidationError::MissingFormSubmit(element.name.clone()));
+            Element::CollapsiblePanel(element) => {
+                validate_collapsible_panel(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)?;
+                let child_depth = next_container_depth(container_depth)?;
+                for child in &element.elements {
+                    child.validate(ids, form_state, count, false, in_form, child_depth)?;
+                }
+                Ok(())
             }
-            Ok(())
-        }
-        Element::CollapsiblePanel(element) => {
-            validate_collapsible_panel(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)?;
-            let child_depth = next_container_depth(container_depth)?;
-            for child in &element.elements {
-                validate_element(child, ids, form_state, count, false, in_form, child_depth)?;
+            Element::InteractiveContainer(element) => {
+                if element.elements.is_empty() {
+                    return Err(ValidationError::EmptyInteractiveContainer);
+                }
+                validate_interactive_container(element)?;
+                validate_optional_element_id(element.element_id.as_deref(), ids)?;
+                let child_depth = next_container_depth(container_depth)?;
+                for child in &element.elements {
+                    child.validate(ids, form_state, count, false, in_form, child_depth)?;
+                }
+                Ok(())
             }
-            Ok(())
-        }
-        Element::InteractiveContainer(element) => {
-            if element.elements.is_empty() {
-                return Err(ValidationError::EmptyInteractiveContainer);
+            Element::Table(table) if root => validate_table(table),
+            Element::Table(_) => Err(ValidationError::TableNestedOutsideBody),
+            Element::Overflow(element) => {
+                validate_control(&element.control, "overflow", in_form)?;
+                let options = element
+                    .options
+                    .as_deref()
+                    .ok_or(ValidationError::EmptyOptions("overflow"))?;
+                if options.is_empty() {
+                    return Err(ValidationError::EmptyOptions("overflow"));
+                }
+                validate_options(options, Some(100))?;
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            validate_interactive_container(element)?;
-            validate_optional_element_id(element.element_id.as_deref(), ids)?;
-            let child_depth = next_container_depth(container_depth)?;
-            for child in &element.elements {
-                validate_element(child, ids, form_state, count, false, in_form, child_depth)?;
+            Element::SelectStatic(element) => {
+                validate_control(&element.control, "select_static", in_form)?;
+                if let Some(options) = &element.options {
+                    validate_options(options, None)?;
+                }
+                validate_initial_option(
+                    "select_static",
+                    element.initial_option.as_deref(),
+                    element.options.as_deref(),
+                )?;
+                if element.initial_option.is_none()
+                    && let (Some(index), Some(options)) =
+                        (element.initial_index, element.options.as_deref())
+                    && index > options.len() as u32
+                {
+                    return Err(ValidationError::InvalidInitialIndex(index));
+                }
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            Ok(())
-        }
-        Element::Table(table) if root => validate_table(table),
-        Element::Table(_) => Err(ValidationError::TableNestedOutsideBody),
-        Element::Overflow(element) => {
-            validate_control(&element.control, "overflow", in_form)?;
-            let options = element
-                .options
-                .as_deref()
-                .ok_or(ValidationError::EmptyOptions("overflow"))?;
-            if options.is_empty() {
-                return Err(ValidationError::EmptyOptions("overflow"));
+            Element::MultiSelectStatic(element) => {
+                validate_control(&element.control, "multi_select_static", in_form)?;
+                if let Some(options) = &element.options {
+                    validate_options(options, None)?;
+                }
+                validate_selected_values(
+                    "multi_select_static",
+                    element.selected_values.as_deref(),
+                    element.options.as_deref(),
+                )?;
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            validate_options(options, Some(100))?;
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
-        }
-        Element::SelectStatic(element) => {
-            validate_control(&element.control, "select_static", in_form)?;
-            if let Some(options) = &element.options {
-                validate_options(options, None)?;
+            Element::SelectPerson(element) => {
+                validate_control(&element.control, "select_person", in_form)?;
+                if let Some(options) = &element.options {
+                    validate_person_options(options)?;
+                }
+                validate_person_initial_option(
+                    "select_person",
+                    element.initial_option.as_deref(),
+                    element.options.as_deref(),
+                )?;
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            validate_initial_option(
-                "select_static",
-                element.initial_option.as_deref(),
-                element.options.as_deref(),
-            )?;
-            if element.initial_option.is_none()
-                && let (Some(index), Some(options)) =
-                    (element.initial_index, element.options.as_deref())
-                && index > options.len() as u32
-            {
-                return Err(ValidationError::InvalidInitialIndex(index));
+            Element::MultiSelectPerson(element) => {
+                validate_control(&element.control, "multi_select_person", in_form)?;
+                if let Some(options) = &element.options {
+                    validate_person_options(options)?;
+                }
+                validate_person_selected_values(
+                    "multi_select_person",
+                    element.selected_values.as_deref(),
+                    element.options.as_deref(),
+                )?;
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
-        }
-        Element::MultiSelectStatic(element) => {
-            validate_control(&element.control, "multi_select_static", in_form)?;
-            if let Some(options) = &element.options {
-                validate_options(options, None)?;
-            }
-            validate_selected_values(
-                "multi_select_static",
-                element.selected_values.as_deref(),
-                element.options.as_deref(),
-            )?;
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
-        }
-        Element::SelectPerson(element) => {
-            validate_control(&element.control, "select_person", in_form)?;
-            if let Some(options) = &element.options {
-                validate_person_options(options)?;
-            }
-            validate_person_initial_option(
-                "select_person",
-                element.initial_option.as_deref(),
-                element.options.as_deref(),
-            )?;
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
-        }
-        Element::MultiSelectPerson(element) => {
-            validate_control(&element.control, "multi_select_person", in_form)?;
-            if let Some(options) = &element.options {
-                validate_person_options(options)?;
-            }
-            validate_person_selected_values(
-                "multi_select_person",
-                element.selected_values.as_deref(),
-                element.options.as_deref(),
-            )?;
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
-        }
-        Element::DatePicker(element) => {
-            validate_control(&element.control, "date_picker", in_form)?;
-            if element.initial_date.is_none() && element.control.placeholder.is_none() {
-                return Err(ValidationError::MissingPickerValue("date_picker"));
-            }
-            if let Some(value) = element.initial_date.as_deref()
-                && !valid_date(value)
-            {
-                return Err(ValidationError::InvalidPickerInitialValue(
-                    "date_picker",
-                    value.to_string(),
-                ));
-            }
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
-        }
-        Element::PickerTime(element) => {
-            validate_control(&element.control, "picker_time", in_form)?;
-            if element.initial_time.is_none() && element.control.placeholder.is_none() {
-                return Err(ValidationError::MissingPickerValue("picker_time"));
-            }
-            if let Some(value) = element.initial_time.as_deref()
-                && !valid_time(value)
-            {
-                return Err(ValidationError::InvalidPickerInitialValue(
-                    "picker_time",
-                    value.to_string(),
-                ));
-            }
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
-        }
-        Element::PickerDatetime(element) => {
-            validate_control(&element.control, "picker_datetime", in_form)?;
-            if element.initial_datetime.is_none() && element.control.placeholder.is_none() {
-                return Err(ValidationError::MissingPickerValue("picker_datetime"));
-            }
-            if let Some(value) = element.initial_datetime.as_deref() {
-                let (date, time) = value.split_once(' ').unwrap_or_default();
-                if !valid_date(date) || !valid_time(time) {
+            Element::DatePicker(element) => {
+                validate_control(&element.control, "date_picker", in_form)?;
+                if element.initial_date.is_none() && element.control.placeholder.is_none() {
+                    return Err(ValidationError::MissingPickerValue("date_picker"));
+                }
+                if let Some(value) = element.initial_date.as_deref()
+                    && !valid_date(value)
+                {
                     return Err(ValidationError::InvalidPickerInitialValue(
-                        "picker_datetime",
+                        "date_picker",
                         value.to_string(),
                     ));
                 }
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
-        }
-        Element::SelectImg(element) => {
-            validate_image_select(element)?;
-            if in_form && element.control.name.as_deref().is_none_or(str::is_empty) {
-                return Err(ValidationError::MissingFormControlName("select_img"));
+            Element::PickerTime(element) => {
+                validate_control(&element.control, "picker_time", in_form)?;
+                if element.initial_time.is_none() && element.control.placeholder.is_none() {
+                    return Err(ValidationError::MissingPickerValue("picker_time"));
+                }
+                if let Some(value) = element.initial_time.as_deref()
+                    && !valid_time(value)
+                {
+                    return Err(ValidationError::InvalidPickerInitialValue(
+                        "picker_time",
+                        value.to_string(),
+                    ));
+                }
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            if element.multi_select == Some(true) && !in_form {
-                return Err(ValidationError::MultiSelectImageOutsideForm);
+            Element::PickerDatetime(element) => {
+                validate_control(&element.control, "picker_datetime", in_form)?;
+                if element.initial_datetime.is_none() && element.control.placeholder.is_none() {
+                    return Err(ValidationError::MissingPickerValue("picker_datetime"));
+                }
+                if let Some(value) = element.initial_datetime.as_deref() {
+                    let (date, time) = value.split_once(' ').unwrap_or_default();
+                    if !valid_date(date) || !valid_time(time) {
+                        return Err(ValidationError::InvalidPickerInitialValue(
+                            "picker_datetime",
+                            value.to_string(),
+                        ));
+                    }
+                }
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            if element.can_preview.is_some() && !in_form {
-                return Err(ValidationError::ImagePreviewOutsideForm);
+            Element::SelectImg(element) => {
+                validate_image_select(element)?;
+                if in_form && element.control.name.as_deref().is_none_or(str::is_empty) {
+                    return Err(ValidationError::MissingFormControlName("select_img"));
+                }
+                if element.multi_select == Some(true) && !in_form {
+                    return Err(ValidationError::MultiSelectImageOutsideForm);
+                }
+                if element.can_preview.is_some() && !in_form {
+                    return Err(ValidationError::ImagePreviewOutsideForm);
+                }
+                if element.options.is_empty() {
+                    return Err(ValidationError::EmptyOptions("select_img"));
+                }
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            if element.options.is_empty() {
-                return Err(ValidationError::EmptyOptions("select_img"));
+            Element::Checker(element) => {
+                validate_checker(element)?;
+                if in_form && element.control.name.as_deref().is_none_or(str::is_empty) {
+                    return Err(ValidationError::MissingFormControlName("checker"));
+                }
+                if let Some(button_area) = &element.button_area
+                    && button_area.buttons.len() > 3
+                {
+                    return Err(ValidationError::TooManyCheckerButtons(
+                        button_area.buttons.len(),
+                    ));
+                }
+                validate_optional_element_id(element.control.element_id.as_deref(), ids)
             }
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
-        }
-        Element::Checker(element) => {
-            validate_checker(element)?;
-            if in_form && element.control.name.as_deref().is_none_or(str::is_empty) {
-                return Err(ValidationError::MissingFormControlName("checker"));
-            }
-            if let Some(button_area) = &element.button_area
-                && button_area.buttons.len() > 3
-            {
-                return Err(ValidationError::TooManyCheckerButtons(
-                    button_area.buttons.len(),
-                ));
-            }
-            validate_optional_element_id(element.control.element_id.as_deref(), ids)
         }
     }
 }
