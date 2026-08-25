@@ -192,9 +192,50 @@ const REQUIRED_V2_FIELDS: &[&str] = &[
     "interactive_container.hover_tips",
     "interactive_container.confirm",
     "form.name",
+    "form.elements",
+    "form.direction",
+    "form.horizontal_spacing",
+    "form.vertical_spacing",
+    "form.horizontal_align",
+    "form.vertical_align",
+    "form.padding",
+    "form.margin",
+    "button.text",
+    "button.type",
+    "button.size",
+    "button.width",
+    "button.behaviors",
+    "button.icon",
+    "button.disabled",
+    "button.disabled_tips",
+    "button.hover_tips",
+    "button.confirm",
+    "button.name",
     "button.form_action_type",
     "input.name",
     "input.required",
+    "input.placeholder",
+    "input.default_value",
+    "input.label",
+    "input.label_position",
+    "input.input_type",
+    "input.rows",
+    "input.auto_resize",
+    "input.max_rows",
+    "input.max_length",
+    "input.show_icon",
+    "input.width",
+    "input.disabled",
+    "input.disabled_tips",
+    "input.behaviors",
+    "input.confirm",
+    "overflow.options",
+    "overflow.option.text",
+    "overflow.option.value",
+    "overflow.option.multi_url",
+    "overflow.behaviors",
+    "overflow.confirm",
+    "overflow.width",
     "column_set.columns",
     "column_set.flex_mode",
     "column_set.horizontal_spacing",
@@ -792,6 +833,38 @@ fn card_json_v2_fixtures_are_exact_protocol_contracts() {
                                 Err(card::ValidationError::FormNestedOutsideBody)
                             );
                         }
+                        "form_control_name" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::MissingFormControlName("input"))
+                            );
+                        }
+                        "duplicate_form_control_name" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::DuplicateFormControlName(
+                                    "action".into(),
+                                ))
+                            );
+                        }
+                        "button_text" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::ButtonTextRequiresPlainText)
+                            );
+                        }
                         other => panic!("unknown v2 fixture constraint {other}"),
                     }
                 }
@@ -1307,11 +1380,11 @@ fn modern_v2_button_and_input_preserve_optional_interaction_fields() {
     input.label = Some(card::Text::plain("Reason"));
     input.label_position = Some(card::LabelPosition::Left);
     input.input_type = Some(card::InputType::MultilineText);
-    input.multiline = Some(true);
     input.rows = Some(3);
     input.auto_resize = Some(true);
     input.max_rows = Some(6);
     input.max_length = Some(500);
+    input.show_icon = Some(false);
     input.width = Some("fill".into());
     input.disabled = Some(false);
     input.behaviors.push(card::Behavior::callback(
@@ -1319,7 +1392,6 @@ fn modern_v2_button_and_input_preserve_optional_interaction_fields() {
     ));
     let input = serde_json::to_value(card::Element::Input(input)).expect("serialize input");
     assert_eq!(input["default_value"], "initial");
-    assert_eq!(input["multiline"], true);
     assert_eq!(input["rows"], 3);
     assert_eq!(input["max_length"], 500);
     assert_eq!(input["label"]["content"], "Reason");
@@ -1327,6 +1399,7 @@ fn modern_v2_button_and_input_preserve_optional_interaction_fields() {
     assert_eq!(input["input_type"], "multiline_text");
     assert_eq!(input["auto_resize"], true);
     assert_eq!(input["max_rows"], 6);
+    assert_eq!(input["show_icon"], false);
     assert_eq!(input["behaviors"][0]["type"], "callback");
 
     let mut select = card::StaticSelect::new();
@@ -1382,6 +1455,109 @@ fn modern_v2_controls_match_fixture() {
         );
     card.validate().expect("controls fixture is valid");
     assert_eq!(card.to_json(), fixture("card_json_v2/controls.json").into());
+}
+
+#[test]
+fn modern_v2_form_action_controls_fixture_round_trips_and_validates() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let fixture = fixture("card_json_v2/form_action_controls.json");
+    let card: card::Card = serde_json::from_value(fixture.clone())
+        .expect("form and action-control fixture must deserialize");
+    card.validate()
+        .expect("form and action-control fixture must validate");
+    assert_eq!(card.to_json(), fixture.into());
+
+    let shared_card = |element| {
+        card::Card::new()
+            .config(card::Config::new().update_multi())
+            .body(card::Body::new().element(element))
+    };
+    let mut too_long = card::Input::new("reason");
+    too_long.max_length = Some(1001);
+    assert_eq!(
+        shared_card(card::Element::Input(too_long)).validate(),
+        Err(card::ValidationError::InvalidInputMaxLength(1001))
+    );
+
+    let mut narrow = card::Button::new(card::Text::plain("Open"))
+        .behavior(card::Behavior::callback(serde_json::json!({})));
+    narrow.width = Some("99px".into());
+    assert_eq!(
+        shared_card(card::Element::Button(narrow)).validate(),
+        Err(card::ValidationError::InvalidControlWidth("99px".into()))
+    );
+
+    let markdown_button = card::Button::new(card::Text::lark_md("Open"))
+        .behavior(card::Behavior::callback(serde_json::json!({})));
+    assert_eq!(
+        shared_card(card::Element::Button(markdown_button)).validate(),
+        Err(card::ValidationError::ButtonTextRequiresPlainText)
+    );
+
+    let long_button = card::Button::new(card::Text::plain("x".repeat(101)))
+        .behavior(card::Behavior::callback(serde_json::json!({})));
+    assert_eq!(
+        shared_card(card::Element::Button(long_button)).validate(),
+        Err(card::ValidationError::ButtonTextTooLong(101))
+    );
+
+    let form = card::Form::new("approval")
+        .element(card::Element::Input(card::Input::new("reason")))
+        .element(card::Element::Button(
+            card::Button::new(card::Text::plain("Submit"))
+                .name("submit")
+                .form_action(card::FormActionType::Submit),
+        ));
+    let duplicate = card::Form::new("approval")
+        .element(card::Element::Input(card::Input::new("other")))
+        .element(card::Element::Button(
+            card::Button::new(card::Text::plain("Submit"))
+                .name("other_submit")
+                .form_action(card::FormActionType::Submit),
+        ));
+    let card = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .body(
+            card::Body::new()
+                .element(card::Element::Form(form))
+                .element(card::Element::Form(duplicate)),
+        );
+    assert_eq!(
+        card.validate(),
+        Err(card::ValidationError::DuplicateFormName("approval".into()))
+    );
+
+    let overflow = || {
+        let mut overflow = card::Overflow::new();
+        overflow.control.name = Some("action".into());
+        overflow.control.behaviors = vec![card::Behavior::callback(serde_json::json!({}))];
+        overflow.options = Some(vec![card::SelectOption::new(
+            card::Text::plain("Open"),
+            "open",
+        )]);
+        card::Element::Overflow(overflow)
+    };
+    let card = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .body(
+            card::Body::new().element(card::Element::Form(
+                card::Form::new("actions")
+                    .element(overflow())
+                    .element(overflow())
+                    .element(card::Element::Button(
+                        card::Button::new(card::Text::plain("Submit"))
+                            .name("submit")
+                            .form_action(card::FormActionType::Submit),
+                    )),
+            )),
+        );
+    assert_eq!(
+        card.validate(),
+        Err(card::ValidationError::DuplicateFormControlName(
+            "action".into()
+        ))
+    );
 }
 
 #[test]
@@ -1586,6 +1762,7 @@ fn modern_v2_validation_rejects_documented_component_placement_errors() {
         card::Body::new().element(card::Element::Form(
             card::Form::new("form").element(card::Element::Button(
                 card::Button::new(card::Text::plain("button"))
+                    .name("submit")
                     .form_action(card::FormActionType::Submit)
                     .behavior(card::Behavior::callback(serde_json::json!({}))),
             )),
