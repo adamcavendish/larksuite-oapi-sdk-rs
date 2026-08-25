@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "protocol": "cardkit",
+  "version": "v1",
+  "sources": {
+    "official_docs": {
+      "role": "normative",
+      "accessed_on": "2026-08-25",
+      "urls": [
+        "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/cardkit-v1/card/create",
+        "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/cardkit-v1/card-element/content"
+      ]
+    },
+    "go_sdk": {
+      "role": "implementation_cross_check",
+      "repository": "https://github.com/larksuite/oapi-sdk-go.git",
+      "revision": "dbeec3d5f3afa4558d5cb22d93506c570e25385a",
+      "artifacts": [
+        {
+          "path": "service/cardkit/v1/model.go",
+          "required_snippets": ["card_json", "Content *string", "Sequence *int"]
+        }
+      ]
+    },
+    "lark_cli": {
+      "role": "implementation_cross_check",
+      "repository": "https://github.com/larksuite/cli.git",
+      "revision": "7874dc144b6d94ba5986664dfe65b007dcd5e381",
+      "artifacts": [
+        {
+          "path": "skills/lark-im/references/card/card-2.0-schema.md",
+          "required_snippets": ["\"schema\": \"2.0\"", "streaming_mode"]
+        }
+      ]
+    }
+  },
+  "surfaces": [
+    {"id": "card_json_document", "kind": "create_update_payload", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
+    {"id": "content_stream", "kind": "ordered_element_update", "status": "implemented", "sources": ["official_docs", "go_sdk"]}
+  ],
+  "fixtures": [
+    {"id": "streaming_document", "path": "cardkit_v1/streaming_document.json", "kind": "card_json_document", "expected_tags": ["markdown"]},
+    {"id": "streaming_content", "path": "cardkit_v1/streaming_content.json", "kind": "content_stream", "expected_tags": []}
+  ]
+}

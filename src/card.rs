@@ -51,6 +51,10 @@ pub mod v1;
 #[path = "card/v2.rs"]
 pub mod v2;
 
+/// Typed CardKit helpers for Card JSON 2.0 documents and content streaming.
+#[path = "card/cardkit.rs"]
+pub mod cardkit;
+
 // ── Closed card option sets ──
 
 /// Header templates supported by Feishu interactive cards.

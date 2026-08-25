@@ -1,0 +1,4 @@
+{
+  "type": "card_json",
+  "data": "{\"schema\":\"2.0\",\"config\":{\"streaming_mode\":true,\"update_multi\":true},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"element_id\":\"stream_content\",\"content\":\"Preparing\"}]}}"
+}

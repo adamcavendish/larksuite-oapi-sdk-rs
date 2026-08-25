@@ -61,9 +61,11 @@ form-value shape, and the three-second acknowledgement/update response. The
 SDK may expose outbound card construction and inbound event types independently,
 but their protocol relationship must be tested together.
 
-Card JSON 2.0 and CardKit streaming or delayed updates are separate future
-tracks. They need their own root fixtures and transport fixtures; neither may
-be accepted as an optional extension of a Card JSON 1.0 fixture.
+Card JSON 2.0 and CardKit are separate tracks. CardKit's typed Card JSON 2.0
+document transport and ordered text-content streaming have their own manifest
+and transport fixtures; they are not optional extensions of a Card JSON 1.0
+fixture. CardKit settings, element mutation, and batch-action helpers remain
+separate follow-up surfaces.
 
 ## Gate status
 
@@ -89,3 +91,18 @@ fixture, invalid constraint fixture where applicable, and direct serde
 round-trip coverage are all present. A complete component group does not imply
 that the incompatible Card JSON 2.0 root or unrelated interaction and update
 surfaces are complete.
+
+## CardKit document and content-stream coverage
+
+`card::cardkit::CardDocument` accepts only a locally validated Card JSON 2.0
+document and emits CardKit's escaped `type: "card_json"` payload. The typed
+`LarkClient::cardkit_cards()` helper covers entity creation and creates an
+ordered update session for full replacement and full-content updates on one
+text or Markdown element.
+
+Each CardKit update carries a caller-provided idempotency key and a positive
+sequence. One `CardKitUpdateSession` owns the sequence across document and
+content updates, advancing it only after a successful request; a failed update
+can therefore be retried with the same sequence and key. Content updates
+intentionally send the complete current value: Lark renders a prefix extension
+as a typewriter update and otherwise replaces the element content.
