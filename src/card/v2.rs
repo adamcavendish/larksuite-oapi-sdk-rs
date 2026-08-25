@@ -2810,7 +2810,6 @@ impl std::error::Error for ValidationError {}
 #[derive(Default)]
 struct FormValidationState {
     names: BTreeSet<String>,
-    control_names: BTreeSet<String>,
 }
 
 fn validate_optional_element_id(
@@ -3707,8 +3706,9 @@ fn validate_element(
             validate_form(element, &mut form_state.names)?;
             validate_optional_element_id(element.element_id.as_deref(), ids)?;
             let child_depth = next_container_depth(container_depth)?;
+            let mut control_names = BTreeSet::new();
             for child in &element.elements {
-                validate_form_control_names(child, &mut form_state.control_names)?;
+                validate_form_control_names(child, &mut control_names)?;
                 validate_element(child, ids, form_state, count, false, true, child_depth)?;
             }
             if !element.elements.iter().any(has_form_submit) {

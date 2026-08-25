@@ -22,6 +22,7 @@ use serde_json::Value;
 
 const V1_MANIFEST: &str = include_str!("fixtures/card_protocol/card_json_v1.json");
 const V2_MANIFEST: &str = include_str!("fixtures/card_protocol/card_json_v2.json");
+const CARDKIT_V1_MANIFEST: &str = include_str!("fixtures/card_protocol/cardkit_v1.json");
 const FIXTURE_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/card_protocol");
 
 const REQUIRED_SURFACES: &[&str] = &[
@@ -408,6 +409,11 @@ fn v2_manifest() -> Manifest {
     serde_json::from_str(V2_MANIFEST).expect("Card JSON 2.0 protocol manifest must be valid JSON")
 }
 
+fn cardkit_v1_manifest() -> Manifest {
+    serde_json::from_str(CARDKIT_V1_MANIFEST)
+        .expect("CardKit v1 protocol manifest must be valid JSON")
+}
+
 fn fixture(path: &str) -> Value {
     let full_path = Path::new(FIXTURE_ROOT).join(path);
     serde_json::from_str(
@@ -695,6 +701,72 @@ fn card_json_v2_inventory_is_complete_and_traceable() {
         assert!(!field.domain.is_empty());
         assert!(!field.constraints.is_empty());
         assert!(field.sources.contains(&"official_docs".to_string()));
+    }
+}
+
+#[test]
+fn cardkit_v1_document_and_content_stream_are_traceable() {
+    let manifest = cardkit_v1_manifest();
+    assert_eq!(manifest.schema_version, 1);
+    assert_eq!(manifest.protocol, "cardkit");
+    assert_eq!(manifest.version, "v1");
+    assert_eq!(manifest.sources.official_docs.role, "normative");
+    assert_eq!(manifest.sources.official_docs.accessed_on, "2026-08-25");
+    assert!(manifest.sources.official_docs.urls.len() >= 2);
+    for source in [&manifest.sources.go_sdk, &manifest.sources.lark_cli] {
+        assert_eq!(source.role, "implementation_cross_check");
+        assert_eq!(source.revision.len(), 40);
+        assert!(!source.artifacts.is_empty());
+    }
+    assert_reference_revision(
+        "CARD_PROTOCOL_GO_SDK_DIR",
+        &manifest.sources.go_sdk.revision,
+    );
+    assert_reference_revision("CARD_PROTOCOL_CLI_DIR", &manifest.sources.lark_cli.revision);
+    assert_reference_artifacts("CARD_PROTOCOL_GO_SDK_DIR", &manifest.sources.go_sdk);
+    assert_reference_artifacts("CARD_PROTOCOL_CLI_DIR", &manifest.sources.lark_cli);
+
+    let surfaces: BTreeSet<_> = manifest
+        .surfaces
+        .iter()
+        .map(|surface| surface.id.as_str())
+        .collect();
+    assert_eq!(
+        surfaces,
+        BTreeSet::from(["card_json_document", "content_stream"])
+    );
+    assert!(
+        manifest
+            .surfaces
+            .iter()
+            .all(|surface| surface.status == "implemented")
+    );
+
+    for entry in &manifest.fixtures {
+        assert!(entry.path.starts_with("cardkit_v1/"));
+        let value = fixture(&entry.path);
+        match entry.kind.as_str() {
+            "card_json_document" => {
+                assert_eq!(value["type"], "card_json");
+                let document: Value = serde_json::from_str(
+                    value["data"]
+                        .as_str()
+                        .expect("CardKit card_json data must be escaped JSON"),
+                )
+                .expect("CardKit card_json data must decode");
+                assert_eq!(document["schema"], "2.0");
+                assert_eq!(
+                    document["body"]["elements"][0]["tag"],
+                    entry.expected_tags[0]
+                );
+            }
+            "content_stream" => {
+                assert_eq!(value["sequence"], 1);
+                assert!(value["uuid"].as_str().is_some_and(|uuid| !uuid.is_empty()));
+                assert!(value["content"].as_str().is_some());
+            }
+            other => panic!("unknown CardKit fixture kind {other}"),
+        }
     }
 }
 
@@ -1614,6 +1686,32 @@ fn modern_v2_form_action_controls_fixture_round_trips_and_validates() {
         card.validate(),
         Err(card::ValidationError::DuplicateFormName("approval".into()))
     );
+
+    let card = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .body(
+            card::Body::new()
+                .element(card::Element::Form(
+                    card::Form::new("approval")
+                        .element(card::Element::Input(card::Input::new("reason")))
+                        .element(card::Element::Button(
+                            card::Button::new(card::Text::plain("Submit"))
+                                .name("submit")
+                                .form_action(card::FormActionType::Submit),
+                        )),
+                ))
+                .element(card::Element::Form(
+                    card::Form::new("escalation")
+                        .element(card::Element::Input(card::Input::new("reason")))
+                        .element(card::Element::Button(
+                            card::Button::new(card::Text::plain("Submit"))
+                                .name("submit")
+                                .form_action(card::FormActionType::Submit),
+                        )),
+                )),
+        );
+    card.validate()
+        .expect("form controls may reuse names in separate forms");
 
     let overflow = || {
         let mut overflow = card::Overflow::new();
