@@ -20,6 +20,9 @@ use larksuite_oapi_sdk_rs::event::{CallbackCard, CardActionTriggerRequest};
 use serde::Deserialize;
 use serde_json::Value;
 
+#[path = "card_protocol_support.rs"]
+mod support;
+
 const V1_MANIFEST: &str = include_str!("fixtures/card_protocol/card_json_v1.json");
 const V2_MANIFEST: &str = include_str!("fixtures/card_protocol/card_json_v2.json");
 const CARDKIT_V1_MANIFEST: &str = include_str!("fixtures/card_protocol/cardkit_v1.json");
@@ -403,25 +406,19 @@ struct ProtocolField {
 }
 
 fn v1_manifest() -> Manifest {
-    serde_json::from_str(V1_MANIFEST).expect("Card JSON 1.0 protocol manifest must be valid JSON")
+    support::manifest(V1_MANIFEST, "Card JSON 1.0")
 }
 
 fn v2_manifest() -> Manifest {
-    serde_json::from_str(V2_MANIFEST).expect("Card JSON 2.0 protocol manifest must be valid JSON")
+    support::manifest(V2_MANIFEST, "Card JSON 2.0")
 }
 
 fn cardkit_v1_manifest() -> Manifest {
-    serde_json::from_str(CARDKIT_V1_MANIFEST)
-        .expect("CardKit v1 protocol manifest must be valid JSON")
+    support::manifest(CARDKIT_V1_MANIFEST, "CardKit v1")
 }
 
 fn fixture(path: &str) -> Value {
-    let full_path = Path::new(FIXTURE_ROOT).join(path);
-    serde_json::from_str(
-        &fs::read_to_string(&full_path)
-            .unwrap_or_else(|error| panic!("read fixture {}: {error}", full_path.display())),
-    )
-    .unwrap_or_else(|error| panic!("parse fixture {}: {error}", full_path.display()))
+    support::fixture(FIXTURE_ROOT, path)
 }
 
 fn assert_reference_revision(environment: &str, expected_revision: &str) {
