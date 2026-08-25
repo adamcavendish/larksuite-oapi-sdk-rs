@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::card::SendReadyCard;
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
@@ -502,24 +503,14 @@ impl CreateMessageReqBody {
 
     pub fn interactive_card(
         receive_id: impl Into<String>,
-        card: impl Serialize,
+        card: &impl SendReadyCard,
     ) -> Result<Self, LarkError> {
-        Ok(Self::interactive_card_content(
-            receive_id,
-            card_content(card)?,
-        ))
-    }
-
-    pub fn interactive_card_content(
-        receive_id: impl Into<String>,
-        content: impl Into<String>,
-    ) -> Self {
-        Self {
+        Ok(Self {
             receive_id: Some(receive_id.into()),
             msg_type: Some(MessageType::INTERACTIVE.to_string()),
-            content: Some(content.into()),
+            content: Some(card_content(card)?),
             uuid: None,
-        }
+        })
     }
 }
 
@@ -546,17 +537,13 @@ impl ReplyMessageReqBody {
         self
     }
 
-    pub fn interactive_card(card: impl Serialize) -> Result<Self, LarkError> {
-        Ok(Self::interactive_card_content(card_content(card)?))
-    }
-
-    pub fn interactive_card_content(content: impl Into<String>) -> Self {
-        Self {
-            content: Some(content.into()),
+    pub fn interactive_card(card: &impl SendReadyCard) -> Result<Self, LarkError> {
+        Ok(Self {
+            content: Some(card_content(card)?),
             msg_type: Some(MessageType::INTERACTIVE.to_string()),
             reply_in_thread: None,
             uuid: None,
-        }
+        })
     }
 
     pub fn reply_in_thread(mut self, reply_in_thread: bool) -> Self {
@@ -572,14 +559,10 @@ pub struct PatchMessageReqBody {
 }
 
 impl PatchMessageReqBody {
-    pub fn interactive_card(card: impl Serialize) -> Result<Self, LarkError> {
-        Ok(Self::interactive_card_content(card_content(card)?))
-    }
-
-    pub fn interactive_card_content(content: impl Into<String>) -> Self {
-        Self {
-            content: Some(content.into()),
-        }
+    pub fn interactive_card(card: &impl SendReadyCard) -> Result<Self, LarkError> {
+        Ok(Self {
+            content: Some(card_content(card)?),
+        })
     }
 }
 
@@ -597,20 +580,16 @@ impl UpdateMessageReqBody {
         self
     }
 
-    pub fn interactive_card(card: impl Serialize) -> Result<Self, LarkError> {
-        Ok(Self::interactive_card_content(card_content(card)?))
-    }
-
-    pub fn interactive_card_content(content: impl Into<String>) -> Self {
-        Self {
+    pub fn interactive_card(card: &impl SendReadyCard) -> Result<Self, LarkError> {
+        Ok(Self {
             msg_type: Some(MessageType::INTERACTIVE.to_string()),
-            content: Some(content.into()),
-        }
+            content: Some(card_content(card)?),
+        })
     }
 }
 
-fn card_content(card: impl Serialize) -> Result<String, LarkError> {
-    Ok(serde_json::to_string(&card)?)
+fn card_content(card: &impl SendReadyCard) -> Result<String, LarkError> {
+    card.encoded_content()
 }
 
 #[derive(Debug, Clone, Default, Serialize)]

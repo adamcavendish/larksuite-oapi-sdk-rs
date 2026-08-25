@@ -3,30 +3,23 @@ mod common;
 use common::{http_response, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::LarkClient;
-use larksuite_oapi_sdk_rs::LarkError;
-use larksuite_oapi_sdk_rs::card::v1::{Card, Div, Element, Header, Text};
+use larksuite_oapi_sdk_rs::card::v1::{Card, CardDocument, Div, Element, Header, Text};
+use larksuite_oapi_sdk_rs::card::v2::{
+    Body as V2Body, Card as V2Card, CardDocument as V2CardDocument, Config as V2Config,
+    Element as V2Element, Markdown as V2Markdown, ValidationError as V2ValidationError,
+};
 use larksuite_oapi_sdk_rs::req::RequestOption;
 use larksuite_oapi_sdk_rs::service::im::v1::{
     CreateMessageReqBody, MessageType, PatchMessageReqBody, ReplyMessageReqBody,
     UpdateMessageReqBody,
 };
-use serde::{Serialize, Serializer};
-
-struct FailingSerialize;
-
 fn div(content: impl Into<String>) -> Element {
     Element::Div(Div::new(Text::lark_md(content)))
 }
 
-impl Serialize for FailingSerialize {
-    fn serialize<S>(&self, _: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        Err(serde::ser::Error::custom(
-            "intentional serialization failure",
-        ))
-    }
+fn v1_document(title: impl Into<String>, content: impl Into<String>) -> CardDocument {
+    CardDocument::new(Card::new().header(Header::new(title)).element(div(content)))
+        .expect("test Card JSON 1.0 document must be valid")
 }
 
 fn client_for(addr: std::net::SocketAddr) -> LarkClient {
@@ -79,36 +72,15 @@ fn message_request_uuid_builders_serialize() {
 }
 
 #[test]
-fn interactive_card_helpers_surface_sdk_json_errors() {
-    let create = CreateMessageReqBody::interactive_card("oc_group", FailingSerialize).unwrap_err();
-    let reply = ReplyMessageReqBody::interactive_card(FailingSerialize).unwrap_err();
-    let patch = PatchMessageReqBody::interactive_card(FailingSerialize).unwrap_err();
-    let update = UpdateMessageReqBody::interactive_card(FailingSerialize).unwrap_err();
+fn card_document_must_validate_before_an_outbound_transport_can_use_it() {
+    let error = V2CardDocument::new(V2Card::new()).unwrap_err();
 
-    assert!(matches!(create, LarkError::Json(_)));
-    assert!(matches!(reply, LarkError::Json(_)));
-    assert!(matches!(patch, LarkError::Json(_)));
-    assert!(matches!(update, LarkError::Json(_)));
-}
-
-#[test]
-fn interactive_card_content_accepts_pre_serialized_card_json() {
-    let content = r#"{"config":{"wide_screen_mode":true}}"#;
-    let reply = ReplyMessageReqBody::interactive_card_content(content);
-    let patch = PatchMessageReqBody::interactive_card_content(content);
-
-    let reply_json = serde_json::to_value(&reply).unwrap();
-    let patch_json = serde_json::to_value(&patch).unwrap();
-    assert_eq!(reply_json["msg_type"], "interactive");
-    assert_eq!(reply_json["content"], content);
-    assert_eq!(patch_json["content"], content);
+    assert_eq!(error, V2ValidationError::V2RequiresSharedCard);
 }
 
 #[test]
 fn card_can_be_sent_as_reply_and_patched_later() {
-    let card = Card::new()
-        .header(Header::new("Working"))
-        .element(div("Preparing answer"));
+    let card = v1_document("Working", "Preparing answer");
 
     let reply = ReplyMessageReqBody::interactive_card(&card)
         .unwrap()
@@ -121,9 +93,7 @@ fn card_can_be_sent_as_reply_and_patched_later() {
         serde_json::from_str(reply_json["content"].as_str().unwrap()).unwrap();
     assert_eq!(reply_content["header"]["title"]["content"], "Working");
 
-    let updated = Card::new()
-        .header(Header::new("Done"))
-        .element(div("Final answer"));
+    let updated = v1_document("Done", "Final answer");
     let patch = PatchMessageReqBody::interactive_card(&updated).unwrap();
     let patch_json = serde_json::to_value(&patch).unwrap();
     let patch_content: serde_json::Value =
@@ -133,9 +103,7 @@ fn card_can_be_sent_as_reply_and_patched_later() {
 
 #[test]
 fn card_can_be_created_and_updated_as_interactive_message() {
-    let card = Card::new()
-        .header(Header::new("Live"))
-        .element(div("Initial"));
+    let card = v1_document("Live", "Initial");
     let create = CreateMessageReqBody::interactive_card("oc_group", &card).unwrap();
     let create_json = serde_json::to_value(&create).unwrap();
     assert_eq!(create_json["receive_id"], "oc_group");
@@ -145,6 +113,22 @@ fn card_can_be_created_and_updated_as_interactive_message() {
     let update_json = serde_json::to_value(&update).unwrap();
     assert_eq!(update_json["msg_type"], "interactive");
     assert!(update_json["content"].as_str().unwrap().contains("Live"));
+}
+
+#[test]
+fn card_json_v2_document_can_use_the_same_im_transport_seam() {
+    let document = V2CardDocument::new(
+        V2Card::new()
+            .config(V2Config::new().update_multi())
+            .body(V2Body::new().element(V2Element::Markdown(V2Markdown::new("Ready")))),
+    )
+    .expect("test Card JSON 2.0 document must be valid");
+
+    let create = CreateMessageReqBody::interactive_card("oc_group", &document).unwrap();
+    let content: serde_json::Value =
+        serde_json::from_str(create.content.as_deref().expect("card content")).unwrap();
+    assert_eq!(content["schema"], "2.0");
+    assert_eq!(content["body"]["elements"][0]["tag"], "markdown");
 }
 
 #[tokio::test]
@@ -158,9 +142,7 @@ async fn reply_card_then_patch_uses_typed_im_methods() {
     .await;
 
     let client = client_for(addr);
-    let card = Card::new()
-        .header(Header::new("Working"))
-        .element(div("Preparing answer"));
+    let card = v1_document("Working", "Preparing answer");
     let body = ReplyMessageReqBody::interactive_card(&card)
         .unwrap()
         .reply_in_thread(true);
@@ -173,9 +155,7 @@ async fn reply_card_then_patch_uses_typed_im_methods() {
         .unwrap();
     assert_eq!(sent.data.unwrap().message_id.as_deref(), Some("om_live"));
 
-    let final_card = Card::new()
-        .header(Header::new("Done"))
-        .element(div("Final answer"));
+    let final_card = v1_document("Done", "Final answer");
     let patch = PatchMessageReqBody::interactive_card(&final_card).unwrap();
     let patched = client
         .im()

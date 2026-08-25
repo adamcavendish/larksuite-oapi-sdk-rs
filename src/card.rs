@@ -34,6 +34,7 @@
 //! ```
 
 use crate::JsonValue as Value;
+use crate::LarkError;
 use serde::{Deserialize, Serialize};
 
 /// Modern, versioned Card JSON models.
@@ -54,6 +55,36 @@ pub mod v2;
 /// Typed CardKit helpers for Card JSON 2.0 documents and content streaming.
 #[path = "card/cardkit.rs"]
 pub mod cardkit;
+
+mod sealed {
+    pub trait Sealed {}
+}
+
+/// A versioned Card JSON document that has passed its protocol validation.
+///
+/// This is the only Card value accepted by outbound message transports. Its
+/// implementation is sealed so callers cannot bypass version-specific
+/// validation by supplying an arbitrary serializable value.
+pub trait SendReadyCard: sealed::Sealed {
+    #[doc(hidden)]
+    fn encoded_content(&self) -> Result<String, LarkError>;
+}
+
+impl sealed::Sealed for v1::CardDocument {}
+
+impl SendReadyCard for v1::CardDocument {
+    fn encoded_content(&self) -> Result<String, LarkError> {
+        self.encoded_content()
+    }
+}
+
+impl sealed::Sealed for v2::CardDocument {}
+
+impl SendReadyCard for v2::CardDocument {
+    fn encoded_content(&self) -> Result<String, LarkError> {
+        self.encoded_content()
+    }
+}
 
 // ── Closed card option sets ──
 
