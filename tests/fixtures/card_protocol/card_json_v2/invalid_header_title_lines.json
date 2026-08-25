@@ -1,0 +1,6 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "header": {"title": {"tag": "plain_text", "content": "Release health", "lines": 5}},
+  "body": {"elements": []}
+}

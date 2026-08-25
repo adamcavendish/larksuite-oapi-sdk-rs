@@ -72,34 +72,23 @@ impl Card {
         {
             return Err(ValidationError::V2RequiresSharedCard);
         }
-        if self.card_link.as_ref().is_some_and(|link| {
-            link.url.is_none()
-                && (link.android_url.is_none() || link.ios_url.is_none() || link.pc_url.is_none())
-        }) {
+        if self
+            .card_link
+            .as_ref()
+            .is_some_and(|link| link.url.as_deref().is_none_or(str::is_empty))
+        {
             return Err(ValidationError::InvalidCardLink);
+        }
+        if self.config.as_ref().is_some_and(|config| {
+            config.streaming_config.is_some() && config.streaming_mode != Some(true)
+        }) {
+            return Err(ValidationError::StreamingConfigRequiresStreamingMode);
         }
 
         let mut element_ids = BTreeSet::new();
         let mut element_count = 0;
         if let Some(header) = &self.header {
-            if header.text_tag_list.len() > 3 {
-                return Err(ValidationError::TooManyHeaderTags(
-                    header.text_tag_list.len(),
-                ));
-            }
-            for tag in &header.text_tag_list {
-                validate_optional_element_id(tag.element_id.as_deref(), &mut element_ids)?;
-            }
-            if let Some(localized) = &header.i18n_text_tag_list {
-                for tags in localized.values() {
-                    if tags.len() > 3 {
-                        return Err(ValidationError::TooManyHeaderTags(tags.len()));
-                    }
-                    for tag in tags {
-                        validate_optional_element_id(tag.element_id.as_deref(), &mut element_ids)?;
-                    }
-                }
-            }
+            validate_header(header, &mut element_ids)?;
         }
         let body = self.body.as_ref().ok_or(ValidationError::MissingBody)?;
         validate_body(body)?;
@@ -2528,6 +2517,10 @@ pub enum ValidationError {
     V2RequiresSharedCard,
     MissingBody,
     InvalidCardLink,
+    StreamingConfigRequiresStreamingMode,
+    HeaderTagRequiresPlainText,
+    InvalidHeaderTitleLines(u32),
+    InvalidHeaderSubtitleLines(u32),
     InvalidSpacing(String),
     InvalidPadding(String),
     InvalidMargin(String),
@@ -2582,7 +2575,17 @@ impl std::fmt::Display for ValidationError {
             Self::InvalidSchema => f.write_str("Card JSON v2 requires schema 2.0"),
             Self::V2RequiresSharedCard => f.write_str("Card JSON v2 supports shared cards only"),
             Self::MissingBody => f.write_str("Card JSON v2 requires body.elements"),
-            Self::InvalidCardLink => f.write_str("card_link requires url or all platform URLs"),
+            Self::InvalidCardLink => f.write_str("card_link requires a non-empty url"),
+            Self::StreamingConfigRequiresStreamingMode => {
+                f.write_str("streaming_config requires streaming_mode true")
+            }
+            Self::HeaderTagRequiresPlainText => f.write_str("header text tags require plain_text"),
+            Self::InvalidHeaderTitleLines(lines) => {
+                write!(f, "header title supports at most four lines, got {lines}")
+            }
+            Self::InvalidHeaderSubtitleLines(lines) => {
+                write!(f, "header subtitle supports at most one line, got {lines}")
+            }
             Self::InvalidSpacing(value) => write!(f, "invalid spacing {value:?}"),
             Self::InvalidPadding(value) => write!(f, "invalid padding {value:?}"),
             Self::InvalidMargin(value) => write!(f, "invalid margin {value:?}"),
@@ -2706,6 +2709,49 @@ fn validate_optional_element_id(
     }
     Ok(())
 }
+
+fn validate_header_tag(tag: &HeaderTag, ids: &mut BTreeSet<String>) -> Result<(), ValidationError> {
+    if tag.text.tag != TextTag::PlainText {
+        return Err(ValidationError::HeaderTagRequiresPlainText);
+    }
+    validate_optional_element_id(tag.element_id.as_deref(), ids)
+}
+
+fn validate_header_tag_list(
+    tags: &[HeaderTag],
+    ids: &mut BTreeSet<String>,
+) -> Result<(), ValidationError> {
+    if tags.len() > 3 {
+        return Err(ValidationError::TooManyHeaderTags(tags.len()));
+    }
+    for tag in tags {
+        validate_header_tag(tag, ids)?;
+    }
+    Ok(())
+}
+
+fn validate_header(header: &Header, ids: &mut BTreeSet<String>) -> Result<(), ValidationError> {
+    validate_padding(header.padding.as_deref())?;
+    validate_header_tag_list(&header.text_tag_list, ids)?;
+    if let Some(lines) = header.title.lines
+        && lines > 4
+    {
+        return Err(ValidationError::InvalidHeaderTitleLines(lines));
+    }
+    if let Some(subtitle) = &header.subtitle
+        && let Some(lines) = subtitle.lines
+        && lines > 1
+    {
+        return Err(ValidationError::InvalidHeaderSubtitleLines(lines));
+    }
+    if let Some(localized) = &header.i18n_text_tag_list {
+        for tags in localized.values() {
+            validate_header_tag_list(tags, ids)?;
+        }
+    }
+    Ok(())
+}
+
 fn validate_control(
     control: &Control,
     tag: &'static str,

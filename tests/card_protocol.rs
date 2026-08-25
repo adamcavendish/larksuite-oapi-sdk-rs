@@ -116,6 +116,16 @@ const REQUIRED_V2_FIELDS: &[&str] = &[
     "config.enable_forward_interaction",
     "config.style",
     "card_link.url",
+    "card_link.android_url",
+    "card_link.ios_url",
+    "card_link.pc_url",
+    "streaming_config.print_frequency_ms",
+    "streaming_config.print_step",
+    "streaming_config.print_strategy",
+    "summary.content",
+    "summary.i18n_content",
+    "style.text_size",
+    "style.color",
     "body.elements",
     "body.direction",
     "body.padding",
@@ -133,6 +143,14 @@ const REQUIRED_V2_FIELDS: &[&str] = &[
     "header.i18n_text_tag_list",
     "header.icon",
     "header.padding",
+    "header.title.lines",
+    "header.subtitle.lines",
+    "header.text_tag.text",
+    "header.text_tag.color",
+    "header.icon.tag",
+    "header.icon.token",
+    "header.icon.color",
+    "header.icon.size",
     "behavior.type",
     "behavior.value",
     "form.name",
@@ -686,6 +704,36 @@ fn card_json_v2_fixtures_are_exact_protocol_contracts() {
                                 Err(card::ValidationError::TableRowMaxHeightRequiresAutoRowHeight)
                             );
                         }
+                        "card_link_url" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::InvalidCardLink)
+                            );
+                        }
+                        "streaming_config_mode" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::StreamingConfigRequiresStreamingMode)
+                            );
+                        }
+                        "header_title_lines" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::InvalidHeaderTitleLines(5))
+                            );
+                        }
                         other => panic!("unknown v2 fixture constraint {other}"),
                     }
                 }
@@ -748,16 +796,6 @@ fn modern_v2_root_matches_complete_fixture() {
                     card::HeaderTag::new(card::Text::plain("Stable"), card::HeaderTagColor::Green)
                         .element_id("status_tag"),
                 )
-                .i18n_text_tag_list(BTreeMap::from([(
-                    card::Locale::ZhCn,
-                    vec![
-                        card::HeaderTag::new(
-                            card::Text::plain("稳定"),
-                            card::HeaderTagColor::Green,
-                        )
-                        .element_id("status_tag_zh"),
-                    ],
-                )]))
                 .padding("12px 12px 8px 12px"),
         )
         .body(
@@ -936,6 +974,62 @@ fn modern_v2_display_layout_validation_rejects_documented_ranges() {
     let error = serde_json::from_value::<card::ChartAspectRatio>(serde_json::json!("3:2"))
         .expect_err("undocumented chart aspect ratios must be rejected");
     assert!(error.to_string().contains("unknown variant"));
+}
+
+#[test]
+fn modern_v2_root_header_validation_rejects_documented_constraints() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let shared_card = |header| {
+        card::Card::new()
+            .config(card::Config::new().update_multi())
+            .header(header)
+            .body(card::Body::new())
+    };
+
+    assert!(
+        shared_card(
+            card::Header::new(card::Text::plain("Title"))
+                .text_tag(card::HeaderTag::new(
+                    card::Text::plain("Stable"),
+                    card::HeaderTagColor::Green,
+                ))
+                .i18n_text_tag_list(BTreeMap::from([(
+                    card::Locale::ZhCn,
+                    vec![card::HeaderTag::new(
+                        card::Text::plain("稳定"),
+                        card::HeaderTagColor::Green,
+                    )],
+                )])),
+        )
+        .validate()
+        .is_ok()
+    );
+
+    assert_eq!(
+        shared_card(
+            card::Header::new(card::Text::plain("Title"))
+                .subtitle(card::Text::plain("Subtitle").lines(2),)
+        )
+        .validate(),
+        Err(card::ValidationError::InvalidHeaderSubtitleLines(2))
+    );
+
+    assert_eq!(
+        shared_card(
+            card::Header::new(card::Text::plain("Title")).text_tag(card::HeaderTag::new(
+                card::Text::lark_md("**not a plain tag**"),
+                card::HeaderTagColor::Green,
+            )),
+        )
+        .validate(),
+        Err(card::ValidationError::HeaderTagRequiresPlainText)
+    );
+
+    assert_eq!(
+        shared_card(card::Header::new(card::Text::plain("Title")).padding("100px")).validate(),
+        Err(card::ValidationError::InvalidPadding("100px".into()))
+    );
 }
 
 #[test]

@@ -1,0 +1,5 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true, "streaming_mode": false, "streaming_config": {"print_strategy": "fast"}},
+  "body": {"elements": []}
+}

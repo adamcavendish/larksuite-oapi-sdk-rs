@@ -37,11 +37,6 @@
     "text_tag_list": [
       {"tag": "text_tag", "element_id": "status_tag", "text": {"tag": "plain_text", "content": "Stable"}, "color": "green"}
     ],
-    "i18n_text_tag_list": {
-      "zh_cn": [
-        {"tag": "text_tag", "element_id": "status_tag_zh", "text": {"tag": "plain_text", "content": "稳定"}, "color": "green"}
-      ]
-    },
     "padding": "12px 12px 8px 12px"
   },
   "body": {
