@@ -1,0 +1,45 @@
+{
+  "schema": "2.0",
+  "config": {
+    "streaming_mode": true,
+    "streaming_config": {
+      "print_frequency_ms": {"default": 70, "android": 80, "ios": 90, "pc": 60},
+      "print_step": {"default": 2},
+      "print_strategy": "delay"
+    },
+    "summary": {"content": "Release health", "i18n_content": {"zh_cn": "发布健康度"}},
+    "locales": ["en_us", "zh_cn"],
+    "enable_forward": true,
+    "update_multi": true,
+    "width_mode": "compact",
+    "use_custom_translation": true,
+    "enable_forward_interaction": false,
+    "style": {
+      "text_size": {"title": {"default": "heading-2", "pc": "heading-2", "mobile": "heading-3"}},
+      "color": {"cus-primary": {"light_mode": "rgba(30,120,255,1)", "dark_mode": "rgba(80,150,255,1)"}}
+    }
+  },
+  "card_link": {
+    "url": "https://example.com/release",
+    "android_url": "https://example.com/android",
+    "ios_url": "https://example.com/ios",
+    "pc_url": "https://example.com/desktop"
+  },
+  "header": {
+    "title": {"tag": "lark_md", "content": "**Release health**", "lines": 4},
+    "subtitle": {"tag": "plain_text", "content": "All systems normal", "lines": 1},
+    "template": "default",
+    "text_tag_list": [
+      {"tag": "text_tag", "element_id": "status_tag_default", "text": {"tag": "plain_text", "content": "Stable"}, "color": "green"}
+    ],
+    "i18n_text_tag_list": {
+      "zh_cn": [
+        {"tag": "text_tag", "element_id": "status_tag_zh", "text": {"tag": "plain_text", "content": "稳定"}, "color": "green"},
+        {"tag": "text_tag", "element_id": "region_tag", "text": {"tag": "plain_text", "content": "全球"}, "color": "blue"}
+      ]
+    },
+    "icon": {"tag": "standard_icon", "token": "approval_colorful", "color": "green", "size": "16px"},
+    "padding": "12px 12px 8px 12px"
+  },
+  "body": {"elements": []}
+}

@@ -1,0 +1,6 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "card_link": {"pc_url": "https://example.com/desktop"},
+  "body": {"elements": []}
+}
