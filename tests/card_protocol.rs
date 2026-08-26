@@ -26,6 +26,7 @@ mod support;
 const V1_MANIFEST: &str = include_str!("fixtures/card_protocol/card_json_v1.json");
 const V2_MANIFEST: &str = include_str!("fixtures/card_protocol/card_json_v2.json");
 const CARDKIT_V1_MANIFEST: &str = include_str!("fixtures/card_protocol/cardkit_v1.json");
+const CARD_BUILDER_MANIFEST: &str = include_str!("fixtures/card_protocol/card_builder.json");
 const FIXTURE_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/card_protocol");
 
 const REQUIRED_SURFACES: &[&str] = &[
@@ -415,6 +416,10 @@ fn v2_manifest() -> Manifest {
 
 fn cardkit_v1_manifest() -> Manifest {
     support::manifest(CARDKIT_V1_MANIFEST, "CardKit v1")
+}
+
+fn card_builder_manifest() -> Manifest {
+    support::manifest(CARD_BUILDER_MANIFEST, "Card Builder")
 }
 
 fn fixture(path: &str) -> Value {
@@ -862,6 +867,86 @@ fn cardkit_v1_document_and_content_stream_are_traceable() {
             other => panic!("unknown CardKit fixture kind {other}"),
         }
     }
+}
+
+#[test]
+fn card_builder_templates_are_traceable_through_im_delivery() {
+    let manifest = card_builder_manifest();
+    assert_eq!(manifest.schema_version, 1);
+    assert_eq!(manifest.protocol, "card-builder");
+    assert_eq!(manifest.version, "published-template");
+    assert_eq!(manifest.sources.official_docs.role, "normative");
+    assert_eq!(manifest.sources.official_docs.accessed_on, "2026-08-26");
+    assert!(
+        manifest
+            .sources
+            .official_docs
+            .urls
+            .iter()
+            .all(|url| url.starts_with("https://open.larksuite.com/"))
+    );
+    for source in [&manifest.sources.go_sdk, &manifest.sources.lark_cli] {
+        assert_eq!(source.role, "implementation_cross_check");
+        assert_eq!(source.revision.len(), 40);
+        assert!(!source.artifacts.is_empty());
+    }
+    assert_reference_revision(
+        "CARD_PROTOCOL_GO_SDK_DIR",
+        &manifest.sources.go_sdk.revision,
+    );
+    assert_reference_revision("CARD_PROTOCOL_CLI_DIR", &manifest.sources.lark_cli.revision);
+    assert_reference_artifacts("CARD_PROTOCOL_GO_SDK_DIR", &manifest.sources.go_sdk);
+    assert_reference_artifacts("CARD_PROTOCOL_CLI_DIR", &manifest.sources.lark_cli);
+
+    assert_eq!(
+        manifest
+            .surfaces
+            .iter()
+            .map(|surface| surface.id.as_str())
+            .collect::<BTreeSet<_>>(),
+        BTreeSet::from(["published_template_message"])
+    );
+    assert!(
+        manifest
+            .surfaces
+            .iter()
+            .all(|surface| surface.status == "implemented")
+    );
+    assert_eq!(
+        manifest
+            .fields
+            .iter()
+            .map(|field| format!("{}.{}", field.surface, field.name))
+            .collect::<BTreeSet<_>>(),
+        BTreeSet::from([
+            "message.type".to_string(),
+            "message.data".to_string(),
+            "data.template_id".to_string(),
+            "data.template_version_name".to_string(),
+            "data.template_variable".to_string(),
+        ])
+    );
+
+    assert_eq!(manifest.fixtures.len(), 1);
+    let entry = &manifest.fixtures[0];
+    assert_eq!(entry.id, "published_template_message");
+    assert_eq!(entry.kind, "published_template_message");
+    assert!(entry.expected_tags.is_empty());
+    assert!(entry.path.starts_with("card_builder/"));
+    let value = fixture(&entry.path);
+    assert_eq!(value["type"], "template");
+    assert!(
+        value["data"]["template_id"]
+            .as_str()
+            .is_some_and(|id| !id.is_empty())
+    );
+    assert!(
+        value["data"]["template_version_name"]
+            .as_str()
+            .is_some_and(|version| !version.is_empty())
+    );
+    assert!(value["data"]["template_variable"].is_object());
+    assert!(value["data"]["template_variable"]["looping"].is_array());
 }
 
 #[test]
