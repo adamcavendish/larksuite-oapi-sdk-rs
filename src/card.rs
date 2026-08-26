@@ -90,9 +90,9 @@ impl SendReadyCard for v2::CardDocument {
 #[path = "card/template.rs"]
 pub mod template;
 
-impl sealed::Sealed for template::TemplateMessage {}
+impl<T: serde::Serialize> sealed::Sealed for template::TemplateMessage<T> {}
 
-impl SendReadyCard for template::TemplateMessage {
+impl<T: serde::Serialize> SendReadyCard for template::TemplateMessage<T> {
     fn encoded_content(&self) -> Result<String, LarkError> {
         self.to_content()
     }
