@@ -108,6 +108,11 @@ document and emits CardKit's escaped `type: "card_json"` payload. The typed
 ordered update session for full replacement and full-content updates on one
 text or Markdown element.
 
+Creation returns a CardKit entity ID, not an IM message. Send it through an IM
+`interactive` request with `card::cardkit::CardEntityMessage`, which emits the
+separate `{"type":"card","data":{"card_id":"..."}}` content envelope.
+Do not reuse the CardKit `card_json` REST envelope for this step.
+
 Each CardKit update carries a caller-provided idempotency key and a positive
 sequence. One `CardKitUpdateSession` owns the sequence across document and
 content, settings, element, and batch updates, advancing it only after a

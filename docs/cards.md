@@ -25,15 +25,17 @@ shared-card requirements, and element-identifier rules are incompatible with
 ## Stream a CardKit document
 
 CardKit accepts a validated Card JSON 2.0 `card::cardkit::CardDocument`.
-`LarkClient::cardkit_cards()` creates the entity and owns ordered updates. Keep
-one update session for full-document, settings, element, and content updates;
-each successful mutation advances its sequence.
+`LarkClient::cardkit_cards()` creates the entity; send that entity once with a
+`card::cardkit::CardEntityMessage` through IM before beginning ordered updates.
+Keep one update session for full-document, settings, element, and content
+updates; each successful mutation advances its sequence. CardKit entities have
+the documented 14-day lifetime and may be sent only once.
 
 [`examples/cardkit_stream.rs`](../examples/cardkit_stream.rs) creates a
 streaming CardKit card and replaces a Markdown element's complete content:
 
 ```sh
-APP_ID=... APP_SECRET=... cargo run --example cardkit_stream
+APP_ID=... APP_SECRET=... CHAT_ID=oc_... cargo run --example cardkit_stream
 ```
 
 ## Send a published Card Builder template

@@ -27,7 +27,7 @@ Most examples use this shape:
 | `app_registration` | OAuth app registration | Create or update an app through the device-code registration flow | optional `APP_AVATAR_URL`, `CREATE_ONLY`, `EXISTING_APP_ID`, `REGISTRATION_DOMAIN`, `REGISTRATION_LARK_DOMAIN` | `cargo run --example app_registration` |
 | `send_message` | IM v1 | Send a text IM message through the generated IM service | `APP_ID`, `APP_SECRET`, `CHAT_ID` | `cargo run --example send_message` |
 | `card_send` | Card JSON 1.0 | Validate and send an interactive card through IM v1 | `APP_ID`, `APP_SECRET`, `CHAT_ID` | `cargo run --example card_send` |
-| `cardkit_stream` | CardKit | Create a Card JSON 2.0 streaming document and replace its Markdown content | `APP_ID`, `APP_SECRET` | `cargo run --example cardkit_stream` |
+| `cardkit_stream` | CardKit | Create, send, and stream a Card JSON 2.0 card entity | `APP_ID`, `APP_SECRET`, `CHAT_ID` | `cargo run --example cardkit_stream` |
 | `card_template_send` | Card Builder | Send a published template with typed variables through IM v1 | `APP_ID`, `APP_SECRET`, `CHAT_ID`, `CARD_TEMPLATE_ID`, optional `CARD_TEMPLATE_TITLE` | `cargo run --example card_template_send` |
 | `event_handler` | Event dispatcher | Handle encrypted HTTP callback events | none for compilation | `cargo run --example event_handler` |
 | `card_action_handler` | Card callbacks | Handle an interactive card callback and return a toast JSON body | none for compilation | `cargo run --example card_action_handler` |

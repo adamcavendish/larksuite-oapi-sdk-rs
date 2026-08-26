@@ -4,10 +4,11 @@ use common::{http_response, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::card::cardkit::{
-    CardDocument, CardUpdateMetadata, IdempotencyKey, UpdateSequence,
+    CardDocument, CardEntityMessage, CardUpdateMetadata, IdempotencyKey, UpdateSequence,
 };
 use larksuite_oapi_sdk_rs::card::v2::{Body, Card, Config, Element, Markdown};
 use larksuite_oapi_sdk_rs::req::RequestOption;
+use larksuite_oapi_sdk_rs::service::im::v1::CreateMessageReqBody;
 
 fn client_for(addr: std::net::SocketAddr) -> LarkClient {
     LarkClient::builder("test_app_id", "test_secret")
@@ -53,12 +54,32 @@ fn cardkit_document_rejects_invalid_card_and_serializes_card_json_envelopes() {
     assert!(UpdateSequence::new(0).is_err());
 }
 
+#[test]
+fn cardkit_entity_message_serializes_as_the_documented_im_envelope() {
+    let message = CardEntityMessage::new("card-1").unwrap();
+    assert_eq!(message.card_id(), "card-1");
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(&message.to_content().unwrap()).unwrap(),
+        serde_json::json!({"type": "card", "data": {"card_id": "card-1"}}),
+    );
+
+    let request = CreateMessageReqBody::interactive_card("oc_card", &message).unwrap();
+    assert_eq!(request.msg_type.as_deref(), Some("interactive"));
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(request.content.as_deref().unwrap()).unwrap(),
+        serde_json::json!({"type": "card", "data": {"card_id": "card-1"}}),
+    );
+    assert!(CardEntityMessage::new("").is_err());
+}
+
 #[tokio::test]
 async fn cardkit_helpers_create_update_and_stream_in_sequence() {
     let create_body = r#"{"code":0,"msg":"ok","data":{"card_id":"card-1"}}"#;
+    let send_body = r#"{"code":0,"msg":"ok","data":{"message_id":"om_card-1"}}"#;
     let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, create_body),
+        http_response(200, send_body),
         http_response(200, empty_body),
         http_response(200, empty_body),
         http_response(200, empty_body),
@@ -73,7 +94,15 @@ async fn cardkit_helpers_create_update_and_stream_in_sequence() {
         .create(&document, &option)
         .await
         .unwrap();
-    assert_eq!(created.data.unwrap().card_id.as_deref(), Some("card-1"));
+    let card_id = created.data.unwrap().card_id.unwrap();
+    let entity = CardEntityMessage::new(card_id).unwrap();
+    let send = CreateMessageReqBody::interactive_card("oc_card", &entity).unwrap();
+    client
+        .im()
+        .message
+        .create("chat_id", &send, &option)
+        .await
+        .unwrap();
 
     let metadata = CardUpdateMetadata::new(
         IdempotencyKey::new("full-update").unwrap(),
@@ -120,11 +149,13 @@ async fn cardkit_helpers_create_update_and_stream_in_sequence() {
 
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("POST /open-apis/cardkit/v1/cards "));
+    assert!(request.contains("POST /open-apis/im/v1/messages?receive_id_type=chat_id "));
     assert!(request.contains("PUT /open-apis/cardkit/v1/cards/card-1 "));
     assert!(
         request.contains("PUT /open-apis/cardkit/v1/cards/card-1/elements/stream_content/content ")
     );
     assert!(request.contains(r#""type":"card_json""#));
+    assert!(request.contains(r#"\"type\":\"card\",\"data\":{\"card_id\":\"card-1\"}"#));
     assert!(request.contains(r#""uuid":"full-update""#));
     assert!(request.contains(r#""sequence":5"#));
     assert!(request.contains(r#""uuid":"content-1""#));

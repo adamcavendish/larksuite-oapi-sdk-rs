@@ -16,7 +16,8 @@
         "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/cardkit-v1/card-element/patch",
         "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/cardkit-v1/card-element/content",
         "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/cardkit-v1/card-instance/create",
-        "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/cardkit-v1/card-instance/update"
+        "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/cardkit-v1/card-instance/update",
+        "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/im-v1/message/create_json#3ea4c2d5"
       ]
     },
     "go_sdk": {
@@ -51,7 +52,8 @@
     {"id": "element_delete", "kind": "ordered_element_delete", "status": "implemented", "sources": ["official_docs", "go_sdk"]},
     {"id": "element_patch", "kind": "ordered_element_patch", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
     {"id": "batch_update", "kind": "ordered_batch_mutation", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]},
-    {"id": "template_instance", "kind": "template_instance_lifecycle", "status": "implemented", "sources": ["official_docs"], "cross_check_note": "The pinned Go CardKit v1 source does not expose Card Instance create or update resources; its unrelated CardTemplate models are not evidence for this endpoint."}
+    {"id": "template_instance", "kind": "template_instance_lifecycle", "status": "implemented", "sources": ["official_docs"], "cross_check_note": "The pinned Go CardKit v1 source does not expose Card Instance create or update resources; its unrelated CardTemplate models are not evidence for this endpoint."},
+    {"id": "entity_message", "kind": "im_entity_delivery", "status": "implemented", "sources": ["official_docs"], "cross_check_note": "CardKit creation returns the entity ID; the IM content envelope is a separate official wire contract and has no generated Go helper."}
   ],
   "fixtures": [
     {"id": "streaming_document", "path": "cardkit_v1/streaming_document.json", "kind": "card_json_document", "expected_tags": ["markdown"]},
@@ -62,6 +64,7 @@
     {"id": "element_delete", "path": "cardkit_v1/element_delete.json", "kind": "element_delete", "expected_tags": []},
     {"id": "element_patch", "path": "cardkit_v1/element_patch.json", "kind": "element_patch", "expected_tags": []},
     {"id": "batch_update", "path": "cardkit_v1/batch_update.json", "kind": "batch_update", "expected_tags": ["partial_update_setting", "add_elements", "delete_elements", "partial_update_element", "update_element"]},
-    {"id": "template_instance", "path": "cardkit_v1/template_instance.json", "kind": "template_instance", "expected_tags": []}
+    {"id": "template_instance", "path": "cardkit_v1/template_instance.json", "kind": "template_instance", "expected_tags": []},
+    {"id": "entity_message", "path": "cardkit_v1/entity_message.json", "kind": "entity_message", "expected_tags": ["card"]}
   ]
 }
