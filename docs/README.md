@@ -6,6 +6,8 @@ examples, features, and coverage.
 
 - [Go service and event compatibility](go-compatibility.md) covers raw
   requests, the compatibility bridge, and reproducible Go-to-Rust checks.
+- [Cards](cards.md) covers versioned Card JSON delivery, CardKit streaming,
+  published Card Builder templates, and callbacks.
 - [Card protocol alignment](card-protocol.md) defines the source hierarchy and
   verification workflow for Card JSON, card callbacks, and CardKit mutations.
 - [Events, WebSockets, and channels](events-and-channels.md) covers webhook

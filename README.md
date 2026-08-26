@@ -27,7 +27,7 @@ WebSocket, Axum, and channel integration.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.3.6"
+larksuite-oapi-sdk-rs = "0.3.7"
 ```
 
 The minimum supported Rust version is 1.95.0.
@@ -79,6 +79,9 @@ for the complete setup.
 | Read, edit, or render Slides AI presentations | [`examples/slides_ai_read.rs`](examples/slides_ai_read.rs), [`examples/slides_ai_render.rs`](examples/slides_ai_render.rs), and [Slides AI presentation content](docs/slides-ai.md) |
 | Exchange or refresh OAuth tokens | [`examples/authen_oauth.rs`](examples/authen_oauth.rs) and [OAuth SSO guide](docs/oauth-sso.md) |
 | Receive webhook events | [`examples/event_handler.rs`](examples/event_handler.rs) |
+| Send a validated interactive card | [`examples/card_send.rs`](examples/card_send.rs) and [Cards guide](docs/cards.md) |
+| Stream a CardKit document | [`examples/cardkit_stream.rs`](examples/cardkit_stream.rs) and [Cards guide](docs/cards.md) |
+| Send a published Card Builder template | [`examples/card_template_send.rs`](examples/card_template_send.rs) and [Cards guide](docs/cards.md) |
 | Handle interactive card callbacks | [`examples/card_action_handler.rs`](examples/card_action_handler.rs) |
 | Run a WebSocket event client | [`examples/ws_client.rs`](examples/ws_client.rs) with `ws` enabled |
 | Send channel messages | [`examples/channel_send.rs`](examples/channel_send.rs) with `messaging` enabled |
@@ -89,6 +92,8 @@ for the complete setup.
 
 - [Go service and event compatibility](docs/go-compatibility.md): raw
   requests, the compatibility bridge, and deterministic Go-to-Rust checks.
+- [Cards](docs/cards.md): versioned Card JSON, CardKit streaming, published
+  Card Builder templates, and callbacks.
 - [Card protocol alignment](docs/card-protocol.md): source hierarchy and
   verification workflow for Card JSON and card callbacks.
 - [Events, WebSockets, and channels](docs/events-and-channels.md): webhook
@@ -141,7 +146,7 @@ separately does not enable the `channel` runtime API.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.3.6", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.3.7", features = ["ws", "axum"] }
 ```
 
 ## API Coverage

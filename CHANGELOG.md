@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+## [0.3.7] - 2026-08-26
+
+### Cards
+
+- Added validated, versioned Card JSON 1.0 and 2.0 models with complete
+  documented handwritten components, callback behavior, exact protocol
+  fixtures, and shared Go/CLI reference alignment.
+- Added CardKit document creation, ordered content streaming, settings and
+  element mutations, batch actions, and template-instance variable updates.
+- Added published Card Builder template delivery through typed
+  `TemplateMessage<T>` bindings, while retaining `JsonValue` for dynamic
+  template variables.
+- Deprecated the historical incomplete `card::Card` facade in favor of the
+  versioned Card JSON roots.
+
+### Compatibility
+
+- Interactive-message create, reply, update, patch, and channel edit helpers
+  now require a validated Card JSON document or Card Builder template message;
+  arbitrary serializable values can no longer bypass card validation.
+
+### REST service coverage
+
+- Added Calendar v4 event-organizer transfer with user or tenant credentials.
+- Added Base template-center operations and IM read-status inputs aligned with
+  the Go v3.10.0 SDK, including refreshed VC bot event detail coverage.
+
+### Tooling
+
+- Added deterministic embedded-card protocol inventories and fixtures to the
+  aggregate reference-alignment gate, covering Card JSON, CardKit, and
+  published Card Builder template delivery.
+
 ## [0.3.6] - 2026-08-21
 
 ### Authentication
@@ -504,6 +537,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.7]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.7
 [0.3.6]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.6
 [0.3.5]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.5
 [0.3.4]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.4

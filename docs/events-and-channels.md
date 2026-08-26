@@ -79,19 +79,24 @@ messaging
 ## Message updates
 
 Use `ChannelMessaging::edit_text` to update a text message. Use
-`ChannelMessaging::edit_card` only for interactive cards; it uses the separate
-card patch operation. See
-[`examples/channel_send.rs`](../examples/channel_send.rs) for sending and
+`ChannelMessaging::edit_card` only for validated interactive-card documents; it
+uses the separate card patch operation. See
+[`examples/card_send.rs`](../examples/card_send.rs) for Card JSON delivery and
 [`examples/card_action_handler.rs`](../examples/card_action_handler.rs) for
 interactive callback responses.
 
 ```rust,no_run
-use larksuite_oapi_sdk_rs::card::v1::{Card, Div, Element, Header, Text};
+use larksuite_oapi_sdk_rs::card::v1::{Card, CardDocument, Div, Element, Header, Text};
 use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
 
 # async fn run() -> Result<(), Box<dyn std::error::Error>> {
 let client = LarkClient::builder("APP_ID", "APP_SECRET").build()?;
 let messaging = client.channel_messaging();
+let card = CardDocument::new(
+    Card::new()
+        .header(Header::new("Done"))
+        .element(Element::Div(Div::new(Text::lark_md("Complete")))),
+)?;
 
 messaging
     .edit_text("om_text_message", "Updated status", &RequestOption::default())
@@ -99,9 +104,7 @@ messaging
 messaging
     .edit_card(
         "om_card_message",
-        Card::new()
-            .header(Header::new("Done"))
-            .element(Element::Div(Div::new(Text::lark_md("Complete")))),
+        &card,
         &RequestOption::default(),
     )
     .await?;
@@ -111,5 +114,7 @@ messaging
 
 ## Cards
 
-The `card` module builds interactive Lark cards, and `CardActionHandler` handles
-callback payloads. Consult the generated API documentation for card builders.
+Use `card::v1` or `card::v2` to build versioned Card JSON, and validate it with
+their `CardDocument` types before sending. `CardActionHandler` handles callback
+payloads. See the [Cards guide](cards.md) for CardKit and published Card Builder
+templates.
