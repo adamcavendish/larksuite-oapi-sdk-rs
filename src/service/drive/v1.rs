@@ -2411,6 +2411,34 @@ impl<'a> MediaResource<'a> {
         .await
     }
 
+    /// Downloads a selected preview artifact for a Drive media file.
+    ///
+    /// `preview_type` is the platform-provided preview artifact code (for
+    /// example, `"16"` selects the source-file artifact in the official CLI).
+    /// Use the Drive preview-result endpoint when the available artifact codes
+    /// must be discovered first. The response is binary and preserves the file
+    /// name supplied by `Content-Disposition` when present.
+    pub async fn preview_download(
+        &self,
+        file_token: &str,
+        preview_type: &str,
+        version: Option<&str>,
+        option: &RequestOption,
+    ) -> Result<DownloadResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/drive/v1/medias/:file_token/preview_download",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .path_param("file_token", file_token)
+        .query("preview_type", Some(preview_type))
+        .query("version", version)
+        .download()
+        .await
+    }
+
     pub async fn upload_prepare(
         &self,
         body: &MediaUploadInfo,

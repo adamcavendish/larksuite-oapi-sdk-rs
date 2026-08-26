@@ -32,6 +32,63 @@ async fn drive_media_download_smoke() {
 }
 
 #[tokio::test]
+async fn drive_media_preview_download_smoke() {
+    let body = "preview-bytes";
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Disposition: attachment; filename=\"preview.pdf\"\r\nContent-Type: application/pdf\r\n",
+        body,
+    )])
+    .await;
+
+    let client = client_for(addr);
+    let resp = client
+        .drive()
+        .media
+        .preview_download(
+            "media/token? with spaces",
+            "16",
+            Some("7633658129540910621"),
+            &RequestOption::default(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(resp.file_name.as_deref(), Some("preview.pdf"));
+    assert_eq!(resp.data, body.as_bytes());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains(
+        "GET /open-apis/drive/v1/medias/media%2Ftoken%3F%20with%20spaces/preview_download?"
+    ));
+    assert!(request.contains("preview_type=16"));
+    assert!(request.contains("version=7633658129540910621"));
+}
+
+#[tokio::test]
+async fn drive_media_preview_download_omits_absent_version() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response_with_headers(
+        200,
+        "Content-Type: application/octet-stream\r\n",
+        "preview-bytes",
+    )])
+    .await;
+
+    let client = client_for(addr);
+    client
+        .drive()
+        .media
+        .preview_download("media-token-1", "0", None, &RequestOption::default())
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains(
+        "GET /open-apis/drive/v1/medias/media-token-1/preview_download?preview_type=0 HTTP/1.1"
+    ));
+    assert!(!request.contains("version="));
+}
+
+#[tokio::test]
 async fn drive_media_upload_all_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"file_token":"media-token-1"}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
