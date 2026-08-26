@@ -26,6 +26,9 @@ Most examples use this shape:
 | `slides_ai_render` | Slides AI v1 | Render an XML slide fragment and decode the returned image bytes | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, optional `SLIDES_AI_RENDER_CONTENT` | `cargo run --example slides_ai_render` |
 | `app_registration` | OAuth app registration | Create or update an app through the device-code registration flow | optional `APP_AVATAR_URL`, `CREATE_ONLY`, `EXISTING_APP_ID`, `REGISTRATION_DOMAIN`, `REGISTRATION_LARK_DOMAIN` | `cargo run --example app_registration` |
 | `send_message` | IM v1 | Send a text IM message through the generated IM service | `APP_ID`, `APP_SECRET`, `CHAT_ID` | `cargo run --example send_message` |
+| `card_send` | Card JSON 1.0 | Validate and send an interactive card through IM v1 | `APP_ID`, `APP_SECRET`, `CHAT_ID` | `cargo run --example card_send` |
+| `cardkit_stream` | CardKit | Create a Card JSON 2.0 streaming document and replace its Markdown content | `APP_ID`, `APP_SECRET` | `cargo run --example cardkit_stream` |
+| `card_template_send` | Card Builder | Send a published template with typed variables through IM v1 | `APP_ID`, `APP_SECRET`, `CHAT_ID`, `CARD_TEMPLATE_ID`, optional `CARD_TEMPLATE_TITLE` | `cargo run --example card_template_send` |
 | `event_handler` | Event dispatcher | Handle encrypted HTTP callback events | none for compilation | `cargo run --example event_handler` |
 | `card_action_handler` | Card callbacks | Handle an interactive card callback and return a toast JSON body | none for compilation | `cargo run --example card_action_handler` |
 | `ws_client` | WebSocket events | Receive events through WebSocket long connections; optionally attach a trusted user channel | `APP_ID`, `APP_SECRET`, optional `WS_CHANNEL_TAG`, `USER_ACCESS_TOKEN` | `cargo run --features ws --example ws_client` |
@@ -64,7 +67,7 @@ Use this table when translating code from the official Go SDK sample tree.
 | `sample/api/application.go` | `application_v6` | Use versioned accessors such as `client.application_v6()` |
 | `sample/event/event.go` | `event_handler` | Register typed event callbacks on `EventDispatcher` |
 | `sample/ws/sample.go` | `ws_client` | Build a dispatcher, then start `client.ws_client(dispatcher)` with the `ws` feature |
-| `sample/card/card.go` | `card_action_handler`, card builder APIs | Use `CardActionHandler` for callbacks and `larksuite_oapi_sdk_rs::card` for message JSON |
+| `sample/card/card.go` | `card_send`, `card_template_send`, `card_action_handler` | Use versioned `card::v1` or `card::v2` documents for Card JSON, `TemplateMessage<T>` for published templates, and `CardActionHandler` for callbacks |
 | `sample/channel/main.go` | `channel_send`, `channel_normalize` | Use `messaging` for outbound operations and `channel` for inbound normalization and runtime policy |
 | `sample/apiall/botv4`, `sample/apiall/okrv2` | `bot_search`, `okr_v2` | Prefer the dedicated typed resources; retain `go_compatibility` for endpoints not promoted to Rust resources |
 
