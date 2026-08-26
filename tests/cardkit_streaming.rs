@@ -76,11 +76,12 @@ fn cardkit_entity_message_serializes_as_the_documented_im_envelope() {
 async fn cardkit_helpers_create_update_and_stream_in_sequence() {
     let create_body = r#"{"code":0,"msg":"ok","data":{"card_id":"card-1"}}"#;
     let send_body = r#"{"code":0,"msg":"ok","data":{"message_id":"om_card-1"}}"#;
+    let update_body = r#"{"code":0,"msg":"ok","data":{}}"#;
     let empty_body = r#"{"code":0,"msg":"ok"}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, create_body),
         http_response(200, send_body),
-        http_response(200, empty_body),
+        http_response(200, update_body),
         http_response(200, empty_body),
         http_response(200, empty_body),
     ])
@@ -112,10 +113,12 @@ async fn cardkit_helpers_create_update_and_stream_in_sequence() {
         .cardkit_cards()
         .resume_update_session("card-1", metadata.sequence)
         .unwrap();
-    updates
+    let update = updates
         .replace_document(&document, &metadata.idempotency_key, &option)
         .await
         .unwrap();
+    assert!(update.success());
+    assert!(update.data.is_some());
     assert_eq!(
         updates.next_sequence(),
         Some(UpdateSequence::new(6).unwrap())
