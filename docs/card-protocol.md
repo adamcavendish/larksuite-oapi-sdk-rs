@@ -88,10 +88,11 @@ handwritten Card JSON tag.
 
 Card Builder is not a Card JSON AST. The SDK does not replicate the visual
 editor or represent builder-only components. It supports delivery of a published
-template through `card::template::TemplateMessage`, whose open JSON variables
-are sent as an IM `interactive` message. The template-delivery manifest keeps
-that envelope, its IM transport, and the builder-only recycling-container
-example in the same aggregate alignment check.
+template through `card::template::TemplateMessage<T>`. `T` is a caller-defined
+`Serialize` variable object, validated before delivery; `TemplateMessage` uses
+`JsonValue` by default as the dynamic JSON escape hatch. The template-delivery
+manifest keeps that envelope, its IM transport, and the builder-only
+recycling-container example in the same aggregate alignment check.
 
 `implemented` is reserved for a component whose field-level inventory, valid
 fixture, invalid constraint fixture where applicable, and direct serde
