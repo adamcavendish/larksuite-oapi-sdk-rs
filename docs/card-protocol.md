@@ -86,6 +86,13 @@ and exact fixtures must still be covered. The documented Card-Builder-only
 recycling container is recorded as a known divergence because it has no
 handwritten Card JSON tag.
 
+Card Builder is not a Card JSON AST. The SDK does not replicate the visual
+editor or represent builder-only components. It supports delivery of a published
+template through `card::template::TemplateMessage`, whose open JSON variables
+are sent as an IM `interactive` message. The template-delivery manifest keeps
+that envelope, its IM transport, and the builder-only recycling-container
+example in the same aggregate alignment check.
+
 `implemented` is reserved for a component whose field-level inventory, valid
 fixture, invalid constraint fixture where applicable, and direct serde
 round-trip coverage are all present. A complete component group does not imply

@@ -1,0 +1,14 @@
+{
+  "type": "template",
+  "data": {
+    "template_id": "AAqi6xJ8rabcd",
+    "template_version_name": "1.0.0",
+    "template_variable": {
+      "title": "Products",
+      "looping": [
+        {"title": "和风陶韵", "image": {"img_key": "img_v3_xxx"}},
+        {"title": "匠心之作", "image": {"img_key": "img_v3_yyy"}}
+      ]
+    }
+  }
+}

@@ -86,6 +86,18 @@ impl SendReadyCard for v2::CardDocument {
     }
 }
 
+/// Typed IM envelopes for published Card Builder templates.
+#[path = "card/template.rs"]
+pub mod template;
+
+impl sealed::Sealed for template::TemplateMessage {}
+
+impl SendReadyCard for template::TemplateMessage {
+    fn encoded_content(&self) -> Result<String, LarkError> {
+        self.to_content()
+    }
+}
+
 // ── Closed card option sets ──
 
 /// Header templates supported by Feishu interactive cards.

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "protocol": "card-builder",
+  "version": "published-template",
+  "sources": {
+    "official_docs": {
+      "role": "normative",
+      "accessed_on": "2026-08-26",
+      "urls": [
+        "https://open.larksuite.com/document/uAjLw4CM/ukTMukTMukTM/im-v1/message/create_json"
+      ]
+    },
+    "go_sdk": {
+      "role": "implementation_cross_check",
+      "repository": "https://github.com/larksuite/oapi-sdk-go.git",
+      "revision": "dbeec3d5f3afa4558d5cb22d93506c570e25385a",
+      "artifacts": [
+        {
+          "path": "service/im/v1/model.go",
+          "required_snippets": ["CreateMessageReqBody", "interactive"]
+        }
+      ]
+    },
+    "lark_cli": {
+      "role": "implementation_cross_check",
+      "repository": "https://github.com/larksuite/cli.git",
+      "revision": "7874dc144b6d94ba5986664dfe65b007dcd5e381",
+      "artifacts": [
+        {
+          "path": "skills/lark-im/references/card/components/recycling_container.md",
+          "required_snippets": ["无 JSON tag", "template_variable", "msg_type"]
+        }
+      ]
+    }
+  },
+  "surfaces": [
+    {"id": "published_template_message", "kind": "outbound_template", "status": "implemented", "sources": ["official_docs", "go_sdk", "lark_cli"]}
+  ],
+  "fields": [
+    {"surface": "message", "name": "type", "domain": "literal template", "constraints": ["required"], "sources": ["official_docs", "lark_cli"]},
+    {"surface": "message", "name": "data", "domain": "template payload object", "constraints": ["required"], "sources": ["official_docs", "lark_cli"]},
+    {"surface": "data", "name": "template_id", "domain": "published template identifier", "constraints": ["required and non-empty"], "sources": ["official_docs", "lark_cli"]},
+    {"surface": "data", "name": "template_version_name", "domain": "published template version", "constraints": ["optional and non-empty when present"], "sources": ["lark_cli"]},
+    {"surface": "data", "name": "template_variable", "domain": "open JSON object", "constraints": ["optional name-keyed bindings; array values support recycling-container data"], "sources": ["lark_cli"]}
+  ],
+  "fixtures": [
+    {"id": "published_template_message", "path": "card_builder/published_template_message.json", "kind": "published_template_message", "expected_tags": []}
+  ]
+}
