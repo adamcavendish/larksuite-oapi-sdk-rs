@@ -26,7 +26,7 @@ fn request_body(request: &str) -> serde_json::Value {
 
 #[tokio::test]
 async fn cardkit_session_orders_settings_element_and_batch_mutations() {
-    let empty = r#"{"code":0,"msg":"ok"}"#;
+    let empty = r#"{"code":0,"msg":"ok","data":{}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, empty),
         http_response(200, empty),

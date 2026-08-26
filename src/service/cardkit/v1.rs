@@ -143,14 +143,21 @@ pub struct CardInstanceData {
 impl_resp!(CreateCardInstanceResp, CardInstanceData);
 
 impl_resp_v2!(CreateCardResp, CreateCardRespData);
-impl_resp_v2!(UpdateCardResp, ());
-impl_resp_v2!(BatchUpdateCardResp, ());
-impl_resp_v2!(SettingsCardResp, ());
-impl_resp_v2!(CreateCardElementResp, ());
-impl_resp_v2!(UpdateCardElementResp, ());
-impl_resp_v2!(DeleteCardElementResp, ());
-impl_resp_v2!(PatchCardElementResp, ());
-impl_resp_v2!(ContentCardElementResp, ());
+
+/// The documented empty response object returned by CardKit mutations.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+#[non_exhaustive]
+pub struct CardKitMutationRespData {}
+
+impl_resp_v2!(UpdateCardResp, CardKitMutationRespData);
+impl_resp_v2!(BatchUpdateCardResp, CardKitMutationRespData);
+impl_resp_v2!(SettingsCardResp, CardKitMutationRespData);
+impl_resp_v2!(CreateCardElementResp, CardKitMutationRespData);
+impl_resp_v2!(UpdateCardElementResp, CardKitMutationRespData);
+impl_resp_v2!(DeleteCardElementResp, CardKitMutationRespData);
+impl_resp_v2!(PatchCardElementResp, CardKitMutationRespData);
+impl_resp_v2!(ContentCardElementResp, CardKitMutationRespData);
 
 #[derive(Debug, Clone)]
 #[non_exhaustive]
@@ -452,7 +459,7 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<(), UpdateCardResp>()
+        .send_v2_response::<CardKitMutationRespData, UpdateCardResp>()
         .await
     }
 
@@ -480,7 +487,7 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<(), BatchUpdateCardResp>()
+        .send_v2_response::<CardKitMutationRespData, BatchUpdateCardResp>()
         .await
     }
 
@@ -508,7 +515,7 @@ impl CardResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<(), SettingsCardResp>()
+        .send_v2_response::<CardKitMutationRespData, SettingsCardResp>()
         .await
     }
 }
@@ -542,7 +549,7 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<(), CreateCardElementResp>()
+        .send_v2_response::<CardKitMutationRespData, CreateCardElementResp>()
         .await
     }
 
@@ -577,7 +584,7 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<(), UpdateCardElementResp>()
+        .send_v2_response::<CardKitMutationRespData, UpdateCardElementResp>()
         .await
     }
 
@@ -628,7 +635,7 @@ impl CardElementResource<'_> {
             request
         };
         request
-            .send_v2_response::<(), DeleteCardElementResp>()
+            .send_v2_response::<CardKitMutationRespData, DeleteCardElementResp>()
             .await
     }
 
@@ -663,7 +670,7 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<(), PatchCardElementResp>()
+        .send_v2_response::<CardKitMutationRespData, PatchCardElementResp>()
         .await
     }
 
@@ -698,7 +705,7 @@ impl CardElementResource<'_> {
             option,
         )
         .json_body(query.body)?
-        .send_v2_response::<(), ContentCardElementResp>()
+        .send_v2_response::<CardKitMutationRespData, ContentCardElementResp>()
         .await
     }
 }
