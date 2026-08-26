@@ -2,10 +2,17 @@
 
 ## Unreleased
 
+## [0.3.8] - 2026-08-26
+
 ### Cards
 
 - Added a typed CardKit card-entity IM envelope so a created CardKit entity can
   be sent as an interactive message before it receives updates.
+
+### REST service coverage
+
+- Added Drive v1 media preview downloads with typed preview parameters and
+  binary response handling.
 
 ## [0.3.7] - 2026-08-26
 
@@ -542,6 +549,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.8]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.8
 [0.3.7]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.7
 [0.3.6]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.6
 [0.3.5]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.5
