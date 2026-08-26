@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Cards
+
+- Added a typed CardKit card-entity IM envelope so a created CardKit entity can
+  be sent as an interactive message before it receives updates.
+
 ## [0.3.7] - 2026-08-26
 
 ### Cards

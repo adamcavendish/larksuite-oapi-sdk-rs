@@ -740,6 +740,7 @@ fn cardkit_v1_document_and_content_stream_are_traceable() {
             "batch_update",
             "card_json_document",
             "content_stream",
+            "entity_message",
             "element_create",
             "element_delete",
             "element_patch",
@@ -863,6 +864,14 @@ fn cardkit_v1_document_and_content_stream_are_traceable() {
                         .is_some_and(|template_id| !template_id.is_empty())
                 );
                 assert!(value["template_variable"].is_object());
+            }
+            "entity_message" => {
+                assert_eq!(value["type"], entry.expected_tags[0]);
+                assert!(
+                    value["data"]["card_id"]
+                        .as_str()
+                        .is_some_and(|card_id| !card_id.is_empty())
+                );
             }
             other => panic!("unknown CardKit fixture kind {other}"),
         }

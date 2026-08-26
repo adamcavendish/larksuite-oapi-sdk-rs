@@ -98,6 +98,14 @@ impl<T: serde::Serialize> SendReadyCard for template::TemplateMessage<T> {
     }
 }
 
+impl sealed::Sealed for cardkit::CardEntityMessage {}
+
+impl SendReadyCard for cardkit::CardEntityMessage {
+    fn encoded_content(&self) -> Result<String, LarkError> {
+        self.to_content()
+    }
+}
+
 // ── Closed card option sets ──
 
 /// Header templates supported by Feishu interactive cards.

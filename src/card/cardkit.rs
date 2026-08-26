@@ -79,6 +79,46 @@ impl TryFrom<v2::Card> for CardDocument {
     }
 }
 
+/// An interactive message that displays one CardKit card entity.
+///
+/// CardKit creation returns a `card_id`, but IM displays that entity through a
+/// distinct `type: "card"` envelope rather than the `card_json` payload used
+/// by CardKit's REST endpoints. An entity may be sent only once and expires
+/// after the documented CardKit lifetime.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct CardEntityMessage {
+    #[serde(rename = "type")]
+    message_type: &'static str,
+    data: CardEntityMessageData,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+struct CardEntityMessageData {
+    card_id: String,
+}
+
+impl CardEntityMessage {
+    /// Reference a non-empty CardKit card entity for an IM interactive message.
+    pub fn new(card_id: impl Into<String>) -> Result<Self, LarkError> {
+        let card_id = card_id.into();
+        validate_identifier("CardKit card_id", &card_id)?;
+        Ok(Self {
+            message_type: "card",
+            data: CardEntityMessageData { card_id },
+        })
+    }
+
+    /// Return the CardKit entity identifier that this message displays.
+    pub fn card_id(&self) -> &str {
+        &self.data.card_id
+    }
+
+    /// Return the serialized IM `interactive` message content.
+    pub fn to_content(&self) -> Result<String, LarkError> {
+        serde_json::to_string(self).map_err(LarkError::Json)
+    }
+}
+
 /// An idempotency key supplied with one CardKit mutation.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IdempotencyKey(String);
