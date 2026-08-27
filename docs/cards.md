@@ -22,6 +22,48 @@ Use `card::v1` for Card JSON 1.0. Use `card::v2` for Card JSON 2.0; its root,
 shared-card requirements, and element-identifier rules are incompatible with
 1.0.
 
+## Author Card JSON 2.0 layouts safely
+
+`CardDocument::new` remains the final strict protocol gate. For dynamic
+authoring, `CardDocument::new_with_diagnostic` preserves the original
+`ValidationError` and also returns a stable code, a JSON Pointer, the violated
+constraint, and relevant legal values. Do not parse its display string.
+
+`ColumnSet` has constructors for the three legal width branches. They emit the
+wire shape required by Card JSON 2.0 and leave document validation enabled:
+
+```rust
+use larksuite_oapi_sdk_rs::card::v2::{
+    AutoColumn, Body, Card, CardDocument, ColumnSet, ColumnWeight, Config,
+    Element, FixedColumn, FixedColumnWidth, Markdown, WeightedColumn,
+};
+
+let automatic = Element::ColumnSet(ColumnSet::automatic([
+    AutoColumn::new().element(Element::Markdown(Markdown::new("auto"))),
+]));
+
+let fixed = Element::ColumnSet(ColumnSet::fixed([
+    FixedColumn::new(FixedColumnWidth::pixels(160)?)
+        .element(Element::Markdown(Markdown::new("fixed"))),
+]));
+
+let weighted = Element::ColumnSet(ColumnSet::weighted([
+    WeightedColumn::new(ColumnWeight::new(3)?)
+        .element(Element::Markdown(Markdown::new("weighted"))),
+]));
+
+let card = Card::new()
+    .config(Config::new().update_multi())
+    .body(Body::new().element(automatic).element(fixed).element(weighted));
+let _document = CardDocument::new(card)?;
+# Ok::<(), larksuite_oapi_sdk_rs::card::v2::ValidationError>(())
+```
+
+The `Padding`, `Margin`, `Spacing::pixels`, `FixedColumnWidth`, and
+`ColumnWeight` constructors encode the documented finite pixel/range grammar.
+Existing string-oriented builders remain supported for compatibility and are
+still validated by `CardDocument`.
+
 ## Stream a CardKit document
 
 CardKit accepts a validated Card JSON 2.0 `card::cardkit::CardDocument`.

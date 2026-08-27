@@ -1,0 +1,42 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "padding": "12px",
+    "horizontal_spacing": "8px",
+    "elements": [
+      {
+        "tag": "column_set",
+        "columns": [
+          {
+            "tag": "column",
+            "elements": [{"tag": "markdown", "content": "automatic", "margin": "4px -12px"}]
+          }
+        ]
+      },
+      {
+        "tag": "column_set",
+        "flex_mode": "none",
+        "columns": [
+          {
+            "tag": "column",
+            "width": "160px",
+            "elements": [{"tag": "markdown", "content": "fixed"}]
+          }
+        ]
+      },
+      {
+        "tag": "column_set",
+        "flex_mode": "none",
+        "columns": [
+          {
+            "tag": "column",
+            "width": "weighted",
+            "weight": 3,
+            "elements": [{"tag": "markdown", "content": "weighted"}]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "2.0",
+  "config": {"update_multi": true},
+  "body": {
+    "elements": [
+      {
+        "tag": "column_set",
+        "flex_mode": "flow",
+        "columns": [
+          {
+            "tag": "column",
+            "width": "weighted",
+            "weight": 1,
+            "elements": [{"tag": "markdown", "content": "invalid"}]
+          }
+        ]
+      }
+    ]
+  }
+}
