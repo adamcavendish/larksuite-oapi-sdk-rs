@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## [0.3.9] - 2026-08-27
+
+### Cards
+
+- Fixed CardKit full, batch, settings, and element mutations to decode the
+  documented empty `data: {}` response object.
+
 ## [0.3.8] - 2026-08-26
 
 ### Cards
@@ -549,6 +556,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.9]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.9
 [0.3.8]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.8
 [0.3.7]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.7
 [0.3.6]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.6
