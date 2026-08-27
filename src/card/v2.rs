@@ -13,6 +13,69 @@ use crate::{JsonValue, LarkError};
 pub use super::TemplateColor;
 pub use super::v1::Color;
 
+/// A stable, machine-readable explanation of a Card JSON 2.0 validation failure.
+///
+/// `path` is a JSON Pointer.  When validation has no document instance to
+/// inspect (for example, [`ValidationError::diagnostic`]), a `*` segment
+/// denotes the matching member of a repeated collection.  Use
+/// [`Card::validate_with_diagnostic`] or
+/// [`CardDocument::new_with_diagnostic`] to obtain the concrete pointer for
+/// layout and spacing failures.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ValidationDiagnostic {
+    /// Stable identifier for programmatic handling.
+    pub code: &'static str,
+    /// JSON Pointer for the invalid field or the field that must be changed.
+    pub path: String,
+    /// The protocol rule that was violated.
+    pub constraint: Option<String>,
+    /// Closed values, a numeric range, or a minimal valid shape when useful.
+    pub allowed_values: Option<Vec<String>>,
+}
+
+impl ValidationDiagnostic {
+    fn new(
+        code: &'static str,
+        path: impl Into<String>,
+        constraint: impl Into<Option<String>>,
+        allowed_values: Option<Vec<String>>,
+    ) -> Self {
+        Self {
+            code,
+            path: path.into(),
+            constraint: constraint.into(),
+            allowed_values,
+        }
+    }
+}
+
+impl std::fmt::Display for ValidationDiagnostic {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} at {}", self.code, self.path)
+    }
+}
+
+impl std::error::Error for ValidationDiagnostic {}
+
+/// A validation failure together with its concrete document location.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CardValidationError {
+    pub error: ValidationError,
+    pub diagnostic: ValidationDiagnostic,
+}
+
+impl std::fmt::Display for CardValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.error.fmt(f)
+    }
+}
+
+impl std::error::Error for CardValidationError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.error)
+    }
+}
+
 /// A Card JSON 2.0 document.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -117,6 +180,67 @@ impl Card {
         Ok(())
     }
 
+    /// Validate the card and return a machine-readable diagnostic on failure.
+    ///
+    /// This is additive to [`Card::validate`], whose `ValidationError` return
+    /// type remains the compatibility API.
+    pub fn validate_with_diagnostic(&self) -> Result<(), ValidationDiagnostic> {
+        self.validate().map_err(|error| self.diagnostic_for(&error))
+    }
+
+    fn diagnostic_for(&self, error: &ValidationError) -> ValidationDiagnostic {
+        let mut diagnostic = error.diagnostic();
+        if let Some(path) = self.concrete_validation_path(error) {
+            diagnostic.path = path;
+        }
+        diagnostic
+    }
+
+    fn concrete_validation_path(&self, error: &ValidationError) -> Option<String> {
+        match error {
+            ValidationError::InvalidSchema => Some("/schema".to_string()),
+            ValidationError::V2RequiresSharedCard => Some("/config/update_multi".to_string()),
+            ValidationError::MissingBody => Some("/body".to_string()),
+            ValidationError::InvalidCardLink => Some("/card_link/url".to_string()),
+            ValidationError::StreamingConfigRequiresStreamingMode => {
+                Some("/config/streaming_mode".to_string())
+            }
+            ValidationError::HeaderTagRequiresPlainText => {
+                Some("/header/text_tag_list".to_string())
+            }
+            ValidationError::InvalidHeaderTitleLines(_) => Some("/header/title/lines".to_string()),
+            ValidationError::InvalidHeaderSubtitleLines(_) => {
+                Some("/header/subtitle/lines".to_string())
+            }
+            ValidationError::TooManyTables(_) | ValidationError::TooManyElements(_) => {
+                Some("/body/elements".to_string())
+            }
+            ValidationError::InvalidColumnWidth(_) | ValidationError::InvalidColumnWeight(_) => {
+                find_column_path(
+                    self.body.as_ref()?.elements.as_slice(),
+                    error,
+                    "/body/elements",
+                )
+            }
+            ValidationError::ColumnWidthRequiresFixedFlexMode => find_column_set_flex_mode_path(
+                self.body.as_ref()?.elements.as_slice(),
+                "/body/elements",
+            ),
+            ValidationError::InvalidMargin(_)
+            | ValidationError::InvalidPadding(_)
+            | ValidationError::InvalidSpacing(_) => self
+                .header
+                .as_ref()
+                .and_then(|header| find_header_layout_path(header, error))
+                .or_else(|| find_typed_layout_path(self.body.as_ref()?, error)),
+            _ => self
+                .body
+                .as_ref()
+                .and_then(|body| find_element_error_path(&body.elements, error, "/body/elements"))
+                .or_else(|| Some("/body".to_string())),
+        }
+    }
+
     pub fn to_json(&self) -> JsonValue {
         JsonValue::from_serializable(self).expect("Card JSON 2.0 is serializable")
     }
@@ -138,6 +262,21 @@ impl CardDocument {
     /// Validate a Card JSON 2.0 document before an outbound Card transport uses it.
     pub fn new(card: Card) -> Result<Self, ValidationError> {
         card.validate()?;
+        Ok(Self { card })
+    }
+
+    /// Validate a Card JSON 2.0 document and retain structured failure data.
+    ///
+    /// Unlike [`CardDocument::new`], this constructor exposes a concrete JSON
+    /// Pointer for authoring tools without changing the established error type
+    /// of the compatibility constructor.
+    pub fn new_with_diagnostic(card: Card) -> Result<Self, Box<CardValidationError>> {
+        card.validate().map_err(|error| {
+            Box::new(CardValidationError {
+                diagnostic: card.diagnostic_for(&error),
+                error,
+            })
+        })?;
         Ok(Self { card })
     }
 
@@ -800,6 +939,119 @@ pub enum Spacing {
     Pixels(String),
 }
 
+impl Spacing {
+    /// Construct a protocol-valid pixel spacing value.
+    ///
+    /// The public `Pixels(String)` variant remains for deserializing existing
+    /// documents; new authored cards should prefer this constructor.
+    pub fn pixels(value: u8) -> Result<Self, ValidationDiagnostic> {
+        if value <= 99 {
+            Ok(Self::Pixels(format!("{value}px")))
+        } else {
+            Err(ValidationDiagnostic::new(
+                "invalid_spacing",
+                "/horizontal_spacing",
+                Some("spacing_pixels_must_be_between_0_and_99".to_string()),
+                Some(vec!["0px through 99px".to_string()]),
+            ))
+        }
+    }
+}
+
+/// A protocol-valid one-, two-, or four-value padding declaration.
+///
+/// Construct it with [`Padding::uniform`], [`Padding::symmetric`], or
+/// [`Padding::sides`] and pass it to existing `padding(...)` builders.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Padding(String);
+
+impl Padding {
+    pub fn uniform(value: u8) -> Result<Self, ValidationDiagnostic> {
+        Self::from_values(&[value])
+    }
+
+    pub fn symmetric(vertical: u8, horizontal: u8) -> Result<Self, ValidationDiagnostic> {
+        Self::from_values(&[vertical, horizontal])
+    }
+
+    pub fn sides(top: u8, right: u8, bottom: u8, left: u8) -> Result<Self, ValidationDiagnostic> {
+        Self::from_values(&[top, right, bottom, left])
+    }
+
+    fn from_values(values: &[u8]) -> Result<Self, ValidationDiagnostic> {
+        if values.iter().all(|value| *value <= 99) {
+            Ok(Self(
+                values
+                    .iter()
+                    .map(|value| format!("{value}px"))
+                    .collect::<Vec<_>>()
+                    .join(" "),
+            ))
+        } else {
+            Err(ValidationDiagnostic::new(
+                "invalid_padding",
+                "/padding",
+                Some("padding_pixels_must_be_between_0_and_99".to_string()),
+                Some(vec!["0px through 99px".to_string()]),
+            ))
+        }
+    }
+}
+
+impl From<Padding> for String {
+    fn from(value: Padding) -> Self {
+        value.0
+    }
+}
+
+/// A protocol-valid one-, two-, or four-value margin declaration.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Margin(String);
+
+impl Margin {
+    pub fn uniform(value: i16) -> Result<Self, ValidationDiagnostic> {
+        Self::from_values(&[value])
+    }
+
+    pub fn symmetric(vertical: i16, horizontal: i16) -> Result<Self, ValidationDiagnostic> {
+        Self::from_values(&[vertical, horizontal])
+    }
+
+    pub fn sides(
+        top: i16,
+        right: i16,
+        bottom: i16,
+        left: i16,
+    ) -> Result<Self, ValidationDiagnostic> {
+        Self::from_values(&[top, right, bottom, left])
+    }
+
+    fn from_values(values: &[i16]) -> Result<Self, ValidationDiagnostic> {
+        if values.iter().all(|value| (-99..=99).contains(value)) {
+            Ok(Self(
+                values
+                    .iter()
+                    .map(|value| format!("{value}px"))
+                    .collect::<Vec<_>>()
+                    .join(" "),
+            ))
+        } else {
+            Err(ValidationDiagnostic::new(
+                "invalid_margin",
+                "/margin",
+                Some("margin_pixels_must_be_between_negative_99_and_99".to_string()),
+                Some(vec!["-99px through 99px".to_string()]),
+            ))
+        }
+    }
+}
+
+impl From<Margin> for String {
+    fn from(value: Margin) -> Self {
+        value.0
+    }
+}
+
 impl Serialize for Spacing {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1160,6 +1412,35 @@ impl ColumnSet {
         self.flex_mode = Some(flex_mode);
         self
     }
+
+    /// Build the automatic-width branch of the column layout grammar.
+    pub fn automatic(columns: impl IntoIterator<Item = AutoColumn>) -> Self {
+        Self::new().with_columns(columns.into_iter().map(AutoColumn::into_column))
+    }
+
+    /// Build the fixed-width branch of the column layout grammar.
+    ///
+    /// This always emits the required `flex_mode: none`.
+    pub fn fixed(columns: impl IntoIterator<Item = FixedColumn>) -> Self {
+        Self::new()
+            .flex_mode(ColumnFlexMode::None)
+            .with_columns(columns.into_iter().map(FixedColumn::into_column))
+    }
+
+    /// Build the weighted-width branch of the column layout grammar.
+    ///
+    /// This always emits `flex_mode: none`, `width: weighted`, and a weight in
+    /// the protocol's one-through-five range.
+    pub fn weighted(columns: impl IntoIterator<Item = WeightedColumn>) -> Self {
+        Self::new()
+            .flex_mode(ColumnFlexMode::None)
+            .with_columns(columns.into_iter().map(WeightedColumn::into_column))
+    }
+
+    fn with_columns(mut self, columns: impl IntoIterator<Item = Column>) -> Self {
+        self.columns.extend(columns);
+        self
+    }
 }
 impl Default for ColumnSet {
     fn default() -> Self {
@@ -1231,6 +1512,109 @@ impl Column {
 impl Default for Column {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// A column in the automatic-width layout branch.
+#[derive(Debug, Clone)]
+pub struct AutoColumn(Column);
+
+impl AutoColumn {
+    pub fn new() -> Self {
+        Self(Column::new())
+    }
+
+    pub fn element(mut self, element: Element) -> Self {
+        self.0.elements.push(element);
+        self
+    }
+
+    fn into_column(self) -> Column {
+        self.0
+    }
+}
+
+impl Default for AutoColumn {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// A checked Card JSON 2.0 fixed column width.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FixedColumnWidth(u16);
+
+impl FixedColumnWidth {
+    /// Accept a documented fixed width of 16 through 600 pixels.
+    pub fn pixels(value: u16) -> Result<Self, ValidationDiagnostic> {
+        if (16..=600).contains(&value) {
+            Ok(Self(value))
+        } else {
+            Err(ValidationDiagnostic::new(
+                "invalid_column_width",
+                "/width",
+                Some("column_width_pixels_must_be_between_16_and_600".to_string()),
+                Some(vec!["16px through 600px".to_string()]),
+            ))
+        }
+    }
+}
+
+/// A column in the fixed-width layout branch.
+#[derive(Debug, Clone)]
+pub struct FixedColumn(Column);
+
+impl FixedColumn {
+    pub fn new(width: FixedColumnWidth) -> Self {
+        Self(Column::new().width(ColumnWidth::Pixels(format!("{}px", width.0))))
+    }
+
+    pub fn element(mut self, element: Element) -> Self {
+        self.0.elements.push(element);
+        self
+    }
+
+    fn into_column(self) -> Column {
+        self.0
+    }
+}
+
+/// A checked Card JSON 2.0 weighted column value.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ColumnWeight(u8);
+
+impl ColumnWeight {
+    /// Accept a documented relative weight of one through five.
+    pub fn new(value: u8) -> Result<Self, ValidationDiagnostic> {
+        if (1..=5).contains(&value) {
+            Ok(Self(value))
+        } else {
+            Err(ValidationDiagnostic::new(
+                "invalid_column_weight",
+                "/weight",
+                Some("column_weight_must_be_between_1_and_5".to_string()),
+                Some((1..=5).map(|value| value.to_string()).collect()),
+            ))
+        }
+    }
+}
+
+/// A column in the weighted-width layout branch.
+#[derive(Debug, Clone)]
+pub struct WeightedColumn(Column);
+
+impl WeightedColumn {
+    pub fn new(weight: ColumnWeight) -> Self {
+        Self(Column::new().width(ColumnWidth::Weighted).weight(weight.0))
+    }
+
+    pub fn element(mut self, element: Element) -> Self {
+        self.0.elements.push(element);
+        self
+    }
+
+    fn into_column(self) -> Column {
+        self.0
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -2673,6 +3057,152 @@ pub enum ValidationError {
     MissingImageSelectBehavior,
     ImagePreviewOutsideForm,
 }
+
+impl ValidationError {
+    /// Stable machine-readable identifier for this validation rule.
+    pub fn code(&self) -> &'static str {
+        match self {
+            Self::InvalidSchema => "invalid_schema",
+            Self::V2RequiresSharedCard => "v2_requires_shared_card",
+            Self::MissingBody => "missing_body",
+            Self::InvalidCardLink => "invalid_card_link",
+            Self::StreamingConfigRequiresStreamingMode => {
+                "streaming_config_requires_streaming_mode"
+            }
+            Self::HeaderTagRequiresPlainText => "header_tag_requires_plain_text",
+            Self::InvalidHeaderTitleLines(_) => "invalid_header_title_lines",
+            Self::InvalidHeaderSubtitleLines(_) => "invalid_header_subtitle_lines",
+            Self::InvalidSpacing(_) => "invalid_spacing",
+            Self::InvalidPadding(_) => "invalid_padding",
+            Self::InvalidMargin(_) => "invalid_margin",
+            Self::EmptyColumnSet => "empty_column_set",
+            Self::InvalidColumnWidth(_) => "invalid_column_width",
+            Self::InvalidColumnWeight(_) => "invalid_column_weight",
+            Self::ColumnWidthRequiresFixedFlexMode => "column_layout_requires_fixed_flex_mode",
+            Self::InvalidDivWidth(_) => "invalid_div_width",
+            Self::ImageSizeRequiresCropScale => "image_size_requires_crop_scale",
+            Self::TooManyImagesInCombination { .. } => "too_many_images_in_combination",
+            Self::InvalidPersonListLines => "invalid_person_list_lines",
+            Self::InvalidChartSpec => "invalid_chart_spec",
+            Self::InvalidChartHeight(_) => "invalid_chart_height",
+            Self::InvalidElementId(_) => "invalid_element_id",
+            Self::DuplicateElementId(_) => "duplicate_element_id",
+            Self::TooManyElements(_) => "too_many_elements",
+            Self::EmptyForm(_) => "empty_form",
+            Self::InvalidFormName(_) => "invalid_form_name",
+            Self::DuplicateFormName(_) => "duplicate_form_name",
+            Self::FormNestedOutsideBody => "form_nested_outside_body",
+            Self::TableNestedOutsideBody => "table_nested_outside_body",
+            Self::MultiSelectImageOutsideForm => "multi_select_image_outside_form",
+            Self::EmptyInteractiveContainer => "empty_interactive_container",
+            Self::MissingInteractiveContainerBehavior => "missing_interactive_container_behavior",
+            Self::InvalidOpenUrl(_) => "invalid_open_url",
+            Self::InvalidInteractiveContainerWidth(_) => "invalid_interactive_container_width",
+            Self::InvalidInteractiveContainerHeight(_) => "invalid_interactive_container_height",
+            Self::InvalidCornerRadius(_) => "invalid_corner_radius",
+            Self::EmptyOptions(_) => "empty_options",
+            Self::DuplicateOptionValue(_) => "duplicate_option_value",
+            Self::MissingPickerValue(_) => "missing_picker_value",
+            Self::MissingFormControlName(_) => "missing_form_control_name",
+            Self::ButtonBehaviorConflict => "button_behavior_conflict",
+            Self::FormActionOutsideForm => "form_action_outside_form",
+            Self::MissingButtonBehavior => "missing_button_behavior",
+            Self::TooManyCheckerButtons(_) => "too_many_checker_buttons",
+            Self::TooManyHeaderTags(_) => "too_many_header_tags",
+            Self::TooManyTables(_) => "too_many_tables",
+            Self::EmptyTableColumns => "empty_table_columns",
+            Self::EmptyTableRows => "empty_table_rows",
+            Self::TooManyTableColumns(_) => "too_many_table_columns",
+            Self::DuplicateTableColumn(_) => "duplicate_table_column",
+            Self::InvalidTablePageSize(_) => "invalid_table_page_size",
+            Self::InvalidTableColumnWidth(_) => "invalid_table_column_width",
+            Self::InvalidTableRowHeight(_) => "invalid_table_row_height",
+            Self::InvalidTableRowMaxHeight(_) => "invalid_table_row_max_height",
+            Self::TableRowMaxHeightRequiresAutoRowHeight => {
+                "table_row_max_height_requires_auto_row_height"
+            }
+            Self::UnknownTableRowColumn(_) => "unknown_table_row_column",
+            Self::DuplicateFormControlName(_) => "duplicate_form_control_name",
+            Self::TooDeeplyNestedContainer(_) => "too_deeply_nested_container",
+            Self::MissingFormSubmit(_) => "missing_form_submit",
+            Self::MissingFormButtonAction => "missing_form_button_action",
+            Self::ButtonTextRequiresPlainText => "button_text_requires_plain_text",
+            Self::ButtonTextTooLong(_) => "button_text_too_long",
+            Self::PlainTextRequired(_) => "plain_text_required",
+            Self::TextTooLong { .. } => "text_too_long",
+            Self::InvalidControlWidth(_) => "invalid_control_width",
+            Self::InvalidInputMaxLength(_) => "invalid_input_max_length",
+            Self::InvalidInitialOption(_, _) => "invalid_initial_option",
+            Self::InvalidInitialIndex(_) => "invalid_initial_index",
+            Self::InvalidPickerInitialValue(_, _) => "invalid_picker_initial_value",
+            Self::MissingImageSelectBehavior => "missing_image_select_behavior",
+            Self::ImagePreviewOutsideForm => "image_preview_outside_form",
+        }
+    }
+
+    /// A stable, machine-readable description of this rule.
+    ///
+    /// This method is available even when the error originated from a local
+    /// component validator.  For a concrete JSON Pointer in a Card document,
+    /// use [`Card::validate_with_diagnostic`].
+    pub fn diagnostic(&self) -> ValidationDiagnostic {
+        match self {
+            Self::InvalidMargin(_) => ValidationDiagnostic::new(
+                self.code(),
+                "/body/elements/*/margin",
+                Some("margin_pixels_must_be_between_negative_99_and_99".to_string()),
+                Some(vec!["-99px through 99px".to_string()]),
+            ),
+            Self::InvalidPadding(_) => ValidationDiagnostic::new(
+                self.code(),
+                "/body/padding",
+                Some("padding_pixels_must_be_between_0_and_99".to_string()),
+                Some(vec!["0px through 99px".to_string()]),
+            ),
+            Self::InvalidSpacing(_) => ValidationDiagnostic::new(
+                self.code(),
+                "/body/horizontal_spacing",
+                Some("spacing_pixels_must_be_between_0_and_99".to_string()),
+                Some(
+                    vec![
+                        "small",
+                        "medium",
+                        "large",
+                        "extra_large",
+                        "0px through 99px",
+                    ]
+                    .into_iter()
+                    .map(str::to_string)
+                    .collect(),
+                ),
+            ),
+            Self::InvalidColumnWidth(_) => ValidationDiagnostic::new(
+                self.code(),
+                "/body/elements/*/columns/*/width",
+                Some("column_width_must_be_auto_weighted_or_16_to_600px".to_string()),
+                Some(
+                    vec!["auto", "weighted", "16px through 600px"]
+                        .into_iter()
+                        .map(str::to_string)
+                        .collect(),
+                ),
+            ),
+            Self::InvalidColumnWeight(_) => ValidationDiagnostic::new(
+                self.code(),
+                "/body/elements/*/columns/*/weight",
+                Some("weight_requires_weighted_width_and_value_1_through_5".to_string()),
+                Some((1..=5).map(|value| value.to_string()).collect()),
+            ),
+            Self::ColumnWidthRequiresFixedFlexMode => ValidationDiagnostic::new(
+                self.code(),
+                "/body/elements/*/flex_mode",
+                Some("width_or_weight_requires_flex_mode_none".to_string()),
+                Some(vec!["none".to_string()]),
+            ),
+            _ => ValidationDiagnostic::new(self.code(), "/", Some(self.code().to_string()), None),
+        }
+    }
+}
 impl std::fmt::Display for ValidationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -2849,6 +3379,494 @@ impl std::error::Error for ValidationError {}
 #[derive(Default)]
 struct FormValidationState {
     names: BTreeSet<String>,
+}
+
+fn find_column_path(elements: &[Element], error: &ValidationError, base: &str) -> Option<String> {
+    for (element_index, element) in elements.iter().enumerate() {
+        let element_path = format!("{base}/{element_index}");
+        if let Element::ColumnSet(column_set) = element {
+            for (column_index, column) in column_set.columns.iter().enumerate() {
+                let column_path = format!("{element_path}/columns/{column_index}");
+                match error {
+                    ValidationError::InvalidColumnWidth(value) if matches!(&column.width, Some(ColumnWidth::Pixels(width)) if width == value) =>
+                    {
+                        return Some(format!("{column_path}/width"));
+                    }
+                    ValidationError::InvalidColumnWeight(weight)
+                        if column.weight == Some(*weight)
+                            && (!(1..=5).contains(weight)
+                                || !matches!(column.width, Some(ColumnWidth::Weighted))) =>
+                    {
+                        return Some(format!("{column_path}/weight"));
+                    }
+                    _ => {}
+                }
+                if let Some(path) =
+                    find_column_path(&column.elements, error, &format!("{column_path}/elements"))
+                {
+                    return Some(path);
+                }
+            }
+        }
+        if let Some(children) = element_children(element)
+            && let Some(path) =
+                find_column_path(children, error, &format!("{element_path}/elements"))
+        {
+            return Some(path);
+        }
+    }
+    None
+}
+
+fn find_column_set_flex_mode_path(elements: &[Element], base: &str) -> Option<String> {
+    for (element_index, element) in elements.iter().enumerate() {
+        let element_path = format!("{base}/{element_index}");
+        if let Element::ColumnSet(column_set) = element {
+            if column_set
+                .flex_mode
+                .is_some_and(|mode| mode != ColumnFlexMode::None)
+                && column_set
+                    .columns
+                    .iter()
+                    .any(|column| column.width.is_some() || column.weight.is_some())
+            {
+                return Some(format!("{element_path}/flex_mode"));
+            }
+            for (column_index, column) in column_set.columns.iter().enumerate() {
+                if let Some(path) = find_column_set_flex_mode_path(
+                    &column.elements,
+                    &format!("{element_path}/columns/{column_index}/elements"),
+                ) {
+                    return Some(path);
+                }
+            }
+        }
+        if let Some(children) = element_children(element)
+            && let Some(path) =
+                find_column_set_flex_mode_path(children, &format!("{element_path}/elements"))
+        {
+            return Some(path);
+        }
+    }
+    None
+}
+
+fn element_children(element: &Element) -> Option<&[Element]> {
+    match element {
+        Element::CollapsiblePanel(panel) => Some(&panel.elements),
+        Element::Form(form) => Some(&form.elements),
+        Element::InteractiveContainer(container) => Some(&container.elements),
+        _ => None,
+    }
+}
+
+fn find_element_error_path(
+    elements: &[Element],
+    error: &ValidationError,
+    base: &str,
+) -> Option<String> {
+    for (index, element) in elements.iter().enumerate() {
+        let path = format!("{base}/{index}");
+        if let Some(field) = element_error_field(element, error) {
+            return Some(format!("{path}/{field}"));
+        }
+        if let Element::ColumnSet(column_set) = element {
+            for (column_index, column) in column_set.columns.iter().enumerate() {
+                let column_path = format!("{path}/columns/{column_index}");
+                if matches!(error, ValidationError::EmptyColumnSet) {
+                    return Some(format!("{path}/columns"));
+                }
+                if let Some(path) = find_element_error_path(
+                    &column.elements,
+                    error,
+                    &format!("{column_path}/elements"),
+                ) {
+                    return Some(path);
+                }
+            }
+        }
+        if let Some(children) = element_children(element)
+            && let Some(path) =
+                find_element_error_path(children, error, &format!("{path}/elements"))
+        {
+            return Some(path);
+        }
+    }
+    None
+}
+
+fn element_error_field(element: &Element, error: &ValidationError) -> Option<&'static str> {
+    match (element, error) {
+        (Element::Div(_), ValidationError::InvalidDivWidth(_)) => Some("width"),
+        (Element::Img(_), ValidationError::ImageSizeRequiresCropScale) => Some("scale_type"),
+        (Element::Img(_), ValidationError::InvalidCornerRadius(_)) => Some("corner_radius"),
+        (Element::ImgCombination(_), ValidationError::TooManyImagesInCombination { .. }) => {
+            Some("img_list")
+        }
+        (Element::ImgCombination(_), ValidationError::InvalidCornerRadius(_)) => {
+            Some("corner_radius")
+        }
+        (Element::PersonList(_), ValidationError::InvalidPersonListLines) => Some("lines"),
+        (Element::Chart(_), ValidationError::InvalidChartSpec) => Some("chart_spec"),
+        (Element::Chart(_), ValidationError::InvalidChartHeight(_)) => Some("height"),
+        (Element::Table(_), ValidationError::EmptyTableColumns)
+        | (Element::Table(_), ValidationError::TooManyTableColumns(_))
+        | (Element::Table(_), ValidationError::DuplicateTableColumn(_))
+        | (Element::Table(_), ValidationError::InvalidTableColumnWidth(_)) => Some("columns"),
+        (Element::Table(_), ValidationError::EmptyTableRows)
+        | (Element::Table(_), ValidationError::UnknownTableRowColumn(_)) => Some("rows"),
+        (Element::Table(_), ValidationError::InvalidTablePageSize(_)) => Some("page_size"),
+        (Element::Table(_), ValidationError::InvalidTableRowHeight(_)) => Some("row_height"),
+        (Element::Table(_), ValidationError::InvalidTableRowMaxHeight(_))
+        | (Element::Table(_), ValidationError::TableRowMaxHeightRequiresAutoRowHeight) => {
+            Some("row_max_height")
+        }
+        (Element::ColumnSet(_), ValidationError::EmptyColumnSet) => Some("columns"),
+        (Element::Form(_), ValidationError::EmptyForm(_))
+        | (Element::Form(_), ValidationError::InvalidFormName(_))
+        | (Element::Form(_), ValidationError::DuplicateFormName(_)) => Some("name"),
+        (Element::Form(_), ValidationError::FormNestedOutsideBody) => Some("tag"),
+        (Element::Form(_), ValidationError::MissingFormSubmit(_)) => Some("elements"),
+        (Element::InteractiveContainer(_), ValidationError::EmptyInteractiveContainer) => {
+            Some("elements")
+        }
+        (
+            Element::InteractiveContainer(_),
+            ValidationError::MissingInteractiveContainerBehavior,
+        ) => Some("behaviors"),
+        (
+            Element::InteractiveContainer(_),
+            ValidationError::InvalidInteractiveContainerWidth(_),
+        ) => Some("width"),
+        (
+            Element::InteractiveContainer(_),
+            ValidationError::InvalidInteractiveContainerHeight(_),
+        ) => Some("height"),
+        (Element::InteractiveContainer(_), ValidationError::InvalidCornerRadius(_)) => {
+            Some("corner_radius")
+        }
+        (Element::Button(_), ValidationError::ButtonTextRequiresPlainText)
+        | (Element::Button(_), ValidationError::ButtonTextTooLong(_)) => Some("text"),
+        (Element::Button(_), ValidationError::MissingButtonBehavior) => Some("behaviors"),
+        (Element::Button(_), ValidationError::MissingFormButtonAction)
+        | (Element::Button(_), ValidationError::FormActionOutsideForm) => Some("form_action_type"),
+        (Element::Button(_), ValidationError::ButtonBehaviorConflict) => Some("behaviors"),
+        (Element::Input(_), ValidationError::InvalidInputMaxLength(_)) => Some("max_length"),
+        (Element::Input(_), ValidationError::InvalidControlWidth(_)) => Some("width"),
+        (Element::SelectImg(_), ValidationError::MissingImageSelectBehavior) => Some("behaviors"),
+        (Element::SelectImg(_), ValidationError::ImagePreviewOutsideForm) => Some("can_preview"),
+        (Element::CollapsiblePanel(_), ValidationError::InvalidCornerRadius(_)) => {
+            Some("border/corner_radius")
+        }
+        (Element::Table(_), ValidationError::TableNestedOutsideBody) => Some("tag"),
+        (Element::SelectImg(_), ValidationError::MultiSelectImageOutsideForm) => {
+            Some("multi_select")
+        }
+        (Element::Checker(_), ValidationError::TooManyCheckerButtons(_)) => {
+            Some("button_area/buttons")
+        }
+        (Element::Button(_), ValidationError::InvalidControlWidth(_)) => Some("width"),
+        (_, ValidationError::EmptyOptions(tag)) if element_wire_tag(element) == *tag => {
+            Some("options")
+        }
+        (_, ValidationError::MissingPickerValue(tag)) if element_wire_tag(element) == *tag => {
+            Some("placeholder")
+        }
+        (_, ValidationError::MissingFormControlName(tag)) if element_wire_tag(element) == *tag => {
+            Some("name")
+        }
+        (_, ValidationError::InvalidInitialOption(tag, _)) if element_wire_tag(element) == *tag => {
+            Some(initial_option_field(tag))
+        }
+        (_, ValidationError::InvalidInitialIndex(_))
+            if matches!(element, Element::SelectStatic(_)) =>
+        {
+            Some("initial_index")
+        }
+        (_, ValidationError::InvalidPickerInitialValue(tag, _))
+            if element_wire_tag(element) == *tag =>
+        {
+            Some(initial_picker_field(tag))
+        }
+        (_, ValidationError::DuplicateOptionValue(_)) if element_has_options(element) => {
+            Some("options")
+        }
+        (_, ValidationError::PlainTextRequired(field))
+            if field.starts_with("input.") && matches!(element, Element::Input(_)) =>
+        {
+            Some("placeholder")
+        }
+        (_, ValidationError::TextTooLong { field, .. })
+            if field.starts_with("input.") && matches!(element, Element::Input(_)) =>
+        {
+            Some("placeholder")
+        }
+        (_, ValidationError::InvalidOpenUrl(_)) if element_has_behaviors(element) => {
+            Some("behaviors")
+        }
+        (_, ValidationError::DuplicateFormControlName(_))
+            if matches!(element, Element::Form(_)) =>
+        {
+            Some("elements")
+        }
+        (_, ValidationError::TooDeeplyNestedContainer(_))
+            if element_children(element).is_some() || matches!(element, Element::ColumnSet(_)) =>
+        {
+            Some("elements")
+        }
+        _ => element_id_path(element, error),
+    }
+}
+
+fn element_wire_tag(element: &Element) -> &'static str {
+    match element {
+        Element::Div(_) => "div",
+        Element::Markdown(_) => "markdown",
+        Element::Img(_) => "img",
+        Element::ImgCombination(_) => "img_combination",
+        Element::Person(_) => "person",
+        Element::PersonList(_) => "person_list",
+        Element::Chart(_) => "chart",
+        Element::Table(_) => "table",
+        Element::Hr(_) => "hr",
+        Element::ColumnSet(_) => "column_set",
+        Element::CollapsiblePanel(_) => "collapsible_panel",
+        Element::Form(_) => "form",
+        Element::InteractiveContainer(_) => "interactive_container",
+        Element::Button(_) => "button",
+        Element::Input(_) => "input",
+        Element::Overflow(_) => "overflow",
+        Element::SelectStatic(_) => "select_static",
+        Element::MultiSelectStatic(_) => "multi_select_static",
+        Element::SelectPerson(_) => "select_person",
+        Element::MultiSelectPerson(_) => "multi_select_person",
+        Element::DatePicker(_) => "date_picker",
+        Element::PickerTime(_) => "picker_time",
+        Element::PickerDatetime(_) => "picker_datetime",
+        Element::SelectImg(_) => "select_img",
+        Element::Checker(_) => "checker",
+    }
+}
+
+fn element_has_options(element: &Element) -> bool {
+    matches!(
+        element,
+        Element::Overflow(_)
+            | Element::SelectStatic(_)
+            | Element::MultiSelectStatic(_)
+            | Element::SelectPerson(_)
+            | Element::MultiSelectPerson(_)
+            | Element::SelectImg(_)
+    )
+}
+
+fn element_has_behaviors(element: &Element) -> bool {
+    matches!(
+        element,
+        Element::Button(_)
+            | Element::Input(_)
+            | Element::Overflow(_)
+            | Element::SelectStatic(_)
+            | Element::MultiSelectStatic(_)
+            | Element::SelectPerson(_)
+            | Element::MultiSelectPerson(_)
+            | Element::DatePicker(_)
+            | Element::PickerTime(_)
+            | Element::PickerDatetime(_)
+            | Element::SelectImg(_)
+            | Element::Checker(_)
+            | Element::InteractiveContainer(_)
+    )
+}
+
+fn initial_option_field(tag: &str) -> &'static str {
+    match tag {
+        "multi_select_static" | "multi_select_person" => "selected_values",
+        _ => "initial_option",
+    }
+}
+
+fn initial_picker_field(tag: &str) -> &'static str {
+    match tag {
+        "date_picker" => "initial_date",
+        "picker_time" => "initial_time",
+        "picker_datetime" => "initial_datetime",
+        _ => "value",
+    }
+}
+
+fn element_id_path(element: &Element, error: &ValidationError) -> Option<&'static str> {
+    let id = match element {
+        Element::Div(value) => value.element_id.as_deref(),
+        Element::Markdown(value) => value.element_id.as_deref(),
+        Element::Img(value) => value.element_id.as_deref(),
+        Element::ImgCombination(value) => value.element_id.as_deref(),
+        Element::Person(value) => value.element_id.as_deref(),
+        Element::PersonList(value) => value.element_id.as_deref(),
+        Element::Chart(value) => value.element_id.as_deref(),
+        Element::Hr(value) => value.element_id.as_deref(),
+        Element::ColumnSet(value) => value.element_id.as_deref(),
+        Element::CollapsiblePanel(value) => value.element_id.as_deref(),
+        Element::Form(value) => value.element_id.as_deref(),
+        Element::InteractiveContainer(value) => value.element_id.as_deref(),
+        Element::Button(value) => value.element_id.as_deref(),
+        Element::Input(value) => value.element_id.as_deref(),
+        Element::Overflow(value) => value.control.element_id.as_deref(),
+        Element::SelectStatic(value) => value.control.element_id.as_deref(),
+        Element::MultiSelectStatic(value) => value.control.element_id.as_deref(),
+        Element::SelectPerson(value) => value.control.element_id.as_deref(),
+        Element::MultiSelectPerson(value) => value.control.element_id.as_deref(),
+        Element::DatePicker(value) => value.control.element_id.as_deref(),
+        Element::PickerTime(value) => value.control.element_id.as_deref(),
+        Element::PickerDatetime(value) => value.control.element_id.as_deref(),
+        Element::SelectImg(value) => value.control.element_id.as_deref(),
+        Element::Checker(value) => value.control.element_id.as_deref(),
+        Element::Table(_) => None,
+    };
+    matches!(error, ValidationError::InvalidElementId(value) | ValidationError::DuplicateElementId(value) if id == Some(value))
+        .then_some("element_id")
+}
+
+fn find_header_layout_path(header: &Header, error: &ValidationError) -> Option<String> {
+    matches!(error, ValidationError::InvalidPadding(value) if header.padding.as_deref() == Some(value))
+        .then(|| "/header/padding".to_string())
+}
+
+fn find_typed_layout_path(body: &Body, error: &ValidationError) -> Option<String> {
+    match error {
+        ValidationError::InvalidPadding(value) if body.padding.as_deref() == Some(value) => {
+            Some("/body/padding".to_string())
+        }
+        ValidationError::InvalidSpacing(value) if matches!(&body.horizontal_spacing, Some(Spacing::Pixels(spacing)) if spacing == value) => {
+            Some("/body/horizontal_spacing".to_string())
+        }
+        ValidationError::InvalidSpacing(value) if matches!(&body.vertical_spacing, Some(Spacing::Pixels(spacing)) if spacing == value) => {
+            Some("/body/vertical_spacing".to_string())
+        }
+        _ => find_element_layout_path(&body.elements, error, "/body/elements"),
+    }
+}
+
+fn find_element_layout_path(
+    elements: &[Element],
+    error: &ValidationError,
+    base: &str,
+) -> Option<String> {
+    for (index, element) in elements.iter().enumerate() {
+        let path = format!("{base}/{index}");
+        if let Some(field) = direct_layout_field(element, error) {
+            return Some(format!("{path}/{field}"));
+        }
+        if let Element::ColumnSet(column_set) = element {
+            for (column_index, column) in column_set.columns.iter().enumerate() {
+                let column_path = format!("{path}/columns/{column_index}");
+                if let Some(field) = column_layout_field(column, error) {
+                    return Some(format!("{column_path}/{field}"));
+                }
+                if let Some(path) = find_element_layout_path(
+                    &column.elements,
+                    error,
+                    &format!("{column_path}/elements"),
+                ) {
+                    return Some(path);
+                }
+            }
+        }
+        if let Some(children) = element_children(element)
+            && let Some(path) =
+                find_element_layout_path(children, error, &format!("{path}/elements"))
+        {
+            return Some(path);
+        }
+    }
+    None
+}
+
+fn direct_layout_field(element: &Element, error: &ValidationError) -> Option<&'static str> {
+    let margin = match element {
+        Element::Div(value) => value.margin.as_deref(),
+        Element::Markdown(value) => value.margin.as_deref(),
+        Element::Img(value) => value.margin.as_deref(),
+        Element::ImgCombination(value) => value.margin.as_deref(),
+        Element::Person(value) => value.margin.as_deref(),
+        Element::PersonList(value) => value.margin.as_deref(),
+        Element::Chart(value) => value.margin.as_deref(),
+        Element::Table(value) => value.margin.as_deref(),
+        Element::Hr(value) => value.margin.as_deref(),
+        Element::ColumnSet(value) => value.margin.as_deref(),
+        Element::CollapsiblePanel(value) => value.margin.as_deref(),
+        Element::Form(value) => value.margin.as_deref(),
+        Element::InteractiveContainer(value) => value.margin.as_deref(),
+        Element::Button(value) => value.margin.as_deref(),
+        Element::Input(value) => value.margin.as_deref(),
+        Element::Overflow(value) => value.control.margin.as_deref(),
+        Element::SelectStatic(value) => value.control.margin.as_deref(),
+        Element::MultiSelectStatic(value) => value.control.margin.as_deref(),
+        Element::SelectPerson(value) => value.control.margin.as_deref(),
+        Element::MultiSelectPerson(value) => value.control.margin.as_deref(),
+        Element::DatePicker(value) => value.control.margin.as_deref(),
+        Element::PickerTime(value) => value.control.margin.as_deref(),
+        Element::PickerDatetime(value) => value.control.margin.as_deref(),
+        Element::SelectImg(value) => value.control.margin.as_deref(),
+        Element::Checker(value) => value.control.margin.as_deref(),
+    };
+    if matches!(error, ValidationError::InvalidMargin(value) if margin == Some(value)) {
+        return Some("margin");
+    }
+
+    let padding = match element {
+        Element::CollapsiblePanel(value) => value.padding.as_deref(),
+        Element::Form(value) => value.padding.as_deref(),
+        Element::InteractiveContainer(value) => value.padding.as_deref(),
+        Element::Checker(value) => value.padding.as_deref(),
+        _ => None,
+    };
+    if matches!(error, ValidationError::InvalidPadding(value) if padding == Some(value)) {
+        return Some("padding");
+    }
+
+    let (horizontal_spacing, vertical_spacing) = match element {
+        Element::ColumnSet(value) => (value.horizontal_spacing.as_ref(), None),
+        Element::CollapsiblePanel(value) => (
+            value.horizontal_spacing.as_ref(),
+            value.vertical_spacing.as_ref(),
+        ),
+        Element::Form(value) => (
+            value.horizontal_spacing.as_ref(),
+            value.vertical_spacing.as_ref(),
+        ),
+        _ => (None, None),
+    };
+    if let ValidationError::InvalidSpacing(value) = error {
+        if matches!(horizontal_spacing, Some(Spacing::Pixels(spacing)) if spacing == value) {
+            return Some("horizontal_spacing");
+        }
+        if matches!(vertical_spacing, Some(Spacing::Pixels(spacing)) if spacing == value) {
+            return Some("vertical_spacing");
+        }
+    }
+    None
+}
+
+fn column_layout_field(column: &Column, error: &ValidationError) -> Option<&'static str> {
+    if matches!(error, ValidationError::InvalidPadding(value) if column.padding.as_deref() == Some(value))
+    {
+        return Some("padding");
+    }
+    if matches!(error, ValidationError::InvalidMargin(value) if column.margin.as_deref() == Some(value))
+    {
+        return Some("margin");
+    }
+    if let ValidationError::InvalidSpacing(value) = error {
+        if matches!(&column.horizontal_spacing, Some(Spacing::Pixels(spacing)) if spacing == value)
+        {
+            return Some("horizontal_spacing");
+        }
+        if matches!(&column.vertical_spacing, Some(Spacing::Pixels(spacing)) if spacing == value) {
+            return Some("vertical_spacing");
+        }
+    }
+    None
 }
 
 fn validate_optional_element_id(
@@ -3926,3 +4944,7 @@ impl Element {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "v2_diagnostic_path_tests.rs"]
+mod diagnostic_path_tests;

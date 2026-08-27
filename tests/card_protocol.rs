@@ -1065,6 +1065,16 @@ fn card_json_v2_fixtures_are_exact_protocol_contracts() {
                                 Err(card::ValidationError::ImageSizeRequiresCropScale)
                             );
                         }
+                        "column_layout_requires_fixed_flex_mode" => {
+                            use larksuite_oapi_sdk_rs::card::v2 as card;
+
+                            let card: card::Card = serde_json::from_value(value.clone())
+                                .expect("fixture must deserialize before validation");
+                            assert_eq!(
+                                card.validate(),
+                                Err(card::ValidationError::ColumnWidthRequiresFixedFlexMode)
+                            );
+                        }
                         "table_row_max_height_requires_auto" => {
                             use larksuite_oapi_sdk_rs::card::v2 as card;
 
@@ -1356,6 +1366,486 @@ fn modern_v2_display_layout_fixture_round_trips_and_validates() {
         fixture.into(),
         "display/layout fixture must preserve every documented field"
     );
+}
+
+#[test]
+fn modern_v2_column_layout_builders_emit_the_documented_wire_shapes() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let card = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .body(
+            card::Body::new()
+                .padding(card::Padding::uniform(12).unwrap())
+                .horizontal_spacing(card::Spacing::pixels(8).unwrap())
+                .element(card::Element::ColumnSet(card::ColumnSet::automatic([
+                    card::AutoColumn::new().element(card::Element::Markdown(
+                        card::Markdown::new("automatic")
+                            .margin(card::Margin::symmetric(4, -12).unwrap()),
+                    )),
+                ])))
+                .element(card::Element::ColumnSet(card::ColumnSet::fixed([
+                    card::FixedColumn::new(card::FixedColumnWidth::pixels(160).unwrap())
+                        .element(card::Element::Markdown(card::Markdown::new("fixed"))),
+                ])))
+                .element(card::Element::ColumnSet(card::ColumnSet::weighted([
+                    card::WeightedColumn::new(card::ColumnWeight::new(3).unwrap())
+                        .element(card::Element::Markdown(card::Markdown::new("weighted"))),
+                ]))),
+        );
+
+    card.validate()
+        .expect("layout constructors only emit valid column combinations");
+    assert_eq!(
+        card.to_json(),
+        fixture("card_json_v2/column_layouts.json").into(),
+    );
+}
+
+#[test]
+fn modern_v2_diagnostics_are_structured_and_locate_authoring_errors() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let invalid_layout: card::Card =
+        serde_json::from_value(fixture("card_json_v2/invalid_column_layout.json"))
+            .expect("decode invalid column-layout fixture");
+    let error = card::CardDocument::new_with_diagnostic(invalid_layout).unwrap_err();
+    assert_eq!(error.error.code(), "column_layout_requires_fixed_flex_mode");
+    assert_eq!(
+        error.diagnostic.code,
+        "column_layout_requires_fixed_flex_mode"
+    );
+    assert_eq!(error.diagnostic.path, "/body/elements/0/flex_mode");
+    assert_eq!(
+        error.diagnostic.constraint.as_deref(),
+        Some("width_or_weight_requires_flex_mode_none")
+    );
+    assert_eq!(
+        error.diagnostic.allowed_values,
+        Some(vec!["none".to_string()])
+    );
+
+    let invalid_margin = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .body(card::Body::new().element(card::Element::Markdown(
+            card::Markdown::new("margin").margin("default"),
+        )));
+    let error = card::CardDocument::new_with_diagnostic(invalid_margin).unwrap_err();
+    assert_eq!(error.error.code(), "invalid_margin");
+    assert_eq!(error.diagnostic.path, "/body/elements/0/margin");
+    assert_eq!(
+        error.diagnostic.constraint.as_deref(),
+        Some("margin_pixels_must_be_between_negative_99_and_99")
+    );
+
+    let chart_margin_is_not_a_card_margin = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .body(
+            card::Body::new()
+                .element(card::Element::Chart(card::Chart::new(
+                    serde_json::json!({"margin": "default"}).into(),
+                )))
+                .element(card::Element::Markdown(
+                    card::Markdown::new("margin").margin("default"),
+                )),
+        );
+    let error =
+        card::CardDocument::new_with_diagnostic(chart_margin_is_not_a_card_margin).unwrap_err();
+    assert_eq!(error.diagnostic.path, "/body/elements/1/margin");
+
+    let invalid_id = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .body(card::Body::new().element(card::Element::Markdown(
+            card::Markdown::new("id").element_id("1invalid"),
+        )));
+    let error = card::CardDocument::new_with_diagnostic(invalid_id).unwrap_err();
+    assert_eq!(error.diagnostic.path, "/body/elements/0/element_id");
+
+    let invalid_table = card::Card::new()
+        .config(card::Config::new().update_multi())
+        .body(card::Body::new().element(card::Element::Table(card::Table::new())));
+    let error = card::CardDocument::new_with_diagnostic(invalid_table).unwrap_err();
+    assert_eq!(error.diagnostic.path, "/body/elements/0/columns");
+
+    assert!(card::ColumnWeight::new(0).is_err());
+    assert!(card::FixedColumnWidth::pixels(15).is_err());
+    assert!(card::Spacing::pixels(100).is_err());
+    assert!(card::Margin::uniform(-100).is_err());
+}
+
+#[test]
+fn modern_v2_validation_error_codes_cover_the_public_error_vocabulary() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    let cases = [
+        (card::ValidationError::InvalidSchema, "invalid_schema"),
+        (
+            card::ValidationError::V2RequiresSharedCard,
+            "v2_requires_shared_card",
+        ),
+        (card::ValidationError::MissingBody, "missing_body"),
+        (card::ValidationError::InvalidCardLink, "invalid_card_link"),
+        (
+            card::ValidationError::StreamingConfigRequiresStreamingMode,
+            "streaming_config_requires_streaming_mode",
+        ),
+        (
+            card::ValidationError::HeaderTagRequiresPlainText,
+            "header_tag_requires_plain_text",
+        ),
+        (
+            card::ValidationError::InvalidHeaderTitleLines(0),
+            "invalid_header_title_lines",
+        ),
+        (
+            card::ValidationError::InvalidHeaderSubtitleLines(0),
+            "invalid_header_subtitle_lines",
+        ),
+        (
+            card::ValidationError::InvalidSpacing("100px".into()),
+            "invalid_spacing",
+        ),
+        (
+            card::ValidationError::InvalidPadding("100px".into()),
+            "invalid_padding",
+        ),
+        (
+            card::ValidationError::InvalidMargin("100px".into()),
+            "invalid_margin",
+        ),
+        (card::ValidationError::EmptyColumnSet, "empty_column_set"),
+        (
+            card::ValidationError::InvalidColumnWidth("15px".into()),
+            "invalid_column_width",
+        ),
+        (
+            card::ValidationError::InvalidColumnWeight(0),
+            "invalid_column_weight",
+        ),
+        (
+            card::ValidationError::ColumnWidthRequiresFixedFlexMode,
+            "column_layout_requires_fixed_flex_mode",
+        ),
+        (
+            card::ValidationError::InvalidDivWidth("bad".into()),
+            "invalid_div_width",
+        ),
+        (
+            card::ValidationError::ImageSizeRequiresCropScale,
+            "image_size_requires_crop_scale",
+        ),
+        (
+            card::ValidationError::TooManyImagesInCombination {
+                mode: card::ImageCombinationMode::Double,
+                count: 3,
+            },
+            "too_many_images_in_combination",
+        ),
+        (
+            card::ValidationError::InvalidPersonListLines,
+            "invalid_person_list_lines",
+        ),
+        (
+            card::ValidationError::InvalidChartSpec,
+            "invalid_chart_spec",
+        ),
+        (
+            card::ValidationError::InvalidChartHeight("0px".into()),
+            "invalid_chart_height",
+        ),
+        (
+            card::ValidationError::InvalidElementId("bad".into()),
+            "invalid_element_id",
+        ),
+        (
+            card::ValidationError::DuplicateElementId("dup".into()),
+            "duplicate_element_id",
+        ),
+        (
+            card::ValidationError::TooManyElements(201),
+            "too_many_elements",
+        ),
+        (
+            card::ValidationError::EmptyForm("form".into()),
+            "empty_form",
+        ),
+        (
+            card::ValidationError::InvalidFormName("bad".into()),
+            "invalid_form_name",
+        ),
+        (
+            card::ValidationError::DuplicateFormName("form".into()),
+            "duplicate_form_name",
+        ),
+        (
+            card::ValidationError::FormNestedOutsideBody,
+            "form_nested_outside_body",
+        ),
+        (
+            card::ValidationError::TableNestedOutsideBody,
+            "table_nested_outside_body",
+        ),
+        (
+            card::ValidationError::MultiSelectImageOutsideForm,
+            "multi_select_image_outside_form",
+        ),
+        (
+            card::ValidationError::EmptyInteractiveContainer,
+            "empty_interactive_container",
+        ),
+        (
+            card::ValidationError::MissingInteractiveContainerBehavior,
+            "missing_interactive_container_behavior",
+        ),
+        (
+            card::ValidationError::InvalidOpenUrl("bad".into()),
+            "invalid_open_url",
+        ),
+        (
+            card::ValidationError::InvalidInteractiveContainerWidth("bad".into()),
+            "invalid_interactive_container_width",
+        ),
+        (
+            card::ValidationError::InvalidInteractiveContainerHeight("bad".into()),
+            "invalid_interactive_container_height",
+        ),
+        (
+            card::ValidationError::InvalidCornerRadius("bad".into()),
+            "invalid_corner_radius",
+        ),
+        (
+            card::ValidationError::EmptyOptions("options"),
+            "empty_options",
+        ),
+        (
+            card::ValidationError::DuplicateOptionValue("dup".into()),
+            "duplicate_option_value",
+        ),
+        (
+            card::ValidationError::MissingPickerValue("picker"),
+            "missing_picker_value",
+        ),
+        (
+            card::ValidationError::MissingFormControlName("control"),
+            "missing_form_control_name",
+        ),
+        (
+            card::ValidationError::ButtonBehaviorConflict,
+            "button_behavior_conflict",
+        ),
+        (
+            card::ValidationError::FormActionOutsideForm,
+            "form_action_outside_form",
+        ),
+        (
+            card::ValidationError::MissingButtonBehavior,
+            "missing_button_behavior",
+        ),
+        (
+            card::ValidationError::TooManyCheckerButtons(2),
+            "too_many_checker_buttons",
+        ),
+        (
+            card::ValidationError::TooManyHeaderTags(11),
+            "too_many_header_tags",
+        ),
+        (card::ValidationError::TooManyTables(6), "too_many_tables"),
+        (
+            card::ValidationError::EmptyTableColumns,
+            "empty_table_columns",
+        ),
+        (card::ValidationError::EmptyTableRows, "empty_table_rows"),
+        (
+            card::ValidationError::TooManyTableColumns(11),
+            "too_many_table_columns",
+        ),
+        (
+            card::ValidationError::DuplicateTableColumn("column".into()),
+            "duplicate_table_column",
+        ),
+        (
+            card::ValidationError::InvalidTablePageSize(0),
+            "invalid_table_page_size",
+        ),
+        (
+            card::ValidationError::InvalidTableColumnWidth("bad".into()),
+            "invalid_table_column_width",
+        ),
+        (
+            card::ValidationError::InvalidTableRowHeight("bad".into()),
+            "invalid_table_row_height",
+        ),
+        (
+            card::ValidationError::InvalidTableRowMaxHeight("bad".into()),
+            "invalid_table_row_max_height",
+        ),
+        (
+            card::ValidationError::TableRowMaxHeightRequiresAutoRowHeight,
+            "table_row_max_height_requires_auto_row_height",
+        ),
+        (
+            card::ValidationError::UnknownTableRowColumn("column".into()),
+            "unknown_table_row_column",
+        ),
+        (
+            card::ValidationError::DuplicateFormControlName("control".into()),
+            "duplicate_form_control_name",
+        ),
+        (
+            card::ValidationError::TooDeeplyNestedContainer(11),
+            "too_deeply_nested_container",
+        ),
+        (
+            card::ValidationError::MissingFormSubmit("form".into()),
+            "missing_form_submit",
+        ),
+        (
+            card::ValidationError::MissingFormButtonAction,
+            "missing_form_button_action",
+        ),
+        (
+            card::ValidationError::ButtonTextRequiresPlainText,
+            "button_text_requires_plain_text",
+        ),
+        (
+            card::ValidationError::ButtonTextTooLong(301),
+            "button_text_too_long",
+        ),
+        (
+            card::ValidationError::PlainTextRequired("text"),
+            "plain_text_required",
+        ),
+        (
+            card::ValidationError::TextTooLong {
+                field: "text",
+                length: 301,
+            },
+            "text_too_long",
+        ),
+        (
+            card::ValidationError::InvalidControlWidth("bad".into()),
+            "invalid_control_width",
+        ),
+        (
+            card::ValidationError::InvalidInputMaxLength(0),
+            "invalid_input_max_length",
+        ),
+        (
+            card::ValidationError::InvalidInitialOption("option", "bad".into()),
+            "invalid_initial_option",
+        ),
+        (
+            card::ValidationError::InvalidInitialIndex(0),
+            "invalid_initial_index",
+        ),
+        (
+            card::ValidationError::InvalidPickerInitialValue("picker", "bad".into()),
+            "invalid_picker_initial_value",
+        ),
+        (
+            card::ValidationError::MissingImageSelectBehavior,
+            "missing_image_select_behavior",
+        ),
+        (
+            card::ValidationError::ImagePreviewOutsideForm,
+            "image_preview_outside_form",
+        ),
+    ];
+
+    for (error, code) in cases {
+        assert_eq!(error.code(), code);
+    }
+}
+
+#[test]
+fn modern_v2_checked_authoring_values_preserve_wire_values_and_diagnostics() {
+    use larksuite_oapi_sdk_rs::card::v2 as card;
+
+    assert_eq!(String::from(card::Padding::uniform(0).unwrap()), "0px");
+    assert_eq!(
+        String::from(card::Padding::symmetric(1, 99).unwrap()),
+        "1px 99px"
+    );
+    assert_eq!(
+        String::from(card::Padding::sides(1, 2, 3, 4).unwrap()),
+        "1px 2px 3px 4px"
+    );
+    assert_eq!(String::from(card::Margin::uniform(-99).unwrap()), "-99px");
+    assert_eq!(
+        String::from(card::Margin::symmetric(-1, 99).unwrap()),
+        "-1px 99px"
+    );
+    assert_eq!(
+        String::from(card::Margin::sides(-1, 2, 3, 4).unwrap()),
+        "-1px 2px 3px 4px"
+    );
+    assert_eq!(
+        serde_json::to_value(card::Spacing::pixels(99).unwrap()).unwrap(),
+        serde_json::json!("99px")
+    );
+    assert_eq!(
+        card::FixedColumnWidth::pixels(16).unwrap(),
+        card::FixedColumnWidth::pixels(16).unwrap()
+    );
+    assert_eq!(
+        card::FixedColumnWidth::pixels(600).unwrap(),
+        card::FixedColumnWidth::pixels(600).unwrap()
+    );
+    assert_eq!(
+        card::ColumnWeight::new(1).unwrap(),
+        card::ColumnWeight::new(1).unwrap()
+    );
+    assert_eq!(
+        card::ColumnWeight::new(5).unwrap(),
+        card::ColumnWeight::new(5).unwrap()
+    );
+
+    for diagnostic in [
+        card::Padding::uniform(100).unwrap_err(),
+        card::Margin::uniform(-100).unwrap_err(),
+        card::Spacing::pixels(100).unwrap_err(),
+        card::FixedColumnWidth::pixels(15).unwrap_err(),
+        card::FixedColumnWidth::pixels(601).unwrap_err(),
+        card::ColumnWeight::new(0).unwrap_err(),
+        card::ColumnWeight::new(6).unwrap_err(),
+    ] {
+        assert!(diagnostic.constraint.is_some());
+        assert!(diagnostic.allowed_values.is_some());
+    }
+
+    let expected = [
+        (
+            card::ValidationError::InvalidMargin("default".into()),
+            "/body/elements/*/margin",
+        ),
+        (
+            card::ValidationError::InvalidPadding("default".into()),
+            "/body/padding",
+        ),
+        (
+            card::ValidationError::InvalidSpacing("100px".into()),
+            "/body/horizontal_spacing",
+        ),
+        (
+            card::ValidationError::InvalidColumnWidth("15px".into()),
+            "/body/elements/*/columns/*/width",
+        ),
+        (
+            card::ValidationError::InvalidColumnWeight(0),
+            "/body/elements/*/columns/*/weight",
+        ),
+        (
+            card::ValidationError::ColumnWidthRequiresFixedFlexMode,
+            "/body/elements/*/flex_mode",
+        ),
+        (card::ValidationError::MissingBody, "/"),
+    ];
+    for (error, path) in expected {
+        let diagnostic = error.diagnostic();
+        assert_eq!(diagnostic.path, path);
+        assert_eq!(diagnostic.code, error.code());
+        assert!(diagnostic.constraint.is_some());
+    }
 }
 
 #[test]

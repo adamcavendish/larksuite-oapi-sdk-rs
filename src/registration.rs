@@ -708,12 +708,16 @@ mod tests {
             })),
         }));
 
-        for _ in 0..50 {
-            if requests.lock().unwrap().len() >= 3 {
-                break;
+        tokio::time::timeout(std::time::Duration::from_secs(3), async {
+            loop {
+                if requests.lock().unwrap().len() >= 3 {
+                    break;
+                }
+                tokio::time::sleep(std::time::Duration::from_millis(20)).await;
             }
-            tokio::time::sleep(std::time::Duration::from_millis(20)).await;
-        }
+        })
+        .await
+        .expect("registration should complete the begin and two poll requests");
         assert_eq!(requests.lock().unwrap().len(), 3);
 
         let result = handle.await.unwrap().unwrap();

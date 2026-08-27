@@ -343,6 +343,8 @@
     {"id": "form_action_controls", "path": "card_json_v2/form_action_controls.json", "kind": "outbound_card", "expected_tags": ["form", "overflow"]},
     {"id": "selection_picker_controls", "path": "card_json_v2/selection_picker_controls.json", "kind": "outbound_card", "expected_tags": ["select_static", "multi_select_static", "select_person", "multi_select_person", "date_picker", "picker_time", "picker_datetime", "select_img", "checker", "form"]},
     {"id": "display_layout", "path": "card_json_v2/display_layout.json", "kind": "outbound_card", "expected_tags": ["div", "markdown", "img", "img_combination", "person", "person_list", "chart", "table", "hr", "column_set"]},
+    {"id": "column_layouts", "path": "card_json_v2/column_layouts.json", "kind": "outbound_card", "expected_tags": ["column_set", "column_set", "column_set"]},
+    {"id": "invalid_column_layout", "path": "card_json_v2/invalid_column_layout.json", "kind": "invalid_card", "expected_tags": ["column_set"], "expected_constraints": ["column_layout_requires_fixed_flex_mode"]},
     {"id": "invalid_img_combination_count", "path": "card_json_v2/invalid_img_combination_count.json", "kind": "invalid_card", "expected_tags": ["img_combination"], "expected_constraints": ["img_combination_limit"]},
     {"id": "invalid_img_size_scale", "path": "card_json_v2/invalid_img_size_scale.json", "kind": "invalid_card", "expected_tags": ["img"], "expected_constraints": ["img_size_requires_crop_scale"]},
     {"id": "invalid_table_row_max_height", "path": "card_json_v2/invalid_table_row_max_height.json", "kind": "invalid_card", "expected_tags": ["table"], "expected_constraints": ["table_row_max_height_requires_auto"]},
