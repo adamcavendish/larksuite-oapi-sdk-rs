@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## [0.3.10] - 2026-08-28
+
+### Cards
+
+- Added stable Card JSON 2.0 validation codes, structured diagnostics, and
+  concrete JSON Pointer paths for invalid authoring input.
+- Added checked constructors for automatic, fixed, and weighted column layouts,
+  plus documented margin, padding, and spacing values.
+
+### Compatibility
+
+- Card JSON 2.0 remains strictly validated by `CardDocument`; CardKit continues
+  to be a separate API surface.
+
 ## [0.3.9] - 2026-08-27
 
 ### Cards
@@ -556,6 +570,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.10]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.10
 [0.3.9]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.9
 [0.3.8]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.8
 [0.3.7]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.7
