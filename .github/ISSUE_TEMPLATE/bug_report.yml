@@ -1,0 +1,50 @@
+name: Bug report
+description: Report a reproducible SDK behavior problem.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include app secrets, tokens, tenant data, or production payloads.
+  - type: input
+    id: version
+    attributes:
+      label: SDK version
+      placeholder: "0.3.10"
+    validations:
+      required: true
+  - type: input
+    id: rust
+    attributes:
+      label: Rust version
+      placeholder: "rustc 1.95.0"
+    validations:
+      required: true
+  - type: input
+    id: features
+    attributes:
+      label: Enabled Cargo features
+      placeholder: "ws, axum"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Include the smallest redacted code and command that demonstrates the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include a redacted error or response when relevant.
+    validations:
+      required: true

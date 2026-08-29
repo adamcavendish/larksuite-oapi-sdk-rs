@@ -1,0 +1,31 @@
+name: API or feature request
+description: Propose a concrete SDK improvement.
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or workflow
+      description: Describe the Open Platform workflow that is difficult today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Rust API
+      description: Show a small example of the API you would like to call.
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Open Platform reference
+      description: Link the relevant Lark or Feishu endpoint, event, or protocol documentation.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Explain any raw request or existing SDK API you considered.
