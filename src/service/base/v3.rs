@@ -8,6 +8,9 @@ use crate::service::common::{JsonResp, PageQuery, RestRequest};
 
 pub type ListRecordResp = JsonResp;
 pub type SearchRecordResp = JsonResp;
+pub type GetFieldExtensionResp = JsonResp;
+pub type UpdateFieldExtensionResp = JsonResp;
+pub type UpdateFieldExtensionCellsResp = JsonResp;
 
 /// The default number of Base templates returned per request.
 pub const DEFAULT_BASE_TEMPLATE_LIMIT: i32 = 10;
@@ -161,6 +164,150 @@ pub struct UpdateFormShareSettings {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub require_login: Option<bool>,
 }
+
+/// One segment in a field-extension completion prompt.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct FieldExtensionPromptSegment {
+    #[serde(rename = "type")]
+    pub kind: FieldExtensionPromptSegmentKind,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub field: Option<String>,
+}
+
+impl FieldExtensionPromptSegment {
+    pub fn text(value: impl Into<String>) -> Self {
+        Self {
+            kind: FieldExtensionPromptSegmentKind::Text,
+            text: Some(value.into()),
+            field: None,
+        }
+    }
+
+    pub fn field_ref(value: impl Into<String>) -> Self {
+        Self {
+            kind: FieldExtensionPromptSegmentKind::FieldRef,
+            text: None,
+            field: Some(value.into()),
+        }
+    }
+}
+
+/// Supported kinds of field-extension completion prompt segments.
+#[derive(Debug, Clone, Copy, Serialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum FieldExtensionPromptSegmentKind {
+    Text,
+    FieldRef,
+}
+
+/// Input for the built-in field-extension completion configuration.
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct FieldExtensionCompletionInput {
+    pub prompt: Vec<FieldExtensionPromptSegment>,
+}
+
+impl FieldExtensionCompletionInput {
+    pub fn new(prompt: impl IntoIterator<Item = FieldExtensionPromptSegment>) -> Self {
+        Self {
+            prompt: prompt.into_iter().collect(),
+        }
+    }
+}
+
+/// PUT body for a Base field extension. The default value serializes as `{}`
+/// and clears the extension.
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct UpdateFieldExtensionReqBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extension_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inputs: Option<FieldExtensionCompletionInput>,
+}
+
+impl UpdateFieldExtensionReqBody {
+    /// Clears the extension configuration.
+    pub fn clear() -> Self {
+        Self::default()
+    }
+
+    /// Configures the official built-in LLM completion extension.
+    pub fn builtin_llm_completion(inputs: FieldExtensionCompletionInput) -> Self {
+        Self {
+            extension_id: Some("builtin_llm_completion".to_string()),
+            inputs: Some(inputs),
+        }
+    }
+}
+
+/// Scope for a field-extension cell update task.
+#[derive(Debug, Clone, Copy, Serialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum FieldExtensionUpdateCellsType {
+    Column,
+    Row,
+}
+
+/// POST body for a field-extension cell update task.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct UpdateFieldExtensionCellsReqBody {
+    #[serde(rename = "type")]
+    pub update_type: FieldExtensionUpdateCellsType,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub record_ids: Option<Vec<String>>,
+}
+
+impl UpdateFieldExtensionCellsReqBody {
+    pub fn column(view_id: Option<impl Into<String>>) -> Self {
+        Self {
+            update_type: FieldExtensionUpdateCellsType::Column,
+            view_id: view_id.map(Into::into),
+            record_ids: None,
+        }
+    }
+
+    pub fn rows(record_ids: impl IntoIterator<Item = impl Into<String>>) -> Self {
+        Self {
+            update_type: FieldExtensionUpdateCellsType::Row,
+            view_id: None,
+            record_ids: Some(record_ids.into_iter().map(Into::into).collect()),
+        }
+    }
+}
+
+/// Request body for batch-generating Base record share links.
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct CreateRecordShareLinksReqBody {
+    pub record_ids: Vec<String>,
+}
+
+impl CreateRecordShareLinksReqBody {
+    pub fn new(record_ids: impl IntoIterator<Item = impl Into<String>>) -> Self {
+        Self {
+            record_ids: record_ids.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+/// Response data for batch record-share-link generation. Missing request IDs
+/// represent records the service did not expose to the caller.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[non_exhaustive]
+pub struct CreateRecordShareLinksRespData {
+    pub record_share_links: Option<std::collections::HashMap<String, String>>,
+}
+
+impl_resp!(CreateRecordShareLinksResp, CreateRecordShareLinksRespData);
 
 impl UpdateFormShareSettings {
     pub fn new() -> Self {
@@ -455,6 +602,7 @@ impl<'a> GetBaseAppBlockDataQuery<'a> {
 
 pub struct V3<'a> {
     pub record: RecordResource<'a>,
+    pub field_extension: FieldExtensionResource<'a>,
     pub template: TemplateResource<'a>,
     pub dashboard_share: DashboardShareResource<'a>,
     pub form_share: FormShareResource<'a>,
@@ -468,6 +616,7 @@ impl<'a> V3<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
             record: RecordResource { config },
+            field_extension: FieldExtensionResource { config },
             template: TemplateResource { config },
             dashboard_share: DashboardShareResource { config },
             form_share: FormShareResource { config },
@@ -705,6 +854,128 @@ impl RecordResource<'_> {
         .json_body(&body)?
         .send_json()
         .await
+    }
+
+    /// Generates share links for up to 100 records. The response may omit
+    /// record IDs the service cannot expose to the caller.
+    pub async fn create_share_links(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        body: &CreateRecordShareLinksReqBody,
+        option: &RequestOption,
+    ) -> Result<CreateRecordShareLinksResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/records/share_links/batch",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .json_body(body)?
+        .send_response::<CreateRecordShareLinksRespData, CreateRecordShareLinksResp>()
+        .await
+    }
+}
+
+/// Field-extension configuration and execution operations for Base v3.
+pub struct FieldExtensionResource<'a> {
+    config: &'a Config,
+}
+
+impl FieldExtensionResource<'_> {
+    /// Reads a field's extension configuration.
+    pub async fn get(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        field_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetFieldExtensionResp, LarkError> {
+        self.request(
+            http::Method::GET,
+            base_token,
+            table_id,
+            field_id,
+            None::<&UpdateFieldExtensionReqBody>,
+            option,
+        )
+        .await
+    }
+
+    /// Installs, updates, or clears a field extension.
+    pub async fn update(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        field_id: &str,
+        body: &UpdateFieldExtensionReqBody,
+        option: &RequestOption,
+    ) -> Result<UpdateFieldExtensionResp, LarkError> {
+        self.request(
+            http::Method::PUT,
+            base_token,
+            table_id,
+            field_id,
+            Some(body),
+            option,
+        )
+        .await
+    }
+
+    /// Starts a field-extension update task for a row set or a column view.
+    pub async fn update_cells(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        field_id: &str,
+        body: &UpdateFieldExtensionCellsReqBody,
+        option: &RequestOption,
+    ) -> Result<UpdateFieldExtensionCellsResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/fields/:field_id/field_extensions/update_cells",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("field_id", field_id)
+        .json_body(body)?
+        .send_json()
+        .await
+    }
+
+    async fn request<T: Serialize>(
+        &self,
+        method: http::Method,
+        base_token: &str,
+        table_id: &str,
+        field_id: &str,
+        body: Option<T>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        let request = RestRequest::new(
+            self.config,
+            method,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/fields/:field_id/field_extensions",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("field_id", field_id);
+        let request = match body {
+            Some(body) => request.json_body(&body)?,
+            None => request,
+        };
+        request.send_json().await
     }
 }
 

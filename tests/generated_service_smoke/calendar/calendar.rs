@@ -3,6 +3,33 @@ use super::prelude::*;
 // ── Calendar ──
 
 #[tokio::test]
+async fn calendar_join_event_smoke() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(
+        200,
+        r#"{"code":0,"msg":"ok","data":{}}"#,
+    )])
+    .await;
+    let client = client_for(addr);
+    let option = RequestOption {
+        tenant_access_token: Some("tenant-token".into()),
+        ..RequestOption::default()
+    };
+
+    let response = client
+        .calendar()
+        .calendar
+        .join_event(&JoinCalendarEventReqBody::new("share token"), &option)
+        .await
+        .unwrap();
+
+    assert!(response.success());
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/calendar/v4/calendars/join_event "));
+    assert!(request.contains(r#""share_token":"share token""#));
+    assert!(request.contains("authorization: Bearer tenant-token"));
+}
+
+#[tokio::test]
 async fn calendar_get_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{"calendar_id":"cal-1","summary":"Team Calendar"}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;

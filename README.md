@@ -75,9 +75,11 @@ for the complete setup.
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
 | Discover or manage BaseApps | [`examples/base_v3_app_read.rs`](examples/base_v3_app_read.rs) and [Base v3 application mode](docs/base-v3-apps.md) |
 | Read or update Base dashboard or form sharing | [Base v3 sharing](docs/base-v3-sharing.md) |
+| Configure a Base field extension or share records | [Base v3 field extensions and record share links](docs/base-v3-field-extensions.md) |
 | Read or update modern Docx content | [`examples/docs_ai_fetch.rs`](examples/docs_ai_fetch.rs) and [Docs AI document content](docs/docs-ai.md) |
 | Read, edit, or render Slides AI presentations | [`examples/slides_ai_read.rs`](examples/slides_ai_read.rs), [`examples/slides_ai_render.rs`](examples/slides_ai_render.rs), and [Slides AI presentation content](docs/slides-ai.md) |
 | Exchange or refresh OAuth tokens | [`examples/authen_oauth.rs`](examples/authen_oauth.rs) and [OAuth SSO guide](docs/oauth-sso.md) |
+| Join a shared calendar event | [Events, WebSockets, and channels](docs/events-and-channels.md#calendar-share-token-joins) |
 | Receive webhook events | [`examples/event_handler.rs`](examples/event_handler.rs) |
 | Send a validated interactive card | [`examples/card_send.rs`](examples/card_send.rs) and [Cards guide](docs/cards.md) |
 | Stream a CardKit document | [`examples/cardkit_stream.rs`](examples/cardkit_stream.rs) and [Cards guide](docs/cards.md) |
@@ -104,6 +106,8 @@ for the complete setup.
   BaseApp, page, and block operations.
 - [Base v3 sharing](docs/base-v3-sharing.md): dashboard and form sharing
   reads and partial updates with user or tenant credentials.
+- [Base v3 field extensions and record share links](docs/base-v3-field-extensions.md):
+  typed extension configuration, cell updates, and batch record links.
 - [Docs AI document content](docs/docs-ai.md): modern Docx content fetches,
   updates, and version-history operations.
 - [Slides AI presentation content](docs/slides-ai.md): XML presentation and

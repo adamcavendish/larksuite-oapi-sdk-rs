@@ -232,6 +232,100 @@ async fn base_v3_share_contract_smoke() {
 }
 
 #[tokio::test]
+async fn base_v3_field_extensions_and_record_share_links_contract_smoke() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, r#"{"code":0,"msg":"ok","data":{"current_extension":null}}"#),
+        http_response(200, r#"{"code":0,"msg":"ok","data":{}}"#),
+        http_response(200, r#"{"code":0,"msg":"ok","data":{}}"#),
+        http_response(
+            200,
+            r#"{"code":0,"msg":"ok","data":{"record_share_links":{"rec-1":"https://example.test/rec-1"}}}"#,
+        ),
+    ])
+    .await;
+    let client = client_for(addr);
+    let option = RequestOption {
+        user_access_token: Some("user-token".into()),
+        ..RequestOption::default()
+    };
+    let extension =
+        UpdateFieldExtensionReqBody::builtin_llm_completion(FieldExtensionCompletionInput::new([
+            FieldExtensionPromptSegment::text("Summarize "),
+            FieldExtensionPromptSegment::field_ref("Description"),
+        ]));
+
+    client
+        .base_v3()
+        .field_extension
+        .get("base token", "table id", "field id", &option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .field_extension
+        .update("base token", "table id", "field id", &extension, &option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .field_extension
+        .update_cells(
+            "base token",
+            "table id",
+            "field id",
+            &UpdateFieldExtensionCellsReqBody::column(Some("view id")),
+            &option,
+        )
+        .await
+        .unwrap();
+    let shares = client
+        .base_v3()
+        .record
+        .create_share_links(
+            "base token",
+            "table id",
+            &CreateRecordShareLinksReqBody::new(["rec-1", "rec-2"]),
+            &option,
+        )
+        .await
+        .unwrap();
+
+    assert!(shares.success());
+    assert_eq!(
+        shares
+            .data
+            .as_ref()
+            .and_then(|data| data.record_share_links.as_ref())
+            .and_then(|links| links.get("rec-1"))
+            .map(String::as_str),
+        Some("https://example.test/rec-1")
+    );
+    let request = requests.lock().unwrap().join("\n");
+    for path in [
+        "GET /open-apis/base/v3/bases/base%20token/tables/table%20id/fields/field%20id/field_extensions ",
+        "PUT /open-apis/base/v3/bases/base%20token/tables/table%20id/fields/field%20id/field_extensions ",
+        "POST /open-apis/base/v3/bases/base%20token/tables/table%20id/fields/field%20id/field_extensions/update_cells ",
+        "POST /open-apis/base/v3/bases/base%20token/tables/table%20id/records/share_links/batch ",
+    ] {
+        assert!(
+            request.contains(path),
+            "missing request path {path}:\n{request}"
+        );
+    }
+    for body_fragment in [
+        r#""extension_id":"builtin_llm_completion""#,
+        r#""type":"field_ref""#,
+        r#""view_id":"view id""#,
+        r#""record_ids":["rec-1","rec-2"]"#,
+    ] {
+        assert!(
+            request.contains(body_fragment),
+            "missing request body {body_fragment}:\n{request}"
+        );
+    }
+}
+
+#[tokio::test]
 async fn base_v3_template_center_contract_smoke() {
     let category_body =
         r#"{"code":0,"msg":"ok","data":{"categories":[{"key":"office","name":"Office"}]}}"#;

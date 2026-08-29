@@ -34,7 +34,41 @@ while control.connection_id().is_none() {
 control.attach_user("USER_ACCESS_TOKEN").await?;
 // Later, before dropping the user session:
 // control.detach_user("USER_ACCESS_TOKEN").await?;
+control.close_and_wait().await;
 task.await??;
+# Ok(())
+# }
+```
+
+`WsClientControl::close` requests shutdown without waiting, which is safe from
+lifecycle callbacks. `close_and_wait` is for external teardown and waits until
+the running client has stopped. The client honors a finite reconnect count from
+the gateway bootstrap configuration, bounds each connection write to ten
+seconds by default, and accepts `write_timeout` for a different bound. Use
+`websocket_connector` when a custom proxy, TLS, or test dial transport is
+needed; it affects only the WebSocket gateway dial, not the bootstrap HTTP
+client.
+
+## Calendar share-token joins
+
+Calendar invitations provide an opaque share token through their link, QR
+code, or RSVP card. Join with that token; the endpoint deliberately has no
+event-ID alternative.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::service::calendar::v4::JoinCalendarEventReqBody;
+use larksuite_oapi_sdk_rs::{LarkClient, RequestOption};
+
+# async fn example() -> Result<(), larksuite_oapi_sdk_rs::LarkError> {
+let client = LarkClient::builder("APP_ID", "APP_SECRET").build()?;
+client
+    .calendar()
+    .calendar
+    .join_event(
+        &JoinCalendarEventReqBody::new("CALENDAR_SHARE_TOKEN"),
+        &RequestOption::default(),
+    )
+    .await?;
 # Ok(())
 # }
 ```

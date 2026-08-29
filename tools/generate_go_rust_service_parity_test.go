@@ -142,6 +142,25 @@ macro_rules! external_resource {
 	}
 }
 
+func TestExtractRustContractsSkipsBaseV3RequestHelper(t *testing.T) {
+	source := `
+async fn request(method: http::Method) {
+    RestRequest::new(
+        config,
+        method,
+        "/open-apis/base/v3/bases/:base_token/tables/:table_id/fields/:field_id/field_extensions",
+        vec![AccessTokenType::User, AccessTokenType::Tenant],
+        option,
+    )
+}
+`
+
+	contracts, unparsed := extractRustContracts("src/service/base/v3.rs", source)
+	if len(contracts) != 0 || len(unparsed) != 0 {
+		t.Fatalf("contracts = %#v, unparsed = %#v", contracts, unparsed)
+	}
+}
+
 func TestExtractRustContractsExpandsSupportedMacroInvocations(t *testing.T) {
 	source := `
 post_method!(search, SearchResp, (), "/open-apis/corehr/v2/banks/search");

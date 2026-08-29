@@ -22,6 +22,9 @@ examples, features, and coverage.
   BaseApp, page, and block operations with user credentials.
 - [Base v3 sharing](base-v3-sharing.md) covers dashboard and form sharing
   reads and partial updates with user or tenant credentials.
+- [Base v3 field extensions and record share links](base-v3-field-extensions.md)
+  covers extension configuration, cell updates, and partial batch share-link
+  results.
 - [Drive media preview downloads](drive-media-preview.md) covers selecting and
   downloading a Drive preview artifact with user or tenant credentials.
 - [Docs AI document content](docs-ai.md) covers modern Docx content fetches,

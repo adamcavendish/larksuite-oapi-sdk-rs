@@ -18,6 +18,8 @@
 //! ```
 
 use std::collections::HashMap;
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
 use std::sync::RwLock;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -26,7 +28,7 @@ use std::time::{Duration, Instant};
 use base64::Engine as _;
 use futures_util::{SinkExt as _, StreamExt as _};
 use prost::Message as ProstMessage;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, watch};
 use tokio::time::sleep;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
@@ -100,6 +102,80 @@ struct ClientConfig {
     reconnect_nonce: u64,
     #[serde(rename = "PingInterval", default)]
     ping_interval: u64,
+}
+
+struct WsRunControl {
+    shutdown: AtomicBool,
+    started: AtomicBool,
+    completed: AtomicBool,
+    shutdown_tx: watch::Sender<bool>,
+    completion_tx: watch::Sender<bool>,
+}
+
+impl WsRunControl {
+    fn new() -> Self {
+        let (shutdown_tx, _) = watch::channel(false);
+        let (completion_tx, _) = watch::channel(true);
+        Self {
+            shutdown: AtomicBool::new(false),
+            started: AtomicBool::new(false),
+            completed: AtomicBool::new(true),
+            shutdown_tx,
+            completion_tx,
+        }
+    }
+
+    fn begin(&self) -> bool {
+        if self.shutdown.load(Ordering::Acquire) {
+            return false;
+        }
+        self.completed.store(false, Ordering::Release);
+        let _ = self.completion_tx.send(false);
+        self.started.store(true, Ordering::Release);
+        true
+    }
+
+    fn finish(&self) {
+        self.completed.store(true, Ordering::Release);
+        let _ = self.completion_tx.send(true);
+    }
+
+    fn is_running(&self) -> bool {
+        self.started.load(Ordering::Acquire) && !self.completed.load(Ordering::Acquire)
+    }
+
+    fn close(&self) -> bool {
+        if !self.is_running() {
+            return false;
+        }
+        self.shutdown.store(true, Ordering::Release);
+        let _ = self.shutdown_tx.send(true);
+        true
+    }
+
+    fn is_shutdown(&self) -> bool {
+        self.shutdown.load(Ordering::Acquire)
+    }
+
+    async fn cancelled(&self) {
+        if self.is_shutdown() {
+            return;
+        }
+        let mut shutdown = self.shutdown_tx.subscribe();
+        if *shutdown.borrow() {
+            return;
+        }
+        let _ = shutdown.changed().await;
+    }
+
+    async fn wait_for_completion(&self) {
+        let mut completed = self.completion_tx.subscribe();
+        while !*completed.borrow() {
+            if completed.changed().await.is_err() {
+                return;
+            }
+        }
+    }
 }
 
 #[derive(serde::Deserialize)]
@@ -274,6 +350,17 @@ fn sanitize_ws_url(raw_url: &str) -> String {
 
 type LifecycleCallback = Arc<dyn Fn() + Send + Sync>;
 type ErrorCallback = Arc<dyn Fn(&LarkError) + Send + Sync>;
+type WsConnectResult = Result<
+    (
+        tokio_tungstenite::WebSocketStream<
+            tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
+        >,
+        tokio_tungstenite::tungstenite::handshake::client::Response,
+    ),
+    tokio_tungstenite::tungstenite::Error,
+>;
+type WsConnectFuture = Pin<Box<dyn Future<Output = WsConnectResult> + Send>>;
+type WsConnector = Arc<dyn Fn(String) -> WsConnectFuture + Send + Sync>;
 
 /// Controls a running trusted-user WebSocket channel.
 ///
@@ -286,9 +373,28 @@ pub struct WsClientControl {
     headers: HashMap<String, String>,
     channel_tag: Option<String>,
     connection_id: Arc<RwLock<Option<String>>>,
+    run_control: Arc<WsRunControl>,
 }
 
 impl WsClientControl {
+    /// Request shutdown of the active WebSocket run.
+    ///
+    /// This is safe to call from a lifecycle callback. Use
+    /// [`Self::close_and_wait`] outside callbacks when teardown must complete
+    /// before releasing dependent resources.
+    pub fn close(&self) {
+        let _ = self.run_control.close();
+    }
+
+    /// Request shutdown and wait for the active run to finish.
+    ///
+    /// If the client has not been started, this returns immediately.
+    pub async fn close_and_wait(&self) {
+        if self.run_control.close() {
+            self.run_control.wait_for_completion().await;
+        }
+    }
+
     /// Return the connected WebSocket's current device ID, if it is ready.
     pub fn connection_id(&self) -> Option<String> {
         self.connection_id.read().ok().and_then(|id| id.clone())
@@ -388,7 +494,11 @@ pub struct WsClient {
     ping_interval: Arc<AtomicU64>,
     reconnect_interval: Arc<AtomicU64>,
     reconnect_nonce: Arc<AtomicU64>,
+    reconnect_count: Arc<std::sync::atomic::AtomicI64>,
     auto_reconnect: Arc<AtomicBool>,
+    run_control: Arc<WsRunControl>,
+    write_timeout: Duration,
+    websocket_connector: WsConnector,
     on_ready: Option<LifecycleCallback>,
     on_error: Option<ErrorCallback>,
     on_reconnecting: Option<LifecycleCallback>,
@@ -436,7 +546,11 @@ impl WsClient {
             ping_interval: Arc::new(AtomicU64::new(120)),
             reconnect_interval: Arc::new(AtomicU64::new(120)),
             reconnect_nonce: Arc::new(AtomicU64::new(30)),
+            reconnect_count: Arc::new(std::sync::atomic::AtomicI64::new(-1)),
             auto_reconnect: Arc::new(AtomicBool::new(true)),
+            run_control: Arc::new(WsRunControl::new()),
+            write_timeout: Duration::from_secs(10),
+            websocket_connector: Arc::new(|url| Box::pin(async move { connect_async(url).await })),
             on_ready: None,
             on_error: None,
             on_reconnecting: None,
@@ -449,6 +563,28 @@ impl WsClient {
     /// return after the first connection closes instead of reconnecting.
     pub fn auto_reconnect(self, enable: bool) -> Self {
         self.auto_reconnect.store(enable, Ordering::Relaxed);
+        self
+    }
+
+    /// Sets an upper bound for an individual WebSocket write, including time
+    /// spent waiting for the shared connection writer. A zero duration keeps
+    /// the default ten-second bound.
+    pub fn write_timeout(mut self, timeout: Duration) -> Self {
+        if !timeout.is_zero() {
+            self.write_timeout = timeout;
+        }
+        self
+    }
+
+    /// Replaces the WebSocket connection factory for this client. This is
+    /// useful when an application needs a custom proxy, TLS, or test transport;
+    /// it affects only the gateway dial, not the HTTP bootstrap request.
+    pub fn websocket_connector<F, Fut>(mut self, connector: F) -> Self
+    where
+        F: Fn(String) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = WsConnectResult> + Send + 'static,
+    {
+        self.websocket_connector = Arc::new(move |url| Box::pin(connector(url)));
         self
     }
 
@@ -500,6 +636,7 @@ impl WsClient {
             headers: self.headers.clone(),
             channel_tag: self.channel_tag.clone(),
             connection_id: Arc::clone(&self.connection_id),
+            run_control: Arc::clone(&self.run_control),
         }
     }
 
@@ -557,6 +694,8 @@ impl WsClient {
     }
 
     fn apply_config(&self, conf: &ClientConfig) {
+        self.reconnect_count
+            .store(i64::from(conf.reconnect_count), Ordering::Relaxed);
         if conf.ping_interval > 0 {
             self.ping_interval
                 .store(conf.ping_interval, Ordering::Relaxed);
@@ -574,8 +713,20 @@ impl WsClient {
     /// Run the WebSocket connection. If auto-reconnect is enabled (default),
     /// reconnects indefinitely on errors. Otherwise returns after one session.
     pub async fn start(self) -> Result<(), LarkError> {
+        if !self.run_control.begin() {
+            return Ok(());
+        }
+        let result = self.run().await;
+        self.run_control.finish();
+        result
+    }
+
+    async fn run(&self) -> Result<(), LarkError> {
         let mut consecutive_failures: u32 = 0;
         loop {
+            if self.run_control.is_shutdown() {
+                return Ok(());
+            }
             let was_reconnecting = consecutive_failures > 0;
             match self.run_once(was_reconnecting).await {
                 Ok(()) => {
@@ -594,8 +745,17 @@ impl WsClient {
                     consecutive_failures += 1;
                 }
             }
+            if self.run_control.is_shutdown() {
+                return Ok(());
+            }
             if !self.auto_reconnect.load(Ordering::Relaxed) {
                 return Ok(());
+            }
+            let reconnect_count = self.reconnect_count.load(Ordering::Relaxed);
+            if reconnect_count >= 0 && i64::from(consecutive_failures) > reconnect_count {
+                return Err(LarkError::Event(format!(
+                    "ws reconnect attempts exhausted after {reconnect_count} retries"
+                )));
             }
             // Fast reconnect (5s) on first failure after a working connection.
             // Use server-configured interval on repeated failures to avoid
@@ -618,12 +778,21 @@ impl WsClient {
             if let Some(ref handler) = self.on_reconnecting {
                 handler();
             }
-            sleep(wait).await;
+            tokio::select! {
+                _ = self.run_control.cancelled() => return Ok(()),
+                _ = sleep(wait) => {}
+            }
         }
     }
 
     async fn run_once(&self, was_reconnecting: bool) -> Result<(), LarkError> {
-        let endpoint = WsGateway { client: self }.endpoint().await?;
+        let gateway = WsGateway { client: self };
+        let endpoint = gateway.endpoint();
+        tokio::pin!(endpoint);
+        let endpoint = tokio::select! {
+            _ = self.run_control.cancelled() => return Ok(()),
+            result = &mut endpoint => result,
+        }?;
         if self.log_enabled(tracing::Level::INFO) {
             tracing::info!(
                 "connecting to ws endpoint: {}",
@@ -631,9 +800,13 @@ impl WsClient {
             );
         }
 
-        let (ws_stream, resp) = connect_async(&endpoint.url)
-            .await
-            .map_err(|e| LarkError::Event(format!("ws connect failed: {e}")))?;
+        let connect = (self.websocket_connector)(endpoint.url.clone());
+        tokio::pin!(connect);
+        let (ws_stream, resp) = tokio::select! {
+            _ = self.run_control.cancelled() => return Ok(()),
+            result = &mut connect => result,
+        }
+        .map_err(|e| LarkError::Event(format!("ws connect failed: {e}")))?;
 
         // Parse handshake error headers on non-101 responses (Go SDK parseErr)
         if resp.status() != http::StatusCode::SWITCHING_PROTOCOLS {
@@ -666,6 +839,17 @@ impl WsClient {
         if let Ok(mut current) = self.connection_id.write() {
             *current = connection_id;
         }
+    }
+
+    async fn send_message<S>(
+        &self,
+        write: &Arc<Mutex<S>>,
+        message: Message,
+    ) -> Result<(), LarkError>
+    where
+        S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error> + Unpin,
+    {
+        send_message_with_timeout(write, message, self.write_timeout).await
     }
 
     fn parse_handshake_error(
@@ -824,18 +1008,31 @@ impl<'a> WsSession<'a> {
         let ping_service_id = self.service_id;
         let ping_channel_tag = self.client.channel_tag.clone();
         let ping_log_level = self.client.log_level;
+        let ping_run_control = Arc::clone(&self.client.run_control);
+        let ping_write_timeout = self.client.write_timeout;
         let ping_handle = tokio::spawn(async move {
             loop {
                 let secs = ping_interval.load(Ordering::Relaxed);
-                sleep(Duration::from_secs(secs)).await;
+                tokio::select! {
+                    _ = ping_run_control.cancelled() => break,
+                    _ = sleep(Duration::from_secs(secs)) => {}
+                }
                 let frame = new_ping_frame(ping_service_id, ping_channel_tag.as_deref());
                 let encoded = frame.encode_to_vec();
-                let mut writer = ping_write.lock().await;
-                if (*writer)
-                    .send(Message::Binary(encoded.into()))
-                    .await
-                    .is_err()
-                {
+                let send = send_message_with_timeout(
+                    &ping_write,
+                    Message::Binary(encoded.into()),
+                    ping_write_timeout,
+                );
+                tokio::pin!(send);
+                let sent = tokio::select! {
+                    _ = ping_run_control.cancelled() => break,
+                    result = &mut send => result,
+                };
+                if let Err(error) = sent {
+                    if ws_log_enabled(ping_log_level, tracing::Level::WARN) {
+                        tracing::warn!("ws ping write failed: {error}");
+                    }
                     break;
                 }
                 if ws_log_enabled(ping_log_level, tracing::Level::DEBUG) {
@@ -844,7 +1041,15 @@ impl<'a> WsSession<'a> {
             }
         });
 
-        while let Some(message) = read.next().await {
+        loop {
+            let next_message = read.next();
+            tokio::pin!(next_message);
+            let Some(message) = (tokio::select! {
+                _ = self.client.run_control.cancelled() => break,
+                message = &mut next_message => message,
+            }) else {
+                break;
+            };
             let message = match message {
                 Ok(message) => message,
                 Err(error) => {
@@ -873,6 +1078,7 @@ impl<'a> WsSession<'a> {
         }
 
         ping_handle.abort();
+        let _ = ping_handle.await;
     }
 }
 
@@ -927,8 +1133,9 @@ impl<'a> WsFrameHandler<'a> {
                     log_id_new: None,
                 };
                 let encoded = pong.encode_to_vec();
-                let mut writer = write.lock().await;
-                let _ = (*writer).send(Message::Binary(encoded.into())).await;
+                self.client
+                    .send_message(write, Message::Binary(encoded.into()))
+                    .await?;
             }
             MSG_TYPE_PONG => {
                 if self.client.log_enabled(tracing::Level::DEBUG) {
@@ -998,8 +1205,9 @@ impl<'a> WsFrameHandler<'a> {
             log_id_new: frame.log_id_new.clone(),
         };
         let encoded = ack.encode_to_vec();
-        let mut writer = write.lock().await;
-        let _ = (*writer).send(Message::Binary(encoded.into())).await;
+        self.client
+            .send_message(write, Message::Binary(encoded.into()))
+            .await?;
 
         Ok(())
     }
@@ -1054,6 +1262,27 @@ impl<'a> WsFrameHandler<'a> {
     }
 }
 
+async fn send_message_with_timeout<S>(
+    write: &Arc<Mutex<S>>,
+    message: Message,
+    write_timeout: Duration,
+) -> Result<(), LarkError>
+where
+    S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error> + Unpin,
+{
+    let send = async {
+        let mut writer = write.lock().await;
+        (*writer).send(message).await
+    };
+    match tokio::time::timeout(write_timeout, send).await {
+        Ok(Ok(())) => Ok(()),
+        Ok(Err(error)) => Err(LarkError::Event(format!("ws write failed: {error}"))),
+        Err(_) => Err(LarkError::Event(format!(
+            "ws write timed out after {write_timeout:?}"
+        ))),
+    }
+}
+
 fn extract_ws_aud(raw_url: &str) -> Result<String, LarkError> {
     let with_scheme;
     let url = if raw_url.contains("://") {
@@ -1080,6 +1309,7 @@ mod tests {
 
     use futures_util::Sink;
     use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
+    use tokio::sync::Notify;
 
     struct CapturingSink(Arc<StdMutex<Vec<Message>>>);
 
@@ -1110,6 +1340,37 @@ mod tests {
             _cx: &mut Context<'_>,
         ) -> Poll<Result<(), Self::Error>> {
             Poll::Ready(Ok(()))
+        }
+    }
+
+    struct PendingSink;
+
+    impl Sink<Message> for PendingSink {
+        type Error = tokio_tungstenite::tungstenite::Error;
+
+        fn poll_ready(
+            self: Pin<&mut Self>,
+            _cx: &mut Context<'_>,
+        ) -> Poll<Result<(), Self::Error>> {
+            Poll::Pending
+        }
+
+        fn start_send(self: Pin<&mut Self>, _item: Message) -> Result<(), Self::Error> {
+            unreachable!("pending sink must not accept a message")
+        }
+
+        fn poll_flush(
+            self: Pin<&mut Self>,
+            _cx: &mut Context<'_>,
+        ) -> Poll<Result<(), Self::Error>> {
+            Poll::Pending
+        }
+
+        fn poll_close(
+            self: Pin<&mut Self>,
+            _cx: &mut Context<'_>,
+        ) -> Poll<Result<(), Self::Error>> {
+            Poll::Pending
         }
     }
 
@@ -1181,6 +1442,36 @@ mod tests {
         assert!(!client.log_enabled(tracing::Level::TRACE));
     }
 
+    #[tokio::test]
+    async fn websocket_write_timeout_bounds_stalled_writers() {
+        let write = Arc::new(Mutex::new(PendingSink));
+        let error = send_message_with_timeout(
+            &write,
+            Message::Binary(vec![1].into()),
+            Duration::from_millis(5),
+        )
+        .await
+        .unwrap_err();
+
+        assert!(error.to_string().contains("ws write timed out"));
+    }
+
+    #[tokio::test]
+    async fn websocket_connector_builder_replaces_the_default_dialer() {
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .websocket_connector(|_| async {
+            Err(tokio_tungstenite::tungstenite::Error::ConnectionClosed)
+        });
+
+        assert!(matches!(
+            (client.websocket_connector)("wss://example.test".into()).await,
+            Err(tokio_tungstenite::tungstenite::Error::ConnectionClosed)
+        ));
+    }
+
     #[test]
     fn trusted_channel_builders_omit_empty_configuration() {
         let client = WsClient::new(
@@ -1207,7 +1498,7 @@ mod tests {
             let n = stream.read(&mut buf).await.unwrap();
             *captured.lock().unwrap() = String::from_utf8_lossy(&buf[..n]).into_owned();
 
-            let body = r#"{"code":0,"msg":"ok","data":{"URL":"wss://example.test/ws?service_id=42","ClientConfig":{"PingInterval":15,"ReconnectInterval":16,"ReconnectNonce":7}}}"#;
+            let body = r#"{"code":0,"msg":"ok","data":{"URL":"wss://example.test/ws?service_id=42","ClientConfig":{"PingInterval":15,"ReconnectCount":2,"ReconnectInterval":16,"ReconnectNonce":7}}}"#;
             let response = format!(
                 "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
                 body.len()
@@ -1244,6 +1535,7 @@ mod tests {
         );
         assert_eq!(endpoint.service_id, 99);
         assert_eq!(client.ping_interval.load(Ordering::Relaxed), 15);
+        assert_eq!(client.reconnect_count.load(Ordering::Relaxed), 2);
         assert_eq!(client.reconnect_interval.load(Ordering::Relaxed), 16);
         assert_eq!(client.reconnect_nonce.load(Ordering::Relaxed), 7);
 
@@ -1264,6 +1556,143 @@ mod tests {
 
         let untagged = new_ping_frame(42, Some(""));
         assert_eq!(get_header(&untagged.headers, HEADER_CHANNEL_TAG), None);
+    }
+
+    #[tokio::test]
+    async fn control_close_stops_a_reconnect_delay_and_waits_for_completion() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        drop(listener);
+
+        let reconnecting = Arc::new(Notify::new());
+        let observed_reconnect = Arc::clone(&reconnecting);
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{addr}"))
+        .on_reconnecting(move || observed_reconnect.notify_one());
+        let control = client.control();
+        let start = tokio::spawn(client.start());
+
+        tokio::time::timeout(Duration::from_secs(1), reconnecting.notified())
+            .await
+            .unwrap();
+        control.close_and_wait().await;
+        assert!(
+            tokio::time::timeout(Duration::from_secs(1), start)
+                .await
+                .unwrap()
+                .unwrap()
+                .is_ok()
+        );
+    }
+
+    #[tokio::test]
+    async fn control_close_before_start_is_a_noop() {
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        );
+        let control = client.control();
+
+        control.close_and_wait().await;
+
+        assert!(!control.run_control.is_shutdown());
+        assert!(!control.run_control.is_running());
+    }
+
+    #[tokio::test]
+    async fn control_close_cancels_a_stalled_bootstrap_request() {
+        let bootstrap_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let bootstrap_addr = bootstrap_listener.local_addr().unwrap();
+        let (bootstrap_started_tx, bootstrap_started_rx) = tokio::sync::oneshot::channel();
+        let bootstrap_handle = tokio::spawn(async move {
+            let (mut stream, _) = bootstrap_listener.accept().await.unwrap();
+            let mut first_byte = [0; 1];
+            stream.read_exact(&mut first_byte).await.unwrap();
+            bootstrap_started_tx.send(()).unwrap();
+
+            let mut buffer = [0; 1];
+            let _ = tokio::time::timeout(Duration::from_secs(1), stream.read(&mut buffer)).await;
+        });
+
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{bootstrap_addr}"));
+        let control = client.control();
+        let start = tokio::spawn(client.start());
+
+        bootstrap_started_rx.await.unwrap();
+        tokio::time::timeout(Duration::from_secs(1), control.close_and_wait())
+            .await
+            .unwrap();
+
+        assert!(start.await.unwrap().is_ok());
+        bootstrap_handle.await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn control_close_clears_connection_and_runs_disconnect_callback() {
+        let ws_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let ws_addr = ws_listener.local_addr().unwrap();
+        let (connected_tx, connected_rx) = tokio::sync::oneshot::channel();
+        let ws_handle = tokio::spawn(async move {
+            let (stream, _) = ws_listener.accept().await.unwrap();
+            let mut stream = tokio_tungstenite::accept_async(stream).await.unwrap();
+            connected_tx.send(()).unwrap();
+            let _ = stream.next().await;
+        });
+
+        let bootstrap_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let bootstrap_addr = bootstrap_listener.local_addr().unwrap();
+        let bootstrap_handle = tokio::spawn(async move {
+            let (mut stream, _) = bootstrap_listener.accept().await.unwrap();
+            let mut first_byte = [0; 1];
+            stream.read_exact(&mut first_byte).await.unwrap();
+            let body = format!(
+                r#"{{"code":0,"data":{{"URL":"ws://{ws_addr}/?service_id=42&device_id=device%2Fid"}}}}"#
+            );
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+            stream.shutdown().await.unwrap();
+        });
+
+        let disconnected = Arc::new(Notify::new());
+        let observed_disconnection = Arc::clone(&disconnected);
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{bootstrap_addr}"))
+        .auto_reconnect(false)
+        .on_disconnected(move || observed_disconnection.notify_one());
+        let control = client.control();
+        let start = tokio::spawn(client.start());
+
+        connected_rx.await.unwrap();
+        tokio::time::timeout(Duration::from_secs(1), async {
+            while control.connection_id().as_deref() != Some("device/id") {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+
+        control.close_and_wait().await;
+
+        assert!(start.await.unwrap().is_ok());
+        tokio::time::timeout(Duration::from_secs(1), disconnected.notified())
+            .await
+            .unwrap();
+        assert_eq!(control.connection_id(), None);
+        ws_handle.await.unwrap();
+        bootstrap_handle.await.unwrap();
     }
 
     #[tokio::test]
