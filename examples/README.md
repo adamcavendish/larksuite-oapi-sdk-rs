@@ -31,7 +31,7 @@ Most examples use this shape:
 | `card_template_send` | Card Builder | Send a published template with typed variables through IM v1 | `APP_ID`, `APP_SECRET`, `CHAT_ID`, `CARD_TEMPLATE_ID`, optional `CARD_TEMPLATE_TITLE` | `cargo run --example card_template_send` |
 | `event_handler` | Event dispatcher | Handle encrypted HTTP callback events | none for compilation | `cargo run --example event_handler` |
 | `card_action_handler` | Card callbacks | Handle an interactive card callback and return a toast JSON body | none for compilation | `cargo run --example card_action_handler` |
-| `ws_client` | WebSocket events | Receive events through WebSocket long connections; optionally attach a trusted user channel | `APP_ID`, `APP_SECRET`, optional `WS_CHANNEL_TAG`, `USER_ACCESS_TOKEN` | `cargo run --features ws --example ws_client` |
+| `ws_client` | WebSocket bot | Queue received text events, reply with an idempotency UUID, and optionally attach a trusted user channel | `APP_ID`, `APP_SECRET`, optional `WS_CHANNEL_TAG`, `USER_ACCESS_TOKEN` | `cargo run --features ws --example ws_client` |
 | `channel_send` | Channel messaging | Send markdown through channel messaging with an optional idempotency UUID | `APP_ID`, `APP_SECRET`, `CHAT_ID`, optional `MESSAGE_UUID` | `cargo run --features messaging --example channel_send` |
 | `channel_normalize` | Channel helpers | Normalize incoming channel messages | `APP_ID`, `APP_SECRET` | `cargo run --features channel --example channel_normalize` |
 
