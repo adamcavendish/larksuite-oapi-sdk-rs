@@ -41,7 +41,7 @@ connection.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.3.10"
+larksuite-oapi-sdk-rs = "0.3.11"
 ```
 
 The minimum supported Rust version is 1.95.0.
@@ -167,7 +167,7 @@ separately does not enable the `channel` runtime API.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.3.10", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.3.11", features = ["ws", "axum"] }
 ```
 
 ## API Coverage

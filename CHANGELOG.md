@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## [0.3.11] - 2026-08-29
+
+### Channel
+
+- Added cancellable WebSocket shutdown, bounded writes, finite bootstrap
+  reconnect handling, and injectable gateway dialers for controlled
+  integrations.
+
+### REST service coverage
+
+- Added typed Base v3 field-extension settings and cell updates, partial batch
+  record-share links, and Calendar event joins with opaque share tokens.
+
+### Documentation
+
+- Added a queue-backed WebSocket bot tutorial and example with typed event
+  dispatch, lifecycle health signals, idempotent replies, and troubleshooting.
+- Expanded Lark and Feishu discoverability guidance and contributor-facing
+  community, conduct, and security documentation.
+
 ## [0.3.10] - 2026-08-28
 
 ### Cards
@@ -570,6 +590,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.11]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.11
 [0.3.10]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.10
 [0.3.9]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.9
 [0.3.8]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.8
