@@ -4,6 +4,9 @@ This directory holds detailed operational guides for the SDK. The root
 [README](../README.md) remains the shortest path to installation, quick start,
 examples, features, and coverage.
 
+- [Tutorial: build a Lark / Feishu bot](tutorial-build-a-feishu-bot.md) is a
+  newcomer walkthrough for receiving and replying to messages over a WebSocket
+  long connection, without exposing a public callback URL.
 - [Go service and event compatibility](go-compatibility.md) covers raw
   requests, the compatibility bridge, and reproducible Go-to-Rust checks.
 - [Cards](cards.md) covers versioned Card JSON delivery, CardKit streaming,

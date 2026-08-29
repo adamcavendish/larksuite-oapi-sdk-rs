@@ -5,10 +5,24 @@
 [![CI](https://github.com/adamcavendish/larksuite-oapi-sdk-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/adamcavendish/larksuite-oapi-sdk-rs/actions/workflows/ci.yml)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-Lark/Feishu OpenAPI SDK for Rust. It follows the official
+Non-official, Tokio-native Rust SDK for Lark / Feishu (飞书) Open Platform
+APIs, bots, events, WebSockets, and interactive cards. It follows the official
 [Go SDK](https://github.com/larksuite/oapi-sdk-go) closely while providing
 idiomatic Rust configuration, typed REST resources, event handling, and optional
 WebSocket, Axum, and channel integration.
+
+## Build with Lark / Feishu
+
+- **Build a bot:** receive typed message events and reply through the IM API.
+- **Receive events:** use WebSocket long connections without a public callback
+  URL, or verify and dispatch HTTP webhooks.
+- **Automate Open Platform workflows:** use typed REST resources for messages,
+  calendars, documents, Base, approvals, and more.
+
+New to the platform? Start with the
+[build a Lark / Feishu bot tutorial](docs/tutorial-build-a-feishu-bot.md). It
+creates a bot that replies to received messages over a WebSocket long
+connection.
 
 ## Highlights
 
@@ -71,6 +85,7 @@ for the complete setup.
 
 | Need | Start here |
 | --- | --- |
+| Build a first Lark / Feishu bot | [Tutorial: build a Lark / Feishu bot](docs/tutorial-build-a-feishu-bot.md) |
 | Call a typed REST endpoint | [`examples/send_message.rs`](examples/send_message.rs) or [generated examples](examples/README.md) |
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
 | Discover or manage BaseApps | [`examples/base_v3_app_read.rs`](examples/base_v3_app_read.rs) and [Base v3 application mode](docs/base-v3-apps.md) |
@@ -92,6 +107,8 @@ for the complete setup.
 
 ## Guides
 
+- [Tutorial: build a Lark / Feishu bot](docs/tutorial-build-a-feishu-bot.md):
+  create a WebSocket-connected bot that receives and replies to messages.
 - [Go service and event compatibility](docs/go-compatibility.md): raw
   requests, the compatibility bridge, and deterministic Go-to-Rust checks.
 - [Cards](docs/cards.md): versioned Card JSON, CardKit streaming, published
