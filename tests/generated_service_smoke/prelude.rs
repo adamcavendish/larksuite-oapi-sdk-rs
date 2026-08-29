@@ -114,10 +114,12 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
     base::{
         v2::{CreateAppRoleV2Query, ListAppRoleV2Query, UpdateAppRoleV2Query},
         v3::{
-            GetBaseAppBlockDataQuery, ListBaseAppBlocksQuery, ListBaseAppPagesQuery,
-            ListBaseTemplateQuery, ListRecordQuery as ListBaseV3RecordQuery,
+            CreateRecordShareLinksReqBody, FieldExtensionCompletionInput,
+            FieldExtensionPromptSegment, GetBaseAppBlockDataQuery, ListBaseAppBlocksQuery,
+            ListBaseAppPagesQuery, ListBaseTemplateQuery, ListRecordQuery as ListBaseV3RecordQuery,
             ListWorkspaceEntitiesQuery, SearchBaseTemplateQuery, UpdateDashboardShareReqBody,
-            UpdateDashboardShareSettings, UpdateFormShareReqBody, UpdateFormShareSettings,
+            UpdateDashboardShareSettings, UpdateFieldExtensionCellsReqBody,
+            UpdateFieldExtensionReqBody, UpdateFormShareReqBody, UpdateFormShareSettings,
         },
     },
     bitable::v1::{
@@ -147,8 +149,8 @@ pub(crate) use larksuite_oapi_sdk_rs::service::{
     calendar::v4::{
         BatchFreeBusyQuery, BatchFreeBusyReqBody, GetCalendarQuery,
         GetEventQuery as GetCalendarEventQuery, InstanceViewEventQuery, InstancesEventQuery,
-        ListAclQuery as ListCalendarAclQuery, ListAttendeeQuery, ListCalendarQuery,
-        ListChatMemberQuery as ListCalendarChatMemberQuery,
+        JoinCalendarEventReqBody, ListAclQuery as ListCalendarAclQuery, ListAttendeeQuery,
+        ListCalendarQuery, ListChatMemberQuery as ListCalendarChatMemberQuery,
         ListEventQuery as ListCalendarEventQuery, ListFreeBusyQuery, ListFreeBusyReqBody,
         ListTimeZoneQuery, SearchCalendarQuery, SearchCalendarReqBody,
         SearchEventQuery as SearchCalendarEventQuery, SearchEventReqBody,

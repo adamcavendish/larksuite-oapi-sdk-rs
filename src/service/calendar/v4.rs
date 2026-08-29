@@ -428,6 +428,21 @@ pub struct CreateCalendarReqBody {
     pub summary_alias: Option<String>,
 }
 
+/// Request body for joining an event through an opaque calendar share token.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct JoinCalendarEventReqBody {
+    pub share_token: String,
+}
+
+impl JoinCalendarEventReqBody {
+    pub fn new(share_token: impl Into<String>) -> Self {
+        Self {
+            share_token: share_token.into(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PatchCalendarReqBody {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -961,6 +976,25 @@ impl<'a> SearchCalendarQuery<'a> {
 }
 
 impl<'a> CalendarResource<'a> {
+    /// Joins an event using the opaque token from its share link, QR code, or
+    /// RSVP card. This endpoint deliberately does not accept an event ID.
+    pub async fn join_event(
+        &self,
+        body: &JoinCalendarEventReqBody,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/calendar/v4/calendars/join_event",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(body)?
+        .send_empty()
+        .await
+    }
+
     pub async fn create(
         &self,
         body: &CreateCalendarReqBody,

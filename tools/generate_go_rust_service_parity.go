@@ -342,10 +342,11 @@ func extractRustContracts(sourceFile, source string) ([]rustEndpoint, []unparsed
 			continue
 		}
 		function := source[match[8]:match[9]]
-		// The local `request` helper in OKR v2 centralizes the shared user/tenant token set for the
-		// generated OKR v2 resource. Its own RestRequest construction has a
-		// variable method, while every caller carries literal contract metadata.
-		if sourceFile == "src/service/okr/v2.rs" && function == "request" {
+		// The local request helpers in OKR v2 and Base v3 centralize operations
+		// whose callers carry literal contract metadata. Their own RestRequest
+		// constructions use variable methods and must not be reported as direct
+		// endpoint contracts.
+		if (sourceFile == "src/service/okr/v2.rs" || sourceFile == "src/service/base/v3.rs") && function == "request" {
 			continue
 		}
 		open := strings.Index(source[match[1]:], "{")
