@@ -26,10 +26,11 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
 use base64::Engine as _;
+use futures_util::stream::FuturesUnordered;
 use futures_util::{SinkExt as _, StreamExt as _};
 use prost::Message as ProstMessage;
 use tokio::sync::{Mutex, watch};
-use tokio::time::sleep;
+use tokio::time::{sleep, timeout};
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
@@ -73,6 +74,14 @@ const HEADER_HANDSHAKE_AUTH_ERR_CODE: &str = "Handshake-Autherrcode";
 const AUTH_FAILED: i32 = 514;
 const FORBIDDEN: i32 = 403;
 const EXCEED_CONN_LIMIT: i32 = 1000040350;
+
+// Keep the inbound liveness window aligned with the upstream Go SDK: allow
+// two expected ping intervals plus a small scheduling/network grace period.
+const PONG_GRACE_PERIOD: Duration = Duration::from_secs(5);
+
+fn pong_wait(ping_interval_secs: u64) -> Duration {
+    Duration::from_secs(ping_interval_secs.saturating_mul(2)) + PONG_GRACE_PERIOD
+}
 
 // ── WS endpoint response ──
 
@@ -825,14 +834,14 @@ impl WsClient {
             handler();
         }
 
-        WsSession::new(self, endpoint.service_id)
+        let session_result = WsSession::new(self, endpoint.service_id)
             .run(ws_stream)
             .await;
         self.set_connection_id(None);
         if let Some(ref handler) = self.on_disconnected {
             handler();
         }
-        Ok(())
+        session_result
     }
 
     fn set_connection_id(&self, connection_id: Option<String>) {
@@ -996,117 +1005,157 @@ impl<'a> WsSession<'a> {
         }
     }
 
-    async fn run<S>(&mut self, ws_stream: tokio_tungstenite::WebSocketStream<S>)
+    async fn run<S>(
+        &mut self,
+        ws_stream: tokio_tungstenite::WebSocketStream<S>,
+    ) -> Result<(), LarkError>
     where
         S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin + Send + 'static,
     {
         let (write, mut read) = ws_stream.split();
         let write = Arc::new(Mutex::new(write));
 
-        let ping_write = Arc::clone(&write);
-        let ping_interval = Arc::clone(&self.client.ping_interval);
-        let ping_service_id = self.service_id;
-        let ping_channel_tag = self.client.channel_tag.clone();
-        let ping_log_level = self.client.log_level;
-        let ping_run_control = Arc::clone(&self.client.run_control);
-        let ping_write_timeout = self.client.write_timeout;
-        let ping_handle = tokio::spawn(async move {
-            loop {
-                let secs = ping_interval.load(Ordering::Relaxed);
-                tokio::select! {
-                    _ = ping_run_control.cancelled() => break,
-                    _ = sleep(Duration::from_secs(secs)) => {}
-                }
-                let frame = new_ping_frame(ping_service_id, ping_channel_tag.as_deref());
-                let encoded = frame.encode_to_vec();
-                let send = send_message_with_timeout(
-                    &ping_write,
-                    Message::Binary(encoded.into()),
-                    ping_write_timeout,
-                );
-                tokio::pin!(send);
-                let sent = tokio::select! {
-                    _ = ping_run_control.cancelled() => break,
-                    result = &mut send => result,
-                };
-                if let Err(error) = sent {
-                    if ws_log_enabled(ping_log_level, tracing::Level::WARN) {
-                        tracing::warn!("ws ping write failed: {error}");
-                    }
-                    break;
-                }
-                if ws_log_enabled(ping_log_level, tracing::Level::DEBUG) {
-                    tracing::debug!("ws ping sent");
-                }
-            }
-        });
+        let mut ping_handle = tokio::spawn(run_ping_loop(
+            Arc::clone(&write),
+            Arc::clone(&self.client.ping_interval),
+            self.service_id,
+            self.client.channel_tag.clone(),
+            self.client.log_level,
+            Arc::clone(&self.client.run_control),
+            self.client.write_timeout,
+        ));
+        let mut event_tasks = FuturesUnordered::new();
+        let mut ping_joined = false;
 
-        loop {
+        let result = loop {
             let next_message = read.next();
             tokio::pin!(next_message);
-            let Some(message) = (tokio::select! {
-                _ = self.client.run_control.cancelled() => break,
-                message = &mut next_message => message,
-            }) else {
-                break;
-            };
-            let message = match message {
-                Ok(message) => message,
-                Err(error) => {
-                    if self.client.log_enabled(tracing::Level::WARN) {
-                        tracing::warn!("ws recv error: {error}");
+            let read_deadline = pong_wait(self.client.ping_interval.load(Ordering::Relaxed));
+            tokio::select! {
+                _ = self.client.run_control.cancelled() => break Ok(()),
+                ping_result = &mut ping_handle => {
+                    ping_joined = true;
+                    if self.client.run_control.is_shutdown() {
+                        break Ok(());
                     }
-                    break;
+                    break match ping_result {
+                        Ok(Ok(())) => Err(LarkError::Event("ws ping loop stopped unexpectedly".to_string())),
+                        Ok(Err(error)) => Err(error),
+                        Err(error) => Err(LarkError::Event(format!("ws ping task failed: {error}"))),
+                    };
                 }
-            };
-            match message {
-                Message::Binary(data) => {
-                    if let Err(error) = self.frames.handle_binary_message(&data, &write).await
-                        && self.client.log_enabled(tracing::Level::WARN)
-                    {
-                        tracing::warn!("ws frame handling error: {error}");
+                event_result = event_tasks.next(), if !event_tasks.is_empty() => {
+                    if let Some(Err(error)) = event_result {
+                        break Err(error);
                     }
                 }
-                Message::Close(_) => {
-                    if self.client.log_enabled(tracing::Level::INFO) {
-                        tracing::info!("ws server closed connection");
+                next = timeout(read_deadline, &mut next_message) => match next {
+                    Err(_) => break Err(LarkError::Event(format!(
+                        "ws receive idle timeout after {read_deadline:?}"
+                    ))),
+                    Ok(None) => break Ok(()),
+                    Ok(Some(Err(error))) => break Err(LarkError::Event(format!("ws recv failed: {error}"))),
+                    Ok(Some(Ok(message))) => match message {
+                        Message::Binary(data) => {
+                            let frame = match proto::Frame::decode(data.as_ref()) {
+                                Ok(frame) => frame,
+                                Err(error) => {
+                                    if self.client.log_enabled(tracing::Level::WARN) {
+                                        tracing::warn!("ws frame handling error: proto frame decode error: {error}");
+                                    }
+                                    continue;
+                                }
+                            };
+                            match frame.method {
+                                METHOD_CONTROL => {
+                                    if let Err(error) = self.frames.handle_control_frame(frame, &write).await {
+                                        break Err(error);
+                                    }
+                                }
+                                METHOD_DATA => {
+                                    if let Some(payload) = self.frames.event_payload(&frame) {
+                                        event_tasks.push(Box::pin(
+                                            WsFrameHandler::handle_event_payload(
+                                                self.client,
+                                                frame,
+                                                payload,
+                                                Arc::clone(&write),
+                                            ),
+                                        ));
+                                    }
+                                }
+                                _ => {
+                                    if self.client.log_enabled(tracing::Level::DEBUG) {
+                                        tracing::debug!("ws unknown method: {}", frame.method);
+                                    }
+                                }
+                            }
+                        }
+                        Message::Close(_) => {
+                            if self.client.log_enabled(tracing::Level::INFO) {
+                                tracing::info!("ws server closed connection");
+                            }
+                            break Ok(());
+                        }
+                        _ => {}
                     }
-                    break;
-                }
-                _ => {}
+                },
             }
-        }
+        };
 
-        ping_handle.abort();
-        let _ = ping_handle.await;
+        if !ping_joined {
+            if !ping_handle.is_finished() {
+                ping_handle.abort();
+            }
+            let _ = ping_handle.await;
+        }
+        result
+    }
+}
+
+async fn run_ping_loop<S>(
+    write: Arc<Mutex<S>>,
+    ping_interval: Arc<AtomicU64>,
+    service_id: i32,
+    channel_tag: Option<String>,
+    log_level: Option<tracing::Level>,
+    run_control: Arc<WsRunControl>,
+    write_timeout: Duration,
+) -> Result<(), LarkError>
+where
+    S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error>
+        + Unpin
+        + Send
+        + 'static,
+{
+    loop {
+        let secs = ping_interval.load(Ordering::Relaxed);
+        tokio::select! {
+            _ = run_control.cancelled() => return Ok(()),
+            _ = sleep(Duration::from_secs(secs)) => {}
+        }
+        let frame = new_ping_frame(service_id, channel_tag.as_deref());
+        let encoded = frame.encode_to_vec();
+        let send =
+            send_message_with_timeout(&write, Message::Binary(encoded.into()), write_timeout);
+        tokio::pin!(send);
+        let sent = tokio::select! {
+            _ = run_control.cancelled() => return Ok(()),
+            result = &mut send => result,
+        };
+        if let Err(error) = sent {
+            if ws_log_enabled(log_level, tracing::Level::WARN) {
+                tracing::warn!("ws ping write failed: {error}");
+            }
+            return Err(error);
+        }
+        if ws_log_enabled(log_level, tracing::Level::DEBUG) {
+            tracing::debug!("ws ping sent");
+        }
     }
 }
 
 impl<'a> WsFrameHandler<'a> {
-    async fn handle_binary_message<S>(
-        &mut self,
-        data: &[u8],
-        write: &Arc<Mutex<S>>,
-    ) -> Result<(), LarkError>
-    where
-        S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error> + Unpin,
-    {
-        let frame = proto::Frame::decode(data)
-            .map_err(|e| LarkError::Event(format!("proto frame decode error: {e}")))?;
-
-        match frame.method {
-            METHOD_CONTROL => self.handle_control_frame(frame, write).await?,
-            METHOD_DATA => self.handle_data_frame(frame, write).await?,
-            _ => {
-                if self.client.log_enabled(tracing::Level::DEBUG) {
-                    tracing::debug!("ws unknown method: {}", frame.method);
-                }
-            }
-        }
-
-        Ok(())
-    }
-
     async fn handle_control_frame<S>(
         &self,
         frame: proto::Frame,
@@ -1161,6 +1210,7 @@ impl<'a> WsFrameHandler<'a> {
         Ok(())
     }
 
+    #[cfg(test)]
     async fn handle_data_frame<S>(
         &mut self,
         frame: proto::Frame,
@@ -1173,8 +1223,20 @@ impl<'a> WsFrameHandler<'a> {
             return Ok(());
         };
 
+        Self::handle_event_payload(self.client, frame, payload, Arc::clone(write)).await
+    }
+
+    async fn handle_event_payload<S>(
+        client: &WsClient,
+        frame: proto::Frame,
+        payload: Vec<u8>,
+        write: Arc<Mutex<S>>,
+    ) -> Result<(), LarkError>
+    where
+        S: futures_util::Sink<Message, Error = tokio_tungstenite::tungstenite::Error> + Unpin,
+    {
         let start = Instant::now();
-        let outcome = self.dispatch_event(payload).await;
+        let outcome = Self::dispatch_event(client, payload).await;
         let biz_rt = start.elapsed().as_millis().to_string();
         let response = outcome.response();
 
@@ -1205,8 +1267,8 @@ impl<'a> WsFrameHandler<'a> {
             log_id_new: frame.log_id_new.clone(),
         };
         let encoded = ack.encode_to_vec();
-        self.client
-            .send_message(write, Message::Binary(encoded.into()))
+        client
+            .send_message(&write, Message::Binary(encoded.into()))
             .await?;
 
         Ok(())
@@ -1240,7 +1302,7 @@ impl<'a> WsFrameHandler<'a> {
         }
     }
 
-    async fn dispatch_event(&self, payload: Vec<u8>) -> crate::event::DispatchOutcome {
+    async fn dispatch_event(client: &WsClient, payload: Vec<u8>) -> crate::event::DispatchOutcome {
         use crate::event::EventReq;
 
         let req = EventReq {
@@ -1248,10 +1310,10 @@ impl<'a> WsFrameHandler<'a> {
             body: payload,
             request_uri: String::new(),
         };
-        let outcome = self.client.dispatcher.dispatch_for_ws(req).await;
+        let outcome = client.dispatcher.dispatch_for_ws(req).await;
         let response = outcome.response();
 
-        if response.status_code != 200 && self.client.log_enabled(tracing::Level::WARN) {
+        if response.status_code != 200 && client.log_enabled(tracing::Level::WARN) {
             tracing::warn!(
                 "event dispatch returned {}: {}",
                 response.status_code,
@@ -1456,6 +1518,32 @@ mod tests {
         assert!(error.to_string().contains("ws write timed out"));
     }
 
+    #[test]
+    fn pong_wait_matches_the_upstream_liveness_window() {
+        assert_eq!(pong_wait(15), Duration::from_secs(35));
+    }
+
+    #[tokio::test]
+    async fn ping_loop_returns_a_stalled_write_error() {
+        let error = tokio::time::timeout(
+            Duration::from_secs(1),
+            run_ping_loop(
+                Arc::new(Mutex::new(PendingSink)),
+                Arc::new(AtomicU64::new(0)),
+                42,
+                None,
+                None,
+                Arc::new(WsRunControl::new()),
+                Duration::from_millis(5),
+            ),
+        )
+        .await
+        .expect("ping loop should not hang")
+        .expect_err("stalled write must fail the ping loop");
+
+        assert!(error.to_string().contains("ws write timed out"));
+    }
+
     #[tokio::test]
     async fn websocket_connector_builder_replaces_the_default_dialer() {
         let client = WsClient::new(
@@ -1586,6 +1674,191 @@ mod tests {
                 .unwrap()
                 .is_ok()
         );
+    }
+
+    #[tokio::test]
+    async fn silent_peer_enters_the_reconnect_lifecycle() {
+        let ws_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let ws_addr = ws_listener.local_addr().unwrap();
+        let (connected_tx, connected_rx) = tokio::sync::oneshot::channel();
+        let ws_handle = tokio::spawn(async move {
+            let (stream, _) = ws_listener.accept().await.unwrap();
+            let mut stream = tokio_tungstenite::accept_async(stream).await.unwrap();
+            connected_tx.send(()).unwrap();
+            // Read client pings but deliberately send no frames back. This
+            // models a peer that remains TCP-connected while its inbound path
+            // has gone silent.
+            while stream.next().await.is_some() {}
+        });
+
+        let bootstrap_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let bootstrap_addr = bootstrap_listener.local_addr().unwrap();
+        let bootstrap_handle = tokio::spawn(async move {
+            let (mut stream, _) = bootstrap_listener.accept().await.unwrap();
+            let mut first_byte = [0; 1];
+            stream.read_exact(&mut first_byte).await.unwrap();
+            let body = format!(r#"{{"code":0,"data":{{"URL":"ws://{ws_addr}/?service_id=42"}}}}"#);
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+            stream.shutdown().await.unwrap();
+        });
+
+        let reconnecting = Arc::new(Notify::new());
+        let observed_reconnect = Arc::clone(&reconnecting);
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{bootstrap_addr}"))
+        .on_reconnecting(move || observed_reconnect.notify_one());
+        client.ping_interval.store(1, Ordering::Relaxed);
+        let control = client.control();
+        let start = tokio::spawn(client.start());
+
+        connected_rx.await.unwrap();
+        tokio::time::timeout(Duration::from_secs(9), reconnecting.notified())
+            .await
+            .expect("silent peer should trigger a reconnect attempt");
+        control.close_and_wait().await;
+
+        assert!(start.await.unwrap().is_ok());
+        ws_handle.await.unwrap();
+        bootstrap_handle.await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn silent_peer_reconnects_while_event_handler_is_pending() {
+        let ws_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let ws_addr = ws_listener.local_addr().unwrap();
+        let (connected_tx, connected_rx) = tokio::sync::oneshot::channel();
+        let ws_handle = tokio::spawn(async move {
+            let (stream, _) = ws_listener.accept().await.unwrap();
+            let mut stream = tokio_tungstenite::accept_async(stream).await.unwrap();
+            stream
+                .send(Message::Binary(
+                    card_action_event_frame().encode_to_vec().into(),
+                ))
+                .await
+                .unwrap();
+            connected_tx.send(()).unwrap();
+            while stream.next().await.is_some() {}
+        });
+
+        let bootstrap_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let bootstrap_addr = bootstrap_listener.local_addr().unwrap();
+        let bootstrap_handle = tokio::spawn(async move {
+            let (mut stream, _) = bootstrap_listener.accept().await.unwrap();
+            let mut first_byte = [0; 1];
+            stream.read_exact(&mut first_byte).await.unwrap();
+            let body = format!(r#"{{"code":0,"data":{{"URL":"ws://{ws_addr}/?service_id=42"}}}}"#);
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+            stream.shutdown().await.unwrap();
+        });
+
+        let handler_started = Arc::new(Notify::new());
+        let observed_handler = Arc::clone(&handler_started);
+        let reconnecting = Arc::new(Notify::new());
+        let observed_reconnect = Arc::clone(&reconnecting);
+        let dispatcher = EventDispatcher::new("", "").on_event("card.action.trigger", move |_| {
+            let observed_handler = Arc::clone(&observed_handler);
+            async move {
+                observed_handler.notify_one();
+                std::future::pending::<Result<(), LarkError>>().await
+            }
+        });
+        let client = WsClient::new(Config::new("app_id", "app_secret"), dispatcher)
+            .domain(format!("http://{bootstrap_addr}"))
+            .on_reconnecting(move || observed_reconnect.notify_one());
+        client.ping_interval.store(1, Ordering::Relaxed);
+        let control = client.control();
+        let start = tokio::spawn(client.start());
+
+        connected_rx.await.unwrap();
+        tokio::time::timeout(Duration::from_secs(1), handler_started.notified())
+            .await
+            .expect("event handler should start");
+        tokio::time::timeout(Duration::from_secs(9), reconnecting.notified())
+            .await
+            .expect("silent peer should reconnect despite a pending event handler");
+        control.close_and_wait().await;
+
+        assert!(start.await.unwrap().is_ok());
+        ws_handle.await.unwrap();
+        bootstrap_handle.await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn stalled_ping_write_enters_the_reconnect_lifecycle() {
+        let ws_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let ws_addr = ws_listener.local_addr().unwrap();
+        let (connected_tx, connected_rx) = tokio::sync::oneshot::channel();
+        let ws_handle = tokio::spawn(async move {
+            let (stream, _) = ws_listener.accept().await.unwrap();
+            let _stream = tokio_tungstenite::accept_async(stream).await.unwrap();
+            connected_tx.send(()).unwrap();
+            // Keep the receive window closed so zero-interval pings eventually
+            // block in the client's bounded writer.
+            tokio::time::sleep(Duration::from_secs(30)).await;
+        });
+
+        let bootstrap_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let bootstrap_addr = bootstrap_listener.local_addr().unwrap();
+        let bootstrap_handle = tokio::spawn(async move {
+            let (mut stream, _) = bootstrap_listener.accept().await.unwrap();
+            let mut first_byte = [0; 1];
+            stream.read_exact(&mut first_byte).await.unwrap();
+            let body = format!(r#"{{"code":0,"data":{{"URL":"ws://{ws_addr}/?service_id=42"}}}}"#);
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+            stream.shutdown().await.unwrap();
+        });
+
+        let last_error = Arc::new(StdMutex::new(None));
+        let observed_error = Arc::clone(&last_error);
+        let reconnecting = Arc::new(Notify::new());
+        let observed_reconnect = Arc::clone(&reconnecting);
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{bootstrap_addr}"))
+        // A large but valid trusted-channel tag fills the peer's closed receive
+        // window quickly, making the scheduled ping write deterministically stall.
+        .channel_tag("x".repeat(128 * 1024))
+        .write_timeout(Duration::from_millis(20))
+        .on_error(move |error| *observed_error.lock().unwrap() = Some(error.to_string()))
+        .on_reconnecting(move || observed_reconnect.notify_one());
+        client.ping_interval.store(0, Ordering::Relaxed);
+        let control = client.control();
+        let start = tokio::spawn(client.start());
+
+        connected_rx.await.unwrap();
+        tokio::time::timeout(Duration::from_secs(12), reconnecting.notified())
+            .await
+            .expect("stalled ping write should trigger a reconnect attempt");
+        assert!(
+            last_error
+                .lock()
+                .unwrap()
+                .as_deref()
+                .is_some_and(|error| error.contains("ws write timed out"))
+        );
+        control.close_and_wait().await;
+
+        assert!(start.await.unwrap().is_ok());
+        ws_handle.abort();
+        let _ = ws_handle.await;
+        bootstrap_handle.await.unwrap();
     }
 
     #[tokio::test]

@@ -43,8 +43,12 @@ task.await??;
 `WsClientControl::close` requests shutdown without waiting, which is safe from
 lifecycle callbacks. `close_and_wait` is for external teardown and waits until
 the running client has stopped. The client honors a finite reconnect count from
-the gateway bootstrap configuration, bounds each connection write to ten
-seconds by default, and accepts `write_timeout` for a different bound. Use
+the gateway bootstrap configuration, treats an inbound-silent connection as
+failed after two ping intervals plus five seconds, and reconnects after either
+that liveness timeout or a timed-out connection write. It bounds each
+connection write to ten seconds by default and accepts `write_timeout` for a
+different bound. Event callbacks run independently of the receive loop, so a
+slow callback does not mask a silent gateway. Use
 `websocket_connector` when a custom proxy, TLS, or test dial transport is
 needed; it affects only the WebSocket gateway dial, not the bootstrap HTTP
 client.
