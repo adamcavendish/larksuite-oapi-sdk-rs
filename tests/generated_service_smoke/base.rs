@@ -1,4 +1,7 @@
 use super::prelude::*;
+use larksuite_oapi_sdk_rs::service::base::v3::{
+    DashboardUserIdTypeQuery, ListDashboardBlocksQuery, ListDashboardsQuery,
+};
 
 // ── Base ──
 
@@ -229,6 +232,176 @@ async fn base_v3_share_contract_smoke() {
     }
     assert!(!request.contains("enable_auto_analysis"));
     assert!(!request.contains("allow_anonymous"));
+}
+
+#[tokio::test]
+async fn base_v3_dashboard_contract_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _handle, requests) =
+        mock_server_with_requests(vec![http_response(200, body); 12]).await;
+    let client = client_for(addr);
+    let user_option = RequestOption {
+        user_access_token: Some("user-token".to_string()),
+        ..RequestOption::default()
+    };
+    let tenant_option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..RequestOption::default()
+    };
+    let user_id_type = DashboardUserIdTypeQuery::new().user_id_type("open_id");
+
+    client
+        .base_v3()
+        .dashboard
+        .list(
+            &ListDashboardsQuery::new("base token")
+                .page(PageQuery::new().page_size(20).page_token("next-dashboard")),
+            &user_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard
+        .get("base token", "dashboard id", &tenant_option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard
+        .create(
+            "base token",
+            json_value!({"name":"Sales","theme":{"theme_style":"light"}}),
+            &user_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard
+        .update(
+            "base token",
+            "dashboard id",
+            json_value!({"name":"Sales 2026"}),
+            &tenant_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard
+        .delete("base token", "dashboard id", &user_option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard_block
+        .list(
+            &ListDashboardBlocksQuery::new("base token", "dashboard id")
+                .page(PageQuery::new().page_size(10).page_token("next-block")),
+            &tenant_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard_block
+        .get(
+            "base token",
+            "dashboard id",
+            "block id",
+            &user_id_type,
+            &user_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard_block
+        .create(
+            "base token",
+            "dashboard id",
+            json_value!({
+                "name":"Revenue",
+                "type":"statistics",
+                "data_config":{"table_name":"Orders","count_all":true}
+            }),
+            &user_id_type,
+            &tenant_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard_block
+        .update(
+            "base token",
+            "dashboard id",
+            "block id",
+            json_value!({"data_config":{"limit_size":20}}),
+            &user_id_type,
+            &user_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard_block
+        .delete("base token", "dashboard id", "block id", &tenant_option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard_block
+        .get_data("base token", "block id", &user_option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .dashboard
+        .arrange("base token", "dashboard id", &user_id_type, &tenant_option)
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    for method_path in [
+        "GET /open-apis/base/v3/bases/base%20token/dashboards?",
+        "GET /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id ",
+        "POST /open-apis/base/v3/bases/base%20token/dashboards ",
+        "PATCH /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id ",
+        "DELETE /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id ",
+        "GET /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id/blocks?",
+        "GET /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id/blocks/block%20id?",
+        "POST /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id/blocks?",
+        "PATCH /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id/blocks/block%20id?",
+        "DELETE /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id/blocks/block%20id ",
+        "GET /open-apis/base/v3/bases/base%20token/dashboards/blocks/block%20id/data ",
+        "POST /open-apis/base/v3/bases/base%20token/dashboards/dashboard%20id/arrange?",
+    ] {
+        assert!(
+            request.contains(method_path),
+            "missing request path {method_path}:\n{request}"
+        );
+    }
+    for value in [
+        "page_size=20",
+        "page_token=next-dashboard",
+        "page_size=10",
+        "page_token=next-block",
+        "user_id_type=open_id",
+        "authorization: Bearer user-token",
+        "authorization: Bearer tenant-token",
+        "x-app-id: test_app_id",
+        r#""name":"Sales""#,
+        r#""name":"Sales 2026""#,
+        r#""type":"statistics""#,
+        r#""limit_size":20"#,
+    ] {
+        assert!(
+            request.contains(value),
+            "missing request value {value}:\n{request}"
+        );
+    }
 }
 
 #[tokio::test]

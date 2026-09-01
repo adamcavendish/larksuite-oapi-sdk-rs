@@ -590,6 +590,70 @@ pub struct GetBaseAppBlockDataQuery<'a> {
     pub base_token: &'a str,
 }
 
+/// Query parameters for listing dashboards in a Base.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListDashboardsQuery<'a> {
+    pub base_token: &'a str,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListDashboardsQuery<'a> {
+    pub fn new(base_token: &'a str) -> Self {
+        Self {
+            base_token,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
+/// Query parameters for listing blocks in a Base dashboard.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListDashboardBlocksQuery<'a> {
+    pub base_token: &'a str,
+    pub dashboard_id: &'a str,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListDashboardBlocksQuery<'a> {
+    pub fn new(base_token: &'a str, dashboard_id: &'a str) -> Self {
+        Self {
+            base_token,
+            dashboard_id,
+            page: PageQuery::default(),
+        }
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
+/// Optional user-ID representation for dashboard block and arrange requests.
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct DashboardUserIdTypeQuery<'a> {
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> DashboardUserIdTypeQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 impl<'a> GetBaseAppBlockDataQuery<'a> {
     pub fn new(app_token: &'a str, block_id: &'a str, base_token: &'a str) -> Self {
         Self {
@@ -604,6 +668,8 @@ pub struct V3<'a> {
     pub record: RecordResource<'a>,
     pub field_extension: FieldExtensionResource<'a>,
     pub template: TemplateResource<'a>,
+    pub dashboard: DashboardResource<'a>,
+    pub dashboard_block: DashboardBlockResource<'a>,
     pub dashboard_share: DashboardShareResource<'a>,
     pub form_share: FormShareResource<'a>,
     pub workspace: WorkspaceResource<'a>,
@@ -618,6 +684,8 @@ impl<'a> V3<'a> {
             record: RecordResource { config },
             field_extension: FieldExtensionResource { config },
             template: TemplateResource { config },
+            dashboard: DashboardResource { config },
+            dashboard_block: DashboardBlockResource { config },
             dashboard_share: DashboardShareResource { config },
             form_share: FormShareResource { config },
             workspace: WorkspaceResource { config },
@@ -692,6 +760,292 @@ impl TemplateResource<'_> {
         .query("limit", query.limit)
         .query("offset", query.normalized_offset())
         .send_response::<ListBaseTemplateRespData, ListBaseTemplateResp>()
+        .await
+    }
+}
+
+/// Dashboard management operations for Base v3.
+pub struct DashboardResource<'a> {
+    config: &'a Config,
+}
+
+impl DashboardResource<'_> {
+    /// Lists dashboards in a Base.
+    pub async fn list(
+        &self,
+        query: &ListDashboardsQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/dashboards",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", query.base_token)
+        .page_query(query.page)
+        .send_json()
+        .await
+    }
+
+    /// Gets one dashboard.
+    pub async fn get(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .send_json()
+        .await
+    }
+
+    /// Creates a dashboard from the documented JSON request body.
+    pub async fn create(
+        &self,
+        base_token: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/bases/:base_token/dashboards",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Partially updates a dashboard from the documented JSON request body.
+    pub async fn update(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Deletes one dashboard.
+    pub async fn delete(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .send_json()
+        .await
+    }
+
+    /// Asks the service to arrange the blocks in a dashboard.
+    pub async fn arrange(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        query: &DashboardUserIdTypeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id/arrange",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(&serde_json::json!({}))?
+        .send_json()
+        .await
+    }
+}
+
+/// Block operations for Base dashboards.
+pub struct DashboardBlockResource<'a> {
+    config: &'a Config,
+}
+
+impl DashboardBlockResource<'_> {
+    /// Lists blocks in a dashboard.
+    pub async fn list(
+        &self,
+        query: &ListDashboardBlocksQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id/blocks",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", query.base_token)
+        .path_param("dashboard_id", query.dashboard_id)
+        .page_query(query.page)
+        .send_json()
+        .await
+    }
+
+    /// Gets one dashboard block.
+    pub async fn get(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        block_id: &str,
+        query: &DashboardUserIdTypeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id/blocks/:block_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .path_param("block_id", block_id)
+        .query("user_id_type", query.user_id_type)
+        .send_json()
+        .await
+    }
+
+    /// Creates a dashboard block from the documented JSON request body.
+    pub async fn create(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        body: impl Serialize,
+        query: &DashboardUserIdTypeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id/blocks",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Partially updates a dashboard block from the documented JSON request body.
+    pub async fn update(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        block_id: &str,
+        body: impl Serialize,
+        query: &DashboardUserIdTypeQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id/blocks/:block_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .path_param("block_id", block_id)
+        .query("user_id_type", query.user_id_type)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Deletes one dashboard block.
+    pub async fn delete(
+        &self,
+        base_token: &str,
+        dashboard_id: &str,
+        block_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            "/open-apis/base/v3/bases/:base_token/dashboards/:dashboard_id/blocks/:block_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("dashboard_id", dashboard_id)
+        .path_param("block_id", block_id)
+        .send_json()
+        .await
+    }
+
+    /// Reads computed data for a dashboard chart block.
+    pub async fn get_data(
+        &self,
+        base_token: &str,
+        block_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/dashboards/blocks/:block_id/data",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("block_id", block_id)
+        .send_json()
         .await
     }
 }

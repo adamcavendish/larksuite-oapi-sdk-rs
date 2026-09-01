@@ -3,6 +3,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 use crate::cache::Cache;
 use crate::config::Config;
@@ -75,7 +76,7 @@ impl TokenManager {
             ));
         }
 
-        let cache_key = format!("{APP_ACCESS_TOKEN_KEY_PREFIX}-{}", config.app_id);
+        let cache_key = app_access_token_cache_key(&config.app_id, &config.app_secret);
         if let Some(token) = self.cache.get(&cache_key).await? {
             return Ok(token);
         }
@@ -103,10 +104,10 @@ impl TokenManager {
                 .await;
         }
 
-        let tk = tenant_key.unwrap_or_default();
-        let cache_key = format!(
-            "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:app_secret:{}-{tk}",
-            config.app_id
+        let cache_key = tenant_access_token_cache_key(
+            &config.app_id,
+            &config.app_secret,
+            tenant_key.unwrap_or_default(),
         );
         if let Some(token) = self.cache.get(&cache_key).await? {
             return Ok(token);
@@ -141,7 +142,7 @@ impl TokenManager {
             )));
         }
 
-        let cache_key = format!("{APP_ACCESS_TOKEN_KEY_PREFIX}-{}", config.app_id);
+        let cache_key = app_access_token_cache_key(&config.app_id, &config.app_secret);
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
         if let Err(e) = self
             .cache
@@ -179,10 +180,10 @@ impl TokenManager {
             )));
         }
 
-        let tk = tenant_key.unwrap_or_default();
-        let cache_key = format!(
-            "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:app_secret:{}-{tk}",
-            config.app_id
+        let cache_key = tenant_access_token_cache_key(
+            &config.app_id,
+            &config.app_secret,
+            tenant_key.unwrap_or_default(),
         );
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
         if let Err(e) = self
@@ -218,7 +219,7 @@ impl TokenManager {
             )));
         }
 
-        let cache_key = format!("{APP_ACCESS_TOKEN_KEY_PREFIX}-{}", config.app_id);
+        let cache_key = app_access_token_cache_key(&config.app_id, &config.app_secret);
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
         if let Err(e) = self
             .cache
@@ -255,10 +256,10 @@ impl TokenManager {
             )));
         }
 
-        let tk = tenant_key.unwrap_or_default();
-        let cache_key = format!(
-            "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:app_secret:{}-{tk}",
-            config.app_id
+        let cache_key = tenant_access_token_cache_key(
+            &config.app_id,
+            &config.app_secret,
+            tenant_key.unwrap_or_default(),
         );
         let ttl = Duration::from_secs(resp.expire.saturating_sub(EXPIRY_DELTA_SECONDS));
         if let Err(e) = self
@@ -395,6 +396,24 @@ impl TokenManager {
 
         Ok(resp.access_token)
     }
+}
+
+fn app_access_token_cache_key(app_id: &str, app_secret: &str) -> String {
+    format!(
+        "{APP_ACCESS_TOKEN_KEY_PREFIX}:app_secret:{app_id}:{}",
+        app_secret_fingerprint(app_secret)
+    )
+}
+
+fn tenant_access_token_cache_key(app_id: &str, app_secret: &str, tenant_key: &str) -> String {
+    format!(
+        "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:app_secret:{app_id}:{}:{tenant_key}",
+        app_secret_fingerprint(app_secret)
+    )
+}
+
+fn app_secret_fingerprint(app_secret: &str) -> String {
+    hex::encode(Sha256::digest(app_secret.as_bytes()))
 }
 
 pub struct AppTicketManager {
@@ -652,4 +671,23 @@ pub(crate) async fn token_endpoint<Req: Serialize, Resp: for<'de> Deserialize<'d
 
     let resp: Resp = serde_json::from_slice(&api_resp.raw_body)?;
     Ok((api_resp, resp))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{app_access_token_cache_key, tenant_access_token_cache_key};
+
+    #[test]
+    fn app_secret_fingerprint_scopes_token_cache_keys_without_leaking_secret() {
+        let app_key = app_access_token_cache_key("cli_a", "secret-a");
+        let tenant_key = tenant_access_token_cache_key("cli_a", "secret-a", "tenant-key");
+
+        assert_ne!(app_key, app_access_token_cache_key("cli_a", "secret-b"));
+        assert_ne!(
+            tenant_key,
+            tenant_access_token_cache_key("cli_a", "secret-b", "tenant-key")
+        );
+        assert!(!app_key.contains("secret-a"));
+        assert!(!tenant_key.contains("secret-a"));
+    }
 }

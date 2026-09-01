@@ -89,6 +89,7 @@ for the complete setup.
 | Call a typed REST endpoint | [`examples/send_message.rs`](examples/send_message.rs) or [generated examples](examples/README.md) |
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
 | Discover or manage BaseApps | [`examples/base_v3_app_read.rs`](examples/base_v3_app_read.rs) and [Base v3 application mode](docs/base-v3-apps.md) |
+| Manage Base dashboards or dashboard blocks | [Base v3 dashboards](docs/base-v3-dashboards.md) |
 | Read or update Base dashboard or form sharing | [Base v3 sharing](docs/base-v3-sharing.md) |
 | Configure a Base field extension or share records | [Base v3 field extensions and record share links](docs/base-v3-field-extensions.md) |
 | Read or update modern Docx content | [`examples/docs_ai_fetch.rs`](examples/docs_ai_fetch.rs) and [Docs AI document content](docs/docs-ai.md) |
@@ -121,6 +122,8 @@ for the complete setup.
   refresh, and application-owned session handling.
 - [Base v3 application mode](docs/base-v3-apps.md): user-token workspace,
   BaseApp, page, and block operations.
+- [Base v3 dashboards](docs/base-v3-dashboards.md): dashboard and dashboard
+  block lifecycle, chart data, and layout operations.
 - [Base v3 sharing](docs/base-v3-sharing.md): dashboard and form sharing
   reads and partial updates with user or tenant credentials.
 - [Base v3 field extensions and record share links](docs/base-v3-field-extensions.md):

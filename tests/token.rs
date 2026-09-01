@@ -1,8 +1,8 @@
 mod common;
-use common::{http_response, mock_server};
+use common::{http_response, mock_server, mock_server_with_requests};
 
 use larksuite_oapi_sdk_rs::LarkClient;
-use larksuite_oapi_sdk_rs::cache::LocalCache;
+use larksuite_oapi_sdk_rs::cache::{Cache, LocalCache};
 use larksuite_oapi_sdk_rs::error::LarkError;
 use larksuite_oapi_sdk_rs::token::{AppTicketManager, TokenManager};
 use std::sync::Arc;
@@ -32,7 +32,7 @@ async fn token_marketplace_requires_app_ticket() {
         .build()
         .unwrap();
 
-    let cache = Arc::new(LocalCache::new());
+    let cache: Arc<dyn Cache> = Arc::new(LocalCache::new());
     let tm = TokenManager::new(cache);
 
     let err = tm
@@ -53,7 +53,7 @@ async fn token_marketplace_tenant_requires_app_ticket() {
         .build()
         .unwrap();
 
-    let cache = Arc::new(LocalCache::new());
+    let cache: Arc<dyn Cache> = Arc::new(LocalCache::new());
     let tm = TokenManager::new(cache);
 
     let err = tm
@@ -68,55 +68,124 @@ async fn token_marketplace_tenant_requires_app_ticket() {
 
 #[tokio::test]
 async fn token_cache_hit_returns_cached_value() {
-    use larksuite_oapi_sdk_rs::cache::Cache;
-
-    let client = LarkClient::builder("app_id", "secret").build().unwrap();
-    let cache = Arc::new(LocalCache::new());
-
-    let cache_key = format!("app_access_token-{}", client.config().app_id());
-    cache
-        .set(
-            &cache_key,
-            "cached_token_abc",
-            std::time::Duration::from_secs(3600),
-        )
-        .await
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(
+        200,
+        r#"{"app_access_token":"cached_token_abc","expire":7200}"#,
+    )])
+    .await;
+    let client = LarkClient::builder("app_id", "secret")
+        .base_url(format!("http://{addr}"))
+        .build()
         .unwrap();
-
-    let tm = TokenManager::new(cache);
-    let token = tm
+    let cache: Arc<dyn Cache> = Arc::new(LocalCache::new());
+    let tm = TokenManager::new(Arc::clone(&cache));
+    let first = tm
         .get_app_access_token(client.config(), None)
         .await
         .unwrap();
-    assert_eq!(token, "cached_token_abc");
+    let second = tm
+        .get_app_access_token(client.config(), None)
+        .await
+        .unwrap();
+
+    assert_eq!(first, "cached_token_abc");
+    assert_eq!(second, "cached_token_abc");
+    assert_eq!(requests.lock().unwrap().len(), 1);
 }
 
 #[tokio::test]
 async fn token_tenant_cache_hit_returns_cached_value() {
-    use larksuite_oapi_sdk_rs::cache::Cache;
-
-    let client = LarkClient::builder("app_id", "secret").build().unwrap();
-    let cache = Arc::new(LocalCache::new());
-
-    let cache_key = format!(
-        "tenant_access_token:app_secret:{}-tenant_1",
-        client.config().app_id()
-    );
-    cache
-        .set(
-            &cache_key,
-            "cached_tenant_token",
-            std::time::Duration::from_secs(3600),
-        )
-        .await
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(
+        200,
+        r#"{"tenant_access_token":"cached_tenant_token","expire":7200}"#,
+    )])
+    .await;
+    let client = LarkClient::builder("app_id", "secret")
+        .base_url(format!("http://{addr}"))
+        .build()
         .unwrap();
-
-    let tm = TokenManager::new(cache);
-    let token = tm
+    let cache: Arc<dyn Cache> = Arc::new(LocalCache::new());
+    let tm = TokenManager::new(Arc::clone(&cache));
+    let first = tm
         .get_tenant_access_token(client.config(), Some("tenant_1"), None)
         .await
         .unwrap();
-    assert_eq!(token, "cached_tenant_token");
+    let second = tm
+        .get_tenant_access_token(client.config(), Some("tenant_1"), None)
+        .await
+        .unwrap();
+
+    assert_eq!(first, "cached_tenant_token");
+    assert_eq!(second, "cached_tenant_token");
+    assert_eq!(requests.lock().unwrap().len(), 1);
+}
+
+#[tokio::test]
+async fn token_cache_does_not_cross_app_secret_rotation() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(
+            200,
+            r#"{"app_access_token":"token-for-secret-a","expire":7200}"#,
+        ),
+        http_response(200, r#"{"code":19002,"msg":"invalid app secret"}"#),
+    ])
+    .await;
+    let current = LarkClient::builder("app_id", "secret-a")
+        .base_url(format!("http://{addr}"))
+        .build()
+        .unwrap();
+    let rotated = LarkClient::builder("app_id", "secret-b")
+        .base_url(format!("http://{addr}"))
+        .build()
+        .unwrap();
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+
+    assert_eq!(
+        tm.get_app_access_token(current.config(), None)
+            .await
+            .unwrap(),
+        "token-for-secret-a"
+    );
+    assert!(
+        tm.get_app_access_token(rotated.config(), None)
+            .await
+            .is_err()
+    );
+    assert_eq!(requests.lock().unwrap().len(), 2);
+}
+
+#[tokio::test]
+async fn tenant_token_cache_does_not_cross_app_secret_rotation() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(
+            200,
+            r#"{"tenant_access_token":"token-for-secret-a","expire":7200}"#,
+        ),
+        http_response(200, r#"{"code":19002,"msg":"invalid app secret"}"#),
+    ])
+    .await;
+    let current = LarkClient::builder("app_id", "secret-a")
+        .base_url(format!("http://{addr}"))
+        .build()
+        .unwrap();
+    let rotated = LarkClient::builder("app_id", "secret-b")
+        .base_url(format!("http://{addr}"))
+        .build()
+        .unwrap();
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+
+    assert_eq!(
+        tm.get_tenant_access_token(current.config(), Some("tenant_1"), None)
+            .await
+            .unwrap(),
+        "token-for-secret-a"
+    );
+    assert!(
+        tm.get_tenant_access_token(rotated.config(), Some("tenant_1"), None)
+            .await
+            .is_err()
+    );
+    assert_eq!(requests.lock().unwrap().len(), 2);
 }
 
 #[tokio::test]
