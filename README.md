@@ -91,6 +91,7 @@ for the complete setup.
 | Discover or manage BaseApps | [`examples/base_v3_app_read.rs`](examples/base_v3_app_read.rs) and [Base v3 application mode](docs/base-v3-apps.md) |
 | Manage Base dashboards or dashboard blocks | [Base v3 dashboards](docs/base-v3-dashboards.md) |
 | Read or update Base dashboard or form sharing | [Base v3 sharing](docs/base-v3-sharing.md) |
+| Manage Base v3 forms and questions | [Base v3 forms](docs/base-v3-forms.md) |
 | Configure a Base field extension or share records | [Base v3 field extensions and record share links](docs/base-v3-field-extensions.md) |
 | Read or update modern Docx content | [`examples/docs_ai_fetch.rs`](examples/docs_ai_fetch.rs) and [Docs AI document content](docs/docs-ai.md) |
 | Read, edit, or render Slides AI presentations | [`examples/slides_ai_read.rs`](examples/slides_ai_read.rs), [`examples/slides_ai_render.rs`](examples/slides_ai_render.rs), and [Slides AI presentation content](docs/slides-ai.md) |
@@ -126,6 +127,8 @@ for the complete setup.
   block lifecycle, chart data, and layout operations.
 - [Base v3 sharing](docs/base-v3-sharing.md): dashboard and form sharing
   reads and partial updates with user or tenant credentials.
+- [Base v3 forms](docs/base-v3-forms.md): form lifecycle and form-question
+  operations, including explicit destructive-delete semantics.
 - [Base v3 field extensions and record share links](docs/base-v3-field-extensions.md):
   typed extension configuration, cell updates, and batch record links.
 - [Docs AI document content](docs/docs-ai.md): modern Docx content fetches,

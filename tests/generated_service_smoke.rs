@@ -80,6 +80,8 @@ mod baike_entity;
 mod baike_file;
 #[path = "generated_service_smoke/base.rs"]
 mod base;
+#[path = "generated_service_smoke/base_forms.rs"]
+mod base_forms;
 #[path = "generated_service_smoke/bitable/dashboard.rs"]
 mod bitable_dashboard;
 #[path = "generated_service_smoke/bitable/field.rs"]
