@@ -25,6 +25,8 @@ examples, features, and coverage.
   BaseApp, page, and block operations with user credentials.
 - [Base v3 sharing](base-v3-sharing.md) covers dashboard and form sharing
   reads and partial updates with user or tenant credentials.
+- [Base v3 forms](base-v3-forms.md) covers form lifecycle, form questions,
+  and the destructive question-removal contract.
 - [Base v3 dashboards](base-v3-dashboards.md) covers dashboard and dashboard
   block CRUD, computed chart data, and server-side layout arrangement.
 - [Base v3 field extensions and record share links](base-v3-field-extensions.md)

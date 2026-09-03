@@ -621,6 +621,54 @@ pub struct ListDashboardBlocksQuery<'a> {
     pub page: PageQuery<'a>,
 }
 
+/// Query parameters for listing forms in a Base table.
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListFormsQuery<'a> {
+    pub base_token: &'a str,
+    pub table_id: &'a str,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListFormsQuery<'a> {
+    pub fn new(base_token: &'a str, table_id: &'a str) -> Self {
+        Self {
+            base_token,
+            table_id,
+            page: PageQuery::new(),
+        }
+    }
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
+/// Request body for removing questions from a Base v3 form.
+///
+/// Omitting `keep_field` is intentionally different from setting it to false:
+/// the service's default deletes the backing fields and their record data.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct DeleteFormQuestionsReqBody {
+    pub question_ids: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub keep_field: Option<bool>,
+}
+
+impl DeleteFormQuestionsReqBody {
+    pub fn new(question_ids: impl IntoIterator<Item = impl Into<String>>) -> Self {
+        Self {
+            question_ids: question_ids.into_iter().map(Into::into).collect(),
+            keep_field: None,
+        }
+    }
+    pub fn keep_field(mut self, value: bool) -> Self {
+        self.keep_field = Some(value);
+        self
+    }
+}
+
 impl<'a> ListDashboardBlocksQuery<'a> {
     pub fn new(base_token: &'a str, dashboard_id: &'a str) -> Self {
         Self {
@@ -672,6 +720,8 @@ pub struct V3<'a> {
     pub dashboard_block: DashboardBlockResource<'a>,
     pub dashboard_share: DashboardShareResource<'a>,
     pub form_share: FormShareResource<'a>,
+    pub form: FormResource<'a>,
+    pub form_question: FormQuestionResource<'a>,
     pub workspace: WorkspaceResource<'a>,
     pub app: BaseAppResource<'a>,
     pub page: BaseAppPageResource<'a>,
@@ -688,6 +738,8 @@ impl<'a> V3<'a> {
             dashboard_block: DashboardBlockResource { config },
             dashboard_share: DashboardShareResource { config },
             form_share: FormShareResource { config },
+            form: FormResource { config },
+            form_question: FormQuestionResource { config },
             workspace: WorkspaceResource { config },
             app: BaseAppResource { config },
             page: BaseAppPageResource { config },
@@ -1144,6 +1196,217 @@ impl FormShareResource<'_> {
             self.config,
             http::Method::PATCH,
             "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id/share",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("form_id", form_id)
+        .json_body(body)?
+        .send_json()
+        .await
+    }
+}
+
+/// Form lifecycle operations for Base v3.
+pub struct FormResource<'a> {
+    config: &'a Config,
+}
+
+impl FormResource<'_> {
+    pub async fn list(
+        &self,
+        query: &ListFormsQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", query.base_token)
+        .path_param("table_id", query.table_id)
+        .page_query(query.page)
+        .send_json()
+        .await
+    }
+    pub async fn get(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        form_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("form_id", form_id)
+        .send_json()
+        .await
+    }
+    pub async fn create(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+    pub async fn update(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        form_id: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("form_id", form_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+    pub async fn delete(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        form_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("form_id", form_id)
+        .send_json()
+        .await
+    }
+}
+
+/// Question operations for Base v3 forms.
+pub struct FormQuestionResource<'a> {
+    config: &'a Config,
+}
+
+impl FormQuestionResource<'_> {
+    pub async fn list(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        form_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id/questions",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("form_id", form_id)
+        .send_json()
+        .await
+    }
+    pub async fn create(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        form_id: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id/questions",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("form_id", form_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+    pub async fn update(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        form_id: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id/questions",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("form_id", form_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+    pub async fn delete(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        form_id: &str,
+        body: &DeleteFormQuestionsReqBody,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/forms/:form_id/questions",
             vec![AccessTokenType::User, AccessTokenType::Tenant],
             &option,
         )
