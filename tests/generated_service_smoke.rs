@@ -372,6 +372,8 @@ mod translation;
 mod trust_party;
 #[path = "generated_service_smoke/unified_kms.rs"]
 mod unified_kms;
+#[path = "generated_service_smoke/vc_bot.rs"]
+mod vc_bot;
 #[path = "generated_service_smoke/vc/meeting.rs"]
 mod vc_meeting;
 #[path = "generated_service_smoke/vc/reporting.rs"]

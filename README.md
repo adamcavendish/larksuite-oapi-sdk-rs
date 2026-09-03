@@ -88,6 +88,7 @@ for the complete setup.
 | Build a first Lark / Feishu bot | [Tutorial: build a Lark / Feishu bot](docs/tutorial-build-a-feishu-bot.md) |
 | Call a typed REST endpoint | [`examples/send_message.rs`](examples/send_message.rs) or [generated examples](examples/README.md) |
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
+| Control VC meeting bots | [VC meeting bots](docs/vc-bots.md) |
 | Manage Unified KMS autonomous keys | [Unified KMS](docs/unified-kms.md) |
 | Discover or manage BaseApps | [`examples/base_v3_app_read.rs`](examples/base_v3_app_read.rs) and [Base v3 application mode](docs/base-v3-apps.md) |
 | Manage Base dashboards or dashboard blocks | [Base v3 dashboards](docs/base-v3-dashboards.md) |
@@ -122,6 +123,8 @@ for the complete setup.
   dispatch, long connections, trusted user channels, replies, and updates.
 - [OAuth SSO](docs/oauth-sso.md): Feishu and Lark browser login, PKCE, token
   refresh, and application-owned session handling.
+- [VC meeting bots](docs/vc-bots.md): event queries and outbound meeting join,
+  leave, message, and active-meeting operations.
 - [Unified KMS](docs/unified-kms.md): tenant-scoped autonomous-key lifecycle,
   deletion plans, recovery, and import material.
 - [Base v3 application mode](docs/base-v3-apps.md): user-token workspace,

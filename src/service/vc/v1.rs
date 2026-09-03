@@ -169,6 +169,65 @@ pub struct MeetingReport {
     pub active_meeting_per_day: Option<Vec<crate::JsonValue>>,
 }
 
+/// Query parameters for reading a VC bot's in-meeting events.
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct ListBotEventQuery<'a> {
+    pub meeting_id: Option<&'a str>,
+    pub start_time: Option<&'a str>,
+    pub end_time: Option<&'a str>,
+    pub page: PageQuery<'a>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> ListBotEventQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+    pub fn meeting_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.meeting_id = value.into();
+        self
+    }
+    pub fn start_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.start_time = value.into();
+        self
+    }
+    pub fn end_time(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.end_time = value.into();
+        self
+    }
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+/// Query parameters for a user's active VC meetings.
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct UserActiveMeetingBotQuery<'a> {
+    pub user_id: Option<&'a str>,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> UserActiveMeetingBotQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+    pub fn user_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id = value.into();
+        self
+    }
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
 // ── Request body types ──
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -3894,6 +3953,103 @@ impl<'a> ParticipantQualityListResource<'a> {
 
 // ── ResourceReservationListResource ──
 
+/// Bot operations for joining meetings and reading or sending in-meeting data.
+///
+/// The platform accepts both user and tenant access tokens. Request bodies are
+/// `Serialize`-generic so new bot join and message options need not wait for a
+/// crate release.
+pub struct BotResource<'a> {
+    config: &'a Config,
+}
+
+impl BotResource<'_> {
+    pub async fn events(
+        &self,
+        query: &ListBotEventQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<crate::service::common::JsonResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/bots/events",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("meeting_id", query.meeting_id)
+        .query("start_time", query.start_time)
+        .query("end_time", query.end_time)
+        .page_query(query.page)
+        .query("user_id_type", query.user_id_type)
+        .send_json()
+        .await
+    }
+    pub async fn join(
+        &self,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<crate::service::common::JsonResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/bots/join",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+    pub async fn leave(
+        &self,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<crate::service::common::JsonResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/bots/leave",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+    pub async fn message(
+        &self,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<crate::service::common::JsonResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/bots/message",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+    pub async fn user_active_meeting(
+        &self,
+        query: &UserActiveMeetingBotQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<crate::service::common::JsonResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/vc/v1/bots/user_active_meeting",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("user_id", query.user_id)
+        .query("user_id_type", query.user_id_type)
+        .send_json()
+        .await
+    }
+}
+
 pub struct ResourceReservationListResource<'a> {
     config: &'a Config,
 }
@@ -4012,6 +4168,7 @@ impl<'a> ResourceReservationListResource<'a> {
 // ── Version struct ──
 
 pub struct V1<'a> {
+    pub bot: BotResource<'a>,
     pub room: RoomResource<'a>,
     pub room_config: RoomConfigResource<'a>,
     pub meeting: MeetingResource<'a>,
@@ -4036,6 +4193,7 @@ pub struct V1<'a> {
 impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
+            bot: BotResource { config },
             room: RoomResource { config },
             room_config: RoomConfigResource { config },
             meeting: MeetingResource { config },
