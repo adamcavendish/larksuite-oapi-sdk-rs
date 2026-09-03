@@ -60,6 +60,7 @@ pub mod task;
 pub mod tenant;
 pub mod translation;
 pub mod trust_party;
+pub mod unified_kms;
 pub mod vc;
 pub mod verification;
 pub mod wiki;
