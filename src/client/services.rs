@@ -48,6 +48,7 @@ impl LarkClient {
     service_accessor!(okr, okr, v1, V1);
     service_accessor!(okr_v2, okr, v2, V2);
     service_accessor!(translation, translation, v1, V1);
+    service_accessor!(unified_kms, unified_kms, v1, V1);
     service_accessor!(search, search, v2, V2);
     service_accessor!(vc, vc, v1, V1);
     service_accessor!(wiki_v2, wiki, v2, V2);

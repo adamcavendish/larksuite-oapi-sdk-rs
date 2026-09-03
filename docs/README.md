@@ -32,6 +32,8 @@ examples, features, and coverage.
 - [Base v3 field extensions and record share links](base-v3-field-extensions.md)
   covers extension configuration, cell updates, and partial batch share-link
   results.
+- [Unified KMS](unified-kms.md) covers tenant-scoped autonomous-key lifecycle,
+  deletion plans, recovery, and import material.
 - [Drive media preview downloads](drive-media-preview.md) covers selecting and
   downloading a Drive preview artifact with user or tenant credentials.
 - [Docs AI document content](docs-ai.md) covers modern Docx content fetches,
