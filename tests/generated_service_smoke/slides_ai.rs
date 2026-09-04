@@ -1,8 +1,9 @@
 use super::prelude::*;
+use larksuite_oapi_sdk_rs::LarkError;
 use larksuite_oapi_sdk_rs::service::slides_ai::v1::{
     AddSlideQuery, DeleteSlideQuery, GetSlideImagesRequest, GetSlideQuery,
     GetXmlPresentationHistoryRevertStatusQuery, GetXmlPresentationQuery,
-    ListXmlPresentationHistoryQuery, ReplaceSlideQuery, SlideImage,
+    ListXmlPresentationHistoryQuery, ReplaceSlideQuery, SlideImage, XmlLintBody,
 };
 
 // ── Slides AI ──
@@ -78,7 +79,11 @@ async fn slides_ai_core_contract_smoke() {
         .slide
         .add(
             &AddSlideQuery::new(presentation_id),
-            json_value!({"slide": {"content": "<slide id=\"new\"/>"}}),
+            XmlLintBody::new(json_value!({
+                "lint_xml": false,
+                "slide": {"content": "<slide id=\"new\"/>"},
+            }))
+            .unwrap(),
             &tenant_option,
         )
         .await
@@ -99,13 +104,14 @@ async fn slides_ai_core_contract_smoke() {
             &ReplaceSlideQuery::new(presentation_id, "slide /1")
                 .revision_id(10)
                 .tid("tid /1"),
-            json_value!({
+            XmlLintBody::without_lint(json_value!({
                 "parts": [{
                     "action": "block_replace",
                     "block_id": "slide /1",
                     "replacement": "<slide id=\"slide /1\"/>",
                 }],
-            }),
+            }))
+            .unwrap(),
             &tenant_option,
         )
         .await
@@ -191,6 +197,22 @@ async fn slides_ai_core_contract_smoke() {
     assert!(request.contains(r#""xml_presentation":{"content":"<presentation/>"}"#));
     assert!(request.contains(r#""block_replace"#));
     assert!(request.contains(r#""history_version_id":"42"#));
+    assert!(request.contains(r#""lint_xml":true"#));
+    assert!(request.contains(r#""lint_xml":false"#));
+    assert!(!request.contains("lint_xml=true"));
+    assert!(!request.contains("lint_xml=false"));
+}
+
+#[test]
+fn xml_lint_body_requires_an_object_and_owns_the_reserved_field() {
+    let body = XmlLintBody::new(json_value!({"lint_xml": false, "parts": []})).unwrap();
+    assert_eq!(serde_json::to_value(body).unwrap()["lint_xml"], true);
+
+    let unlinted = XmlLintBody::without_lint(json_value!({"parts": []})).unwrap();
+    assert_eq!(serde_json::to_value(unlinted).unwrap()["lint_xml"], false);
+
+    let error = XmlLintBody::new(json_value!([])).unwrap_err();
+    assert!(matches!(error, LarkError::IllegalParam(_)));
 }
 
 #[tokio::test]

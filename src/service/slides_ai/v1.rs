@@ -23,6 +23,46 @@ pub type RenderSlideImageResp = SlideImageResponse<RenderedSlideImageData>;
 
 const MAX_SLIDE_IMAGES_PER_REQUEST: usize = 10;
 
+/// A Slides AI write body with an explicit server-side XML lint setting.
+///
+/// Construct with [`Self::new`] to ask the platform to lint the resulting
+/// slide before committing it. [`Self::without_lint`] sends `lint_xml: false`
+/// explicitly when a caller needs the platform's unlinted path. The wrapper is
+/// opt-in: existing `Serialize` bodies keep their current behavior.
+///
+/// The wrapped value must serialize to a JSON object. The wrapper owns the
+/// `lint_xml` field and replaces any conflicting caller-provided value, so the
+/// outgoing request has one unambiguous protocol control.
+#[derive(Debug, Clone, Serialize)]
+#[serde(transparent)]
+#[non_exhaustive]
+pub struct XmlLintBody {
+    body: crate::JsonValue,
+}
+
+impl XmlLintBody {
+    /// Creates a body that requests server-side XML linting.
+    pub fn new(body: impl Serialize) -> Result<Self, LarkError> {
+        Self::with_lint(body, true)
+    }
+
+    /// Creates a body that explicitly opts out of server-side XML linting.
+    pub fn without_lint(body: impl Serialize) -> Result<Self, LarkError> {
+        Self::with_lint(body, false)
+    }
+
+    fn with_lint(body: impl Serialize, lint_xml: bool) -> Result<Self, LarkError> {
+        let mut body = crate::JsonValue::from_serializable(body)?.into_value();
+        let serde_json::Value::Object(fields) = &mut body else {
+            return Err(LarkError::IllegalParam(
+                "Slides XML lint bodies must serialize to a JSON object".to_string(),
+            ));
+        };
+        fields.insert("lint_xml".to_string(), serde_json::Value::Bool(lint_xml));
+        Ok(Self { body: body.into() })
+    }
+}
+
 /// A rendered slide image returned as Base64-encoded bytes.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[non_exhaustive]

@@ -68,6 +68,41 @@ value. For replacement, supply the full service body, including its `parts`
 array. The SDK forwards those parts unchanged: it does not parse XML, insert
 block IDs, normalize content, or construct a `block_replace` request for you.
 
+### Request server-side XML linting
+
+Use `XmlLintBody::new` with `slide.add` or `slide.replace` to send
+`lint_xml: true` in the JSON body. The platform validates the page produced by
+the write and can reject it with API code `4000153`; that report is returned as
+the normal SDK API error without CLI-specific rewriting. The field must remain
+in the body: the gateway does not bind it from the query string. The wrapper is
+opt-in, so existing generic request bodies retain their current behavior.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::service::slides_ai::v1::{
+    AddSlideQuery, XmlLintBody,
+};
+
+# async fn example(
+#     client: &larksuite_oapi_sdk_rs::LarkClient,
+#     option: &larksuite_oapi_sdk_rs::RequestOption,
+# ) -> Result<(), Box<dyn std::error::Error>> {
+let body = XmlLintBody::new(serde_json::json!({
+    "slide": {"content": "<slide id=\"new\"/>"},
+}))?;
+client.slides_ai().slide.add(
+    &AddSlideQuery::new("xml_presentation_id"),
+    body,
+    option,
+).await?;
+# Ok(())
+# }
+```
+
+`XmlLintBody::without_lint(body)` explicitly sends `lint_xml: false`. This is
+useful when callers need an unlinted write while keeping that choice stable if
+the platform's default changes. The wrapper replaces any supplied `lint_xml`
+value, so it never produces an ambiguous duplicate field.
+
 `slide.delete`, `slide.replace`, and `history.revert` have immediate server-side
 effects. Confirm the presentation ID, slide ID, revision, and XML/parts body
 before issuing them. A history revert is asynchronous; pass its task ID to
@@ -116,8 +151,9 @@ disk, converting formats, and displaying the image remain caller-owned.
 
 ## Deliberate exclusions
 
-The SDK does not copy the CLI's XML linting, `@path` image uploads, wiki
-resolution, permission grants, prompts, or filesystem output.
+The SDK forwards the server-side lint control but does not copy the CLI's XML
+parsing, lint-report rendering, `@path` image uploads, wiki resolution,
+permission grants, prompts, or filesystem output.
 
 See [`examples/slides_ai_read.rs`](../examples/slides_ai_read.rs) for a
 runnable, read-only presentation fetch, and
