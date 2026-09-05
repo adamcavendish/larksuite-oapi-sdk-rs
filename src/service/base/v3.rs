@@ -712,6 +712,71 @@ impl<'a> GetBaseAppBlockDataQuery<'a> {
     }
 }
 
+/// Body parameters for listing workflows in a Base.
+///
+/// The service uses a POST body for pagination rather than query parameters.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct ListWorkflowQuery<'a> {
+    pub base_token: &'a str,
+    pub status: Option<&'a str>,
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListWorkflowQuery<'a> {
+    pub fn new(base_token: &'a str) -> Self {
+        Self {
+            base_token,
+            status: None,
+            page: PageQuery::new(),
+        }
+    }
+
+    pub fn status(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.status = value.into();
+        self
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+}
+
+/// Parameters for retrieving one Base workflow.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetWorkflowQuery<'a> {
+    pub base_token: &'a str,
+    pub workflow_id: &'a str,
+    pub user_id_type: Option<&'a str>,
+}
+
+impl<'a> GetWorkflowQuery<'a> {
+    pub fn new(base_token: &'a str, workflow_id: &'a str) -> Self {
+        Self {
+            base_token,
+            workflow_id,
+            user_id_type: None,
+        }
+    }
+
+    pub fn user_id_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.user_id_type = value.into();
+        self
+    }
+}
+
+#[derive(Serialize)]
+struct ListWorkflowReqBody<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    status: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    page_size: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    page_token: Option<&'a str>,
+}
+
 pub struct V3<'a> {
     pub record: RecordResource<'a>,
     pub field_extension: FieldExtensionResource<'a>,
@@ -722,6 +787,7 @@ pub struct V3<'a> {
     pub form_share: FormShareResource<'a>,
     pub form: FormResource<'a>,
     pub form_question: FormQuestionResource<'a>,
+    pub workflow: WorkflowResource<'a>,
     pub workspace: WorkspaceResource<'a>,
     pub app: BaseAppResource<'a>,
     pub page: BaseAppPageResource<'a>,
@@ -740,11 +806,158 @@ impl<'a> V3<'a> {
             form_share: FormShareResource { config },
             form: FormResource { config },
             form_question: FormQuestionResource { config },
+            workflow: WorkflowResource { config },
             workspace: WorkspaceResource { config },
             app: BaseAppResource { config },
             page: BaseAppPageResource { config },
             block: BaseAppBlockResource { config },
         }
+    }
+}
+
+/// Base v3 automation workflow operations.
+///
+/// Workflow definitions intentionally accept arbitrary serializable JSON: the
+/// server's step schema evolves independently of the stable route contract.
+pub struct WorkflowResource<'a> {
+    config: &'a Config,
+}
+
+impl WorkflowResource<'_> {
+    /// Creates a disabled workflow. The body must include a unique
+    /// server-recognized `client_token`.
+    pub async fn create(
+        &self,
+        base_token: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/bases/:base_token/workflows",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Gets one workflow definition, including its untyped step graph.
+    pub async fn get(
+        &self,
+        query: &GetWorkflowQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/workflows/:workflow_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", query.base_token)
+        .path_param("workflow_id", query.workflow_id)
+        .query("user_id_type", query.user_id_type)
+        .send_json()
+        .await
+    }
+
+    /// Lists workflows using the API's body-paginated list operation.
+    pub async fn list(
+        &self,
+        query: &ListWorkflowQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        let body = ListWorkflowReqBody {
+            status: query.status,
+            page_size: query.page.page_size,
+            page_token: query.page.page_token,
+        };
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/base/v3/bases/:base_token/workflows/list",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", query.base_token)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Replaces a workflow definition. Preserve fields that should remain set.
+    pub async fn update(
+        &self,
+        base_token: &str,
+        workflow_id: &str,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            "/open-apis/base/v3/bases/:base_token/workflows/:workflow_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("workflow_id", workflow_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Enables a workflow.
+    pub async fn enable(
+        &self,
+        base_token: &str,
+        workflow_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        self.set_enabled(base_token, workflow_id, true, option)
+            .await
+    }
+
+    /// Disables a workflow.
+    pub async fn disable(
+        &self,
+        base_token: &str,
+        workflow_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        self.set_enabled(base_token, workflow_id, false, option)
+            .await
+    }
+
+    async fn set_enabled(
+        &self,
+        base_token: &str,
+        workflow_id: &str,
+        enabled: bool,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        let action = if enabled { "enable" } else { "disable" };
+        RestRequest::new(
+            self.config,
+            http::Method::PATCH,
+            format!("/open-apis/base/v3/bases/:base_token/workflows/:workflow_id/{action}"),
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("workflow_id", workflow_id)
+        .json_body(&serde_json::json!({}))?
+        .send_json()
+        .await
     }
 }
 
