@@ -1,6 +1,7 @@
 use super::prelude::*;
 use larksuite_oapi_sdk_rs::service::base::v3::{
-    DashboardUserIdTypeQuery, ListDashboardBlocksQuery, ListDashboardsQuery,
+    DashboardUserIdTypeQuery, GetWorkflowQuery, ListDashboardBlocksQuery, ListDashboardsQuery,
+    ListWorkflowQuery,
 };
 
 // ── Base ──
@@ -140,6 +141,110 @@ async fn base_v3_record_read_contract_smoke() {
     assert!(request.contains("x-app-id: test_app_id"));
     assert!(request.contains(r#""keyword":"Task""#));
     assert!(request.contains(r#""search_fields":["Name"]"#));
+}
+
+#[tokio::test]
+async fn base_v3_workflow_contract_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+        http_response(200, body),
+    ])
+    .await;
+    let client = client_for(addr);
+    let user_option = RequestOption {
+        user_access_token: Some("user-token".to_string()),
+        ..RequestOption::default()
+    };
+    let tenant_option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..RequestOption::default()
+    };
+    let create_body = json_value!({
+        "client_token": "workflow-create-1",
+        "title": "Classify feedback",
+        "steps": [{"id": "classify", "type": "AIClassificationBranch"}],
+    });
+    let update_body = json_value!({
+        "title": "Analyze feedback",
+        "steps": [{"id": "analyze", "type": "AIAnalysisAction"}],
+    });
+
+    client
+        .base_v3()
+        .workflow
+        .create("base token", &create_body, &user_option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .workflow
+        .get(
+            &GetWorkflowQuery::new("base token", "workflow/id").user_id_type("open_id"),
+            &tenant_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .workflow
+        .list(
+            &ListWorkflowQuery::new("base token")
+                .status("disabled")
+                .page(PageQuery::new().page_size(100).page_token("next page")),
+            &user_option,
+        )
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .workflow
+        .update("base token", "workflow/id", &update_body, &tenant_option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .workflow
+        .enable("base token", "workflow/id", &user_option)
+        .await
+        .unwrap();
+    client
+        .base_v3()
+        .workflow
+        .disable("base token", "workflow/id", &tenant_option)
+        .await
+        .unwrap();
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("POST /open-apis/base/v3/bases/base%20token/workflows "));
+    assert!(request.contains(
+        "GET /open-apis/base/v3/bases/base%20token/workflows/workflow%2Fid?user_id_type=open_id"
+    ));
+    assert!(request.contains("POST /open-apis/base/v3/bases/base%20token/workflows/list "));
+    assert!(request.contains("PUT /open-apis/base/v3/bases/base%20token/workflows/workflow%2Fid "));
+    assert!(
+        request.contains(
+            "PATCH /open-apis/base/v3/bases/base%20token/workflows/workflow%2Fid/enable "
+        )
+    );
+    assert!(
+        request.contains(
+            "PATCH /open-apis/base/v3/bases/base%20token/workflows/workflow%2Fid/disable "
+        )
+    );
+    assert!(request.contains(r#""client_token":"workflow-create-1""#));
+    assert!(request.contains(r#""type":"AIClassificationBranch""#));
+    assert!(request.contains(r#""type":"AIAnalysisAction""#));
+    assert!(request.contains(r#""status":"disabled""#));
+    assert!(request.contains("\"page_size\":100"));
+    assert!(request.contains(r#""page_token":"next page""#));
+    assert!(request.contains("authorization: Bearer user-token"));
+    assert!(request.contains("authorization: Bearer tenant-token"));
+    assert!(request.contains("x-app-id: test_app_id"));
 }
 
 #[tokio::test]
