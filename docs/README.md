@@ -27,6 +27,8 @@ examples, features, and coverage.
   reads and partial updates with user or tenant credentials.
 - [Base v3 forms](base-v3-forms.md) covers form lifecycle, form questions,
   and the destructive question-removal contract.
+- [Base v3 workflows](base-v3-workflows.md) covers workflow lifecycle routes
+  and their intentionally flexible workflow-definition JSON boundary.
 - [Base v3 dashboards](base-v3-dashboards.md) covers dashboard and dashboard
   block CRUD, computed chart data, and server-side layout arrangement.
 - [Base v3 field extensions and record share links](base-v3-field-extensions.md)
