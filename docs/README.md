@@ -17,6 +17,8 @@ examples, features, and coverage.
   dispatch, long connections, trusted user channels, replies, and updates.
 - [OAuth SSO](oauth-sso.md) covers Feishu and Lark browser authorization,
   authorization-code exchange, refresh-token rotation, and user identity lookup.
+- [Mail v1 user-mailbox threads](mail-v1-threads.md) covers conversation reads
+  and batch label, folder, and Trash operations with user or tenant credentials.
 - [Spark db sync](spark-db-sync.md) covers user-token Base-to-database sync
   previews, task lifecycle operations, and opt-in live verification.
 - [Base v3 record reads](base-v3-records.md) covers CLI-aligned Base record

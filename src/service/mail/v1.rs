@@ -681,6 +681,24 @@ pub struct GetUserMailboxMessageRespData {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[non_exhaustive]
+pub struct GetUserMailboxThreadRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub thread: Option<Thread>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ListUserMailboxThreadRespData {
+    #[serde(default)]
+    pub items: Vec<Thread>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct GetByCardUserMailboxMessageRespData {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub owner_info: Option<UserInfo>,
@@ -1032,6 +1050,18 @@ pub struct Message {
     pub references: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub body_calendar: Option<String>,
+}
+
+/// A mail conversation and its messages.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct Thread {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub body_preview: Option<String>,
+    #[serde(default)]
+    pub messages: Vec<Message>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -2101,9 +2131,31 @@ pub struct ReorderUserMailboxRuleReqBody {
     pub rule_ids: Option<Vec<String>>,
 }
 
+/// Changes labels or the folder for a batch of mail conversations.
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchModifyUserMailboxThreadReqBody {
+    pub thread_ids: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub add_label_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub remove_label_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub add_folder: Option<String>,
+}
+
+/// Moves a batch of mail conversations to Trash.
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatchTrashUserMailboxThreadReqBody {
+    pub thread_ids: Vec<String>,
+}
+
 // ── Response types for new resources ──
 
 impl_resp_v2!(GetUserMailboxMessageResp, GetUserMailboxMessageRespData);
+impl_resp_v2!(GetUserMailboxThreadResp, GetUserMailboxThreadRespData);
+impl_resp_v2!(ListUserMailboxThreadResp, ListUserMailboxThreadRespData);
+impl_resp_v2!(BatchModifyUserMailboxThreadResp, ());
+impl_resp_v2!(BatchTrashUserMailboxThreadResp, ());
 impl_resp_v2!(
     GetByCardUserMailboxMessageResp,
     GetByCardUserMailboxMessageRespData
@@ -2168,6 +2220,82 @@ impl_resp_v2!(
     SubscriptionUserMailboxEventRespData
 );
 impl_resp_v2!(UnsubscribeUserMailboxEventResp, ());
+
+// ── UserMailboxThread query types ──
+
+/// Parameters for listing mail conversations in a user mailbox.
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct ListUserMailboxThreadQuery<'a> {
+    pub user_mailbox_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub folder_id: Option<&'a str>,
+    pub only_unread: Option<bool>,
+    pub label_id: Option<&'a str>,
+}
+
+impl<'a> ListUserMailboxThreadQuery<'a> {
+    pub fn new(user_mailbox_id: &'a str) -> Self {
+        Self {
+            user_mailbox_id,
+            page: PageQuery::default(),
+            folder_id: None,
+            only_unread: None,
+            label_id: None,
+        }
+    }
+
+    pub fn page(mut self, value: PageQuery<'a>) -> Self {
+        self.page = value;
+        self
+    }
+
+    pub fn folder_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.folder_id = value.into();
+        self
+    }
+
+    pub fn only_unread(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.only_unread = value.into();
+        self
+    }
+
+    pub fn label_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.label_id = value.into();
+        self
+    }
+}
+
+/// Parameters for reading one mail conversation.
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub struct GetUserMailboxThreadQuery<'a> {
+    pub user_mailbox_id: &'a str,
+    pub thread_id: &'a str,
+    pub format: Option<&'a str>,
+    pub include_spam_trash: Option<bool>,
+}
+
+impl<'a> GetUserMailboxThreadQuery<'a> {
+    pub fn new(user_mailbox_id: &'a str, thread_id: &'a str) -> Self {
+        Self {
+            user_mailbox_id,
+            thread_id,
+            format: None,
+            include_spam_trash: None,
+        }
+    }
+
+    pub fn format(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.format = value.into();
+        self
+    }
+
+    pub fn include_spam_trash(mut self, value: impl Into<Option<bool>>) -> Self {
+        self.include_spam_trash = value.into();
+        self
+    }
+}
 
 // ── UserMailboxMessage resource ──
 
@@ -2264,6 +2392,97 @@ impl UserMailboxMessageResource<'_> {
         )
         .json_body(body)?
         .send_v2_response::<SendUserMailboxMessageRespData, SendUserMailboxMessageResp>()
+        .await
+    }
+}
+
+// ── UserMailboxThread resource ──
+
+pub struct UserMailboxThreadResource<'a> {
+    config: &'a Config,
+}
+
+impl UserMailboxThreadResource<'_> {
+    /// GET /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/threads
+    pub async fn list(
+        &self,
+        query: &ListUserMailboxThreadQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListUserMailboxThreadResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/threads",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .path_param("user_mailbox_id", query.user_mailbox_id)
+        .page_query(query.page)
+        .query("folder_id", query.folder_id)
+        .query("only_unread", query.only_unread)
+        .query("label_id", query.label_id)
+        .send_v2_response::<ListUserMailboxThreadRespData, ListUserMailboxThreadResp>()
+        .await
+    }
+
+    /// GET /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/threads/:thread_id
+    pub async fn get(
+        &self,
+        query: &GetUserMailboxThreadQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetUserMailboxThreadResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/threads/:thread_id",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .path_param("user_mailbox_id", query.user_mailbox_id)
+        .path_param("thread_id", query.thread_id)
+        .query("format", query.format)
+        .query("include_spam_trash", query.include_spam_trash)
+        .send_v2_response::<GetUserMailboxThreadRespData, GetUserMailboxThreadResp>()
+        .await
+    }
+
+    /// POST /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/threads/batch_modify
+    pub async fn batch_modify(
+        &self,
+        user_mailbox_id: &str,
+        body: &BatchModifyUserMailboxThreadReqBody,
+        option: &RequestOption,
+    ) -> Result<BatchModifyUserMailboxThreadResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/threads/batch_modify",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .path_param("user_mailbox_id", user_mailbox_id)
+        .json_body(body)?
+        .send_v2_response::<(), BatchModifyUserMailboxThreadResp>()
+        .await
+    }
+
+    /// POST /open-apis/mail/v1/user_mailboxes/:user_mailbox_id/threads/batch_trash
+    pub async fn batch_trash(
+        &self,
+        user_mailbox_id: &str,
+        body: &BatchTrashUserMailboxThreadReqBody,
+        option: &RequestOption,
+    ) -> Result<BatchTrashUserMailboxThreadResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/mail/v1/user_mailboxes/:user_mailbox_id/threads/batch_trash",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .path_param("user_mailbox_id", user_mailbox_id)
+        .json_body(body)?
+        .send_v2_response::<(), BatchTrashUserMailboxThreadResp>()
         .await
     }
 }
@@ -3133,6 +3352,7 @@ pub struct V1<'a> {
     pub user_mailbox_alias: UserMailboxAliasResource<'a>,
     pub user_mailbox_event: UserMailboxEventResource<'a>,
     pub user_mailbox_message: UserMailboxMessageResource<'a>,
+    pub user_mailbox_thread: UserMailboxThreadResource<'a>,
     pub user_mailbox_message_attachment: UserMailboxMessageAttachmentResource<'a>,
     pub user_mailbox_folder: UserMailboxFolderResource<'a>,
     pub user_mailbox_mail_contact: UserMailboxMailContactResource<'a>,
@@ -3155,6 +3375,7 @@ impl<'a> V1<'a> {
             user_mailbox_alias: UserMailboxAliasResource { config },
             user_mailbox_event: UserMailboxEventResource { config },
             user_mailbox_message: UserMailboxMessageResource { config },
+            user_mailbox_thread: UserMailboxThreadResource { config },
             user_mailbox_message_attachment: UserMailboxMessageAttachmentResource { config },
             user_mailbox_folder: UserMailboxFolderResource { config },
             user_mailbox_mail_contact: UserMailboxMailContactResource { config },
