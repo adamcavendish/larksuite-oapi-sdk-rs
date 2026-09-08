@@ -290,6 +290,8 @@ mod mail_mailgroup_member;
 mod mail_public_mailbox;
 #[path = "generated_service_smoke/mail/public_mailbox_member.rs"]
 mod mail_public_mailbox_member;
+#[path = "generated_service_smoke/mail/user_mailbox_thread.rs"]
+mod mail_user_mailbox_thread;
 #[path = "generated_service_smoke/mdm.rs"]
 mod mdm;
 #[path = "generated_service_smoke/minutes.rs"]
