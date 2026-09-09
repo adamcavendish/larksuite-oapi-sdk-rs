@@ -53,3 +53,50 @@ async fn wiki_get_space_smoke() {
     let request = requests.lock().unwrap().join("\n");
     assert!(request.contains("GET /open-apis/wiki/v2/spaces/sp-1"));
 }
+
+#[tokio::test]
+async fn wiki_node_by_token_smoke() {
+    let body = r#"{"code":0,"msg":"ok","data":{"node":{"node_token":"wik_1","obj_token":"doxcn_1","obj_type":"docx"}}}"#;
+    let (addr, _handle, requests) =
+        mock_server_with_requests(vec![http_response(200, body), http_response(200, body)]).await;
+
+    let client = client_for(addr);
+    let user_option = RequestOption {
+        user_access_token: Some("user-token".to_string()),
+        ..RequestOption::default()
+    };
+    let tenant_option = RequestOption {
+        tenant_access_token: Some("tenant-token".to_string()),
+        ..RequestOption::default()
+    };
+
+    let user_response = client
+        .wiki_v2()
+        .space
+        .node_by_token("wik token/1", &user_option)
+        .await
+        .unwrap();
+    let tenant_response = client
+        .wiki_v2()
+        .space
+        .node_by_token("wik token/1", &tenant_option)
+        .await
+        .unwrap();
+
+    assert!(user_response.success());
+    assert!(tenant_response.success());
+    assert_eq!(
+        user_response
+            .data
+            .as_ref()
+            .and_then(|data| data.node.as_ref())
+            .and_then(|node| node.obj_type.as_deref()),
+        Some("docx")
+    );
+
+    let request = requests.lock().unwrap().join("\n");
+    assert!(request.contains("GET /open-apis/wiki/v2/spaces/node_by_token?token=wik+token%2F1"));
+    assert!(!request.contains("obj_type="));
+    assert!(request.contains("authorization: Bearer user-token"));
+    assert!(request.contains("authorization: Bearer tenant-token"));
+}

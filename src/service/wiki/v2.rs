@@ -314,6 +314,27 @@ impl<'a> SpaceResource<'a> {
         .send_response::<NodeData, GetNodeResp>()
         .await
     }
+
+    /// Resolves a Wiki node or mounted object token without an object type.
+    ///
+    /// Unlike [`Self::get_node`], this route lets the service identify the
+    /// supplied token type, so callers do not need to infer `obj_type` first.
+    pub async fn node_by_token(
+        &self,
+        token: &str,
+        option: &RequestOption,
+    ) -> Result<GetNodeResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/wiki/v2/spaces/node_by_token",
+            vec![AccessTokenType::Tenant, AccessTokenType::User],
+            option,
+        )
+        .query("token", token)
+        .send_response::<NodeData, GetNodeResp>()
+        .await
+    }
 }
 
 pub struct NodeResource<'a> {
