@@ -5,8 +5,12 @@ use super::prelude::*;
 #[tokio::test]
 async fn docs_ai_document_content_contract_smoke() {
     let body = r#"{"code":0,"msg":"ok","data":{}}"#;
+    let async_task_body =
+        r#"{"code":0,"msg":"ok","data":{"task":{"task_id":"task id/one","status":"succeeded"}}}"#;
     let (addr, _handle, requests) = mock_server_with_requests(vec![
         http_response(200, body),
+        http_response(200, async_task_body),
+        http_response(200, async_task_body),
         http_response(200, body),
         http_response(200, body),
         http_response(200, body),
@@ -30,9 +34,26 @@ async fn docs_ai_document_content_contract_smoke() {
         .docs_ai()
         .document
         .create(
-            json_value!({"title": "Spec", "content": "<p>hello</p>", "format": "xml"}),
+            json_value!({
+                "title": "Spec",
+                "content": "<p>hello</p>",
+                "format": "xml",
+                "extra_param": r#"{"open_create_async":true}"#,
+            }),
             &user_option,
         )
+        .await
+        .unwrap();
+    let async_task_as_user = client
+        .docs_ai()
+        .async_task
+        .get("task id/one", &user_option)
+        .await
+        .unwrap();
+    let async_task_as_tenant = client
+        .docs_ai()
+        .async_task
+        .get("task id/one", &tenant_option)
         .await
         .unwrap();
     let fetch = client
@@ -105,8 +126,46 @@ async fn docs_ai_document_content_contract_smoke() {
     assert!(history.success());
     assert!(revert.success());
     assert!(status.success());
+    assert!(async_task_as_user.success());
+    assert!(async_task_as_tenant.success());
+    assert_eq!(
+        async_task_as_user
+            .data
+            .as_ref()
+            .and_then(|data| data.get("task"))
+            .and_then(|task| task.get("status"))
+            .and_then(serde_json::Value::as_str),
+        Some("succeeded")
+    );
 
-    let request = requests.lock().unwrap().join("\n");
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 8);
+    let (create_headers, create_body) = requests[0].split_once("\r\n\r\n").unwrap();
+    assert_eq!(
+        create_headers.lines().next(),
+        Some("POST /open-apis/docs_ai/v1/documents HTTP/1.1")
+    );
+    let create_body: serde_json::Value = serde_json::from_str(create_body).unwrap();
+    assert_eq!(
+        create_body["extra_param"],
+        serde_json::json!(r#"{"open_create_async":true}"#)
+    );
+    for (request, token) in [(&requests[1], "user-token"), (&requests[2], "tenant-token")] {
+        let (headers, body) = request.split_once("\r\n\r\n").unwrap();
+        assert_eq!(
+            headers.lines().next(),
+            Some("GET /open-apis/docs_ai/v1/async_tasks/task%20id%2Fone HTTP/1.1")
+        );
+        let authorization: Vec<_> = headers
+            .lines()
+            .filter_map(|line| line.split_once(':'))
+            .filter(|(name, _)| name.eq_ignore_ascii_case("authorization"))
+            .map(|(_, value)| value.trim())
+            .collect();
+        assert_eq!(authorization, vec![format!("Bearer {token}")]);
+        assert!(body.is_empty());
+    }
+    let request = requests.join("\n");
     assert!(request.contains("POST /open-apis/docs_ai/v1/documents "));
     assert!(request.contains("POST /open-apis/docs_ai/v1/documents/doxcn%20doc%2Fa/fetch "));
     assert!(request.contains("PUT /open-apis/docs_ai/v1/documents/doxcn%20doc%2Fa "));
@@ -118,6 +177,7 @@ async fn docs_ai_document_content_contract_smoke() {
         request
             .contains("GET /open-apis/docs_ai/v1/documents/doxcn%20doc%2Fa/history/revert_status?")
     );
+    assert!(request.contains("GET /open-apis/docs_ai/v1/async_tasks/task%20id%2Fone "));
     assert!(request.contains("page_size=20"));
     assert!(request.contains("page_token=next+page"));
     assert!(request.contains("task_id=task+id"));

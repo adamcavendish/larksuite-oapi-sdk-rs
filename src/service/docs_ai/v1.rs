@@ -12,6 +12,7 @@ pub type UpdateDocumentResp = JsonResp;
 pub type ListDocumentHistoryResp = JsonResp;
 pub type RevertDocumentHistoryResp = JsonResp;
 pub type GetDocumentHistoryRevertStatusResp = JsonResp;
+pub type GetAsyncTaskResp = JsonResp;
 
 /// Query parameters for listing document history versions.
 #[derive(Debug, Clone, Copy)]
@@ -61,6 +62,7 @@ impl<'a> GetDocumentHistoryRevertStatusQuery<'a> {
 pub struct V1<'a> {
     pub document: DocumentResource<'a>,
     pub history: DocumentHistoryResource<'a>,
+    pub async_task: AsyncTaskResource<'a>,
 }
 
 impl<'a> V1<'a> {
@@ -68,6 +70,7 @@ impl<'a> V1<'a> {
         Self {
             document: DocumentResource { config },
             history: DocumentHistoryResource { config },
+            async_task: AsyncTaskResource { config },
         }
     }
 }
@@ -75,6 +78,35 @@ impl<'a> V1<'a> {
 /// Create, fetch, and update Docs AI documents.
 pub struct DocumentResource<'a> {
     config: &'a Config,
+}
+
+/// Reads the state of a Docs AI asynchronous task.
+///
+/// The service owns task status, result, failure, and any polling hint fields,
+/// so this resource returns the protocol response unchanged. Callers choose
+/// their own polling interval, deadline, and retry policy.
+pub struct AsyncTaskResource<'a> {
+    config: &'a Config,
+}
+
+impl AsyncTaskResource<'_> {
+    /// Gets a Docs AI asynchronous task by its service-issued ID.
+    pub async fn get(
+        &self,
+        task_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetAsyncTaskResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/docs_ai/v1/async_tasks/:task_id",
+            supported_access_tokens(),
+            option,
+        )
+        .path_param("task_id", task_id)
+        .send_json()
+        .await
+    }
 }
 
 impl DocumentResource<'_> {

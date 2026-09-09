@@ -14,6 +14,7 @@ while preserving the service-owned document payloads and responses as
 | --- | --- |
 | `document` | `create`, `fetch`, `update` |
 | `history` | `list`, `revert`, `revert_status` |
+| `async_task` | `get` |
 
 Use either an explicit user access token or a tenant access token for a bot.
 The client obtains the appropriate `Authorization` header from
@@ -58,9 +59,13 @@ include block ranges such as `start_block_id` and `end_block_id`.
 
 `history.revert` starts an asynchronous history restore. Include its returned
 task ID in `GetDocumentHistoryRevertStatusQuery::new(document_id, task_id)` and
-poll `history.revert_status` until the service reports completion. Create,
-update, and revert calls have server-side effects; confirm document IDs, block
-ranges, and command bodies before issuing them.
+poll `history.revert_status` until the service reports completion. Document
+creation can opt into the service's generic async result by sending
+an `extra_param` string value of `{"open_create_async":true}` in the create body, then
+calling `async_task.get(task_id, option)`. The SDK exposes the task response but
+does not impose polling cadence, retry, timeout, permission, or local-resource
+orchestration. Create, update, and revert calls have server-side effects;
+confirm document IDs, block ranges, and command bodies before issuing them.
 
 The SDK does not include CLI-only local-file rewrites, URL parsing, prompts,
 permission-grant orchestration, or output formatting. Those behaviors do not
