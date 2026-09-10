@@ -5,6 +5,94 @@ use larksuite_oapi_sdk_rs::events::vc::{
 };
 
 #[test]
+fn vc_bot_countdown_and_share_reason_round_trip() {
+    use larksuite_oapi_sdk_rs::events::vc::P2VcBotMeetingActivityV1;
+
+    let payload = serde_json::json!({"meeting_activity_items": [
+        {"activity_event_type": "countdown_changed", "meeting":{"id":"meeting-1","host_user":{"id":{"open_id":"ou_host"}}}, "countdown_items": [{
+            "action": "REMIND", "operator": {"id": {"open_id": "ou_operator", "user_id":"user-1", "union_id":"union-1"}, "user_name":"Operator", "user_type":1, "user_role":2},
+            "end_time": "1789000000000", "event_time": "1788999940000",
+            "need_play_audio_at_end": false, "reminders_before_end_in_second": [60, 30],
+            "seq_id": "seq-1", "countdown_set_time": "1788999700000", "remain_minutes": 1
+        }]},
+        {"activity_event_type": "magic_share_started", "magic_share_started_items": [{
+            "share_id": "share-1", "start_reason": "share_detected", "operator":{"id":{"open_id":"ou_operator"}}
+        }]}
+    ]});
+    let event: P2VcBotMeetingActivityV1 = serde_json::from_value(payload.clone()).unwrap();
+    let items = event.meeting_activity_items.as_ref().unwrap();
+    let countdown = &items[0].countdown_items.as_ref().unwrap()[0];
+    assert_eq!(countdown.action.as_deref(), Some("REMIND"));
+    assert_eq!(countdown.need_play_audio_at_end, Some(false));
+    assert_eq!(countdown.remain_minutes, Some(1));
+    assert_eq!(
+        countdown
+            .operator
+            .as_ref()
+            .unwrap()
+            .structured_id
+            .as_ref()
+            .unwrap()
+            .open_id(),
+        Some("ou_operator")
+    );
+    assert_eq!(
+        items[1].magic_share_started_items.as_ref().unwrap()[0]
+            .start_reason
+            .as_deref(),
+        Some("share_detected")
+    );
+    assert_eq!(serde_json::to_value(&event).unwrap(), payload);
+}
+
+#[test]
+fn vc_bot_user_ids_preserve_both_wire_shapes_without_ambiguity() {
+    use larksuite_oapi_sdk_rs::events::vc::MeetingAgentEventUser;
+    for payload in [
+        serde_json::json!({}),
+        serde_json::json!({"id":"ou_legacy"}),
+        serde_json::json!({"id":{"open_id":"ou_new","user_id":"user-1","union_id":"union-1"}}),
+    ] {
+        let user: MeetingAgentEventUser = serde_json::from_value(payload.clone()).unwrap();
+        assert_eq!(user.id.as_deref(), payload["id"].as_str());
+        assert_eq!(user.structured_id.is_some(), payload["id"].is_object());
+        assert_eq!(serde_json::to_value(&user).unwrap(), payload);
+    }
+    let mut user: MeetingAgentEventUser =
+        serde_json::from_value(serde_json::json!({"id":{"open_id":"ou_new"}})).unwrap();
+    user.id = Some("ambiguous".into());
+    assert!(serde_json::to_value(user).is_err());
+    let user: MeetingAgentEventUser =
+        serde_json::from_value(serde_json::json!({"id":null})).unwrap();
+    assert!(user.id.is_none() && user.structured_id.is_none());
+    assert!(serde_json::from_value::<MeetingAgentEventUser>(serde_json::json!({"id":42})).is_err());
+}
+
+#[test]
+fn vc_bot_old_payloads_do_not_invent_new_fields() {
+    use larksuite_oapi_sdk_rs::events::vc::{CountdownItem, P2VcBotMeetingActivityV1};
+
+    let payload = serde_json::json!({"meeting_activity_items": [{
+        "activity_event_type": "magic_share_started", "magic_share_started_items": [{"share_id": "old"}]
+    }]});
+    let event: P2VcBotMeetingActivityV1 = serde_json::from_value(payload.clone()).unwrap();
+    let item = &event.meeting_activity_items.as_ref().unwrap()[0];
+    assert!(item.countdown_items.is_none());
+    assert!(
+        item.magic_share_started_items.as_ref().unwrap()[0]
+            .start_reason
+            .is_none()
+    );
+    assert_eq!(serde_json::to_value(event).unwrap(), payload);
+    let countdown: CountdownItem = serde_json::from_value(serde_json::json!({
+        "action": "ENDED", "operator": null, "reminders_before_end_in_second": []
+    }))
+    .unwrap();
+    assert!(countdown.operator.is_none());
+    assert_eq!(countdown.reminders_before_end_in_second, Some(vec![]));
+}
+
+#[test]
 fn vc_meeting_events_have_typed_meeting_and_operator() {
     let event: P2VcMeetingStartedV1 = serde_json::from_value(serde_json::json!({
         "meeting": {

@@ -1,5 +1,6 @@
 //! Video Conference (VC) v1 event handlers.
 
+use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize};
 
 // ── Event payload types ──
@@ -212,17 +213,77 @@ pub struct TimeConfig {
 }
 
 /// A meeting participant reported by a VC bot webhook.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(from = "MeetingAgentEventUserWire")]
 #[non_exhaustive]
 pub struct MeetingAgentEventUser {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Legacy string-valued wire ID. Mutually exclusive with `structured_id`.
     pub id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    /// Structured wire ID used by newer webhooks; preserves all ID namespaces.
+    /// Serialized under `id`, never as a separate `structured_id` wire field.
+    pub structured_id: Option<UserId>,
     pub user_type: Option<i32>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_role: Option<i32>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_name: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum MeetingAgentEventUserId {
+    Legacy(String),
+    Structured(UserId),
+}
+
+#[derive(Deserialize)]
+struct MeetingAgentEventUserWire {
+    id: Option<MeetingAgentEventUserId>,
+    user_type: Option<i32>,
+    user_role: Option<i32>,
+    user_name: Option<String>,
+}
+
+impl From<MeetingAgentEventUserWire> for MeetingAgentEventUser {
+    fn from(wire: MeetingAgentEventUserWire) -> Self {
+        let (id, structured_id) = match wire.id {
+            Some(MeetingAgentEventUserId::Legacy(id)) => (Some(id), None),
+            Some(MeetingAgentEventUserId::Structured(id)) => (None, Some(id)),
+            None => (None, None),
+        };
+        Self {
+            id,
+            structured_id,
+            user_type: wire.user_type,
+            user_role: wire.user_role,
+            user_name: wire.user_name,
+        }
+    }
+}
+
+impl Serialize for MeetingAgentEventUser {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        if self.id.is_some() && self.structured_id.is_some() {
+            return Err(serde::ser::Error::custom(
+                "VC bot user cannot have both id and structured_id",
+            ));
+        }
+        let mut map = serializer.serialize_map(None)?;
+        if let Some(id) = &self.id {
+            map.serialize_entry("id", id)?;
+        }
+        if let Some(id) = &self.structured_id {
+            map.serialize_entry("id", id)?;
+        }
+        if let Some(user_type) = self.user_type {
+            map.serialize_entry("user_type", &user_type)?;
+        }
+        if let Some(user_role) = self.user_role {
+            map.serialize_entry("user_role", &user_role)?;
+        }
+        if let Some(user_name) = &self.user_name {
+            map.serialize_entry("user_name", user_name)?;
+        }
+        map.end()
+    }
 }
 
 /// The meeting information supplied to VC bot webhooks.
@@ -352,6 +413,9 @@ pub struct MagicShareStartedItem {
     pub share_doc: Option<ShareDoc>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time: Option<String>,
+    /// `share_started` or `share_detected`; absence means `share_started`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_reason: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -384,6 +448,31 @@ pub struct DocumentContextChangedItem {
     pub element_preview: Option<ElementPreview>,
 }
 
+/// A countdown state change delivered to a VC bot.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct CountdownItem {
+    /// SET, PROLONG, END_IN_ADVANCE, CLOSE, ENDED, or REMIND.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<MeetingAgentEventUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub need_play_audio_at_end: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reminders_before_end_in_second: Option<Vec<i32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seq_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub countdown_set_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remain_minutes: Option<i32>,
+}
+
 /// One activity record delivered to a VC bot while it is in a meeting.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -406,6 +495,8 @@ pub struct MeetingActivityItem {
     pub magic_share_ended_items: Option<Vec<MagicShareEndedItem>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub document_context_changed_items: Option<Vec<DocumentContextChangedItem>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub countdown_items: Option<Vec<CountdownItem>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

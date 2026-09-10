@@ -190,6 +190,8 @@ mod drive_like;
 mod drive_media;
 #[path = "generated_service_smoke/drive/permission.rs"]
 mod drive_permission;
+#[path = "generated_service_smoke/drive_token.rs"]
+mod drive_token;
 #[path = "generated_service_smoke/ehr.rs"]
 mod ehr;
 #[path = "generated_service_smoke/ext.rs"]

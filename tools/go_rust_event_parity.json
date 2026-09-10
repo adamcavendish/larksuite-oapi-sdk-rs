@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "go_event_catalog_sha256": "7ca31f16ae10b68010e0d363c26151b1566f6c00c44e086ef788c83e6870618c",
+  "go_event_catalog_sha256": "77c6a7a64caab95b1cd6209fe088e235e44357c06c206dc00235c99db7978ce9",
   "summary": {
     "go_typed_event_keys": 227,
     "rust_typed_event_keys": 234,

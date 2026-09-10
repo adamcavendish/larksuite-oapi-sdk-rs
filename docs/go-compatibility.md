@@ -27,16 +27,16 @@ the same transport behavior for its curated newer-Go-SDK endpoint set. See
 ## Compatibility metadata and service contracts
 
 The GoCompatibility endpoint metadata is generated from the Go SDK's
-`v3.6.1..v3.10.0` resource delta. `GoV397*` names and `go_v397()` accessors
+`v3.6.1..v3.12.0` resource delta. `GoV397*` names and `go_v397()` accessors
 remain as deprecated aliases. Regenerate or verify it with:
 
 ```sh
 GO_SDK_DIR=/path/to/larksuite-oapi-sdk-go
-go run ./tools/generate_go_compatibility_metadata.go --go-sdk "$GO_SDK_DIR" --from v3.6.1 --to v3.10.0
+go run ./tools/generate_go_compatibility_metadata.go --go-sdk "$GO_SDK_DIR" --from v3.6.1 --to v3.12.0
 just go-compatibility-check "$GO_SDK_DIR"
 ```
 
-The checked-in Go service contract catalog records the complete Go `v3.10.0`
+The checked-in Go service contract catalog records the complete Go `v3.12.0`
 request surface: source resource, receiver, operation, HTTP method, path, token
 types, and upload behavior. It is a reproducible tooling input for future
 service generation; it does not alter runtime request dispatch or generate Rust
@@ -45,7 +45,7 @@ pinned Go SDK has not generated, such as Application v7 slash commands.
 
 ```sh
 GO_SDK_DIR=/path/to/larksuite-oapi-sdk-go
-go run ./tools/generate_go_service_catalog.go --go-sdk "$GO_SDK_DIR" --revision v3.10.0
+go run ./tools/generate_go_service_catalog.go --go-sdk "$GO_SDK_DIR" --revision v3.12.0
 just go-service-catalog-check "$GO_SDK_DIR"
 go run ./tools/generate_go_rust_service_parity.go
 just go-rust-service-parity-check
@@ -69,7 +69,7 @@ field shapes.
 
 ```sh
 GO_SDK_DIR=/path/to/larksuite-oapi-sdk-go
-go run ./tools/generate_go_event_catalog.go --go-sdk "$GO_SDK_DIR" --revision v3.10.0
+go run ./tools/generate_go_event_catalog.go --go-sdk "$GO_SDK_DIR" --revision v3.12.0
 go run ./tools/generate_go_rust_event_parity.go
 just go-event-catalog-check "$GO_SDK_DIR"
 just go-rust-event-parity-check
