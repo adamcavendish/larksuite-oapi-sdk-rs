@@ -3963,6 +3963,27 @@ pub struct BotResource<'a> {
 }
 
 impl BotResource<'_> {
+    /// Controls an in-meeting countdown using a long `meeting_id`.
+    ///
+    /// Actions are `set`, `prolong`, `end_in_advance`, and `close_window`.
+    /// `duration` and `reminder_before_end` are minute values encoded as strings.
+    pub async fn countdown(
+        &self,
+        body: impl Serialize,
+        option: &RequestOption,
+    ) -> Result<crate::service::common::JsonResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/vc/v1/bots/countdown",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
     pub async fn events(
         &self,
         query: &ListBotEventQuery<'_>,

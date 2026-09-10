@@ -130,7 +130,7 @@ mod tests {
 
     #[test]
     fn generated_endpoint_metadata_is_valid() {
-        assert_eq!(GoCompatibilityEndpoint::ALL.len(), 194);
+        assert_eq!(GoCompatibilityEndpoint::ALL.len(), 195);
         for endpoint in GoCompatibilityEndpoint::ALL {
             let meta = endpoint.meta();
             assert!(meta.path.starts_with("/open-apis/"));
@@ -180,6 +180,29 @@ mod tests {
             message_search.supported_access_token_types,
             &[AccessTokenType::User, AccessTokenType::Tenant]
         );
+    }
+
+    #[test]
+    fn v3_12_0_vc_contracts_accept_user_and_tenant_tokens() {
+        for (endpoint, path) in [
+            (
+                GoCompatibilityEndpoint::PostVcV1BotsCountdown,
+                "/open-apis/vc/v1/bots/countdown",
+            ),
+            (
+                GoCompatibilityEndpoint::PostVcV1MeetingsSearch,
+                "/open-apis/vc/v1/meetings/search",
+            ),
+        ] {
+            let meta = endpoint.meta();
+            assert_eq!(meta.method, http::Method::POST);
+            assert_eq!(meta.path, path);
+            assert_eq!(
+                meta.supported_access_token_types,
+                &[AccessTokenType::User, AccessTokenType::Tenant]
+            );
+            assert!(!meta.file_upload);
+        }
     }
 
     #[test]

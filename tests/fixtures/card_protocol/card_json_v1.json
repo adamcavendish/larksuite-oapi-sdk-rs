@@ -16,7 +16,7 @@
     "go_sdk": {
       "role": "implementation_cross_check",
       "repository": "https://github.com/larksuite/oapi-sdk-go.git",
-      "revision": "dbeec3d5f3afa4558d5cb22d93506c570e25385a",
+      "revision": "99927aa13e271ea9fe03591204aad7bc6a2d869c",
       "artifacts": [
         {
           "path": "card/model.go",

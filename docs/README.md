@@ -29,6 +29,8 @@ examples, features, and coverage.
   reads and partial updates with user or tenant credentials.
 - [Base v3 forms](base-v3-forms.md) covers form lifecycle, form questions,
   and the destructive question-removal contract.
+- [Base visible fields](base-visible-fields.md) covers view and form field
+  visibility and full-list ordering.
 - [Base v3 workflows](base-v3-workflows.md) covers workflow lifecycle routes
   and their intentionally flexible workflow-definition JSON boundary.
 - [Base v3 dashboards](base-v3-dashboards.md) covers dashboard and dashboard
@@ -37,11 +39,13 @@ examples, features, and coverage.
   covers extension configuration, cell updates, and partial batch share-link
   results.
 - [VC meeting bots](vc-bots.md) covers event queries and outbound meeting join,
-  leave, message, and active-meeting operations.
+  leave, message, countdown, and active-meeting operations.
 - [Unified KMS](unified-kms.md) covers tenant-scoped autonomous-key lifecycle,
   deletion plans, recovery, and import material.
 - [Drive media preview downloads](drive-media-preview.md) covers selecting and
   downloading a Drive preview artifact with user or tenant credentials.
+- [Drive token lookup](drive-token-lookup.md) covers underlying object metadata
+  resolution without implicit download or export.
 - [Docs AI document content](docs-ai.md) covers modern Docx content fetches,
   updates, and version-history operations with user or bot credentials.
 - [Slides AI presentation content](slides-ai.md) covers XML presentation,

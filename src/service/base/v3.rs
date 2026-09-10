@@ -778,6 +778,7 @@ struct ListWorkflowReqBody<'a> {
 }
 
 pub struct V3<'a> {
+    pub view: ViewResource<'a>,
     pub record: RecordResource<'a>,
     pub field_extension: FieldExtensionResource<'a>,
     pub template: TemplateResource<'a>,
@@ -797,6 +798,7 @@ pub struct V3<'a> {
 impl<'a> V3<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
+            view: ViewResource { config },
             record: RecordResource { config },
             field_extension: FieldExtensionResource { config },
             template: TemplateResource { config },
@@ -812,6 +814,76 @@ impl<'a> V3<'a> {
             page: BaseAppPageResource { config },
             block: BaseAppBlockResource { config },
         }
+    }
+}
+
+/// Replaces the complete ordered list of visible field IDs, including in forms.
+/// Omitted fields become hidden; the server may force the primary field first.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct SetViewVisibleFieldsReqBody {
+    pub visible_fields: Vec<String>,
+}
+
+impl SetViewVisibleFieldsReqBody {
+    pub fn new(fields: impl IntoIterator<Item = impl Into<String>>) -> Self {
+        Self {
+            visible_fields: fields.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+/// Visible-field configuration for Base v3 views.
+pub struct ViewResource<'a> {
+    config: &'a Config,
+}
+
+impl ViewResource<'_> {
+    pub async fn get_visible_fields(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        view_id: &str,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/views/:view_id/visible_fields",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("view_id", view_id)
+        .send_json()
+        .await
+    }
+
+    /// Sends a full replacement, not a partial ordering or question-ID list.
+    pub async fn set_visible_fields(
+        &self,
+        base_token: &str,
+        table_id: &str,
+        view_id: &str,
+        body: &SetViewVisibleFieldsReqBody,
+        option: &RequestOption,
+    ) -> Result<JsonResp, LarkError> {
+        let option = with_app_id(self.config, option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::PUT,
+            "/open-apis/base/v3/bases/:base_token/tables/:table_id/views/:view_id/visible_fields",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            &option,
+        )
+        .path_param("base_token", base_token)
+        .path_param("table_id", table_id)
+        .path_param("view_id", view_id)
+        .json_body(body)?
+        .send_json()
+        .await
     }
 }
 

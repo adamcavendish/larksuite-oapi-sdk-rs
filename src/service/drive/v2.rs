@@ -8,6 +8,18 @@ use crate::service::common::{PageQuery, RestRequest};
 
 // ── Domain types ──
 
+/// The underlying object identified by a Drive or Wiki token.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct QueryFileByTokenRespData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub obj_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub obj_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_wiki_token: Option<bool>,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct FileLike {
@@ -78,10 +90,36 @@ pub struct FileLikeListData {
 }
 
 impl_resp!(FileLikeListResp, FileLikeListData);
+impl_resp!(QueryFileByTokenResp, QueryFileByTokenRespData);
 impl_resp!(GetPermissionPublicV2Resp, PermissionPublicV2);
 impl_resp!(PatchPermissionPublicV2Resp, PermissionPublicV2);
 
 // ── Resources ──
+
+pub struct FileResource<'a> {
+    config: &'a Config,
+}
+
+impl FileResource<'_> {
+    /// Resolves token metadata; it does not grant access to download the object.
+    /// Requires `drive:drive.metadata:readonly` and user or tenant credentials.
+    pub async fn query_by_token(
+        &self,
+        token: &str,
+        option: &RequestOption,
+    ) -> Result<QueryFileByTokenResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/drive/v2/files/query_by_token",
+            vec![AccessTokenType::User, AccessTokenType::Tenant],
+            option,
+        )
+        .query("token", token)
+        .send_response::<QueryFileByTokenRespData, QueryFileByTokenResp>()
+        .await
+    }
+}
 
 pub struct FileLikeResource<'a> {
     config: &'a Config,
@@ -270,6 +308,7 @@ impl<'a> PermissionPublicV2Resource<'a> {
 // ── Version struct ──
 
 pub struct V2<'a> {
+    pub file: FileResource<'a>,
     pub file_like: FileLikeResource<'a>,
     pub permission_public: PermissionPublicV2Resource<'a>,
 }
@@ -277,6 +316,7 @@ pub struct V2<'a> {
 impl<'a> V2<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
+            file: FileResource { config },
             file_like: FileLikeResource { config },
             permission_public: PermissionPublicV2Resource { config },
         }

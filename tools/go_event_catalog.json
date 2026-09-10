@@ -2,8 +2,8 @@
   "schema_version": 1,
   "source": {
     "sdk": "larksuite-oapi-sdk-go",
-    "revision": "v3.10.0",
-    "commit": "dbeec3d5f3afa4558d5cb22d93506c570e25385a",
+    "revision": "v3.12.0",
+    "commit": "99927aa13e271ea9fe03591204aad7bc6a2d869c",
     "glob": "event/dispatcher/*_event_dispatch.go"
   },
   "registration_count": 219,

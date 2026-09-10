@@ -2,11 +2,11 @@
   "schema_version": 1,
   "source": {
     "sdk": "larksuite-oapi-sdk-go",
-    "revision": "v3.10.0",
-    "commit": "dbeec3d5f3afa4558d5cb22d93506c570e25385a",
+    "revision": "v3.12.0",
+    "commit": "99927aa13e271ea9fe03591204aad7bc6a2d869c",
     "glob": "service/*/*/resource.go"
   },
-  "endpoint_count": 1642,
+  "endpoint_count": 1643,
   "endpoints": [
     {
       "resource_file": "service/acs/v1/resource.go",
@@ -17690,6 +17690,18 @@
     {
       "resource_file": "service/vc/v1/resource.go",
       "receiver": "bot",
+      "operation": "Countdown",
+      "method": "POST",
+      "path": "/open-apis/vc/v1/bots/countdown",
+      "token_types": [
+        "User",
+        "Tenant"
+      ],
+      "file_upload": false
+    },
+    {
+      "resource_file": "service/vc/v1/resource.go",
+      "receiver": "bot",
       "operation": "Events",
       "method": "GET",
       "path": "/open-apis/vc/v1/bots/events",
@@ -17883,7 +17895,8 @@
       "method": "POST",
       "path": "/open-apis/vc/v1/meetings/search",
       "token_types": [
-        "User"
+        "User",
+        "Tenant"
       ],
       "file_upload": false
     },
