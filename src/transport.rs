@@ -39,12 +39,21 @@ pub(crate) fn request_stream<'a>(
     api_req: &'a ApiReq,
     option: &'a RequestOption,
 ) -> BoxFuture<'a, Result<StreamResp, LarkError>> {
+    request_stream_with_error_limit(config, api_req, option, None)
+}
+
+pub(crate) fn request_stream_with_error_limit<'a>(
+    config: &'a Config,
+    api_req: &'a ApiReq,
+    option: &'a RequestOption,
+    error_limit: Option<usize>,
+) -> BoxFuture<'a, Result<StreamResp, LarkError>> {
     Box::pin(async move {
         let span = request_span(api_req);
 
         let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
 
-        do_request_stream(config, api_req, option, token_type)
+        do_request_stream(config, api_req, option, token_type, error_limit)
             .instrument(span)
             .await
     })
@@ -336,9 +345,22 @@ async fn do_request_stream(
     api_req: &ApiReq,
     option: &RequestOption,
     token_type: AccessTokenType,
+    error_limit: Option<usize>,
 ) -> Result<StreamResp, LarkError> {
     retry_request(config, option, token_type, |bearer| async move {
-        let resp = raw_send_stream(config, api_req, option, token_type, bearer.as_deref()).await?;
+        let resp = if error_limit.is_some() {
+            raw_send_stream_inner(
+                config,
+                api_req,
+                option,
+                bearer.as_deref(),
+                false,
+                error_limit,
+            )
+            .await?
+        } else {
+            raw_send_stream(config, api_req, option, token_type, bearer.as_deref()).await?
+        };
         classify_stream_response(config, resp).await
     })
     .await
@@ -535,7 +557,7 @@ pub(crate) async fn raw_send_stream(
     _token_type: AccessTokenType,
     bearer_token: Option<&str>,
 ) -> Result<StreamResp, LarkError> {
-    raw_send_stream_inner(config, api_req, option, bearer_token, false).await
+    raw_send_stream_inner(config, api_req, option, bearer_token, false, None).await
 }
 
 struct ReceivedResponse {
@@ -597,6 +619,7 @@ async fn raw_send_stream_inner(
     option: &RequestOption,
     bearer_token: Option<&str>,
     absolute_url: bool,
+    error_limit: Option<usize>,
 ) -> Result<StreamResp, LarkError> {
     let ReceivedResponse {
         full_url,
@@ -606,7 +629,19 @@ async fn raw_send_stream_inner(
     } = receive_response(config, api_req, option, bearer_token, absolute_url).await?;
 
     if !(200..300).contains(&status_code) && is_json_header(&header) {
-        let raw_body = response.bytes().await.map_err(LarkError::Http)?.to_vec();
+        let raw_body = if let Some(limit) = error_limit {
+            let mut body = StreamBody::streaming(response.into_bytes_stream());
+            let mut bytes = Vec::new();
+            while bytes.len() < limit {
+                let Some(chunk) = body.next_chunk().await? else {
+                    break;
+                };
+                bytes.extend_from_slice(&chunk[..chunk.len().min(limit - bytes.len())]);
+            }
+            bytes
+        } else {
+            response.bytes().await.map_err(LarkError::Http)?.to_vec()
+        };
         log_buffered_response(config, &full_url, status_code, &header, &raw_body);
 
         return Ok(StreamResp {
