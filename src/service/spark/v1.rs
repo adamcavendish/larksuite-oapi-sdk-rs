@@ -1,8 +1,12 @@
+//! Spark application, storage and database-sync APIs.
+//!
+#![doc = include_str!("../../../docs/spark-app-export.md")]
+
 use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{FormDataField, ReqBody, RequestOption};
-use crate::service::common::{DownloadResp, JsonResp, PageQuery, RestRequest};
+use crate::service::common::{DownloadResp, DownloadStreamResp, JsonResp, PageQuery, RestRequest};
 use crate::service::go_compatibility::{GoCompatibility, GoCompatibilityEndpoint};
 use serde::Serialize;
 
@@ -38,6 +42,28 @@ pub type DisableDbSyncResp = JsonResp;
 pub type DeleteDbSyncResp = JsonResp;
 
 const EMPTY_PARAMS: [(&str, &str); 0] = [];
+
+/// Exactly one app locator for source export. Empty locators are rejected locally.
+#[derive(Debug, Clone, Copy, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ExportAppLocator<'a> {
+    AppId(&'a str),
+    MetaToken(&'a str),
+}
+
+/// Export failures retain HTTP metadata and a bounded response-body prefix.
+#[derive(Debug, thiserror::Error)]
+pub enum ExportAppError {
+    #[error(transparent)]
+    Request(#[from] LarkError),
+    #[error("Spark app export returned a non-archive response (HTTP {status})", status = .api_resp.status_code)]
+    InvalidResponse {
+        /// At most 4 KiB of the response body is retained in `raw_body`.
+        api_resp: Box<crate::resp::ApiResp>,
+        /// Platform error, when the bounded body is a complete error envelope.
+        code_error: Option<Box<crate::resp::CodeError>>,
+    },
+}
 
 #[derive(Debug, Clone, Copy, Default)]
 #[non_exhaustive]
@@ -579,6 +605,76 @@ impl<'a> DbSyncResource<'a> {
 }
 
 impl<'a> AppResource<'a> {
+    /// Stream app source using user credentials with `spark:app:read`.
+    ///
+    /// Only successful ZIP/octet-stream responses are accepted. Other bodies
+    /// are read up to 4 KiB and returned as [`ExportAppError::InvalidResponse`].
+    /// This validates response metadata, not ZIP contents. No files are created.
+    pub async fn export(
+        &self,
+        locator: ExportAppLocator<'_>,
+        option: &RequestOption,
+    ) -> Result<DownloadStreamResp, ExportAppError> {
+        let (ExportAppLocator::AppId(value) | ExportAppLocator::MetaToken(value)) = locator;
+        if value.trim().is_empty() {
+            return Err(
+                LarkError::IllegalParam("app export locator must not be empty".into()).into(),
+            );
+        }
+        if option
+            .user_access_token
+            .as_deref()
+            .is_none_or(|token| token.trim().is_empty())
+        {
+            return Err(
+                LarkError::IllegalParam("app export requires a user access token".into()).into(),
+            );
+        }
+        const ERROR_LIMIT: usize = 4096;
+        let mut response = RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/export",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .json_body(&locator)?
+        .download_stream_with_error_limit(Some(ERROR_LIMIT))
+        .await?;
+        let content_type = response
+            .api_resp
+            .header
+            .get(http::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok())
+            .unwrap_or("")
+            .split(';')
+            .next()
+            .unwrap_or("")
+            .trim();
+        if (200..300).contains(&response.api_resp.status_code)
+            && (content_type.eq_ignore_ascii_case("application/zip")
+                || content_type.eq_ignore_ascii_case("application/octet-stream"))
+        {
+            return Ok(response);
+        }
+        let mut body = Vec::new();
+        while body.len() < ERROR_LIMIT {
+            let Some(chunk) = response.body.next_chunk().await? else {
+                break;
+            };
+            body.extend_from_slice(&chunk[..chunk.len().min(ERROR_LIMIT - body.len())]);
+        }
+        let code_error = serde_json::from_slice::<crate::resp::CodeError>(&body)
+            .ok()
+            .filter(|error| !error.success())
+            .map(Box::new);
+        response.api_resp.raw_body = body;
+        Err(ExportAppError::InvalidResponse {
+            api_resp: Box::new(response.api_resp),
+            code_error,
+        })
+    }
+
     pub async fn create(
         &self,
         body: &impl Serialize,

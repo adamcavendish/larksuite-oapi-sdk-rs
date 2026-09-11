@@ -19,6 +19,8 @@ examples, features, and coverage.
   authorization-code exchange, refresh-token rotation, and user identity lookup.
 - [Mail v1 user-mailbox threads](mail-v1-threads.md) covers conversation reads
   and batch label, folder, and Trash operations with user or tenant credentials.
+- [Spark app export](spark-app-export.md) covers streaming app source archives
+  and bounded handling of export error responses.
 - [Spark db sync](spark-db-sync.md) covers user-token Base-to-database sync
   previews, task lifecycle operations, and opt-in live verification.
 - [Base v3 record reads](base-v3-records.md) covers CLI-aligned Base record

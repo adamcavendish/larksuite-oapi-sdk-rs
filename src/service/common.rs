@@ -238,9 +238,26 @@ impl<'a> RestRequest<'a> {
     }
 
     pub(crate) async fn download_stream(self) -> Result<DownloadStreamResp, LarkError> {
+        self.download_stream_with_error_limit(None).await
+    }
+
+    pub(crate) async fn download_stream_with_error_limit(
+        self,
+        error_limit: Option<usize>,
+    ) -> Result<DownloadStreamResp, LarkError> {
         let mut option = self.option.clone();
         option.file_download = true;
-        let stream_resp = transport::request_stream(self.config, &self.api_req, &option).await?;
+        let stream_resp = if error_limit.is_some() {
+            transport::request_stream_with_error_limit(
+                self.config,
+                &self.api_req,
+                &option,
+                error_limit,
+            )
+            .await?
+        } else {
+            transport::request_stream(self.config, &self.api_req, &option).await?
+        };
         let file_name = stream_resp.api_resp.file_name_by_header();
         let content_length = stream_resp.api_resp.content_length();
 
