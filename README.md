@@ -41,7 +41,7 @@ connection.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.3.11"
+larksuite-oapi-sdk-rs = "0.3.12"
 ```
 
 The minimum supported Rust version is 1.95.0.
@@ -89,11 +89,15 @@ for the complete setup.
 | Call a typed REST endpoint | [`examples/send_message.rs`](examples/send_message.rs) or [generated examples](examples/README.md) |
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
 | Control VC meeting bots | [VC meeting bots](docs/vc-bots.md) |
+| Export Spark app source | [Spark app export](docs/spark-app-export.md) |
+| Read or modify Mail conversations | [Mail user-mailbox threads](docs/mail-v1-threads.md) |
+| Resolve Drive object metadata by token | [Drive token lookup](docs/drive-token-lookup.md) |
 | Manage Unified KMS autonomous keys | [Unified KMS](docs/unified-kms.md) |
 | Discover or manage BaseApps | [`examples/base_v3_app_read.rs`](examples/base_v3_app_read.rs) and [Base v3 application mode](docs/base-v3-apps.md) |
 | Manage Base dashboards or dashboard blocks | [Base v3 dashboards](docs/base-v3-dashboards.md) |
 | Read or update Base dashboard or form sharing | [Base v3 sharing](docs/base-v3-sharing.md) |
 | Manage Base v3 forms and questions | [Base v3 forms](docs/base-v3-forms.md) |
+| Manage Base workflows or visible fields | [Base workflows](docs/base-v3-workflows.md) and [Base visible fields](docs/base-visible-fields.md) |
 | Configure a Base field extension or share records | [Base v3 field extensions and record share links](docs/base-v3-field-extensions.md) |
 | Read or update modern Docx content | [`examples/docs_ai_fetch.rs`](examples/docs_ai_fetch.rs) and [Docs AI document content](docs/docs-ai.md) |
 | Read, edit, or render Slides AI presentations | [`examples/slides_ai_read.rs`](examples/slides_ai_read.rs), [`examples/slides_ai_render.rs`](examples/slides_ai_render.rs), and [Slides AI presentation content](docs/slides-ai.md) |
@@ -124,7 +128,13 @@ for the complete setup.
 - [OAuth SSO](docs/oauth-sso.md): Feishu and Lark browser login, PKCE, token
   refresh, and application-owned session handling.
 - [VC meeting bots](docs/vc-bots.md): event queries and outbound meeting join,
-  leave, message, and active-meeting operations.
+  leave, message, countdown, and active-meeting operations.
+- [Spark app export](docs/spark-app-export.md): streaming source archives,
+  response validation, and app-type-dependent source snapshots.
+- [Mail user-mailbox threads](docs/mail-v1-threads.md): conversation reads
+  and batch label, folder, and Trash operations.
+- [Drive token lookup](docs/drive-token-lookup.md): underlying object metadata
+  resolution without implicit download or export.
 - [Unified KMS](docs/unified-kms.md): tenant-scoped autonomous-key lifecycle,
   deletion plans, recovery, and import material.
 - [Base v3 application mode](docs/base-v3-apps.md): user-token workspace,
@@ -135,10 +145,14 @@ for the complete setup.
   reads and partial updates with user or tenant credentials.
 - [Base v3 forms](docs/base-v3-forms.md): form lifecycle and form-question
   operations, including explicit destructive-delete semantics.
+- [Base v3 workflows](docs/base-v3-workflows.md): workflow lifecycle with
+  caller-owned definition bodies.
+- [Base visible fields](docs/base-visible-fields.md): full-list view and form
+  field visibility and ordering.
 - [Base v3 field extensions and record share links](docs/base-v3-field-extensions.md):
   typed extension configuration, cell updates, and batch record links.
 - [Docs AI document content](docs/docs-ai.md): modern Docx content fetches,
-  updates, and version-history operations.
+  updates, asynchronous-task reads, and version-history operations.
 - [Slides AI presentation content](docs/slides-ai.md): XML presentation and
   slide operations with version-history support.
 - [Documentation index](docs/README.md): detailed guides and runnable examples.
@@ -179,7 +193,7 @@ separately does not enable the `channel` runtime API.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.3.11", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.3.12", features = ["ws", "axum"] }
 ```
 
 ## API Coverage
