@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+## [0.3.12] - 2026-09-12
+
+### REST service coverage
+
+- Added Spark app source export by app ID or share token, with streaming
+  archive responses and bounded handling of HTTP 200 JSON/text errors.
+- Added VC meeting-bot event queries, join, leave, message, active-meeting,
+  and countdown operations; meeting search now supports user and tenant tokens.
+- Added tenant-scoped Unified KMS autonomous-key lifecycle, deletion plans,
+  recovery, and import-material operations.
+- Added Base v3 dashboards and dashboard blocks, chart data and layout
+  operations, forms and questions, workflow lifecycle, and ordered view/form
+  visible-field reads and updates.
+- Added Mail user-mailbox thread reads and batch label, folder, and Trash
+  operations with user or tenant credentials.
+- Added Docs AI asynchronous-task reads, Wiki node lookup by token, and
+  Drive v2 object metadata lookup by token.
+- Added an opt-in Slides AI XML-lint request-body wrapper without changing
+  existing generic write defaults.
+
+### Reliability and compatibility
+
+- Fixed silent-peer and ping-write WebSocket failures so stalled sessions
+  enter the existing reconnect lifecycle.
+- Isolated app and tenant token cache entries by an app-secret fingerprint
+  so secret rotation cannot reuse another credential's cached token.
+- Preserved VC countdown items, magic-share start reasons, and structured
+  user IDs while retaining legacy string-ID access.
+- Aligned Go service/event metadata and card protocol reference revisions
+  with Go SDK v3.12.0.
+
+### Documentation
+
+- Added guides and request-contract tests for the new service workflows,
+  including export error handling, form deletion semantics, and caller-owned
+  orchestration and retry boundaries.
+
 ## [0.3.11] - 2026-08-29
 
 ### Channel
@@ -590,6 +627,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.12]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.12
 [0.3.11]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.11
 [0.3.10]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.10
 [0.3.9]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.9
