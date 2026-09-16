@@ -30,8 +30,19 @@ while let Some(chunk) = export.body.next_chunk().await? {
 The response exposes HTTP metadata, an optional server-supplied filename and
 content length, and a `DownloadBody`. Filename metadata is untrusted: the SDK
 does not create paths or extract archives. Only 2xx responses explicitly marked
-`application/zip` or `application/octet-stream` are accepted. This is a
-content-type check, not ZIP integrity validation.
+with one of these media types are accepted:
+
+- `application/zip`
+- `application/octet-stream`
+- `application/x-zip-compressed`
+- `binary/octet-stream`
+- `application/force-download`
+
+Matching is case-insensitive and ignores media-type parameters. The binary
+aliases allow exports relabelled by gateways without accepting every non-JSON
+response. Missing or unrecognized Content-Type values and text/JSON responses
+(including structured `+json` types) are still rejected. This is a content-type
+check, not ZIP integrity validation; a mislabeled body can still pass.
 
 Non-archive responses, including HTTP 200 JSON/text failures, return
 `ExportAppError::InvalidResponse` with HTTP status/headers, up to 4 KiB of body
@@ -52,5 +63,8 @@ client selects one transport attempt.
 Contract source: official Lark CLI commit `0493db0c`, in
 `shortcuts/apps/apps_export.go` (request, archive/error handling and source
 semantics). This CLI-derived endpoint is not in the pinned Go v3.12.0 catalog.
+The additional binary aliases follow the compatibility cases in CLI commit
+`2ca601ce`. Unlike that CLI revision, the SDK retains rejection of missing
+Content-Type and HTTP 200 text errors instead of accepting all non-JSON bodies.
 Mock tests verify the request and streaming contracts; live authorization,
 app-type availability and exported content require separate platform testing.

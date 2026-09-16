@@ -607,8 +607,11 @@ impl<'a> DbSyncResource<'a> {
 impl<'a> AppResource<'a> {
     /// Stream app source using user credentials with `spark:app:read`.
     ///
-    /// Only successful ZIP/octet-stream responses are accepted. Other bodies
-    /// are read up to 4 KiB and returned as [`ExportAppError::InvalidResponse`].
+    /// Only 2xx responses marked `application/zip`, `application/octet-stream`,
+    /// `application/x-zip-compressed`, `binary/octet-stream`, or
+    /// `application/force-download` are accepted (case-insensitive, ignoring
+    /// parameters). Other bodies, including those with no Content-Type, are read
+    /// up to 4 KiB and returned as [`ExportAppError::InvalidResponse`].
     /// This validates response metadata, not ZIP contents. No files are created.
     pub async fn export(
         &self,
@@ -653,7 +656,10 @@ impl<'a> AppResource<'a> {
             .trim();
         if (200..300).contains(&response.api_resp.status_code)
             && (content_type.eq_ignore_ascii_case("application/zip")
-                || content_type.eq_ignore_ascii_case("application/octet-stream"))
+                || content_type.eq_ignore_ascii_case("application/octet-stream")
+                || content_type.eq_ignore_ascii_case("application/x-zip-compressed")
+                || content_type.eq_ignore_ascii_case("binary/octet-stream")
+                || content_type.eq_ignore_ascii_case("application/force-download"))
         {
             return Ok(response);
         }

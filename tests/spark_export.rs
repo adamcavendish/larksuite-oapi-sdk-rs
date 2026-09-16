@@ -136,10 +136,39 @@ async fn export_rejects_error_envelopes_and_preserves_status_and_metadata() {
             Some(40901),
         ),
         (200, "text/plain", "permission denied", None),
+        (
+            200,
+            "text/plain; detail=\"application/x-zip-compressed\"",
+            "permission denied",
+            None,
+        ),
+        (
+            200,
+            "application/force-download-extra",
+            "not an archive",
+            None,
+        ),
+        (200, "application/unknown", "not an archive", None),
+        (200, "", "PK-archive", None),
         (200, "", r#"{"code":999,"msg":"error"}"#, Some(999)),
+        (
+            200,
+            "application/problem+json",
+            r#"{"code":40901,"msg":"not published"}"#,
+            Some(40901),
+        ),
+        (
+            200,
+            "application/vnd.lark.error+json; charset=utf-8",
+            r#"{"code":40901,"msg":"not published"}"#,
+            Some(40901),
+        ),
         (200, "application/json", r#"{"code":0,"msg":"ok"}"#, None),
         (200, "application/json", "{broken", None),
         (403, "application/zip", "denied", None),
+        (403, "application/x-zip-compressed", "denied", None),
+        (403, "binary/octet-stream", "denied", None),
+        (403, "application/force-download", "denied", None),
         (404, "text/plain", "app not found", None),
         (413, "text/plain", "too large", None),
     ] {
@@ -173,13 +202,24 @@ async fn export_rejects_error_envelopes_and_preserves_status_and_metadata() {
 
 #[tokio::test]
 async fn export_returns_archive_before_body_finishes() {
-    let (addr, handle, _, release) = mock_server_with_gated_body(
-        200,
-        "Content-Type: application/zip\r\n",
-        "PK-first",
-        vec!["-last"],
-    )
-    .await;
+    for content_type in [
+        "application/zip",
+        "application/octet-stream",
+        "application/x-zip-compressed",
+        "binary/octet-stream",
+        "application/force-download",
+        "Application/X-Zip-Compressed; charset=binary",
+        "Binary/Octet-Stream; charset=binary",
+        "Application/Force-Download; charset=binary",
+    ] {
+        assert_streaming_archive(content_type).await;
+    }
+}
+
+async fn assert_streaming_archive(content_type: &str) {
+    let headers = format!("Content-Type: {content_type}\r\nX-Request-Id: archive-request\r\n");
+    let (addr, handle, _, release) =
+        mock_server_with_gated_body(200, &headers, "PK-first", vec!["-last"]).await;
     let mut response = tokio::time::timeout(
         Duration::from_secs(2),
         client(addr)
@@ -190,6 +230,10 @@ async fn export_returns_archive_before_body_finishes() {
     .await
     .expect("export must not buffer archive")
     .unwrap();
+    assert_eq!(response.api_resp.status_code, 200);
+    assert_eq!(response.api_resp.header["content-type"], content_type);
+    assert_eq!(response.api_resp.header["x-request-id"], "archive-request");
+    assert!(response.api_resp.raw_body.is_empty());
     let first = tokio::time::timeout(Duration::from_secs(2), response.body.next_chunk())
         .await
         .unwrap()
@@ -209,7 +253,13 @@ async fn export_returns_archive_before_body_finishes() {
 async fn export_error_reads_stop_at_limit_even_when_server_keeps_body_open() {
     static ERROR_BYTES: [u8; 4096] = [b'x'; 4096];
     let prefix = std::str::from_utf8(&ERROR_BYTES).unwrap();
-    for (status, content_type) in [(200, "text/plain"), (403, "application/json")] {
+    for (status, content_type) in [
+        (200, "text/plain"),
+        (403, "application/json"),
+        (403, "application/x-zip-compressed"),
+        (403, "binary/octet-stream"),
+        (403, "application/force-download"),
+    ] {
         let headers = format!("Content-Type: {content_type}\r\n");
         let (addr, handle, _, release) =
             mock_server_with_gated_body(status, &headers, prefix, vec!["never-read"]).await;
