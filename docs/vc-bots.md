@@ -9,6 +9,23 @@ Typed Webhook event registration for VC bots already lives in the event
 dispatcher (`on_p2_vc_bot_meeting_*_v1`); this resource complements it with
 outbound meeting control.
 
+## Reading in-meeting events
+
+`client.vc().bot.events(&query, option)` reads events from an active meeting.
+Keep the credential identity that discovered the `meeting_id`: a meeting found
+with a user token should be read with that user token, while a meeting found
+through the application-bot path should continue with a tenant token. For
+tenant-token reads, the application bot must still be in the meeting; switching
+identity or reading after the bot has left can result in an empty response or a
+platform permission error.
+
+Do not use this endpoint as a post-meeting event archive. Once a meeting has
+ended, retrieve the relevant meeting details or post-meeting artifact instead
+(for example, minutes, transcript, or recording), according to the capability
+and authorization available to the application. The SDK sends the supplied
+request and does not infer membership, switch tokens, or retry with another
+identity.
+
 ## Countdown control and events
 
 `client.vc().bot.countdown(body, option)` accepts a serializable JSON body:
