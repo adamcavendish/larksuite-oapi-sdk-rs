@@ -24,6 +24,13 @@ pub type UploadAppStorageResp = JsonResp;
 pub type UploadCompleteAppStorageResp = JsonResp;
 pub type UploadInitializeAppStorageResp = JsonResp;
 pub type UploadPartAppStorageResp = JsonResp;
+pub type ListFilesAppStorageResp = JsonResp;
+pub type GetFileAppStorageResp = JsonResp;
+pub type SignFileAppStorageResp = JsonResp;
+pub type GetFileQuotaAppStorageResp = JsonResp;
+pub type PreUploadFileAppStorageResp = JsonResp;
+pub type UploadFileCallbackAppStorageResp = JsonResp;
+pub type BatchRemoveFilesAppStorageResp = JsonResp;
 pub type BatchUpdateTableRecordsAppTableResp = JsonResp;
 pub type DeleteTableRecordsAppTableResp = JsonResp;
 pub type GetTableDetailAppTableResp = JsonResp;
@@ -163,6 +170,92 @@ pub struct DownloadAppStorageQuery<'a> {
     pub app_id: &'a str,
     pub file_key: Option<&'a str>,
     pub file_url: Option<&'a str>,
+}
+
+/// Query parameters for listing files in a Spark app's storage.
+///
+/// Timestamps are forwarded in the platform's RFC 3339 format. The SDK does
+/// not interpret relative dates or normalize them to a local timezone.
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListFilesAppStorageQuery<'a> {
+    pub app_id: &'a str,
+    pub page: PageQuery<'a>,
+    pub name: Option<&'a str>,
+    pub path: Option<&'a str>,
+    pub content_type: Option<&'a str>,
+    pub size_gt: Option<i64>,
+    pub size_lt: Option<i64>,
+    pub uploaded_since: Option<&'a str>,
+    pub uploaded_until: Option<&'a str>,
+}
+
+impl<'a> ListFilesAppStorageQuery<'a> {
+    pub fn new(app_id: &'a str) -> Self {
+        Self {
+            app_id,
+            ..Default::default()
+        }
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn name(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.name = value.into();
+        self
+    }
+
+    pub fn path(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.path = value.into();
+        self
+    }
+
+    pub fn content_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.content_type = value.into();
+        self
+    }
+
+    pub fn size_gt(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.size_gt = value.into();
+        self
+    }
+
+    pub fn size_lt(mut self, value: impl Into<Option<i64>>) -> Self {
+        self.size_lt = value.into();
+        self
+    }
+
+    pub fn uploaded_since(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.uploaded_since = value.into();
+        self
+    }
+
+    pub fn uploaded_until(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.uploaded_until = value.into();
+        self
+    }
+}
+
+/// Query parameters for looking up one Spark storage file by its remote path.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetFileAppStorageQuery<'a> {
+    pub app_id: &'a str,
+    pub path: &'a str,
+}
+
+impl<'a> GetFileAppStorageQuery<'a> {
+    pub fn new(app_id: &'a str, path: &'a str) -> Self {
+        Self { app_id, path }
+    }
 }
 
 impl<'a> DownloadAppStorageQuery<'a> {
@@ -862,6 +955,163 @@ pub struct AppStorageResource<'a> {
 }
 
 impl<'a> AppStorageResource<'a> {
+    /// List files stored by a Spark app.
+    pub async fn list_files(
+        &self,
+        query: &ListFilesAppStorageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListFilesAppStorageResp, LarkError> {
+        require_storage_user_access_token(option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/spark/v1/apps/:app_id/storage/file_list",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", query.app_id)
+        .page_query(query.page)
+        .query("name", query.name)
+        .query("path", query.path)
+        .query("type", query.content_type)
+        .query("size_gt", query.size_gt)
+        .query("size_lt", query.size_lt)
+        .query("uploaded_since", query.uploaded_since)
+        .query("uploaded_until", query.uploaded_until)
+        .send_json()
+        .await
+    }
+
+    /// Get one Spark storage file's metadata by its remote path.
+    pub async fn get_file(
+        &self,
+        query: &GetFileAppStorageQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetFileAppStorageResp, LarkError> {
+        require_storage_user_access_token(option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/spark/v1/apps/:app_id/storage/file",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", query.app_id)
+        .query("path", query.path)
+        .send_json()
+        .await
+    }
+
+    /// Create a temporary signed download URL for a storage file.
+    pub async fn sign_file(
+        &self,
+        app_id: &str,
+        body: &impl Serialize,
+        option: &RequestOption,
+    ) -> Result<SignFileAppStorageResp, LarkError> {
+        require_storage_user_access_token(option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/storage/file_sign",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(body)?
+        .send_json()
+        .await
+    }
+
+    /// Get the app's file-storage usage and quota reported by the platform.
+    pub async fn get_file_quota(
+        &self,
+        app_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetFileQuotaAppStorageResp, LarkError> {
+        require_storage_user_access_token(option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/spark/v1/apps/:app_id/storage/file_quota",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .send_json()
+        .await
+    }
+
+    /// Request a presigned upload URL and its upload ID.
+    ///
+    /// Upload the bytes to the returned external URL yourself, then pass its
+    /// returned ETag to [`Self::upload_file_callback`]. The SDK intentionally
+    /// does not forward Lark credentials to that URL.
+    pub async fn pre_upload_file(
+        &self,
+        app_id: &str,
+        body: &impl Serialize,
+        option: &RequestOption,
+    ) -> Result<PreUploadFileAppStorageResp, LarkError> {
+        require_storage_user_access_token(option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/storage/file_pre_upload",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(body)?
+        .send_json()
+        .await
+    }
+
+    /// Register a presigned upload using its platform-issued upload ID and ETag.
+    pub async fn upload_file_callback(
+        &self,
+        app_id: &str,
+        body: &impl Serialize,
+        option: &RequestOption,
+    ) -> Result<UploadFileCallbackAppStorageResp, LarkError> {
+        require_storage_user_access_token(option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/storage/file_upload_callback",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(body)?
+        .send_json()
+        .await
+    }
+
+    /// Delete storage files by path.
+    ///
+    /// Successful transport only means the batch endpoint accepted the request;
+    /// inspect the platform's per-item results in `data` for partial failures.
+    pub async fn batch_remove_files(
+        &self,
+        app_id: &str,
+        body: &impl Serialize,
+        option: &RequestOption,
+    ) -> Result<BatchRemoveFilesAppStorageResp, LarkError> {
+        require_storage_user_access_token(option)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/storage/file_batch_remove",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(body)?
+        .send_json()
+        .await
+    }
+
     pub async fn download_by_query(
         &self,
         query: &DownloadAppStorageQuery<'_>,
@@ -950,6 +1200,19 @@ impl<'a> AppStorageResource<'a> {
             )
             .await
     }
+}
+
+fn require_storage_user_access_token(option: &RequestOption) -> Result<(), LarkError> {
+    if option
+        .user_access_token
+        .as_deref()
+        .is_none_or(|token| token.trim().is_empty())
+    {
+        return Err(LarkError::IllegalParam(
+            "Spark storage management requires a user access token".into(),
+        ));
+    }
+    Ok(())
 }
 
 pub struct AppTableResource<'a> {
