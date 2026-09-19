@@ -68,3 +68,25 @@ The additional binary aliases follow the compatibility cases in CLI commit
 Content-Type and HTTP 200 text errors instead of accepting all non-JSON bodies.
 Mock tests verify the request and streaming contracts; live authorization,
 app-type availability and exported content require separate platform testing.
+
+## Spark storage management
+
+`client.spark().app_storage` supports user-token access to Spark app storage:
+
+- `list_files` and `get_file` read file metadata.
+- `sign_file` creates a temporary download URL.
+- `get_file_quota` returns the platform-reported usage and quota fields without
+  SDK rounding or field projection.
+- `pre_upload_file` obtains the platform upload URL and upload ID;
+  `upload_file_callback` registers that upload using the ETag returned by the
+  external upload.
+- `batch_remove_files` sends a batch of remote paths. Its successful API
+  envelope can still contain individual failures, so inspect `data.results`.
+
+Storage management requires a real Spark app ID. This differs from source
+export, which can also use a meta token.
+
+The SDK deliberately leaves the external upload transfer under caller control:
+perform the PUT only to the returned presigned URL, capture its ETag, and do not
+forward Lark authorization headers to that URL. It does not read local files,
+choose a file name, retry destructive operations, or flatten batch results.
