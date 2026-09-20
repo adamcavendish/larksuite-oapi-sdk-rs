@@ -90,3 +90,43 @@ The SDK deliberately leaves the external upload transfer under caller control:
 perform the PUT only to the returned presigned URL, capture its ETag, and do not
 forward Lark authorization headers to that URL. It does not read local files,
 choose a file name, retry destructive operations, or flatten batch results.
+
+## Spark database quota
+
+`client.spark().app.get_db_quota` reads
+`GET /open-apis/spark/v1/apps/{app_id}/db/quota`. It requires an explicit,
+nonempty user access token with `spark:app:read`; tenant credentials are not a
+substitute. This reports database usage and table/view counts, not the
+file-storage quota returned by `app_storage.get_file_quota`.
+
+```rust,no_run
+use larksuite_oapi_sdk_rs::{LarkClient, LarkError, RequestOption};
+use larksuite_oapi_sdk_rs::service::spark::v1::GetDbQuotaQuery;
+
+# async fn example(client: &LarkClient, user_token: String) -> Result<(), LarkError> {
+let option = RequestOption {
+    user_access_token: Some(user_token),
+    ..Default::default()
+};
+let quota = client.spark().app
+    .get_db_quota(&GetDbQuotaQuery::new("app_id").env("online"), &option)
+    .await?;
+// Inspect quota.data for the platform's unmodified quota and usage fields.
+let _ = quota;
+# Ok(())
+# }
+```
+
+Use `.env("dev")` or `.env("online")` to select an environment explicitly.
+Without `.env(...)`, the query parameter is omitted: the platform selects
+`dev` for multi-environment apps and `online` for single-environment apps.
+The SDK does not choose an environment locally. Responses retain zero or
+missing quota values, unrounded usage percentages, and unknown fields rather
+than applying the CLI's display projection.
+
+Contract source: official Lark CLI commit `32d19889`, in
+`shortcuts/apps/apps_db_quota_get.go` and `shortcuts/apps/db_common.go`.
+The endpoint was introduced in `75926f97`; `1a9f6378` made environment
+selection optional. Mock tests cover the wire contract, not live platform
+authorization or availability. No database migration, recovery, polling, or
+automatic environment policy is added.
