@@ -16,6 +16,7 @@ pub type IconAppResp = JsonResp;
 pub type ListAppResp = JsonResp;
 pub type PatchAppResp = JsonResp;
 pub type SqlCommandsAppResp = JsonResp;
+pub type GetDbQuotaResp = JsonResp;
 pub type UpdateAppVisibilityAppResp = JsonResp;
 pub type UploadHtmlCodeAndReleaseAppResp = JsonResp;
 pub type GetEnumDetailAppEnumResp = JsonResp;
@@ -49,6 +50,27 @@ pub type DisableDbSyncResp = JsonResp;
 pub type DeleteDbSyncResp = JsonResp;
 
 const EMPTY_PARAMS: [(&str, &str); 0] = [];
+
+/// Query parameters for Spark database usage and quota.
+///
+/// Leave `env` unset to let the platform select the app's environment.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct GetDbQuotaQuery<'a> {
+    pub app_id: &'a str,
+    pub env: Option<&'a str>,
+}
+
+impl<'a> GetDbQuotaQuery<'a> {
+    pub fn new(app_id: &'a str) -> Self {
+        Self { app_id, env: None }
+    }
+
+    pub fn env(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.env = value.into();
+        self
+    }
+}
 
 /// Exactly one app locator for source export. Empty locators are rejected locally.
 #[derive(Debug, Clone, Copy, Serialize)]
@@ -855,6 +877,38 @@ impl<'a> AppResource<'a> {
                 option,
             )
             .await
+    }
+
+    /// Read database usage and quota with a user token and `spark:app:read`.
+    ///
+    /// An unset environment is omitted from the request for server-side
+    /// selection. The response preserves platform fields, including zero quotas
+    /// and unknown fields, without CLI-style rounding or projection.
+    pub async fn get_db_quota(
+        &self,
+        query: &GetDbQuotaQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<GetDbQuotaResp, LarkError> {
+        if option
+            .user_access_token
+            .as_deref()
+            .is_none_or(|token| token.trim().is_empty())
+        {
+            return Err(LarkError::IllegalParam(
+                "Spark database quota requires a user access token".into(),
+            ));
+        }
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/spark/v1/apps/:app_id/db/quota",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", query.app_id)
+        .query("env", query.env)
+        .send_json()
+        .await
     }
 
     pub async fn sql_commands(
