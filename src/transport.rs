@@ -83,6 +83,27 @@ pub(crate) async fn request_typed<T: for<'de> serde::Deserialize<'de>>(
     Ok((resp, raw))
 }
 
+pub(crate) async fn request_typed_once<T: for<'de> serde::Deserialize<'de>>(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+) -> Result<(ApiResp, RawResponse<T>), LarkError> {
+    let span = request_span(api_req);
+    let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
+    let resp = async {
+        let bearer = resolve_bearer_token(config, option, token_type).await?;
+        raw_send(config, api_req, option, token_type, bearer.as_deref()).await
+    }
+    .instrument(span)
+    .await?;
+
+    let raw: RawResponse<T> = serde_json::from_slice(&resp.raw_body)?;
+    if !raw.code_error.success() {
+        return Err(LarkError::Api(Box::new(raw.code_error)));
+    }
+    Ok((resp, raw))
+}
+
 #[derive(Debug)]
 pub(crate) struct StreamResp {
     pub(crate) api_resp: ApiResp,

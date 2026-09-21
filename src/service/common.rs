@@ -224,6 +224,17 @@ impl<'a> RestRequest<'a> {
         self.send_v2_response::<crate::JsonValue, JsonResp>().await
     }
 
+    pub(crate) async fn send_json_once(self) -> Result<JsonResp, LarkError> {
+        let (api_resp, raw) = transport::request_typed_once::<crate::JsonValue>(
+            self.config,
+            &self.api_req,
+            self.option,
+        )
+        .await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(JsonResp::from_v2_response(api_resp, code_error, data))
+    }
+
     pub(crate) async fn download(self) -> Result<DownloadResp, LarkError> {
         let mut option = self.option.clone();
         option.file_download = true;

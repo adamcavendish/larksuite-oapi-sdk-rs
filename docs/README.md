@@ -23,6 +23,8 @@ examples, features, and coverage.
   and bounded handling of export error responses.
 - [Spark db sync](spark-db-sync.md) covers user-token Base-to-database sync
   previews, task lifecycle operations, and opt-in live verification.
+- [Spark database migration](spark-db-migration.md) covers dev-to-online schema
+  preview, irreversible apply, and caller-owned asynchronous status polling.
 - [Base v3 record reads](base-v3-records.md) covers CLI-aligned Base record
   list/search operations and their read-only live verification.
 - [Base v3 application mode](base-v3-apps.md) covers CLI-proven workspace,

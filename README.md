@@ -90,6 +90,7 @@ for the complete setup.
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
 | Control VC meeting bots | [VC meeting bots](docs/vc-bots.md) |
 | Export Spark app source | [Spark app export](docs/spark-app-export.md) |
+| Preview or apply Spark database schema changes | [Spark database migration](docs/spark-db-migration.md) |
 | Read or modify Mail conversations | [Mail user-mailbox threads](docs/mail-v1-threads.md) |
 | Resolve Drive object metadata by token | [Drive token lookup](docs/drive-token-lookup.md) |
 | Manage Unified KMS autonomous keys | [Unified KMS](docs/unified-kms.md) |
@@ -131,6 +132,8 @@ for the complete setup.
   leave, message, countdown, and active-meeting operations.
 - [Spark app export](docs/spark-app-export.md): streaming source archives,
   response validation, and app-type-dependent source snapshots.
+- [Spark database migration](docs/spark-db-migration.md): explicit preview,
+  irreversible apply, and caller-owned asynchronous status polling.
 - [Mail user-mailbox threads](docs/mail-v1-threads.md): conversation reads
   and batch label, folder, and Trash operations.
 - [Drive token lookup](docs/drive-token-lookup.md): underlying object metadata
