@@ -1,4 +1,4 @@
-//! Spark application, storage and database-sync APIs.
+//! Spark application, storage, database migration, and database-sync APIs.
 //!
 #![doc = include_str!("../../../docs/spark-app-export.md")]
 
@@ -17,6 +17,9 @@ pub type ListAppResp = JsonResp;
 pub type PatchAppResp = JsonResp;
 pub type SqlCommandsAppResp = JsonResp;
 pub type GetDbQuotaResp = JsonResp;
+pub type PreviewDbMigrationResp = JsonResp;
+pub type ApplyDbMigrationResp = JsonResp;
+pub type GetDbMigrationStatusResp = JsonResp;
 pub type UpdateAppVisibilityAppResp = JsonResp;
 pub type UploadHtmlCodeAndReleaseAppResp = JsonResp;
 pub type GetEnumDetailAppEnumResp = JsonResp;
@@ -911,6 +914,80 @@ impl<'a> AppResource<'a> {
         .await
     }
 
+    /// Preview pending dev-to-online schema changes without applying them.
+    ///
+    /// The platform requires a user token with `spark:app:write`, even though
+    /// this operation does not apply the returned changes.
+    pub async fn preview_db_migration(
+        &self,
+        app_id: &str,
+        option: &RequestOption,
+    ) -> Result<PreviewDbMigrationResp, LarkError> {
+        require_db_migration_user_access_token(option)?;
+        let body = crate::JsonValue::from_serializable(serde_json::json!({ "dry_run": true }))?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/db/env_migrate",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Apply pending dev-to-online schema changes.
+    ///
+    /// Applying a migration is irreversible. The response may represent
+    /// synchronous completion or contain a task ID for caller-owned polling.
+    pub async fn apply_db_migration(
+        &self,
+        app_id: &str,
+        option: &RequestOption,
+    ) -> Result<ApplyDbMigrationResp, LarkError> {
+        require_db_migration_user_access_token(option)?;
+        let body = crate::JsonValue::from_serializable(serde_json::json!({ "dry_run": false }))?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/v1/apps/:app_id/db/env_migrate",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(&body)?
+        .send_json_once()
+        .await
+    }
+
+    /// Read one database migration task without automatic polling.
+    pub async fn get_db_migration_status(
+        &self,
+        app_id: &str,
+        task_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetDbMigrationStatusResp, LarkError> {
+        require_db_migration_user_access_token(option)?;
+        if task_id.trim().is_empty() {
+            return Err(LarkError::IllegalParam(
+                "Spark database migration task ID must not be empty".into(),
+            ));
+        }
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/spark/v1/apps/:app_id/db/env_migrate_status",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .query("task_id", Some(task_id))
+        .send_json()
+        .await
+    }
+
     pub async fn sql_commands(
         &self,
         app_id: &str,
@@ -1264,6 +1341,19 @@ fn require_storage_user_access_token(option: &RequestOption) -> Result<(), LarkE
     {
         return Err(LarkError::IllegalParam(
             "Spark storage management requires a user access token".into(),
+        ));
+    }
+    Ok(())
+}
+
+fn require_db_migration_user_access_token(option: &RequestOption) -> Result<(), LarkError> {
+    if option
+        .user_access_token
+        .as_deref()
+        .is_none_or(|token| token.trim().is_empty())
+    {
+        return Err(LarkError::IllegalParam(
+            "Spark database migration requires a user access token".into(),
         ));
     }
     Ok(())
