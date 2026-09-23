@@ -63,11 +63,23 @@ impl CodeError {
     pub fn success(&self) -> bool {
         self.code == 0
     }
+
+    /// The nonempty server-rendered diagnostic, falling back to the original
+    /// top-level [`msg`](Self::msg). Whitespace is preserved, not trimmed.
+    ///
+    /// This does not change the error code or [`success`](Self::success).
+    pub fn effective_message(&self) -> &str {
+        self.error
+            .as_ref()
+            .and_then(|error| error.message.as_deref())
+            .filter(|message| !message.is_empty())
+            .unwrap_or(&self.msg)
+    }
 }
 
 impl std::fmt::Display for CodeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "code: {}, msg: {}", self.code, self.msg)?;
+        write!(f, "code: {}, msg: {}", self.code, self.effective_message())?;
         if let Some(ref err) = self.error
             && let Some(ref log_id) = err.log_id
         {
@@ -81,6 +93,14 @@ impl std::error::Error for CodeError {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CodeErrorInfo {
+    /// Server-rendered diagnostic. Missing, null, or non-string values decode
+    /// as `None`; an empty string is retained but is not an effective message.
+    #[serde(
+        default,
+        deserialize_with = "deserialize_error_message",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub message: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub log_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -93,6 +113,16 @@ pub struct CodeErrorInfo {
     pub field_violations: Option<Vec<CodeErrorFieldViolation>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub helps: Option<Vec<CodeErrorHelp>>,
+}
+
+fn deserialize_error_message<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    Ok(match serde_json::Value::deserialize(deserializer)? {
+        serde_json::Value::String(message) => Some(message),
+        _ => None,
+    })
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

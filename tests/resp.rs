@@ -172,6 +172,7 @@ fn code_error_serde_roundtrip() {
             permission_violations: None,
             field_violations: None,
             helps: None,
+            message: None,
         }),
     };
     let json = serde_json::to_string(&err).unwrap();
@@ -187,6 +188,77 @@ fn code_error_deserialize_minimal() {
     let err: CodeError = serde_json::from_str(json).unwrap();
     assert!(err.success());
     assert!(err.error.is_none());
+}
+
+#[test]
+fn code_error_rendered_message_preserves_wire_fields() {
+    let wire = serde_json::json!({
+        "code": 3350001,
+        "msg": "invalid param",
+        "error": {
+            "message": "Invalid request parameter: request. Invalid reason: insertion is required.",
+            "log_id": "log-rendered",
+            "troubleshooter": "https://example.com/help",
+            "details": [{"key": "request", "value": "insert"}],
+            "permission_violations": [{"type": "scope", "subject": "example:read", "description": "missing"}],
+            "field_violations": [{"field": "request", "value": "", "description": "insertion is required"}],
+            "helps": [{"url": "https://example.com/help", "description": "help"}]
+        }
+    });
+    let err: CodeError = serde_json::from_value(wire.clone()).unwrap();
+    assert_eq!(err.code, 3350001);
+    assert_eq!(err.msg, "invalid param");
+    assert!(!err.success());
+    let rendered = wire["error"]["message"].as_str().unwrap();
+    assert_eq!(err.effective_message(), rendered);
+    assert_eq!(
+        err.to_string(),
+        format!("code: 3350001, msg: {rendered}, log_id: log-rendered")
+    );
+    assert_eq!(serde_json::to_value(&err).unwrap(), wire);
+}
+
+#[test]
+fn code_error_rendered_message_fallbacks() {
+    for error in [
+        serde_json::Value::Null,
+        serde_json::json!({}),
+        serde_json::json!({"message": null}),
+        serde_json::json!({"message": ""}),
+        serde_json::json!({"message": 42}),
+        serde_json::json!({"message": true}),
+        serde_json::json!({"message": ["diagnostic"]}),
+        serde_json::json!({"message": {"text": "diagnostic"}}),
+    ] {
+        let err: CodeError = serde_json::from_value(serde_json::json!({
+            "code": 3350001, "msg": "invalid param", "error": error
+        }))
+        .unwrap();
+        assert_eq!(err.effective_message(), "invalid param", "{error}");
+        assert_eq!(err.to_string(), "code: 3350001, msg: invalid param");
+        if let Some(info) = &err.error {
+            assert_eq!(info.message.as_deref(), error["message"].as_str());
+            let serialized = serde_json::to_value(info).unwrap();
+            if error["message"] == "" {
+                assert_eq!(serialized["message"], "");
+            } else {
+                assert!(serialized.get("message").is_none());
+            }
+        }
+    }
+    let err: CodeError = serde_json::from_str(r#"{"code":1,"msg":""}"#).unwrap();
+    assert_eq!(err.effective_message(), "");
+    assert_eq!(err.to_string(), "code: 1, msg: ");
+}
+
+#[test]
+fn code_error_rendered_message_does_not_change_success_or_trim() {
+    let err: CodeError =
+        serde_json::from_str(r#"{"code":0,"msg":"ok","error":{"message":"  "}}"#).unwrap();
+    assert!(err.success());
+    assert_eq!(err.msg, "ok");
+    assert_eq!(err.effective_message(), "  ");
+    assert_eq!(err.to_string(), "code: 0, msg:   ");
 }
 
 #[test]
