@@ -11,6 +11,8 @@ examples, features, and coverage.
   requests, the compatibility bridge, and reproducible Go-to-Rust checks.
 - [Cards](cards.md) covers versioned Card JSON delivery, CardKit streaming,
   published Card Builder templates, and callbacks.
+- [API errors](api-errors.md) explains raw and effective error messages,
+  structured diagnostics, and compatibility notes.
 - [Card protocol alignment](card-protocol.md) defines the source hierarchy and
   verification workflow for Card JSON, card callbacks, and CardKit mutations.
 - [Events, WebSockets, and channels](events-and-channels.md) covers webhook

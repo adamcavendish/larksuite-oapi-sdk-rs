@@ -146,6 +146,72 @@ async fn transport_typed_request_api_error() {
     assert!(matches!(err, LarkError::Api(_)));
 }
 
+#[tokio::test]
+async fn transport_typed_request_preserves_rendered_api_error() {
+    let body = r#"{"code":3350001,"msg":"invalid param","error":{"message":"Invalid request parameter: request. Invalid reason: insertion is required.","log_id":"log-rendered"}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+    let client = client_for(addr);
+    let mut req = ApiReq::new(http::Method::GET, "/open-apis/test");
+    req.supported_access_token_types = vec![AccessTokenType::None];
+    let err = client
+        .raw_request_typed::<serde_json::Value>(&req, &RequestOption::default())
+        .await
+        .unwrap_err();
+    let LarkError::Api(code_error) = &err else {
+        panic!("expected business error, got {err:?}");
+    };
+    assert_eq!(code_error.code, 3350001);
+    assert_eq!(code_error.msg, "invalid param");
+    assert_eq!(
+        code_error.effective_message(),
+        "Invalid request parameter: request. Invalid reason: insertion is required."
+    );
+    assert_eq!(
+        err.to_string(),
+        "api error: code: 3350001, msg: Invalid request parameter: request. Invalid reason: insertion is required., log_id: log-rendered"
+    );
+}
+
+#[tokio::test]
+async fn transport_typed_request_ignores_non_string_error_message() {
+    let body = r#"{"code":3350001,"msg":"invalid param","error":{"message":{"unexpected":true},"log_id":"log-fallback"}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+    let client = client_for(addr);
+    let mut req = ApiReq::new(http::Method::GET, "/open-apis/test");
+    req.supported_access_token_types = vec![AccessTokenType::None];
+    let err = client
+        .raw_request_typed::<serde_json::Value>(&req, &RequestOption::default())
+        .await
+        .unwrap_err();
+    let LarkError::Api(code_error) = &err else {
+        panic!("expected business error, got {err:?}");
+    };
+    assert_eq!(code_error.code, 3350001);
+    assert_eq!(code_error.effective_message(), "invalid param");
+    assert_eq!(
+        err.to_string(),
+        "api error: code: 3350001, msg: invalid param, log_id: log-fallback"
+    );
+}
+
+#[tokio::test]
+async fn transport_typed_request_rendered_message_does_not_fail_success() {
+    let body = r#"{"code":0,"msg":"ok","error":{"message":"diagnostic"},"data":{"id":"123"}}"#;
+    let (addr, _h) = mock_server(vec![http_response(200, body)]).await;
+    let client = client_for(addr);
+    let mut req = ApiReq::new(http::Method::GET, "/open-apis/test");
+    req.supported_access_token_types = vec![AccessTokenType::None];
+    let (resp, raw) = client
+        .raw_request_typed::<serde_json::Value>(&req, &RequestOption::default())
+        .await
+        .unwrap();
+    assert_eq!(resp.raw_body, body.as_bytes());
+    assert!(raw.code_error.success());
+    assert_eq!(raw.code_error.msg, "ok");
+    assert_eq!(raw.code_error.effective_message(), "diagnostic");
+    assert_eq!(raw.data.unwrap()["id"], "123");
+}
+
 // ── File download: skips JSON parsing ──
 
 #[tokio::test]

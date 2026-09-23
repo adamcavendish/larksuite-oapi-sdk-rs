@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Preserve server-rendered `error.message` in `CodeErrorInfo` and prefer it in
+  `CodeError::effective_message()` and API error display, falling back to `msg`.
+  Non-string nested messages are ignored without losing the business error.
+  Exhaustive `CodeErrorInfo` struct literals must add `message: None`; literals
+  using `..Default::default()` remain unchanged.
+
 ## [0.3.12] - 2026-09-12
 
 ### REST service coverage
