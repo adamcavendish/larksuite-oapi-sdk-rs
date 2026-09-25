@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Reject nonzero OAuth token response codes before caching client-assertion
+  tenant tokens, even when a response also contains an access token. An opt-in
+  token result exposes fresh issuance `status_message` advisories; cache hits
+  report no advisory.
 - Preserve server-rendered `error.message` in `CodeErrorInfo` and prefer it in
   `CodeError::effective_message()` and API error display, falling back to `msg`.
   Non-string nested messages are ignored without losing the business error.

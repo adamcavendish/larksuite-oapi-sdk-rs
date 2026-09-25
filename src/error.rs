@@ -56,6 +56,15 @@ pub enum LarkError {
     /// LarkClient assertion (JWT bearer) error.
     #[error("client assertion error: {0}")]
     ClientAssertion(String),
+
+    /// The OAuth endpoint rejected a client-assertion token request.
+    #[error("oauth token response error: code={code}, msg={message}")]
+    OAuthTokenRejected {
+        code: i64,
+        message: String,
+        challenge_url: Option<String>,
+        hint: Option<String>,
+    },
 }
 
 impl From<crate::resp::CodeError> for LarkError {

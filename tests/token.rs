@@ -4,8 +4,109 @@ use common::{http_response, mock_server, mock_server_with_requests};
 use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::cache::{Cache, LocalCache};
 use larksuite_oapi_sdk_rs::error::LarkError;
-use larksuite_oapi_sdk_rs::token::{AppTicketManager, TokenManager};
+use larksuite_oapi_sdk_rs::token::{
+    AppTicketManager, ClientAssertionProvider, Token, TokenManager,
+};
 use std::sync::Arc;
+
+#[derive(Debug)]
+struct TestAssertion;
+
+impl ClientAssertionProvider for TestAssertion {
+    fn retrieve_token(
+        &self,
+        _aud: &str,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Token, LarkError>> + Send + '_>>
+    {
+        Box::pin(async {
+            Ok(Token {
+                value: "signed-assertion".into(),
+                target_info: None,
+            })
+        })
+    }
+}
+
+#[tokio::test]
+async fn client_assertion_rejects_policy_denial_even_with_token() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(200, r#"{"code":21001,"msg":"issuance denied","access_token":"denied","expires_in":7200,"data":{"challenge_url":"https://open.feishu.cn/challenge","cli_hint":"review policy"}}"#),
+        http_response(200, r#"{"code":0,"access_token":"allowed","expires_in":7200,"status_message":"scopes trimmed"}"#),
+        http_response(200, r#"{"code":0,"access_token":"other","expires_in":7200}"#),
+    ]).await;
+    let client = LarkClient::builder("app_id", "secret")
+        .oauth_base_url(format!("http://{addr}"))
+        .client_assertion_provider(Arc::new(TestAssertion))
+        .build()
+        .unwrap();
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+
+    let err = tm
+        .get_tenant_access_token(client.config(), None, None)
+        .await
+        .unwrap_err();
+    assert!(matches!(err, LarkError::OAuthTokenRejected {
+        code: 21001,
+        ref message,
+        challenge_url: Some(ref challenge_url),
+        hint: Some(ref hint),
+    } if message == "issuance denied"
+        && challenge_url == "https://open.feishu.cn/challenge"
+        && hint == "review policy"));
+    let result = tm
+        .get_client_assertion_tenant_token(client.config(), None)
+        .await
+        .unwrap();
+    assert_eq!(result.access_token, "allowed");
+    assert_eq!(result.status_message.as_deref(), Some("scopes trimmed"));
+    let cached = tm
+        .get_client_assertion_tenant_token(client.config(), None)
+        .await
+        .unwrap();
+    assert_eq!(cached.access_token, "allowed");
+    assert_eq!(cached.status_message, None);
+    assert_eq!(
+        tm.get_tenant_access_token(client.config(), None, None)
+            .await
+            .unwrap(),
+        "allowed"
+    );
+    let without_advisory = tm
+        .get_client_assertion_tenant_token(client.config(), Some("other-tenant"))
+        .await
+        .unwrap();
+    assert_eq!(without_advisory.access_token, "other");
+    assert_eq!(without_advisory.status_message, None);
+    assert_eq!(requests.lock().unwrap().len(), 3);
+}
+
+#[tokio::test]
+async fn client_assertion_preserves_non_200_policy_denial() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(
+        403,
+        r#"{"code":21000,"msg":"challenge required","data":{"challenge_url":"https://open.feishu.cn/challenge"}}"#,
+    )])
+    .await;
+    let client = LarkClient::builder("app_id", "secret")
+        .oauth_base_url(format!("http://{addr}"))
+        .client_assertion_provider(Arc::new(TestAssertion))
+        .build()
+        .unwrap();
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+    let err = tm
+        .get_client_assertion_tenant_token(client.config(), None)
+        .await
+        .unwrap_err();
+    assert!(matches!(
+        err,
+        LarkError::OAuthTokenRejected {
+            code: 21000,
+            challenge_url: Some(_),
+            ..
+        }
+    ));
+    assert_eq!(requests.lock().unwrap().len(), 1);
+}
 
 fn marketplace_client(addr: std::net::SocketAddr) -> LarkClient {
     LarkClient::builder("app_id", "secret")

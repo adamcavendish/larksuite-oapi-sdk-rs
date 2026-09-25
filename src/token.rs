@@ -54,6 +54,24 @@ pub struct TokenManager {
     cache: Arc<dyn Cache>,
 }
 
+/// Result of a client-assertion tenant token request.
+#[derive(Clone, PartialEq, Eq)]
+pub struct ClientAssertionTenantToken {
+    pub access_token: String,
+    /// Advisory returned on a fresh issuance, for example when scopes were trimmed.
+    /// Cached tokens have no associated advisory and return `None`.
+    pub status_message: Option<String>,
+}
+
+impl Debug for ClientAssertionTenantToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ClientAssertionTenantToken")
+            .field("access_token", &"[redacted]")
+            .field("status_message", &self.status_message)
+            .finish()
+    }
+}
+
 impl std::fmt::Debug for TokenManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TokenManager").finish_non_exhaustive()
@@ -101,7 +119,8 @@ impl TokenManager {
         if config.client_assertion_provider.is_some() {
             return self
                 .get_tenant_token_by_client_assertion(config, tenant_key)
-                .await;
+                .await
+                .map(|result| result.access_token);
         }
 
         let cache_key = tenant_access_token_cache_key(
@@ -123,6 +142,19 @@ impl TokenManager {
                     .await
             }
         }
+    }
+
+    /// Obtain a tenant token and any advisory from the OAuth response.
+    ///
+    /// Requires a configured client assertion provider. A cache hit has no
+    /// response advisory, so `status_message` is `None`.
+    pub async fn get_client_assertion_tenant_token(
+        &self,
+        config: &Config,
+        tenant_key: Option<&str>,
+    ) -> Result<ClientAssertionTenantToken, LarkError> {
+        self.get_tenant_token_by_client_assertion(config, tenant_key)
+            .await
     }
 
     async fn fetch_self_built_app_token(&self, config: &Config) -> Result<String, LarkError> {
@@ -298,12 +330,12 @@ impl TokenManager {
         Ok(resp)
     }
 
-    async fn oauth_token_request<T: for<'de> Deserialize<'de>>(
+    async fn oauth_token_request(
         &self,
         config: &Config,
         url: &str,
         body: &impl Serialize,
-    ) -> Result<T, LarkError> {
+    ) -> Result<OAuthTokenResp, LarkError> {
         let mut api_req = ApiReq::new(http::Method::POST, url);
         api_req.body = Some(ReqBody::json(body)?);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
@@ -311,22 +343,24 @@ impl TokenManager {
         let option = RequestOption::default();
         let api_resp = transport::raw_send_absolute_url(config, &api_req, &option, None).await?;
 
-        if api_resp.status_code != 200 {
+        // A policy denial can arrive at a non-200 HTTP status. Preserve its
+        // business code rather than reducing it to an HTTP status string.
+        let parsed = serde_json::from_slice::<OAuthTokenResp>(&api_resp.raw_body);
+        if api_resp.status_code != 200 && !matches!(&parsed, Ok(resp) if resp.code != 0) {
             return Err(LarkError::Token(format!(
                 "oauth token request failed with status {}",
                 api_resp.status_code
             )));
         }
 
-        let resp: T = serde_json::from_slice(&api_resp.raw_body)?;
-        Ok(resp)
+        Ok(parsed?)
     }
 
     async fn get_tenant_token_by_client_assertion(
         &self,
         config: &Config,
         tenant_key: Option<&str>,
-    ) -> Result<String, LarkError> {
+    ) -> Result<ClientAssertionTenantToken, LarkError> {
         let oauth_base_url = resolve_oauth_base_url(config);
         let aud = extract_aud_from_url(&oauth_base_url)?;
 
@@ -337,7 +371,10 @@ impl TokenManager {
         );
 
         if let Some(token) = self.cache.get(&token_key).await? {
-            return Ok(token);
+            return Ok(ClientAssertionTenantToken {
+                access_token: token,
+                status_message: None,
+            });
         }
 
         let provider = config.client_assertion_provider.as_ref().ok_or_else(|| {
@@ -375,8 +412,27 @@ impl TokenManager {
         };
 
         let resp = self
-            .oauth_token_request::<OAuthTokenResp>(config, &request_url, &body)
+            .oauth_token_request(config, &request_url, &body)
             .await?;
+
+        if resp.code != 0 {
+            let message = if !resp.error_description.is_empty() {
+                &resp.error_description
+            } else if !resp.msg.is_empty() {
+                &resp.msg
+            } else {
+                &resp.error
+            };
+            return Err(LarkError::OAuthTokenRejected {
+                code: resp.code,
+                message: message.to_string(),
+                challenge_url: resp
+                    .data
+                    .as_ref()
+                    .and_then(|data| data.challenge_url.clone()),
+                hint: resp.data.as_ref().and_then(|data| data.cli_hint.clone()),
+            });
+        }
 
         if resp.access_token.is_empty() {
             let msg = if !resp.error_description.is_empty() {
@@ -394,7 +450,10 @@ impl TokenManager {
             tracing::warn!("client assertion tenant access token save cache: {e}");
         }
 
-        Ok(resp.access_token)
+        Ok(ClientAssertionTenantToken {
+            access_token: resp.access_token,
+            status_message: resp.status_message.filter(|message| !message.is_empty()),
+        })
     }
 }
 
@@ -524,8 +583,9 @@ struct OAuthTokenReq<'a> {
 #[derive(Deserialize)]
 struct OAuthTokenResp {
     #[serde(default)]
-    #[allow(dead_code)]
     code: i64,
+    #[serde(default)]
+    msg: String,
     #[serde(default)]
     error: String,
     #[serde(default)]
@@ -544,8 +604,18 @@ struct OAuthTokenResp {
     #[allow(dead_code)]
     scope: String,
     #[serde(default)]
+    status_message: Option<String>,
+    #[serde(default)]
+    data: Option<OAuthTokenErrorData>,
+    #[serde(default)]
     #[allow(dead_code)]
     token_type: String,
+}
+
+#[derive(Deserialize)]
+struct OAuthTokenErrorData {
+    challenge_url: Option<String>,
+    cli_hint: Option<String>,
 }
 
 pub(crate) fn resolve_oauth_base_url(config: &Config) -> String {
