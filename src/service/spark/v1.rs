@@ -51,6 +51,9 @@ pub type UpdateDbSyncResp = JsonResp;
 pub type EnableDbSyncResp = JsonResp;
 pub type DisableDbSyncResp = JsonResp;
 pub type DeleteDbSyncResp = JsonResp;
+pub type CreateAppReleaseResp = JsonResp;
+pub type GetAppReleaseResp = JsonResp;
+pub type ListAppReleaseResp = JsonResp;
 
 const EMPTY_PARAMS: [(&str, &str); 0] = [];
 
@@ -570,6 +573,60 @@ pub struct AppResource<'a> {
     config: &'a Config,
 }
 
+/// Parameters for creating a Spark app release.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct CreateAppReleaseRequest<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_reason: Option<&'a str>,
+}
+
+impl<'a> CreateAppReleaseRequest<'a> {
+    pub fn new() -> Self {
+        Self {
+            branch: None,
+            apply_reason: None,
+        }
+    }
+    pub fn branch(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.branch = value.into();
+        self
+    }
+    pub fn apply_reason(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.apply_reason = value.into();
+        self
+    }
+}
+
+impl Default for CreateAppReleaseRequest<'_> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Query parameters for listing Spark app releases.
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListAppReleaseQuery<'a> {
+    pub page: PageQuery<'a>,
+}
+
+impl<'a> ListAppReleaseQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+}
+
 /// Base-to-database sync task operations.
 ///
 /// All endpoints currently require a user access token. Request and response
@@ -723,6 +780,67 @@ impl<'a> DbSyncResource<'a> {
 }
 
 impl<'a> AppResource<'a> {
+    /// Create a release for a Spark app.
+    pub async fn create_release(
+        &self,
+        app_id: &str,
+        request: &CreateAppReleaseRequest<'_>,
+        option: &RequestOption,
+    ) -> Result<CreateAppReleaseResp, LarkError> {
+        let body = crate::JsonValue::from_serializable(request)?;
+        RestRequest::new(
+            self.config,
+            http::Method::POST,
+            "/open-apis/spark/apps/:app_id/releases",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .json_body(&body)?
+        .send_json()
+        .await
+    }
+
+    /// Get release status and approval details.
+    pub async fn get_release(
+        &self,
+        app_id: &str,
+        release_id: &str,
+        option: &RequestOption,
+    ) -> Result<GetAppReleaseResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/spark/apps/:app_id/releases/:release_id",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .path_param("release_id", release_id)
+        .send_json()
+        .await
+    }
+
+    /// List releases for a Spark app.
+    pub async fn list_releases(
+        &self,
+        app_id: &str,
+        query: &ListAppReleaseQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAppReleaseResp, LarkError> {
+        RestRequest::new(
+            self.config,
+            http::Method::GET,
+            "/open-apis/spark/apps/:app_id/releases",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .page_query(query.page)
+        .send_json()
+        .await
+    }
+
     /// Stream app source using user credentials with `spark:app:read`.
     ///
     /// Only 2xx responses marked `application/zip`, `application/octet-stream`,
