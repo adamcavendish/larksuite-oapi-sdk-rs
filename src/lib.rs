@@ -80,7 +80,7 @@ pub use service::go_compatibility::{
 pub use service::go_compatibility::{GoV397, GoV397Endpoint, GoV397EndpointMeta};
 pub use token::{
     AppTicketManager, AppTokenResponse, ClientAssertionProvider, ClientAssertionTenantToken,
-    MarketplaceAppTokenReq, MarketplaceTenantTokenReq, ResendAppTicketRequest,
+    IssuedToken, MarketplaceAppTokenReq, MarketplaceTenantTokenReq, ResendAppTicketRequest,
     ResendAppTicketResponse, SelfBuiltAppTokenReq, SelfBuiltTenantTokenReq, TargetInfo,
     TenantTokenResponse, Token, TokenManager,
 };

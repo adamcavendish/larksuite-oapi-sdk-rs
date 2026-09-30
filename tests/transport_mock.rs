@@ -8,6 +8,7 @@ use larksuite_oapi_sdk_rs::cache::{Cache, LocalCache};
 use larksuite_oapi_sdk_rs::constants::AccessTokenType;
 use larksuite_oapi_sdk_rs::error::LarkError;
 use larksuite_oapi_sdk_rs::req::{ApiReq, FormDataField, FormDataValue, ReqBody, RequestOption};
+use larksuite_oapi_sdk_rs::token::{ClientAssertionProvider, Token};
 
 fn client_for(addr: std::net::SocketAddr) -> LarkClient {
     LarkClient::builder("test_app_id", "test_secret")
@@ -15,6 +16,24 @@ fn client_for(addr: std::net::SocketAddr) -> LarkClient {
         .disable_token_cache()
         .build()
         .unwrap()
+}
+
+#[derive(Debug)]
+struct DPoPAssertion;
+
+impl ClientAssertionProvider for DPoPAssertion {
+    fn retrieve_token(
+        &self,
+        _aud: &str,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Token, LarkError>> + Send + '_>>
+    {
+        Box::pin(async {
+            Ok(Token {
+                value: "assertion".into(),
+                target_info: None,
+            })
+        })
+    }
 }
 
 // ── Happy path: successful JSON response ──
@@ -159,6 +178,64 @@ async fn transport_dpop_retry_generates_a_fresh_proof() {
         .collect();
     assert_eq!(proofs.len(), 2);
     assert_ne!(proofs[0], proofs[1]);
+}
+
+#[tokio::test]
+async fn transport_client_assertion_restores_dpop_binding_automatically() {
+    let token = r#"{"code":0,"access_token":"dpop-token","token_type":"DPoP","expires_in":7200}"#;
+    let api = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _h, requests) =
+        mock_server_with_requests(vec![http_response(200, token), http_response(200, api)]).await;
+    let client = LarkClient::builder("app", "secret")
+        .base_url(format!("http://{addr}"))
+        .oauth_base_url(format!("http://{addr}"))
+        .client_assertion_provider(std::sync::Arc::new(DPoPAssertion))
+        .dpop_mode(larksuite_oapi_sdk_rs::DPoPMode::Preferred)
+        .dpop_key(larksuite_oapi_sdk_rs::DPoPKey::generate())
+        .build()
+        .unwrap();
+    let mut req = ApiReq::new(http::Method::GET, "/open-apis/tenant");
+    req.supported_access_token_types = vec![AccessTokenType::Tenant];
+    client
+        .raw_request(&req, &RequestOption::default())
+        .await
+        .unwrap();
+    let requests = requests.lock().unwrap();
+    assert!(requests.iter().any(|r| {
+        r.to_ascii_lowercase()
+            .contains("authorization: dpop dpop-token")
+    }));
+    assert!(
+        requests
+            .iter()
+            .any(|r| r.to_ascii_lowercase().contains("dpop: "))
+    );
+}
+
+#[tokio::test]
+async fn transport_rejects_conflicting_dpop_headers() {
+    let client = client_for("127.0.0.1:1".parse().unwrap());
+    let token = "bound-token";
+    let binding =
+        larksuite_oapi_sdk_rs::DPoPBinding::new(token, larksuite_oapi_sdk_rs::DPoPKey::generate())
+            .unwrap();
+    let mut req = ApiReq::new(http::Method::GET, "/open-apis/conflict");
+    req.supported_access_token_types = vec![AccessTokenType::User];
+    let mut headers = http::HeaderMap::new();
+    headers.insert(
+        "Authorization",
+        http::HeaderValue::from_static("Bearer other"),
+    );
+    let option = RequestOption {
+        user_access_token: Some(token.into()),
+        dpop_binding: Some(binding),
+        headers: Some(headers),
+        ..Default::default()
+    };
+    let err = client.raw_request(&req, &option).await.unwrap_err();
+    assert!(
+        matches!(err, LarkError::DPoPBinding(message) if message.contains("cannot be overridden"))
+    );
 }
 
 #[tokio::test]
