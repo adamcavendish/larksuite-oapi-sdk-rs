@@ -9,6 +9,30 @@ use serde::Serialize;
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum DPoPMode {
+    #[default]
+    Disabled,
+    Preferred,
+    Required,
+}
+
+pub trait DPoPClock: Send + Sync + std::fmt::Debug {
+    fn now_unix_seconds(&self) -> Result<i64, DPoPError>;
+}
+
+#[derive(Debug, Default)]
+pub struct SystemDPoPClock;
+
+impl DPoPClock for SystemDPoPClock {
+    fn now_unix_seconds(&self) -> Result<i64, DPoPError> {
+        Ok(std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|e| DPoPError::Clock(e.to_string()))?
+            .as_secs() as i64)
+    }
+}
+
 fn encode_part<T: Serialize>(value: &T) -> Result<String, DPoPError> {
     Ok(URL_SAFE_NO_PAD.encode(serde_json::to_vec(value)?))
 }
@@ -21,6 +45,8 @@ pub enum DPoPError {
     InvalidUrl(String),
     #[error("failed to serialize DPoP proof: {0}")]
     Serialize(#[from] serde_json::Error),
+    #[error("failed to read DPoP clock: {0}")]
+    Clock(String),
 }
 
 #[derive(Clone)]

@@ -192,6 +192,9 @@ pub struct RequestOption {
     pub tenant_key: Option<String>,
     /// Explicit user access token (skips automatic token resolution).
     pub user_access_token: Option<String>,
+    /// DPoP binding for `user_access_token`, obtained from a token response
+    /// whose `token_type` was DPoP. Both token values must match.
+    pub dpop_binding: Option<crate::dpop::DPoPBinding>,
     /// Explicit app access token (skips automatic token resolution).
     pub app_access_token: Option<String>,
     /// Explicit tenant access token (skips automatic token resolution).

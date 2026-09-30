@@ -1,6 +1,13 @@
 /// Errors returned by SDK operations.
 #[derive(Debug, thiserror::Error)]
 pub enum LarkError {
+    /// A DPoP token does not match its key binding or the selected request token.
+    #[error("DPoP binding error: {0}")]
+    DPoPBinding(String),
+
+    /// Failed to produce a fresh DPoP proof for this request attempt.
+    #[error("DPoP proof error: {0}")]
+    DPoPProof(#[from] crate::dpop::DPoPError),
     /// A required parameter is missing or invalid (caught before sending the request).
     #[error("illegal parameter: {0}")]
     IllegalParam(String),
