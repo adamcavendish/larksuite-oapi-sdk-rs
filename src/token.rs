@@ -14,9 +14,29 @@ use crate::constants::{
     OAUTH_TOKEN_URL_PATH, TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH, TENANT_ACCESS_TOKEN_KEY_PREFIX,
     TENANT_ACCESS_TOKEN_URL_PATH,
 };
+use crate::dpop::DPoPKey;
 use crate::error::LarkError;
 use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::transport;
+
+/// An issued access token together with the protocol metadata needed to send
+/// subsequent requests safely.
+#[derive(Clone, Debug)]
+pub struct IssuedToken {
+    pub access_token: String,
+    pub token_type: String,
+    pub dpop_binding: Option<crate::dpop::DPoPBinding>,
+}
+
+impl IssuedToken {
+    pub fn bearer(access_token: impl Into<String>) -> Self {
+        Self {
+            access_token: access_token.into(),
+            token_type: "Bearer".into(),
+            dpop_binding: None,
+        }
+    }
+}
 
 // ── ClientAssertionProvider (JWT bearer token) ──
 
@@ -55,12 +75,14 @@ pub struct TokenManager {
 }
 
 /// Result of a client-assertion tenant token request.
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone)]
 pub struct ClientAssertionTenantToken {
     pub access_token: String,
     /// Advisory returned on a fresh issuance, for example when scopes were trimmed.
     /// Cached tokens have no associated advisory and return `None`.
     pub status_message: Option<String>,
+    pub token_type: String,
+    pub dpop_binding: Option<crate::dpop::DPoPBinding>,
 }
 
 impl Debug for ClientAssertionTenantToken {
@@ -68,6 +90,7 @@ impl Debug for ClientAssertionTenantToken {
         f.debug_struct("ClientAssertionTenantToken")
             .field("access_token", &"[redacted]")
             .field("status_message", &self.status_message)
+            .field("token_type", &self.token_type)
             .finish()
     }
 }
@@ -315,7 +338,9 @@ impl TokenManager {
         api_req.body = Some(ReqBody::json(body)?);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
 
-        let option = dpop_option(config, &format!("{}{}", config.base_url, path))?;
+        // Legacy app/tenant token endpoints issue Bearer tokens and do not
+        // advertise DPoP token binding. Keep their wire contract unchanged.
+        let option = RequestOption::default();
         let api_resp =
             transport::raw_send(config, &api_req, &option, AccessTokenType::None, None).await?;
 
@@ -353,15 +378,26 @@ impl TokenManager {
             )));
         }
 
-        let parsed = parsed?;
+        let mut parsed = parsed?;
         if config.dpop_mode != crate::dpop::DPoPMode::Disabled
             && config.dpop_key.is_some()
             && !parsed.token_type.eq_ignore_ascii_case("DPoP")
         {
-            return Err(LarkError::DPoPBinding(format!(
-                "token endpoint returned {:?} for a DPoP request",
-                parsed.token_type
-            )));
+            if config.dpop_mode == crate::dpop::DPoPMode::Preferred {
+                let plain = transport::raw_send_absolute_url(
+                    config,
+                    &api_req,
+                    &RequestOption::default(),
+                    None,
+                )
+                .await?;
+                parsed = serde_json::from_slice(&plain.raw_body)?;
+            } else {
+                return Err(LarkError::DPoPBinding(format!(
+                    "token endpoint returned {:?} for a DPoP request",
+                    parsed.token_type
+                )));
+            }
         }
         Ok(parsed)
     }
@@ -381,10 +417,46 @@ impl TokenManager {
         );
 
         if let Some(token) = self.cache.get(&token_key).await? {
-            return Ok(ClientAssertionTenantToken {
-                access_token: token,
-                status_message: None,
-            });
+            if let Ok(cached) = serde_json::from_str::<CachedIssuedToken>(&token) {
+                let binding = if cached.token_type.eq_ignore_ascii_case("DPoP")
+                    && config.dpop_key.as_ref().is_some_and(|key| {
+                        cached.dpop_jkt.as_deref() == Some(key.thumbprint().as_str())
+                    }) {
+                    config
+                        .dpop_key
+                        .clone()
+                        .map(|key| crate::dpop::DPoPBinding::new(cached.access_token.clone(), key))
+                        .transpose()?
+                } else {
+                    None
+                };
+                let unusable_dpop = cached.token_type.eq_ignore_ascii_case("DPoP")
+                    && (config.dpop_mode == crate::dpop::DPoPMode::Disabled || binding.is_none());
+                if unusable_dpop
+                    || (config.dpop_mode == crate::dpop::DPoPMode::Required && binding.is_none())
+                {
+                    let _ = self.cache.set(&token_key, "", Duration::ZERO).await;
+                } else {
+                    return Ok(ClientAssertionTenantToken {
+                        access_token: cached.access_token,
+                        status_message: None,
+                        token_type: cached.token_type,
+                        dpop_binding: binding,
+                    });
+                }
+            }
+            if config.dpop_mode == crate::dpop::DPoPMode::Required
+                || config.dpop_mode == crate::dpop::DPoPMode::Disabled && token.starts_with('{')
+            {
+                let _ = self.cache.set(&token_key, "", Duration::ZERO).await;
+            } else {
+                return Ok(ClientAssertionTenantToken {
+                    access_token: token,
+                    status_message: None,
+                    token_type: "Bearer".into(),
+                    dpop_binding: None,
+                });
+            }
         }
 
         let provider = config.client_assertion_provider.as_ref().ok_or_else(|| {
@@ -455,14 +527,40 @@ impl TokenManager {
             return Err(LarkError::ClientAssertion(msg.to_string()));
         }
 
+        let token_type = if resp.token_type.is_empty() {
+            "Bearer"
+        } else {
+            &resp.token_type
+        };
         let ttl = Duration::from_secs(resp.expires_in.saturating_sub(EXPIRY_DELTA_SECONDS));
-        if let Err(e) = self.cache.set(&token_key, &resp.access_token, ttl).await {
+        let cached = CachedIssuedToken {
+            access_token: resp.access_token.clone(),
+            token_type: token_type.to_string(),
+            dpop_jkt: if token_type.eq_ignore_ascii_case("DPoP") {
+                config.dpop_key.as_ref().map(DPoPKey::thumbprint)
+            } else {
+                None
+            },
+        };
+        let cached = serde_json::to_string(&cached)?;
+        if let Err(e) = self.cache.set(&token_key, &cached, ttl).await {
             tracing::warn!("client assertion tenant access token save cache: {e}");
         }
 
+        let dpop_binding = if token_type.eq_ignore_ascii_case("DPoP") {
+            config
+                .dpop_key
+                .clone()
+                .map(|key| crate::dpop::DPoPBinding::new(resp.access_token.clone(), key))
+                .transpose()?
+        } else {
+            None
+        };
         Ok(ClientAssertionTenantToken {
             access_token: resp.access_token,
             status_message: resp.status_message.filter(|message| !message.is_empty()),
+            token_type: token_type.to_string(),
+            dpop_binding,
         })
     }
 }
@@ -644,6 +742,14 @@ struct OAuthTokenResp {
     #[serde(default)]
     #[allow(dead_code)]
     token_type: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct CachedIssuedToken {
+    access_token: String,
+    token_type: String,
+    #[serde(default)]
+    dpop_jkt: Option<String>,
 }
 
 #[derive(Deserialize)]

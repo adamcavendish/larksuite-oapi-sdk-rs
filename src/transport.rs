@@ -91,8 +91,19 @@ pub(crate) async fn request_typed_once<T: for<'de> serde::Deserialize<'de>>(
     let span = request_span(api_req);
     let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
     let resp = async {
-        let bearer = resolve_bearer_token(config, option, token_type).await?;
-        raw_send(config, api_req, option, token_type, bearer.as_deref()).await
+        let credentials = resolve_credentials(config, option, token_type).await?;
+        let mut attempt = option.clone();
+        if attempt.dpop_binding.is_none() {
+            attempt.dpop_binding = credentials.binding.clone();
+        }
+        raw_send(
+            config,
+            api_req,
+            &attempt,
+            token_type,
+            credentials.token.as_deref(),
+        )
+        .await
     }
     .instrument(span)
     .await?;
@@ -344,8 +355,19 @@ async fn do_request(
     option: &RequestOption,
     token_type: AccessTokenType,
 ) -> Result<ApiResp, LarkError> {
-    retry_request(config, option, token_type, |bearer| async move {
-        let resp = raw_send(config, api_req, option, token_type, bearer.as_deref()).await?;
+    retry_request(config, option, token_type, |credentials| async move {
+        let mut attempt = option.clone();
+        if attempt.dpop_binding.is_none() {
+            attempt.dpop_binding = credentials.binding.clone();
+        }
+        let resp = raw_send(
+            config,
+            api_req,
+            &attempt,
+            token_type,
+            credentials.token.as_deref(),
+        )
+        .await?;
         classify_buffered_response(config, resp).await
     })
     .await
@@ -394,19 +416,30 @@ async fn do_request_stream(
     token_type: AccessTokenType,
     error_limit: Option<usize>,
 ) -> Result<StreamResp, LarkError> {
-    retry_request(config, option, token_type, |bearer| async move {
+    retry_request(config, option, token_type, |credentials| async move {
+        let mut attempt = option.clone();
+        if attempt.dpop_binding.is_none() {
+            attempt.dpop_binding = credentials.binding.clone();
+        }
         let resp = if error_limit.is_some() {
             raw_send_stream_inner(
                 config,
                 api_req,
-                option,
-                bearer.as_deref(),
+                &attempt,
+                credentials.token.as_deref(),
                 false,
                 error_limit,
             )
             .await?
         } else {
-            raw_send_stream(config, api_req, option, token_type, bearer.as_deref()).await?
+            raw_send_stream(
+                config,
+                api_req,
+                &attempt,
+                token_type,
+                credentials.token.as_deref(),
+            )
+            .await?
         };
         classify_stream_response(config, resp).await
     })
@@ -435,15 +468,15 @@ async fn retry_request<T, F, Fut>(
     mut send: F,
 ) -> Result<T, LarkError>
 where
-    F: FnMut(Option<String>) -> Fut,
+    F: FnMut(ResolvedCredentials) -> Fut,
     Fut: Future<Output = Result<RequestAttempt<T>, LarkError>>,
 {
     let max_retries = config.max_retries;
     let mut last_err = None;
 
     for _ in 0..max_retries {
-        let bearer = resolve_bearer_token(config, option, token_type).await?;
-        match send(bearer).await {
+        let credentials = resolve_credentials(config, option, token_type).await?;
+        match send(credentials).await {
             Ok(RequestAttempt::Done(value)) => return Ok(value),
             Ok(RequestAttempt::Retry(err)) => {
                 last_err = Some(err);
@@ -481,6 +514,40 @@ async fn resolve_bearer_token(
     token_resolver(config)
         .resolve(config, option, token_type)
         .await
+}
+
+#[derive(Clone)]
+struct ResolvedCredentials {
+    token: Option<String>,
+    binding: Option<crate::dpop::DPoPBinding>,
+}
+
+async fn resolve_credentials(
+    config: &Config,
+    option: &RequestOption,
+    token_type: AccessTokenType,
+) -> Result<ResolvedCredentials, LarkError> {
+    if token_type == AccessTokenType::Tenant
+        && config.client_assertion_provider.is_some()
+        && option.tenant_access_token.is_none()
+    {
+        let issued = TokenManager::new(config.token_cache.clone())
+            .get_client_assertion_tenant_token(config, option.tenant_key.as_deref())
+            .await?;
+        return Ok(ResolvedCredentials {
+            token: Some(issued.access_token),
+            binding: if config.dpop_mode == crate::dpop::DPoPMode::Disabled {
+                None
+            } else {
+                issued.dpop_binding
+            },
+        });
+    }
+    let token = resolve_bearer_token(config, option, token_type).await?;
+    Ok(ResolvedCredentials {
+        token,
+        binding: None,
+    })
 }
 
 enum TokenResolver {
