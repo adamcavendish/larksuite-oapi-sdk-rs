@@ -570,13 +570,17 @@ fn dpop_option(config: &Config, url: &str) -> Result<RequestOption, LarkError> {
     if config.dpop_mode == crate::dpop::DPoPMode::Disabled {
         return Ok(option);
     }
-    let Some(key) = config.dpop_key.as_ref() else {
-        if config.dpop_mode == crate::dpop::DPoPMode::Required {
-            return Err(LarkError::DPoPBinding(
-                "required DPoP key is not configured".into(),
-            ));
+    let key = if let Some(key) = config.dpop_key.clone() {
+        key
+    } else {
+        match config.dpop_key_store.load_or_generate(config.dpop_key_id()) {
+            Ok(key) => key,
+            Err(err) if config.dpop_mode == crate::dpop::DPoPMode::Preferred => {
+                tracing::warn!("DPoP key store unavailable, falling back to Bearer: {err}");
+                return Ok(option);
+            }
+            Err(err) => return Err(LarkError::DPoPBinding(err.to_string())),
         }
-        return Ok(option);
     };
     let now = config.dpop_clock.now_unix_seconds()?;
     let proof = key.proof("POST", url, now)?;

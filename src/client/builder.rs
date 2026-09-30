@@ -7,7 +7,7 @@ use super::LarkClient;
 use crate::cache::Cache;
 use crate::config::Config;
 use crate::constants::AppType;
-use crate::dpop::{DPoPClock, DPoPKey, DPoPMode};
+use crate::dpop::{DPoPClock, DPoPKey, DPoPKeyStore, DPoPMode};
 use crate::error::LarkError;
 use crate::token::ClientAssertionProvider;
 
@@ -62,6 +62,16 @@ impl LarkClientBuilder {
 
     pub fn dpop_key(mut self, key: DPoPKey) -> Self {
         self.config.dpop_key = Some(key);
+        self
+    }
+
+    pub fn dpop_key_store(mut self, store: Arc<dyn DPoPKeyStore>) -> Self {
+        self.config.dpop_key_store = store;
+        self
+    }
+
+    pub fn dpop_key_id(mut self, key_id: impl Into<String>) -> Self {
+        self.config.dpop_key_id = key_id.into();
         self
     }
 

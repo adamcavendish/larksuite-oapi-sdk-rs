@@ -7,6 +7,8 @@ use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use p256::ecdsa::{Signature, SigningKey, VerifyingKey, signature::Signer};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -47,6 +49,73 @@ pub enum DPoPError {
     Serialize(#[from] serde_json::Error),
     #[error("failed to read DPoP clock: {0}")]
     Clock(String),
+    #[error("DPoP key store error: {0}")]
+    KeyStore(String),
+}
+
+pub trait DPoPKeyStore: Send + Sync + std::fmt::Debug {
+    fn load(&self, key_id: &str) -> Result<Option<DPoPKey>, DPoPError>;
+    fn save(&self, key_id: &str, key: &DPoPKey) -> Result<(), DPoPError>;
+    fn remove(&self, key_id: &str) -> Result<(), DPoPError>;
+    fn load_or_generate(&self, key_id: &str) -> Result<DPoPKey, DPoPError> {
+        if let Some(key) = self.load(key_id)? {
+            return Ok(key);
+        }
+        let key = DPoPKey::generate();
+        self.save(key_id, &key)?;
+        Ok(key)
+    }
+}
+
+#[derive(Clone, Default)]
+pub struct MemoryDPoPKeyStore {
+    keys: Arc<Mutex<HashMap<String, DPoPKey>>>,
+}
+
+impl std::fmt::Debug for MemoryDPoPKeyStore {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MemoryDPoPKeyStore")
+            .field(
+                "key_count",
+                &self.keys.lock().map(|keys| keys.len()).unwrap_or_default(),
+            )
+            .finish()
+    }
+}
+
+impl MemoryDPoPKeyStore {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn load_or_generate(&self, key_id: &str) -> Result<DPoPKey, DPoPError> {
+        <Self as DPoPKeyStore>::load_or_generate(self, key_id)
+    }
+}
+
+impl DPoPKeyStore for MemoryDPoPKeyStore {
+    fn load(&self, key_id: &str) -> Result<Option<DPoPKey>, DPoPError> {
+        self.keys
+            .lock()
+            .map_err(|_| DPoPError::KeyStore("memory key store lock poisoned".into()))
+            .map(|keys| keys.get(key_id).cloned())
+    }
+
+    fn save(&self, key_id: &str, key: &DPoPKey) -> Result<(), DPoPError> {
+        self.keys
+            .lock()
+            .map_err(|_| DPoPError::KeyStore("memory key store lock poisoned".into()))?
+            .insert(key_id.to_string(), key.clone());
+        Ok(())
+    }
+
+    fn remove(&self, key_id: &str) -> Result<(), DPoPError> {
+        self.keys
+            .lock()
+            .map_err(|_| DPoPError::KeyStore("memory key store lock poisoned".into()))?
+            .remove(key_id);
+        Ok(())
+    }
 }
 
 #[derive(Clone)]
@@ -217,6 +286,16 @@ struct Jwk {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn memory_store_reuses_and_removes_keys() {
+        let store = super::MemoryDPoPKeyStore::new();
+        let first = store.load_or_generate("tenant-a").unwrap();
+        let second = store.load_or_generate("tenant-a").unwrap();
+        assert_eq!(first.thumbprint(), second.thumbprint());
+        assert!(store.load("tenant-b").unwrap().is_none());
+        store.remove("tenant-a").unwrap();
+        assert!(store.load("tenant-a").unwrap().is_none());
+    }
     #[test]
     fn resource_proof_binds_token_and_preserves_non_default_port() {
         use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
