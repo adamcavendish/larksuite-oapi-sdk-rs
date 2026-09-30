@@ -380,7 +380,7 @@ impl TokenManager {
 
         let mut parsed = parsed?;
         if config.dpop_mode != crate::dpop::DPoPMode::Disabled
-            && config.dpop_key.is_some()
+            && config.resolved_dpop_key()?.is_some()
             && !parsed.token_type.eq_ignore_ascii_case("DPoP")
         {
             if config.dpop_mode == crate::dpop::DPoPMode::Preferred {
@@ -419,7 +419,7 @@ impl TokenManager {
         if let Some(token) = self.cache.get(&token_key).await? {
             if let Ok(cached) = serde_json::from_str::<CachedIssuedToken>(&token) {
                 let binding = if cached.token_type.eq_ignore_ascii_case("DPoP")
-                    && config.dpop_key.as_ref().is_some_and(|key| {
+                    && config.resolved_dpop_key()?.as_ref().is_some_and(|key| {
                         cached.dpop_jkt.as_deref() == Some(key.thumbprint().as_str())
                     }) {
                     config
@@ -537,7 +537,10 @@ impl TokenManager {
             access_token: resp.access_token.clone(),
             token_type: token_type.to_string(),
             dpop_jkt: if token_type.eq_ignore_ascii_case("DPoP") {
-                config.dpop_key.as_ref().map(DPoPKey::thumbprint)
+                config
+                    .resolved_dpop_key()?
+                    .as_ref()
+                    .map(DPoPKey::thumbprint)
             } else {
                 None
             },
@@ -549,8 +552,7 @@ impl TokenManager {
 
         let dpop_binding = if token_type.eq_ignore_ascii_case("DPoP") {
             config
-                .dpop_key
-                .clone()
+                .resolved_dpop_key()?
                 .map(|key| crate::dpop::DPoPBinding::new(resp.access_token.clone(), key))
                 .transpose()?
         } else {
@@ -570,17 +572,15 @@ fn dpop_option(config: &Config, url: &str) -> Result<RequestOption, LarkError> {
     if config.dpop_mode == crate::dpop::DPoPMode::Disabled {
         return Ok(option);
     }
-    let key = if let Some(key) = config.dpop_key.clone() {
-        key
-    } else {
-        match config.dpop_key_store.load_or_generate(config.dpop_key_id()) {
-            Ok(key) => key,
-            Err(err) if config.dpop_mode == crate::dpop::DPoPMode::Preferred => {
-                tracing::warn!("DPoP key store unavailable, falling back to Bearer: {err}");
-                return Ok(option);
-            }
-            Err(err) => return Err(LarkError::DPoPBinding(err.to_string())),
+    let Some(key) = (match config.resolved_dpop_key() {
+        Ok(key) => key,
+        Err(err) if config.dpop_mode == crate::dpop::DPoPMode::Preferred => {
+            tracing::warn!("DPoP key store unavailable, falling back to Bearer: {err}");
+            return Ok(option);
         }
+        Err(err) => return Err(err),
+    }) else {
+        return Ok(option);
     };
     let now = config.dpop_clock.now_unix_seconds()?;
     let proof = key.proof("POST", url, now)?;

@@ -21,4 +21,10 @@ impl LarkClient {
     pub fn config(&self) -> &Config {
         &self.config
     }
+
+    /// Remove the configured store entry so the next DPoP request generates a
+    /// new key and obtains a newly bound token.
+    pub fn rotate_dpop_key(&self) -> Result<(), crate::LarkError> {
+        self.config.rotate_dpop_key()
+    }
 }
