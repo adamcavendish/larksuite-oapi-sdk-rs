@@ -240,3 +240,21 @@ impl std::fmt::Debug for Config {
             .finish_non_exhaustive()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dpop_config_resolves_store_keys_and_rejects_explicit_rotation() {
+        let mut config = Config::new("app", "secret");
+        config.dpop_mode = DPoPMode::Required;
+        let first = config.resolved_dpop_key().unwrap().unwrap();
+        assert_eq!(
+            config.resolved_dpop_key().unwrap().unwrap().thumbprint(),
+            first.thumbprint()
+        );
+        config.dpop_key = Some(DPoPKey::generate());
+        assert!(config.rotate_dpop_key().is_err());
+    }
+}

@@ -58,7 +58,7 @@ pub use crypto::{
 };
 pub use dpop::{
     DPoPBinding, DPoPClock, DPoPError, DPoPKey, DPoPKeyStore, DPoPMode, MemoryDPoPKeyStore,
-    SystemDPoPClock,
+    OffsetDPoPClock, SystemDPoPClock,
 };
 pub use error::LarkError;
 pub use event::{
