@@ -56,7 +56,10 @@ pub use crypto::{
     encrypted_event_msg, event_decrypt, event_encrypt, verify_signature_sha1,
     verify_signature_sha256,
 };
-pub use dpop::{DPoPBinding, DPoPClock, DPoPError, DPoPKey, DPoPMode, SystemDPoPClock};
+pub use dpop::{
+    DPoPBinding, DPoPClock, DPoPError, DPoPKey, DPoPKeyStore, DPoPMode, MemoryDPoPKeyStore,
+    SystemDPoPClock,
+};
 pub use error::LarkError;
 pub use event::{
     CallbackAction, CallbackCard, CallbackContext, CallbackHandlerFn, CallbackOperator, CardAction,

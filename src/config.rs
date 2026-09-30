@@ -6,7 +6,9 @@ use http::HeaderMap;
 
 use crate::cache::{Cache, LocalCache};
 use crate::constants::{AppType, FEISHU_BASE_URL};
-use crate::dpop::{DPoPClock, DPoPKey, DPoPMode, SystemDPoPClock};
+use crate::dpop::{
+    DPoPClock, DPoPKey, DPoPKeyStore, DPoPMode, MemoryDPoPKeyStore, SystemDPoPClock,
+};
 use crate::token::ClientAssertionProvider;
 
 static CRYPTO_PROVIDER_INIT: Once = Once::new();
@@ -46,6 +48,8 @@ pub struct Config {
     pub(crate) dpop_mode: DPoPMode,
     pub(crate) dpop_key: Option<DPoPKey>,
     pub(crate) dpop_clock: Arc<dyn DPoPClock>,
+    pub(crate) dpop_key_store: Arc<dyn DPoPKeyStore>,
+    pub(crate) dpop_key_id: String,
 }
 
 impl Config {
@@ -75,6 +79,8 @@ impl Config {
             dpop_mode: DPoPMode::Disabled,
             dpop_key: None,
             dpop_clock: Arc::new(SystemDPoPClock),
+            dpop_key_store: Arc::new(MemoryDPoPKeyStore::new()),
+            dpop_key_id: "default".into(),
         }
     }
 
@@ -190,6 +196,14 @@ impl Config {
 
     pub fn dpop_clock(&self) -> &Arc<dyn DPoPClock> {
         &self.dpop_clock
+    }
+
+    pub fn dpop_key_store(&self) -> &Arc<dyn DPoPKeyStore> {
+        &self.dpop_key_store
+    }
+
+    pub fn dpop_key_id(&self) -> &str {
+        &self.dpop_key_id
     }
 }
 
