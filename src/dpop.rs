@@ -15,6 +15,8 @@ fn encode_part<T: Serialize>(value: &T) -> Result<String, DPoPError> {
 
 #[derive(Debug, thiserror::Error)]
 pub enum DPoPError {
+    #[error("DPoP access token is empty")]
+    EmptyAccessToken,
     #[error("invalid DPoP URL: {0}")]
     InvalidUrl(String),
     #[error("failed to serialize DPoP proof: {0}")]
@@ -53,13 +55,36 @@ impl DPoPKey {
     }
 
     pub fn proof(&self, method: &str, uri: &str, iat: i64) -> Result<String, DPoPError> {
+        self.proof_with_access_token(method, uri, iat, None)
+    }
+
+    /// Generate a resource proof bound to an access token. Token endpoint
+    /// proofs omit `ath`; resource proofs must include it.
+    pub fn resource_proof(
+        &self,
+        method: &str,
+        uri: &str,
+        iat: i64,
+        access_token: &str,
+    ) -> Result<String, DPoPError> {
+        self.proof_with_access_token(method, uri, iat, Some(access_token))
+    }
+
+    fn proof_with_access_token(
+        &self,
+        method: &str,
+        uri: &str,
+        iat: i64,
+        access_token: Option<&str>,
+    ) -> Result<String, DPoPError> {
         let parsed = url::Url::parse(uri).map_err(|e| DPoPError::InvalidUrl(e.to_string()))?;
-        let htu = format!(
-            "{}://{}{}",
-            parsed.scheme(),
-            parsed.host_str().unwrap_or_default(),
-            parsed.path()
-        );
+        if !matches!(parsed.scheme(), "http" | "https") || parsed.host_str().is_none() {
+            return Err(DPoPError::InvalidUrl(uri.to_string()));
+        }
+        let mut htu_url = parsed;
+        htu_url.set_query(None);
+        htu_url.set_fragment(None);
+        let htu = htu_url.to_string();
         let header = Header {
             typ: "dpop+jwt",
             alg: "ES256",
@@ -70,6 +95,7 @@ impl DPoPKey {
             htm: method,
             htu,
             iat,
+            ath: access_token.map(|token| URL_SAFE_NO_PAD.encode(Sha256::digest(token.as_bytes()))),
         };
         let signing = format!("{}.{}", encode_part(&header)?, encode_part(&claims)?);
         let sig: Signature = self.signing_key.sign(signing.as_bytes());
@@ -100,6 +126,46 @@ impl DPoPKey {
     }
 }
 
+/// An access token issued with `token_type=DPoP` and its corresponding key.
+/// Construct this only after validating the token endpoint response.
+#[derive(Clone)]
+pub struct DPoPBinding {
+    access_token: String,
+    key: DPoPKey,
+}
+
+impl std::fmt::Debug for DPoPBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DPoPBinding")
+            .field("access_token", &"[redacted]")
+            .field("key_thumbprint", &self.key.thumbprint())
+            .finish()
+    }
+}
+
+impl DPoPBinding {
+    pub fn new(access_token: impl Into<String>, key: DPoPKey) -> Result<Self, DPoPError> {
+        let access_token = access_token.into();
+        if access_token.is_empty() {
+            return Err(DPoPError::EmptyAccessToken);
+        }
+        Ok(Self { access_token, key })
+    }
+
+    pub fn access_token(&self) -> &str {
+        &self.access_token
+    }
+
+    pub fn key_thumbprint(&self) -> String {
+        self.key.thumbprint()
+    }
+
+    pub fn proof(&self, method: &str, uri: &str, iat: i64) -> Result<String, DPoPError> {
+        self.key
+            .resource_proof(method, uri, iat, &self.access_token)
+    }
+}
+
 #[derive(Serialize)]
 struct Header<'a> {
     typ: &'a str,
@@ -112,6 +178,8 @@ struct Claims<'a> {
     htm: &'a str,
     htu: String,
     iat: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    ath: Option<String>,
 }
 #[derive(Serialize)]
 struct Jwk {
@@ -123,6 +191,31 @@ struct Jwk {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn resource_proof_binds_token_and_preserves_non_default_port() {
+        use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
+        use sha2::{Digest, Sha256};
+
+        let key = super::DPoPKey::generate();
+        let proof = key
+            .resource_proof(
+                "GET",
+                "https://example.com:8443/path?q=secret#part",
+                123,
+                "bound-token",
+            )
+            .unwrap();
+        let payload = proof.split('.').nth(1).unwrap();
+        let claims: serde_json::Value =
+            serde_json::from_slice(&URL_SAFE_NO_PAD.decode(payload).unwrap()).unwrap();
+        assert_eq!(claims["htu"], "https://example.com:8443/path");
+        assert_eq!(claims["htm"], "GET");
+        assert_eq!(
+            claims["ath"],
+            URL_SAFE_NO_PAD.encode(Sha256::digest(b"bound-token"))
+        );
+        assert!(!proof.contains("bound-token"));
+    }
     use super::*;
 
     #[test]
