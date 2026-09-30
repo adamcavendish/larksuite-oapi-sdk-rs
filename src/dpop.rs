@@ -8,6 +8,7 @@ use p256::ecdsa::{Signature, SigningKey, VerifyingKey, signature::Signer};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
@@ -32,6 +33,60 @@ impl DPoPClock for SystemDPoPClock {
             .duration_since(std::time::UNIX_EPOCH)
             .map_err(|e| DPoPError::Clock(e.to_string()))?
             .as_secs() as i64)
+    }
+}
+
+/// A clock that applies a caller-supplied, bounded correction to a base clock.
+///
+/// Applications may update the correction after reading a trusted server
+/// timestamp. The SDK never performs that network exchange automatically.
+#[derive(Debug)]
+pub struct OffsetDPoPClock {
+    base: Arc<dyn DPoPClock>,
+    offset_seconds: AtomicI64,
+    max_offset_seconds: i64,
+}
+
+impl OffsetDPoPClock {
+    pub fn new(max_offset_seconds: i64) -> Result<Self, DPoPError> {
+        Self::with_base(Arc::new(SystemDPoPClock), max_offset_seconds)
+    }
+
+    pub fn with_base(base: Arc<dyn DPoPClock>, max_offset_seconds: i64) -> Result<Self, DPoPError> {
+        if max_offset_seconds < 0 {
+            return Err(DPoPError::Clock(
+                "maximum clock offset must be non-negative".into(),
+            ));
+        }
+        Ok(Self {
+            base,
+            offset_seconds: AtomicI64::new(0),
+            max_offset_seconds,
+        })
+    }
+
+    pub fn adjust_to_server_time(&self, server_unix_seconds: i64) -> Result<(), DPoPError> {
+        let local = self.base.now_unix_seconds()?;
+        let offset = server_unix_seconds
+            .checked_sub(local)
+            .ok_or_else(|| DPoPError::Clock("server clock offset overflow".into()))?;
+        if offset.unsigned_abs() > self.max_offset_seconds as u64 {
+            return Err(DPoPError::Clock(format!(
+                "server clock offset {offset}s exceeds limit {}s",
+                self.max_offset_seconds
+            )));
+        }
+        self.offset_seconds.store(offset, Ordering::Relaxed);
+        Ok(())
+    }
+}
+
+impl DPoPClock for OffsetDPoPClock {
+    fn now_unix_seconds(&self) -> Result<i64, DPoPError> {
+        self.base
+            .now_unix_seconds()?
+            .checked_add(self.offset_seconds.load(Ordering::Relaxed))
+            .ok_or_else(|| DPoPError::Clock("adjusted clock overflow".into()))
     }
 }
 
@@ -134,6 +189,12 @@ impl std::fmt::Debug for DPoPKey {
 
 impl DPoPKey {
     pub fn generate() -> Self {
+        Self {
+            signing_key: SigningKey::random(&mut rand_core::OsRng),
+            kid: None,
+        }
+    }
+
     pub fn private_key_bytes(&self) -> [u8; 32] {
         self.signing_key.to_bytes().into()
     }
@@ -141,13 +202,10 @@ impl DPoPKey {
     pub fn from_private_key_bytes(bytes: [u8; 32]) -> Result<Self, DPoPError> {
         let signing_key = SigningKey::from_bytes((&bytes).into())
             .map_err(|e| DPoPError::KeyStore(format!("invalid P-256 private key: {e}")))?;
-        Ok(Self { signing_key, kid: None })
-    }
-
-        Self {
-            signing_key: SigningKey::random(&mut rand_core::OsRng),
+        Ok(Self {
+            signing_key,
             kid: None,
-        }
+        })
     }
 
     pub fn with_kid(mut self, kid: impl Into<String>) -> Self {
@@ -296,6 +354,26 @@ struct Jwk {
 
 #[cfg(test)]
 mod tests {
+    #[derive(Debug)]
+    struct FixedClock(i64);
+
+    impl super::DPoPClock for FixedClock {
+        fn now_unix_seconds(&self) -> Result<i64, super::DPoPError> {
+            Ok(self.0)
+        }
+    }
+
+    #[test]
+    fn offset_clock_applies_bounded_server_correction() {
+        let clock =
+            super::OffsetDPoPClock::with_base(std::sync::Arc::new(FixedClock(100)), 30).unwrap();
+        assert_eq!(super::DPoPClock::now_unix_seconds(&clock).unwrap(), 100);
+        clock.adjust_to_server_time(115).unwrap();
+        assert_eq!(super::DPoPClock::now_unix_seconds(&clock).unwrap(), 115);
+        assert!(clock.adjust_to_server_time(200).is_err());
+        assert_eq!(super::DPoPClock::now_unix_seconds(&clock).unwrap(), 115);
+    }
+
     #[test]
     fn memory_store_reuses_and_removes_keys() {
         let store = super::MemoryDPoPKeyStore::new();
@@ -305,6 +383,19 @@ mod tests {
         assert!(store.load("tenant-b").unwrap().is_none());
         store.remove("tenant-a").unwrap();
         assert!(store.load("tenant-a").unwrap().is_none());
+    }
+
+    #[test]
+    fn private_key_bytes_round_trip_and_invalid_input() {
+        let key = super::DPoPKey::generate().with_kid("round-trip");
+        let restored = super::DPoPKey::from_private_key_bytes(key.private_key_bytes()).unwrap();
+        assert_eq!(key.thumbprint(), restored.thumbprint());
+        assert!(super::DPoPKey::from_private_key_bytes([0; 32]).is_err());
+    }
+
+    #[test]
+    fn offset_clock_rejects_negative_limit() {
+        assert!(super::OffsetDPoPClock::new(-1).is_err());
     }
     #[test]
     fn resource_proof_binds_token_and_preserves_non_default_port() {
