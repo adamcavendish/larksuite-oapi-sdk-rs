@@ -53,6 +53,29 @@ pub struct Config {
 }
 
 impl Config {
+    pub(crate) fn resolved_dpop_key(&self) -> Result<Option<DPoPKey>, crate::LarkError> {
+        if self.dpop_mode == DPoPMode::Disabled {
+            return Ok(None);
+        }
+        if let Some(key) = &self.dpop_key {
+            return Ok(Some(key.clone()));
+        }
+        self.dpop_key_store
+            .load_or_generate(&self.dpop_key_id)
+            .map(Some)
+            .map_err(|e| crate::LarkError::DPoPBinding(e.to_string()))
+    }
+
+    pub(crate) fn rotate_dpop_key(&self) -> Result<(), crate::LarkError> {
+        if self.dpop_key.is_some() {
+            return Err(crate::LarkError::DPoPBinding(
+                "cannot rotate an explicitly configured DPoP key; use a key store".into(),
+            ));
+        }
+        self.dpop_key_store
+            .remove(&self.dpop_key_id)
+            .map_err(|e| crate::LarkError::DPoPBinding(e.to_string()))
+    }
     pub(crate) fn new(app_id: impl Into<String>, app_secret: impl Into<String>) -> Self {
         let timeout = Duration::from_secs(30);
         install_default_crypto_provider();

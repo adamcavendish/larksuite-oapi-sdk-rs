@@ -134,6 +134,16 @@ impl std::fmt::Debug for DPoPKey {
 
 impl DPoPKey {
     pub fn generate() -> Self {
+    pub fn private_key_bytes(&self) -> [u8; 32] {
+        self.signing_key.to_bytes().into()
+    }
+
+    pub fn from_private_key_bytes(bytes: [u8; 32]) -> Result<Self, DPoPError> {
+        let signing_key = SigningKey::from_bytes((&bytes).into())
+            .map_err(|e| DPoPError::KeyStore(format!("invalid P-256 private key: {e}")))?;
+        Ok(Self { signing_key, kid: None })
+    }
+
         Self {
             signing_key: SigningKey::random(&mut rand_core::OsRng),
             kid: None,
