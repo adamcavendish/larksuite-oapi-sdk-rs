@@ -6,6 +6,7 @@ use http::HeaderMap;
 
 use crate::cache::{Cache, LocalCache};
 use crate::constants::{AppType, FEISHU_BASE_URL};
+use crate::dpop::{DPoPClock, DPoPKey, DPoPMode, SystemDPoPClock};
 use crate::token::ClientAssertionProvider;
 
 static CRYPTO_PROVIDER_INIT: Once = Once::new();
@@ -42,6 +43,9 @@ pub struct Config {
     pub(crate) log_level: Option<tracing::Level>,
     pub(crate) log_req_at_debug: bool,
     pub(crate) client_assertion_provider: Option<Arc<dyn ClientAssertionProvider>>,
+    pub(crate) dpop_mode: DPoPMode,
+    pub(crate) dpop_key: Option<DPoPKey>,
+    pub(crate) dpop_clock: Arc<dyn DPoPClock>,
 }
 
 impl Config {
@@ -68,6 +72,9 @@ impl Config {
             log_level: None,
             log_req_at_debug: false,
             client_assertion_provider: None,
+            dpop_mode: DPoPMode::Disabled,
+            dpop_key: None,
+            dpop_clock: Arc::new(SystemDPoPClock),
         }
     }
 
@@ -171,6 +178,18 @@ impl Config {
     #[inline]
     pub fn client_assertion_provider(&self) -> Option<&Arc<dyn ClientAssertionProvider>> {
         self.client_assertion_provider.as_ref()
+    }
+
+    pub fn dpop_mode(&self) -> DPoPMode {
+        self.dpop_mode
+    }
+
+    pub fn dpop_key(&self) -> Option<&DPoPKey> {
+        self.dpop_key.as_ref()
+    }
+
+    pub fn dpop_clock(&self) -> &Arc<dyn DPoPClock> {
+        &self.dpop_clock
     }
 }
 

@@ -213,6 +213,32 @@ fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result
 
     validate_token_type(&api_req.supported_access_token_types, option)?;
 
+    if let Some(binding) = &option.dpop_binding {
+        if option.headers.as_ref().is_some_and(|headers| {
+            headers.contains_key(http::header::AUTHORIZATION) || headers.contains_key("DPoP")
+        }) {
+            return Err(LarkError::DPoPBinding(
+                "Authorization and DPoP headers cannot be overridden for a DPoP request".into(),
+            ));
+        }
+        if option.user_access_token.as_deref() != Some(binding.access_token()) {
+            return Err(LarkError::DPoPBinding(
+                "user_access_token does not match the DPoP binding".to_string(),
+            ));
+        }
+        if !api_req
+            .supported_access_token_types
+            .contains(&AccessTokenType::User)
+            || api_req
+                .supported_access_token_types
+                .contains(&AccessTokenType::None)
+        {
+            return Err(LarkError::DPoPBinding(
+                "the request does not select a user access token".to_string(),
+            ));
+        }
+    }
+
     Ok(())
 }
 
@@ -718,7 +744,7 @@ async fn send_http_response(
             .map_err(|e| LarkError::IllegalParam(format!("invalid request id header: {e}")))?;
     }
 
-    if let Some(token) = bearer_token {
+    if let Some(token) = bearer_token.filter(|_| option.dpop_binding.is_none()) {
         builder = builder.bearer_auth(token);
     }
 
@@ -737,6 +763,21 @@ async fn send_http_response(
         for (key, value) in headers {
             builder = builder.header(key.clone(), value.clone());
         }
+    }
+
+    if let Some(binding) = &option.dpop_binding {
+        if bearer_token != Some(binding.access_token()) {
+            return Err(LarkError::DPoPBinding(
+                "selected token does not match the DPoP binding".to_string(),
+            ));
+        }
+        let now = config.dpop_clock.now_unix_seconds()?;
+        let proof = binding.proof(api_req.http_method.as_str(), &full_url, now)?;
+        builder = builder
+            .header_str("Authorization", &format!("DPoP {}", binding.access_token()))
+            .map_err(|e| LarkError::DPoPBinding(format!("invalid DPoP authorization: {e}")))?
+            .header_str("DPoP", &proof)
+            .map_err(|e| LarkError::DPoPBinding(format!("invalid DPoP proof header: {e}")))?;
     }
 
     match &api_req.body {

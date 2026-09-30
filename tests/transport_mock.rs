@@ -103,6 +103,65 @@ async fn transport_raw_request_with_token_sets_supported_token_type() {
 }
 
 #[tokio::test]
+async fn transport_dpop_binding_replaces_bearer_and_adds_proof() {
+    let body = r#"{"code":0,"msg":"ok"}"#;
+    let (addr, _h, requests) = mock_server_with_requests(vec![http_response(200, body)]).await;
+    let client = client_for(addr);
+    let token = "user-token-dpop";
+    let key = larksuite_oapi_sdk_rs::DPoPKey::generate();
+    let binding = larksuite_oapi_sdk_rs::DPoPBinding::new(token, key).unwrap();
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/custom");
+    api_req.supported_access_token_types = vec![AccessTokenType::User];
+    let option = RequestOption {
+        user_access_token: Some(token.to_string()),
+        dpop_binding: Some(binding),
+        ..Default::default()
+    };
+
+    client.raw_request(&api_req, &option).await.unwrap();
+    let request = requests.lock().unwrap().join("\n").to_ascii_lowercase();
+    assert!(request.contains("authorization: dpop user-token-dpop"));
+    assert!(request.contains("dpop: "));
+    assert!(!request.contains("authorization: bearer"));
+}
+
+#[tokio::test]
+async fn transport_dpop_retry_generates_a_fresh_proof() {
+    let first = http_response(504, "gateway timeout");
+    let second = http_response(200, r#"{"code":0,"msg":"ok"}"#);
+    let (addr, _h, requests) = mock_server_with_requests(vec![first, second]).await;
+    let client = LarkClient::builder("test_app_id", "test_secret")
+        .base_url(format!("http://{addr}"))
+        .disable_token_cache()
+        .max_retries(2)
+        .build()
+        .unwrap();
+    let token = "user-token-retry";
+    let binding =
+        larksuite_oapi_sdk_rs::DPoPBinding::new(token, larksuite_oapi_sdk_rs::DPoPKey::generate())
+            .unwrap();
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/retry");
+    api_req.supported_access_token_types = vec![AccessTokenType::User];
+    let option = RequestOption {
+        user_access_token: Some(token.into()),
+        dpop_binding: Some(binding),
+        ..Default::default()
+    };
+    client.raw_request(&api_req, &option).await.unwrap();
+    let requests = requests.lock().unwrap();
+    let proofs: Vec<_> = requests
+        .iter()
+        .filter_map(|request| {
+            request
+                .lines()
+                .find(|line| line.to_ascii_lowercase().starts_with("dpop:"))
+        })
+        .collect();
+    assert_eq!(proofs.len(), 2);
+    assert_ne!(proofs[0], proofs[1]);
+}
+
+#[tokio::test]
 async fn transport_raw_request_typed_with_token_sets_supported_token_type() {
     #[derive(Debug, serde::Deserialize)]
     struct TestData {

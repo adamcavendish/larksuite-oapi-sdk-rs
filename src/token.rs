@@ -315,7 +315,7 @@ impl TokenManager {
         api_req.body = Some(ReqBody::json(body)?);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
 
-        let option = RequestOption::default();
+        let option = dpop_option(config, &format!("{}{}", config.base_url, path))?;
         let api_resp =
             transport::raw_send(config, &api_req, &option, AccessTokenType::None, None).await?;
 
@@ -340,7 +340,7 @@ impl TokenManager {
         api_req.body = Some(ReqBody::json(body)?);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
 
-        let option = RequestOption::default();
+        let option = dpop_option(config, url)?;
         let api_resp = transport::raw_send_absolute_url(config, &api_req, &option, None).await?;
 
         // A policy denial can arrive at a non-200 HTTP status. Preserve its
@@ -353,7 +353,17 @@ impl TokenManager {
             )));
         }
 
-        Ok(parsed?)
+        let parsed = parsed?;
+        if config.dpop_mode != crate::dpop::DPoPMode::Disabled
+            && config.dpop_key.is_some()
+            && !parsed.token_type.eq_ignore_ascii_case("DPoP")
+        {
+            return Err(LarkError::DPoPBinding(format!(
+                "token endpoint returned {:?} for a DPoP request",
+                parsed.token_type
+            )));
+        }
+        Ok(parsed)
     }
 
     async fn get_tenant_token_by_client_assertion(
@@ -455,6 +465,30 @@ impl TokenManager {
             status_message: resp.status_message.filter(|message| !message.is_empty()),
         })
     }
+}
+
+fn dpop_option(config: &Config, url: &str) -> Result<RequestOption, LarkError> {
+    let mut option = RequestOption::default();
+    if config.dpop_mode == crate::dpop::DPoPMode::Disabled {
+        return Ok(option);
+    }
+    let Some(key) = config.dpop_key.as_ref() else {
+        if config.dpop_mode == crate::dpop::DPoPMode::Required {
+            return Err(LarkError::DPoPBinding(
+                "required DPoP key is not configured".into(),
+            ));
+        }
+        return Ok(option);
+    };
+    let now = config.dpop_clock.now_unix_seconds()?;
+    let proof = key.proof("POST", url, now)?;
+    let mut headers = http::HeaderMap::new();
+    headers.insert(
+        "DPoP",
+        http::HeaderValue::from_str(&proof).map_err(|e| LarkError::DPoPBinding(e.to_string()))?,
+    );
+    option.headers = Some(headers);
+    Ok(option)
 }
 
 fn app_access_token_cache_key(app_id: &str, app_secret: &str) -> String {
