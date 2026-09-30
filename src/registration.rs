@@ -9,6 +9,7 @@ use std::io::Write as _;
 use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 
+use crate::dpop::DPoPKey;
 use crate::error::LarkError;
 
 const SDK_NAME: &str = "rust-sdk";
@@ -308,18 +309,38 @@ async fn do_registration_request<T: for<'de> Deserialize<'de>>(
     domain: &str,
     form: &[(&str, &str)],
 ) -> Result<T, LarkError> {
+    do_registration_request_with_dpop(client, domain, form, None).await
+}
+
+async fn do_registration_request_with_dpop<T: for<'de> Deserialize<'de>>(
+    client: &aioduct::TokioClient,
+    domain: &str,
+    form: &[(&str, &str)],
+    dpop: Option<&DPoPKey>,
+) -> Result<T, LarkError> {
     let url = build_endpoint_url(domain);
     let body: String = url::form_urlencoded::Serializer::new(String::new())
         .extend_pairs(form)
         .finish();
-    let resp = client
+    let mut request = client
         .request(http::Method::POST, &url)
         .map_err(|e| LarkError::Registration(format!("invalid registration url: {e}")))?
         .header(
             http::header::CONTENT_TYPE,
             http::HeaderValue::from_static("application/x-www-form-urlencoded"),
         )
-        .body(body.into_bytes())
+        .body(body.into_bytes());
+    if let Some(key) = dpop {
+        let proof = key
+            .proof("POST", &url, chrono_like_now())
+            .map_err(|e| LarkError::Registration(format!("DPoP proof failed: {e}")))?;
+        request = request.header(
+            http::header::HeaderName::from_static("dpop"),
+            http::HeaderValue::from_str(&proof)
+                .map_err(|e| LarkError::Registration(format!("invalid DPoP proof header: {e}")))?,
+        );
+    }
+    let resp = request
         .send()
         .await
         .map_err(|e| LarkError::Registration(format!("registration request failed: {e}")))?;
@@ -336,7 +357,21 @@ async fn do_registration_request<T: for<'de> Deserialize<'de>>(
         .map_err(|e| LarkError::Registration(format!("registration: decode response failed: {e}")))
 }
 
+fn chrono_like_now() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or_default()
+}
+
 pub async fn register_app(opts: Options) -> Result<RegisterAppResult, LarkError> {
+    register_app_with_dpop(opts, None).await
+}
+
+pub async fn register_app_with_dpop(
+    opts: Options,
+    dpop_key: Option<DPoPKey>,
+) -> Result<RegisterAppResult, LarkError> {
     let domain = if opts.domain.is_empty() {
         DEFAULT_FEISHU_DOMAIN.to_string()
     } else {
@@ -403,10 +438,11 @@ pub async fn register_app(opts: Options) -> Result<RegisterAppResult, LarkError>
         }
         wait_before_poll = true;
 
-        let resp: PollResponse = do_registration_request(
+        let resp: PollResponse = do_registration_request_with_dpop(
             &client,
             &current_domain,
             &[("action", "poll"), ("device_code", &begin.device_code)],
+            dpop_key.as_ref(),
         )
         .await?;
 

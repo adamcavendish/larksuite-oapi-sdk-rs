@@ -27,6 +27,8 @@ futures-util = { version = "0.3", optional = true }
 hex = "0.4"
 http = "1"
 percent-encoding = "2"
+p256 = { version = "0.13", features = ["ecdsa", "pem", "arithmetic", "std"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
 aioduct = { version = "0.2.3", features = ["json", "tokio", "rustls", "rustls-ring"] }
 rustls = { version = "0.23", default-features = false, features = ["ring"] }
 prost = { version = "0.13", optional = true }
