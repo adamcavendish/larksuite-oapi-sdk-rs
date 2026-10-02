@@ -1,7 +1,7 @@
 //! Typed Card JSON 1.0 composition.
 //!
 //! This module is the modern Card JSON 1.0 root. It deliberately does not add
-//! new fields to the historical [`Card`](crate::card::Card) builder, so a future
+//! new fields to the historical [`crate::card::Card`] builder, so a future
 //! `card::v2` root can model its incompatible structure directly.
 
 use std::collections::BTreeMap;

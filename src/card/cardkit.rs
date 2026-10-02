@@ -1,7 +1,7 @@
 //! Typed CardKit helpers for validated Card JSON 2.0 documents.
 //!
 //! The generated CardKit resource remains available through
-//! [`LarkClient::cardkit`](crate::LarkClient::cardkit). This module removes the
+//! [`crate::LarkClient::cardkit`]. This module removes the
 //! stringly-typed `card_json` envelope for a Card JSON 2.0 document and owns
 //! sequence progression for text-content streaming updates.
 

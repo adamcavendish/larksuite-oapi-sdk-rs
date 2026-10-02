@@ -65,9 +65,9 @@ impl CodeError {
     }
 
     /// The nonempty server-rendered diagnostic, falling back to the original
-    /// top-level [`msg`](Self::msg). Whitespace is preserved, not trimmed.
+    /// top-level [`Self::msg`]. Whitespace is preserved, not trimmed.
     ///
-    /// This does not change the error code or [`success`](Self::success).
+    /// This does not change the error code or [`Self::success`].
     pub fn effective_message(&self) -> &str {
         self.error
             .as_ref()
