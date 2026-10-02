@@ -1,4 +1,4 @@
-/// Generate [`LarkClient`](crate::LarkClient) service accessor methods.
+/// Generate [`crate::LarkClient`] service accessor methods.
 ///
 /// Each invocation expands to a `pub fn` that constructs the service version
 /// struct and borrows the client's config. Four tokens:
@@ -189,7 +189,7 @@ macro_rules! impl_resp_v2 {
     };
 }
 
-/// Generate [`EventDispatcher`](crate::event::EventDispatcher) registration
+/// Generate [`crate::event::EventDispatcher`] registration
 /// methods for typed event payloads.
 ///
 /// Each entry expands to a builder method that deserializes the raw event JSON

@@ -24,7 +24,7 @@
     "lark_cli": {
       "role": "implementation_cross_check",
       "repository": "https://github.com/larksuite/cli.git",
-      "revision": "7874dc144b6d94ba5986664dfe65b007dcd5e381",
+      "revision": "7beffb086d7fa3c5b843d8affa7c089f49cfc65e",
       "artifacts": [
         {
           "path": "skills/lark-im/references/card/components/recycling_container.md",

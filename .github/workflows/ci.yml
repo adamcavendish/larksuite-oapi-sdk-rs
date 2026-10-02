@@ -106,7 +106,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           repository: larksuite/cli
-          ref: 7874dc144b6d94ba5986664dfe65b007dcd5e381
+          ref: 7beffb086d7fa3c5b843d8affa7c089f49cfc65e
           path: .lark-cli
           fetch-depth: 1
       - uses: taiki-e/install-action@just
