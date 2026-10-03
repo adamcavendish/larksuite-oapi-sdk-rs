@@ -184,27 +184,34 @@ async fn transport_dpop_retry_generates_a_fresh_proof() {
 async fn transport_client_assertion_restores_dpop_binding_automatically() {
     let token = r#"{"code":0,"access_token":"dpop-token","token_type":"DPoP","expires_in":7200}"#;
     let api = r#"{"code":0,"msg":"ok"}"#;
-    let (addr, _h, requests) =
-        mock_server_with_requests(vec![http_response(200, token), http_response(200, api)]).await;
+    let (addr, _h, requests) = mock_server_with_requests(vec![
+        http_response(200, token),
+        http_response(200, api),
+        http_response(200, api),
+    ])
+    .await;
     let client = LarkClient::builder("app", "secret")
         .base_url(format!("http://{addr}"))
         .oauth_base_url(format!("http://{addr}"))
         .client_assertion_provider(std::sync::Arc::new(DPoPAssertion))
         .dpop_mode(larksuite_oapi_sdk_rs::DPoPMode::Preferred)
-        .dpop_key(larksuite_oapi_sdk_rs::DPoPKey::generate())
         .build()
         .unwrap();
     let mut req = ApiReq::new(http::Method::GET, "/open-apis/tenant");
     req.supported_access_token_types = vec![AccessTokenType::Tenant];
-    client
-        .raw_request(&req, &RequestOption::default())
-        .await
-        .unwrap();
+    for _ in 0..2 {
+        client
+            .raw_request(&req, &RequestOption::default())
+            .await
+            .unwrap();
+    }
     let requests = requests.lock().unwrap();
-    assert!(requests.iter().any(|r| {
-        r.to_ascii_lowercase()
-            .contains("authorization: dpop dpop-token")
-    }));
+    assert_eq!(requests.len(), 3);
+    for request in &requests[1..] {
+        let request = request.to_ascii_lowercase();
+        assert!(request.contains("authorization: dpop dpop-token"));
+        assert!(request.contains("dpop: "));
+    }
     assert!(
         requests
             .iter()

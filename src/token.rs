@@ -418,13 +418,10 @@ impl TokenManager {
 
         if let Some(token) = self.cache.get(&token_key).await? {
             if let Ok(cached) = serde_json::from_str::<CachedIssuedToken>(&token) {
-                let binding = if cached.token_type.eq_ignore_ascii_case("DPoP")
-                    && config.resolved_dpop_key()?.as_ref().is_some_and(|key| {
-                        cached.dpop_jkt.as_deref() == Some(key.thumbprint().as_str())
-                    }) {
+                let binding = if cached.token_type.eq_ignore_ascii_case("DPoP") {
                     config
-                        .dpop_key
-                        .clone()
+                        .resolved_dpop_key()?
+                        .filter(|key| cached.dpop_jkt.as_deref() == Some(key.thumbprint().as_str()))
                         .map(|key| crate::dpop::DPoPBinding::new(cached.access_token.clone(), key))
                         .transpose()?
                 } else {
@@ -432,11 +429,9 @@ impl TokenManager {
                 };
                 let unusable_dpop = cached.token_type.eq_ignore_ascii_case("DPoP")
                     && (config.dpop_mode == crate::dpop::DPoPMode::Disabled || binding.is_none());
-                if unusable_dpop
-                    || (config.dpop_mode == crate::dpop::DPoPMode::Required && binding.is_none())
+                if !unusable_dpop
+                    && (config.dpop_mode != crate::dpop::DPoPMode::Required || binding.is_some())
                 {
-                    let _ = self.cache.set(&token_key, "", Duration::ZERO).await;
-                } else {
                     return Ok(ClientAssertionTenantToken {
                         access_token: cached.access_token,
                         status_message: None,
@@ -444,12 +439,9 @@ impl TokenManager {
                         dpop_binding: binding,
                     });
                 }
-            }
-            if config.dpop_mode == crate::dpop::DPoPMode::Required
-                || config.dpop_mode == crate::dpop::DPoPMode::Disabled && token.starts_with('{')
+            } else if config.dpop_mode != crate::dpop::DPoPMode::Required
+                && !token.trim_start().starts_with('{')
             {
-                let _ = self.cache.set(&token_key, "", Duration::ZERO).await;
-            } else {
                 return Ok(ClientAssertionTenantToken {
                     access_token: token,
                     status_message: None,
@@ -457,6 +449,8 @@ impl TokenManager {
                     dpop_binding: None,
                 });
             }
+            // Invalid structured records must be reissued, never used as plain tokens.
+            let _ = self.cache.set(&token_key, "", Duration::ZERO).await;
         }
 
         let provider = config.client_assertion_provider.as_ref().ok_or_else(|| {

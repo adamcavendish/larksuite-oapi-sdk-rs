@@ -382,3 +382,139 @@ async fn app_ticket_manager_get_triggers_apply_when_missing() {
     let result = atm.get(client.config()).await.unwrap();
     assert!(result.is_none());
 }
+
+#[tokio::test]
+async fn client_assertion_cache_restores_store_only_dpop_binding() {
+    use larksuite_oapi_sdk_rs::{DPoPMode, MemoryDPoPKeyStore};
+    for mode in [DPoPMode::Preferred, DPoPMode::Required] {
+        let store = Arc::new(MemoryDPoPKeyStore::new());
+        let key = store.load_or_generate("default").unwrap();
+        let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(
+            200,
+            r#"{"code":0,"access_token":"unexpected-reissue","token_type":"DPoP","expires_in":7200}"#,
+        )]).await;
+        let client = LarkClient::builder("app_id", "secret")
+            .oauth_base_url(format!("http://{addr}"))
+            .client_assertion_provider(Arc::new(TestAssertion))
+            .dpop_mode(mode)
+            .dpop_key_store(store)
+            .build()
+            .unwrap();
+        let cache = Arc::new(LocalCache::new());
+        let cached = serde_json::json!({
+            "access_token": "cached-dpop", "token_type": "DPoP",
+            "dpop_jkt": key.thumbprint(),
+        })
+        .to_string();
+        cache
+            .set(
+                "tenant_access_token:client_assertion:app_id--127.0.0.1",
+                &cached,
+                std::time::Duration::from_secs(600),
+            )
+            .await
+            .unwrap();
+        let tm = TokenManager::new(cache);
+        for _ in 0..2 {
+            let token = tm
+                .get_client_assertion_tenant_token(client.config(), None)
+                .await
+                .unwrap();
+            assert_eq!(token.access_token, "cached-dpop", "{mode:?}");
+            let binding = token.dpop_binding.unwrap();
+            assert_eq!(binding.access_token(), "cached-dpop");
+            assert_eq!(binding.key_thumbprint(), key.thumbprint());
+        }
+        assert!(requests.lock().unwrap().is_empty(), "{mode:?}");
+    }
+}
+
+#[tokio::test]
+async fn client_assertion_cache_reissues_unusable_records() {
+    use larksuite_oapi_sdk_rs::{DPoPKey, DPoPMode, MemoryDPoPKeyStore};
+    for mode in [DPoPMode::Preferred, DPoPMode::Required, DPoPMode::Disabled] {
+        let old_key = DPoPKey::generate();
+        let mismatched = serde_json::json!({
+            "access_token": "old-dpop", "token_type": "DPoP",
+            "dpop_jkt": old_key.thumbprint(),
+        })
+        .to_string();
+        let mut records = vec![mismatched, " {invalid-json".into()];
+        if mode == DPoPMode::Required {
+            records.push("legacy-bearer".into());
+            records.push(r#"{"access_token":"cached-bearer","token_type":"Bearer"}"#.into());
+        }
+        for record in records {
+            let response_type = if mode == DPoPMode::Disabled {
+                "Bearer"
+            } else {
+                "DPoP"
+            };
+            let response = serde_json::json!({"code":0, "access_token":"fresh-token",
+                "token_type":response_type, "expires_in":7200})
+            .to_string();
+            let (addr, _handle, requests) =
+                mock_server_with_requests(vec![http_response(200, &response)]).await;
+            let client = LarkClient::builder("app_id", "secret")
+                .oauth_base_url(format!("http://{addr}"))
+                .client_assertion_provider(Arc::new(TestAssertion))
+                .dpop_mode(mode)
+                .dpop_key_store(Arc::new(MemoryDPoPKeyStore::new()))
+                .build()
+                .unwrap();
+            let cache = Arc::new(LocalCache::new());
+            cache
+                .set(
+                    "tenant_access_token:client_assertion:app_id--127.0.0.1",
+                    &record,
+                    std::time::Duration::from_secs(600),
+                )
+                .await
+                .unwrap();
+            let tm = TokenManager::new(cache);
+            for _ in 0..2 {
+                let token = tm
+                    .get_client_assertion_tenant_token(client.config(), None)
+                    .await
+                    .unwrap();
+                assert_eq!(token.access_token, "fresh-token", "{mode:?}: {record}");
+                assert_eq!(token.dpop_binding.is_some(), mode != DPoPMode::Disabled);
+            }
+            assert_eq!(requests.lock().unwrap().len(), 1);
+        }
+    }
+}
+
+#[tokio::test]
+async fn client_assertion_cache_preserves_legacy_bearer_tokens() {
+    use larksuite_oapi_sdk_rs::DPoPMode;
+    for mode in [DPoPMode::Preferred, DPoPMode::Disabled] {
+        for record in [
+            "legacy-bearer",
+            r#"{"access_token":"legacy-bearer","token_type":"Bearer"}"#,
+        ] {
+            let client = LarkClient::builder("app_id", "secret")
+                .oauth_base_url("http://127.0.0.1:1")
+                .dpop_mode(mode)
+                .build()
+                .unwrap();
+            let cache = Arc::new(LocalCache::new());
+            cache
+                .set(
+                    "tenant_access_token:client_assertion:app_id--127.0.0.1",
+                    record,
+                    std::time::Duration::from_secs(600),
+                )
+                .await
+                .unwrap();
+            let tm = TokenManager::new(cache);
+            let token = tm
+                .get_client_assertion_tenant_token(client.config(), None)
+                .await
+                .unwrap();
+            assert_eq!(token.access_token, "legacy-bearer");
+            assert_eq!(token.token_type, "Bearer");
+            assert!(token.dpop_binding.is_none());
+        }
+    }
+}
