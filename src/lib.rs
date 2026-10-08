@@ -40,6 +40,8 @@ pub mod req;
 pub mod resp;
 pub mod service;
 pub mod token;
+pub mod url_resolver;
+pub use url_resolver::PlatformUrlResolver;
 pub(crate) mod transport;
 #[cfg(feature = "ws")]
 pub mod ws;
