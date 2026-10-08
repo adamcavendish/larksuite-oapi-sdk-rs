@@ -304,21 +304,14 @@ fn build_qr_code_url(raw_url: &str, opts: &Options) -> Result<String, LarkError>
     Ok(parsed.to_string())
 }
 
-async fn do_registration_request<T: for<'de> Deserialize<'de>>(
-    client: &aioduct::TokioClient,
-    domain: &str,
-    form: &[(&str, &str)],
-) -> Result<T, LarkError> {
-    do_registration_request_with_dpop(client, domain, form, None).await
-}
-
 async fn do_registration_request_with_dpop<T: for<'de> Deserialize<'de>>(
     client: &aioduct::TokioClient,
     domain: &str,
     form: &[(&str, &str)],
     dpop: Option<&DPoPKey>,
+    resolver: Option<&std::sync::Arc<dyn crate::PlatformUrlResolver>>,
 ) -> Result<T, LarkError> {
-    let url = build_endpoint_url(domain);
+    let url = crate::url_resolver::resolve(resolver, &build_endpoint_url(domain))?;
     let body: String = url::form_urlencoded::Serializer::new(String::new())
         .extend_pairs(form)
         .finish();
@@ -340,10 +333,18 @@ async fn do_registration_request_with_dpop<T: for<'de> Deserialize<'de>>(
                 .map_err(|e| LarkError::Registration(format!("invalid DPoP proof header: {e}")))?,
         );
     }
-    let resp = request
-        .send()
-        .await
-        .map_err(|e| LarkError::Registration(format!("registration request failed: {e}")))?;
+    let resp = request.send().await.map_err(|e| {
+        LarkError::Registration(format!(
+            "registration request failed at {}: {}",
+            crate::url_resolver::diagnostic_url(&url),
+            e.into_error()
+        ))
+    })?;
+    if resolver.is_some() && resp.status().is_redirection() {
+        return Err(LarkError::Registration(
+            "registration redirect refused".into(),
+        ));
+    }
     let raw_body = resp
         .bytes()
         .await
@@ -372,6 +373,20 @@ pub async fn register_app_with_dpop(
     opts: Options,
     dpop_key: Option<DPoPKey>,
 ) -> Result<RegisterAppResult, LarkError> {
+    register_app_with_url_resolver(opts, dpop_key, None).await
+}
+
+/// Register through an optional trusted platform URL resolver.
+///
+/// Resolves both begin and poll requests (including domain switches) before
+/// DPoP signing. Server-returned verification links remain unchanged.
+/// With a resolver configured, registration requests reject redirects to avoid
+/// replaying proofs or device-code forms to another endpoint.
+pub async fn register_app_with_url_resolver(
+    opts: Options,
+    dpop_key: Option<DPoPKey>,
+    resolver: Option<std::sync::Arc<dyn crate::PlatformUrlResolver>>,
+) -> Result<RegisterAppResult, LarkError> {
     let domain = if opts.domain.is_empty() {
         DEFAULT_FEISHU_DOMAIN.to_string()
     } else {
@@ -387,11 +402,16 @@ pub async fn register_app_with_dpop(
         crate::config::install_default_crypto_provider();
         aioduct::TokioClient::builder()
             .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
+            .redirect_policy(if resolver.is_some() {
+                aioduct::RedirectPolicy::none()
+            } else {
+                aioduct::RedirectPolicy::default()
+            })
             .timeout(std::time::Duration::from_secs(30))
             .build()?
     };
 
-    let begin: BeginResponse = do_registration_request(
+    let begin: BeginResponse = do_registration_request_with_dpop(
         &client,
         &domain,
         &[
@@ -400,6 +420,8 @@ pub async fn register_app_with_dpop(
             ("auth_method", "client_secret"),
             ("request_user_info", "open_id"),
         ],
+        None,
+        resolver.as_ref(),
     )
     .await?;
 
@@ -443,6 +465,7 @@ pub async fn register_app_with_dpop(
             &current_domain,
             &[("action", "poll"), ("device_code", &begin.device_code)],
             dpop_key.as_ref(),
+            resolver.as_ref(),
         )
         .await?;
 

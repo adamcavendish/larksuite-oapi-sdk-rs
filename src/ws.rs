@@ -448,7 +448,11 @@ impl WsClientControl {
                 action,
             ]);
 
-        let mut request = self.config.http_client.post(request_url.as_str())?;
+        let request_url = crate::url_resolver::resolve(
+            self.config.platform_url_resolver.as_ref(),
+            request_url.as_str(),
+        )?;
+        let mut request = self.config.http_client.post(&request_url)?;
         for (key, value) in &self.headers {
             request = request
                 .header_str(key, value)
@@ -942,6 +946,8 @@ impl<'a> WsGateway<'a> {
             ));
         }
 
+        let url =
+            crate::url_resolver::resolve(self.client.config.platform_url_resolver.as_ref(), &url)?;
         let mut req = self
             .client
             .config
@@ -1486,6 +1492,199 @@ mod tests {
         };
         let ack = proto::Frame::decode(frame.as_ref()).unwrap();
         serde_json::from_slice(ack.payload.as_deref().unwrap()).unwrap()
+    }
+
+    #[derive(Debug)]
+    struct GatewayAssertion {
+        audiences: Arc<StdMutex<Vec<String>>>,
+        target: String,
+    }
+
+    impl crate::token::ClientAssertionProvider for GatewayAssertion {
+        fn retrieve_token(
+            &self,
+            aud: &str,
+        ) -> Pin<Box<dyn Future<Output = Result<crate::token::Token, LarkError>> + Send + '_>>
+        {
+            self.audiences.lock().unwrap().push(aud.into());
+            let target = self.target.clone();
+            Box::pin(async move {
+                Ok(crate::token::Token {
+                    value: "test-assertion".into(),
+                    target_info: Some(crate::token::TargetInfo {
+                        target_service: target,
+                        target_prefix: "/proxy".into(),
+                    }),
+                })
+            })
+        }
+    }
+
+    #[tokio::test]
+    async fn platform_resolver_routes_ws_bootstrap_and_user_bindings() {
+        let logical_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let logical = format!(
+            "http://localhost:{}",
+            logical_listener.local_addr().unwrap().port()
+        );
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let gateway = format!("http://{}", listener.local_addr().unwrap());
+        let requests = Arc::new(StdMutex::new(Vec::new()));
+        let captured = requests.clone();
+        let server = tokio::spawn(async move {
+            for _ in 0..4 {
+                let (mut stream, _) = listener.accept().await.unwrap();
+                let mut bytes = Vec::new();
+                loop {
+                    let mut buf = [0; 4096];
+                    let n = stream.read(&mut buf).await.unwrap();
+                    assert!(n > 0, "request closed before its body arrived");
+                    bytes.extend_from_slice(&buf[..n]);
+                    let request = String::from_utf8_lossy(&bytes);
+                    if let Some(header_end) = request.find("\r\n\r\n") {
+                        let body_len = request[..header_end]
+                            .lines()
+                            .find_map(|line| {
+                                let (name, value) = line.split_once(':')?;
+                                name.eq_ignore_ascii_case("content-length")
+                                    .then(|| value.trim().parse::<usize>().unwrap())
+                            })
+                            .unwrap_or(0);
+                        if bytes.len() >= header_end + 4 + body_len {
+                            break;
+                        }
+                    }
+                }
+                captured
+                    .lock()
+                    .unwrap()
+                    .push(String::from_utf8(bytes).unwrap());
+                let body = r#"{"code":0,"msg":"ok","data":{"URL":"wss://connection.example/ws?service_id=42&signature=a%2Fb"}}"#;
+                let response = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                    body.len()
+                );
+                stream.write_all(response.as_bytes()).await.unwrap();
+                stream.shutdown().await.unwrap();
+            }
+        });
+        let inputs = Arc::new(StdMutex::new(Vec::new()));
+        let recorded = inputs.clone();
+        let lark = crate::LarkClient::builder("app_id", "app_secret")
+            .base_url(&logical)
+            .timeout(Duration::from_secs(2))
+            .platform_url_resolver(Arc::new(move |url: &str| {
+                recorded.lock().unwrap().push(url.to_owned());
+                Ok(format!(
+                    "{gateway}/mapped{}",
+                    url::Url::parse(url).unwrap().path()
+                ))
+            }))
+            .build()
+            .unwrap();
+        let client = WsClient::new(lark.config().clone(), EventDispatcher::new("", ""));
+        let endpoint = WsGateway { client: &client }.endpoint().await.unwrap();
+        assert_eq!(
+            endpoint.url,
+            "wss://connection.example/ws?service_id=42&signature=a%2Fb"
+        );
+        client.set_connection_id(Some("device/id".into()));
+        let control = client.control();
+        control.attach_user("user-token").await.unwrap();
+        control.detach_user("user-token").await.unwrap();
+
+        let audiences = Arc::new(StdMutex::new(Vec::new()));
+        let mut config = lark.config().clone();
+        config.client_assertion_provider = Some(Arc::new(GatewayAssertion {
+            audiences: audiences.clone(),
+            target: logical.clone(),
+        }));
+        let assertion_client = WsClient::new(config, EventDispatcher::new("", ""));
+        let endpoint = WsGateway {
+            client: &assertion_client,
+        }
+        .endpoint()
+        .await
+        .unwrap();
+        assert_eq!(
+            endpoint.url,
+            "wss://connection.example/ws?service_id=42&signature=a%2Fb"
+        );
+        server.await.unwrap();
+        assert_eq!(*audiences.lock().unwrap(), vec!["localhost"]);
+        assert_eq!(
+            *inputs.lock().unwrap(),
+            vec![
+                format!("{logical}/callback/ws/endpoint"),
+                format!("{logical}/open-apis/event/v1/connections/device%2Fid/bind_user"),
+                format!("{logical}/open-apis/event/v1/connections/device%2Fid/unbind_user"),
+                format!("{logical}/proxy/callback/ws/endpoint"),
+            ]
+        );
+        {
+            let requests = requests.lock().unwrap();
+            assert!(requests[0].starts_with("POST /mapped/callback/ws/endpoint "));
+            assert!(requests[0].contains(r#""AppSecret":"app_secret""#));
+            for request in &requests[1..3] {
+                assert!(
+                    request
+                        .to_ascii_lowercase()
+                        .contains("authorization: bearer user-token")
+                );
+            }
+            assert!(
+                requests[1].starts_with(
+                    "POST /mapped/open-apis/event/v1/connections/device%2Fid/bind_user "
+                )
+            );
+            assert!(requests[2].starts_with(
+                "POST /mapped/open-apis/event/v1/connections/device%2Fid/unbind_user "
+            ));
+            assert!(requests[3].starts_with("POST /mapped/proxy/callback/ws/endpoint "));
+            assert!(requests[3].contains(r#""AppSecret":"""#));
+            assert!(requests[3].contains(r#""ClientAssertion":"test-assertion""#));
+            assert!(
+                requests[3]
+                    .to_ascii_lowercase()
+                    .contains("x-target-service: localhost")
+            );
+        }
+        assert!(
+            tokio::time::timeout(Duration::from_millis(10), logical_listener.accept())
+                .await
+                .is_err()
+        );
+    }
+
+    #[tokio::test]
+    async fn platform_resolver_failure_blocks_ws_http_requests() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let lark = crate::LarkClient::builder("app_id", "app_secret")
+            .base_url(format!("http://{}", listener.local_addr().unwrap()))
+            .timeout(Duration::from_secs(2))
+            .platform_url_resolver(Arc::new(|_: &str| {
+                Err(LarkError::IllegalParam("route denied".into()))
+            }))
+            .build()
+            .unwrap();
+        let client = WsClient::new(lark.config().clone(), EventDispatcher::new("", ""));
+        assert!(matches!(WsGateway { client: &client }.endpoint().await,
+            Err(LarkError::IllegalParam(ref message)) if message == "route denied"));
+        client.set_connection_id(Some("device/id".into()));
+        let control = client.control();
+        for result in [
+            control.attach_user("user-token").await,
+            control.detach_user("user-token").await,
+        ] {
+            assert!(
+                matches!(result, Err(LarkError::IllegalParam(ref message)) if message == "route denied")
+            );
+        }
+        assert!(
+            tokio::time::timeout(Duration::from_millis(10), listener.accept())
+                .await
+                .is_err()
+        );
     }
 
     // ── Builder/config tests ──

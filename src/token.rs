@@ -361,12 +361,15 @@ impl TokenManager {
         url: &str,
         body: &impl Serialize,
     ) -> Result<OAuthTokenResp, LarkError> {
+        let destination = crate::url_resolver::resolve(config.platform_url_resolver.as_ref(), url)?;
+        let url = destination.as_str();
         let mut api_req = ApiReq::new(http::Method::POST, url);
         api_req.body = Some(ReqBody::json(body)?);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
 
         let option = dpop_option(config, url)?;
-        let api_resp = transport::raw_send_absolute_url(config, &api_req, &option, None).await?;
+        let api_resp =
+            transport::raw_send_resolved_absolute_url(config, &api_req, &option, None).await?;
 
         // A policy denial can arrive at a non-200 HTTP status. Preserve its
         // business code rather than reducing it to an HTTP status string.
@@ -384,7 +387,7 @@ impl TokenManager {
             && !parsed.token_type.eq_ignore_ascii_case("DPoP")
         {
             if config.dpop_mode == crate::dpop::DPoPMode::Preferred {
-                let plain = transport::raw_send_absolute_url(
+                let plain = transport::raw_send_resolved_absolute_url(
                     config,
                     &api_req,
                     &RequestOption::default(),

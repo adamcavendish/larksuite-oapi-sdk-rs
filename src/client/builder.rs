@@ -35,6 +35,18 @@ impl LarkClientBuilder {
         self
     }
 
+    /// Route SDK-owned platform requests through a trusted local resolver.
+    ///
+    /// Called before signing/sending API, OAuth, streaming requests, and
+    /// WebSocket bootstrap/user-binding HTTP requests.
+    /// Credentials go to the returned destination; external downloads and
+    /// response links stay unchanged. DPoP requests do not follow redirects.
+    /// Standalone registration uses `register_app_with_url_resolver` separately.
+    pub fn platform_url_resolver(mut self, resolver: Arc<dyn crate::PlatformUrlResolver>) -> Self {
+        self.config.platform_url_resolver = Some(resolver);
+        self
+    }
+
     pub fn disable_token_cache(mut self) -> Self {
         self.config.enable_token_cache = false;
         self
@@ -128,7 +140,25 @@ impl LarkClientBuilder {
         config.http_client = aioduct::TokioClient::builder()
             .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
             .timeout(config.req_timeout)
+            .redirect_policy(if config.platform_url_resolver.is_some() {
+                crate::url_resolver::redirect_policy()
+            } else {
+                aioduct::RedirectPolicy::default()
+            })
+            .sensitive_header(http::HeaderName::from_static("dpop"))
+            .sensitive_header(http::HeaderName::from_static(
+                "x-lark-helpdesk-authorization",
+            ))
             .build()?;
+        config.dpop_http_client = if config.platform_url_resolver.is_some() {
+            aioduct::TokioClient::builder()
+                .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
+                .timeout(config.req_timeout)
+                .redirect_policy(aioduct::RedirectPolicy::none())
+                .build()?
+        } else {
+            config.http_client.clone()
+        };
         Ok(LarkClient { config })
     }
 }

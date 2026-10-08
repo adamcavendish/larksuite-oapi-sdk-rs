@@ -37,6 +37,29 @@ connection.
 - Optional WebSocket long connections, Axum handlers, and higher-level channel
   message helpers.
 
+## Enterprise gateway routing
+
+For endpoint-dependent routing, configure
+`LarkClientBuilder::platform_url_resolver` with a trusted, local
+`PlatformUrlResolver`. See [the gateway example](examples/platform_gateway.rs).
+It runs after API/OAuth URL construction and before DPoP signing, including
+uploads, streaming downloads, and WebSocket bootstrap/user-binding HTTP calls.
+OAuth assertion audiences remain unchanged. Server-returned WebSocket connection
+URLs are not resolved.
+External downloads, pre-signed URLs, and server-returned links are not resolved.
+Standalone app registration accepts the same resolver through
+`registration::register_app_with_url_resolver`.
+
+The resolver receives full platform URLs and controls where platform credentials
+are sent. Return only HTTP(S) URLs without userinfo or fragments, and avoid
+sensitive details in resolver errors. With a resolver configured, HTTPS
+redirect downgrades and cross-origin body replay are blocked; cross-origin
+GET/HEAD redirects strip credentials. DPoP requests return redirect responses
+without following them; registration requests reject redirects. Proofs and
+device-code forms are not replayed. Request diagnostics omit URL queries,
+userinfo, and fragments; routed request/response bodies are omitted from debug
+logs.
+
 ## Install
 
 ```toml

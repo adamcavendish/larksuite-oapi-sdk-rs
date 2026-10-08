@@ -651,6 +651,22 @@ pub(crate) async fn raw_send_absolute_url(
     option: &RequestOption,
     bearer_token: Option<&str>,
 ) -> Result<ApiResp, LarkError> {
+    if config.platform_url_resolver.is_none() {
+        return raw_send_resolved_absolute_url(config, api_req, option, bearer_token).await;
+    }
+    let mut resolved = api_req.clone();
+    resolved.api_path =
+        crate::url_resolver::resolve(config.platform_url_resolver.as_ref(), &api_req.api_path)?;
+    raw_send_resolved_absolute_url(config, &resolved, option, bearer_token).await
+}
+
+// URL has already been resolved before constructing an OAuth DPoP proof.
+pub(crate) async fn raw_send_resolved_absolute_url(
+    config: &Config,
+    api_req: &ApiReq,
+    option: &RequestOption,
+    bearer_token: Option<&str>,
+) -> Result<ApiResp, LarkError> {
     raw_send_inner(config, api_req, option, bearer_token, true).await
 }
 
@@ -793,8 +809,24 @@ async fn send_http_response(
         build_url(config, api_req)
     };
 
-    let mut builder = config
-        .http_client
+    let full_url = if absolute_url {
+        full_url
+    } else {
+        crate::url_resolver::resolve(config.platform_url_resolver.as_ref(), &full_url)?
+    };
+    let diagnostic_url = crate::url_resolver::diagnostic_url(&full_url);
+    let has_dpop = config.default_headers.contains_key("dpop")
+        || option.dpop_binding.is_some()
+        || option
+            .headers
+            .as_ref()
+            .is_some_and(|headers| headers.contains_key("dpop"));
+    let client = if has_dpop && config.platform_url_resolver.is_some() {
+        &config.dpop_http_client
+    } else {
+        &config.http_client
+    };
+    let mut builder = client
         .request(api_req.http_method.clone(), &full_url)
         .map_err(|e| LarkError::IllegalParam(format!("invalid url: {e}")))?;
 
@@ -893,12 +925,13 @@ async fn send_http_response(
     }
 
     if config.log_req_at_debug {
-        let sensitive_endpoint = is_sensitive_log_endpoint(&full_url);
+        let sensitive_endpoint =
+            config.platform_url_resolver.is_some() || is_sensitive_log_endpoint(&full_url);
         match &api_req.body {
             Some(ReqBody::Json(_)) if sensitive_endpoint => {
                 tracing::debug!(
                     method = %api_req.http_method,
-                    url = %full_url,
+                    url = %diagnostic_url,
                     body = "<omitted sensitive token request>",
                     "lark.request"
                 );
@@ -907,7 +940,7 @@ async fn send_http_response(
                 let redacted = redact_json_for_logging(v.as_value());
                 tracing::debug!(
                     method = %api_req.http_method,
-                    url = %full_url,
+                    url = %diagnostic_url,
                     body = %redacted,
                     "lark.request"
                 );
@@ -915,7 +948,7 @@ async fn send_http_response(
             Some(ReqBody::UrlEncoded(_)) if sensitive_endpoint => {
                 tracing::debug!(
                     method = %api_req.http_method,
-                    url = %full_url,
+                    url = %diagnostic_url,
                     body = "<omitted sensitive token request>",
                     "lark.request"
                 );
@@ -923,7 +956,7 @@ async fn send_http_response(
             Some(ReqBody::UrlEncoded(_)) => {
                 tracing::debug!(
                     method = %api_req.http_method,
-                    url = %full_url,
+                    url = %diagnostic_url,
                     body = "<urlencoded>",
                     "lark.request"
                 );
@@ -931,7 +964,7 @@ async fn send_http_response(
             Some(ReqBody::FormData(_)) => {
                 tracing::debug!(
                     method = %api_req.http_method,
-                    url = %full_url,
+                    url = %diagnostic_url,
                     body = "<multipart>",
                     "lark.request"
                 );
@@ -939,7 +972,7 @@ async fn send_http_response(
             None => {
                 tracing::debug!(
                     method = %api_req.http_method,
-                    url = %full_url,
+                    url = %diagnostic_url,
                     "lark.request"
                 );
             }
@@ -947,12 +980,12 @@ async fn send_http_response(
     }
 
     let response = builder.send().await.map_err(|e| {
-        let url = e.url().clone();
+        let url = crate::url_resolver::diagnostic_url(&e.url().to_string());
         let err = e.into_error();
         match err {
             aioduct::Error::Timeout => {
                 tracing::debug!(%url, "request timed out");
-                LarkError::ClientTimeout("request timed out".to_string())
+                LarkError::ClientTimeout(format!("request timed out at {url}"))
             }
             aioduct::Error::Io(ref io_err)
                 if matches!(
@@ -962,7 +995,7 @@ async fn send_http_response(
                         | std::io::ErrorKind::ConnectionAborted
                 ) =>
             {
-                LarkError::DialFailed(err.to_string())
+                LarkError::DialFailed(format!("{err} at {url}"))
             }
             other => LarkError::Http(other),
         }
@@ -1022,7 +1055,7 @@ fn log_buffered_response(
         .log_level
         .is_none_or(|lvl| lvl <= tracing::Level::DEBUG);
     if enabled {
-        if config.log_req_at_debug {
+        if config.log_req_at_debug && config.platform_url_resolver.is_none() {
             let content_type = header
                 .get(CONTENT_TYPE)
                 .and_then(|v| v.to_str().ok())
@@ -1030,12 +1063,12 @@ fn log_buffered_response(
             let body_str = response_body_for_debug(full_url, content_type, raw_body);
             tracing::debug!(
                 status = status_code,
-                url = %full_url,
+                url = %crate::url_resolver::diagnostic_url(full_url),
                 body = %body_str,
                 "lark.response"
             );
         } else {
-            tracing::debug!(status = status_code, url = %full_url, "lark.response");
+            tracing::debug!(status = status_code, url = %crate::url_resolver::diagnostic_url(full_url), "lark.response");
         }
     }
 }
@@ -1048,12 +1081,12 @@ fn log_stream_response(config: &Config, full_url: &str, status_code: u16) {
         if config.log_req_at_debug {
             tracing::debug!(
                 status = status_code,
-                url = %full_url,
+                url = %crate::url_resolver::diagnostic_url(full_url),
                 body = "<streaming body>",
                 "lark.response"
             );
         } else {
-            tracing::debug!(status = status_code, url = %full_url, "lark.response");
+            tracing::debug!(status = status_code, url = %crate::url_resolver::diagnostic_url(full_url), "lark.response");
         }
     }
 }
