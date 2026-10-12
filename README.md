@@ -137,6 +137,17 @@ for the complete setup.
 | Normalize channel messages | [`examples/channel_normalize.rs`](examples/channel_normalize.rs) with `channel` enabled |
 | Search bots or work with OKRs | [`examples/bot_search.rs`](examples/bot_search.rs) and [`examples/okr_v2.rs`](examples/okr_v2.rs) |
 
+## Webhook authentication and rotation
+
+Token-only HTTP webhooks now validate explicitly configured verification tokens
+before dispatch, including missing or invalid challenge tokens.
+`skip_sign_verify` does not bypass these token checks. Both event and legacy card
+handlers support a local `WebhookCredentialsProvider` snapshot for credential
+rotation without rebuilding handlers. Trusted WebSocket delivery remains
+independent of HTTP webhook credentials. See
+[the authentication and rotation contract](docs/events-and-channels.md#http-webhook-authentication-and-credential-rotation)
+and [the event example](examples/event_handler.rs).
+
 ## Guides
 
 - [Tutorial: build a Lark / Feishu bot](docs/tutorial-build-a-feishu-bot.md):

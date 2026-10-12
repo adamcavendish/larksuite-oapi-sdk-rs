@@ -2527,8 +2527,13 @@ mod tests {
         use crate::event::{CardActionTriggerResponse, Toast};
         use base64::Engine as _;
 
-        let dispatcher = EventDispatcher::new("", "")
-            .skip_sign_verify()
+        let provider_calls = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let observed = provider_calls.clone();
+        let dispatcher = EventDispatcher::new("http-token", "http-encrypt-key")
+            .with_webhook_credentials_provider(Arc::new(move || {
+                observed.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                Err(crate::WebhookCredentialsError)
+            }))
             .on_card_action_trigger(|_| async {
                 Ok(CardActionTriggerResponse {
                     toast: Some(Toast::new("Proposal accepted").toast_type("success")),
@@ -2544,12 +2549,12 @@ mod tests {
         let callback_body: serde_json::Value = serde_json::from_slice(&callback_body).unwrap();
         assert_eq!(callback_body["toast"]["type"], "success");
         assert_eq!(callback_body["toast"]["content"], "Proposal accepted");
+        assert_eq!(provider_calls.load(std::sync::atomic::Ordering::SeqCst), 0);
     }
 
     #[tokio::test]
     async fn frame_handler_omits_data_for_ordinary_events() {
-        let dispatcher = EventDispatcher::new("", "")
-            .skip_sign_verify()
+        let dispatcher = EventDispatcher::new("http-token", "http-encrypt-key")
             .on_event("card.action.trigger", |_| async { Ok(()) });
         let client = WsClient::new(Config::new("app_id", "app_secret"), dispatcher);
 

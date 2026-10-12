@@ -69,7 +69,7 @@ pub use event::{
     CardHandlerResult, CustomResp, CustomizedEventHandlerFn, EventBase, EventDispatcher,
     EventHandlerFn, EventHeader, EventReq, EventResp, EventV1Header, EventV2Base, EventV2Body,
     InlinePreview, PreviewUrl, TemplateCard, Toast, ToastI18n, URLPreviewGetRequest,
-    URLPreviewGetResponse,
+    URLPreviewGetResponse, WebhookCredentials, WebhookCredentialsError, WebhookCredentialsProvider,
 };
 pub use http::Method as HttpMethod;
 pub use json::JsonValue;
