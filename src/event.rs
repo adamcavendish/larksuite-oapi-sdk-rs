@@ -216,6 +216,54 @@ pub type CallbackHandlerFn = Arc<
         + Sync,
 >;
 
+/// One complete HTTP webhook authentication credential snapshot.
+///
+/// Replace both fields together when rotating credentials. Debug output redacts
+/// both values. Empty fields retain the existing empty-credential behavior.
+#[derive(Clone, Default)]
+pub struct WebhookCredentials {
+    pub verification_token: String,
+    pub encrypt_key: String,
+}
+
+impl std::fmt::Debug for WebhookCredentials {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("WebhookCredentials")
+            .field("verification_token", &"[REDACTED]")
+            .field("encrypt_key", &"[REDACTED]")
+            .finish()
+    }
+}
+
+/// A credential lookup failure without secret-bearing error details.
+#[derive(Debug, Clone, Copy, thiserror::Error)]
+#[error("webhook credentials provider failed")]
+pub struct WebhookCredentialsError;
+
+/// Supplies a local credential snapshot once per HTTP webhook request.
+///
+/// Implementations must be thread safe and promptly read local cached
+/// configuration. Refresh external configuration outside the request path:
+/// this synchronous API provides no I/O timeout or cancellation. Failures
+/// reject the request without static-credential fallback. Trusted WebSocket
+/// dispatch never invokes this provider.
+///
+/// Unwinding panics are converted to a fixed error, but the process panic hook
+/// may still run. Never put secrets in panic values. `panic=abort` cannot be
+/// recovered.
+pub trait WebhookCredentialsProvider: Send + Sync {
+    fn credentials(&self) -> Result<WebhookCredentials, WebhookCredentialsError>;
+}
+
+impl<F> WebhookCredentialsProvider for F
+where
+    F: Fn() -> Result<WebhookCredentials, WebhookCredentialsError> + Send + Sync,
+{
+    fn credentials(&self) -> Result<WebhookCredentials, WebhookCredentialsError> {
+        self()
+    }
+}
+
 // ── Shared dispatch pipeline ──
 
 #[derive(Debug, Clone)]
@@ -235,12 +283,13 @@ enum PipelineResult {
 /// Shared pre-processing pipeline used by both [`EventDispatcher`] and
 /// [`CardActionHandler`]. Owns decode, decryption, challenge handling, and
 /// signature verification.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct DispatchPipeline {
     verification_token: String,
     event_encrypt_key: String,
     skip_sign_verify: bool,
     sign_algorithm: SignAlgorithm,
+    credentials_provider: Option<Arc<dyn WebhookCredentialsProvider>>,
 }
 
 impl DispatchPipeline {
@@ -254,14 +303,35 @@ impl DispatchPipeline {
             event_encrypt_key,
             skip_sign_verify: false,
             sign_algorithm,
+            credentials_provider: None,
         }
     }
 
     fn process(&self, req: EventReq) -> Result<PipelineResult, LarkError> {
+        let credentials = match &self.credentials_provider {
+            Some(provider) => {
+                std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| provider.credentials()))
+                    .map_err(|_| WebhookCredentialsError)
+                    .and_then(|result| result)
+                    .map_err(|_| LarkError::Event(WebhookCredentialsError.to_string()))?
+            }
+            None => WebhookCredentials {
+                verification_token: self.verification_token.clone(),
+                encrypt_key: self.event_encrypt_key.clone(),
+            },
+        };
+        self.process_with_credentials(req, &credentials)
+    }
+
+    fn process_with_credentials(
+        &self,
+        req: EventReq,
+        credentials: &WebhookCredentials,
+    ) -> Result<PipelineResult, LarkError> {
         let body_str = std::str::from_utf8(&req.body)
             .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))?;
 
-        let body_str = decrypt_if_needed(&self.event_encrypt_key, body_str)?;
+        let body_str = decrypt_if_needed(&credentials.encrypt_key, body_str)?;
 
         let parsed: crate::JsonValue = serde_json::from_str(&body_str)
             .map_err(|e| LarkError::Event(format!("failed to parse body: {e}")))?;
@@ -271,12 +341,7 @@ impl DispatchPipeline {
             || parsed.get("req_type").and_then(|v| v.as_str()) == Some("url_verification");
 
         if is_challenge {
-            if let Some(ref token) = parsed.get("token").and_then(|v| v.as_str())
-                && token != &self.verification_token
-                && !self.verification_token.is_empty()
-            {
-                return Err(LarkError::Event("verification token mismatch".to_string()));
-            }
+            verify_webhook_token(&credentials.verification_token, parsed.get("token"))?;
             let challenge = parsed
                 .get("challenge")
                 .and_then(|v| v.as_str())
@@ -286,15 +351,28 @@ impl DispatchPipeline {
             )));
         }
 
+        if matches!(self.sign_algorithm, SignAlgorithm::Sha256)
+            && credentials.encrypt_key.is_empty()
+            && !credentials.verification_token.is_empty()
+        {
+            // Any v2 marker forbids fallback to the v1 top-level token.
+            let token = if parsed.get("schema").is_some() || parsed.get("header").is_some() {
+                parsed.get("header").and_then(|header| header.get("token"))
+            } else {
+                parsed.get("token")
+            };
+            verify_webhook_token(&credentials.verification_token, token)?;
+        }
+
         if !self.skip_sign_verify {
             match self.sign_algorithm {
                 SignAlgorithm::Sha256 => {
-                    if !self.event_encrypt_key.is_empty() {
+                    if !credentials.encrypt_key.is_empty() {
                         let (timestamp, nonce, sig) = extract_signature_headers(&req.headers)?;
                         if !crypto::verify_signature_sha256(
                             &timestamp,
                             &nonce,
-                            &self.event_encrypt_key,
+                            &credentials.encrypt_key,
                             &req.body,
                             &sig,
                         ) {
@@ -305,12 +383,12 @@ impl DispatchPipeline {
                     }
                 }
                 SignAlgorithm::Sha1 => {
-                    if !self.verification_token.is_empty() {
+                    if !credentials.verification_token.is_empty() {
                         let (timestamp, nonce, sig) = extract_signature_headers(&req.headers)?;
                         if !crypto::verify_signature_sha1(
                             &timestamp,
                             &nonce,
-                            &self.verification_token,
+                            &credentials.verification_token,
                             &body_str,
                             &sig,
                         ) {
@@ -324,6 +402,25 @@ impl DispatchPipeline {
         }
 
         Ok(PipelineResult::Event { body_str, req })
+    }
+}
+
+fn verify_webhook_token(
+    expected: &str,
+    token: Option<&serde_json::Value>,
+) -> Result<(), LarkError> {
+    use subtle::ConstantTimeEq;
+
+    if expected.is_empty() {
+        return Ok(());
+    }
+    let valid = token
+        .and_then(|value| value.as_str())
+        .is_some_and(|actual| bool::from(expected.as_bytes().ct_eq(actual.as_bytes())));
+    if valid {
+        Ok(())
+    } else {
+        Err(LarkError::Event("verification token mismatch".into()))
     }
 }
 
@@ -356,6 +453,19 @@ impl EventDispatcher {
         }
     }
 
+    /// Register a local credential snapshot provider without invoking it.
+    ///
+    /// Each HTTP request uses one snapshot; trusted WebSocket delivery does not
+    /// invoke the provider. Without a provider, constructor credentials are used.
+    pub fn with_webhook_credentials_provider(
+        mut self,
+        provider: Arc<dyn WebhookCredentialsProvider>,
+    ) -> Self {
+        self.pipeline.credentials_provider = Some(provider);
+        self
+    }
+
+    /// Skip HTTP signatures while retaining configured verification-token checks.
     pub fn skip_sign_verify(mut self) -> Self {
         self.pipeline.skip_sign_verify = true;
         self
@@ -524,6 +634,8 @@ impl EventDispatcher {
     ///
     /// If an encrypt key is configured and the body contains an `"encrypt"` field,
     /// returns the encrypted ciphertext string. Otherwise returns the raw body as-is.
+    /// Uses static constructor credentials; dynamic providers apply only to
+    /// complete HTTP requests through [`Self::handle`].
     pub fn parse_req(&self, req: &EventReq) -> Result<String, LarkError> {
         let body_str = std::str::from_utf8(&req.body)
             .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))?;
@@ -543,6 +655,7 @@ impl EventDispatcher {
     ///
     /// If an encrypt key is configured, decrypts the ciphertext. Otherwise
     /// returns the input unchanged. This is the second step after [`Self::parse_req`].
+    /// Uses static constructor credentials rather than a dynamic provider.
     pub fn decrypt_event(&self, cipher_event_json: &str) -> Result<String, LarkError> {
         if self.pipeline.event_encrypt_key.is_empty() {
             return Ok(cipher_event_json.to_string());
@@ -551,16 +664,24 @@ impl EventDispatcher {
     }
 
     pub async fn handle(&self, req: EventReq) -> EventResp {
-        self.dispatch(req).await.into_response()
+        self.dispatch(self.pipeline.process(req))
+            .await
+            .into_response()
     }
 
     #[cfg(feature = "ws")]
     pub(crate) async fn dispatch_for_ws(&self, req: EventReq) -> DispatchOutcome {
-        self.dispatch(req).await
+        // The WebSocket transport has already authenticated this plaintext
+        // payload. Never resolve HTTP credentials or apply HTTP preprocessing.
+        let prepared = std::str::from_utf8(&req.body)
+            .map(|body| body.to_owned())
+            .map_err(|e| LarkError::Event(format!("invalid utf8 body: {e}")))
+            .map(|body_str| PipelineResult::Event { body_str, req });
+        self.dispatch(prepared).await
     }
 
-    async fn dispatch(&self, req: EventReq) -> DispatchOutcome {
-        match self.do_handle(req).await {
+    async fn dispatch(&self, prepared: Result<PipelineResult, LarkError>) -> DispatchOutcome {
+        match self.do_handle(prepared).await {
             Ok(outcome) => outcome,
             Err(e) => {
                 tracing::error!("event handler error: {e}");
@@ -569,8 +690,11 @@ impl EventDispatcher {
         }
     }
 
-    async fn do_handle(&self, req: EventReq) -> Result<DispatchOutcome, LarkError> {
-        let (body_str, req) = match self.pipeline.process(req)? {
+    async fn do_handle(
+        &self,
+        prepared: Result<PipelineResult, LarkError>,
+    ) -> Result<DispatchOutcome, LarkError> {
+        let (body_str, req) = match prepared? {
             PipelineResult::Challenge(resp) => return Ok(DispatchOutcome::Event(resp)),
             PipelineResult::Event { body_str, req } => (body_str, req),
         };

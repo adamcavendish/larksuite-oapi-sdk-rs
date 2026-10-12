@@ -53,6 +53,44 @@ slow callback does not mask a silent gateway. Use
 needed; it affects only the WebSocket gateway dial, not the bootstrap HTTP
 client.
 
+## HTTP webhook authentication and credential rotation
+
+When `EventDispatcher` has a nonempty verification token and no encrypt key,
+HTTP events must supply a matching token: top-level `token` for v1 and
+`header.token` for v2, including v2 callbacks. A v2 payload cannot authenticate
+with a top-level token. Missing, null, empty, non-string and mismatched tokens
+are rejected before business handlers run. Both event and card URL challenges
+must supply a matching top-level token when a verification token is configured.
+This closes the previous token-only authentication gap; senders that omitted
+the configured token now receive an error.
+
+Encrypted ordinary events retain SHA256 signature checks. Legacy
+`CardActionHandler` retains its SHA1 signature contract without requiring a body
+token on ordinary card actions. `skip_sign_verify` skips signatures only; it
+does not bypass configured HTTP token checks. Empty verification tokens retain
+the existing compatibility behavior. Trusted WebSocket delivery uses a private
+internal path without HTTP authentication or decryption.
+
+Both handlers accept `with_webhook_credentials_provider` with an
+`Arc<dyn WebhookCredentialsProvider>`. The provider synchronously returns one
+owned `WebhookCredentials` snapshot, containing the complete encrypt key and
+verification token pair, before each HTTP request is parsed or decrypted.
+Registration does not call the provider. In-flight requests keep their snapshot;
+later requests can observe a rotation. Without a provider, constructor credentials
+are used. A successful empty pair retains the existing empty-credential behavior.
+Failures reject requests without falling back to constructor credentials; the SDK
+returns a fixed error without credential details. Provider panics are caught when
+unwinding is enabled, but the process panic hook can still run and `panic=abort`
+cannot be recovered. Do not include secrets in panic values.
+
+Providers must be thread safe, fast, and read local cached configuration. Refresh
+KMS or other external configuration outside the request path; the synchronous
+API has no I/O timeout or cancellation mechanism. Trusted WebSocket delivery
+never invokes the provider. `parse_req` and `decrypt_event` remain separate
+static-credential utilities; use `handle` for request-scoped dynamic credentials.
+See [`examples/event_handler.rs`](../examples/event_handler.rs) for a local
+snapshot and complete-pair rotation example.
+
 ## Calendar share-token joins
 
 Calendar invitations provide an opaque share token through their link, QR

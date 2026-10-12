@@ -8,7 +8,10 @@ use serde::{Deserialize, Serialize};
 use crate::error::LarkError;
 
 use super::callback::CallbackAction;
-use super::{DispatchPipeline, EventReq, EventResp, PipelineResult, SignAlgorithm};
+use super::{
+    DispatchPipeline, EventReq, EventResp, PipelineResult, SignAlgorithm,
+    WebhookCredentialsProvider,
+};
 
 /// Return type for card action handlers.
 ///
@@ -136,6 +139,17 @@ impl CardActionHandler {
         }
     }
 
+    /// Register a local credential snapshot provider without invoking it.
+    /// Each HTTP request uses one complete snapshot before parsing/decryption.
+    pub fn with_webhook_credentials_provider(
+        mut self,
+        provider: Arc<dyn WebhookCredentialsProvider>,
+    ) -> Self {
+        self.pipeline.credentials_provider = Some(provider);
+        self
+    }
+
+    /// Skip card signatures while retaining configured challenge-token checks.
     pub fn skip_sign_verify(mut self) -> Self {
         self.pipeline.skip_sign_verify = true;
         self
