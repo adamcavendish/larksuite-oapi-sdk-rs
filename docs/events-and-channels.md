@@ -53,6 +53,22 @@ slow callback does not mask a silent gateway. Use
 needed; it affects only the WebSocket gateway dial, not the bootstrap HTTP
 client.
 
+For deployments that route the gateway through a dedicated host, configure
+the host and handshake headers independently from the HTTP bootstrap request:
+
+```rust,no_run
+let ws_client = client
+    .ws_client(dispatcher)
+    .connection_host("websocket.example.com:443")
+    .connection_headers(HashMap::from([("X-Route".into(), "events".into())]));
+```
+
+The host override preserves the server-provided scheme, path, and query. The
+connection headers are copied to every handshake, including reconnects;
+protocol-owned headers such as `Host`, `Upgrade`, and `Sec-WebSocket-*` are
+rejected. These settings are for trusted application configuration and should
+not be populated directly from end-user input.
+
 ## HTTP webhook authentication and credential rotation
 
 When `EventDispatcher` has a nonempty verification token and no encrypt key,
