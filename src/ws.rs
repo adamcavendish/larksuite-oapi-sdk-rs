@@ -33,6 +33,7 @@ use tokio::sync::{Mutex, watch};
 use tokio::time::{sleep, timeout};
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
+use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 
 use crate::config::Config;
 use crate::constants::HEADER_X_TARGET_SERVICE;
@@ -317,6 +318,77 @@ fn append_ws_query_params(
     Ok(url.into())
 }
 
+fn validate_connection_host(host: &str) -> Result<(), LarkError> {
+    if host.trim().is_empty() || host.contains(['/', '?', '#']) {
+        return Err(LarkError::IllegalParam(
+            "invalid WebSocket connection host".to_string(),
+        ));
+    }
+    Ok(())
+}
+
+fn validate_connection_headers(headers: &HashMap<String, String>) -> Result<(), LarkError> {
+    for name in headers.keys() {
+        if http::HeaderName::try_from(name.as_str()).is_err() {
+            return Err(LarkError::IllegalParam(format!(
+                "invalid WebSocket connection header: {name}"
+            )));
+        }
+        let lower = name.to_ascii_lowercase();
+        if lower == "host"
+            || lower == "connection"
+            || lower == "upgrade"
+            || lower.starts_with("sec-websocket-")
+        {
+            return Err(LarkError::IllegalParam(format!(
+                "invalid WebSocket connection header: {name}"
+            )));
+        }
+    }
+    for (name, value) in headers {
+        if http::HeaderValue::try_from(value.as_str()).is_err() {
+            return Err(LarkError::IllegalParam(format!(
+                "invalid WebSocket connection header value: {name}"
+            )));
+        }
+    }
+    Ok(())
+}
+
+fn replace_connection_host(raw_url: &str, host: Option<&str>) -> Result<String, LarkError> {
+    let Some(host) = host else {
+        return Ok(raw_url.to_string());
+    };
+    validate_connection_host(host)?;
+    let mut url = url::Url::parse(raw_url)
+        .map_err(|e| LarkError::Event(format!("invalid WebSocket endpoint URL: {e}")))?;
+    if !matches!(url.scheme(), "ws" | "wss")
+        || !url.username().is_empty()
+        || url.password().is_some()
+    {
+        return Err(LarkError::Event(
+            "invalid WebSocket endpoint URL".to_string(),
+        ));
+    }
+    let authority = url::Url::parse(&format!("{}://{host}", url.scheme()))
+        .map_err(|_| LarkError::IllegalParam("invalid WebSocket connection host".to_string()))?;
+    url.set_host(authority.host_str())
+        .map_err(|_| LarkError::IllegalParam("invalid WebSocket connection host".to_string()))?;
+    url.set_port(authority.port())
+        .map_err(|_| LarkError::IllegalParam("invalid WebSocket connection host".to_string()))?;
+    Ok(url.into())
+}
+
+fn validate_connection_config(
+    connection_host: Option<&str>,
+    connection_headers: &HashMap<String, String>,
+) -> Result<(), LarkError> {
+    if let Some(host) = connection_host {
+        validate_connection_host(host)?;
+    }
+    validate_connection_headers(connection_headers)
+}
+
 fn ws_query_param(raw_url: &str, key: &str) -> Option<String> {
     url::Url::parse(raw_url)
         .ok()?
@@ -369,7 +441,7 @@ type WsConnectResult = Result<
     tokio_tungstenite::tungstenite::Error,
 >;
 type WsConnectFuture = Pin<Box<dyn Future<Output = WsConnectResult> + Send>>;
-type WsConnector = Arc<dyn Fn(String) -> WsConnectFuture + Send + Sync>;
+type WsConnector = Arc<dyn Fn(String, HashMap<String, String>) -> WsConnectFuture + Send + Sync>;
 
 /// Controls a running trusted-user WebSocket channel.
 ///
@@ -500,6 +572,8 @@ pub struct WsClient {
     dispatcher: Arc<EventDispatcher>,
     domain: String,
     headers: HashMap<String, String>,
+    connection_host: Option<String>,
+    connection_headers: HashMap<String, String>,
     channel_tag: Option<String>,
     websocket_query_params: HashMap<String, String>,
     connection_id: Arc<RwLock<Option<String>>>,
@@ -552,6 +626,8 @@ impl WsClient {
             dispatcher: Arc::new(dispatcher),
             domain,
             headers: HashMap::new(),
+            connection_host: None,
+            connection_headers: HashMap::new(),
             channel_tag: None,
             websocket_query_params: HashMap::new(),
             connection_id: Arc::new(RwLock::new(None)),
@@ -563,7 +639,21 @@ impl WsClient {
             auto_reconnect: Arc::new(AtomicBool::new(true)),
             run_control: Arc::new(WsRunControl::new()),
             write_timeout: Duration::from_secs(10),
-            websocket_connector: Arc::new(|url| Box::pin(async move { connect_async(url).await })),
+            websocket_connector: Arc::new(|url, headers| {
+                Box::pin(async move {
+                    if headers.is_empty() {
+                        return connect_async(url).await;
+                    }
+                    let mut request = url.into_client_request()?;
+                    for (name, value) in headers {
+                        let name = http::HeaderName::try_from(name).expect("validated header name");
+                        let value =
+                            http::HeaderValue::try_from(value).expect("validated header value");
+                        request.headers_mut().insert(name, value);
+                    }
+                    connect_async(request).await
+                })
+            }),
             on_ready: None,
             on_error: None,
             on_reconnecting: None,
@@ -597,7 +687,17 @@ impl WsClient {
         F: Fn(String) -> Fut + Send + Sync + 'static,
         Fut: Future<Output = WsConnectResult> + Send + 'static,
     {
-        self.websocket_connector = Arc::new(move |url| Box::pin(connector(url)));
+        self.websocket_connector = Arc::new(move |url, _headers| Box::pin(connector(url)));
+        self
+    }
+
+    /// Replaces the WebSocket connection factory and receives handshake headers.
+    pub fn websocket_connector_with_headers<F, Fut>(mut self, connector: F) -> Self
+    where
+        F: Fn(String, HashMap<String, String>) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = WsConnectResult> + Send + 'static,
+    {
+        self.websocket_connector = Arc::new(move |url, headers| Box::pin(connector(url, headers)));
         self
     }
 
@@ -617,6 +717,18 @@ impl WsClient {
     /// Mirrors the Go SDK's `WithHeaders` option.
     pub fn headers(mut self, headers: HashMap<String, String>) -> Self {
         self.headers = headers;
+        self
+    }
+
+    /// Overrides only the WebSocket gateway host, preserving scheme, path, and query.
+    pub fn connection_host(mut self, host: impl Into<String>) -> Self {
+        self.connection_host = Some(host.into());
+        self
+    }
+
+    /// Sets headers used only for WebSocket handshakes, including reconnects.
+    pub fn connection_headers(mut self, headers: HashMap<String, String>) -> Self {
+        self.connection_headers = headers;
         self
     }
 
@@ -799,6 +911,7 @@ impl WsClient {
     }
 
     async fn run_once(&self, was_reconnecting: bool) -> Result<(), LarkError> {
+        validate_connection_config(self.connection_host.as_deref(), &self.connection_headers)?;
         let gateway = WsGateway { client: self };
         let endpoint = gateway.endpoint();
         tokio::pin!(endpoint);
@@ -813,7 +926,9 @@ impl WsClient {
             );
         }
 
-        let connect = (self.websocket_connector)(endpoint.url.clone());
+        let connection_url =
+            replace_connection_host(&endpoint.url, self.connection_host.as_deref())?;
+        let connect = (self.websocket_connector)(connection_url, self.connection_headers.clone());
         tokio::pin!(connect);
         let (ws_stream, resp) = tokio::select! {
             _ = self.run_control.cancelled() => return Ok(()),
@@ -1754,7 +1869,7 @@ mod tests {
         });
 
         assert!(matches!(
-            (client.websocket_connector)("wss://example.test".into()).await,
+            (client.websocket_connector)("wss://example.test".into(), HashMap::new()).await,
             Err(tokio_tungstenite::tungstenite::Error::ConnectionClosed)
         ));
     }
@@ -1770,6 +1885,88 @@ mod tests {
 
         assert_eq!(client.channel_tag, None);
         assert!(client.websocket_query_params.is_empty());
+    }
+
+    #[test]
+    fn connection_host_replaces_only_the_authority() {
+        let replaced = replace_connection_host(
+            "wss://gateway.example/ws?service_id=42&ticket=secret",
+            Some("proxy.example:8443"),
+        )
+        .unwrap();
+
+        assert_eq!(
+            replaced,
+            "wss://proxy.example:8443/ws?service_id=42&ticket=secret"
+        );
+    }
+
+    #[test]
+    fn connection_configuration_rejects_reserved_headers_and_invalid_hosts() {
+        assert!(validate_connection_host("https://proxy.example").is_err());
+        assert!(validate_connection_host("proxy.example/path").is_err());
+        assert!(
+            validate_connection_headers(&HashMap::from([(
+                "Sec-WebSocket-Protocol".to_string(),
+                "events".to_string(),
+            )]))
+            .is_err()
+        );
+        assert!(
+            validate_connection_headers(&HashMap::from([(
+                "X-Route".to_string(),
+                "events".to_string(),
+            )]))
+            .is_ok()
+        );
+    }
+
+    #[test]
+    fn connection_configuration_is_separate_from_bootstrap_headers() {
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .headers(HashMap::from([(
+            "X-Bootstrap".to_string(),
+            "yes".to_string(),
+        )]))
+        .connection_headers(HashMap::from([(
+            "X-Handshake".to_string(),
+            "yes".to_string(),
+        )]))
+        .connection_host("proxy.example:443");
+
+        assert_eq!(client.headers.get("X-Bootstrap"), Some(&"yes".to_string()));
+        assert_eq!(
+            client.connection_headers.get("X-Handshake"),
+            Some(&"yes".to_string())
+        );
+        assert_eq!(client.connection_host.as_deref(), Some("proxy.example:443"));
+    }
+
+    #[tokio::test]
+    async fn invalid_connection_configuration_skips_bootstrap_request() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let client = WsClient::new(
+            Config::new("app_id", "app_secret"),
+            EventDispatcher::new("", ""),
+        )
+        .domain(format!("http://{address}"))
+        .connection_headers(HashMap::from([(
+            "Host".to_string(),
+            "gateway.example".to_string(),
+        )]));
+
+        let result = client.run_once(false).await;
+
+        assert!(result.is_err());
+        assert!(
+            tokio::time::timeout(Duration::from_millis(50), listener.accept())
+                .await
+                .is_err()
+        );
     }
 
     #[tokio::test]
