@@ -138,6 +138,7 @@ impl LarkClientBuilder {
     pub fn build(self) -> Result<LarkClient, LarkError> {
         let mut config = self.config;
         config.http_client = aioduct::TokioClient::builder()
+            .system_proxy()
             .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
             .timeout(config.req_timeout)
             .redirect_policy(if config.platform_url_resolver.is_some() {
@@ -152,6 +153,7 @@ impl LarkClientBuilder {
             .build()?;
         config.dpop_http_client = if config.platform_url_resolver.is_some() {
             aioduct::TokioClient::builder()
+                .system_proxy()
                 .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
                 .timeout(config.req_timeout)
                 .redirect_policy(aioduct::RedirectPolicy::none())

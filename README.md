@@ -104,6 +104,12 @@ custom headers, marketplace mode, helpdesk credentials, or a JWT client
 assertion provider. See [`examples/client_config.rs`](examples/client_config.rs)
 for the complete setup.
 
+HTTP requests made by `LarkClient` (including authentication and DPoP) and
+standalone app registration honor `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY`.
+Lowercase variants are supported; uppercase values take precedence. Set these
+before constructing the client or starting registration. Without proxy settings,
+requests connect directly. WebSocket connections use their separate connector.
+
 ## Common Flows
 
 | Need | Start here |

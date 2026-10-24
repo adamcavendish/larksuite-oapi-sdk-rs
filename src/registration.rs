@@ -401,6 +401,7 @@ pub async fn register_app_with_url_resolver(
     let client = {
         crate::config::install_default_crypto_provider();
         aioduct::TokioClient::builder()
+            .system_proxy()
             .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
             .redirect_policy(if resolver.is_some() {
                 aioduct::RedirectPolicy::none()
