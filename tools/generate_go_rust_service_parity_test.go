@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -256,5 +258,36 @@ func TestCurrentParityBaselineHasNoUnresolvedContracts(t *testing.T) {
 	}
 	if report.Summary.IntentionalOmissions != 1 || len(report.IntentionalOmissions) != 1 {
 		t.Fatalf("intentional omissions = %#v", report.IntentionalOmissions)
+	}
+}
+
+func TestSparkSessionContractsAreParsed(t *testing.T) {
+	sourceFile := "src/service/spark/v1/session.rs"
+	source, err := os.ReadFile(filepath.Join("..", sourceFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+	contracts, unparsed := extractRustContracts(sourceFile, string(source))
+	if len(unparsed) != 0 || len(contracts) != 6 {
+		t.Fatalf("contracts = %#v, unparsed = %#v", contracts, unparsed)
+	}
+	want := map[string]string{
+		"create":   "POST /open-apis/spark/v1/apps/{}/sessions",
+		"list":     "GET /open-apis/spark/v1/apps/{}/sessions",
+		"get":      "GET /open-apis/spark/v1/apps/{}/sessions/{}",
+		"chat":     "POST /open-apis/spark/v1/apps/{}/sessions/{}/chat",
+		"stop":     "POST /open-apis/spark/v1/apps/{}/sessions/{}/stop",
+		"messages": "GET /open-apis/spark/v1/apps/{}/sessions/{}/turns/{}/reply_message",
+	}
+	for _, contract := range contracts {
+		route, ok := want[contract.Function]
+		if !ok || contract.Method+" "+contract.Path != route ||
+			!equalTokenTypes(contract.TokenTypes, []string{"User"}) || contract.FileUpload {
+			t.Fatalf("unexpected session contract: %#v", contract)
+		}
+		delete(want, contract.Function)
+	}
+	if len(want) != 0 {
+		t.Fatalf("missing session contracts: %#v", want)
 	}
 }
