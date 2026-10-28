@@ -28,6 +28,8 @@ connection.
 
 - Tenant, user, app, and marketplace token acquisition with configurable
   caching and retry behavior.
+- Opt-in DPoP proofs for app registration, OAuth token issuance, and resource
+  requests, with application-owned key storage and rotation.
 - Typed REST resources with query inputs, upload/download helpers, and lazy
   iterators for supported paginated endpoints.
 - Raw requests and a Go-compatibility bridge for endpoints not yet promoted to
@@ -64,7 +66,7 @@ logs.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = "0.3.12"
+larksuite-oapi-sdk-rs = "0.3.13"
 ```
 
 The minimum supported Rust version is 1.95.0.
@@ -119,7 +121,11 @@ requests connect directly. WebSocket connections use their separate connector.
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
 | Control VC meeting bots | [VC meeting bots](docs/vc-bots.md) |
 | Export Spark app source | [Spark app export](docs/spark-app-export.md) |
+| Manage Spark app releases | [Spark app releases](docs/spark-app-export.md#spark-app-releases) |
+| Manage Spark cloud sessions | [Spark cloud sessions](docs/spark-sessions.md) |
 | Preview or apply Spark database schema changes | [Spark database migration](docs/spark-db-migration.md) |
+| Use OAuth-bound DPoP credentials | [DPoP](docs/dpop.md) |
+| Interpret API error diagnostics | [API errors](docs/api-errors.md) |
 | Read or modify Mail conversations | [Mail user-mailbox threads](docs/mail-v1-threads.md) |
 | Resolve Drive object metadata by token | [Drive token lookup](docs/drive-token-lookup.md) |
 | Manage Unified KMS autonomous keys | [Unified KMS](docs/unified-kms.md) |
@@ -162,16 +168,22 @@ and [the event example](examples/event_handler.rs).
   requests, the compatibility bridge, and deterministic Go-to-Rust checks.
 - [Cards](docs/cards.md): versioned Card JSON, CardKit streaming, published
   Card Builder templates, and callbacks.
+- [API errors](docs/api-errors.md): nested server diagnostics, effective error
+  messages, and source-compatibility guidance.
 - [Card protocol alignment](docs/card-protocol.md): source hierarchy and
   verification workflow for Card JSON and card callbacks.
 - [Events, WebSockets, and channels](docs/events-and-channels.md): webhook
   dispatch, long connections, trusted user channels, replies, and updates.
 - [OAuth SSO](docs/oauth-sso.md): Feishu and Lark browser login, PKCE, token
   refresh, and application-owned session handling.
+- [DPoP](docs/dpop.md): opt-in proof modes, token bindings, key stores,
+  registration polling, rotation, and bounded clock correction.
 - [VC meeting bots](docs/vc-bots.md): event queries and outbound meeting join,
   leave, message, countdown, and active-meeting operations.
 - [Spark app export](docs/spark-app-export.md): streaming source archives,
-  response validation, and app-type-dependent source snapshots.
+  storage files, quotas, and app release lifecycle operations.
+- [Spark cloud sessions](docs/spark-sessions.md): user-token session creation,
+  queue-aware status reads, chat cancellation, and paginated replies.
 - [Spark database migration](docs/spark-db-migration.md): explicit preview,
   irreversible apply, and caller-owned asynchronous status polling.
 - [Mail user-mailbox threads](docs/mail-v1-threads.md): conversation reads
@@ -236,7 +248,7 @@ separately does not enable the `channel` runtime API.
 
 ```toml
 [dependencies]
-larksuite-oapi-sdk-rs = { version = "0.3.12", features = ["ws", "axum"] }
+larksuite-oapi-sdk-rs = { version = "0.3.13", features = ["ws", "axum"] }
 ```
 
 ## API Coverage

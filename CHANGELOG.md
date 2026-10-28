@@ -2,15 +2,56 @@
 
 ## Unreleased
 
-- Reject nonzero OAuth token response codes before caching client-assertion
-  tenant tokens, even when a response also contains an access token. An opt-in
-  token result exposes fresh issuance `status_message` advisories; cache hits
-  report no advisory.
-- Preserve server-rendered `error.message` in `CodeErrorInfo` and prefer it in
-  `CodeError::effective_message()` and API error display, falling back to `msg`.
-  Non-string nested messages are ignored without losing the business error.
-  Exhaustive `CodeErrorInfo` struct literals must add `message: None`; literals
-  using `..Default::default()` remain unchanged.
+
+## [0.3.13] - 2026-10-29
+
+### REST service coverage
+
+- Added Spark app storage file listing, metadata, signed downloads, quota,
+  presigned uploads, upload callbacks, and batch removal operations.
+- Added Spark database usage and quota queries with explicit environment
+  selection, plus dev-to-online schema migration preview, apply, and status.
+- Added Spark app release creation, status, and pagination APIs.
+- Added Spark cloud session creation, listing, status, chat, stop, and paginated
+  message reads with queue-aware, caller-owned polling guidance.
+- Accepted documented binary Content-Type aliases for Spark source exports
+  while retaining bounded handling for HTTP 200 JSON and text errors.
+
+### Authentication and transport
+
+- Added opt-in DPoP proofs for app registration polling, OAuth token issuance,
+  and resource requests, including token-bound cache/retry propagation,
+  configurable key stores, key rotation, and bounded clock correction.
+- Added trusted platform URL routing for API, OAuth, registration, streaming,
+  and WebSocket bootstrap requests while preserving external and presigned
+  destinations.
+- Enabled `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` handling for SDK and
+  standalone registration clients.
+- Rejected nonzero OAuth token responses before caching client-assertion tenant
+  tokens and exposed fresh issuance `status_message` advisories.
+
+### Events and WebSocket
+
+- Enforced configured webhook verification tokens and added per-request
+  credential-provider snapshots for rotation without rebuilding handlers.
+- Added WebSocket connection-host overrides and dedicated handshake headers
+  that persist across reconnects while preserving the existing connector API.
+
+### Compatibility and diagnostics
+
+- Preserved server-rendered `error.message` in `CodeErrorInfo` and API error
+  display, with fallback to the existing top-level `msg` value.
+- Restored DPoP bindings from compatible key stores and safely reissued stale,
+  malformed, or mismatched cached records.
+- Refreshed Card protocol CLI provenance and the checked-in parity metadata.
+
+### Documentation
+
+- Added API-error, DPoP, Spark storage/quota/migration/release/session, and
+  gateway guidance, along with runnable examples for DPoP key stores and
+  routing.
+- Clarified VC event-reading behavior and caller-owned retry, upload, polling,
+  and irreversible-operation boundaries.
 
 ## [0.3.12] - 2026-09-12
 
@@ -637,6 +678,7 @@ Initial release of larksuite-oapi-sdk-rs, a Rust port of the
 
 - Rust 1.95.0+, edition 2024
 
+[0.3.13]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.13
 [0.3.12]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.12
 [0.3.11]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.11
 [0.3.10]: https://github.com/adamcavendish/larksuite-oapi-sdk-rs/releases/tag/0.3.10
