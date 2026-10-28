@@ -130,3 +130,16 @@ The endpoint was introduced in `75926f97`; `1a9f6378` made environment
 selection optional. Mock tests cover the wire contract, not live platform
 authorization or availability. No database migration, recovery, polling, or
 automatic environment policy is added.
+
+## Spark app releases
+
+`client.spark().app` also exposes the user-token release lifecycle:
+
+- `create_release` submits a release request with an optional branch and reason.
+- `get_release` reads one release's status and approval details.
+- `list_releases` returns paginated release records.
+
+These methods preserve the platform's JSON response fields and do not publish
+source, wait for approval, retry an ambiguous submission, or invent a release
+state machine. Treat release creation as a mutating operation and choose the
+caller-owned confirmation and polling policy for the returned response.

@@ -17,6 +17,8 @@ Most examples use this shape:
 | Example | Service | Scenario | Required env vars | Command |
 | --- | --- | --- | --- | --- |
 | `client_config` | LarkClient | Build default and tuned clients with Go-SDK-style builder options | optional `APP_ID`, `APP_SECRET` | `cargo run --example client_config` |
+| `platform_gateway` | Platform routing | Route SDK-owned platform requests through a trusted enterprise gateway | none for compilation | `cargo run --example platform_gateway` |
+| `dpop_file_key_store` | DPoP | Implement application-owned persistent key storage and explicit rotation policy | none for compilation | `cargo run --example dpop_file_key_store` |
 | `raw_api` | Raw OpenAPI | Call endpoints through `ApiReq` with path/query params and explicit token mode | `APP_ID`, `APP_SECRET`, `USER_ID`, `USER_ACCESS_TOKEN`, optional `CHAT_ID` | `cargo run --example raw_api` |
 | `spark_sessions` | Spark v1 | Poll an existing cloud session with queue-aware completion and a caller deadline | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `SPARK_APP_ID`, `SPARK_SESSION_ID`, `SPARK_POLL_FALLBACK_MS`, `SPARK_POLL_TIMEOUT_SECS` | `cargo run --example spark_sessions` |
 | `spark_db_sync` | Spark v1 | Safely preview a Base-to-database sync configuration with a user token | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `SPARK_APP_ID`, `SPARK_DB_SYNC_CONFIG` | `cargo run --example spark_db_sync` |

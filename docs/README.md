@@ -19,14 +19,18 @@ examples, features, and coverage.
   dispatch, long connections, trusted user channels, replies, and updates.
 - [OAuth SSO](oauth-sso.md) covers Feishu and Lark browser authorization,
   authorization-code exchange, refresh-token rotation, and user identity lookup.
+- [DPoP](dpop.md) covers opt-in proof modes for registration, OAuth, and
+  resource requests, plus key stores, rotation, and clock correction.
 - [Mail v1 user-mailbox threads](mail-v1-threads.md) covers conversation reads
   and batch label, folder, and Trash operations with user or tenant credentials.
-- [Spark app export](spark-app-export.md) covers streaming app source archives
-  and bounded handling of export error responses.
+- [Spark app export](spark-app-export.md) covers streaming source archives,
+  storage files, quotas, and app release lifecycle operations.
 - [Spark db sync](spark-db-sync.md) covers user-token Base-to-database sync
   previews, task lifecycle operations, and opt-in live verification.
 - [Spark database migration](spark-db-migration.md) covers dev-to-online schema
   preview, irreversible apply, and caller-owned asynchronous status polling.
+- [Spark cloud sessions](spark-sessions.md) covers user-token session lifecycle,
+  queue-aware status, chat cancellation, and paginated replies.
 - [Base v3 record reads](base-v3-records.md) covers CLI-aligned Base record
   list/search operations and their read-only live verification.
 - [Base v3 application mode](base-v3-apps.md) covers CLI-proven workspace,
