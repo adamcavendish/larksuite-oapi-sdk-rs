@@ -18,6 +18,7 @@ Most examples use this shape:
 | --- | --- | --- | --- | --- |
 | `client_config` | LarkClient | Build default and tuned clients with Go-SDK-style builder options | optional `APP_ID`, `APP_SECRET` | `cargo run --example client_config` |
 | `raw_api` | Raw OpenAPI | Call endpoints through `ApiReq` with path/query params and explicit token mode | `APP_ID`, `APP_SECRET`, `USER_ID`, `USER_ACCESS_TOKEN`, optional `CHAT_ID` | `cargo run --example raw_api` |
+| `spark_sessions` | Spark v1 | Poll an existing cloud session with queue-aware completion and a caller deadline | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `SPARK_APP_ID`, `SPARK_SESSION_ID`, `SPARK_POLL_FALLBACK_MS`, `SPARK_POLL_TIMEOUT_SECS` | `cargo run --example spark_sessions` |
 | `spark_db_sync` | Spark v1 | Safely preview a Base-to-database sync configuration with a user token | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `SPARK_APP_ID`, `SPARK_DB_SYNC_CONFIG` | `cargo run --example spark_db_sync` |
 | `base_v3_record_read` | Base v3 | Read Base table records with an offset-paginated, user-token request | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `BASE_V3_BASE_TOKEN`, `BASE_V3_TABLE_ID` | `cargo run --example base_v3_record_read` |
 | `base_v3_app_read` | Base v3 | Discover BaseApps in a workspace, then read their pages and optional blocks | `APP_ID`, `APP_SECRET`, `USER_ACCESS_TOKEN`, `BASE_V3_WORKSPACE_TOKEN`, `BASE_V3_APP_TOKEN`, optional `BASE_V3_PAGE_ID` | `cargo run --example base_v3_app_read` |

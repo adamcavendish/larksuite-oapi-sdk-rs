@@ -1,6 +1,10 @@
-//! Spark application, storage, database migration, and database-sync APIs.
+//! Spark application, cloud-session, storage, database migration, and database-sync APIs.
+//!
+//! Cloud sessions use `session` with a user token. See `examples/spark_sessions.rs`
+//! for queue-aware polling; a finished turn does not imply publication.
 //!
 #![doc = include_str!("../../../docs/spark-app-export.md")]
+#![doc = include_str!("../../../docs/spark-sessions.md")]
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
@@ -9,6 +13,9 @@ use crate::req::{FormDataField, ReqBody, RequestOption};
 use crate::service::common::{DownloadResp, DownloadStreamResp, JsonResp, PageQuery, RestRequest};
 use crate::service::go_compatibility::{GoCompatibility, GoCompatibilityEndpoint};
 use serde::Serialize;
+
+mod session;
+pub use session::*;
 
 pub type CreateAppResp = JsonResp;
 pub type GetAppVisibilityAppResp = JsonResp;
@@ -1656,6 +1663,7 @@ impl<'a> DirectoryUserResource<'a> {
 }
 
 pub struct V1<'a> {
+    pub session: SessionResource<'a>,
     pub app: AppResource<'a>,
     pub db_sync: DbSyncResource<'a>,
     pub app_enum: AppEnumResource<'a>,
@@ -1669,6 +1677,7 @@ pub struct V1<'a> {
 impl<'a> V1<'a> {
     pub fn new(config: &'a Config) -> Self {
         Self {
+            session: SessionResource { config },
             app: AppResource { config },
             db_sync: DbSyncResource { config },
             app_enum: AppEnumResource { config },
