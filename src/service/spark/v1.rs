@@ -5,6 +5,7 @@
 //!
 #![doc = include_str!("../../../docs/spark-app-export.md")]
 #![doc = include_str!("../../../docs/spark-sessions.md")]
+#![doc = include_str!("../../../docs/spark-features.md")]
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
@@ -14,6 +15,7 @@ use crate::service::common::{DownloadResp, DownloadStreamResp, JsonResp, PageQue
 use crate::service::go_compatibility::{GoCompatibility, GoCompatibilityEndpoint};
 use serde::Serialize;
 
+mod features;
 mod session;
 pub use session::*;
 
