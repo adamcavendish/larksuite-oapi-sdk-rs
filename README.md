@@ -120,6 +120,7 @@ requests connect directly. WebSocket connections use their separate connector.
 | Call a typed REST endpoint | [`examples/send_message.rs`](examples/send_message.rs) or [generated examples](examples/README.md) |
 | Call an uncovered endpoint | [`examples/raw_api.rs`](examples/raw_api.rs) |
 | Control VC meeting bots | [VC meeting bots](docs/vc-bots.md) |
+| Filter or delete Spark apps | [Spark apps](docs/spark-apps.md) |
 | Export Spark app source | [Spark app export](docs/spark-app-export.md) |
 | Manage Spark app releases | [Spark app releases](docs/spark-app-export.md#spark-app-releases) |
 | Manage Spark cloud sessions | [Spark cloud sessions](docs/spark-sessions.md) |
@@ -182,6 +183,8 @@ and [the event example](examples/event_handler.rs).
   leave, message, countdown, and active-meeting operations.
 - [Spark app export](docs/spark-app-export.md): streaming source archives,
   storage files, quotas, and app release lifecycle operations.
+- [Spark apps](docs/spark-apps.md): server-side owner and app filters,
+  pagination, and explicit single-send deletion.
 - [Spark cloud sessions](docs/spark-sessions.md): user-token session creation,
   queue-aware status reads, chat cancellation, and paginated replies.
 - [Spark database migration](docs/spark-db-migration.md): explicit preview,
