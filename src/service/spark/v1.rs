@@ -4,6 +4,7 @@
 //! for queue-aware polling; a finished turn does not imply publication.
 //!
 #![doc = include_str!("../../../docs/spark-app-export.md")]
+#![doc = include_str!("../../../docs/spark-apps.md")]
 #![doc = include_str!("../../../docs/spark-sessions.md")]
 #![doc = include_str!("../../../docs/spark-features.md")]
 
@@ -20,6 +21,7 @@ mod session;
 pub use session::*;
 
 pub type CreateAppResp = JsonResp;
+pub type DeleteAppResp = JsonResp;
 pub type GetAppVisibilityAppResp = JsonResp;
 pub type IconAppResp = JsonResp;
 pub type ListAppResp = JsonResp;
@@ -65,6 +67,19 @@ pub type GetAppReleaseResp = JsonResp;
 pub type ListAppReleaseResp = JsonResp;
 
 const EMPTY_PARAMS: [(&str, &str); 0] = [];
+
+fn require_app_user(option: &RequestOption) -> Result<(), LarkError> {
+    if option
+        .user_access_token
+        .as_deref()
+        .is_none_or(|token| token.trim().is_empty())
+    {
+        return Err(LarkError::IllegalParam(
+            "Spark apps require a user access token".into(),
+        ));
+    }
+    Ok(())
+}
 
 /// Query parameters for Spark database usage and quota.
 ///
@@ -139,6 +154,81 @@ impl<'a> SparkPageQuery<'a> {
             pairs.push(("page_token", page_token.to_string()));
         }
         pairs
+    }
+}
+
+/// Server-side filters for apps visible to the calling user.
+///
+/// All fields are optional. An explicit owner must be a nonempty `ou_` open ID;
+/// surrounding whitespace is trimmed before validation and sending.
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+pub struct ListAppQuery<'a> {
+    pub page: PageQuery<'a>,
+    /// Owner open ID, independent of the ownership filter.
+    pub owner_id: Option<&'a str>,
+    /// Fuzzy match against the app name or description.
+    pub keyword: Option<&'a str>,
+    /// Known values: `all`, `mine`, `shared`. Other values reach the platform.
+    pub ownership: Option<&'a str>,
+    /// Known values: `html`, `frontend`, `full_stack`.
+    pub app_type: Option<&'a str>,
+}
+
+impl<'a> ListAppQuery<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn page_size(mut self, value: impl Into<Option<i32>>) -> Self {
+        self.page.page_size = value.into();
+        self
+    }
+
+    pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.page.page_token = value.into();
+        self
+    }
+
+    pub fn owner_id(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.owner_id = value.into();
+        self
+    }
+
+    pub fn keyword(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.keyword = value.into();
+        self
+    }
+
+    pub fn ownership(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.ownership = value.into();
+        self
+    }
+
+    pub fn app_type(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.app_type = value.into();
+        self
+    }
+
+    fn as_pairs(&self) -> Result<Vec<(&'static str, String)>, LarkError> {
+        let owner_id = self.owner_id.map(str::trim);
+        if owner_id.is_some_and(|owner| !owner.starts_with("ou_")) {
+            return Err(LarkError::IllegalParam(
+                "owner_id must be an open ID starting with ou_".into(),
+            ));
+        }
+        let mut pairs = SparkPageQuery { page: self.page }.as_pairs();
+        for (key, value) in [
+            ("owner_id", owner_id),
+            ("keyword", self.keyword),
+            ("ownership", self.ownership),
+            ("app_type", self.app_type),
+        ] {
+            if let Some(value) = value {
+                pairs.push((key, value.to_string()));
+            }
+        }
+        Ok(pairs)
     }
 }
 
@@ -989,6 +1079,56 @@ impl<'a> AppResource<'a> {
                 option,
             )
             .await
+    }
+
+    /// List visible apps using server-side filters and a user token with
+    /// `spark:app:read`. Pagination and complete response fields are preserved.
+    /// An explicitly blank or non-`ou_` owner is rejected before sending.
+    pub async fn list_with_query(
+        &self,
+        query: &ListAppQuery<'_>,
+        option: &RequestOption,
+    ) -> Result<ListAppResp, LarkError> {
+        require_app_user(option)?;
+        GoCompatibility::new(self.config)
+            .request_json(
+                GoCompatibilityEndpoint::GetSparkV1Apps,
+                EMPTY_PARAMS,
+                query.as_pairs()?,
+                None,
+                option,
+            )
+            .await
+    }
+
+    /// Delete a caller-selected app using its real `app_` ID and a user token.
+    /// Sends once even when retries are configured; an ambiguous failure must
+    /// not trigger an automatic repeat. Deletion takes effect asynchronously.
+    /// Only `data.in_trash=true` confirms recoverability; a missing field is
+    /// preserved on success. No name check or meta-token lookup is performed.
+    /// See the module documentation for credential scopes and response semantics.
+    pub async fn delete(
+        &self,
+        app_id: &str,
+        option: &RequestOption,
+    ) -> Result<DeleteAppResp, LarkError> {
+        require_app_user(option)?;
+        let app_id = app_id.trim();
+        if !app_id.starts_with("app_") {
+            return Err(LarkError::IllegalParam(
+                "app_id must be a Spark app ID starting with app_".into(),
+            ));
+        }
+        RestRequest::new(
+            self.config,
+            http::Method::DELETE,
+            "/open-apis/spark/v1/apps/:app_id",
+            vec![AccessTokenType::User],
+            option,
+        )
+        .path_param("app_id", app_id)
+        .send_json_once()
+        .await
     }
 
     pub async fn patch(
