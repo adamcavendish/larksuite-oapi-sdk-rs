@@ -149,6 +149,10 @@ pub struct Notice {
     pub to_user_id: Option<UserId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notice_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_mentioned: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from_user_type: Option<String>,
 }
 
 // ── Event payload types ──
@@ -351,6 +355,50 @@ pub struct P2DriveNoticeCommentAddV1 {
     pub reply_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_mentioned: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_token: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visibility: Option<String>,
+}
+
+impl P2DriveNoticeCommentAddV1 {
+    /// Read the nonempty document token from `notice_meta`, falling back to
+    /// the event's top-level field. Neither stored field is changed.
+    ///
+    /// ```
+    /// use larksuite_oapi_sdk_rs::events::drive::P2DriveNoticeCommentAddV1;
+    /// let event: P2DriveNoticeCommentAddV1 = serde_json::from_str(
+    ///     r#"{"file_token":"doc_1","notice_meta":{"is_mentioned":false}}"#,
+    /// ).unwrap();
+    /// assert_eq!(event.effective_file_token(), Some("doc_1"));
+    /// assert_eq!(event.effective_is_mentioned(), Some(false));
+    /// ```
+    pub fn effective_file_token(&self) -> Option<&str> {
+        self.notice_meta
+            .as_ref()
+            .and_then(|meta| meta.file_token.as_deref())
+            .filter(|value| !value.is_empty())
+            .or_else(|| self.file_token.as_deref().filter(|value| !value.is_empty()))
+    }
+
+    /// Read the nonempty document type from `notice_meta`, falling back to
+    /// the top-level field without trimming or rewriting either value.
+    pub fn effective_file_type(&self) -> Option<&str> {
+        self.notice_meta
+            .as_ref()
+            .and_then(|meta| meta.file_type.as_deref())
+            .filter(|value| !value.is_empty())
+            .or_else(|| self.file_type.as_deref().filter(|value| !value.is_empty()))
+    }
+
+    /// Prefer the top-level mention flag, including explicit `false`, then
+    /// fall back to `notice_meta`. Missing flags remain `None`.
+    pub fn effective_is_mentioned(&self) -> Option<bool> {
+        self.is_mentioned
+            .or_else(|| self.notice_meta.as_ref().and_then(|meta| meta.is_mentioned))
+    }
 }
 
 // ── EventDispatcher extension methods ──

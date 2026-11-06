@@ -289,3 +289,102 @@ fn drive_event_structs_accept_empty_and_null_payloads() {
     .unwrap();
     assert!(notice.notice_meta.is_none());
 }
+
+#[test]
+fn comment_notice_layouts_preserve_fields_and_resolve_precedence() {
+    use serde_json::json;
+    let cases = [
+        (
+            json!({"notice_meta":{"file_token":"nested", "file_type":"docx", "is_mentioned":true}}),
+            Some("nested"),
+            Some("docx"),
+            Some(true),
+        ),
+        (
+            json!({"file_token":"top", "file_type":"sheet", "visibility":"future", "notice_meta":{"is_mentioned":false,"from_user_type":"future_actor"}}),
+            Some("top"),
+            Some("sheet"),
+            Some(false),
+        ),
+        (
+            json!({"file_token":"top", "file_type":"sheet", "is_mentioned":false, "notice_meta":{"file_token":"nested", "file_type":"docx", "is_mentioned":true}}),
+            Some("nested"),
+            Some("docx"),
+            Some(false),
+        ),
+        (
+            json!({"file_token":" top ", "file_type":"sheet", "notice_meta":{"file_token":"", "file_type":""}}),
+            Some(" top "),
+            Some("sheet"),
+            None,
+        ),
+        (
+            json!({"file_token":"", "file_type":"", "notice_meta":null}),
+            None,
+            None,
+            None,
+        ),
+        (
+            json!({"notice_meta":{"file_token":null,"is_mentioned":null},"is_mentioned":null}),
+            None,
+            None,
+            None,
+        ),
+        (json!({}), None, None, None),
+    ];
+    for (input, token, file_type, mentioned) in cases {
+        let event: P2DriveNoticeCommentAddV1 = serde_json::from_value(input.clone()).unwrap();
+        assert_eq!(event.effective_file_token(), token, "{input}");
+        assert_eq!(event.effective_file_type(), file_type, "{input}");
+        assert_eq!(event.effective_is_mentioned(), mentioned, "{input}");
+        // Optional nulls are omitted, but every supplied non-null field stays
+        // in its original position, even after calling the accessors.
+        let output = serde_json::to_value(&event).unwrap();
+        for key in ["file_token", "file_type", "is_mentioned", "visibility"] {
+            assert_eq!(output.get(key), input.get(key).filter(|v| !v.is_null()));
+        }
+        for key in ["file_token", "file_type", "is_mentioned", "from_user_type"] {
+            assert_eq!(
+                output["notice_meta"].get(key),
+                input["notice_meta"].get(key).filter(|v| !v.is_null())
+            );
+        }
+    }
+}
+
+#[tokio::test]
+async fn comment_notice_alternate_layout_reaches_typed_handler() {
+    use larksuite_oapi_sdk_rs::event::{EventDispatcher, EventReq};
+    use std::sync::{Arc, Mutex};
+    let received = Arc::new(Mutex::new(None));
+    let captured = received.clone();
+    let dispatcher = EventDispatcher::new("", "").on_p2_drive_notice_comment_add_v1(
+        move |event: P2DriveNoticeCommentAddV1| {
+            let captured = captured.clone();
+            async move {
+                *captured.lock().unwrap() = Some((
+                    event.effective_file_token().map(str::to_owned),
+                    event.effective_is_mentioned(),
+                ));
+                Ok(())
+            }
+        },
+    );
+    let body = serde_json::json!({
+        "schema":"2.0",
+        "header":{"event_id":"comment-layout", "event_type":"drive.notice.comment_add_v1"},
+        "event":{"file_token":"doc_top", "comment_id":"c1", "notice_meta":{"is_mentioned":true}}
+    });
+    let response = dispatcher
+        .handle(EventReq {
+            headers: Default::default(),
+            body: serde_json::to_vec(&body).unwrap(),
+            request_uri: "/events".into(),
+        })
+        .await;
+    assert_eq!(response.status_code, 200);
+    assert_eq!(
+        *received.lock().unwrap(),
+        Some((Some("doc_top".into()), Some(true)))
+    );
+}

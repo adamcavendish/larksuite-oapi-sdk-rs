@@ -210,3 +210,30 @@ Use `card::v1` or `card::v2` to build versioned Card JSON, and validate it with
 their `CardDocument` types before sending. `CardActionHandler` handles callback
 payloads. See the [Cards guide](cards.md) for CardKit and published Card Builder
 templates.
+
+## Drive comment notices
+
+Register `on_p2_drive_notice_comment_add_v1` to receive typed comment notices.
+The platform can send `file_token` and `file_type` inside `notice_meta` or at
+event top level, and `is_mentioned` at either location. Use
+`effective_file_token()`, `effective_file_type()`, and
+`effective_is_mentioned()` on the event to handle both layouts. Nonempty nested
+file fields take precedence; the top-level mention flag takes precedence even
+when it is `false`. A missing mention flag stays `None`. The public fields
+retain their original positions, including `visibility` and
+`notice_meta.from_user_type`.
+
+Before consuming, explicitly register the identity for
+`drive.notice.comment_add_v1` with `POST /open-apis/drive/v1/user/subscription`,
+using JSON `{"event_type":"drive.notice.comment_add_v1"}`. The existing
+`GoCompatibilityEndpoint::PostDriveV1UserSubscription` supports this request;
+`GetDriveV1UserSubscriptionStatus` queries its status. Use an explicit user
+access token for the user identity or tenant access token for the bot identity,
+with `docs:document.comment:read` and the corresponding console event configured.
+
+The subscription is a durable relation for the app, identity, and event type,
+and can be shared by multiple consumers. Creating a dispatcher or opening a
+WebSocket does not register it. Do not automatically unsubscribe when one
+consumer exits, as that can interrupt other consumers. A root comment's
+`reply_id` can identify its first reply; notices for bot-participated threads
+can arrive with `is_mentioned=false`, so avoid treating every notice as an @mention.
