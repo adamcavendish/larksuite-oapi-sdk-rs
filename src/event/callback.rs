@@ -181,7 +181,8 @@ impl Toast {
 
 card_locale_struct!(
     /// Typed locale fields for toast I18n, matching Go SDK's `I18n` struct.
-    ToastI18n, String
+    ToastI18n,
+    String
 );
 
 impl ToastI18n {

@@ -125,6 +125,7 @@ async fn okr_v2_exposes_every_go_resource_route() {
             "obj-1",
             &KeyResultsPositionReqBody {
                 key_result_ids: vec!["kr-1".into()],
+                ..Default::default()
             },
             &option,
         )
@@ -135,6 +136,7 @@ async fn okr_v2_exposes_every_go_resource_route() {
             "obj-1",
             &KeyResultsWeightReqBody {
                 key_result_weights: vec![key_result_weight],
+                ..Default::default()
             },
             &option,
         )
@@ -150,6 +152,7 @@ async fn okr_v2_exposes_every_go_resource_route() {
             &CreateObjectiveAlignmentReqBody {
                 to_entity_type: Some(1),
                 to_entity_id: Some("obj-2".into()),
+                ..Default::default()
             },
             &option,
         )

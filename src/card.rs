@@ -303,7 +303,8 @@ pub struct TextObject {
 
 card_locale_struct!(
     /// Per-locale plain text content for [`TextObject`].
-    TextI18n, String
+    TextI18n,
+    String
 );
 
 impl TextObject {

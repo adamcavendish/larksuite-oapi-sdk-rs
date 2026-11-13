@@ -5,7 +5,7 @@ use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::RequestOption;
 use crate::service::common::{
-    PageIteratorPage, PageIteratorState, RestRequest, impl_page_iterator_controls,
+    EmptyResp, PageIteratorPage, PageIteratorState, RestRequest, impl_page_iterator_controls,
 };
 
 fn request<'a>(
@@ -86,6 +86,8 @@ pub struct Indicator {
     pub unit: Option<IndicatorUnit>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub indicator_status: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -107,6 +109,8 @@ pub struct Objective {
     pub owner: Option<Owner>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub category: Option<Category>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -124,6 +128,8 @@ pub struct KeyResult {
     pub weight: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub owner: Option<Owner>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -137,6 +143,8 @@ pub struct Alignment {
     pub to_entity_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub to_entity_type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -200,6 +208,8 @@ pub struct CreateObjectiveReqBody {
     pub category_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub score: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_to_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -218,6 +228,8 @@ pub struct PatchIndicatorReqBody {
     pub unit: Option<IndicatorUnit>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indicator_status: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_to_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -228,18 +240,24 @@ pub struct PatchKeyResultReqBody {
     pub score: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub deadline: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_to_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct KeyResultsPositionReqBody {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub key_result_ids: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_to_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct KeyResultsWeightReqBody {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub key_result_weights: Vec<KeyResultWeight>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_to_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -254,6 +272,8 @@ pub struct PatchObjectiveReqBody {
     pub deadline: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub category_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_to_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -262,6 +282,8 @@ pub struct CreateObjectiveAlignmentReqBody {
     pub to_entity_type: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub to_entity_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_to_draft: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -272,6 +294,8 @@ pub struct CreateObjectiveKeyResultReqBody {
     pub deadline: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub score: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apply_to_draft: Option<bool>,
 }
 
 // ── Query and response models ──
@@ -400,6 +424,22 @@ impl OkrAlignmentResource<'_> {
         .send_v2_response::<IdData, DeleteOkrAlignmentResp>()
         .await
     }
+    pub async fn delete_with_draft(
+        &self,
+        alignment_id: &str,
+        apply_to_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<DeleteOkrAlignmentResp, LarkError> {
+        request(
+            self.config,
+            http::Method::DELETE,
+            format!("/open-apis/okr/v2/alignments/{alignment_id}"),
+            option,
+        )
+        .query("apply_to_draft", apply_to_draft)
+        .send_v2_response::<IdData, DeleteOkrAlignmentResp>()
+        .await
+    }
     pub async fn get(
         &self,
         alignment_id: &str,
@@ -411,6 +451,22 @@ impl OkrAlignmentResource<'_> {
             format!("/open-apis/okr/v2/alignments/{alignment_id}"),
             option,
         )
+        .send_v2_response::<AlignmentData, GetOkrAlignmentResp>()
+        .await
+    }
+    pub async fn get_with_draft(
+        &self,
+        alignment_id: &str,
+        prefer_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<GetOkrAlignmentResp, LarkError> {
+        request(
+            self.config,
+            http::Method::GET,
+            format!("/open-apis/okr/v2/alignments/{alignment_id}"),
+            option,
+        )
+        .query("prefer_draft", prefer_draft)
         .send_v2_response::<AlignmentData, GetOkrAlignmentResp>()
         .await
     }
@@ -587,6 +643,22 @@ impl OkrKeyResultResource<'_> {
         .send_v2_response::<IdData, DeleteOkrKeyResultResp>()
         .await
     }
+    pub async fn delete_with_draft(
+        &self,
+        key_result_id: &str,
+        apply_to_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<DeleteOkrKeyResultResp, LarkError> {
+        request(
+            self.config,
+            http::Method::DELETE,
+            format!("/open-apis/okr/v2/key_results/{key_result_id}"),
+            option,
+        )
+        .query("apply_to_draft", apply_to_draft)
+        .send_v2_response::<IdData, DeleteOkrKeyResultResp>()
+        .await
+    }
     pub async fn get(
         &self,
         key_result_id: &str,
@@ -598,6 +670,22 @@ impl OkrKeyResultResource<'_> {
             format!("/open-apis/okr/v2/key_results/{key_result_id}"),
             option,
         )
+        .send_v2_response::<KeyResultData, GetOkrKeyResultResp>()
+        .await
+    }
+    pub async fn get_with_draft(
+        &self,
+        key_result_id: &str,
+        prefer_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<GetOkrKeyResultResp, LarkError> {
+        request(
+            self.config,
+            http::Method::GET,
+            format!("/open-apis/okr/v2/key_results/{key_result_id}"),
+            option,
+        )
+        .query("prefer_draft", prefer_draft)
         .send_v2_response::<KeyResultData, GetOkrKeyResultResp>()
         .await
     }
@@ -674,6 +762,34 @@ pub struct OkrObjectiveResource<'a> {
     config: &'a Config,
 }
 impl OkrObjectiveResource<'_> {
+    pub async fn draft_publish(
+        &self,
+        objective_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        request(
+            self.config,
+            http::Method::POST,
+            format!("/open-apis/okr/v2/objectives/{objective_id}/draft_publish"),
+            option,
+        )
+        .send_empty()
+        .await
+    }
+    pub async fn draft_drop(
+        &self,
+        objective_id: &str,
+        option: &RequestOption,
+    ) -> Result<EmptyResp, LarkError> {
+        request(
+            self.config,
+            http::Method::POST,
+            format!("/open-apis/okr/v2/objectives/{objective_id}/draft_drop"),
+            option,
+        )
+        .send_empty()
+        .await
+    }
     pub async fn delete(
         &self,
         objective_id: &str,
@@ -699,6 +815,22 @@ impl OkrObjectiveResource<'_> {
             format!("/open-apis/okr/v2/objectives/{objective_id}"),
             option,
         )
+        .send_v2_response::<ObjectiveData, GetOkrObjectiveResp>()
+        .await
+    }
+    pub async fn get_with_draft(
+        &self,
+        objective_id: &str,
+        prefer_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<GetOkrObjectiveResp, LarkError> {
+        request(
+            self.config,
+            http::Method::GET,
+            format!("/open-apis/okr/v2/objectives/{objective_id}"),
+            option,
+        )
+        .query("prefer_draft", prefer_draft)
         .send_v2_response::<ObjectiveData, GetOkrObjectiveResp>()
         .await
     }
