@@ -1,3 +1,5 @@
+//! OKR v2 resources with optional draft views for supported reads.
+
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
@@ -582,6 +584,17 @@ impl OkrCycleObjectiveResource<'_> {
         query: &OkrPageQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListOkrCycleObjectiveResp, LarkError> {
+        self.list_with_draft(cycle_id, query, None, option).await
+    }
+    /// Reads the selected draft view. `None` omits the choice; `Some(false)` explicitly
+    /// requests the published view. Draft visibility depends on the caller permissions.
+    pub async fn list_with_draft(
+        &self,
+        cycle_id: &str,
+        query: &OkrPageQuery<'_>,
+        prefer_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<ListOkrCycleObjectiveResp, LarkError> {
         page_query(
             request(
                 self.config,
@@ -591,6 +604,7 @@ impl OkrCycleObjectiveResource<'_> {
             ),
             query,
         )
+        .query("prefer_draft", prefer_draft)
         .send_v2_response::<OkrPage<Objective>, ListOkrCycleObjectiveResp>()
         .await
     }
@@ -599,7 +613,16 @@ impl OkrCycleObjectiveResource<'_> {
         cycle_id: &str,
         query: &OkrPageQuery<'_>,
     ) -> ListOkrCycleObjectiveIterator<'_> {
-        ListOkrCycleObjectiveIterator::new(self.config, cycle_id, query)
+        self.list_by_iterator_with_draft(cycle_id, query, None)
+    }
+    /// Keeps the draft choice on every page of the iterator.
+    pub fn list_by_iterator_with_draft(
+        &self,
+        cycle_id: &str,
+        query: &OkrPageQuery<'_>,
+        prefer_draft: Option<bool>,
+    ) -> ListOkrCycleObjectiveIterator<'_> {
+        ListOkrCycleObjectiveIterator::new(self.config, cycle_id, query, prefer_draft)
     }
 }
 
@@ -716,12 +739,23 @@ impl OkrKeyResultIndicatorResource<'_> {
         key_result_id: &str,
         option: &RequestOption,
     ) -> Result<ListOkrKeyResultIndicatorResp, LarkError> {
+        self.list_with_draft(key_result_id, None, option).await
+    }
+    /// Reads the selected draft view. `None` omits the choice; `Some(false)` explicitly
+    /// requests the published view. Draft visibility depends on the caller permissions.
+    pub async fn list_with_draft(
+        &self,
+        key_result_id: &str,
+        prefer_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<ListOkrKeyResultIndicatorResp, LarkError> {
         request(
             self.config,
             http::Method::GET,
             format!("/open-apis/okr/v2/key_results/{key_result_id}/indicators"),
             option,
         )
+        .query("prefer_draft", prefer_draft)
         .send_v2_response::<IndicatorData, ListOkrKeyResultIndicatorResp>()
         .await
     }
@@ -910,6 +944,18 @@ impl OkrObjectiveAlignmentResource<'_> {
         query: &OkrPageQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListOkrObjectiveAlignmentResp, LarkError> {
+        self.list_with_draft(objective_id, query, None, option)
+            .await
+    }
+    /// Reads the selected draft view. `None` omits the choice; `Some(false)` explicitly
+    /// requests the published view. Draft visibility depends on the caller permissions.
+    pub async fn list_with_draft(
+        &self,
+        objective_id: &str,
+        query: &OkrPageQuery<'_>,
+        prefer_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<ListOkrObjectiveAlignmentResp, LarkError> {
         page_query(
             request(
                 self.config,
@@ -919,6 +965,7 @@ impl OkrObjectiveAlignmentResource<'_> {
             ),
             query,
         )
+        .query("prefer_draft", prefer_draft)
         .send_v2_response::<OkrPage<Alignment>, ListOkrObjectiveAlignmentResp>()
         .await
     }
@@ -927,7 +974,16 @@ impl OkrObjectiveAlignmentResource<'_> {
         objective_id: &str,
         query: &OkrPageQuery<'_>,
     ) -> ListOkrObjectiveAlignmentIterator<'_> {
-        ListOkrObjectiveAlignmentIterator::new(self.config, objective_id, query)
+        self.list_by_iterator_with_draft(objective_id, query, None)
+    }
+    /// Keeps the draft choice on every page of the iterator.
+    pub fn list_by_iterator_with_draft(
+        &self,
+        objective_id: &str,
+        query: &OkrPageQuery<'_>,
+        prefer_draft: Option<bool>,
+    ) -> ListOkrObjectiveAlignmentIterator<'_> {
+        ListOkrObjectiveAlignmentIterator::new(self.config, objective_id, query, prefer_draft)
     }
 }
 
@@ -940,12 +996,23 @@ impl OkrObjectiveIndicatorResource<'_> {
         objective_id: &str,
         option: &RequestOption,
     ) -> Result<ListOkrObjectiveIndicatorResp, LarkError> {
+        self.list_with_draft(objective_id, None, option).await
+    }
+    /// Reads the selected draft view. `None` omits the choice; `Some(false)` explicitly
+    /// requests the published view. Draft visibility depends on the caller permissions.
+    pub async fn list_with_draft(
+        &self,
+        objective_id: &str,
+        prefer_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<ListOkrObjectiveIndicatorResp, LarkError> {
         request(
             self.config,
             http::Method::GET,
             format!("/open-apis/okr/v2/objectives/{objective_id}/indicators"),
             option,
         )
+        .query("prefer_draft", prefer_draft)
         .send_v2_response::<IndicatorData, ListOkrObjectiveIndicatorResp>()
         .await
     }
@@ -977,6 +1044,18 @@ impl OkrObjectiveKeyResultResource<'_> {
         query: &OkrPageQuery<'_>,
         option: &RequestOption,
     ) -> Result<ListOkrObjectiveKeyResultResp, LarkError> {
+        self.list_with_draft(objective_id, query, None, option)
+            .await
+    }
+    /// Reads the selected draft view. `None` omits the choice; `Some(false)` explicitly
+    /// requests the published view. Draft visibility depends on the caller permissions.
+    pub async fn list_with_draft(
+        &self,
+        objective_id: &str,
+        query: &OkrPageQuery<'_>,
+        prefer_draft: Option<bool>,
+        option: &RequestOption,
+    ) -> Result<ListOkrObjectiveKeyResultResp, LarkError> {
         page_query(
             request(
                 self.config,
@@ -986,6 +1065,7 @@ impl OkrObjectiveKeyResultResource<'_> {
             ),
             query,
         )
+        .query("prefer_draft", prefer_draft)
         .send_v2_response::<OkrPage<KeyResult>, ListOkrObjectiveKeyResultResp>()
         .await
     }
@@ -994,7 +1074,16 @@ impl OkrObjectiveKeyResultResource<'_> {
         objective_id: &str,
         query: &OkrPageQuery<'_>,
     ) -> ListOkrObjectiveKeyResultIterator<'_> {
-        ListOkrObjectiveKeyResultIterator::new(self.config, objective_id, query)
+        self.list_by_iterator_with_draft(objective_id, query, None)
+    }
+    /// Keeps the draft choice on every page of the iterator.
+    pub fn list_by_iterator_with_draft(
+        &self,
+        objective_id: &str,
+        query: &OkrPageQuery<'_>,
+        prefer_draft: Option<bool>,
+    ) -> ListOkrObjectiveKeyResultIterator<'_> {
+        ListOkrObjectiveKeyResultIterator::new(self.config, objective_id, query, prefer_draft)
     }
 }
 
@@ -1097,20 +1186,28 @@ macro_rules! page_iterator_without_id {
 }
 macro_rules! page_iterator_with_id {
     ($name:ident, $item:ty, $resource:ident, $method:ident) => {
+        page_iterator_with_id!(@impl $name, $item, $resource, $method);
+    };
+    ($name:ident, $item:ty, $resource:ident, $method:ident, draft) => {
+        page_iterator_with_id!(@impl $name, $item, $resource, $method; prefer_draft);
+    };
+    (@impl $name:ident, $item:ty, $resource:ident, $method:ident $(; $draft:ident)?) => {
         #[derive(Debug, Clone)]
         pub struct $name<'a> {
             config: &'a Config,
             state: PageIteratorState<$item>,
             id: String,
             query: PageQueryOwned,
+            $( $draft: Option<bool>, )?
         }
         impl<'a> $name<'a> {
-            fn new(config: &'a Config, id: &str, query: &OkrPageQuery<'_>) -> Self {
+            fn new(config: &'a Config, id: &str, query: &OkrPageQuery<'_> $(, $draft: Option<bool>)?) -> Self {
                 Self {
                     config,
                     state: PageIteratorState::default()
                         .with_page_token(query.page_token.map(ToOwned::to_owned)),
                     id: id.to_string(),
+                    $( $draft, )?
                     query: PageQueryOwned::from_query(query),
                 }
             }
@@ -1124,10 +1221,11 @@ macro_rules! page_iterator_with_id {
                 let config = self.config;
                 let id = &self.id;
                 let query = &self.query;
+                $( let $draft = self.$draft; )?
                 self.state
                     .next_page(|token| async move {
                         let response = $resource { config }
-                            .$method(id, &query.query(token.as_deref()), option)
+                            .$method(id, &query.query(token.as_deref()), $( $draft, )? option)
                             .await?;
                         let data = response.data.unwrap_or_default();
                         Ok(PageIteratorPage::new(
@@ -1141,13 +1239,15 @@ macro_rules! page_iterator_with_id {
         }
     };
 }
+
 page_iterator_without_id!(ListOkrCategoryIterator, Category, OkrCategoryResource, list);
 page_iterator_without_id!(ListOkrCycleIterator, Cycle, OkrCycleResource, list);
 page_iterator_with_id!(
     ListOkrCycleObjectiveIterator,
     Objective,
     OkrCycleObjectiveResource,
-    list
+    list_with_draft,
+    draft
 );
 page_iterator_with_id!(
     ListOkrKeyResultProgressIterator,
@@ -1159,13 +1259,15 @@ page_iterator_with_id!(
     ListOkrObjectiveAlignmentIterator,
     Alignment,
     OkrObjectiveAlignmentResource,
-    list
+    list_with_draft,
+    draft
 );
 page_iterator_with_id!(
     ListOkrObjectiveKeyResultIterator,
     KeyResult,
     OkrObjectiveKeyResultResource,
-    list
+    list_with_draft,
+    draft
 );
 page_iterator_with_id!(
     ListOkrObjectiveProgressIterator,

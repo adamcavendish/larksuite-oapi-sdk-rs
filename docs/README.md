@@ -62,4 +62,5 @@ examples, features, and coverage.
   updates, and version-history operations with user or bot credentials.
 - [Slides AI presentation content](slides-ai.md) covers XML presentation,
   slide image, and version-history operations with user or bot credentials.
+- [OKR draft reads](okr-drafts.md) covers explicit draft views and pagination.
 - [Examples](../examples/README.md) contains runnable service workflows.
