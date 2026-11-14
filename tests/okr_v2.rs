@@ -180,6 +180,7 @@ async fn okr_v2_exposes_every_go_resource_route() {
         .unwrap();
 
     let requests = requests.lock().unwrap().join("\n");
+    assert!(!requests.contains("prefer_draft"));
     for path in [
         "/open-apis/okr/v2/alignments/align-1",
         "/open-apis/okr/v2/categories",
@@ -241,4 +242,291 @@ async fn okr_v2_iterators_resume_from_page_token() {
             .join("\n")
             .contains("page_token=next")
     );
+}
+
+// The wire contract distinguishes an omitted draft choice from explicit false.
+#[tokio::test]
+async fn okr_draft_lists_preserve_optional_query() {
+    for choice in [None, Some(false), Some(true)] {
+        let ok = http_response(
+            200,
+            r#"{"code":0,"data":{"indicator":{"indicator_id":"i"}}}"#,
+        );
+        let (addr, _handle, requests) = mock_server_with_requests(vec![ok; 5]).await;
+        let client = client_for(addr);
+        let okr = client.okr_v2();
+        let option = if choice == Some(true) {
+            RequestOption {
+                user_access_token: Some("user-token".into()),
+                ..Default::default()
+            }
+        } else {
+            tenant_option()
+        };
+        let page = OkrPageQuery::new().page_size(Some(2));
+        okr.okr_cycle_objective
+            .list_with_draft("c", &page, choice, &option)
+            .await
+            .unwrap();
+        okr.okr_objective_alignment
+            .list_with_draft("o", &page, choice, &option)
+            .await
+            .unwrap();
+        okr.okr_objective_key_result
+            .list_with_draft("o", &page, choice, &option)
+            .await
+            .unwrap();
+        assert!(
+            okr.okr_key_result_indicator
+                .list_with_draft("k", choice, &option)
+                .await
+                .unwrap()
+                .data
+                .unwrap()
+                .indicator
+                .is_some()
+        );
+        assert!(
+            okr.okr_objective_indicator
+                .list_with_draft("o", choice, &option)
+                .await
+                .unwrap()
+                .data
+                .unwrap()
+                .indicator
+                .is_some()
+        );
+        let requests = requests.lock().unwrap();
+        assert_eq!(requests.len(), 5);
+        for (request, path) in requests.iter().zip([
+            "/cycles/c/objectives",
+            "/objectives/o/alignments",
+            "/objectives/o/key_results",
+            "/key_results/k/indicators",
+            "/objectives/o/indicators",
+        ]) {
+            let line = request.lines().next().unwrap();
+            assert!(line.starts_with("GET "));
+            assert!(line.contains(path));
+            match choice {
+                None => assert!(!line.contains("prefer_draft")),
+                Some(value) => assert!(line.contains(&format!("prefer_draft={value}"))),
+            }
+            assert!(
+                request
+                    .to_ascii_lowercase()
+                    .contains(if choice == Some(true) {
+                        "authorization: bearer user-token"
+                    } else {
+                        "authorization: bearer tenant-token"
+                    })
+            );
+        }
+    }
+}
+
+#[tokio::test]
+async fn cycle_objective_draft_iterator_keeps_choice_across_pages() {
+    for choice in [None, Some(false), Some(true)] {
+        let first = http_response(
+            200,
+            r#"{"code":0,"data":{"items":[{"objective_id":"one"}],"page_token":"next","has_more":true}}"#,
+        );
+        let second = http_response(
+            200,
+            r#"{"code":0,"data":{"items":[{"objective_id":"two"}],"has_more":false}}"#,
+        );
+        let (addr, _handle, requests) = mock_server_with_requests(vec![first, second]).await;
+        let client = client_for(addr);
+        let okr = client.okr_v2();
+        let page = OkrPageQuery::new()
+            .page_size(Some(1))
+            .page_token(Some("start"))
+            .user_id(Some("user"))
+            .user_id_type(Some("open_id"));
+        let mut iterator = match choice {
+            None => okr.okr_cycle_objective.list_by_iterator("c", &page),
+            _ => okr
+                .okr_cycle_objective
+                .list_by_iterator_with_draft("c", &page, choice),
+        };
+        let option = tenant_option();
+        assert_eq!(
+            iterator
+                .next(&option)
+                .await
+                .unwrap()
+                .unwrap()
+                .objective_id
+                .as_deref(),
+            Some("one")
+        );
+        assert_eq!(
+            iterator
+                .next(&option)
+                .await
+                .unwrap()
+                .unwrap()
+                .objective_id
+                .as_deref(),
+            Some("two")
+        );
+        assert!(iterator.next(&option).await.unwrap().is_none());
+        let requests = requests.lock().unwrap();
+        assert_eq!(requests.len(), 2);
+        for (request, token) in requests.iter().zip(["start", "next"]) {
+            let line = request.lines().next().unwrap();
+            for value in ["page_size=1", "user_id=user", "user_id_type=open_id"] {
+                assert!(line.contains(value));
+            }
+            assert!(line.contains(&format!("page_token={token}")));
+            match choice {
+                None => assert!(!line.contains("prefer_draft")),
+                Some(value) => assert!(line.contains(&format!("prefer_draft={value}"))),
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn objective_alignment_draft_iterator_keeps_choice_across_pages() {
+    for choice in [None, Some(false), Some(true)] {
+        let first = http_response(
+            200,
+            r#"{"code":0,"data":{"items":[{"alignment_id":"one"}],"page_token":"next","has_more":true}}"#,
+        );
+        let second = http_response(
+            200,
+            r#"{"code":0,"data":{"items":[{"alignment_id":"two"}],"has_more":false}}"#,
+        );
+        let (addr, _handle, requests) = mock_server_with_requests(vec![first, second]).await;
+        let client = client_for(addr);
+        let okr = client.okr_v2();
+        let page = OkrPageQuery::new()
+            .page_size(Some(1))
+            .page_token(Some("start"))
+            .user_id(Some("user"))
+            .user_id_type(Some("open_id"));
+        let mut iterator = match choice {
+            None => okr.okr_objective_alignment.list_by_iterator("o", &page),
+            _ => okr
+                .okr_objective_alignment
+                .list_by_iterator_with_draft("o", &page, choice),
+        };
+        let option = tenant_option();
+        assert_eq!(
+            iterator
+                .next(&option)
+                .await
+                .unwrap()
+                .unwrap()
+                .alignment_id
+                .as_deref(),
+            Some("one")
+        );
+        assert_eq!(
+            iterator
+                .next(&option)
+                .await
+                .unwrap()
+                .unwrap()
+                .alignment_id
+                .as_deref(),
+            Some("two")
+        );
+        assert!(iterator.next(&option).await.unwrap().is_none());
+        let requests = requests.lock().unwrap();
+        assert_eq!(requests.len(), 2);
+        for (request, token) in requests.iter().zip(["start", "next"]) {
+            let line = request.lines().next().unwrap();
+            for value in ["page_size=1", "user_id=user", "user_id_type=open_id"] {
+                assert!(line.contains(value));
+            }
+            assert!(line.contains(&format!("page_token={token}")));
+            match choice {
+                None => assert!(!line.contains("prefer_draft")),
+                Some(value) => assert!(line.contains(&format!("prefer_draft={value}"))),
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn objective_key_result_draft_iterator_keeps_choice_across_pages() {
+    for choice in [None, Some(false), Some(true)] {
+        let first = http_response(
+            200,
+            r#"{"code":0,"data":{"items":[{"key_result_id":"one"}],"page_token":"next","has_more":true}}"#,
+        );
+        let second = http_response(
+            200,
+            r#"{"code":0,"data":{"items":[{"key_result_id":"two"}],"has_more":false}}"#,
+        );
+        let (addr, _handle, requests) = mock_server_with_requests(vec![first, second]).await;
+        let client = client_for(addr);
+        let okr = client.okr_v2();
+        let page = OkrPageQuery::new()
+            .page_size(Some(1))
+            .page_token(Some("start"))
+            .user_id(Some("user"))
+            .user_id_type(Some("open_id"));
+        let mut iterator = match choice {
+            None => okr.okr_objective_key_result.list_by_iterator("o", &page),
+            _ => okr
+                .okr_objective_key_result
+                .list_by_iterator_with_draft("o", &page, choice),
+        };
+        let option = tenant_option();
+        assert_eq!(
+            iterator
+                .next(&option)
+                .await
+                .unwrap()
+                .unwrap()
+                .key_result_id
+                .as_deref(),
+            Some("one")
+        );
+        assert_eq!(
+            iterator
+                .next(&option)
+                .await
+                .unwrap()
+                .unwrap()
+                .key_result_id
+                .as_deref(),
+            Some("two")
+        );
+        assert!(iterator.next(&option).await.unwrap().is_none());
+        let requests = requests.lock().unwrap();
+        assert_eq!(requests.len(), 2);
+        for (request, token) in requests.iter().zip(["start", "next"]) {
+            let line = request.lines().next().unwrap();
+            for value in ["page_size=1", "user_id=user", "user_id_type=open_id"] {
+                assert!(line.contains(value));
+            }
+            assert!(line.contains(&format!("page_token={token}")));
+            match choice {
+                None => assert!(!line.contains("prefer_draft")),
+                Some(value) => assert!(line.contains(&format!("prefer_draft={value}"))),
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn okr_draft_list_preserves_service_errors() {
+    let (addr, _handle, _) = mock_server_with_requests(vec![http_response(
+        200,
+        r#"{"code":99991672,"msg":"draft access denied"}"#,
+    )])
+    .await;
+    let client = client_for(addr);
+    let error = client
+        .okr_v2()
+        .okr_objective_indicator
+        .list_with_draft("o", Some(true), &tenant_option())
+        .await
+        .unwrap_err();
+    assert!(error.to_string().contains("draft access denied"));
 }
