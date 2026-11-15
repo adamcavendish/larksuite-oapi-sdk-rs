@@ -52,11 +52,27 @@ just go-rust-service-parity-check
 ```
 
 `tools/go_rust_service_parity.json` compares the Go catalog with Rust's literal
-and `format!`-based `RestRequest` wiring, supported macro-generated request
-methods, and the GoCompatibility bridge. It classifies matches, bridge matches,
-metadata mismatches, missing Go contracts, and unsupported request templates.
+and `format!`-based `RestRequest` wiring, forwarding request helpers, supported
+macro-generated request methods, and the GoCompatibility bridge. It classifies
+matches, bridge matches, metadata mismatches, missing Go contracts, and unsupported
+request templates.
 It is a deterministic request-contract baseline, not a generator for Rust
 resource implementations.
+
+Forwarding helpers are identified from their `RestRequest::new` construction,
+including method/path parameter positions and literal access-token metadata.
+Zero-argument token helpers whose entire body is a literal token vector are also
+read from their definitions.
+Recognition does not depend on the helper name or service file name. The scanner
+also follows module imports (including grouped imports, aliases, and glob imports)
+when a free helper stays in a parent module and resource methods move to a child
+file. A `mod.rs` file is scanned like other service source files.
+
+The supported helper form contains one constructor and forwards method, path or
+token parameters directly. Method helpers are resolved within their local
+`impl` type. Dynamic metadata in recognized calls is reported as unparsed rather
+than assigned default token types. This remains a source-pattern scanner, not a
+complete Rust name resolver or interpreter.
 
 ## Typed webhook catalog
 

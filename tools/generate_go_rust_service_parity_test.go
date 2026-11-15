@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -144,7 +145,7 @@ macro_rules! external_resource {
 	}
 }
 
-func TestExtractRustContractsSkipsBaseV3RequestHelper(t *testing.T) {
+func TestExtractRustContractsDoesNotInventRoutesForUnusedHelpers(t *testing.T) {
 	source := `
 async fn request(method: http::Method) {
     RestRequest::new(
@@ -289,5 +290,224 @@ func TestSparkSessionContractsAreParsed(t *testing.T) {
 	}
 	if len(want) != 0 {
 		t.Fatalf("missing session contracts: %#v", want)
+	}
+}
+
+func TestRequestHelperMetadataSurvivesRelocationAndRename(t *testing.T) {
+	source := `
+fn build_call<'a>(config: &'a Config, path: impl Into<String>, verb: http::Method, option: &'a RequestOption) -> RestRequest<'a> {
+    RestRequest::new(config, verb, path, vec![AccessTokenType::User], option)
+}
+impl Resource<'_> {
+    pub async fn get(&self, option: &RequestOption) {
+        build_call(self.config, "/open-apis/example/v1/items", http::Method::GET, option).send().await
+    }
+}
+`
+	for _, path := range []string{"src/service/example/v1.rs", "src/service/example/v1/mod.rs", "src/service/example/v1/resources.rs"} {
+		contracts, unparsed := extractRustContracts(path, source)
+		if len(unparsed) != 0 || len(contracts) != 1 {
+			t.Fatalf("%s: contracts=%#v unparsed=%#v", path, contracts, unparsed)
+		}
+		c := contracts[0]
+		if c.SourceFile != path || c.Function != "get" || c.Method != "GET" || c.Path != "/open-apis/example/v1/items" || !equalTokenTypes(c.TokenTypes, []string{"User"}) {
+			t.Fatalf("%s: wrong contract %#v", path, c)
+		}
+	}
+}
+
+func TestCurrentOkrContractsSurviveRelocation(t *testing.T) {
+	source, err := os.ReadFile("../src/service/okr/v2.rs")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{"src/service/okr/v2.rs", "src/service/okr/v2/resources.rs"} {
+		contracts, unparsed := extractRustContracts(path, string(source))
+		if len(contracts) != 32 || len(unparsed) != 0 {
+			t.Fatalf("%s: contracts=%d unparsed=%#v", path, len(contracts), unparsed)
+		}
+	}
+}
+
+func TestRequestHelperTokenParameterIsNotHardcoded(t *testing.T) {
+	source := `
+fn dispatch(config: &Config, method: http::Method, path: &str, tokens: Vec<AccessTokenType>, option: &RequestOption) -> RestRequest<'_> {
+    RestRequest::new(config, method, path, tokens, option)
+}
+async fn create() {
+    dispatch(config, http::Method::POST, "/open-apis/example/v1/items", vec![AccessTokenType::Tenant], option).file_upload().send().await;
+}
+`
+	contracts, unparsed := extractRustContracts("src/service/example.rs", source)
+	if len(contracts) != 1 || len(unparsed) != 0 {
+		t.Fatalf("contracts=%#v unparsed=%#v", contracts, unparsed)
+	}
+	if !equalTokenTypes(contracts[0].TokenTypes, []string{"Tenant"}) || !contracts[0].FileUpload {
+		t.Fatalf("wrong metadata: %#v", contracts[0])
+	}
+}
+
+func TestRequestHelperKeepsUnresolvedCallVisible(t *testing.T) {
+	source := `
+fn build_request(config: &Config, method: http::Method, path: &str, option: &RequestOption) -> RestRequest<'_> {
+    RestRequest::new(config, method, path, vec![AccessTokenType::Tenant], option)
+}
+async fn create() {
+    build_request(config, verb, path_from_runtime, option).send().await;
+}
+`
+	contracts, unparsed := extractRustContracts("src/service/example.rs", source)
+	if len(contracts) != 0 || len(unparsed) != 1 || unparsed[0].Function != "create" {
+		t.Fatalf("contracts=%#v unparsed=%#v", contracts, unparsed)
+	}
+}
+
+func TestRequestHelpersResolveAcrossSplitModules(t *testing.T) {
+	for _, importLine := range []string{"use super::build_request;", "use super::{build_request, Resource};", "use super::build_request as dispatch;", "use super::*;"} {
+		t.Run(importLine, func(t *testing.T) {
+			root := t.TempDir()
+			dir := filepath.Join(root, "src", "service", "example", "v1")
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				t.Fatal(err)
+			}
+			helper := `pub(super) fn build_request(config: &Config, method: http::Method, path: &str, option: &RequestOption) -> RestRequest<'_> {
+                RestRequest::new(config, method, path, vec![AccessTokenType::User], option)
+            }`
+			name := "build_request"
+			if strings.Contains(importLine, " as ") {
+				name = "dispatch"
+			}
+			caller := importLine + `
+impl Resource<'_> {
+                pub async fn get(&self, option: &RequestOption) {
+                    ` + name + `(self.config, http::Method::GET, "/open-apis/example/v1/items", option).send().await
+                }
+            }`
+			for name, source := range map[string]string{"mod.rs": helper, "resources.rs": caller} {
+				if err := os.WriteFile(filepath.Join(dir, name), []byte(source), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			contracts, unparsed, err := rustServiceContracts(root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(contracts) != 1 || len(unparsed) != 0 {
+				t.Fatalf("contracts=%#v unparsed=%#v", contracts, unparsed)
+			}
+			if contracts[0].Function != "get" || !equalTokenTypes(contracts[0].TokenTypes, []string{"User"}) {
+				t.Fatalf("wrong contract: %#v", contracts[0])
+			}
+		})
+	}
+}
+
+func TestMethodRequestHelpersKeepReceiverScopesSeparate(t *testing.T) {
+	source := `
+impl First {
+    fn request(&self, method: http::Method) { RestRequest::new(config,method,"/first",vec![AccessTokenType::Tenant],option) }
+    async fn get(&self) { self.request(http::Method::GET).send().await; }
+}
+impl Second {
+    fn request(&self, method: http::Method) { RestRequest::new(config,method,"/second",vec![AccessTokenType::User],option) }
+    async fn get(&self) { self.request(http::Method::GET).send().await; }
+}`
+	contracts, unparsed := extractRustContracts("src/service/example.rs", source)
+	if len(contracts) != 2 || len(unparsed) != 0 {
+		t.Fatalf("contracts=%#v unparsed=%#v", contracts, unparsed)
+	}
+	for i, want := range []string{"Tenant", "User"} {
+		if !equalTokenTypes(contracts[i].TokenTypes, []string{want}) {
+			t.Fatalf("wrong receiver metadata: %#v", contracts[i])
+		}
+	}
+}
+
+func TestHelperTokenMetadataMustBeLiteral(t *testing.T) {
+	source := `
+fn build_request(config: &Config, method: http::Method, path: &str, tokens: Vec<AccessTokenType>, option: &RequestOption) -> RestRequest<'_> {
+    RestRequest::new(config, method, path, tokens, option)
+}
+async fn get() { build_request(config, http::Method::GET, "/items", tokens_from_runtime, option).send().await; }
+`
+	contracts, unparsed := extractRustContracts("src/service/example.rs", source)
+	if len(contracts) != 0 || len(unparsed) != 1 || unparsed[0].Reason != "non-literal request helper access token types" {
+		t.Fatalf("contracts=%#v unparsed=%#v", contracts, unparsed)
+	}
+}
+
+func TestHelperRetainsNoAuthAndUploadMetadata(t *testing.T) {
+	source := `
+fn build_request(config: &Config, path: &str, option: &RequestOption) -> RestRequest<'_> {
+    RestRequest::new(config, http::Method::POST, path, vec![AccessTokenType::None], option).file_upload()
+}
+async fn create() { build_request(config, "/items", option).send().await; }
+`
+	contracts, unparsed := extractRustContracts("src/service/example.rs", source)
+	if len(contracts) != 1 || len(unparsed) != 0 {
+		t.Fatalf("contracts=%#v unparsed=%#v", contracts, unparsed)
+	}
+	if len(contracts[0].TokenTypes) != 0 || !contracts[0].FileUpload || contracts[0].Method != "POST" {
+		t.Fatalf("wrong metadata: %#v", contracts[0])
+	}
+}
+
+func TestBaseFieldExtensionHelperCallsAreVisible(t *testing.T) {
+	source, err := os.ReadFile("../src/service/base/v3.rs")
+	if err != nil {
+		t.Fatal(err)
+	}
+	contracts, unparsed := extractRustContracts("src/service/base/v3/resources.rs", string(source))
+	if len(unparsed) != 0 {
+		t.Fatalf("unparsed=%#v", unparsed)
+	}
+	want := map[string]bool{"GET": false, "PUT": false}
+	for _, contract := range contracts {
+		if contract.Path == "/open-apis/base/v3/bases/{}/tables/{}/fields/{}/field_extensions" {
+			if _, ok := want[contract.Method]; !ok {
+				t.Fatalf("unexpected contract: %#v", contract)
+			}
+			if !equalTokenTypes(contract.TokenTypes, []string{"Tenant", "User"}) {
+				t.Fatalf("wrong tokens: %#v", contract)
+			}
+			want[contract.Method] = true
+		}
+	}
+	for method, seen := range want {
+		if !seen {
+			t.Errorf("missing %s field-extension contract", method)
+		}
+	}
+}
+
+func TestDirectRequestMetadataDoesNotGuessDynamicExpressions(t *testing.T) {
+	for _, source := range []string{
+		`async fn get() { RestRequest::new(config, select_method(http::Method::GET), "/items", vec![AccessTokenType::User], option).send().await; }`,
+		`async fn get() { RestRequest::new(config, http::Method::GET, "/items", tokens_from_runtime, option).send().await; }`,
+	} {
+		contracts, unparsed := extractRustContracts("src/service/example.rs", source)
+		if len(contracts) != 0 || len(unparsed) != 1 {
+			t.Fatalf("contracts=%#v unparsed=%#v", contracts, unparsed)
+		}
+	}
+}
+
+func TestTokenListHelpersComeFromTheirDefinitions(t *testing.T) {
+	source := `
+fn auth_modes() -> Vec<AccessTokenType> { vec![AccessTokenType::User] }
+fn dispatch(config: &Config, method: http::Method, path: &str, option: &RequestOption) -> RestRequest<'_> {
+    RestRequest::new(config,method,path,auth_modes(),option)
+}
+async fn direct() { RestRequest::new(config,http::Method::GET,"/direct",auth_modes(),option).send().await; }
+async fn forwarded() { dispatch(config,http::Method::POST,"/forwarded",option).send().await; }
+`
+	contracts, unparsed := extractRustContracts("src/service/example/moved.rs", source)
+	if len(contracts) != 2 || len(unparsed) != 0 {
+		t.Fatalf("contracts=%#v unparsed=%#v", contracts, unparsed)
+	}
+	for _, contract := range contracts {
+		if !equalTokenTypes(contract.TokenTypes, []string{"User"}) {
+			t.Fatalf("wrong tokens: %#v", contract)
+		}
 	}
 }
