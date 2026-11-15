@@ -2,11 +2,6 @@
 //!
 //! Cloud sessions use `session` with a user token. See `examples/spark_sessions.rs`
 //! for queue-aware polling; a finished turn does not imply publication.
-//!
-#![doc = include_str!("../../../docs/spark-app-export.md")]
-#![doc = include_str!("../../../docs/spark-apps.md")]
-#![doc = include_str!("../../../docs/spark-sessions.md")]
-#![doc = include_str!("../../../docs/spark-features.md")]
 
 use crate::config::Config;
 use crate::constants::AccessTokenType;
