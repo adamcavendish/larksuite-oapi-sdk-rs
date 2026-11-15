@@ -112,6 +112,7 @@ type parityReport struct {
 
 var functionStart = regexp.MustCompile(`(?m)^\s*(pub(\([^)]*\))?\s+)?(async\s+)?fn\s+([A-Za-z_][A-Za-z0-9_]*)\s*`)
 var methodPattern = regexp.MustCompile(`http::Method::([A-Za-z]+)`)
+var literalMethod = regexp.MustCompile(`^http::Method::([A-Za-z]+)$`)
 var tokenPattern = regexp.MustCompile(`AccessTokenType::([A-Za-z]+)`)
 var pathVariablePattern = regexp.MustCompile(`(?s)let\s+(mut\s+)?path\s*=\s*(.*?);`)
 var macroInvocationStart = regexp.MustCompile(`(?m)^\s*(post_method|post_method_with_tokens|get_method|post_query|external_crud_resource)!\s*\(`)
@@ -296,6 +297,7 @@ func rustServiceContracts(rustSDK string) ([]rustEndpoint, []unparsedRustRequest
 	serviceRoot := filepath.Join(rustSDK, "src", "service")
 	var contracts []rustEndpoint
 	var unparsed []unparsedRustRequest
+	sources := make(map[string]string)
 	err := filepath.WalkDir(serviceRoot, func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -311,14 +313,36 @@ func rustServiceContracts(rustSDK string) ([]rustEndpoint, []unparsedRustRequest
 		if err != nil {
 			return err
 		}
-		parsed, unresolved := extractRustContracts(filepath.ToSlash(relative), string(source))
-		contracts = append(contracts, parsed...)
-		unparsed = append(unparsed, unresolved...)
+		sources[filepath.ToSlash(relative)] = string(source)
 		return nil
 	})
 	if err != nil {
 		return nil, nil, fmt.Errorf("read Rust service contracts: %w", err)
 	}
+	helpers := make(map[string]rustRequestHelper)
+	files := make([]string, 0, len(sources))
+	for file := range sources {
+		files = append(files, file)
+	}
+	sort.Strings(files)
+	for _, file := range files {
+		source := sources[file]
+		functions := rustFunctions(source, macroRuleRanges(source))
+		tokenHelpers := rustTokenHelpers(source, functions)
+		for _, function := range functions {
+			if function.owner == "" {
+				if helper, ok := requestHelper(source, function, tokenHelpers); ok {
+					helpers[rustModulePath(file)+"::"+function.name] = helper
+				}
+			}
+		}
+	}
+	for _, file := range files {
+		parsed, unresolved := extractRustContractsWithHelpers(file, sources[file], helpers)
+		contracts = append(contracts, parsed...)
+		unparsed = append(unparsed, unresolved...)
+	}
+
 	sort.Slice(contracts, func(i, j int) bool {
 		if contracts[i].SourceFile != contracts[j].SourceFile {
 			return contracts[i].SourceFile < contracts[j].SourceFile
@@ -330,79 +354,319 @@ func rustServiceContracts(rustSDK string) ([]rustEndpoint, []unparsedRustRequest
 
 func excludedServiceFile(path string) bool {
 	name := filepath.Base(path)
-	return name == "common.rs" || name == "go_compatibility.rs" || name == "go_compatibility_metadata.rs" || name == "mod.rs"
+	return name == "common.rs" || name == "go_compatibility.rs" || name == "go_compatibility_metadata.rs"
 }
 
-func extractRustContracts(sourceFile, source string) ([]rustEndpoint, []unparsedRustRequest) {
-	var contracts []rustEndpoint
-	var unparsed []unparsedRustRequest
-	macroDefinitions := macroRuleRanges(source)
+type rustFunction struct {
+	name       string
+	owner      string
+	parameters []string
+	bodyStart  int
+	bodyEnd    int
+}
+
+type rustRequestHelper struct {
+	function rustFunction
+	args     []string
+	bindings map[int]int // RestRequest argument -> helper parameter.
+	upload   bool
+}
+
+var implStart = regexp.MustCompile(`\bimpl(?:<[^>]*>)?\s+([A-Za-z_][A-Za-z0-9_]*)[^{};]*\{`)
+var rustCallStart = regexp.MustCompile(`\b[A-Za-z_][A-Za-z0-9_]*(?:(?:::|\.)[A-Za-z_][A-Za-z0-9_]*)*\s*\(`)
+var literalTokenTypes = regexp.MustCompile(`(?s)^vec!\[\s*(?:AccessTokenType::[A-Za-z]+\s*,\s*)*(?:AccessTokenType::[A-Za-z]+\s*)?\]$`)
+
+func rustFunctions(source string, macroDefinitions []sourceRange) []rustFunction {
+	var functions []rustFunction
+	type implScope struct {
+		owner      string
+		start, end int
+	}
+	var scopes []implScope
+	for _, match := range implStart.FindAllStringSubmatchIndex(source, -1) {
+		if inSourceRanges(match[0], macroDefinitions) {
+			continue
+		}
+		if end, ok := matchingDelimiter(source, match[1]-1, '{', '}'); ok {
+			scopes = append(scopes, implScope{source[match[2]:match[3]], match[1] - 1, end})
+		}
+	}
 	for _, match := range functionStart.FindAllStringSubmatchIndex(source, -1) {
 		if inSourceRanges(match[0], macroDefinitions) {
 			continue
 		}
-		function := source[match[8]:match[9]]
-		// The local request helpers in OKR v2 and Base v3 centralize operations
-		// whose callers carry literal contract metadata. Their own RestRequest
-		// constructions use variable methods and must not be reported as direct
-		// endpoint contracts.
-		if (sourceFile == "src/service/okr/v2.rs" || sourceFile == "src/service/base/v3.rs") && function == "request" {
-			continue
-		}
-		open := strings.Index(source[match[1]:], "{")
-		if open < 0 {
-			continue
-		}
-		open += match[1]
-		close, ok := matchingDelimiter(source, open, '{', '}')
+		parametersStart := strings.Index(source[match[1]:], "(") + match[1]
+		parametersEnd, ok := matchingDelimiter(source, parametersStart, '(', ')')
 		if !ok {
 			continue
 		}
-		body := source[open : close+1]
-		for offset := 0; ; {
-			index := strings.Index(body[offset:], "RestRequest::new(")
-			if index < 0 {
-				break
-			}
-			callStart := offset + index
-			argsStart := callStart + len("RestRequest::new")
-			closeCall, ok := matchingDelimiter(body, argsStart, '(', ')')
-			line := lineNumber(source, open+callStart)
-			if !ok {
-				unparsed = append(unparsed, unparsedRustRequest{sourceFile, function, line, "unclosed RestRequest::new call"})
-				break
-			}
-			args := splitTopLevel(body[argsStart+1 : closeCall])
-			endpoint, reason := endpointFromRustCall(sourceFile, function, line, body[:callStart], args, body[closeCall:])
-			if reason != "" {
-				unparsed = append(unparsed, unparsedRustRequest{sourceFile, function, line, reason})
-			} else {
-				contracts = append(contracts, endpoint)
-			}
-			offset = closeCall + 1
+		bodyStart := strings.Index(source[parametersEnd+1:], "{")
+		if bodyStart < 0 {
+			continue
 		}
-		if sourceFile == "src/service/okr/v2.rs" {
-			for offset := 0; ; {
-				index := strings.Index(body[offset:], "request(")
-				if index < 0 {
-					break
+		bodyStart += parametersEnd + 1
+		bodyEnd, ok := matchingDelimiter(source, bodyStart, '{', '}')
+		if !ok {
+			continue
+		}
+		function := rustFunction{name: source[match[8]:match[9]], bodyStart: bodyStart, bodyEnd: bodyEnd}
+		for _, parameter := range splitTopLevel(source[parametersStart+1 : parametersEnd]) {
+			if colon := strings.Index(parameter, ":"); colon >= 0 {
+				function.parameters = append(function.parameters, strings.TrimSpace(strings.TrimPrefix(parameter[:colon], "mut ")))
+			}
+		}
+		for _, scope := range scopes {
+			if scope.start < bodyStart && bodyStart < scope.end {
+				function.owner = scope.owner
+			}
+		}
+		functions = append(functions, function)
+	}
+	return functions
+}
+
+func (function rustFunction) key() string {
+	if function.owner != "" {
+		return function.owner + "::" + function.name
+	}
+	return function.name
+}
+
+// Token-list helpers are statically known only when their entire body is a
+// literal vector. Other computations remain unresolved.
+func rustTokenHelpers(source string, functions []rustFunction) map[string]string {
+	helpers := make(map[string]string)
+	for _, function := range functions {
+		body := strings.TrimSpace(source[function.bodyStart+1 : function.bodyEnd])
+		if function.owner == "" && len(function.parameters) == 0 && literalTokenTypes.MatchString(body) {
+			helpers[function.name+"()"] = body
+		}
+	}
+	return helpers
+}
+
+// A helper must forward a method, path or token parameter to one constructor.
+// Metadata literals come from that constructor, never from a service name.
+func requestHelper(source string, function rustFunction, tokenHelpers map[string]string) (rustRequestHelper, bool) {
+	body := source[function.bodyStart : function.bodyEnd+1]
+	const constructor = "RestRequest::new("
+	start := strings.Index(body, constructor)
+	if start < 0 || strings.Count(body, constructor) != 1 {
+		return rustRequestHelper{}, false
+	}
+	open := start + len(constructor) - 1
+	close, ok := matchingDelimiter(body, open, '(', ')')
+	if !ok {
+		return rustRequestHelper{}, false
+	}
+	args := splitTopLevel(body[open+1 : close])
+	if len(args) < 4 {
+		return rustRequestHelper{}, false
+	}
+	if tokens, ok := tokenHelpers[args[3]]; ok {
+		args[3] = tokens
+	}
+	helper := rustRequestHelper{function: function, args: args, bindings: make(map[int]int), upload: rustFileUpload(nextStatement(body[close:]))}
+	for _, argument := range []int{1, 2, 3} {
+		bound := false
+		for index, parameter := range function.parameters {
+			if args[argument] == parameter {
+				helper.bindings[argument] = index
+				bound = true
+				break
+			}
+		}
+		if bound {
+			continue
+		}
+		switch argument {
+		case 1:
+			if !literalMethod.MatchString(args[argument]) {
+				return rustRequestHelper{}, false
+			}
+		case 2:
+			path, ok := rustPath(args[argument], body[:start])
+			if !ok {
+				return rustRequestHelper{}, false
+			}
+			helper.args[argument] = strconv.Quote(path)
+		case 3:
+			if !literalTokenTypes.MatchString(args[argument]) {
+				return rustRequestHelper{}, false
+			}
+		}
+	}
+	return helper, len(helper.bindings) > 0
+}
+
+// Module paths are used only for Rust name resolution, not service-specific rules.
+func rustModulePath(sourceFile string) string {
+	path := strings.TrimSuffix(strings.TrimPrefix(filepath.ToSlash(sourceFile), "src/"), ".rs")
+	path = strings.TrimSuffix(path, "/mod")
+	return strings.ReplaceAll(path, "/", "::")
+}
+
+func resolveRustPath(module, path string) string {
+	parts := strings.Split(path, "::")
+	var prefix []string
+	switch parts[0] {
+	case "crate":
+		parts = parts[1:]
+	case "self":
+		prefix = strings.Split(module, "::")
+		parts = parts[1:]
+	default:
+		prefix = strings.Split(module, "::")
+	}
+	for len(parts) > 0 && parts[0] == "super" {
+		if len(prefix) == 0 {
+			return ""
+		}
+		prefix = prefix[:len(prefix)-1]
+		parts = parts[1:]
+	}
+	return strings.Join(append(prefix, parts...), "::")
+}
+
+var rustUse = regexp.MustCompile(`\buse\s+([^;]+);`)
+
+func rustImports(sourceFile, source string) (map[string]string, []string) {
+	imports := make(map[string]string)
+	var globs []string
+	var add func(string)
+	add = func(path string) {
+		path = strings.TrimSpace(path)
+		if open := strings.Index(path, "{"); open >= 0 {
+			close, ok := matchingDelimiter(path, open, '{', '}')
+			if ok {
+				for _, child := range splitTopLevel(path[open+1 : close]) {
+					if strings.TrimSpace(child) != "" {
+						add(path[:open] + strings.TrimSpace(child))
+					}
 				}
-				callStart := offset + index
-				argsStart := callStart + len("request")
-				closeCall, ok := matchingDelimiter(body, argsStart, '(', ')')
-				line := lineNumber(source, open+callStart)
-				if !ok {
-					unparsed = append(unparsed, unparsedRustRequest{sourceFile, function, line, "unclosed OKR v2 request helper call"})
-					break
+			}
+			return
+		}
+		alias := ""
+		if parts := strings.Split(path, " as "); len(parts) == 2 {
+			path, alias = strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+		}
+		qualified := resolveRustPath(rustModulePath(sourceFile), path)
+		if strings.HasSuffix(qualified, "::*") {
+			globs = append(globs, strings.TrimSuffix(qualified, "::*"))
+			return
+		}
+		if alias == "" {
+			parts := strings.Split(qualified, "::")
+			alias = parts[len(parts)-1]
+		}
+		imports[alias] = qualified
+	}
+	for _, match := range rustUse.FindAllStringSubmatch(source, -1) {
+		add(match[1])
+	}
+	return imports, globs
+}
+
+func importedRequestHelper(sourceFile, name string, imports map[string]string, globs []string, helpers map[string]rustRequestHelper) (rustRequestHelper, bool) {
+	parts := strings.Split(name, "::")
+	if path, ok := imports[parts[0]]; ok {
+		if len(parts) > 1 {
+			path += "::" + strings.Join(parts[1:], "::")
+		}
+		helper, found := helpers[path]
+		return helper, found
+	}
+	if helper, ok := helpers[resolveRustPath(rustModulePath(sourceFile), name)]; ok {
+		return helper, true
+	}
+	for _, module := range globs {
+		if helper, ok := helpers[module+"::"+name]; ok {
+			return helper, true
+		}
+	}
+	return rustRequestHelper{}, false
+}
+
+func extractRustContracts(sourceFile, source string) ([]rustEndpoint, []unparsedRustRequest) {
+	return extractRustContractsWithHelpers(sourceFile, source, nil)
+}
+
+func extractRustContractsWithHelpers(sourceFile, source string, importedHelpers map[string]rustRequestHelper) ([]rustEndpoint, []unparsedRustRequest) {
+	var contracts []rustEndpoint
+	var unparsed []unparsedRustRequest
+	macroDefinitions := macroRuleRanges(source)
+	functions := rustFunctions(source, macroDefinitions)
+	tokenHelpers := rustTokenHelpers(source, functions)
+	imports, globs := rustImports(sourceFile, source)
+	helpers := make(map[string]rustRequestHelper)
+	for _, function := range functions {
+		if helper, ok := requestHelper(source, function, tokenHelpers); ok {
+			helpers[function.key()] = helper
+		}
+	}
+	for _, function := range functions {
+		if helper, ok := helpers[function.key()]; ok && helper.function.bodyStart == function.bodyStart {
+			continue
+		}
+		body := source[function.bodyStart : function.bodyEnd+1]
+		for _, call := range rustCallStart.FindAllStringIndex(body, -1) {
+			open := call[1] - 1
+			name := strings.TrimSpace(body[call[0]:open])
+			key := name
+			if strings.HasPrefix(name, "self.") {
+				key = function.owner + "::" + strings.TrimPrefix(name, "self.")
+			} else if strings.HasPrefix(name, "Self::") {
+				key = function.owner + "::" + strings.TrimPrefix(name, "Self::")
+			}
+			helper, isHelper := helpers[key]
+			if !isHelper {
+				helper, isHelper = importedRequestHelper(sourceFile, name, imports, globs, importedHelpers)
+			}
+			if name != "RestRequest::new" && !isHelper {
+				continue
+			}
+			line := lineNumber(source, function.bodyStart+call[0])
+			close, ok := matchingDelimiter(body, open, '(', ')')
+			if !ok {
+				unparsed = append(unparsed, unparsedRustRequest{sourceFile, function.name, line, "unclosed request call"})
+				continue
+			}
+			args := splitTopLevel(body[open+1 : close])
+			upload := false
+			reason := ""
+			if isHelper {
+				resolved := append([]string(nil), helper.args...)
+				for argument, parameter := range helper.bindings {
+					if parameter >= len(args) || strings.TrimSpace(args[parameter]) == "" {
+						reason = "request helper call has too few arguments"
+						break
+					}
+					resolved[argument] = args[parameter]
 				}
-				args := splitTopLevel(body[argsStart+1 : closeCall])
-				endpoint, reason := endpointFromOkrV2Call(sourceFile, function, line, body[:callStart], args, body[closeCall:])
-				if reason != "" {
-					unparsed = append(unparsed, unparsedRustRequest{sourceFile, function, line, reason})
-				} else {
-					contracts = append(contracts, endpoint)
+				args = resolved
+				if tokens, ok := tokenHelpers[args[3]]; ok {
+					args[3] = tokens
 				}
-				offset = closeCall + 1
+				if reason == "" && !literalTokenTypes.MatchString(args[3]) {
+					reason = "non-literal request helper access token types"
+				}
+				upload = helper.upload
+			}
+			var endpoint rustEndpoint
+			if len(args) >= 4 {
+				if tokens, ok := tokenHelpers[args[3]]; ok {
+					args[3] = tokens
+				}
+			}
+			if reason == "" {
+				endpoint, reason = endpointFromRustCall(sourceFile, function.name, line, body[:call[0]], args, body[close:])
+			}
+			if reason != "" {
+				unparsed = append(unparsed, unparsedRustRequest{sourceFile, function.name, line, reason})
+			} else {
+				endpoint.FileUpload = endpoint.FileUpload || upload
+				contracts = append(contracts, endpoint)
 			}
 		}
 	}
@@ -410,29 +674,6 @@ func extractRustContracts(sourceFile, source string) ([]rustEndpoint, []unparsed
 	contracts = append(contracts, macroContracts...)
 	unparsed = append(unparsed, macroUnparsed...)
 	return contracts, unparsed
-}
-
-func endpointFromOkrV2Call(sourceFile, function string, line int, prefix string, args []string, suffix string) (rustEndpoint, string) {
-	if len(args) < 4 {
-		return rustEndpoint{}, "OKR v2 request helper has fewer than four arguments"
-	}
-	methodMatch := methodPattern.FindStringSubmatch(args[1])
-	if len(methodMatch) != 2 {
-		return rustEndpoint{}, "non-literal OKR v2 HTTP method"
-	}
-	path, ok := rustPath(args[2], prefix)
-	if !ok {
-		return rustEndpoint{}, "non-literal OKR v2 request path"
-	}
-	return rustEndpoint{
-		SourceFile: sourceFile,
-		Function:   function,
-		Line:       line,
-		Method:     strings.ToUpper(methodMatch[1]),
-		Path:       path,
-		TokenTypes: []string{"Tenant", "User"},
-		FileUpload: rustFileUpload(nextStatement(suffix)),
-	}, ""
 }
 
 func macroRuleRanges(source string) []sourceRange {
@@ -544,13 +785,16 @@ func endpointFromRustCall(sourceFile, function string, line int, prefix string, 
 	if len(args) < 4 {
 		return rustEndpoint{}, "RestRequest::new has fewer than four arguments"
 	}
-	methodMatch := methodPattern.FindStringSubmatch(args[1])
+	methodMatch := literalMethod.FindStringSubmatch(args[1])
 	if len(methodMatch) != 2 {
 		return rustEndpoint{}, "non-literal HTTP method"
 	}
 	path, ok := rustPath(args[2], prefix)
 	if !ok {
 		return rustEndpoint{}, "non-literal request path"
+	}
+	if !literalTokenTypes.MatchString(args[3]) {
+		return rustEndpoint{}, "non-literal access token types"
 	}
 	return rustEndpoint{
 		SourceFile: sourceFile,
