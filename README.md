@@ -139,6 +139,7 @@ requests connect directly. WebSocket connections use their separate connector.
 | Read or update modern Docx content | [`examples/docs_ai_fetch.rs`](examples/docs_ai_fetch.rs) and [Docs AI document content](docs/docs-ai.md) |
 | Read, edit, or render Slides AI presentations | [`examples/slides_ai_read.rs`](examples/slides_ai_read.rs), [`examples/slides_ai_render.rs`](examples/slides_ai_render.rs), and [Slides AI presentation content](docs/slides-ai.md) |
 | Exchange or refresh OAuth tokens | [`examples/authen_oauth.rs`](examples/authen_oauth.rs) and [OAuth SSO guide](docs/oauth-sso.md) |
+| Use marketplace ClientAssertion authentication | [Marketplace ClientAssertion guide](docs/marketplace-client-assertion.md) |
 | Join a shared calendar event | [Events, WebSockets, and channels](docs/events-and-channels.md#calendar-share-token-joins) |
 | Receive webhook events | [`examples/event_handler.rs`](examples/event_handler.rs) |
 | Send a validated interactive card | [`examples/card_send.rs`](examples/card_send.rs) and [Cards guide](docs/cards.md) |
@@ -177,6 +178,8 @@ and [the event example](examples/event_handler.rs).
   dispatch, long connections, trusted user channels, replies, and updates.
 - [OAuth SSO](docs/oauth-sso.md): Feishu and Lark browser login, PKCE, token
   refresh, and application-owned session handling.
+- [Marketplace ClientAssertion](docs/marketplace-client-assertion.md):
+  app-secret-free tenant-token exchange with caller-owned signing.
 - [DPoP](docs/dpop.md): opt-in proof modes, token bindings, key stores,
   registration polling, rotation, and bounded clock correction.
 - [VC meeting bots](docs/vc-bots.md): event queries and outbound meeting join,

@@ -220,6 +220,87 @@ async fn transport_client_assertion_restores_dpop_binding_automatically() {
 }
 
 #[tokio::test]
+async fn marketplace_client_assertion_requires_manual_token_when_cache_disabled() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(
+        200,
+        r#"{"code":0,"access_token":"isv-token","expires_in":7200,"token_type":"Bearer"}"#,
+    )])
+    .await;
+    let client = LarkClient::builder("app", "")
+        .base_url(format!("http://{addr}"))
+        .oauth_base_url(format!("http://{addr}"))
+        .marketplace()
+        .disable_token_cache()
+        .client_assertion_provider(Arc::new(DPoPAssertion))
+        .build()
+        .unwrap();
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+    let option = RequestOption {
+        tenant_key: Some("tenant-a".into()),
+        ..Default::default()
+    };
+
+    let err = client.raw_request(&api_req, &option).await.unwrap_err();
+    assert!(matches!(err, LarkError::IllegalParam(message) if message == "access token is empty"));
+    assert!(requests.lock().unwrap().is_empty());
+
+    let option = RequestOption {
+        tenant_key: Some("tenant-a".into()),
+        tenant_access_token: Some("manual-token".into()),
+        ..Default::default()
+    };
+    assert_eq!(
+        client
+            .raw_request(&api_req, &option)
+            .await
+            .unwrap()
+            .status_code,
+        200
+    );
+    assert!(
+        requests.lock().unwrap()[0]
+            .to_ascii_lowercase()
+            .contains("authorization: bearer manual-token")
+    );
+}
+
+#[tokio::test]
+async fn marketplace_client_assertion_skips_app_ticket_resend() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(
+            200,
+            r#"{"code":0,"access_token":"isv-token","expires_in":7200,"token_type":"Bearer"}"#,
+        ),
+        http_response(200, r#"{"code":10012,"msg":"app ticket invalid"}"#),
+    ])
+    .await;
+    let client = LarkClient::builder("app", "")
+        .base_url(format!("http://{addr}"))
+        .oauth_base_url(format!("http://{addr}"))
+        .marketplace()
+        .client_assertion_provider(Arc::new(DPoPAssertion))
+        .build()
+        .unwrap();
+    let mut api_req = ApiReq::new(http::Method::GET, "/open-apis/test");
+    api_req.supported_access_token_types = vec![AccessTokenType::Tenant];
+    let option = RequestOption {
+        tenant_key: Some("tenant-a".into()),
+        ..Default::default()
+    };
+
+    let response = client.raw_request(&api_req, &option).await.unwrap();
+    assert_eq!(response.status_code, 200);
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 2);
+    assert!(
+        requests
+            .iter()
+            .all(|request| !request.contains("app_ticket/resend"))
+    );
+}
+
+#[tokio::test]
 async fn transport_rejects_conflicting_dpop_headers() {
     let client = client_for("127.0.0.1:1".parse().unwrap());
     let token = "bound-token";

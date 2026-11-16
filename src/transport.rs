@@ -188,24 +188,38 @@ fn validate(config: &Config, api_req: &ApiReq, option: &RequestOption) -> Result
         || option.tenant_access_token.is_some()
         || option.app_access_token.is_some();
 
-    if config.client_assertion_provider.is_some() {
-        if config.app_type == AppType::Marketplace {
-            return Err(LarkError::ClientAssertion(
-                "ClientAssertion mode is not supported for marketplace apps".to_string(),
-            ));
-        }
-    } else if config.app_secret.is_empty() && !has_manual_token {
+    if config.client_assertion_provider.is_none()
+        && config.app_secret.is_empty()
+        && !has_manual_token
+    {
         return Err(LarkError::IllegalParam("app_secret is empty".to_string()));
+    }
+
+    let requires_token = !api_req.supported_access_token_types.is_empty()
+        && !api_req
+            .supported_access_token_types
+            .contains(&AccessTokenType::None);
+    if config.app_type == AppType::Marketplace
+        && config.client_assertion_provider.is_some()
+        && !config.enable_token_cache
+        && requires_token
+        && !has_manual_token
+    {
+        return Err(LarkError::IllegalParam("access token is empty".to_string()));
     }
 
     if config.app_type == AppType::Marketplace {
         let needs_tenant_token = api_req
             .supported_access_token_types
             .contains(&AccessTokenType::Tenant);
-        if needs_tenant_token && option.tenant_key.is_none() && config.enable_token_cache {
-            return Err(LarkError::IllegalParam(
-                "marketplace app requires tenant_key for tenant access token".to_string(),
-            ));
+        if needs_tenant_token
+            && (config.enable_token_cache || config.client_assertion_provider.is_some())
+            && option
+                .tenant_key
+                .as_deref()
+                .is_none_or(|key| key.trim().is_empty())
+        {
+            return Err(LarkError::IllegalParam("tenant key is empty".to_string()));
         }
     }
 
@@ -397,7 +411,10 @@ fn response_retry_error<'a>(
             return None;
         };
 
-        if code_err.code == ERR_CODE_APP_TICKET_INVALID {
+        if code_err.code == ERR_CODE_APP_TICKET_INVALID
+            && !(config.app_type == AppType::Marketplace
+                && config.client_assertion_provider.is_some())
+        {
             let atm = AppTicketManager::new(config.token_cache.clone());
             let _ = atm.apply_app_ticket(config).await;
         }
@@ -591,6 +608,9 @@ async fn resolve_client_assertion_token(
     match token_type {
         AccessTokenType::User => Ok(option.user_access_token.clone()),
         AccessTokenType::Tenant => {
+            if option.tenant_access_token.is_some() {
+                return Ok(option.tenant_access_token.clone());
+            }
             let tm = TokenManager::new(config.token_cache.clone());
             let token = tm
                 .get_tenant_access_token(config, option.tenant_key.as_deref(), None)

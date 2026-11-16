@@ -42,6 +42,7 @@ pub const APP_ACCESS_TOKEN_KEY_PREFIX: &str = "app_access_token";
 pub const TENANT_ACCESS_TOKEN_KEY_PREFIX: &str = "tenant_access_token";
 
 pub const GRANT_TYPE_JWT_BEARER: &str = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+pub const GRANT_TYPE_CLIENT_CREDENTIALS: &str = "client_credentials";
 pub const CLIENT_ASSERTION_TYPE_JWT_BEARER: &str =
     "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
