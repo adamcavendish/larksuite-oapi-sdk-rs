@@ -108,6 +108,141 @@ async fn client_assertion_preserves_non_200_policy_denial() {
     assert_eq!(requests.lock().unwrap().len(), 1);
 }
 
+fn marketplace_assertion_client(
+    addr: std::net::SocketAddr,
+    enable_token_cache: bool,
+) -> LarkClient {
+    let mut builder = LarkClient::builder("app_id", "")
+        .base_url(format!("http://{addr}"))
+        .oauth_base_url(format!("http://{addr}"))
+        .marketplace()
+        .client_assertion_provider(Arc::new(TestAssertion));
+    if !enable_token_cache {
+        builder = builder.disable_token_cache();
+    }
+    builder.build().unwrap()
+}
+
+#[tokio::test]
+async fn marketplace_client_assertion_uses_client_credentials_and_tenant_key() {
+    let response = http_response(
+        200,
+        r#"{"code":0,"access_token":"isv-token","token_type":"Bearer","expires_in":7200}"#,
+    );
+    let (addr, _handle, requests) = mock_server_with_requests(vec![response]).await;
+    let client = marketplace_assertion_client(addr, true);
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+
+    assert_eq!(
+        tm.get_tenant_access_token(client.config(), Some("tenant-a"), None)
+            .await
+            .unwrap(),
+        "isv-token"
+    );
+    assert_eq!(
+        tm.get_tenant_access_token(client.config(), Some("tenant-a"), None)
+            .await
+            .unwrap(),
+        "isv-token"
+    );
+
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 1);
+    assert!(requests[0].contains(r#""grant_type":"client_credentials""#));
+    assert!(requests[0].contains(r#""tenant_key":"tenant-a""#));
+    assert!(requests[0].contains(r#""client_id":"app_id""#));
+    assert!(!requests[0].contains("app_secret"));
+}
+
+#[tokio::test]
+async fn marketplace_client_assertion_requires_tenant_key() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(
+        200,
+        r#"{"code":0,"access_token":"isv-token","token_type":"Bearer","expires_in":7200}"#,
+    )])
+    .await;
+    let client = marketplace_assertion_client(addr, true);
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+
+    let err = tm
+        .get_tenant_access_token(client.config(), None, None)
+        .await
+        .unwrap_err();
+    assert!(matches!(err, LarkError::IllegalParam(message) if message == "tenant key is empty"));
+    assert!(requests.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn marketplace_client_assertion_cache_isolated_by_tenant() {
+    let response = http_response(
+        200,
+        r#"{"code":0,"access_token":"isv-token","token_type":"Bearer","expires_in":7200}"#,
+    );
+    let (addr, _handle, requests) =
+        mock_server_with_requests(vec![response.clone(), response]).await;
+    let client = marketplace_assertion_client(addr, true);
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+
+    tm.get_tenant_access_token(client.config(), Some("tenant-a"), None)
+        .await
+        .unwrap();
+    tm.get_tenant_access_token(client.config(), Some("tenant-b"), None)
+        .await
+        .unwrap();
+    tm.get_tenant_access_token(client.config(), Some("tenant-a"), None)
+        .await
+        .unwrap();
+
+    let requests = requests.lock().unwrap();
+    assert_eq!(requests.len(), 2);
+    assert!(requests.iter().any(|request| request.contains("tenant-a")));
+    assert!(requests.iter().any(|request| request.contains("tenant-b")));
+}
+
+#[tokio::test]
+async fn marketplace_client_assertion_preserves_http_oauth_error_details() {
+    let (addr, _handle, _requests) = mock_server_with_requests(vec![http_response(
+        400,
+        r#"{"code":0,"error":"invalid_client","error_description":"assertion rejected"}"#,
+    )])
+    .await;
+    let client = marketplace_assertion_client(addr, true);
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+
+    let err = tm
+        .get_tenant_access_token(client.config(), Some("tenant-a"), None)
+        .await
+        .unwrap_err();
+    assert!(matches!(
+        err,
+        LarkError::OAuthTokenRejected { code: 0, message, .. }
+            if message.contains("HTTP 400")
+                && message.contains("invalid_client")
+                && message.contains("assertion rejected")
+    ));
+}
+
+#[tokio::test]
+async fn marketplace_client_assertion_rejects_invalid_response_metadata() {
+    let (addr, _handle, _requests) = mock_server_with_requests(vec![http_response(
+        200,
+        r#"{"code":0,"access_token":"isv-token","token_type":"Other","expires_in":7200}"#,
+    )])
+    .await;
+    let client = marketplace_assertion_client(addr, true);
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+
+    let err = tm
+        .get_tenant_access_token(client.config(), Some("tenant-a"), None)
+        .await
+        .unwrap_err();
+    assert!(matches!(
+        err,
+        LarkError::ClientAssertion(message)
+            if message.contains("token_type must be Bearer")
+    ));
+}
+
 fn marketplace_client(addr: std::net::SocketAddr) -> LarkClient {
     LarkClient::builder("app_id", "secret")
         .base_url(format!("http://{addr}"))

@@ -19,6 +19,8 @@ examples, features, and coverage.
   dispatch, long connections, trusted user channels, replies, and updates.
 - [OAuth SSO](oauth-sso.md) covers Feishu and Lark browser authorization,
   authorization-code exchange, refresh-token rotation, and user identity lookup.
+- [Marketplace ClientAssertion authentication](marketplace-client-assertion.md)
+  covers app-secret-free tenant-token exchange for marketplace applications.
 - [DPoP](dpop.md) covers opt-in proof modes for registration, OAuth, and
   resource requests, plus key stores, rotation, and clock correction.
 - [Mail v1 user-mailbox threads](mail-v1-threads.md) covers conversation reads

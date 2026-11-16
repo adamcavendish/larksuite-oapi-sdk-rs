@@ -10,9 +10,9 @@ use crate::config::Config;
 use crate::constants::{
     APP_ACCESS_TOKEN_INTERNAL_URL_PATH, APP_ACCESS_TOKEN_KEY_PREFIX, APP_ACCESS_TOKEN_URL_PATH,
     APP_TICKET_KEY_PREFIX, APPLY_APP_TICKET_PATH, AccessTokenType, AppType,
-    CLIENT_ASSERTION_TYPE_JWT_BEARER, EXPIRY_DELTA_SECONDS, GRANT_TYPE_JWT_BEARER,
-    OAUTH_TOKEN_URL_PATH, TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH, TENANT_ACCESS_TOKEN_KEY_PREFIX,
-    TENANT_ACCESS_TOKEN_URL_PATH,
+    CLIENT_ASSERTION_TYPE_JWT_BEARER, EXPIRY_DELTA_SECONDS, GRANT_TYPE_CLIENT_CREDENTIALS,
+    GRANT_TYPE_JWT_BEARER, OAUTH_TOKEN_URL_PATH, TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH,
+    TENANT_ACCESS_TOKEN_KEY_PREFIX, TENANT_ACCESS_TOKEN_URL_PATH,
 };
 use crate::dpop::DPoPKey;
 use crate::error::LarkError;
@@ -360,21 +360,32 @@ impl TokenManager {
         config: &Config,
         url: &str,
         body: &impl Serialize,
-    ) -> Result<OAuthTokenResp, LarkError> {
+        extra_headers: Option<http::HeaderMap>,
+    ) -> Result<(u16, OAuthTokenResp), LarkError> {
         let destination = crate::url_resolver::resolve(config.platform_url_resolver.as_ref(), url)?;
         let url = destination.as_str();
         let mut api_req = ApiReq::new(http::Method::POST, url);
         api_req.body = Some(ReqBody::json(body)?);
         api_req.supported_access_token_types = vec![AccessTokenType::None];
 
-        let option = dpop_option(config, url)?;
+        let mut option = dpop_option(config, url)?;
+        if let Some(extra_headers) = extra_headers.as_ref() {
+            option
+                .headers
+                .get_or_insert_with(http::HeaderMap::new)
+                .extend(extra_headers.clone());
+        }
         let api_resp =
             transport::raw_send_resolved_absolute_url(config, &api_req, &option, None).await?;
 
         // A policy denial can arrive at a non-200 HTTP status. Preserve its
         // business code rather than reducing it to an HTTP status string.
         let parsed = serde_json::from_slice::<OAuthTokenResp>(&api_resp.raw_body);
-        if api_resp.status_code != 200 && !matches!(&parsed, Ok(resp) if resp.code != 0) {
+        if api_resp.status_code != 200
+            && !matches!(&parsed, Ok(resp) if resp.code != 0)
+            && !(config.app_type == AppType::Marketplace
+                && matches!(&parsed, Ok(resp) if !resp.error.is_empty() || !resp.error_description.is_empty()))
+        {
             return Err(LarkError::Token(format!(
                 "oauth token request failed with status {}",
                 api_resp.status_code
@@ -382,15 +393,20 @@ impl TokenManager {
         }
 
         let mut parsed = parsed?;
-        if config.dpop_mode != crate::dpop::DPoPMode::Disabled
+        if config.app_type != AppType::Marketplace
+            && config.dpop_mode != crate::dpop::DPoPMode::Disabled
             && config.resolved_dpop_key()?.is_some()
             && !parsed.token_type.eq_ignore_ascii_case("DPoP")
         {
             if config.dpop_mode == crate::dpop::DPoPMode::Preferred {
+                let fallback_option = RequestOption {
+                    headers: extra_headers,
+                    ..Default::default()
+                };
                 let plain = transport::raw_send_resolved_absolute_url(
                     config,
                     &api_req,
-                    &RequestOption::default(),
+                    &fallback_option,
                     None,
                 )
                 .await?;
@@ -402,7 +418,7 @@ impl TokenManager {
                 )));
             }
         }
-        Ok(parsed)
+        Ok((api_resp.status_code, parsed))
     }
 
     async fn get_tenant_token_by_client_assertion(
@@ -412,14 +428,18 @@ impl TokenManager {
     ) -> Result<ClientAssertionTenantToken, LarkError> {
         let oauth_base_url = resolve_oauth_base_url(config);
         let aud = extract_aud_from_url(&oauth_base_url)?;
+        let tenant_key = match config.app_type {
+            AppType::Marketplace => tenant_key
+                .filter(|key| !key.trim().is_empty())
+                .ok_or_else(|| LarkError::IllegalParam("tenant key is empty".to_string()))?,
+            AppType::SelfBuilt => tenant_key.unwrap_or_default(),
+        };
+        let token_key =
+            Self::client_assertion_token_cache_key(config, tenant_key, &oauth_base_url, &aud);
 
-        let tk = tenant_key.unwrap_or_default();
-        let token_key = format!(
-            "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:client_assertion:{}-{tk}-{aud}",
-            config.app_id
-        );
-
-        if let Some(token) = self.cache.get(&token_key).await? {
+        if config.enable_token_cache
+            && let Some(token) = self.cache.get(&token_key).await?
+        {
             if let Ok(cached) = serde_json::from_str::<CachedIssuedToken>(&token) {
                 let binding = if cached.token_type.eq_ignore_ascii_case("DPoP") {
                     config
@@ -459,11 +479,9 @@ impl TokenManager {
         let provider = config.client_assertion_provider.as_ref().ok_or_else(|| {
             LarkError::ClientAssertion("client assertion provider is not configured".to_string())
         })?;
-
         let assertion = provider.retrieve_token(&aud).await.map_err(|e| {
             LarkError::ClientAssertion(format!("retrieve client assertion token failed: {e}"))
         })?;
-
         if assertion.value.is_empty() {
             return Err(LarkError::ClientAssertion(
                 "client assertion token is empty".to_string(),
@@ -482,17 +500,71 @@ impl TokenManager {
                 oauth_base_url.trim_end_matches('/')
             )
         };
-
+        let extra_headers = if assertion.target_info.is_some() {
+            let mut headers = http::HeaderMap::new();
+            headers.insert(
+                crate::constants::HEADER_X_TARGET_SERVICE,
+                http::HeaderValue::from_str(&aud)
+                    .map_err(|e| LarkError::ClientAssertion(e.to_string()))?,
+            );
+            Some(headers)
+        } else {
+            None
+        };
         let body = OAuthTokenReq {
-            grant_type: GRANT_TYPE_JWT_BEARER,
+            grant_type: if config.app_type == AppType::Marketplace {
+                GRANT_TYPE_CLIENT_CREDENTIALS
+            } else {
+                GRANT_TYPE_JWT_BEARER
+            },
             client_assertion_type: CLIENT_ASSERTION_TYPE_JWT_BEARER,
             client_assertion: &assertion.value,
             client_id: &config.app_id,
+            tenant_key: (config.app_type == AppType::Marketplace).then_some(tenant_key),
         };
-
-        let resp = self
-            .oauth_token_request(config, &request_url, &body)
+        let (status_code, resp) = self
+            .oauth_token_request(config, &request_url, &body, extra_headers)
             .await?;
+
+        if config.app_type == AppType::Marketplace {
+            if status_code != 200
+                || resp.code != 0
+                || !resp.error.is_empty()
+                || !resp.error_description.is_empty()
+            {
+                let mut message = format!("ISV tenant token exchange failed (HTTP {status_code})");
+                if !resp.error.is_empty() {
+                    message.push_str(&format!(", error: {}", resp.error));
+                }
+                if !resp.error_description.is_empty() {
+                    message.push_str(&format!(", error_description: {}", resp.error_description));
+                }
+                return Err(LarkError::OAuthTokenRejected {
+                    code: resp.code,
+                    message,
+                    challenge_url: resp
+                        .data
+                        .as_ref()
+                        .and_then(|data| data.challenge_url.clone()),
+                    hint: resp.data.as_ref().and_then(|data| data.cli_hint.clone()),
+                });
+            }
+            if resp.access_token.is_empty()
+                || resp.expires_in == 0
+                || !resp.token_type.eq_ignore_ascii_case("Bearer")
+            {
+                let message = if resp.access_token.is_empty() {
+                    "access_token is empty"
+                } else if resp.expires_in == 0 {
+                    "expires_in must be positive"
+                } else {
+                    "token_type must be Bearer"
+                };
+                return Err(LarkError::ClientAssertion(format!(
+                    "invalid ISV tenant token response: {message}"
+                )));
+            }
+        }
 
         if resp.code != 0 {
             let message = if !resp.error_description.is_empty() {
@@ -512,7 +584,6 @@ impl TokenManager {
                 hint: resp.data.as_ref().and_then(|data| data.cli_hint.clone()),
             });
         }
-
         if resp.access_token.is_empty() {
             let msg = if !resp.error_description.is_empty() {
                 &resp.error_description
@@ -542,9 +613,11 @@ impl TokenManager {
                 None
             },
         };
-        let cached = serde_json::to_string(&cached)?;
-        if let Err(e) = self.cache.set(&token_key, &cached, ttl).await {
-            tracing::warn!("client assertion tenant access token save cache: {e}");
+        if config.enable_token_cache {
+            let cached = serde_json::to_string(&cached)?;
+            if let Err(e) = self.cache.set(&token_key, &cached, ttl).await {
+                tracing::warn!("client assertion tenant access token save cache: {e}");
+            }
         }
 
         let dpop_binding = if token_type.eq_ignore_ascii_case("DPoP") {
@@ -561,6 +634,25 @@ impl TokenManager {
             token_type: token_type.to_string(),
             dpop_binding,
         })
+    }
+
+    fn client_assertion_token_cache_key(
+        config: &Config,
+        tenant_key: &str,
+        oauth_base_url: &str,
+        aud: &str,
+    ) -> String {
+        if config.app_type == AppType::Marketplace {
+            format!(
+                "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:client_assertion:{}:{tenant_key}:client_credentials:{oauth_base_url}",
+                config.app_id
+            )
+        } else {
+            format!(
+                "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:client_assertion:{}-{tenant_key}-{aud}",
+                config.app_id
+            )
+        }
     }
 }
 
@@ -711,6 +803,8 @@ struct OAuthTokenReq<'a> {
     client_assertion_type: &'a str,
     client_assertion: &'a str,
     client_id: &'a str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tenant_key: Option<&'a str>,
 }
 
 #[derive(Deserialize)]
