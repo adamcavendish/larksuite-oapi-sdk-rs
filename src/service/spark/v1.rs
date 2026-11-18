@@ -12,7 +12,9 @@ use crate::service::go_compatibility::{GoCompatibility, GoCompatibilityEndpoint}
 use serde::Serialize;
 
 mod features;
+mod page_source;
 mod session;
+pub use page_source::*;
 pub use session::*;
 
 pub type CreateAppResp = JsonResp;
@@ -63,7 +65,7 @@ pub type ListAppReleaseResp = JsonResp;
 
 const EMPTY_PARAMS: [(&str, &str); 0] = [];
 
-fn require_app_user(option: &RequestOption) -> Result<(), LarkError> {
+pub(super) fn require_app_user(option: &RequestOption) -> Result<(), LarkError> {
     if option
         .user_access_token
         .as_deref()

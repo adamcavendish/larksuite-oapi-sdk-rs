@@ -29,6 +29,8 @@ examples, features, and coverage.
   storage files, quotas, and app release lifecycle operations.
 - [Spark apps](spark-apps.md) covers server-side owner and app filters,
   pagination, and explicit single-send deletion.
+- [Spark app source browsing](spark-page-source.md) covers user-token source
+  tree listing and raw source-file streaming.
 - [Spark db sync](spark-db-sync.md) covers user-token Base-to-database sync
   previews, task lifecycle operations, and opt-in live verification.
 - [Spark database migration](spark-db-migration.md) covers dev-to-online schema
