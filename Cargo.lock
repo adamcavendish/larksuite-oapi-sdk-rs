@@ -996,6 +996,7 @@ dependencies = [
  "futures-util",
  "hex",
  "http",
+ "httpdate",
  "p256",
  "percent-encoding",
  "prost",

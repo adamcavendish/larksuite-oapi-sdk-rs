@@ -38,8 +38,8 @@ impl DPoPClock for SystemDPoPClock {
 
 /// A clock that applies a caller-supplied, bounded correction to a base clock.
 ///
-/// Applications may update the correction after reading a trusted server
-/// timestamp. The SDK never performs that network exchange automatically.
+/// Applications can apply a trusted server timestamp directly or request
+/// calibration through the Accounts OAuth client.
 #[derive(Debug)]
 pub struct OffsetDPoPClock {
     base: Arc<dyn DPoPClock>,
