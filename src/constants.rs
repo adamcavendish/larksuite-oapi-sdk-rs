@@ -16,7 +16,7 @@ pub const APP_ACCESS_TOKEN_URL_PATH: &str = "/open-apis/auth/v3/app_access_token
 pub const TENANT_ACCESS_TOKEN_INTERNAL_URL_PATH: &str =
     "/open-apis/auth/v3/tenant_access_token/internal";
 pub const TENANT_ACCESS_TOKEN_URL_PATH: &str = "/open-apis/auth/v3/tenant_access_token";
-/// OAuth v3 token endpoint for tenant client-credentials and client-assertion flows.
+/// Accounts OAuth v3 token endpoint for tenant issuance and DPoP-bound user refresh.
 pub const OAUTH_TOKEN_URL_PATH: &str = "/oauth/v3/token";
 /// OAuth v2 endpoint for user authorization-code and refresh-token flows.
 pub const USER_OAUTH_TOKEN_URL_PATH: &str = "/open-apis/authen/v2/oauth/token";

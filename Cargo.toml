@@ -26,6 +26,7 @@ flate2 = "1"
 futures-util = { version = "0.3", optional = true }
 hex = "0.4"
 http = "1"
+httpdate = "1"
 percent-encoding = "2"
 p256 = { version = "0.13", features = ["ecdsa", "pem", "arithmetic", "std"] }
 rand_core = { version = "0.6", features = ["getrandom"] }

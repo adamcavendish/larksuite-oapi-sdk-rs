@@ -169,3 +169,44 @@ let token = client
 # Ok(())
 # }
 ```
+
+## DPoP-bound user token refresh
+
+If your application already holds an Accounts DPoP refresh token, call
+`refresh_dpop` with the original signing key. The SDK sends the refresh grant
+to the brand's Accounts `/oauth/v3/token` endpoint with a fresh DPoP proof.
+It uses the configured OAuth base and trusted URL resolver and rejects redirects.
+
+```rust,no_run
+use std::sync::Arc;
+use larksuite_oapi_sdk_rs::{DPoPKey, LarkClient, LarkError, OffsetDPoPClock};
+use larksuite_oapi_sdk_rs::service::authen::DPoPRefreshResp;
+
+async fn refresh_bound_user(
+    app_id: &str,
+    app_secret: &str,
+    refresh_token: &str,
+    original_key: &DPoPKey,
+) -> Result<(LarkClient, DPoPRefreshResp), LarkError> {
+    let clock = Arc::new(OffsetDPoPClock::new(120)?);
+    let client = LarkClient::builder(app_id, app_secret)
+        .dpop_clock(clock.clone())
+        .build()?;
+    let oauth = client.authen().oauth;
+    let refreshed = oauth.refresh_dpop(refresh_token, original_key, &clock).await?;
+    Ok((client, refreshed))
+}
+```
+
+Set both `RequestOption::user_access_token` and `RequestOption::dpop_binding`
+using the refreshed token and binding for subsequent resource requests.
+Serialize refreshes for each credential and atomically store the result with
+its key identity. When `data.refresh_token` is absent, keep the previous
+refresh token. Use the expiry fields supplied by Accounts.
+
+Call `sync_dpop_clock` explicitly when you want to calibrate the shared clock
+before signing. If a refresh receives the OAuth proof rejection
+`20153` / `invalid_dpop_proof`, the SDK can apply a valid `Date` header
+within the clock's configured offset bound and retry once. Treat transport
+failures and incomplete responses as ambiguous because Accounts may already
+have rotated the refresh token.

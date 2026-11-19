@@ -12,6 +12,9 @@ use crate::req::{ApiReq, ReqBody, RequestOption};
 use crate::service::common::RestRequest;
 use crate::transport;
 
+mod dpop_oauth;
+pub use dpop_oauth::DPoPRefreshResp;
+
 // ── Domain types ──
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
