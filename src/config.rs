@@ -29,6 +29,7 @@ pub(crate) fn install_default_crypto_provider() {
 pub struct Config {
     pub(crate) base_url: String,
     pub(crate) oauth_base_url: String,
+    pub(crate) oauth_audience: Option<String>,
     pub(crate) app_id: String,
     pub(crate) app_secret: String,
     pub(crate) helpdesk_id: Option<String>,
@@ -86,6 +87,7 @@ impl Config {
         Self {
             base_url: FEISHU_BASE_URL.to_string(),
             oauth_base_url: FEISHU_BASE_URL.to_string(),
+            oauth_audience: None,
             app_id: app_id.into(),
             app_secret: app_secret.into(),
             helpdesk_id: None,

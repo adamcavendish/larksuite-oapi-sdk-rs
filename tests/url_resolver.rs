@@ -107,7 +107,7 @@ impl ClientAssertionProvider for Assertion {
 }
 
 #[tokio::test]
-async fn oauth_and_resource_proofs_bind_effective_url_without_changing_audience() {
+async fn oauth_and_resource_proofs_bind_effective_url_with_explicit_oauth_audience() {
     let (addr, server, requests) = mock_server_with_requests(vec![
         http_response(
             200,
@@ -122,6 +122,7 @@ async fn oauth_and_resource_proofs_bind_effective_url_without_changing_audience(
     let client = LarkClient::builder("app", "secret")
         .base_url("https://api.example")
         .oauth_base_url("https://oauth.example")
+        .oauth_audience("urn:lark:tenant-token")
         .client_assertion_provider(Arc::new(Assertion(audiences.clone())))
         .dpop_mode(DPoPMode::Required)
         .platform_url_resolver(Arc::new(move |logical: &str| {
@@ -146,9 +147,22 @@ async fn oauth_and_resource_proofs_bind_effective_url_without_changing_audience(
         .raw_request(&req(http::Method::GET, "/open-apis/resource"), &option)
         .await
         .unwrap();
-    assert_eq!(*audiences.lock().unwrap(), vec!["oauth.example"]);
-    assert_eq!(seen.lock().unwrap().len(), 2);
+    assert_eq!(*audiences.lock().unwrap(), ["urn:lark:tenant-token"]);
+    assert_eq!(
+        *seen.lock().unwrap(),
+        [
+            "https://oauth.example/oauth/v3/token",
+            "https://api.example/open-apis/resource",
+        ]
+    );
     let requests = requests.lock().unwrap();
+    assert!(requests[0].contains(r#""grant_type":"urn:ietf:params:oauth:grant-type:jwt-bearer""#));
+    assert!(!requests[0].contains("tenant_key"));
+    assert!(
+        !requests[0]
+            .to_ascii_lowercase()
+            .contains("x-target-service:")
+    );
     assert_eq!(
         claims(&requests[0])["htu"],
         format!("http://{addr}/mapped/oauth/v3/token")
