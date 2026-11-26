@@ -25,13 +25,18 @@ use larksuite_oapi_sdk_rs::{ClientAssertionProvider, LarkClient};
 
 let client = LarkClient::builder("APP_ID", "")
     .marketplace()
+    // Optional when the platform requires an audience other than the OAuth host.
+    .oauth_audience("tenant-token-audience.example")
     .client_assertion_provider(Arc::new(Provider))
     .build()?;
 # Ok::<(), larksuite_oapi_sdk_rs::LarkError>(())
 ```
 
-The provider receives the OAuth host as its audience. Keep the assertion,
-tenant token, and any signing material out of logs.
+Omit `oauth_audience` or pass an empty string to use the OAuth host as the
+audience. If the provider returns a proxy target, the SDK also sends that
+audience in `X-Target-Service`. The override applies to tenant token exchange.
+The OAuth base URL and optional proxy target determine the request URL. Keep
+the assertion, tenant token, and any signing material out of logs.
 
 ## Call a tenant-scoped API
 
@@ -57,8 +62,9 @@ client.raw_request(&request, &option).await?;
 ```
 
 Tokens are cached by application, tenant, client-credentials mode, and the
-effective OAuth endpoint. A fresh response must contain a Bearer token and a
-positive `expires_in`; OAuth error fields are retained in the returned error.
+OAuth base URL. Setting an explicit audience further scopes the cache to that
+audience. A fresh response must contain a Bearer token and a positive
+`expires_in`. OAuth error fields are retained in the returned error.
 
 With `disable_token_cache()`, automatic marketplace assertion exchange is
 disabled for resource requests. Pass an explicit `tenant_access_token` in

@@ -58,9 +58,9 @@ pub struct Token {
     pub target_info: Option<TargetInfo>,
 }
 
-/// Produces a signed JWT assertion for the `urn:ietf:params:oauth:grant-type:jwt-bearer` flow.
+/// Produces a signed JWT client assertion.
 ///
-/// Implementations must sign a JWT whose `aud` header matches the given audience
+/// Implementations must sign a JWT whose `aud` claim matches the given audience
 /// and return the compact serialization.
 pub trait ClientAssertionProvider: Debug + Send + Sync {
     /// Return a signed JWT assertion for the given audience.
@@ -427,15 +427,26 @@ impl TokenManager {
         tenant_key: Option<&str>,
     ) -> Result<ClientAssertionTenantToken, LarkError> {
         let oauth_base_url = resolve_oauth_base_url(config);
-        let aud = extract_aud_from_url(&oauth_base_url)?;
-        let tenant_key = match config.app_type {
-            AppType::Marketplace => tenant_key
-                .filter(|key| !key.trim().is_empty())
-                .ok_or_else(|| LarkError::IllegalParam("tenant key is empty".to_string()))?,
-            AppType::SelfBuilt => tenant_key.unwrap_or_default(),
+        let aud = match &config.oauth_audience {
+            Some(audience) => audience.clone(),
+            None => extract_aud_from_url(&oauth_base_url)?,
         };
-        let token_key =
-            Self::client_assertion_token_cache_key(config, tenant_key, &oauth_base_url, &aud);
+        let (grant_type, tenant_key) = match config.app_type {
+            AppType::Marketplace => (
+                GRANT_TYPE_CLIENT_CREDENTIALS,
+                tenant_key
+                    .filter(|key| !key.trim().is_empty())
+                    .ok_or_else(|| LarkError::IllegalParam("tenant key is empty".to_string()))?,
+            ),
+            AppType::SelfBuilt => (GRANT_TYPE_JWT_BEARER, tenant_key.unwrap_or_default()),
+        };
+        let token_key = Self::client_assertion_token_cache_key(
+            config,
+            grant_type,
+            tenant_key,
+            &oauth_base_url,
+            &aud,
+        );
 
         if config.enable_token_cache
             && let Some(token) = self.cache.get(&token_key).await?
@@ -512,11 +523,7 @@ impl TokenManager {
             None
         };
         let body = OAuthTokenReq {
-            grant_type: if config.app_type == AppType::Marketplace {
-                GRANT_TYPE_CLIENT_CREDENTIALS
-            } else {
-                GRANT_TYPE_JWT_BEARER
-            },
+            grant_type,
             client_assertion_type: CLIENT_ASSERTION_TYPE_JWT_BEARER,
             client_assertion: &assertion.value,
             client_id: &config.app_id,
@@ -638,10 +645,16 @@ impl TokenManager {
 
     fn client_assertion_token_cache_key(
         config: &Config,
+        grant_type: &str,
         tenant_key: &str,
         oauth_base_url: &str,
         aud: &str,
     ) -> String {
+        if config.oauth_audience.is_some() {
+            let scope =
+                serde_json::json!([config.app_id, tenant_key, grant_type, oauth_base_url, aud]);
+            return format!("{TENANT_ACCESS_TOKEN_KEY_PREFIX}:client_assertion_audience:{scope}");
+        }
         if config.app_type == AppType::Marketplace {
             format!(
                 "{TENANT_ACCESS_TOKEN_KEY_PREFIX}:client_assertion:{}:{tenant_key}:client_credentials:{oauth_base_url}",

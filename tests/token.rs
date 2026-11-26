@@ -5,9 +5,9 @@ use larksuite_oapi_sdk_rs::LarkClient;
 use larksuite_oapi_sdk_rs::cache::{Cache, LocalCache};
 use larksuite_oapi_sdk_rs::error::LarkError;
 use larksuite_oapi_sdk_rs::token::{
-    AppTicketManager, ClientAssertionProvider, Token, TokenManager,
+    AppTicketManager, ClientAssertionProvider, TargetInfo, Token, TokenManager,
 };
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 #[derive(Debug)]
 struct TestAssertion;
@@ -25,6 +25,59 @@ impl ClientAssertionProvider for TestAssertion {
             })
         })
     }
+}
+
+#[derive(Debug, Default)]
+struct RecordingAssertion {
+    audiences: Mutex<Vec<String>>,
+    target_info: Option<TargetInfo>,
+}
+
+impl ClientAssertionProvider for RecordingAssertion {
+    fn retrieve_token(
+        &self,
+        aud: &str,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Token, LarkError>> + Send + '_>>
+    {
+        self.audiences.lock().unwrap().push(aud.into());
+        let target_info = self.target_info.clone();
+        Box::pin(async move {
+            Ok(Token {
+                value: "signed-assertion".into(),
+                target_info,
+            })
+        })
+    }
+}
+
+#[tokio::test]
+async fn client_assertion_uses_oauth_host_when_audience_is_unset_or_empty() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(
+        200,
+        r#"{"code":0,"access_token":"tenant-token","expires_in":7200}"#,
+    )])
+    .await;
+    let provider = Arc::new(RecordingAssertion::default());
+    let builder = || {
+        LarkClient::builder("app_id", "secret")
+            .oauth_base_url(format!("http://{addr}"))
+            .client_assertion_provider(provider.clone())
+            .disable_token_cache()
+    };
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+    for builder in [
+        builder(),
+        builder().oauth_audience("override").oauth_audience(""),
+    ] {
+        let client = builder.build().unwrap();
+        tm.get_client_assertion_tenant_token(client.config(), None)
+            .await
+            .unwrap();
+    }
+
+    let host = addr.ip().to_string();
+    assert_eq!(*provider.audiences.lock().unwrap(), [host.clone(), host]);
+    assert_eq!(requests.lock().unwrap().len(), 2);
 }
 
 #[tokio::test]
@@ -124,13 +177,27 @@ fn marketplace_assertion_client(
 }
 
 #[tokio::test]
-async fn marketplace_client_assertion_uses_client_credentials_and_tenant_key() {
+async fn marketplace_client_assertion_sends_explicit_audience_to_proxy() {
     let response = http_response(
         200,
         r#"{"code":0,"access_token":"isv-token","token_type":"Bearer","expires_in":7200}"#,
     );
     let (addr, _handle, requests) = mock_server_with_requests(vec![response]).await;
-    let client = marketplace_assertion_client(addr, true);
+    let audience = "urn:lark:tenant-token";
+    let provider = Arc::new(RecordingAssertion {
+        target_info: Some(TargetInfo {
+            target_service: format!("http://{addr}"),
+            target_prefix: "/gateway".into(),
+        }),
+        ..Default::default()
+    });
+    let client = LarkClient::builder("app_id", "")
+        .marketplace()
+        .oauth_base_url("https://oauth.example")
+        .oauth_audience(audience)
+        .client_assertion_provider(provider.clone())
+        .build()
+        .unwrap();
     let tm = TokenManager::new(Arc::new(LocalCache::new()));
 
     assert_eq!(
@@ -148,10 +215,46 @@ async fn marketplace_client_assertion_uses_client_credentials_and_tenant_key() {
 
     let requests = requests.lock().unwrap();
     assert_eq!(requests.len(), 1);
+    assert!(requests[0].starts_with("POST /gateway/oauth/v3/token "));
+    assert!(requests[0].lines().any(|line| {
+        line.split_once(':').is_some_and(|(name, value)| {
+            name.eq_ignore_ascii_case("X-Target-Service") && value.trim() == audience
+        })
+    }));
     assert!(requests[0].contains(r#""grant_type":"client_credentials""#));
     assert!(requests[0].contains(r#""tenant_key":"tenant-a""#));
     assert!(requests[0].contains(r#""client_id":"app_id""#));
     assert!(!requests[0].contains("app_secret"));
+    assert_eq!(*provider.audiences.lock().unwrap(), [audience]);
+}
+
+#[tokio::test]
+async fn client_assertion_rejects_invalid_proxy_audience_before_sending() {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![http_response(
+        200,
+        r#"{"code":0,"access_token":"tenant-token","expires_in":7200}"#,
+    )])
+    .await;
+    let client = LarkClient::builder("app_id", "secret")
+        .oauth_base_url(format!("http://{addr}"))
+        .oauth_audience("invalid\naudience")
+        .client_assertion_provider(Arc::new(RecordingAssertion {
+            target_info: Some(TargetInfo {
+                target_service: format!("http://{addr}"),
+                target_prefix: String::new(),
+            }),
+            ..Default::default()
+        }))
+        .build()
+        .unwrap();
+    let tm = TokenManager::new(Arc::new(LocalCache::new()));
+
+    let err = tm
+        .get_client_assertion_tenant_token(client.config(), None)
+        .await
+        .unwrap_err();
+    assert!(matches!(err, LarkError::ClientAssertion(_)));
+    assert!(requests.lock().unwrap().is_empty());
 }
 
 #[tokio::test]
@@ -197,6 +300,61 @@ async fn marketplace_client_assertion_cache_isolated_by_tenant() {
     assert_eq!(requests.len(), 2);
     assert!(requests.iter().any(|request| request.contains("tenant-a")));
     assert!(requests.iter().any(|request| request.contains("tenant-b")));
+}
+
+#[tokio::test]
+async fn marketplace_client_assertion_cache_isolates_explicit_audiences_from_each_other_and_default()
+ {
+    let (addr, _handle, requests) = mock_server_with_requests(vec![
+        http_response(
+            200,
+            r#"{"code":0,"access_token":"token-a","token_type":"Bearer","expires_in":7200}"#,
+        ),
+        http_response(
+            200,
+            r#"{"code":0,"access_token":"token-b","token_type":"Bearer","expires_in":7200}"#,
+        ),
+    ])
+    .await;
+    let oauth_base_url = format!("http://{addr}");
+    let cache = Arc::new(LocalCache::new());
+    cache
+        .set(
+            &format!("tenant_access_token:client_assertion:app_id:tenant-a:client_credentials:{oauth_base_url}"),
+            "legacy-token",
+            std::time::Duration::from_secs(600),
+        )
+        .await
+        .unwrap();
+    let tm = TokenManager::new(cache);
+    let builder = || {
+        LarkClient::builder("app_id", "")
+            .marketplace()
+            .oauth_base_url(&oauth_base_url)
+            .client_assertion_provider(Arc::new(TestAssertion))
+    };
+    let first = builder()
+        .oauth_audience(addr.ip().to_string())
+        .build()
+        .unwrap();
+    let second = builder().oauth_audience("audience-b").build().unwrap();
+    let default = builder().build().unwrap();
+
+    for (client, expected) in [
+        (&first, "token-a"),
+        (&second, "token-b"),
+        (&default, "legacy-token"),
+        (&first, "token-a"),
+        (&second, "token-b"),
+    ] {
+        assert_eq!(
+            tm.get_tenant_access_token(client.config(), Some("tenant-a"), None)
+                .await
+                .unwrap(),
+            expected
+        );
+    }
+    assert_eq!(requests.lock().unwrap().len(), 2);
 }
 
 #[tokio::test]

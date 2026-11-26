@@ -62,6 +62,16 @@ impl LarkClientBuilder {
         self
     }
 
+    /// Override the audience passed to the client assertion provider for tenant tokens.
+    ///
+    /// An empty value uses the OAuth base URL's host. When the provider supplies
+    /// a proxy target, the same audience is sent in `X-Target-Service`.
+    pub fn oauth_audience(mut self, audience: impl Into<String>) -> Self {
+        let audience = audience.into();
+        self.config.oauth_audience = (!audience.is_empty()).then_some(audience);
+        self
+    }
+
     pub fn client_assertion_provider(mut self, provider: Arc<dyn ClientAssertionProvider>) -> Self {
         self.config.client_assertion_provider = Some(provider);
         self
