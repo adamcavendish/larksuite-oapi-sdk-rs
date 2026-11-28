@@ -229,10 +229,23 @@ impl<'a> RestRequest<'a> {
             self.config,
             &self.api_req,
             self.option,
+            transport::SendMode::Standard,
         )
         .await?;
         let (api_resp, code_error, data) = parse_v2(api_resp, raw);
         Ok(JsonResp::from_v2_response(api_resp, code_error, data))
+    }
+
+    pub(crate) async fn send_without_replay<T: serde::de::DeserializeOwned>(
+        self,
+    ) -> Result<(ApiResp, RawResponse<T>), LarkError> {
+        transport::request_typed_once::<T>(
+            self.config,
+            &self.api_req,
+            self.option,
+            transport::SendMode::WithoutReplay,
+        )
+        .await
     }
 
     pub(crate) async fn download(self) -> Result<DownloadResp, LarkError> {
