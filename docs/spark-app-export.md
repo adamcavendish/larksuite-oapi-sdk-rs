@@ -133,13 +133,22 @@ automatic environment policy is added.
 
 ## Spark app releases
 
-`client.spark().app` also exposes the user-token release lifecycle:
+`client.spark().app` exposes the user-token release lifecycle through
+`/open-apis/spark/v1/apps/{app_id}/releases`.
 
-- `create_release` submits a release request with an optional branch and reason.
-- `get_release` reads one release's status and approval details.
-- `list_releases` returns paginated release records.
+- `create_release` submits a release request once with an optional branch and
+  reason. Check release history if the result is unclear before submitting again.
+- `get_release` reads one release into `AppReleaseDetail`, including the
+  workflow node, approval URL, and failure logs when the platform supplies them.
+- `list_releases` returns paginated release records. Use
+  `ListAppReleaseQuery::new().status("finished")` for server-side filtering.
+  The CLI also documents `publishing` and `failed` filters.
 
-These methods preserve the platform's JSON response fields and do not publish
-source, wait for approval, retry an ambiguous submission, or invent a release
-state machine. Treat release creation as a mutating operation and choose the
-caller-owned confirmation and polling policy for the returned response.
+`AppReleaseDetail::is_waiting_for_approval()` returns true when the release
+status is `pending` or `publishing` and the approval node reports `PENDING`.
+Use `online_url` as the published URL once the release status is `finished`.
+The application owns polling and any decision to resubmit a release.
+
+When upgrading from 0.3.13, read fields such as `detail.status` and
+`detail.current_node_info` from `get_release(...).await?.data`. Access the
+original JSON, including unknown fields, through `response.api_resp.raw_body`.

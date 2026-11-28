@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### REST service coverage
+
+- Corrected the Spark app release create, get, and list routes to use `/v1`.
+- Submit Spark app release creation once so an ambiguous response or redirect
+  cannot replay the write.
+- Added a server-side `status` filter for Spark app release history.
+- **Breaking:** Spark `get_release` now returns `GetAppReleaseResp` with
+  `Option<AppReleaseDetail>` data. Read typed fields such as `detail.status`
+  and `detail.current_node_info` in place of JSON keys. The original body
+  remains available through `response.api_resp.raw_body`.
 
 ## [0.3.13] - 2026-10-29
 

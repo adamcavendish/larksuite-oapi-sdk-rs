@@ -7,16 +7,20 @@ use crate::config::Config;
 use crate::constants::AccessTokenType;
 use crate::error::LarkError;
 use crate::req::{FormDataField, ReqBody, RequestOption};
-use crate::service::common::{DownloadResp, DownloadStreamResp, JsonResp, PageQuery, RestRequest};
+use crate::service::common::{
+    DownloadResp, DownloadStreamResp, JsonResp, PageQuery, RestRequest, parse_v2,
+};
 use crate::service::go_compatibility::{GoCompatibility, GoCompatibilityEndpoint};
 use serde::Serialize;
 
 mod db_audit;
 mod features;
 mod page_source;
+mod release;
 mod session;
 pub use db_audit::*;
 pub use page_source::*;
+pub use release::*;
 pub use session::*;
 
 pub type CreateAppResp = JsonResp;
@@ -62,7 +66,6 @@ pub type EnableDbSyncResp = JsonResp;
 pub type DisableDbSyncResp = JsonResp;
 pub type DeleteDbSyncResp = JsonResp;
 pub type CreateAppReleaseResp = JsonResp;
-pub type GetAppReleaseResp = JsonResp;
 pub type ListAppReleaseResp = JsonResp;
 
 const EMPTY_PARAMS: [(&str, &str); 0] = [];
@@ -709,6 +712,7 @@ impl Default for CreateAppReleaseRequest<'_> {
 #[non_exhaustive]
 pub struct ListAppReleaseQuery<'a> {
     pub page: PageQuery<'a>,
+    pub status: Option<&'a str>,
 }
 
 impl<'a> ListAppReleaseQuery<'a> {
@@ -721,6 +725,12 @@ impl<'a> ListAppReleaseQuery<'a> {
     }
     pub fn page_token(mut self, value: impl Into<Option<&'a str>>) -> Self {
         self.page.page_token = value.into();
+        self
+    }
+
+    /// Filter server-side by release status, such as `publishing`, `finished`, or `failed`.
+    pub fn status(mut self, value: impl Into<Option<&'a str>>) -> Self {
+        self.status = value.into();
         self
     }
 }
@@ -879,6 +889,9 @@ impl<'a> DbSyncResource<'a> {
 
 impl<'a> AppResource<'a> {
     /// Create a release for a Spark app.
+    ///
+    /// Submit once. If the outcome is unclear, check release history before
+    /// submitting again.
     pub async fn create_release(
         &self,
         app_id: &str,
@@ -886,17 +899,23 @@ impl<'a> AppResource<'a> {
         option: &RequestOption,
     ) -> Result<CreateAppReleaseResp, LarkError> {
         let body = crate::JsonValue::from_serializable(request)?;
-        RestRequest::new(
+        let (api_resp, raw) = RestRequest::new(
             self.config,
             http::Method::POST,
-            "/open-apis/spark/apps/:app_id/releases",
+            "/open-apis/spark/v1/apps/:app_id/releases",
             vec![AccessTokenType::User],
             option,
         )
         .path_param("app_id", app_id)
         .json_body(&body)?
-        .send_json()
-        .await
+        .send_without_replay()
+        .await?;
+        let (api_resp, code_error, data) = parse_v2(api_resp, raw);
+        Ok(CreateAppReleaseResp {
+            api_resp,
+            code_error,
+            data,
+        })
     }
 
     /// Get release status and approval details.
@@ -906,17 +925,22 @@ impl<'a> AppResource<'a> {
         release_id: &str,
         option: &RequestOption,
     ) -> Result<GetAppReleaseResp, LarkError> {
-        RestRequest::new(
+        let response = RestRequest::new(
             self.config,
             http::Method::GET,
-            "/open-apis/spark/apps/:app_id/releases/:release_id",
+            "/open-apis/spark/v1/apps/:app_id/releases/:release_id",
             vec![AccessTokenType::User],
             option,
         )
         .path_param("app_id", app_id)
         .path_param("release_id", release_id)
         .send_json()
-        .await
+        .await?;
+        Ok(GetAppReleaseResp {
+            api_resp: response.api_resp,
+            code_error: response.code_error,
+            data: response.data.as_ref().and_then(AppReleaseDetail::from_data),
+        })
     }
 
     /// List releases for a Spark app.
@@ -929,12 +953,19 @@ impl<'a> AppResource<'a> {
         RestRequest::new(
             self.config,
             http::Method::GET,
-            "/open-apis/spark/apps/:app_id/releases",
+            "/open-apis/spark/v1/apps/:app_id/releases",
             vec![AccessTokenType::User],
             option,
         )
         .path_param("app_id", app_id)
         .page_query(query.page)
+        .query(
+            "status",
+            query
+                .status
+                .map(str::trim)
+                .filter(|value| !value.is_empty()),
+        )
         .send_json()
         .await
     }
