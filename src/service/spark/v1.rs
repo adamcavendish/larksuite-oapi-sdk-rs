@@ -1,4 +1,4 @@
-//! Spark application, cloud-session, storage, database migration, and database-sync APIs.
+//! Spark application, cloud-session, storage, and database APIs.
 //!
 //! Cloud sessions use `session` with a user token. See `examples/spark_sessions.rs`
 //! for queue-aware polling; a finished turn does not imply publication.
@@ -11,9 +11,11 @@ use crate::service::common::{DownloadResp, DownloadStreamResp, JsonResp, PageQue
 use crate::service::go_compatibility::{GoCompatibility, GoCompatibilityEndpoint};
 use serde::Serialize;
 
+mod db_audit;
 mod features;
 mod page_source;
 mod session;
+pub use db_audit::*;
 pub use page_source::*;
 pub use session::*;
 
@@ -1805,6 +1807,7 @@ pub struct V1<'a> {
     pub session: SessionResource<'a>,
     pub app: AppResource<'a>,
     pub db_sync: DbSyncResource<'a>,
+    pub db_audit: DbAuditResource<'a>,
     pub app_enum: AppEnumResource<'a>,
     pub app_storage: AppStorageResource<'a>,
     pub app_table: AppTableResource<'a>,
@@ -1819,6 +1822,7 @@ impl<'a> V1<'a> {
             session: SessionResource { config },
             app: AppResource { config },
             db_sync: DbSyncResource { config },
+            db_audit: DbAuditResource { config },
             app_enum: AppEnumResource { config },
             app_storage: AppStorageResource { config },
             app_table: AppTableResource { config },

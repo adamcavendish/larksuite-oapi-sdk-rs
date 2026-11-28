@@ -33,6 +33,8 @@ examples, features, and coverage.
   tree listing and raw source-file streaming.
 - [Spark db sync](spark-db-sync.md) covers user-token Base-to-database sync
   previews, task lifecycle operations, and opt-in live verification.
+- [Spark database audit](spark-db-audit.md) covers table audit status,
+  paginated row changes, and audit settings.
 - [Spark database migration](spark-db-migration.md) covers dev-to-online schema
   preview, irreversible apply, and caller-owned asynchronous status polling.
 - [Spark cloud sessions](spark-sessions.md) covers user-token session lifecycle,

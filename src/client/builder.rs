@@ -171,8 +171,8 @@ impl LarkClientBuilder {
         } else {
             config.http_client.clone()
         };
-        // A stale pooled connection can otherwise cause a buffered grant to be sent again.
-        config.accounts_http_client = aioduct::TokioClient::builder()
+        // Redirects and stale pooled connections can replay buffered writes.
+        config.non_replaying_http_client = aioduct::TokioClient::builder()
             .system_proxy()
             .tls(aioduct::tls::RustlsConnector::with_webpki_roots())
             .timeout(config.req_timeout)

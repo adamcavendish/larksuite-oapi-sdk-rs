@@ -144,10 +144,14 @@ impl AccessToken<'_> {
         signed_grant: Option<(&OAuthTokenRequestBody, &str)>,
         timeout: Duration,
     ) -> Result<ApiResp, LarkError> {
-        let mut request = self.config.accounts_http_client.post(endpoint)?.header(
-            header::USER_AGENT,
-            header::HeaderValue::from_static(USER_AGENT),
-        );
+        let mut request = self
+            .config
+            .non_replaying_http_client
+            .post(endpoint)?
+            .header(
+                header::USER_AGENT,
+                header::HeaderValue::from_static(USER_AGENT),
+            );
         if let Some((grant, proof)) = signed_grant {
             request = request
                 .header_str("DPoP", proof)?

@@ -18,6 +18,13 @@ use crate::token::{AppTicketManager, TokenManager};
 
 type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum SendMode {
+    Standard,
+    ResolvedAbsolute,
+    WithoutReplay,
+}
+
 pub(crate) fn request<'a>(
     config: &'a Config,
     api_req: &'a ApiReq,
@@ -87,6 +94,7 @@ pub(crate) async fn request_typed_once<T: for<'de> serde::Deserialize<'de>>(
     config: &Config,
     api_req: &ApiReq,
     option: &RequestOption,
+    mode: SendMode,
 ) -> Result<(ApiResp, RawResponse<T>), LarkError> {
     let span = request_span(api_req);
     let token_type = span.in_scope(|| prepare_request(config, api_req, option))?;
@@ -96,12 +104,12 @@ pub(crate) async fn request_typed_once<T: for<'de> serde::Deserialize<'de>>(
         if attempt.dpop_binding.is_none() {
             attempt.dpop_binding = credentials.binding.clone();
         }
-        raw_send(
+        raw_send_inner(
             config,
             api_req,
             &attempt,
-            token_type,
             credentials.token.as_deref(),
+            mode,
         )
         .await
     }
@@ -444,7 +452,6 @@ async fn do_request_stream(
                 api_req,
                 &attempt,
                 credentials.token.as_deref(),
-                false,
                 error_limit,
             )
             .await?
@@ -687,7 +694,14 @@ pub(crate) async fn raw_send_resolved_absolute_url(
     option: &RequestOption,
     bearer_token: Option<&str>,
 ) -> Result<ApiResp, LarkError> {
-    raw_send_inner(config, api_req, option, bearer_token, true).await
+    raw_send_inner(
+        config,
+        api_req,
+        option,
+        bearer_token,
+        SendMode::ResolvedAbsolute,
+    )
+    .await
 }
 
 pub(crate) async fn raw_send(
@@ -697,7 +711,7 @@ pub(crate) async fn raw_send(
     _token_type: AccessTokenType,
     bearer_token: Option<&str>,
 ) -> Result<ApiResp, LarkError> {
-    raw_send_inner(config, api_req, option, bearer_token, false).await
+    raw_send_inner(config, api_req, option, bearer_token, SendMode::Standard).await
 }
 
 pub(crate) async fn raw_send_stream(
@@ -707,7 +721,7 @@ pub(crate) async fn raw_send_stream(
     _token_type: AccessTokenType,
     bearer_token: Option<&str>,
 ) -> Result<StreamResp, LarkError> {
-    raw_send_stream_inner(config, api_req, option, bearer_token, false, None).await
+    raw_send_stream_inner(config, api_req, option, bearer_token, None).await
 }
 
 struct ReceivedResponse {
@@ -722,12 +736,16 @@ fn receive_response<'a>(
     api_req: &'a ApiReq,
     option: &'a RequestOption,
     bearer_token: Option<&'a str>,
-    absolute_url: bool,
+    mode: SendMode,
 ) -> BoxFuture<'a, Result<ReceivedResponse, LarkError>> {
     Box::pin(async move {
         let (full_url, response) =
-            send_http_response(config, api_req, option, bearer_token, absolute_url).await?;
-        let status_code = response.status().as_u16();
+            send_http_response(config, api_req, option, bearer_token, mode).await?;
+        let status = response.status();
+        if mode == SendMode::WithoutReplay && status.is_redirection() {
+            return Err(LarkError::Http(aioduct::Error::Status(status)));
+        }
+        let status_code = status.as_u16();
         check_status_errors(api_req, status_code, response.headers())?;
 
         Ok(ReceivedResponse {
@@ -744,14 +762,14 @@ async fn raw_send_inner(
     api_req: &ApiReq,
     option: &RequestOption,
     bearer_token: Option<&str>,
-    absolute_url: bool,
+    mode: SendMode,
 ) -> Result<ApiResp, LarkError> {
     let ReceivedResponse {
         full_url,
         status_code,
         header,
         response,
-    } = receive_response(config, api_req, option, bearer_token, absolute_url).await?;
+    } = receive_response(config, api_req, option, bearer_token, mode).await?;
     let raw_body = response.bytes().await.map_err(LarkError::Http)?.to_vec();
 
     log_buffered_response(config, &full_url, status_code, &header, &raw_body);
@@ -768,7 +786,6 @@ async fn raw_send_stream_inner(
     api_req: &ApiReq,
     option: &RequestOption,
     bearer_token: Option<&str>,
-    absolute_url: bool,
     error_limit: Option<usize>,
 ) -> Result<StreamResp, LarkError> {
     let ReceivedResponse {
@@ -776,7 +793,7 @@ async fn raw_send_stream_inner(
         status_code,
         header,
         response,
-    } = receive_response(config, api_req, option, bearer_token, absolute_url).await?;
+    } = receive_response(config, api_req, option, bearer_token, SendMode::Standard).await?;
 
     if !(200..300).contains(&status_code) && is_json_header(&header) {
         let raw_body = if let Some(limit) = error_limit {
@@ -821,17 +838,12 @@ async fn send_http_response(
     api_req: &ApiReq,
     option: &RequestOption,
     bearer_token: Option<&str>,
-    absolute_url: bool,
+    mode: SendMode,
 ) -> Result<(String, aioduct::Response), LarkError> {
-    let full_url = if absolute_url {
+    let full_url = if mode == SendMode::ResolvedAbsolute {
         api_req.api_path.clone()
     } else {
-        build_url(config, api_req)
-    };
-
-    let full_url = if absolute_url {
-        full_url
-    } else {
+        let full_url = build_url(config, api_req);
         crate::url_resolver::resolve(config.platform_url_resolver.as_ref(), &full_url)?
     };
     let diagnostic_url = crate::url_resolver::diagnostic_url(&full_url);
@@ -841,7 +853,9 @@ async fn send_http_response(
             .headers
             .as_ref()
             .is_some_and(|headers| headers.contains_key("dpop"));
-    let client = if has_dpop && config.platform_url_resolver.is_some() {
+    let client = if mode == SendMode::WithoutReplay {
+        &config.non_replaying_http_client
+    } else if has_dpop && config.platform_url_resolver.is_some() {
         &config.dpop_http_client
     } else {
         &config.http_client
